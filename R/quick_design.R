@@ -28,8 +28,5 @@ m_arm_trial <- function(N){
   return(my_design)
 }
 
-debugonce(m_arm_trial)
-m_arm_trial(N = 100)
-
 
 
