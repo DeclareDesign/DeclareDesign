@@ -1,6 +1,6 @@
 
 
-#' @importFrom frontloadr simulate_data level
+#' @importFrom DDfabricate fabricate_data level
 #' @export
 declare_population <-
   function(..., population_function = fabricate_data) {

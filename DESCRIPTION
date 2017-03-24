@@ -17,7 +17,9 @@ Imports:
     magrittr,
     randomizr,
     DDestimate,
-    DDfabricate
+    DDfabricate,
+    dplyr,
+    foreach
 License: All rights reserved
 Encoding: UTF-8
 LazyData: true

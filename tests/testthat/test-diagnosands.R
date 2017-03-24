@@ -1,7 +1,7 @@
-library(dd)
+library(DeclareDesign)
 library(magrittr)
 library(dplyr)
-library(estimatorpack)
+library(DDestimate)
 
 my_population <- declare_population(N = 500, noise = rnorm(N))
 

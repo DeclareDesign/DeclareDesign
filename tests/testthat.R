@@ -1,4 +1,4 @@
 library(testthat)
-library(dd)
+library(DeclareDesign)
 
-test_check("dd")
+test_check("DeclareDesign")

@@ -1,6 +1,6 @@
 rm(list=ls())
 
-library(dd)
+library(DeclareDesign)
 
 default_diagnosands <- declare_diagnosands(
   bias = mean(est - estimand),

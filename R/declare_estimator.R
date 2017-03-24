@@ -1,5 +1,5 @@
 
-#' @importFrom estimatorpack difference_in_means
+#' @importFrom DDestimate difference_in_means
 #' @export
 declare_estimator <-
   function(...,
