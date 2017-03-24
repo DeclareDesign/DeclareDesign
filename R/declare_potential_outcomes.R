@@ -70,7 +70,7 @@ potential_outcomes_function_formula <-
 potential_outcomes_function_discrete <- function(data, ...) {
   options <- eval(substitute(alist(...)))
 
-  potential_outcomes_function <- simulate_data
+  potential_outcomes_function <- fabricate_data
 
   argument_names_potential_outcomes_function <-
     names(formals(potential_outcomes_function))
