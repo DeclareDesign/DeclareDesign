@@ -20,6 +20,7 @@ my_design <- declare_design(my_population(),
                             reveal_outcomes,
                             pate_estimator)
 
+my_design$design_function()
 
 diagnosis <- diagnose_design(my_design, sims = 10)
 diagnosis
