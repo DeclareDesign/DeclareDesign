@@ -12,13 +12,15 @@ declare_estimator_ <-
 
     estimator_function_internal <- function(data) {
 
-      # if it's in the formals
       options$data <- data
 
-      options$formula <- formula
+      if(!is.null(formula) & "formula" %in%  names(formals(estimator_function)))
+        options_internal$formula <- stats::formula(unclass(formula))
 
-      value <- do.call(estimator_function, args = options)
-      return(data.frame(estimator_label = label, value,
+      ##options$formula <- formula
+
+      results <- do.call(estimator_function, args = options)
+      return(data.frame(estimator_label = label, results,
                         estimand_label = attributes(estimand)$label, stringsAsFactors = FALSE))
     }
 
