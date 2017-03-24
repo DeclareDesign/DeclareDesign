@@ -4,6 +4,7 @@
 #' @importFrom dplyr bind_rows
 #' @export
 declare_design <- function(...) {
+
   causal_order <- eval(substitute(alist(...)))
 
   name_or_call <- sapply(causal_order, class)
@@ -11,16 +12,14 @@ declare_design <- function(...) {
   function_types <- rep("", length(causal_order))
 
   function_types[name_or_call == "name"] <-
-    sapply(causal_order[name_or_call == "name"], function(x)
-      attributes(eval(x))$type)
+    sapply(causal_order[name_or_call == "name"], function(x){
+      type <- attributes(eval(x))$type
+      return(ifelse(!is.null(type), type, "unknown_object"))
+    })
 
   causal_order_types <- function_types
   causal_order_types[!function_types %in% c("estimand", "estimator")] <-
     "dgp"
-
-  # function_calls[name_or_call == "name"] <-
-  #   sapply(causal_order[name_or_call == "name"], function(x)
-  #     attributes(eval(x))$call)
 
   causal_order_text <- paste(causal_order)
 
@@ -33,19 +32,15 @@ declare_design <- function(...) {
     split_causal_order(types = causal_order_types,
                        text = causal_order_text)
 
-
-
   # function 1: DGP, returns your "final" dataframe to play with
 
   # turn each step of the DGP into a pipeline
   data_generating_process_text_list <-
     paste(unlist(causal_order_list[names(causal_order_list) == "dgp"]), collapse = " %>% ")
 
-
   data_function <- function() {
     eval(parse(text = data_generating_process_text_list))
   }
-
 
   # function 2: runs things in sequence, returns estimates_df
 
