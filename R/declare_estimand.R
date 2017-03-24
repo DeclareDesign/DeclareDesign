@@ -4,7 +4,7 @@
 declare_estimand <- function(..., estimand_function = default_estimand_function, label = "my_estimand") {
 
   declare_estimand_(paste(substitute(alist(...)))[-1],
-                    estimand_function = default_estimand_function,
+                    estimand_function = estimand_function,
                     label = deparse(substitute(label)))
 
 }
