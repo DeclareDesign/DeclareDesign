@@ -1,6 +1,6 @@
 
 
-#' @importFrom dplyr bind_rows group_by left_join
+#' @importFrom dplyr bind_rows group_by_ left_join
 #' @importFrom parallel parLapply
 #' @importFrom foreach registerDoSEQ getDoParWorkers
 #' @export
@@ -27,7 +27,7 @@ diagnose_design <- function(design, diagnosands = default_diagnosands, sims = 10
 
   diagnosands_df <-
     simulations_df %>%
-    group_by(estimand_label, estimator_label) %>%
+    group_by_("estimand_label", "estimator_label") %>%
     diagnosands %>%
     data.frame(stringsAsFactors = FALSE)
 

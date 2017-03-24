@@ -1,5 +1,6 @@
 
 #' @export
+#' @importFrom dplyr summarize_
 declare_diagnosands <- function(...){
 
   diagnosands <- eval(substitute(alist(...)))
