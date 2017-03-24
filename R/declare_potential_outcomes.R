@@ -1,6 +1,5 @@
 
 
-
 #' @export
 declare_potential_outcomes <-
   function(..., potential_outcomes_function = potential_outcomes_function_default) {
@@ -35,7 +34,8 @@ potential_outcomes_function_default <-
           ... = ...
         )
     } else{
-      potential_outcomes_function <- potential_outcomes_function_discrete(data = data, ... = ...)
+      potential_outcomes_function <-
+        potential_outcomes_function_discrete(data = data, ... = ...)
     }
 
     return(potential_outcomes_function)
