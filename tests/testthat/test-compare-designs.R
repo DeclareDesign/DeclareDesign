@@ -35,3 +35,4 @@
 #
 # #debugonce(compare_designs)
 # comparison <- compare_designs(design_label = my_design_1, my_design_2, sims = 10)
+# comparison

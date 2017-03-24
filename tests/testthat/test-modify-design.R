@@ -31,3 +31,5 @@
 #
 # diagnosis_1 <- diagnose_design(my_design_1, sims = 10)
 # diagnosis_2 <- diagnose_design(my_design_2, sims = 10)
+# diagnosis_1
+# diagnosis_2
