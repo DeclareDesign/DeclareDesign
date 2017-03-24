@@ -4,3 +4,4 @@ README.md
 ^.*\.Rproj$
 ^\.Rproj\.user$
 builtin_objects
+appveyor.yml
