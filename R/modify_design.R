@@ -6,6 +6,9 @@ modify_design <- function(design, ...) {
   from_to_list <- eval(substitute(alist(...)))
   from_to_list_names <- paste(from_to_list)
 
+  ## change so it pulls out the expr from the lazy expression
+  ## then recreates but retains the environment
+
   # it has two arguments and neither are tofrom, overwrite from_to_list
   if (length(from_to_list_names) == 2 &
       !any(startsWith(from_to_list_names, "from_to("))) {

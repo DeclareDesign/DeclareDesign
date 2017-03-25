@@ -21,11 +21,13 @@ my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
 design <- declare_design(my_population(),
                          my_potential_outcomes,
                          my_estimand,
-                         #mutate(var = 5),
+                         mutate(var = 5),
                          my_sampling,
                          my_assignment,
                          reveal_outcomes,
                          my_estimator)
+
+
 
 ##debugonce(declare_design)
 
