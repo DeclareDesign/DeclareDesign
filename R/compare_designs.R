@@ -19,7 +19,6 @@ compare_designs <- function(..., sims = 100) {
     lapply(comparison_sims, function(x)
       x$diagnosands) %>% bind_rows(.id = "design_ID")
 
-
   return(structure(
     list(simulations = simulations_df, diagnosands = diagnosands_df),
     class = "diagnosis"

@@ -1,14 +1,14 @@
 
-#' @importFrom lazyeval lazy_dots make_call lazy_eval
+#' @importFrom lazyeval lazy_dots make_call lazy_eval as.lazy
 #' @importFrom dplyr bind_rows
 #' @export
 declare_design <- function(...) {
 
-  causal_order <- eval(substitute(alist(...)))
+  causal_order <- lazy_eval(lazy_dots(..., .follow_symbols = TRUE))
 
-  causal_order_text <- paste(causal_order)
+  causal_order_text <- eval(substitute(alist(...)))
 
-  name_or_call <- sapply(causal_order, class)
+  name_or_call <- sapply(causal_order_text, class)
 
   function_types <- rep("", length(causal_order))
 
@@ -22,76 +22,44 @@ declare_design <- function(...) {
   causal_order_types[!function_types %in% c("estimand", "estimator")] <-
     "dgp"
 
-  if (class(eval(causal_order[[1]])) == "function") {
-    causal_order_text[1] <- paste0(causal_order_text[1], "()")
-  }
 
-  # split into lists that are either 1. dgp chains 2. estimands or 3. estimators
-  causal_order_list <-
-    split_causal_order(types = causal_order_types,
-                       text = causal_order_text)
-
-  causal_order_list_lazy <- list()
-  for (i in 1:length(causal_order_list)) {
-    causal_order_list_lazy[[i]] <- list()
-    for (j in 1:length(causal_order_list[[i]])) {
-      causal_order_list_lazy[[i]][[j]] <-
-        lazyeval::as.lazy(as.formula(paste0("~", causal_order_list[[i]][j])))
-    }
-  }
-
-  causal_order_list_lazy_steps <- list()
-  for (i in 1:length(causal_order_list)) {
-    causal_order_list_lazy_steps[[i]] <-
-      lazyeval::as.lazy(as.formula(paste0("~", paste0(causal_order_list[[i]], collapse = " %>% "))))
-  }
-
-  # function 1: DGP, returns your "final" dataframe to play with
-
-  # turn each step of the DGP into a pipeline
-  data_generating_process_text_list <-
-    lazyeval::as.lazy(as.formula(paste0("~", paste(unlist(causal_order_list[names(causal_order_list) == "dgp"]),
-                                         collapse = " %>% "))))
 
   data_function <- function() {
-    lazyeval::lazy_eval(data_generating_process_text_list)
+    current_df <- causal_order[[1]]
+    for (i in 2:length(causal_order)) {
+
+      # if it's a dgp
+      if (causal_order_types[i] == "dgp") {
+
+        current_df <- causal_order[[i]](current_df)
+      }
+    }
+    return(current_df)
   }
 
   # function 2: runs things in sequence, returns estimates_df
 
   design_function <- function() {
-    # initialize 2 running data.frames
+    # initialize 3 running data.frames
+    current_df <- causal_order[[1]]
     estimates_df <- estimands_df <- data.frame()
 
-    causal_order_list_types <- names(causal_order_list)
+    for (i in 2:length(causal_order)) {
 
-    current_df <-
-      lazyeval::lazy_eval(causal_order_list_lazy_steps[[1]])
+      # if it's a dgp
+      if(causal_order_types[i] == "dgp") {
 
-    if (length(causal_order_list) > 1) {
-      for (i in 2:length(causal_order_list)) {
-        # 3 cases
-        if (causal_order_list_types[i] == "dgp") {
-          for (j in 1:length(causal_order_list[[i]])) {
-            current_df <- current_df %>% (lazyeval::lazy_eval(causal_order_list_lazy[[i]][[j]]))
-          }
+        current_df <- causal_order[[i]](current_df)
 
-        } else if (causal_order_list_types[i] == "estimand") {
-          for (j in 1:length(causal_order_list[[i]])) {
-            estimands_df <- bind_rows(estimands_df,
-                                      current_df %>% (lazyeval::lazy_eval(causal_order_list_lazy[[i]][[j]])))
+      } else if (causal_order_types[i] == "estimand") {
 
-          }
+        # if it's an estimand
+        estimands_df <- bind_rows(estimands_df, causal_order[[i]](current_df))
 
-          # case 3: Estimator
-        } else if (causal_order_list_types[i] == "estimator")
+      } else if (causal_order_types[i] == "estimator") {
 
-          for (j in 1:length(causal_order_list[[i]])) {
-            estimates_df <- bind_rows(estimates_df,
-                                      current_df %>% (lazyeval::lazy_eval(causal_order_list_lazy[[i]][[j]])))
-
-
-          }
+        # if it's an estimator
+        estimates_df <- bind_rows(estimates_df, causal_order[[i]](current_df))
 
       }
     }
@@ -111,11 +79,16 @@ declare_design <- function(...) {
 
 }
 
-split_causal_order <- function(types, text) {
-  rle_out <- rle(types)
-  obj <-
-    split(text, rep(1:length(rle_out$lengths), rle_out$lengths))
-  names(obj) <- rle_out$values
-  return(obj)
-}
 
+# # split into lists that are either 1. dgp chains 2. estimands or 3. estimators
+# causal_order_list <-
+#   split_causal_order(types = causal_order_types,
+#                      text = causal_order_text)
+# split_causal_order <- function(types, text) {
+#   rle_out <- rle(types)
+#   obj <-
+#     split(text, rep(1:length(rle_out$lengths), rle_out$lengths))
+#   names(obj) <- rle_out$values
+#   return(obj)
+# }
+#
