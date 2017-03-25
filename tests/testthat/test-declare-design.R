@@ -14,25 +14,28 @@ my_sampling <- declare_sampling(n = 250)
 
 my_assignment <- declare_assignment(m = 25)
 
-my_estimator <- declare_estimator(Y_Z_1 ~ Z)
+my_estimator <- declare_estimator(Y ~ Z)
 
+my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
+
+my_population() %>% my_potential_outcomes %>% my_sampling %>% my_assignment %>% reveal_outcomes %>% my_estimator
 #debugonce(declare_estimand)
 
 #debugonce(my_estimand)
-my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
 
 
 #debugonce(design$design_function)
 design <- declare_design(my_population(),
                          my_potential_outcomes,
-                         my_sampling,
                          my_estimand,
+                         my_sampling,
                          my_assignment,
                          reveal_outcomes,
                          my_estimator)
 
-design$data_function() %>% my_estimator
+design$data_function() %>% head
 design$design_function()
+
 
 
 # design <- declare_design(my_population(),

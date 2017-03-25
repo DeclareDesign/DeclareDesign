@@ -64,7 +64,9 @@ declare_sampling <- function(..., sampling_function = draw_rs,
   sampling_function_return_internal <- function(data) {
     data %>%
       sampling_function_internal %>%
-      sampling_probability_function_internal
+      sampling_probability_function_internal %>%
+      filter_(paste0(sampling_variable_name, "== 1")) %>%
+      select_(paste0("-", sampling_variable_name))
   }
 
   attributes(sampling_function_return_internal) <-

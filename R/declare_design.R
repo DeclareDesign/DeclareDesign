@@ -72,7 +72,9 @@ declare_design <- function(...) {
       for (i in 2:length(causal_order_list)) {
         # 3 cases
         if (causal_order_list_types[i] == "dgp") {
-          current_df <- current_df %>% (lazyeval::lazy_eval(causal_order_list_lazy_steps[[i]]))
+          for (j in 1:length(causal_order_list[[i]])) {
+            current_df <- current_df %>% (lazyeval::lazy_eval(causal_order_list_lazy[[i]][[j]]))
+          }
 
         } else if (causal_order_list_types[i] == "estimand") {
           for (j in 1:length(causal_order_list[[i]])) {
