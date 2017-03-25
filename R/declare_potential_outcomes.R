@@ -1,20 +1,20 @@
 
 
+#' @importFrom lazyeval lazy_dots make_call lazy_eval call_modify
 #' @export
-declare_potential_outcomes <-
-  function(..., potential_outcomes_function = potential_outcomes_function_default) {
-    options <- eval(substitute(alist(...)))
-
-    potential_outcomes_function_internal <- function(data) {
-      options$data <- data
-      do.call(potential_outcomes_function, args = options)
-    }
-
-    attributes(potential_outcomes_function_internal) <-
-      list(call = match.call(), type = "potential_outcomes")
-
-    return(potential_outcomes_function_internal)
+declare_potential_outcomes <- function(..., potential_outcomes_function = potential_outcomes_function_default) {
+  dots <- lazy_dots(...)
+  mcall <- make_call(substitute(potential_outcomes_function), dots)
+  potential_outcomes_function_internal <- function(data) {
+    mcall$expr$data <- data
+    lazy_eval(mcall)
   }
+  attributes(potential_outcomes_function_internal) <-
+    list(call = match.call(), type = "potential_outcomes")
+
+  return(potential_outcomes_function_internal)
+}
+
 
 #' @export
 potential_outcomes_function_default <-

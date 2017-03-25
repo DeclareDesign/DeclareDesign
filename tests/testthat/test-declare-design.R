@@ -36,11 +36,8 @@ design <- declare_design(my_population(),
 design$data_function() %>% head
 design$design_function()
 
+diagnose_design(design = design, diagnosands = declare_diagnosands(superpower = mean(p < .555)))
 
 
-# design <- declare_design(my_population(),
-#                          my_potential_outcomes,
-#                          my_assignment)
-#
-# design$data_function() %>% my_estimand
+
 
