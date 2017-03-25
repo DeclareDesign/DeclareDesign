@@ -19,7 +19,8 @@ Imports:
     DDestimate,
     DDfabricate,
     dplyr,
-    foreach
+    foreach,
+    lazyeval
 License: All rights reserved
 Encoding: UTF-8
 LazyData: true

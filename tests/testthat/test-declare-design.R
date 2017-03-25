@@ -27,29 +27,28 @@ design <- declare_design(my_population(),
                          reveal_outcomes,
                          my_estimator)
 
-#debugonce(declare_design)
+##debugonce(declare_design)
 
 #design$data_function() %>% head
 
-debugonce(design$data_function)
+#debugonce(design$data_function)
 design$design_function()
+design$data_function() %>% head
+
 
 diagnose_design(design = design, diagnosands = declare_diagnosands(superpower = mean(p < .555)))
 
 rm(list=ls())
 
-N <- 50
-pop <- declare_population(N = N, Y = rnorm(N), Z = rbinom(N, 1, .5))
-pate_estimator <- declare_estimator(Y ~ Z)
-my_design <- declare_design(pop(), pate_estimator)
-
 m_arm_trial <- function(N){
   pop <- declare_population(N = N, Y = rnorm(N), Z = rbinom(N, 1, .5))
-  pate_estimator <- declare_estimator(Y ~ Z)
+  pate_estimator <- declare_estimator(Y ~ Z, estimator_function = lm_robust_se)
   my_design <- declare_design(pop(), pate_estimator)
   return(my_design)
 }
 
 m_arm_trial(N = 5)$data_function()
 
+
+quick_design(template = m_arm_trial, N = 5)$design_function()
 

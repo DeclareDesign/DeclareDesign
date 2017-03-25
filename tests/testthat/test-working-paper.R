@@ -1,7 +1,6 @@
 rm(list = ls())
 library(testthat)
 library(DeclareDesign)
-library(Matching)
 
 context("Checking Code in Paper Works")
 
