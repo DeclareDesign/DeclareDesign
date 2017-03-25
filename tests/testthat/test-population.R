@@ -3,8 +3,6 @@ library(DDfabricate)
 library(DeclareDesign)
 library(magrittr)
 
-
-
 # works
 declare_population(N = 10, Y1 = rnorm(N), Y2 = rnorm(N))()
 

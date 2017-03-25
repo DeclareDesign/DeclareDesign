@@ -1,11 +1,12 @@
 
-
-
+#' @importFrom lazyeval lazy_dots make_call lazy_eval
 #' @importFrom dplyr bind_rows
 #' @export
 declare_design <- function(...) {
 
   causal_order <- eval(substitute(alist(...)))
+
+  causal_order_text <- paste(causal_order)
 
   name_or_call <- sapply(causal_order, class)
 
@@ -21,8 +22,6 @@ declare_design <- function(...) {
   causal_order_types[!function_types %in% c("estimand", "estimator")] <-
     "dgp"
 
-  causal_order_text <- paste(causal_order)
-
   if (class(eval(causal_order[[1]])) == "function") {
     causal_order_text[1] <- paste0(causal_order_text[1], "()")
   }
@@ -32,14 +31,30 @@ declare_design <- function(...) {
     split_causal_order(types = causal_order_types,
                        text = causal_order_text)
 
+  causal_order_list_lazy <- list()
+  for (i in 1:length(causal_order_list)) {
+    causal_order_list_lazy[[i]] <- list()
+    for (j in 1:length(causal_order_list[[i]])) {
+      causal_order_list_lazy[[i]][[j]] <-
+        lazyeval::as.lazy(as.formula(paste0("~", causal_order_list[[i]][j])))
+    }
+  }
+
+  causal_order_list_lazy_steps <- list()
+  for (i in 1:length(causal_order_list)) {
+    causal_order_list_lazy_steps[[i]] <-
+      lazyeval::as.lazy(as.formula(paste0("~", paste0(causal_order_list[[i]], collapse = " %>% "))))
+  }
+
   # function 1: DGP, returns your "final" dataframe to play with
 
   # turn each step of the DGP into a pipeline
   data_generating_process_text_list <-
-    paste(unlist(causal_order_list[names(causal_order_list) == "dgp"]), collapse = " %>% ")
+    lazyeval::as.lazy(as.formula(paste0("~", paste(unlist(causal_order_list[names(causal_order_list) == "dgp"]),
+                                         collapse = " %>% "))))
 
   data_function <- function() {
-    eval(parse(text = data_generating_process_text_list))
+    lazyeval::lazy_eval(data_generating_process_text_list)
   }
 
   # function 2: runs things in sequence, returns estimates_df
@@ -51,23 +66,18 @@ declare_design <- function(...) {
     causal_order_list_types <- names(causal_order_list)
 
     current_df <-
-      eval(parse(text = paste(causal_order_list[[1]], collapse = " %>% ")))
+      lazyeval::lazy_eval(causal_order_list_lazy_steps[[1]])
 
     if (length(causal_order_list) > 1) {
       for (i in 2:length(causal_order_list)) {
         # 3 cases
         if (causal_order_list_types[i] == "dgp") {
-          current_df <-
-            eval(parse(text = paste(
-              c("current_df", causal_order_list[[i]]), collapse = " %>% "
-            )))
+          current_df <- current_df %>% (lazyeval::lazy_eval(causal_order_list_lazy_steps[[i]]))
 
         } else if (causal_order_list_types[i] == "estimand") {
           for (j in 1:length(causal_order_list[[i]])) {
             estimands_df <- bind_rows(estimands_df,
-                                      current_df %>% (eval(
-                                        parse(text = causal_order_list[[i]][j])
-                                      )))
+                                      current_df %>% (lazyeval::lazy_eval(causal_order_list_lazy[[i]][[j]])))
 
           }
 
@@ -76,9 +86,7 @@ declare_design <- function(...) {
 
           for (j in 1:length(causal_order_list[[i]])) {
             estimates_df <- bind_rows(estimates_df,
-                                      current_df %>% (eval(
-                                        parse(text = causal_order_list[[i]][j])
-                                      )))
+                                      current_df %>% (lazyeval::lazy_eval(causal_order_list_lazy[[i]][[j]])))
 
 
           }
@@ -101,8 +109,6 @@ declare_design <- function(...) {
 
 }
 
-
-
 split_causal_order <- function(types, text) {
   rle_out <- rle(types)
   obj <-
@@ -111,24 +117,3 @@ split_causal_order <- function(types, text) {
   return(obj)
 }
 
-#' @export
-declare_design_ <- function(..., estimator = NULL) {
-  causal_order_text <- list(...)
-
-  ##if (class(eval(parse(text = causal_order[[1]]))) == "function") {
-  ##  causal_order_text[1] <- paste0(causal_order_text[1], "()")
-  ##}
-
-  causal_order_text <- paste(causal_order_text, collapse = " %>% ")
-
-  data_function <- function() {
-    eval(parse(text = causal_order_text))
-  }
-
-  ##attributes(data_function) <- list(function_types = function_types,
-  ##                                  function_calls = function_calls)
-
-  return(list(data_function = data_function, estimator_function = estimator))
-
-
-}
