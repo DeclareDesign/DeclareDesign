@@ -1,14 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
 #' @importFrom magrittr "%>%"
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
 #' @importFrom dplyr filter_ select_
