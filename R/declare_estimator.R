@@ -1,4 +1,16 @@
 
+#' @importFrom DDestimate difference_in_means
+#' @export
+#'
+declare_estimator <- function(formula, estimator_function = difference_in_means, label = my_estimator, estimand = NULL, ...) {
+
+  declare_estimator_(formula = formula,
+                     estimator_function = estimator_function,
+                     label = deparse(substitute(label)),
+                     estimand = estimand,
+                     ... = ...)
+
+}
 
 #' @importFrom DDestimate difference_in_means
 #' @export
@@ -34,20 +46,3 @@ declare_estimator_ <-
     return(estimator_function_internal)
 
   }
-
-
-
-
-
-#' @importFrom DDestimate difference_in_means
-#' @export
-#'
-declare_estimator <- function(formula, estimator_function = difference_in_means, label = "my_estimator",estimand = NULL, ...) {
-
-  declare_estimator_(formula = formula,
-                     estimator_function = estimator_function,
-                     label = deparse(substitute(label)),
-                     estimand = estimand,
-                     ... = ...)
-
-}
