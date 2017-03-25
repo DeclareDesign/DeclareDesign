@@ -68,7 +68,7 @@ print.summary.diagnosis <- function(x, ...) {
          "\\1\\U\\2",
          gsub("_", " ", names(x)),
          perl = TRUE)
-  print(x)
+  print(x, row.names = FALSE)
   cat("\n")
   invisible(x)
 }
