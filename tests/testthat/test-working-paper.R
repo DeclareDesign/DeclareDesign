@@ -12,7 +12,9 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
     data.frame(u = rnorm(size))
   }
   population <-
-    declare_population(custom_population_function = my_population, size = 100)
+    declare_population(population_function = my_population, size = 100)
+  population()
+
   my_sampling <- function(data) {
     rbinom(n = nrow(data),
            size = 1,
