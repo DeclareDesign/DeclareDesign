@@ -26,12 +26,15 @@ declare_design <- function(...) {
 
   data_function <- function() {
     current_df <- causal_order[[1]]
-    for (i in 2:length(causal_order)) {
+    if(length(causal_order) > 1){
 
-      # if it's a dgp
-      if (causal_order_types[i] == "dgp") {
+      for (i in 2:length(causal_order)) {
 
-        current_df <- causal_order[[i]](current_df)
+        # if it's a dgp
+        if (causal_order_types[i] == "dgp") {
+
+          current_df <- causal_order[[i]](current_df)
+        }
       }
     }
     return(current_df)
@@ -44,26 +47,27 @@ declare_design <- function(...) {
     current_df <- causal_order[[1]]
     estimates_df <- estimands_df <- data.frame()
 
-    for (i in 2:length(causal_order)) {
+    if(length(causal_order) > 1){
+      for (i in 2:length(causal_order)) {
 
-      # if it's a dgp
-      if(causal_order_types[i] == "dgp") {
+        # if it's a dgp
+        if(causal_order_types[i] == "dgp") {
 
-        current_df <- causal_order[[i]](current_df)
+          current_df <- causal_order[[i]](current_df)
 
-      } else if (causal_order_types[i] == "estimand") {
+        } else if (causal_order_types[i] == "estimand") {
 
-        # if it's an estimand
-        estimands_df <- bind_rows(estimands_df, causal_order[[i]](current_df))
+          # if it's an estimand
+          estimands_df <- bind_rows(estimands_df, causal_order[[i]](current_df))
 
-      } else if (causal_order_types[i] == "estimator") {
+        } else if (causal_order_types[i] == "estimator") {
 
-        # if it's an estimator
-        estimates_df <- bind_rows(estimates_df, causal_order[[i]](current_df))
+          # if it's an estimator
+          estimates_df <- bind_rows(estimates_df, causal_order[[i]](current_df))
 
+        }
       }
     }
-
     return(list(estimates_df = estimates_df, estimands_df = estimands_df))
   }
 
