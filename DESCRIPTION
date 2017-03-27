@@ -16,16 +16,14 @@ Depends:
 Imports:
     magrittr,
     randomizr,
-    DDestimate,
-    DDfabricate,
     dplyr,
     foreach,
     lazyeval
+Remotes: 
+    graemeblair/DDestimate,
+    graemeblair/DDfabricate
 License: All rights reserved
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 5.0.1
 Suggests: testthat
-Remotes: 
-    graemeblair/DDestimate
-    graemeblair/DDfabricate

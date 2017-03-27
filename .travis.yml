@@ -1,13 +1,37 @@
 language: r
+
+r:
+  - release
+
 sudo: false
+
 cache: packages
+
 warnings_are_errors: false
+
+os:
+  - linux
+  - osx
+
+env:
+  global:
+    - OS=$(uname -s)
+
 r_github_packages:
   - jimhester/covr
+
 after_success:
   - Rscript -e 'covr::coveralls()'
   - mkdir deploy
   - cp "${PKG_FILE_NAME}" deploy/latest.tar.gz
+
+after_failure:
+  - if [ ${OS} = Darwin ]; then cat /Users/travis/build/graemeblair/DDfabricate/DDfabricate.Rcheck/00check.log; fi
+  - if [ ${OS} = Darwin ]; then cat /Users/travis/build/graemeblair/DDfabricate/DDfabricate.Rcheck/00install.out; fi
+  - if [ ${OS} != Darwin ]; then cat /home/travis/build/graemeblair/DDfabricate/DDfabricate.Rcheck/00check.log; fi
+  - if [ ${OS} != Darwin ]; then cat /home/travis/build/graemeblair/DDfabricate/DDfabricate.Rcheck/00install.out; fi
+  - ./travis-tool.sh dump_logs
+
 notifications:
   email:
     recipients:
