@@ -18,24 +18,28 @@ my_estimator <- declare_estimator(Y ~ Z)
 
 my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
 
+my_mutate_wrapper <- function(data){
+  mutate(data, var = 5)
+}
+
 design <- declare_design(my_population(),
                          my_potential_outcomes,
                          my_estimand,
-                         mutate(var = 5),
+                         my_mutate_wrapper,
                          my_sampling,
                          my_assignment,
                          reveal_outcomes,
                          my_estimator)
+design$data_function() %>% head
 
 
 
 ##debugonce(declare_design)
 
-#design$data_function() %>% head
+design$data_function() %>% head
 
 #debugonce(design$data_function)
 design$design_function()
-design$data_function() %>% head
 
 
 diagnose_design(design = design, diagnosands = declare_diagnosands(superpower = mean(p < .555)))
