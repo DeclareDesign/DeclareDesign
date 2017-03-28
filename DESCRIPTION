@@ -23,7 +23,8 @@ Imports:
     DDfabricate
 Remotes: 
     graemeblair/DDestimate,
-    graemeblair/DDfabricate
+    graemeblair/DDfabricate,
+    DeclareDesign/randomizr
 License: All rights reserved
 Encoding: UTF-8
 LazyData: true
