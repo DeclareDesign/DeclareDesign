@@ -25,7 +25,8 @@ my_mutate_wrapper <- function(data){
 design <- declare_design(my_population(),
                          my_potential_outcomes,
                          my_estimand,
-                         my_mutate_wrapper,
+                         ##mutate(var = 5),
+                         ##my_mutate_wrapper
                          my_sampling,
                          my_assignment,
                          reveal_outcomes,
