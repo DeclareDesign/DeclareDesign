@@ -18,7 +18,9 @@ Imports:
     randomizr,
     dplyr,
     foreach,
-    lazyeval
+    lazyeval,
+    DDestimate,
+    DDfabricate
 Remotes: 
     graemeblair/DDestimate,
     graemeblair/DDfabricate
