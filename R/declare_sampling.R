@@ -5,8 +5,8 @@
 #' @importFrom dplyr filter_ select_
 #' @importFrom lazyeval lazy_dots make_call lazy_eval call_modify
 #' @export
-declare_sampling <- function(..., sampling_function = draw_rs,
-                               sampling_probability_function = obtain_inclusion_probabilities,
+declare_sampling <- function(..., sampling_function = randomizr::draw_rs,
+                               sampling_probability_function = randomizr::obtain_inclusion_probabilities,
                                sampling_variable_name = "Z") {
 
   ## if you provide your own sampling_function and don't define your own sampling_probability_function

@@ -2,7 +2,7 @@
 #' @importFrom DDfabricate fabricate_data
 #' @importFrom lazyeval lazy_dots make_call lazy_eval
 #' @export
-declare_population <- function(population_function = fabricate_data, ...) {
+declare_population <- function(population_function = DDfabricate::fabricate_data, ...) {
   dots <- lazyeval::lazy_dots(...)
   mcall <- lazyeval::make_call(substitute(population_function), dots)
   population_function_internal <- function() {
