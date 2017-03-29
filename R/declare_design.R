@@ -4,7 +4,19 @@
 #' @export
 declare_design <- function(...) {
 
-  causal_order <- lazy_eval(lazy_dots(..., .follow_symbols = TRUE))
+  dots <- lazy_dots(..., .follow_symbols = TRUE)
+
+  dots_classes <- sapply(dots, function(x) class(x$expr))
+
+  # doesn't quite work; says "attempt to apply non-function"
+  # for (i in 2:length(dots)) {
+  #   if (dots_classes[[i]] == "call") {
+  #     print(i)
+  #     dots[[i]]$expr <- paste0("step(", deparse(dots[[i]]$expr), ")")
+  #   }
+  # }
+
+  causal_order <- lazy_eval(dots)
 
   causal_order_text <- eval(substitute(alist(...)))
 
@@ -22,11 +34,9 @@ declare_design <- function(...) {
   causal_order_types[!function_types %in% c("estimand", "estimator")] <-
     "dgp"
 
-
-
   data_function <- function() {
     current_df <- causal_order[[1]]
-    if(length(causal_order) > 1){
+    if (length(causal_order) > 1) {
 
       for (i in 2:length(causal_order)) {
 
@@ -47,11 +57,11 @@ declare_design <- function(...) {
     current_df <- causal_order[[1]]
     estimates_df <- estimands_df <- data.frame()
 
-    if(length(causal_order) > 1){
+    if (length(causal_order) > 1) {
       for (i in 2:length(causal_order)) {
 
         # if it's a dgp
-        if(causal_order_types[i] == "dgp") {
+        if (causal_order_types[i] == "dgp") {
 
           current_df <- causal_order[[i]](current_df)
 
@@ -84,15 +94,31 @@ declare_design <- function(...) {
 }
 
 
-# # split into lists that are either 1. dgp chains 2. estimands or 3. estimators
-# causal_order_list <-
-#   split_causal_order(types = causal_order_types,
-#                      text = causal_order_text)
-# split_causal_order <- function(types, text) {
-#   rle_out <- rle(types)
-#   obj <-
-#     split(text, rep(1:length(rle_out$lengths), rle_out$lengths))
-#   names(obj) <- rle_out$values
-#   return(obj)
-# }
-#
+#' @export
+step <- function(...){
+
+  ## this function allows you to put any R expression
+  ## such a dplyr call mutate
+  ## into the causal order, i.e.
+  ## declare_design(pop(), po, step(mutate(q = 5)))
+
+  mcall <- lazy_dots(...)[[1]]
+
+  arg_names <- names(formals(eval(mcall$expr[[1]])))
+
+  step_function_internal <- function(data) {
+    if (".data" %in% arg_names) {
+      mcall$expr$.data <- data
+    } else if ("data" %in% arg_names) {
+      mcall$expr$data <- data
+    }
+    lazy_eval(mcall)
+  }
+  attributes(step_function_internal) <-
+    list(call = match.call(), type = "step")
+
+  return(step_function_internal)
+
+}
+
+
