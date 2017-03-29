@@ -16,10 +16,10 @@ diagnose_design <-
     ##pb <- txtProgressBar(min = 0, max = sims, initial = 0,
     ##                     char = "=", width = 20, style = 3)
 
-    #' importFrom foreach registerDoSEQ getDoParWorkers
-    #' importFrom tcltk tkProgressBar setTkProgressBar
-    #' importFrom utils txtProgressBar setTxtProgressBar
-    #' importFrom doRNG %dorng%
+    # importFrom foreach registerDoSEQ getDoParWorkers
+    # importFrom tcltk tkProgressBar setTkProgressBar
+    # importFrom utils txtProgressBar setTxtProgressBar
+    # importFrom doRNG %dorng%
 
     ##sims <- foreach(i = 1:sims) %do% {
     ##  info <- sprintf("%d%% done", round(i/sims))
