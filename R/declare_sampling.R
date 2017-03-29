@@ -1,4 +1,9 @@
 
+from_package <- function(func, package){
+  func_package <- tryCatch(getNamespaceName(environment(func)), error = function(e) NULL)
+  ifelse(is.null(func_package), FALSE, func_package == package)
+}
+
 
 #' @importFrom magrittr "%>%"
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
@@ -13,11 +18,11 @@ declare_sampling <- function(..., sampling_function = randomizr::draw_rs,
   ## then we don't want to use randomizr's obtain_condition_probabilities (it likely won't work by default)
   if (!(
     substitute(sampling_function) == "draw_rs" &
-    getNamespaceName(environment(sampling_function)) == "randomizr"
+    from_package(sampling_function, "randomizr")
   ) &
   (
     substitute(sampling_probability_function) == "obtain_inclusion_probabilities" &
-    getNamespaceName(environment(sampling_probability_function)) == "randomizr"
+    from_package(sampling_probability_function, "randomizr")
   )) {
     sampling_probability_function <- NULL
   }

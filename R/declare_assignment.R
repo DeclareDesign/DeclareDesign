@@ -15,11 +15,11 @@ declare_assignment <- function(..., assignment_function = randomizr::conduct_ra,
 
   if (!(
     substitute(assignment_function) == "conduct_ra" &
-    getNamespaceName(environment(assignment_function)) == "randomizr"
+    from_package(assignment_function, "randomizr")
   ) &
   (
     substitute(assignment_probability_function) == "obtain_condition_probabilities" &
-    getNamespaceName(environment(assignment_probability_function)) == "randomizr"
+    from_package(assignment_probability_function, "randomizr")
   )) {
     assignment_probability_function <- NULL
   }
