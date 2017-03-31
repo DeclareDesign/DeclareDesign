@@ -20,11 +20,13 @@ Imports:
     foreach,
     lazyeval,
     DDestimate,
-    DDfabricate
+    DDfabricate,
+    rlang
 Remotes: 
     graemeblair/DDestimate,
     graemeblair/DDfabricate,
-    DeclareDesign/randomizr
+    DeclareDesign/randomizr,
+    hadley/rlang
 License: All rights reserved
 Encoding: UTF-8
 LazyData: true
