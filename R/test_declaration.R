@@ -6,19 +6,19 @@
 #' @export
 declare_test <- function(func = default_test_function, ...) {
 
-  ##func_quo <- quo(func)
-  ##dots <- dots_quos(...)
-
-  ## make a call
-  ##form <- dots_quos(UQ(func)(!!! dots_quos(...)))
-
-  ##dots <- c(dots_quos(...), quos(data = data))
-
-  form <- dots_quos(UQ(func)(!!! c(dots_quos(...), quos(data = data))))
+  ## this creates a formula, quoting the function func with UQ(func)
+  ## then creating the arguments to the function using c() which
+  ## concatenates two parts, first the arguments sent to ...
+  ## through dots_quos(...) and second adding an argument data = data,
+  ## which doesn't yet exist (it's just a promise) and will exist
+  ## inside internal_function
+  internal_call <- dots_quos(UQ(func)(!!!c(dots_quos(...), quos(data = data))))
 
   internal_function <- function(data){
-    ## tidy eval the call that combines func and dots
-    eval_tidy(form, data = list(data = data))
+    ## tidy eval the call and all arguments come from the environment
+    ## of form, except data which we set directly through the data = list()
+    ## argument. We send it data coming into internal_function.
+    eval_tidy(internal_call, data = list(data = data))
   }
   ## attributes
   ## return function
