@@ -9,7 +9,7 @@ declare_estimator <- function(..., label = my_estimator,
   env <- freeze_environment(parent.frame())
   func <- eval(estimator_function)
   label <- as.character(substitute(label))
-  estimand_label <- as.character(substitute(label))
+  estimand_label <- as.character(substitute(estimand))
   if (!("data" %in% names(formals(func)))) {
     stop("Please choose potential_outcomes_function with a data argument.")
   }
@@ -17,8 +17,8 @@ declare_estimator <- function(..., label = my_estimator,
     args$data <- data
     results <- do.call(func, args = args, envir = env)
     return_data <- data.frame(estimator_label = label, results, stringsAsFactors = FALSE)
-    if(!is.null(estimand)){
-      return_object$estimand_label <- estimand_label
+    if(!is.null(estimand_label)){
+      return_data$estimand_label <- estimand_label
     }
     return_data
   }
