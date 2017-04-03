@@ -1,15 +1,16 @@
 
 
-#' @importFrom lazyeval lazy_dots make_call lazy_eval call_modify
-#' @importFrom dplyr summarize_
+#' @importFrom dplyr summarize
 #' @export
 declare_diagnosands <- function(...) {
-  dots <- lazy_dots(...)
-  mcall <- make_call(substitute(summarize), args = dots)
-  diagnosand_function_internal <- function(data) {
-    mcall$expr$.data <- data
-    lazy_eval(mcall)
+  args <- eval(substitute(alist(...)))
+  env <- freeze_environment(parent.frame())
+  func <- eval(dplyr::summarize)
+  potential_outcomes_function_internal <- function(data) {
+    args$.data <- data
+    do.call(func, args = args, envir = env)
   }
+
   attributes(diagnosand_function_internal) <-
     list(call = match.call(), type = "diagnosand")
 
