@@ -6,13 +6,13 @@ library(DDfabricate)
 library(DDestimate)
 library(randomizr)
 
-my_population <- declare_population(N = 500, noise = rnorm(N), Z = sample(c(0, 1), N, replace = T))
+my_population <- declare_population(N = 500, noise = rnorm(N))
 
 my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-##my_sampling <- declare_sampling(n = 250)
+my_sampling <- declare_sampling(n = 250)
 
-##my_assignment <- declare_assignment(m = 25)
+my_assignment <- declare_assignment(m = 25)
 
 my_estimator <- declare_estimator(Y ~ Z)
 
@@ -25,10 +25,10 @@ my_mutate_wrapper <- function(data){
 design <- declare_design(my_population(),
                          my_potential_outcomes,
                          my_estimand,
-                         mutate(var = 5),
+                         ##mutate(var = 5),
                          ##my_mutate_wrapper
-                         ##my_sampling,
-                         ##my_assignment,
+                         my_sampling,
+                         my_assignment,
                          reveal_outcomes,
                          my_estimator)
 design$data_function() %>% head
