@@ -4,8 +4,8 @@
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
 #' @importFrom lazyeval lazy_dots make_call lazy_eval call_modify
 #' @export
-declare_assignment <- function(..., assignment_function = randomizr::conduct_ra,
-                               assignment_probability_function = randomizr::obtain_condition_probabilities,
+declare_assignment <- function(..., assignment_function = conduct_ra,
+                               assignment_probability_function = obtain_condition_probabilities,
                                assignment_variable_name = "Z") {
 
   ## if you provide your own assignment_function and

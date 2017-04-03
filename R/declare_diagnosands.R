@@ -6,7 +6,7 @@ declare_diagnosands <- function(...) {
   args <- eval(substitute(alist(...)))
   env <- freeze_environment(parent.frame())
   func <- eval(dplyr::summarize)
-  potential_outcomes_function_internal <- function(data) {
+  diagnosand_function_internal <- function(data) {
     args$.data <- data
     do.call(func, args = args, envir = env)
   }

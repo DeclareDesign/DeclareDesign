@@ -10,8 +10,8 @@ from_package <- function(func, package){
 #' @importFrom dplyr filter_ select_
 #' @importFrom lazyeval lazy_dots make_call lazy_eval call_modify
 #' @export
-declare_sampling <- function(..., sampling_function = randomizr::draw_rs,
-                               sampling_probability_function = randomizr::obtain_inclusion_probabilities,
+declare_sampling <- function(..., sampling_function = draw_rs,
+                               sampling_probability_function = obtain_inclusion_probabilities,
                                sampling_variable_name = "Z") {
 
   ## if you provide your own sampling_function and don't define your own sampling_probability_function
@@ -27,42 +27,42 @@ declare_sampling <- function(..., sampling_function = randomizr::draw_rs,
     sampling_probability_function <- NULL
   }
 
-  sampling_dots <- sampling_probability_dots <- lazy_dots(...)
-  sampling_mcall <- make_call(substitute(sampling_function),
-                                sampling_dots)
-  sampling_probability_mcall <- make_call(substitute(sampling_probability_function),
-                                            sampling_probability_dots)
+  env <- freeze_environment(parent.frame())
 
-  argument_names_sampling_function <-
-    names(formals(sampling_function))
+  sampling_args <- eval(substitute(alist(...)))
+  sampling_function <- eval(sampling_function)
 
-  argument_names_sampling_probability_function <-
-    names(formals(sampling_probability_function))
+  sampling_probability_args <- eval(substitute(alist(...)))
+  sampling_probability_function <- eval(sampling_probability_function)
 
-  sampling_function_options <- names(sampling_dots)
-  sampling_probability_function_options <- names(sampling_probability_dots)
+  sampling_function_options <- names(sampling_args)
+  sampling_probability_function_options <- names(sampling_probability_args)
 
   sampling_function_internal <- function(data) {
-    if ("N" %in% argument_names_sampling_function &
+    if ("N" %in% names(formals(sampling_function)) &
         !("N" %in% sampling_function_options)) {
-      sampling_mcall$expr$N <- nrow(data)
+      sampling_args$N <- nrow(data)
     }
-    data[, sampling_variable_name] <- lazy_eval(sampling_mcall, data = data)
+    data[, sampling_variable_name] <-
+      do.call(sampling_function, args = sampling_args, envir = env)
     return(data)
   }
 
+  argument_names_sampling_probability_function <-
+    names(formals(sampling_probability_function))
   sampling_probability_function_internal <- function(data) {
     ## if N is an option in your sampling_function and you don't provide it in ...
     ## then we add it for convenience to make things easier
     if ("N" %in% argument_names_sampling_probability_function &
         !("N" %in% sampling_probability_function_options)) {
-      sampling_probability_mcall$expr$N <- nrow(data)
+      sampling_probability_args$N <- nrow(data)
     }
     if ("sampling" %in% argument_names_sampling_probability_function)
-      sampling_probability_mcall$expr$sampling <-
+      sampling_probability_args$sampling <-
         data[, sampling_variable_name]
     data[, paste0(sampling_variable_name, "_inclusion_prob")] <-
-      lazy_eval(sampling_probability_mcall, data = data)
+      do.call(sampling_probability_function,
+              args = sampling_probability_args, envir = env)
     return(data)
   }
 

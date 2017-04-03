@@ -1,5 +1,5 @@
 
-#' @importFrom lazyeval lazy_dots make_call lazy_eval as.lazy
+#' @importFrom lazyeval lazy_dots lazy_eval
 #' @importFrom dplyr bind_rows
 #' @export
 declare_design <- function(...) {
