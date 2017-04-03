@@ -8,7 +8,6 @@ from_package <- function(func, package){
 #' @importFrom magrittr "%>%"
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
 #' @importFrom dplyr filter_ select_
-#' @importFrom lazyeval lazy_dots make_call lazy_eval call_modify
 #' @export
 declare_sampling <- function(..., sampling_function = draw_rs,
                                sampling_probability_function = obtain_inclusion_probabilities,

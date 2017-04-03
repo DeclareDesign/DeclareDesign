@@ -25,7 +25,7 @@ my_mutate_wrapper <- function(data){
 design <- declare_design(my_population(),
                          my_potential_outcomes,
                          my_estimand,
-                         ##mutate(var = 5),
+                         step(mutate(var = 5)),
                          ##my_mutate_wrapper
                          my_sampling,
                          my_assignment,
@@ -45,7 +45,7 @@ design$design_function()
 
 diagnose_design(design = design, diagnosands = declare_diagnosands(superpower = mean(p < .555)))
 
-rm(list=ls())
+rm(list = ls())
 
 m_arm_trial <- function(N){
   pop <- declare_population(N = N, Y = rnorm(N), Z = rbinom(N, 1, .5))
