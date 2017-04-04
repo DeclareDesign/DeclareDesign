@@ -59,6 +59,7 @@ potential_outcomes_function_formula <-
       ## make a dataset that we manipulate to make PO columns
       ## by adding Z variables that are all 0's or all 1's for example
       data_environment <- list2env(data)
+      data_environment$N <- nrow(data)
 
       assign(x = assignment_variable_name,
              value = rep(cond, nrow(data)),

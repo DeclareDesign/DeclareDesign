@@ -18,6 +18,8 @@ my_estimator <- declare_estimator(Y ~ Z)
 
 my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
 
+my_population() %>% my_potential_outcomes
+
 my_mutate_wrapper <- function(data){
   mutate(data, var = 5)
 }
@@ -25,12 +27,12 @@ my_mutate_wrapper <- function(data){
 design <- declare_design(my_population(),
                          my_potential_outcomes,
                          my_estimand,
-                         step(mutate(var = 5)),
+                         ##step(mutate(var = 5)),
                          ##my_mutate_wrapper
                          my_sampling,
-                         my_assignment,
-                         reveal_outcomes,
-                         my_estimator)
+                         my_assignment)
+                         ##reveal_outcomes,
+                         ##my_estimator)
 design$data_function() %>% head
 
 
