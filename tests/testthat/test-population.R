@@ -3,15 +3,22 @@ library(DDfabricate)
 library(DeclareDesign)
 library(magrittr)
 
+# just N
+
+my_population <- declare_population(N = 100, q = rnorm(5))
+
+my_population()
+
+my_population <- declare_population(N = 100)
+
+my_population()
+
+
 # custom function
 
 my_population_function <- function(N) {
   data.frame(u = rnorm(N))
 }
-
-Q <- 55
-
-bob <- data.frame(B = runif(10000000))
 
 #debugonce(DeclareDesign:::make_call_DD)
 ##debugonce(declare_population)
