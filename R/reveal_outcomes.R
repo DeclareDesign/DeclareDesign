@@ -6,7 +6,7 @@ reveal_outcomes <- function(data, outcome_variable_name = "Y", assignment_variab
     potential_outcome_variable_names <- variable_names[startsWith(variable_names, paste0(outcome_variable_name, "_", assignment_variable_name, "_"))]
 
     condition_names_potential_outcome_columns <- sapply(potential_outcome_variable_names, FUN = function(x)
-      substr(x, nchar(paste0(outcome_variable_name, "_", assignment_variable_name, "_")) + 1, nchar(potential_outcome_variable_names)))
+      substr(x, nchar(paste0(outcome_variable_name, "_", assignment_variable_name, "_")) + 1, nchar(x)))
 
     condition_names_assignment_variable <- unique(data[, assignment_variable_name])
 
