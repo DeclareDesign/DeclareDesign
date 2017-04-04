@@ -1,87 +1,35 @@
 
-from_package <- function(func, package){
-  func_package <- tryCatch(getNamespaceName(environment(func)), error = function(e) NULL)
-  ifelse(is.null(func_package), FALSE, func_package == package)
+#' @export
+declare_sampling <- function(..., sampling_function = sampling_function_default) {
+  args <- eval(substitute(alist(...)))
+  env <- freeze_environment(parent.frame())
+  func <- eval(sampling_function)
+  if (!("data" %in% names(formals(func)))) {
+    stop("Please choose a sampling_function with a data argument.")
+  }
+  sampling_function_internal <- function(data) {
+    args$data <- data
+    do.call(func, args = args, envir = env)
+  }
+  attributes(sampling_function_internal) <-
+    list(call = match.call(), type = "sampling")
+
+  return(sampling_function_internal)
 }
 
-
-#' @importFrom magrittr "%>%"
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
-#' @importFrom dplyr filter_ select_
-#' @export
-declare_sampling <- function(..., sampling_function = draw_rs,
-                               sampling_probability_function = obtain_inclusion_probabilities,
-                               sampling_variable_name = "Z") {
+sampling_function_default <- function(data, ..., sampling_variable_name = "Z"){
 
-  ## if you provide your own sampling_function and don't define your own sampling_probability_function
-  ## then we don't want to use randomizr's obtain_condition_probabilities (it likely won't work by default)
-  if (!(
-    substitute(sampling_function) == "draw_rs" &
-    from_package(sampling_function, "randomizr")
-  ) &
-  (
-    substitute(sampling_probability_function) == "obtain_inclusion_probabilities" &
-    from_package(sampling_probability_function, "randomizr")
-  )) {
-    sampling_probability_function <- NULL
-  }
+  options <- eval(substitute(alist(...)))
+  options$N <- nrow(data)
+  data[,sampling_variable_name] <-
+    do.call(what = draw_rs, args = options, envir = list2env(data))
 
-  env <- freeze_environment(parent.frame())
+  data[,paste0(sampling_variable_name, "_inclusion_prob")] <-
+    do.call(what = obtain_inclusion_probabilities, args = options, envir = list2env(data))
 
-  sampling_args <- eval(substitute(alist(...)))
-  sampling_function <- eval(sampling_function)
-
-  sampling_probability_args <- eval(substitute(alist(...)))
-  sampling_probability_function <- eval(sampling_probability_function)
-
-  sampling_function_options <- names(sampling_args)
-  sampling_probability_function_options <- names(sampling_probability_args)
-
-  sampling_function_internal <- function(data) {
-    if ("N" %in% names(formals(sampling_function)) &
-        !("N" %in% sampling_function_options)) {
-      sampling_args$N <- nrow(data)
-    }
-    data[, sampling_variable_name] <-
-      do.call(sampling_function, args = sampling_args, envir = data)
-    return(data)
-  }
-
-  argument_names_sampling_probability_function <-
-    names(formals(sampling_probability_function))
-  sampling_probability_function_internal <- function(data) {
-    ## if N is an option in your sampling_function and you don't provide it in ...
-    ## then we add it for convenience to make things easier
-    if ("N" %in% argument_names_sampling_probability_function &
-        !("N" %in% sampling_probability_function_options)) {
-      sampling_probability_args$N <- nrow(data)
-    }
-    if ("sampling" %in% argument_names_sampling_probability_function)
-      sampling_probability_args$sampling <-
-        data[, sampling_variable_name]
-    data[, paste0(sampling_variable_name, "_inclusion_prob")] <-
-      do.call(sampling_probability_function,
-              args = sampling_probability_args, envir = data)
-    return(data)
-  }
-
-
-  sampling_function_return_internal <- function(data) {
-    data %>%
-      sampling_function_internal %>%
-      sampling_probability_function_internal %>%
-      filter_(paste0(sampling_variable_name, "== 1")) %>%
-      select_(paste0("-", sampling_variable_name))
-  }
-
-  attributes(sampling_function_return_internal) <-
-    list(
-      call = match.call(),
-      type = "sampling",
-      sampling_variable_name = sampling_variable_name
-    )
-
-  return(sampling_function_return_internal)
+  ## subset to the sampled observations and remove the sampling variable
+  data[data[, sampling_variable_name] ==1, -which(names(data) %in% sampling_variable_name)]
 
 }
 
