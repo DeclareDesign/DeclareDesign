@@ -22,32 +22,15 @@ my_po_function <- function(data) {
   data %>% mutate(Y_Z_0 = .25 + u, Y_Z_1 = u)
 }
 
-##debugonce(declare_potential_outcomes)
 my_po_custom <- declare_potential_outcomes(
   potential_outcomes_function = my_po_function)
 
-##debugonce(my_po_custom)
-rm(my_po_function)
 pop_custom <- my_po_custom(pop_custom)
 
-head(pop_custom)
 
-## draw POs for it with arguments
+my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
 
-my_po_function <- function(data, q) {
-  data %>% mutate(Y_Z_0 = q + u, Y_Z_1 = u)
-}
-
-##debugonce(declare_potential_outcomes)
-my_po_custom <- declare_potential_outcomes(
-  potential_outcomes_function = my_po_function, q = rnorm(1))
-
-##debugonce(my_po_custom)
-rm(my_po_function)
-pop_custom <- my_po_custom(pop_custom)
-
-head(pop_custom)
-
+my_estimand(pop_custom)
 
 # do quick design
 

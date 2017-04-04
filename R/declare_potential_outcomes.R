@@ -1,13 +1,15 @@
 
-
-#' @importFrom lazyeval lazy_dots make_call lazy_eval call_modify
 #' @export
 declare_potential_outcomes <- function(..., potential_outcomes_function = potential_outcomes_function_default) {
-  dots <- lazy_dots(...)
-  mcall <- make_call(substitute(potential_outcomes_function), dots)
+  args <- eval(substitute(alist(...)))
+  env <- freeze_environment(parent.frame())
+  func <- eval(potential_outcomes_function)
+  if (!("data" %in% names(formals(func)))) {
+    stop("Please choose potential_outcomes_function with a data argument.")
+  }
   potential_outcomes_function_internal <- function(data) {
-    mcall$expr$data <- data
-    lazy_eval(mcall)
+    args$data <- data
+    do.call(func, args = args, envir = env)
   }
   attributes(potential_outcomes_function_internal) <-
     list(call = match.call(), type = "potential_outcomes")
@@ -15,6 +17,10 @@ declare_potential_outcomes <- function(..., potential_outcomes_function = potent
   return(potential_outcomes_function_internal)
 }
 
+## this function is from lazyeval version git version, commit c155c3d
+freeze_environment <- function(x) {
+  list2env(as.list(x, all.names = TRUE), parent = parent.env(x))
+}
 
 #' @export
 potential_outcomes_function_default <-

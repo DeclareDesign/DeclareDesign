@@ -11,7 +11,10 @@ my_population_function <- function(N) {
 
 Q <- 55
 
-##debugonce(DeclareDesign:::make_call_DD)
+bob <- data.frame(B = runif(10000000))
+
+#debugonce(DeclareDesign:::make_call_DD)
+##debugonce(declare_population)
 my_population_custom <- declare_population(
   population_function = my_population_function, N = Q)
 
@@ -20,8 +23,9 @@ rm(my_population_function)
 
 ##debugonce(DeclareDesign:::lazy_eval_DD)
 
-rm(list = ls()[!(ls() %in% c("my_population_function", "my_population_custom"))])
+rm(list = ls()[!(ls() %in% c("my_population_custom"))])
 
+##debugonce(my_population_custom)
 pop_custom <- my_population_custom()
 
 head(pop_custom)
@@ -39,6 +43,7 @@ head(pop_default)
 
 design_func <- function(numb){
   pop <- declare_population(N = numb, q = rnorm(5))
+  rm(numb)
   return(pop)
 }
 

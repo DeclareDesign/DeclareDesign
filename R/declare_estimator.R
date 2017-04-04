@@ -1,16 +1,26 @@
 
 
 #' @importFrom DDestimate difference_in_means
-#' @importFrom lazyeval lazy_dots make_call lazy_eval call_modify
 #' @export
-declare_estimator <- function(..., label = my_estimator, estimator_function = DDestimate::difference_in_means) {
-  dots <- lazy_dots(...)
-  mcall <- make_call(substitute(estimator_function), dots)
+declare_estimator <- function(..., label = my_estimator,
+                              estimator_function = DDestimate::difference_in_means,
+                              estimand = NULL) {
+  args <- eval(substitute(alist(...)))
+  env <- freeze_environment(parent.frame())
+  func <- eval(estimator_function)
   label <- as.character(substitute(label))
+  estimand_label <- as.character(substitute(estimand))
+  if (!("data" %in% names(formals(func)))) {
+    stop("Please choose potential_outcomes_function with a data argument.")
+  }
   estimator_function_internal <- function(data) {
-    mcall$expr$data <- data
-    results <- lazy_eval(mcall)
-    data.frame(estimator_label = label, results, stringsAsFactors = FALSE)
+    args$data <- data
+    results <- do.call(func, args = args, envir = env)
+    return_data <- data.frame(estimator_label = label, results, stringsAsFactors = FALSE)
+    if(!is.null(estimand_label)){
+      return_data$estimand_label <- estimand_label
+    }
+    return_data
   }
   attributes(estimator_function_internal) <-
     list(call = match.call(), type = "estimator")

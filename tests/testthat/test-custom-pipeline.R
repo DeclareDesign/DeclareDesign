@@ -21,7 +21,7 @@
 # }
 #
 # pop() %>%  dumb_mutate(me = 5)
-# debugonce(declare_design)
+# ##debugonce(declare_design)
 # declare_design(pop(), dumb_mutate(me = 5)) %>% draw_data()
 #
 #

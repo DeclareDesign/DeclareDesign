@@ -1,20 +1,21 @@
 
+from_package <- function(func, package){
+  func_package <- tryCatch(getNamespaceName(environment(func)), error = function(e) NULL)
+  ifelse(is.null(func_package), FALSE, func_package == package)
+}
+
 
 #' @importFrom magrittr "%>%"
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
-#' @importFrom lazyeval lazy_dots make_call lazy_eval call_modify
 #' @export
 declare_assignment <- function(..., assignment_function = randomizr::conduct_ra,
-                               assignment_probability_function = randomizr::obtain_condition_probabilities,
-                               assignment_variable_name = "Z") {
+                             assignment_probability_function = randomizr::obtain_condition_probabilities,
+                             assignment_variable_name = "Z") {
 
-  ## if you provide your own assignment_function and
-  ## don't define your own assignment_probability_function
-  ## then we don't want to use randomizr's obtain_condition_probabilities
-  ## (it likely won't work by default)
-
+  ## if you provide your own assignment_function and don't define your own assignment_probability_function
+  ## then we don't want to use randomizr's obtain_condition_probabilities (it likely won't work by default)
   if (!(
-    substitute(assignment_function) == "conduct_ra" &
+    substitute(assignment_function) == "draw_rs" &
     from_package(assignment_function, "randomizr")
   ) &
   (
@@ -24,36 +25,42 @@ declare_assignment <- function(..., assignment_function = randomizr::conduct_ra,
     assignment_probability_function <- NULL
   }
 
-  assignment_dots <- assignment_probability_dots <- lazy_dots(...)
-  assignment_mcall <- make_call(substitute(assignment_function),
-                                assignment_dots)
-  assignment_probability_mcall <- make_call(substitute(assignment_probability_function),
-                                            assignment_probability_dots)
+  env <- freeze_environment(parent.frame())
 
-  argument_names_assignment_function <-
-    names(formals(assignment_function))
+  assignment_args <- eval(substitute(alist(...)))
+  assignment_function <- eval(assignment_function)
 
-  argument_names_assignment_probability_function <-
-    names(formals(assignment_probability_function))
+  assignment_probability_args <- eval(substitute(alist(...)))
+  assignment_probability_function <- eval(assignment_probability_function)
 
-  assignment_function_options <- names(assignment_dots)
-  assignment_probability_function_options <- names(assignment_probability_dots)
+  assignment_function_options <- names(assignment_args)
+  assignment_probability_function_options <- names(assignment_probability_args)
 
   assignment_function_internal <- function(data) {
-    if ("N" %in% argument_names_assignment_function &
+    if ("N" %in% names(formals(assignment_function)) &
         !("N" %in% assignment_function_options)) {
-      assignment_mcall$expr$N <- nrow(data)
+      assignment_args$N <- nrow(data)
     }
-    data[, assignment_variable_name] <- lazy_eval(assignment_mcall, data = data)
+    data[, assignment_variable_name] <-
+      do.call(assignment_function, args = assignment_args, envir = env)
     return(data)
   }
 
+  argument_names_assignment_probability_function <-
+    names(formals(assignment_probability_function))
   assignment_probability_function_internal <- function(data) {
+    ## if N is an option in your assignment_function and you don't provide it in ...
+    ## then we add it for convenience to make things easier
+    if ("N" %in% argument_names_assignment_probability_function &
+        !("N" %in% assignment_probability_function_options)) {
+      assignment_probability_args$N <- nrow(data)
+    }
     if ("assignment" %in% argument_names_assignment_probability_function)
-      assignment_probability_mcall$expr$assignment <-
+      assignment_probability_args$assignment <-
         data[, assignment_variable_name]
     data[, paste0(assignment_variable_name, "_condition_prob")] <-
-      lazy_eval(assignment_probability_mcall, data = data)
+      do.call(assignment_probability_function,
+              args = assignment_probability_args, envir = env)
     return(data)
   }
 
