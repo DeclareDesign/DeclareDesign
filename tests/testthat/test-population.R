@@ -5,13 +5,50 @@ library(magrittr)
 
 # just N
 
-my_population <- declare_population(N = 100, q = rnorm(5))
-
-my_population()
-
 my_population <- declare_population(N = 100)
 
 my_population()
+
+# test multilevel
+
+dat <- fabricate_data(
+  regions = level(N = 5),
+  cities = level(N = sample(1:5), subways = rnorm(N, mean = gdp)))
+
+dat <- fabricate_data(
+  regions = level(N = 5, gdp = rnorm(N)),
+  cities = level(N = sample(1:5), subways = rnorm(N, mean = gdp)))
+
+pop <- declare_population(
+  regions = level(N = 5, gdp = rnorm(N)),
+  cities = level(N = sample(1:5), subways = rnorm(N, mean = gdp)))
+
+pop()
+
+pop <- declare_population(
+  regions = level(N = 5),
+  cities = level(N = sample(1:5), subways = rnorm(N, mean = gdp)))
+
+pop()
+
+
+# test multilevel
+
+dat <- DDfabricate::fabricate_data(
+  districts = level(N = 25, urban = sample(0:1, N, replace = TRUE)),
+  villages = level(N = 100, altitude = rnorm(N)),
+  individuals = level(N = 100, income = rnorm(N),
+                      age = sample(18:95, N, replace = TRUE)))
+
+
+my_population_nested <- declare_population(
+  districts = level(N = 25, urban = sample(0:1, N, replace = TRUE)),
+  villages = level(N = 10, altitude = rnorm(N)),
+  individuals = level(N = 100, income = rnorm(N),
+                      age = sample(18:95, N, replace = TRUE)))
+
+debugonce(DDfabricate::fabricate_data)
+my_population_nested()
 
 
 # custom function
