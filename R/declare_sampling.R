@@ -43,7 +43,7 @@ declare_sampling <- function(..., sampling_function = draw_rs,
       sampling_args$N <- nrow(data)
     }
     data[, sampling_variable_name] <-
-      do.call(sampling_function, args = sampling_args, envir = env)
+      do.call(sampling_function, args = sampling_args, envir = data)
     return(data)
   }
 
@@ -61,7 +61,7 @@ declare_sampling <- function(..., sampling_function = draw_rs,
         data[, sampling_variable_name]
     data[, paste0(sampling_variable_name, "_inclusion_prob")] <-
       do.call(sampling_probability_function,
-              args = sampling_probability_args, envir = env)
+              args = sampling_probability_args, envir = data)
     return(data)
   }
 

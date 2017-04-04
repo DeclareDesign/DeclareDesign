@@ -42,7 +42,7 @@ declare_assignment <- function(..., assignment_function = randomizr::conduct_ra,
       assignment_args$N <- nrow(data)
     }
     data[, assignment_variable_name] <-
-      do.call(assignment_function, args = assignment_args, envir = env)
+      do.call(assignment_function, args = assignment_args, envir = list2env(data))
     return(data)
   }
 
@@ -60,7 +60,7 @@ declare_assignment <- function(..., assignment_function = randomizr::conduct_ra,
         data[, assignment_variable_name]
     data[, paste0(assignment_variable_name, "_condition_prob")] <-
       do.call(assignment_probability_function,
-              args = assignment_probability_args, envir = env)
+              args = assignment_probability_args, envir = list2env(data))
     return(data)
   }
 

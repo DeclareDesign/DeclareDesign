@@ -11,6 +11,7 @@ f_1(df)
 f_1 <- declare_assignment(num_arms = 3)
 f_1(df)
 
+##debugonce(declare_assignment)
 f_1 <- declare_assignment(block_var = block_var)
 f_1(df)
 
