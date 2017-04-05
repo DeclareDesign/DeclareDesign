@@ -12,6 +12,6 @@ default_diagnosands <- declare_diagnosands(
   type_s_rate = mean((sign(est) != sign(estimand)) & p < .05),
   mean_estimand = mean(estimand))
 
-devtools::use_data(default_diagnosands, default_diagnosands, internal = TRUE, overwrite = TRUE)
+devtools::use_data(default_diagnosands, internal = TRUE, overwrite = TRUE)
 
 ##save(default_diagnosands, file = "data/diagnosands.RData", compress = TRUE)
