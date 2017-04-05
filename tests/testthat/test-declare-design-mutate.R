@@ -1,34 +1,32 @@
-rm(list = ls())
-library(magrittr)
-library(dplyr)
-library(DeclareDesign)
-library(DDfabricate)
-library(DDestimate)
-library(randomizr)
+test_that("use custom functions like mutate in the causal order", {
 
-my_population <- declare_population(N = 500, noise = rnorm(N))
+  library(dplyr)
 
-my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+  my_population <- declare_population(N = 500, noise = rnorm(N))
 
-my_sampling <- declare_sampling(n = 250)
+  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-my_assignment <- declare_assignment(m = 25)
+  my_sampling <- declare_sampling(n = 250)
 
-my_estimator <- declare_estimator(Y ~ Z)
+  my_assignment <- declare_assignment(m = 25)
 
-my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
+  my_estimator <- declare_estimator(Y ~ Z)
 
-##debugonce(declare_design)
-design <- declare_design(my_population(),
-                         my_potential_outcomes,
-                         my_estimand,
-                         step(mutate(q = 99)),
-                         my_sampling,
-                         my_assignment,
-                         reveal_outcomes,
-                         my_estimator)
+  my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
 
-design$data_function() %>% head
+  ##debugonce(declare_design)
+  design <- declare_design(my_population(),
+                           my_potential_outcomes,
+                           my_estimand,
+                           step(mutate(q = 99)),
+                           my_sampling,
+                           my_assignment,
+                           reveal_outcomes,
+                           my_estimator)
+
+  head(draw_data(design))
+
+})
 
 ##my_population() %>% my_potential_outcomes %>% step(mutate(q = 99))
 

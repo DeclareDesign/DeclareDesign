@@ -1,3 +1,4 @@
+#' @importFrom dplyr '%>%'
 #' @export
 compare_designs <- function(..., sims = 100) {
   designs <- list(...)

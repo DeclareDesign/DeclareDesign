@@ -14,16 +14,16 @@ Description: Tools for characterizing, diagnosing, and pre-registering research
 Depends:
     R (>= 3.3.0)
 Imports:
-    magrittr,
-    randomizr,
     dplyr,
     foreach,
+    lazyeval,
+    randomizr,
     DDestimate,
     DDfabricate
 Remotes: 
     graemeblair/DDestimate,
     graemeblair/DDfabricate,
-    DeclareDesign/randomizr,
+    DeclareDesign/randomizr
 License: All rights reserved
 URL: https://declaredesign.org, https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues
