@@ -17,8 +17,8 @@ test_that("multiple potential outcomes", {
                               my_potential_outcomes_Y,
                               my_potential_outcomes_attrition,
                               my_assignment,
-                              step(reveal_outcomes(outcome_variable_name = "Y", assignment_variable_name = "Z")),
-                              step(reveal_outcomes(outcome_variable_name = "R", assignment_variable_name = "Z")))
+                              declare_step(reveal_outcomes(outcome_variable_name = "Y", assignment_variable_name = "Z")),
+                              declare_step(reveal_outcomes(outcome_variable_name = "R", assignment_variable_name = "Z")))
 
   head(draw_data(my_design))
 

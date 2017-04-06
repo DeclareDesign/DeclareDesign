@@ -18,11 +18,11 @@ Imports:
     foreach,
     lazyeval,
     randomizr,
-    DDestimate,
-    DDfabricate
+    fabricatr,
+    DDestimate
 Remotes: 
     graemeblair/DDestimate,
-    graemeblair/DDfabricate,
+    graemeblair/fabricatr,
     DeclareDesign/randomizr
 License: All rights reserved
 URL: https://declaredesign.org, https://github.com/DeclareDesign/DeclareDesign

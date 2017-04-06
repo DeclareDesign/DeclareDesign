@@ -18,7 +18,7 @@ test_that("use custom functions like mutate in the causal order", {
   design <- declare_design(my_population(),
                            my_potential_outcomes,
                            my_estimand,
-                           step(mutate(q = 99)),
+                           declare_step(mutate(q = 99)),
                            my_sampling,
                            my_assignment,
                            reveal_outcomes,
@@ -28,7 +28,7 @@ test_that("use custom functions like mutate in the causal order", {
 
 })
 
-##my_population() %>% my_potential_outcomes %>% step(mutate(q = 99))
+##my_population() %>% my_potential_outcomes %>% declare_step(mutate(q = 99))
 
 #
 # if (dots_classes[1] == "function") {

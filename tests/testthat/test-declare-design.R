@@ -22,7 +22,7 @@ test_that("test the full declare design setup", {
   design <- declare_design(my_population(),
                            my_potential_outcomes,
                            my_estimand,
-                           ##step(mutate(var = 5)),
+                           ##declare_step(mutate(var = 5)),
                            ##my_mutate_wrapper
                            my_sampling,
                            my_assignment,

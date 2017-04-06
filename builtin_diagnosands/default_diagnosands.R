@@ -1,6 +1,7 @@
-rm(list=ls())
-
+rm(list = ls())
+ 
 library(DeclareDesign)
+library(devtools)
 
 default_diagnosands <- declare_diagnosands(
   bias = mean(est - estimand),
@@ -12,6 +13,5 @@ default_diagnosands <- declare_diagnosands(
   type_s_rate = mean((sign(est) != sign(estimand)) & p < .05),
   mean_estimand = mean(estimand))
 
-devtools::use_data(default_diagnosands, internal = TRUE, overwrite = TRUE)
+use_data(default_diagnosands, internal = FALSE, overwrite = TRUE)
 
-##save(default_diagnosands, file = "data/diagnosands.RData", compress = TRUE)

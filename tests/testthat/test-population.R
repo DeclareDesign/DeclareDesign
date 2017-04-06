@@ -24,7 +24,7 @@ test_that("declare_population", {
 
   # test multilevel
 
-  dat <- DDfabricate::fabricate_data(
+  dat <- fabricatr::fabricate_data(
     districts = level(N = 25, urban = sample(0:1, N, replace = TRUE)),
     villages = level(N = 100, altitude = rnorm(N)),
     individuals = level(N = 100, income = rnorm(N),

@@ -1,5 +1,5 @@
 # library(DeclareDesign)
-# library(DDfabricate)
+# library(fabricatr)
 # library(magrittr)
 # library(dplyr)
 #

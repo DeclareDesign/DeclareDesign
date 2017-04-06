@@ -12,7 +12,7 @@ declare_design <- function(...) {
   # for (i in 2:length(dots)) {
   #   if (dots_classes[[i]] == "call") {
   #     print(i)
-  #     dots[[i]]$expr <- paste0("step(", deparse(dots[[i]]$expr), ")")
+  #     dots[[i]]$expr <- paste0("declare_step(", deparse(dots[[i]]$expr), ")")
   #   }
   # }
 
@@ -90,34 +90,6 @@ declare_design <- function(...) {
     ),
     class = "design"
   ))
-
-}
-
-
-#' @export
-step <- function(...){
-
-  ## this function allows you to put any R expression
-  ## such a dplyr call mutate
-  ## into the causal order, i.e.
-  ## declare_design(pop(), po, step(mutate(q = 5)))
-
-  mcall <- lazy_dots(...)[[1]]
-
-  arg_names <- names(formals(eval(mcall$expr[[1]])))
-
-  step_function_internal <- function(data) {
-    if (".data" %in% arg_names) {
-      mcall$expr$.data <- data
-    } else if ("data" %in% arg_names) {
-      mcall$expr$data <- data
-    }
-    lazy_eval(mcall)
-  }
-  attributes(step_function_internal) <-
-    list(call = match.call(), type = "step")
-
-  return(step_function_internal)
 
 }
 

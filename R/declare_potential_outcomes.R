@@ -74,7 +74,7 @@ potential_outcomes_function_formula <-
   }
 
 
-#' @importFrom DDfabricate fabricate_data
+#' @importFrom fabricatr fabricate_data
 potential_outcomes_function_discrete <- function(data, ...) {
   options <- eval(substitute(alist(...)))
 

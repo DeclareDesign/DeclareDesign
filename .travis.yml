@@ -26,10 +26,10 @@ after_success:
   - cp "${PKG_FILE_NAME}" deploy/latest.tar.gz
 
 after_failure:
-  - if [ ${OS} = Darwin ]; then cat /Users/travis/build/graemeblair/DDfabricate/DDfabricate.Rcheck/00check.log; fi
-  - if [ ${OS} = Darwin ]; then cat /Users/travis/build/graemeblair/DDfabricate/DDfabricate.Rcheck/00install.out; fi
-  - if [ ${OS} != Darwin ]; then cat /home/travis/build/graemeblair/DDfabricate/DDfabricate.Rcheck/00check.log; fi
-  - if [ ${OS} != Darwin ]; then cat /home/travis/build/graemeblair/DDfabricate/DDfabricate.Rcheck/00install.out; fi
+  - if [ ${OS} = Darwin ]; then cat /Users/travis/build/graemeblair/fabricatr/fabricatr.Rcheck/00check.log; fi
+  - if [ ${OS} = Darwin ]; then cat /Users/travis/build/graemeblair/fabricatr/fabricatr.Rcheck/00install.out; fi
+  - if [ ${OS} != Darwin ]; then cat /home/travis/build/graemeblair/fabricatr/fabricatr.Rcheck/00check.log; fi
+  - if [ ${OS} != Darwin ]; then cat /home/travis/build/graemeblair/fabricatr/fabricatr.Rcheck/00install.out; fi
   - ./travis-tool.sh dump_logs
 
 notifications:

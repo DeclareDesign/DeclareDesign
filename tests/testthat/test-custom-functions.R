@@ -1,4 +1,4 @@
-test_that("you can use custom functions for each of the six steps", {
+test_that("you can use custom functions for each of the six declare_steps", {
 
   ## population
   my_population_function <- function(N) {
