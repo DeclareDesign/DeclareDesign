@@ -7,3 +7,4 @@ builtin_objects
 appveyor.yml
 ^appveyor\.yml$
 builtin_diagnosands
+CONDUCT.md
