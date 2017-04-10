@@ -14,14 +14,14 @@ test_that("use custom functions like mutate in the causal order", {
 
   my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
 
-  ##debugonce(declare_design)
-  design <- declare_design(my_population(),
+  debugonce(declare_design)
+  design <- declare_design(my_population,
                            my_potential_outcomes,
                            my_estimand,
-                           declare_step(mutate(q = 99)),
+                           mutate(q = 99),
                            my_sampling,
                            my_assignment,
-                           reveal_outcomes,
+                           reveal_outcomes(outcome_variable_name = "Y"),
                            my_estimator)
 
   head(draw_data(design))

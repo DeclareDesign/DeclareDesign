@@ -8,13 +8,12 @@ declare_design <- function(...) {
 
   dots_classes <- sapply(dots, function(x) class(x$expr))
 
-  # doesn't quite work; says "attempt to apply non-function"
-  # for (i in 2:length(dots)) {
-  #   if (dots_classes[[i]] == "call") {
-  #     print(i)
-  #     dots[[i]]$expr <- paste0("declare_step(", deparse(dots[[i]]$expr), ")")
-  #   }
-  # }
+  ## wrap any call in declare_step()
+  for (i in 2:length(dots)) {
+    if (dots_classes[[i]] == "call") {
+      dots[[i]]$expr <- call("declare_step", dots[[i]]$expr)
+    }
+  }
 
   causal_order <- lazy_eval(dots)
 
@@ -35,7 +34,22 @@ declare_design <- function(...) {
     "dgp"
 
   data_function <- function() {
-    current_df <- causal_order[[1]]
+    if(class(causal_order[[1]]) == "data.frame"){
+      current_df <- causal_order[[1]]
+    } else if (class(causal_order[[1]]) == "call") {
+      try(current_df <- causal_order[[1]], silent = TRUE)
+      if(!exists("current_df") | class(current_df) != "data.frame"){
+        stop("The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame.")
+      }
+    } else if (class(causal_order[[1]]) == "function") {
+      try(current_df <- causal_order[[1]](), silent = TRUE)
+      if(!exists("current_df") | class(current_df) != "data.frame"){
+        stop("The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame.")
+      }
+    } else {
+      stop("The first element of your design must be a data.frame or a function that returns a data.frame.")
+    }
+
     if (length(causal_order) > 1) {
 
       for (i in 2:length(causal_order)) {

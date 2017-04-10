@@ -15,3 +15,4 @@ A design object or template function
 \description{
 Get Design from the DeclareDesign Library of Research Designs
 }
+
