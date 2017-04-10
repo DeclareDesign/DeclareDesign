@@ -7,11 +7,10 @@
 The development version of this package can be installed directly from GitHub using `ghit`:
 
 ```R
-if (!require("devtools")) {
-    install.packages("devtools")
-    library("devtools")
+if (!require("ghit")) {
+    install.packages("ghit")
 }
-devtools::install_github("DeclareDesign/DeclareDesign")
+ghit::install_github("DeclareDesign/DeclareDesign")
 ```
 
 This software is in alpha release. Please contact the authors before using in experiments or published work.
