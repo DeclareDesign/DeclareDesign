@@ -13,12 +13,12 @@ test_that("multiple potential outcomes", {
 
   my_assignment <- declare_assignment(m = 25)
 
-  my_design <- declare_design(my_population(),
+  my_design <- declare_design(my_population,
                               my_potential_outcomes_Y,
                               my_potential_outcomes_attrition,
                               my_assignment,
-                              declare_step(reveal_outcomes(outcome_variable_name = "Y", assignment_variable_name = "Z")),
-                              declare_step(reveal_outcomes(outcome_variable_name = "R", assignment_variable_name = "Z")))
+                              reveal_outcomes(outcome_variable_name = "R", assignment_variable_name = "Z"),
+                              reveal_outcomes(outcome_variable_name = "Y", assignment_variable_name = "Z"))
 
   head(draw_data(my_design))
 

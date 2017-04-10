@@ -13,7 +13,7 @@ test_that("you can do continuous POs", {
 
   my_assignment <- declare_assignment(assignment_function = continuous_treatment_function)
 
-  my_design <- declare_design(my_population(),
+  my_design <- declare_design(my_population,
                               my_potential_outcomes,
                               my_assignment,
                               reveal_outcomes)

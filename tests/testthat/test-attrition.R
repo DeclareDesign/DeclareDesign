@@ -13,12 +13,12 @@ test_that("attrition as a PO", {
 
   my_assignment <- declare_assignment(m = 25)
 
-  my_design <- declare_design(my_population(),
+  my_design <- declare_design(my_population,
                               my_potential_outcomes_Y,
                               my_potential_outcomes_attrition,
                               my_assignment,
-                              declare_step(reveal_outcomes(outcome_variable_name = "R")),
-                              declare_step(reveal_outcomes(attrition_variable_name = "R")))
+                              reveal_outcomes(outcome_variable_name = "R"),
+                              reveal_outcomes(attrition_variable_name = "R"))
 
   head(draw_data(my_design))
 

@@ -34,6 +34,8 @@ declare_design <- function(...) {
     "dgp"
 
   data_function <- function() {
+
+    ## the first part of the DGP must be a data.frame. Take what the user creates and turn it into a data.frame.
     if(class(causal_order[[1]]) == "data.frame"){
       current_df <- causal_order[[1]]
     } else if (class(causal_order[[1]]) == "call") {
@@ -67,8 +69,24 @@ declare_design <- function(...) {
   # function 2: runs things in sequence, returns estimates_df
 
   design_function <- function() {
-    # initialize 3 running data.frames
-    current_df <- causal_order[[1]]
+
+    ## the first part of the DGP must be a data.frame. Take what the user creates and turn it into a data.frame.
+    if(class(causal_order[[1]]) == "data.frame"){
+      current_df <- causal_order[[1]]
+    } else if (class(causal_order[[1]]) == "call") {
+      try(current_df <- causal_order[[1]], silent = TRUE)
+      if(!exists("current_df") | class(current_df) != "data.frame"){
+        stop("The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame.")
+      }
+    } else if (class(causal_order[[1]]) == "function") {
+      try(current_df <- causal_order[[1]](), silent = TRUE)
+      if(!exists("current_df") | class(current_df) != "data.frame"){
+        stop("The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame.")
+      }
+    } else {
+      stop("The first element of your design must be a data.frame or a function that returns a data.frame.")
+    }
+
     estimates_df <- estimands_df <- data.frame()
 
     if (length(causal_order) > 1) {

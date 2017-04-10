@@ -21,4 +21,4 @@ test_that("test the full declare design setup", {
   design <- declare_design(df, my_potential_outcomes)
   design$data_function()
 
-}
+})
