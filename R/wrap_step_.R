@@ -1,4 +1,5 @@
 
+#' @export
 wrap_step_ <- function(...){
 
   ## this function allows you to put any R expression

@@ -18,6 +18,7 @@ test_that("test the full declare design setup", {
                            my_potential_outcomes,
                            my_estimand,
                            my_sampling,
+                           mutate(q = 5),
                            my_assignment,
                            reveal_outcomes,
                            my_estimator)
