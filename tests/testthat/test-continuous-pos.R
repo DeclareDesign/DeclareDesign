@@ -18,7 +18,6 @@ test_that("you can do continuous POs", {
                               my_assignment,
                               reveal_outcomes)
 
-  ##debugonce(reveal_outcomes)
   head(draw_data(my_design))
 
 })

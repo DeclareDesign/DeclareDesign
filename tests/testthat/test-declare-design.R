@@ -14,7 +14,7 @@ test_that("test the full declare design setup", {
 
   my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
-  design <- declare_design(my_population(),
+  design <- declare_design(my_population,
                            my_potential_outcomes,
                            my_estimand,
                            my_sampling,
@@ -22,26 +22,6 @@ test_that("test the full declare design setup", {
                            reveal_outcomes,
                            my_estimator)
 
-  design$data_function()
-
+  head(design$data_function())
   design$design_function()
-
-
-  diagnose_design(design = design, diagnosands = declare_diagnosands(superpower = mean(p < .555)))
-
-  rm(list = ls())
-
-  m_arm_trial <- function(N){
-    pop <- declare_population(N = N, Y = rnorm(N), Z = rbinom(N, 1, .5))
-    pate_estimator <- declare_estimator(Y ~ Z, estimator_function = lm_robust_se)
-    my_design <- declare_design(pop(), pate_estimator)
-    return(my_design)
-  }
-
-  m_arm_trial(N = 5)$data_function()
-
-
-  quick_design(template = m_arm_trial, N = 5)$design_function()
-
-
 })

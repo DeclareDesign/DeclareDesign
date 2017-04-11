@@ -12,6 +12,8 @@ test_that("declare_potential_outcomes", {
   rm(my_population_function)
   pop_custom <- my_population_custom()
 
+  head(pop_custom)
+
   # draw POs for it without arguments
 
   my_po_function <- function(data) {
@@ -47,23 +49,5 @@ test_that("declare_potential_outcomes", {
   pop_custom <- my_po_custom(pop_custom)
 
   head(pop_custom)
-
-
-  # do quick design
-
-  design_func <- function(numb){
-    pop <- declare_population(N = numb, u = rnorm(N))
-    my_po_function_qd <- function(data) {
-      data$Y_Z_0 <- with(data, .25 + u)
-      data$Y_Z_1 <- with(data, u)
-      data
-    }
-    pos <- declare_potential_outcomes(potential_outcomes_function = my_po_function_qd)
-    return(pop)
-  }
-
-  design_func(numb = 5)()
-
-  g <- quick_design(design_func, numb = 5)
 
 })

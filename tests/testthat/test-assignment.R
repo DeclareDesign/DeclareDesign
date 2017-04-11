@@ -11,7 +11,6 @@ test_that("randomizr works through declare_assignment", {
   f_1 <- declare_assignment(num_arms = 3)
   f_1(df)
 
-  ##debugonce(declare_assignment)
   f_1 <- declare_assignment(block_var = block_var)
   f_1(df)
 
@@ -22,8 +21,7 @@ test_that("randomizr works through declare_assignment", {
     f_1 <- declare_assignment(num_arms = num_arms)
     f_1(df)
   }
-  # Breaks rn
-  #new_fun(3)
+  new_fun(3)
 
 })
 

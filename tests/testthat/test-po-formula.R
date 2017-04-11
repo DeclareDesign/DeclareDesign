@@ -9,16 +9,11 @@ test_that("PO as a formula works", {
 
   pop <- my_population()
 
-  ##logistic <- function(x)
-  ##  exp(x) / (1 + exp(x))
-  ## including logistic below does not work. why?
+  my_potential_outcomes <-
+    declare_potential_outcomes(
+      formula = R ~ rbinom(n = N, size = 1, prob = pnorm(.025 * Z)
+    ))
 
-  my_potential_outcomes1 <- declare_potential_outcomes(formula = R ~ rbinom(
-    n = N,
-    size = 1,
-    prob = pnorm(.025 * Z)
-  ))
-
-  head(my_potential_outcomes1(pop))
+  head(my_potential_outcomes(pop))
 
 })

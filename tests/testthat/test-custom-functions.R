@@ -10,7 +10,6 @@ test_that("you can use custom functions for each of the six declare steps", {
 
   rm(my_population_function)
   pop_custom <- my_population_custom()
-
   head(pop_custom)
 
   ## potential outcomes
@@ -30,20 +29,18 @@ test_that("you can use custom functions for each of the six declare steps", {
 
   head(pop_custom)
 
-
-
   ## sampling
-
   my_sampling_function <- function(data) {
-    rbinom(n = nrow(data),
+    S <- rbinom(n = nrow(data),
            size = 1,
            prob = 0.1)
+    data[S == 1,]
   }
 
   my_sampling_custom <- declare_sampling(
     sampling_function = my_sampling_function)
 
   smp_custom <- my_sampling_custom(pop_custom)
-
+  smp_custom
 })
 

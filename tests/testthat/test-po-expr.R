@@ -2,8 +2,6 @@
 
 test_that("PO as a formula works", {
 
-  library(DeclareDesign)
-
   N <- 1000
 
   my_population <- declare_population(
@@ -18,10 +16,10 @@ test_that("PO as a formula works", {
   ##  exp(x) / (1 + exp(x))
   ## including logistic below does not work. why?
 
-  my_potential_outcomes1 <- declare_potential_outcomes(
+  my_potential_outcomes <- declare_potential_outcomes(
     Y_Z_0 = income,
     Y_Z_1 = income + 5)
 
-  head(my_potential_outcomes1(pop))
+  head(my_potential_outcomes(pop))
 
 })
