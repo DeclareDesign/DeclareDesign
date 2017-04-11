@@ -8,10 +8,10 @@ declare_design <- function(...) {
 
   dots_classes <- sapply(dots, function(x) class(x$expr))
 
-  ## wrap any call in declare_step()
+  ## wrap any call in wrap_step_()
   for (i in 2:length(dots)) {
     if (dots_classes[[i]] == "call") {
-      dots[[i]]$expr <- call("declare_step", dots[[i]]$expr)
+      dots[[i]]$expr <- call("wrap_step_", dots[[i]]$expr)
     }
   }
 

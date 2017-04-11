@@ -1,5 +1,5 @@
-#' @export
-declare_step <- function(...){
+
+wrap_step_ <- function(...){
 
   ## this function allows you to put any R expression
   ## such a dplyr call mutate
