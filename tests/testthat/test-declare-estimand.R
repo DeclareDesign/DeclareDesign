@@ -17,7 +17,9 @@ test_that("declare estimand", {
   # draw POs for it without arguments
 
   my_po_function <- function(data) {
-    data %>% mutate(Y_Z_0 = .25 + u, Y_Z_1 = u)
+    data$Y_Z_0 <- with(data, .25 + u)
+    data$Y_Z_1 <- with(data, u)
+    data
   }
 
   my_po_custom <- declare_potential_outcomes(

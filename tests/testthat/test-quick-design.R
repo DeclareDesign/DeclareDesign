@@ -27,7 +27,7 @@ test_that("quick_design works", {
     return(my_design)
   }
 
-  design <- quick_design(template = m_arm_trial, N = 1000)
+  design <- quick_design(template = m_arm_trial, N = 100)
 
   draw_data(design)
 

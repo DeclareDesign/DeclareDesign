@@ -17,18 +17,27 @@ declare_assignment <- function(..., assignment_function = assignment_function_de
   return(assignment_function_internal)
 }
 
+#' @importFrom lazyeval make_call lazy_eval as.lazy
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
 assignment_function_default <- function(data, ..., assignment_variable_name = "Z"){
 
-  options <- eval(substitute(alist(...)))
-  options$N <- nrow(data)
-  data[,assignment_variable_name] <-
-    do.call(what = conduct_ra, args = options, envir = list2env(data))
+  ## draw assignment
 
-  options$assignment <- data[,assignment_variable_name]
+  options <- lazy_dots(...)
+  options$N <- as.lazy(nrow(data), env = options[[1]]$env)
 
-  data[,paste0(assignment_variable_name, "_cond_prob")] <-
-    do.call(what = obtain_condition_probabilities, args = options, envir = list2env(data))
+  mcall <- make_call(quote(randomizr::conduct_ra), args = options)
+
+  data[,assignment_variable_name] <- lazy_eval(mcall, data = data)
+
+  ## obtain condition probabilities
+
+  options <- lazy_dots(...)
+  options$assignment <- as.lazy(assignment_variable_name, env = options[[1]]$env)
+
+  mcall <- make_call(quote(randomizr::obtain_condition_probabilities), args = options)
+
+  data[,paste0(assignment_variable_name, "_cond_prob")] <- lazy_eval(mcall, data = data)
 
   return(data)
 

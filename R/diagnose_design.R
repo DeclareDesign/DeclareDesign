@@ -1,7 +1,7 @@
 
 
 
-#' @importFrom dplyr bind_rows group_by_ left_join
+#' @importFrom dplyr bind_rows group_by_ left_join summarize_
 #' @export
 diagnose_design <-
   function(design,
