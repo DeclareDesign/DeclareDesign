@@ -15,4 +15,3 @@ An R function
 \description{
 Get Design Template from the DeclareDesign Library of Research Designs
 }
-
