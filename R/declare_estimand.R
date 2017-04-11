@@ -16,7 +16,7 @@ declare_estimand <- function(..., label = my_estimand, estimand_function = defau
     data.frame(estimand_label = label, estimand = value, stringsAsFactors = FALSE)
   }
   attributes(estimand_function_internal) <-
-    list(call = match.call(), type = "estimand")
+    list(call = match.call(), type = "estimand", label = label)
 
   return(estimand_function_internal)
 }
