@@ -1,8 +1,4 @@
 
-## this function is from lazyeval version git version, commit c155c3d
-freeze_environment <- function(x) {
-  list2env(as.list(x, all.names = TRUE), parent = parent.env(x))
-}
 
 #' @export
 declare_potential_outcomes <- function(..., potential_outcomes_function = potential_outcomes_function_default) {
