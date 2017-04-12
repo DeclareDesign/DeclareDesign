@@ -6,7 +6,7 @@ declare_potential_outcomes <- function(..., potential_outcomes_function = potent
   env <- freeze_environment(parent.frame())
   func <- eval(potential_outcomes_function)
   if (!("data" %in% names(formals(func)))) {
-    stop("Please choose potential_outcomes_function with a data argument.")
+    stop("Please choose a potential_outcomes_function with a data argument.")
   }
   potential_outcomes_function_internal <- function(data) {
     args$data <- data
