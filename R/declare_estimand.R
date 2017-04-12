@@ -31,9 +31,4 @@ default_estimand_function <- function(data, ...){
   }
 
   lazy_eval(options, data = data)
-
-  estimand <- options[[1]]
-  estimand <- parse(text = deparse(substitute(estimand)))
-  data_environment <- list2env(data)
-  eval(estimand, envir = data_environment)
 }

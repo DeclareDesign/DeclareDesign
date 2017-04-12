@@ -12,6 +12,8 @@ test_that("test the full declare design setup", {
 
   my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = ATE)
 
+  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+
   my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
   design <- declare_design(my_population,
