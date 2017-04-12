@@ -1,7 +1,3 @@
-from_package <- function(func, package){
-  func_package <- tryCatch(getNamespaceName(environment(func)), error = function(e) NULL)
-  ifelse(is.null(func_package), FALSE, func_package == package)
-}
 
 
 
