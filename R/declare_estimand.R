@@ -12,6 +12,7 @@ declare_estimand <- function(..., label = NULL, estimand_function = default_esti
 
   ## handles four uses cases of labeling so it's really easy to label without specifying
   ## would be great to clean up the next 10 lines
+  label_internal <- NULL
   if (substitute(estimand_function) == "default_estimand_function" &
       from_package(estimand_function, "DeclareDesign")) {
     label_internal <- names(args)[1]
