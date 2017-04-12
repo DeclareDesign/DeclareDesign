@@ -1,6 +1,7 @@
 test_that("test the full declare design setup", {
 
   library(DDestimate)
+  library(dplyr)
 
   my_population <- declare_population(N = 500, noise = rnorm(N))
 
@@ -10,7 +11,7 @@ test_that("test the full declare design setup", {
 
   my_assignment <- declare_assignment(m = 25)
 
-  my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = ATE)
+  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
   my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
@@ -20,7 +21,7 @@ test_that("test the full declare design setup", {
                            my_potential_outcomes,
                            my_estimand,
                            my_sampling,
-                           mutate(q = 5),
+                           dplyr::mutate(q = 5),
                            my_assignment,
                            reveal_outcomes,
                            my_estimator)

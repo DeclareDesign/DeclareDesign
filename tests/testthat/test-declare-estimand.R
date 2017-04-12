@@ -1,18 +1,32 @@
 
 test_that("declare estimand", {
 
-
-
   my_population <- declare_population(N = 500, noise = rnorm(N))
 
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-  debugonce(declare_estimand)
-  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-
   pop <- my_population()
   pop <- my_potential_outcomes(pop)
 
+  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+  attributes(my_estimand)$label
+  my_estimand(pop)
+
+  ###debugonce(declare_estimand)
+  my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
+  attributes(my_estimand)$label
+  my_estimand(pop)
+
+  my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = ATE)
+  attributes(my_estimand)$label
+  my_estimand(pop)
+
+  my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "ATE")
+  attributes(my_estimand)$label
+  my_estimand(pop)
+
+  my_estimand <- declare_estimand(SATT = mean(Y_Z_1 - Y_Z_0), label = ATE)
+  attributes(my_estimand)$label
   my_estimand(pop)
 
   # set up a population
