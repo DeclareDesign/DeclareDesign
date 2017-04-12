@@ -33,6 +33,16 @@ declare_design <- function(...) {
   causal_order_types[!function_types %in% c("estimand", "estimator")] <-
     "dgp"
 
+  estimand_labels <- sapply(causal_order[function_types == "estimand"], function(x) attributes(x)$label)
+  if(length(unique(estimand_labels)) != length(estimand_labels)){
+    stop("You have estimands with identical labels. Please provide estimands with unique labels.")
+  }
+
+  estimator_labels <- sapply(causal_order[function_types == "estimator"], function(x) attributes(x)$label)
+  if(length(unique(estimator_labels)) != length(estimator_labels)){
+    stop("You have estimators with identical labels. Please provide estimators with unique labels.")
+  }
+
   data_function <- function() {
 
     ## the first part of the DGP must be a data.frame. Take what the user creates and turn it into a data.frame.
