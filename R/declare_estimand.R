@@ -1,5 +1,7 @@
 
 
+## declare_estimand(ATE = mean(Y_Z_1-Y_Z_0)) ## ATE
+
 #' @importFrom lazyeval lazy_dots make_call lazy_eval call_modify
 #' @export
 declare_estimand <- function(..., label = my_estimand, estimand_function = default_estimand_function) {
@@ -22,7 +24,15 @@ declare_estimand <- function(..., label = my_estimand, estimand_function = defau
 }
 
 #' @export
-default_estimand_function <- function(data, estimand){
+default_estimand_function <- function(data, ...){
+  options <- lazy_dots(...)
+  if(length(options) > 1){
+    stop("Please only provide a single estimand to declare_estimand.")
+  }
+
+  lazy_eval(options, data = data)
+
+  estimand <- options[[1]]
   estimand <- parse(text = deparse(substitute(estimand)))
   data_environment <- list2env(data)
   eval(estimand, envir = data_environment)
