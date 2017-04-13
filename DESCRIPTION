@@ -20,7 +20,7 @@ Imports:
     randomizr,
     fabricatr,
     DDestimate
-Remotes: graemeblair/DDestimate,
+Remotes: DeclareDesign/DDestimate,
     DeclareDesign/fabricatr,
     DeclareDesign/randomizr
 License: All rights reserved
