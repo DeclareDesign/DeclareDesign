@@ -1,8 +1,8 @@
 # DeclareDesign
 
-[![Travis-CI Build Status](https://travis-ci.org/graemeblair/DeclareDesign.svg?branch=master)](https://travis-ci.org/graemeblair/DeclareDesign)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/graemeblair/DeclareDesign?branch=master&svg=true)](https://ci.appveyor.com/project/graemeblair/DeclareDesign)
-[![Coverage Status](https://coveralls.io/repos/github/graemeblair/DeclareDesign/badge.svg?branch=master)](https://coveralls.io/github/graemeblair/DeclareDesign?branch=master)
+[![Travis-CI Build Status](https://travis-ci.org/DeclareDesign/DeclareDesign.svg?branch=master)](https://travis-ci.org/DeclareDesign/DeclareDesign)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/DeclareDesign/DeclareDesign?branch=master&svg=true)](https://ci.appveyor.com/project/DeclareDesign/DeclareDesign)
+[![Coverage Status](https://coveralls.io/repos/github/DeclareDesign/DeclareDesign/badge.svg?branch=master)](https://coveralls.io/github/DeclareDesign/DeclareDesign?branch=master)
 
 The development version of this package can be installed directly from GitHub using `ghit`:
 
