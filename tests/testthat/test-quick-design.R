@@ -25,8 +25,6 @@ test_that("quick_design works", {
 
   draw_data(design)
 
-  simulate_design(design)
-
 })
 
 
