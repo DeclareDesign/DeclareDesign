@@ -4,7 +4,10 @@
 #' @export
 declare_design <- function(...) {
 
-  dots <- lazy_dots(..., .follow_symbols = TRUE)
+
+  # Some preprocessign
+
+  dots <- lazy_dots(...)
 
   dots_classes <- sapply(dots, function(x) class(x$expr))
 
@@ -45,6 +48,8 @@ declare_design <- function(...) {
     stop("You have estimators with identical labels. Please provide estimators with unique labels.")
   }
 
+
+  # this extracts the "DGP" parts of the causal order and runs them.
   data_function <- function() {
 
     ## the first part of the DGP must be a data.frame. Take what the user creates and turn it into a data.frame.
@@ -78,7 +83,7 @@ declare_design <- function(...) {
     return(current_df)
   }
 
-  # function 2: runs things in sequence, returns estimates_df
+  # This does causal order step by step; saving calculated estimands and estimates along the way
 
   design_function <- function() {
 

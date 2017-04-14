@@ -1,3 +1,4 @@
+
 #' @importFrom fabricatr fabricate_data
 #' @export
 declare_population <- function(..., population_function = fabricatr::fabricate_data) {

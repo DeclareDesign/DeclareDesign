@@ -1,5 +1,4 @@
 
-
 #' @importFrom DDestimate difference_in_means
 #' @export
 declare_estimator <- function(..., label = my_estimator,

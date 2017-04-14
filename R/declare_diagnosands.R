@@ -1,5 +1,4 @@
 
-
 #' @importFrom dplyr summarize
 #' @export
 declare_diagnosands <- function(...) {
