@@ -12,3 +12,4 @@ vignettes/.*
 .Rproj.user
 tests/testthat/*.pdf
 .DS_Store
+inst/doc
