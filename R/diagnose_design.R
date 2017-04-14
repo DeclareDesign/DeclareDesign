@@ -40,9 +40,16 @@ diagnose_design <-
     simulations_df <-
       suppressMessages(left_join(estimands_df, estimates_df))
 
+    if (nrow(simulations_df) == 0 & nrow(estimates_df) == 1) {
+      simulations_df <- estimates_df
+    }
+
+    group_by_set <- c("estimand_label", "estimator_label")[
+      which(c("estimand_label", "estimator_label") %in% colnames(simulations_df))]
+
     diagnosands_df <-
       simulations_df %>%
-      group_by_("estimand_label", "estimator_label") %>%
+      group_by_(.dots = group_by_set) %>%
       diagnosands %>%
       data.frame(stringsAsFactors = FALSE)
 
