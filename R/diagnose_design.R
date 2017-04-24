@@ -40,7 +40,7 @@ diagnose_design <-
     simulations_df <-
       suppressMessages(left_join(estimands_df, estimates_df))
 
-    if (nrow(simulations_df) == 0 & nrow(estimates_df) == 1) {
+    if (nrow(simulations_df) == 0 & nrow(estimates_df) > 1) {
       simulations_df <- estimates_df
     }
 

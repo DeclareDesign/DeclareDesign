@@ -19,7 +19,6 @@ test_that("test the full declare design setup", {
 
   design <- declare_design(my_population,
                            my_potential_outcomes,
-                           my_estimand,
                            my_sampling,
                            dplyr::mutate(q = 5),
                            my_assignment,

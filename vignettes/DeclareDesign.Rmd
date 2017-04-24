@@ -182,7 +182,7 @@ The only part baked in to `DeclareDesign` is the naming structure, outcome_assig
 
 ## Estimators
 
-To declare an estimator, you declare an estimator function, our difference_in_means by default. Optionally you also declare an estimand that is attached to the estimator.
+To declare an estimator, you declare an estimator function, a difference_in_means by default. Optionally you also declare an estimand that is attached to the estimator.
 
 ```{r}
 smp <- reveal_outcomes(smp)
