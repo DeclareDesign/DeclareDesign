@@ -13,7 +13,7 @@ declare_estimand <- function(..., label = NULL, estimand_function = estimand_fun
   ## handles four uses cases of labeling so it's really easy to label without specifying
   ## would be great to clean up the next 10 lines
   label_internal <- NULL
-  if (substitute(estimand_function) == "default_estimand_function" &
+  if (substitute(estimand_function) == "estimand_function_default" &
       from_package(estimand_function, "DeclareDesign")) {
     label_internal <- names(args)[1]
   }
@@ -40,10 +40,15 @@ declare_estimand <- function(..., label = NULL, estimand_function = estimand_fun
 
 #' @importFrom lazyeval lazy_eval lazy_dots
 #' @export
-estimand_function_default <- function(data, ...){
+estimand_function_default <- function(data, ..., subset = NULL){
   options <- lazy_dots(...)
   if (length(options) > 1) {
     stop("Please only provide a single estimand to declare_estimand.")
+  }
+
+  condition_call <- substitute(subset)
+  if (!is.null(condition_call)) {
+    data <- data[eval(condition_call, data), ]
   }
 
   lazy_eval(options[[1]], data = data)

@@ -1,3 +1,4 @@
+library(testthat)
 
 test_that("declare_population", {
 
@@ -31,6 +32,9 @@ test_that("declare_population", {
 
   head(pop())
 
+})
+
+test_that("custom declare", {
 
   # custom function
 
@@ -81,3 +85,94 @@ test_that("declare_population", {
                      villages = level(N = 12, subways = rnorm(N, mean = gdp)))()
 
 })
+
+
+# test_that("use custom data with declare_population", {
+#   region_data <- data.frame(regions_ID = as.character(26:30), capital = c(1, 0, 0, 0, 0), stringsAsFactors = FALSE)
+#
+#   ## create single-level data taking user data
+#   declare_population(data = region_data)() %>% head
+#
+#   ## create single-level data taking user data and adding variables
+#   declare_population(data = region_data, gdp = rnorm(N))() %>% head
+#
+#   ## create multi-level data with data only at the top level, adding variables at each level
+#   debugonce(level)
+#   declare_population(regions = level(level_data = region_data, gdp = rnorm(N), ID_label = "regions_ID"),
+#                      villages = level(N = 12, subways = rnorm(N, mean = gdp)))() %>% head
+#
+#   ## create multi-level data with data at each level, merging on the ID variables of upper levels
+#   villages_data <- data.frame(regions_ID = as.character(rep(26:30, each = 5)),
+#                               altitude = rnorm(5*5), stringsAsFactors = FALSE)
+#
+#   declare_population(regions = level(level_data = region_data, gdp = rnorm(N), ID_label = "regions_ID"),
+#                      villages = level(level_data = villages_data, by = regions_ID, subways = rnorm(N, mean = gdp)))() %>% head
+# })
+#
+
+context("generating data with declare_population")
+
+
+test_that("test data generation functions", {
+
+  # what are these
+  my_function <- function(x) x + 10
+  a <- 500
+
+  # Simple 1-level cases
+
+  one_lev1 <- declare_population(
+    N = 10,
+    income = rnorm(N),
+    age = rpois(10, 30)
+  )
+  one_lev2 <- declare_population(
+    level_A = level(N = 10, income = rnorm(N),
+                    age = rpois(n = N, 30 ))
+  )
+
+  one_lev1()
+  one_lev2()
+
+  # Simple multi-level cases
+  multi_lev1 <- declare_population(
+    region = level(N = 2),
+    city = level(
+      N = 5,
+      city_educ_mean = rnorm(n = N, mean = 100, sd = 10),
+      city_educ_sd = rgamma(n = N, shape = 2, rate = 2)
+    ),
+    indiv = level(
+      N = 10,
+      income = rnorm(N),
+      age = rpois(N,30)
+    )
+  )
+
+  # With transformations within levels
+  multi_lev2 <- declare_population(
+    region = level(N = 2),
+    city = level(
+      N = 5,
+      city_educ_mean = rnorm(n = N, mean = 100, sd = 10),
+      city_educ_sd = rgamma(n = N, shape = 2, rate = 2),
+      city_educ_zscore = scale(city_educ_mean)
+    ),
+    indiv = level(
+      N = 10,
+      income = rnorm(N),
+      age = rpois(N,30),
+      income_times_age = income*age
+    )
+  )
+
+  multi_lev1()
+  multi_lev2()
+
+})
+
+
+
+
+
+
