@@ -24,4 +24,26 @@ test_that("attrition as a PO", {
 
   head(draw_data(my_design))
 
+
+
+  # Fixed pos
+
+
+  my_potential_outcomes_attrition <- declare_potential_outcomes(
+    R_Z_0 = rbinom(n = N, size = 1, prob = pnorm(income)),
+    R_Z_1 = rbinom(n = N, size = 1, prob = pnorm(income + .2)))
+
+  my_design <- declare_design(
+    my_population,
+    my_potential_outcomes_Y,
+    my_potential_outcomes_attrition,
+    my_assignment,
+    reveal_outcomes(outcome_variable_name = "R"),
+    reveal_outcomes(attrition_variable_name = "R")
+  )
+
+  head(draw_data(my_design))
+
+
+
 })
