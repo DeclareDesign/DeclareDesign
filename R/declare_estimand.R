@@ -5,7 +5,7 @@
 
 #' @importFrom lazyeval lazy_dots make_call lazy_eval call_modify
 #' @export
-declare_estimand <- function(..., label = NULL, estimand_function = default_estimand_function) {
+declare_estimand <- function(..., label = NULL, estimand_function = estimand_function_default) {
   args <- eval(substitute(alist(...)))
   env <- freeze_environment(parent.frame())
   func <- eval(estimand_function)
@@ -18,9 +18,9 @@ declare_estimand <- function(..., label = NULL, estimand_function = default_esti
     label_internal <- names(args)[1]
   }
 
-  if(!exists("label_internal") | is.null(label_internal)){
+  if (!exists("label_internal") | is.null(label_internal)) {
     label_internal <- substitute(label)
-    if(!is.null(label_internal)){
+    if (!is.null(label_internal)) {
       label_internal <- as.character(label_internal)
     } else {
       label_internal <- "my_estimand"
@@ -40,9 +40,9 @@ declare_estimand <- function(..., label = NULL, estimand_function = default_esti
 
 #' @importFrom lazyeval lazy_eval lazy_dots
 #' @export
-default_estimand_function <- function(data, ...){
+estimand_function_default <- function(data, ...){
   options <- lazy_dots(...)
-  if(length(options) > 1){
+  if (length(options) > 1) {
     stop("Please only provide a single estimand to declare_estimand.")
   }
 

@@ -4,8 +4,7 @@
 #' @export
 declare_design <- function(...) {
 
-
-  # Some preprocessign
+  # Some preprocessing
 
   dots <- lazy_dots(...)
 
