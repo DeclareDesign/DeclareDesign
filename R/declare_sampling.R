@@ -24,7 +24,12 @@ sampling_function_default <- function(data, ..., sampling_variable_name = "S"){
   ## draw sample
 
   options <- lazy_dots(...)
-  options$N <- as.lazy(nrow(data), env = options[[1]]$env)
+
+  if(length(options) > 0){
+    options$N <- as.lazy(nrow(data), env = options[[1]]$env)
+  } else {
+    options$N <- as.lazy(nrow(data))
+  }
 
   mcall <- make_call(quote(randomizr::draw_rs), args = options)
 
