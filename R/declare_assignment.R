@@ -24,7 +24,12 @@ assignment_function_default <- function(data, ..., assignment_variable_name = "Z
   ## draw assignment
 
   options <- lazy_dots(...)
-  options$N <- as.lazy(nrow(data), env = options[[1]]$env)
+
+  if(length(options) > 0){
+    options$N <- as.lazy(nrow(data), env = options[[1]]$env)
+  } else {
+    options$N <- as.lazy(nrow(data))
+  }
 
   mcall <- make_call(quote(randomizr::conduct_ra), args = options)
 
@@ -33,7 +38,14 @@ assignment_function_default <- function(data, ..., assignment_variable_name = "Z
   ## obtain condition probabilities
 
   options <- lazy_dots(...)
-  options$assignment <- as.lazy(assignment_variable_name, env = options[[1]]$env)
+
+  if(length(options) > 0){
+    options$assignment <- as.lazy(assignment_variable_name, env = options[[1]]$env)
+  } else {
+    options$assignment <- as.lazy(assignment_variable_name)
+  }
+
+
 
   mcall <- make_call(quote(randomizr::obtain_condition_probabilities), args = options)
 
