@@ -34,7 +34,7 @@ potential_outcomes_function_default <-
 
     if ("formula" %in% names(options)) {
       # TODO: checks re: condition names and assignment variable names
-      mcall <- make_call(quote(DeclareDesign:::potential_outcomes_function_formula), args = options)
+      mcall <- make_call(quote(potential_outcomes_function_formula), args = options)
 
       mcall$expr$data <- data
       mcall$expr$assignment_variable_name <- assignment_variable_name
@@ -50,7 +50,7 @@ potential_outcomes_function_default <-
       #     ... = ...
       #   )
     } else{
-      mcall <- make_call(quote(DeclareDesign:::potential_outcomes_function_discrete), args = options)
+      mcall <- make_call(quote(potential_outcomes_function_discrete), args = options)
       mcall$expr$data <- data
 
       return(lazy_eval(mcall))

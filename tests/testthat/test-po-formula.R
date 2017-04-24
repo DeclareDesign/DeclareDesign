@@ -15,9 +15,7 @@ test_that("PO as a formula works", {
       formula = R ~ rbinom(n = N, size = 1, prob = pnorm(.025 * Z)
     ))
 
-
-
-#  debugonce(potential_outcomes_function_default)
+  ##debugonce(DeclareDesign:::potential_outcomes_function_formula)
   head(my_potential_outcomes(pop))
 
 })

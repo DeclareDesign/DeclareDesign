@@ -79,6 +79,7 @@ test_that("test assignment and probability functions", {
   # Blocked and Clustered assignments
   assignment_13 <- declare_assignment(clust_var = villages_ID,
                                       block_var = high_elevation)
+
   assignment_14 <- declare_assignment(clust_var = villages_ID,
                                       block_var = high_elevation, condition_names = c(0,1))
   assignment_15 <- declare_assignment(clust_var = villages_ID,
@@ -87,6 +88,7 @@ test_that("test assignment and probability functions", {
   # Draw Data
   smp_draw <- population() %>% sampling() %>% potential_outcomes()
 
+  smp_draw %>% head
   # Attempt to Assign
 
   smp_draw %>% assignment_0() %$% table(Z)
