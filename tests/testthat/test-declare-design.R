@@ -15,6 +15,8 @@ test_that("test the full declare design setup", {
 
   my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
+  my_population() %>% my_potential_outcomes
+
   design <- declare_design(my_population,
                            my_potential_outcomes,
                            my_sampling,

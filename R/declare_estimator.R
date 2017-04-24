@@ -8,9 +8,11 @@ declare_estimator <- function(..., label = my_estimator,
   env <- freeze_environment(parent.frame())
   func <- eval(estimator_function)
   label <- as.character(substitute(label))
+
   if (!("data" %in% names(formals(func)))) {
-    stop("Please choose an estimator with a data argument.")
+    stop("Please provide an estimator function with a data argument.")
   }
+
   estimator_function_internal <- function(data) {
     args$data <- data
     results <- do.call(func, args = args, envir = env)
@@ -20,6 +22,7 @@ declare_estimator <- function(..., label = my_estimator,
     }
     return_data
   }
+
   attributes(estimator_function_internal) <-
     list(call = match.call(), type = "estimator")
 

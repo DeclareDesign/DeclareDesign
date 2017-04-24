@@ -4,13 +4,16 @@ declare_assignment <- function(..., assignment_function = assignment_function_de
   args <- eval(substitute(alist(...)))
   env <- freeze_environment(parent.frame())
   func <- eval(assignment_function)
+
   if (!("data" %in% names(formals(func)))) {
     stop("Please choose an assignment_function with a data argument.")
   }
+
   assignment_function_internal <- function(data) {
     args$data <- data
     do.call(func, args = args, envir = env)
   }
+
   attributes(assignment_function_internal) <-
     list(call = match.call(), type = "assignment")
 

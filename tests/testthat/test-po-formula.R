@@ -1,6 +1,7 @@
 
 
 test_that("PO as a formula works", {
+
   my_population <- declare_population(
     N = 100,
     income = rnorm(N),
@@ -14,6 +15,9 @@ test_that("PO as a formula works", {
       formula = R ~ rbinom(n = N, size = 1, prob = pnorm(.025 * Z)
     ))
 
+
+
+#  debugonce(potential_outcomes_function_default)
   head(my_potential_outcomes(pop))
 
 })

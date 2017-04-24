@@ -1,18 +1,19 @@
 rm(list = ls())
 library(testthat)
 library(DeclareDesign)
-library(Matching)
 
 context("Checking Code in Paper Works")
 
 # “Characterizing Research Designs in Code" -------------------------------
 
 test_that("section on 'Characterizing Research Designs in Code' works", {
+
   my_population <- function(N) {
     data.frame(u = rnorm(N))
   }
+
   population <-
-    declare_population(population_function = my_population, N = 100)
+    declare_population(population_function = my_population, N = 500)
 
   my_sampling <- function(data) {
     data$S <- rbinom(n = nrow(data),
@@ -22,6 +23,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
     data$S <- NULL
     data
   }
+
   sampling <- declare_sampling(sampling_function = my_sampling)
 
   my_assignment <- function(data) {
@@ -37,7 +39,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
   my_potential_outcomes <-
     function(data) {
       data$Y_Z_0 <- with(data, u)
-      data$Y_Z_1 <- with(data, Z * 0.25 + u)
+      data$Y_Z_1 <- with(data, 0.25 + u)
       data
     }
 
@@ -57,6 +59,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
     colnames(phi) <- c("est", "se", "t", "p")
     phi
   }
+
   estimator <-
     declare_estimator(estimator_function = my_estimator, estimand = estimand)
 
@@ -74,10 +77,13 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
       estimator
     )
 
+  design$data_function()
+  design$design_function()
 
   diagnose_design(
     design = design,
     diagnosands = diagnosand
   )
+
 
 })
