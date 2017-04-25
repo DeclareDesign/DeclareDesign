@@ -1,3 +1,4 @@
+context("Continuous POs")
 test_that("you can do continuous POs", {
 
   my_population <- declare_population(

@@ -1,4 +1,4 @@
-
+context("Diagnosands")
 test_that("test diagnosands", {
 
   my_population <- declare_population(N = 500, noise = rnorm(N))

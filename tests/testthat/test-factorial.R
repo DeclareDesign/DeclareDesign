@@ -1,6 +1,4 @@
-library(dplyr)
-
-context("A simple factorial design ")
+context("Factorial Design")
 
 test_that("Factorial", {
 
@@ -23,7 +21,7 @@ test_that("Factorial", {
       my_potential_outcomes,
       my_estimand,
       my_assignment,
-      mutate(Z1 = as.numeric(Z %in% c("T2", "T4")),
+      dplyr::mutate(Z1 = as.numeric(Z %in% c("T2", "T4")),
              Z2 = as.numeric(Z %in% c("T3", "T4"))),
       reveal_outcomes,
       my_estimator
@@ -36,6 +34,6 @@ test_that("Factorial", {
   #my_estimator(df)
   #commarobust::commarobust(lm(Y ~ Z1*Z2, data = df))
 
-  diagnosis <- diagnose_design(my_design, sims = 100)
+  diagnosis <- diagnose_design(my_design, sims = 5)
   diagnosis
 })

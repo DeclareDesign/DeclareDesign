@@ -1,7 +1,6 @@
-test_that("test the full declare design setup", {
+context("Noncompliance")
 
-  library(DDestimate)
-  library(dplyr)
+test_that("Noncompliance", {
 
   my_population <- declare_population(N = 1000, noise = rnorm(N))
 
@@ -61,7 +60,7 @@ test_that("test the full declare design setup", {
   df <- design$data_function()
   cace_estimator(df)
 
-  diagnose_design(design, sims = 100)
+  diagnose_design(design, sims = 5)
 
 
 })

@@ -1,5 +1,4 @@
-library(DeclareDesign)
-library(testthat)
+context("Quick Design")
 
 test_that("quick_design works", {
 

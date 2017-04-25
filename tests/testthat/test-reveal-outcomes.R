@@ -1,7 +1,7 @@
-test_that("test the full declare design setup", {
+context("Reveal Outcomes")
 
-  library(DDestimate)
-  library(dplyr)
+test_that("Reveal Outcomes", {
+
 
   my_population <- declare_population(N = 500, noise = rnorm(N))
 

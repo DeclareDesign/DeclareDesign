@@ -1,3 +1,4 @@
+context("Sampling and probability functions")
 
 test_that("randomizr works through declare_sampling", {
   df <- data.frame(ID = 1:10, strata_var = rep(c("A", "B"), 5, 5))
@@ -23,8 +24,6 @@ test_that("randomizr works through declare_sampling", {
 })
 
 
-
-context("Sampling and probability functions")
 
 test_that("test sampling and probability functions", {
 

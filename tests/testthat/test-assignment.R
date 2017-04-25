@@ -1,3 +1,4 @@
+context("Assignment and probability functions")
 
 test_that("randomizr works through declare_assignment", {
   df <- data.frame(ID = 1:10, block_var = rep(c("A", "B"), 5, 5))
@@ -30,7 +31,6 @@ test_that("randomizr works through declare_assignment", {
 
 
 
-context("Assignment and probability functions")
 
 test_that("test assignment and probability functions", {
 

@@ -1,3 +1,5 @@
+context("Attrition")
+
 test_that("attrition as a PO", {
 
   ## would be nice to do with fixed POs

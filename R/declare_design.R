@@ -91,35 +91,39 @@ declare_design <- function(...) {
     "dgp"
 
   estimand_labels <- sapply(causal_order[function_types == "estimand"], function(x) attributes(x)$label)
-  if(length(unique(estimand_labels)) != length(estimand_labels)){
+  if (length(unique(estimand_labels)) != length(estimand_labels)) {
     stop("You have estimands with identical labels. Please provide estimands with unique labels.")
   }
 
   estimator_labels <- sapply(causal_order[function_types == "estimator"], function(x) attributes(x)$label)
-  if(length(unique(estimator_labels)) != length(estimator_labels)){
+  if (length(unique(estimator_labels)) != length(estimator_labels)) {
     stop("You have estimators with identical labels. Please provide estimators with unique labels.")
   }
 
-
-  # this extracts the "DGP" parts of the causal order and runs them.
-  data_function <- function() {
-
+  process_population <- function(population){
     ## the first part of the DGP must be a data.frame. Take what the user creates and turn it into a data.frame.
-    if(class(causal_order[[1]]) == "data.frame"){
-      current_df <- causal_order[[1]]
-    } else if (class(causal_order[[1]]) == "call") {
-      try(current_df <- causal_order[[1]], silent = TRUE)
-      if(!exists("current_df") | class(current_df) != "data.frame"){
+    if (class(population) == "data.frame") {
+      current_df <- population
+    } else if (class(population) == "call") {
+      try(current_df <- population, silent = TRUE)
+      if (!exists("current_df") | class(current_df) != "data.frame") {
         stop("The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame.")
       }
-    } else if (class(causal_order[[1]]) == "function") {
-      try(current_df <- causal_order[[1]](), silent = TRUE)
-      if(!exists("current_df") | class(current_df) != "data.frame"){
+    } else if (class(population) == "function") {
+      try(current_df <- population(), silent = TRUE)
+      if (!exists("current_df") | class(current_df) != "data.frame") {
         stop("The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame.")
       }
     } else {
       stop("The first element of your design must be a data.frame or a function that returns a data.frame.")
     }
+    return(current_df)
+  }
+
+  # this extracts the "DGP" parts of the causal order and runs them.
+  data_function <- function() {
+
+    current_df <- process_population(causal_order[[1]])
 
     if (length(causal_order) > 1) {
 
@@ -139,22 +143,7 @@ declare_design <- function(...) {
 
   design_function <- function() {
 
-    ## the first part of the DGP must be a data.frame. Take what the user creates and turn it into a data.frame.
-    if(class(causal_order[[1]]) == "data.frame"){
-      current_df <- causal_order[[1]]
-    } else if (class(causal_order[[1]]) == "call") {
-      try(current_df <- causal_order[[1]], silent = TRUE)
-      if(!exists("current_df") | class(current_df) != "data.frame"){
-        stop("The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame.")
-      }
-    } else if (class(causal_order[[1]]) == "function") {
-      try(current_df <- causal_order[[1]](), silent = TRUE)
-      if(!exists("current_df") | class(current_df) != "data.frame"){
-        stop("The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame.")
-      }
-    } else {
-      stop("The first element of your design must be a data.frame or a function that returns a data.frame.")
-    }
+    current_df <- process_population(causal_order[[1]])
 
     estimates_df <- estimands_df <- data.frame()
 

@@ -1,7 +1,6 @@
-test_that("test the full declare design setup", {
+context("Subsetting")
 
-  library(DDestimate)
-  library(dplyr)
+test_that("Test Subsetting", {
 
   my_population <- declare_population(N = 500, noise = rnorm(N))
 
@@ -31,7 +30,8 @@ test_that("test the full declare design setup", {
   head(design$data_function())
   design$design_function()
 
-  diagnose_design(design, sims = 500)
+  diagnose_design(design, sims = 5)
 
 
 })
+

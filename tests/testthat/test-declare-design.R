@@ -1,3 +1,5 @@
+context("declare design")
+
 test_that("test the full declare design setup", {
 
   library(DDestimate)

@@ -1,4 +1,4 @@
-library(testthat)
+context("Population")
 
 test_that("declare_population", {
 
@@ -110,9 +110,6 @@ test_that("use custom data with declare_population", {
 })
 
 
-context("generating data with declare_population")
-
-
 test_that("test data generation functions", {
 
   # what are these
@@ -173,6 +170,28 @@ test_that("test data generation functions", {
 
 
 
+test_that("Population declaration variations", {
+
+  my_population <- declare_population(N = 10, noise = rnorm(N))
+  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+
+  # Way 1
+
+  design <- declare_design(my_population, my_potential_outcomes)
+  design$data_function()
+
+  # Way 2
+
+  design <- declare_design(my_population(), my_potential_outcomes)
+  design$data_function()
+
+  # Way 3
+
+  df <- my_population()
+  design <- declare_design(df, my_potential_outcomes)
+  design$data_function()
+
+})
 
 
 

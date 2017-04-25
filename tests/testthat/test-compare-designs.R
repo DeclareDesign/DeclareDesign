@@ -1,3 +1,4 @@
+context("Compare Designs")
 test_that("compare_designs works", {
 
   my_population <- declare_population(N = 500, noise = rnorm(N))

@@ -1,7 +1,3 @@
-rm(list = ls())
-library(testthat)
-library(DeclareDesign)
-
 context("Checking Code in Paper Works")
 
 # “Characterizing Research Designs in Code" -------------------------------

@@ -1,3 +1,5 @@
+context("Multiple POs")
+
 test_that("multiple potential outcomes", {
 
   ## would be nice to do with fixed POs

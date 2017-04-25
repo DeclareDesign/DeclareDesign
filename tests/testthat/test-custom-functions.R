@@ -1,3 +1,5 @@
+context("Custom Functions")
+
 test_that("you can use custom functions for each of the six declare steps", {
 
   ## population
