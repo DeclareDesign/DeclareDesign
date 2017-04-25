@@ -1,5 +1,42 @@
 
+#' Declare Assignment Procedure
+#'
+#' @param ... Arguments to the assignment function
+#' @param assignment_function A function that takes a data.frame, adds an assignment variable and optionally assignment probabilities or other relevant quantities, and returns a data.frame. By default, the assignment_function uses the \code{randomizr} functions \code{\link{conduct_ra}} and \code{\link{obtain_condition_probabilities}} to conduct random assignment and obtain the probabilities of assignment to each condition.
+#'
+#' @return data.frame
 #' @export
+#'
+#' @examples
+#'
+#' my_population <- declare_population(N = 100)
+#' df <- my_population()
+#'
+#' # Complete random assignment using randomizr
+#' # use any arguments you would use in conduct_ra.
+#'
+#' my_assignment <- declare_assignment(m = 50)
+#' df <- my_assignment(pop)
+#' head(df)
+#' table(df$Z)
+#'
+#' # Custom random assignment functions
+#'
+#' df <- my_population()
+#'
+#' my_assignment_function <- function(data) {
+#'    data$Z <- rbinom(n = nrow(data),
+#'    size = 1,
+#'    prob = 0.5)
+#'    data
+#'    }
+#'
+#' my_assignment_custom <- declare_assignment(
+#'    assignment_function = my_assignment_function)
+#'
+#' df <- my_custom_assignment(pop)
+#' head(df)
+#' table(df$Z)
 declare_assignment <- function(..., assignment_function = assignment_function_default) {
   args <- eval(substitute(alist(...)))
   env <- freeze_environment(parent.frame())
@@ -28,7 +65,7 @@ assignment_function_default <- function(data, ..., assignment_variable_name = "Z
 
   options <- lazy_dots(...)
 
-  if(length(options) > 0){
+  if (length(options) > 0) {
     options$N <- as.lazy(nrow(data), env = options[[1]]$env)
   } else {
     options$N <- as.lazy(nrow(data))
@@ -42,7 +79,7 @@ assignment_function_default <- function(data, ..., assignment_variable_name = "Z
 
   options <- lazy_dots(...)
 
-  if(length(options) > 0){
+  if(length(options) > 0) {
     options$assignment <- as.lazy(assignment_variable_name, env = options[[1]]$env)
   } else {
     options$assignment <- as.lazy(assignment_variable_name)
