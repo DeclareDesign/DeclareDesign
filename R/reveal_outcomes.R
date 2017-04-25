@@ -32,7 +32,7 @@ reveal_outcomes <- function(data, outcome_variable_name = Y, assignment_variable
       data[, outcome_variable] <- NA
       for (cond in condition_names_assignment_variable) {
         data[data[, assignment_variable] == cond, outcome_variable] <-
-          data[data[, assignment_variable] == cond, paste0(outcome_variable, "_", assignment_variable, "_", cond)]
+          data[data[, assignment_variable] == cond, paste0(outcome_variable, "_", assignment_variable, "_", cond), drop = FALSE]
       }
     }
 

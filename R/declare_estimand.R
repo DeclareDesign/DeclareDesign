@@ -48,7 +48,7 @@ estimand_function_default <- function(data, ..., subset = NULL){
 
   condition_call <- substitute(subset)
   if (!is.null(condition_call)) {
-    data <- data[eval(condition_call, data), ]
+    data <- data[eval(condition_call, data), , drop = FALSE]
   }
 
   lazy_eval(options[[1]], data = data)

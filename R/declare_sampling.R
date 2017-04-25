@@ -42,7 +42,8 @@ sampling_function_default <- function(data, ..., sampling_variable_name = "S"){
   data[,paste0(sampling_variable_name, "_inclusion_prob")] <- lazy_eval(mcall, data = data)
 
   ## subset to the sampled observations and remove the sampling variable
-  data[data[, sampling_variable_name] ==1, -which(names(data) %in% sampling_variable_name)]
+  data[data[, sampling_variable_name] == 1,
+       -which(names(data) %in% sampling_variable_name), drop = FALSE]
 
 }
 
