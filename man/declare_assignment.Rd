@@ -23,7 +23,7 @@ my_population <- declare_population(N = 100)
 df <- my_population()
 
 # Complete random assignment using randomizr
-# use any arguments you would use in \\code{\\link{conduct_ra}}.
+# use any arguments you would use in conduct_ra.
 
 my_assignment <- declare_assignment(m = 50)
 df <- my_assignment(pop)
