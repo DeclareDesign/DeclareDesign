@@ -1,9 +1,6 @@
-context("declare design")
+context("Design summary")
 
-test_that("test the full declare design setup", {
-
-  library(DDestimate)
-  library(dplyr)
+test_that("Basic design summary", {
 
   my_population <- declare_population(N = 500, noise = rnorm(N))
 
@@ -17,10 +14,6 @@ test_that("test the full declare design setup", {
 
   my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
-  my_population() %>% my_potential_outcomes
-
-
-  de
   design <- declare_design(my_population,
                            my_potential_outcomes,
                            my_sampling,
@@ -30,11 +23,7 @@ test_that("test the full declare design setup", {
                            reveal_outcomes,
                            my_estimator)
 
-  head(design$data_function())
-  design$design_function()
 
-  #debugonce(diagnose_design)
-  diagnose_design(design, sims = 3)
-
+  summary(design)
 
 })

@@ -54,6 +54,21 @@ declare_assignment <- function(..., assignment_function = assignment_function_de
   attributes(assignment_function_internal) <-
     list(call = match.call(), type = "assignment")
 
+  if (from_package(assignment_function, "DeclareDesign") &
+      substitute(assignment_function) == "assignment_function_default") {
+
+    randomizr_summary <- function(data){
+      args$N <- nrow(data)
+
+      ra_declaration <- do.call(randomizr::declare_ra, args = args, envir = list2env(data))
+
+      return(print(ra_declaration))
+    }
+
+    attributes(assignment_function_internal)$summary_function <- randomizr_summary
+
+  }
+
   return(assignment_function_internal)
 }
 
@@ -79,13 +94,11 @@ assignment_function_default <- function(data, ..., assignment_variable_name = "Z
 
   options <- lazy_dots(...)
 
-  if(length(options) > 0) {
+  if (length(options) > 0) {
     options$assignment <- as.lazy(assignment_variable_name, env = options[[1]]$env)
   } else {
     options$assignment <- as.lazy(assignment_variable_name)
   }
-
-
 
   mcall <- make_call(quote(randomizr::obtain_condition_probabilities), args = options)
 

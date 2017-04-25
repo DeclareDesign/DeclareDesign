@@ -83,8 +83,9 @@ declare_design <- function(...) {
   function_types[name_or_call == "name"] <-
     sapply(causal_order[name_or_call == "name"], function(x){
       type <- attributes(eval(x))$type
-      return(ifelse(!is.null(type), type, "unknown_object"))
+      return(ifelse(!is.null(type), type, "unknown"))
     })
+  function_types[name_or_call == "call" & function_types == ""] <- "unknown"
 
   causal_order_types <- function_types
   causal_order_types[!function_types %in% c("estimand", "estimator")] <-
@@ -171,16 +172,120 @@ declare_design <- function(...) {
     return(list(estimates_df = estimates_df, estimands_df = estimands_df))
   }
 
+  summarize_step <- function(last_df = NULL, current_df){
+    current_names <- names(current_df)
+    if (is.null(last_df)) {
+      return(current_names)
+    } else {
+      return(current_names[!current_names %in% names(last_df)])
+    }
+  }
+
+  summary_function <- function() {
+
+    variables_added <- quantities_added <- list()
+
+    current_df <- process_population(causal_order[[1]])
+
+    variables_added[[1]] <- paste(summarize_step(current_df = current_df), collapse = ", ")
+
+    estimates_df <- estimands_df <- data.frame()
+
+    last_df <- current_df
+
+    if (length(causal_order) > 1) {
+
+      for (i in 2:length(causal_order)) {
+
+        # if it's a dgp
+        if (causal_order_types[i] == "dgp") {
+
+          current_df <- causal_order[[i]](last_df)
+
+          variables_added[[i]] <- paste(summarize_step(last_df = last_df, current_df = current_df), collapse = ", ")
+
+          if (!is.null(attributes(causal_order[[i]])$summary_function)) {
+            quantities_added[[i]] <- capture.output(attributes(causal_order[[i]])$summary_function(last_df))
+          }
+
+          last_df <- current_df
+
+        } else if (causal_order_types[i] == "estimand") {
+
+          quantities_added[[i]] <- causal_order[[i]](current_df)
+
+        } else if (causal_order_types[i] == "estimator") {
+
+          # if it's an estimator
+          estimates_df <- bind_rows(estimates_df, causal_order[[i]](current_df))
+
+          quantities_added[[i]] <- causal_order[[i]](current_df)
+
+        }
+      }
+    }
+    structure(list(variables_added = variables_added,
+                   quantities_added = quantities_added), class = "design_summary")
+  }
+
   return(structure(
     list(
       data_function = data_function,
       design_function = design_function,
+      summary_function = summary_function,
       causal_order = causal_order_text,
+      function_types = function_types,
+      causal_order_types = causal_order_types,
       call = match.call()
     ),
     class = "design"
   ))
 
+}
+
+#' @export
+print.design <- function(x, ...) {
+  print(summary(x))
+  invisible(summary(x))
+}
+
+#' @export
+summary.design <- function(object, ...) {
+  summ <- design$summary_function()
+  structure(list(variables_added = summ$variables_added,
+                 quantities_added = summ$quantities_added,
+                 causal_order = design$causal_order,
+                 causal_order_types = design$causal_order_types,
+                 function_types = design$function_types),
+            class = c("summary.design", "list"))
+}
+
+#' @export
+print.summary.design <- function(x, ...) {
+  for (i in seq_along(x$variables_added)) {
+    step_name <- deparse(x$causal_order[[i]])
+    cat("Step ", i, ": ", step_name, " ", paste0(rep("-", 80 - 7 - nchar(i) - nchar(step_name)), collapse = ""), "\n\n", sep = "")
+
+    if (x$function_types[[i]] != "unknown") {
+      cat("This step is a ", gsub("_", " ", x$function_types[[i]]), " step.\n\n", sep = "")
+    } else {
+      cat("This is a custom step that modifies the data.\n\n")
+    }
+    if (!is.null(x$quantities_added[[i]])) {
+      if (class(x$quantities_added[[i]]) == "data.frame") {
+        cat("Below is one draw of the ", x$function_types[[i]], ":\n", sep = "")
+        print(x$quantities_added[[i]])
+        cat("\n")
+      } else {
+        cat(x$quantities_added[[i]], sep = "\n")
+        cat("\n")
+      }
+    }
+    if (length(x$variables_added[[i]]) != 0) {
+      cat("Variables added: ", x$variables_added[[i]], "\n\n", sep = "")
+    }
+  }
+  invisible(x)
 }
 
 

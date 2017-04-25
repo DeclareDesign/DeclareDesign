@@ -6,6 +6,7 @@ test_that("randomizr works through declare_assignment", {
   f_1 <- declare_assignment()
   f_1(df)
 
+  debugonce(declare_assignment)
   f_1 <- declare_assignment(m = 5)
   f_1(df)
 

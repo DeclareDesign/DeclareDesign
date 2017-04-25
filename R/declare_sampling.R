@@ -51,6 +51,21 @@ declare_sampling <- function(..., sampling_function = sampling_function_default)
   attributes(sampling_function_internal) <-
     list(call = match.call(), type = "sampling")
 
+  if (from_package(sampling_function, "DeclareDesign") &
+      substitute(sampling_function) == "sampling_function_default") {
+
+    randomizr_summary <- function(data){
+      args$N <- nrow(data)
+
+      rs_declaration <- do.call(randomizr::declare_rs, args = args, envir = list2env(data))
+
+      return(print(rs_declaration))
+    }
+
+    attributes(sampling_function_internal)$summary_function <- randomizr_summary
+
+  }
+
   return(sampling_function_internal)
 }
 
