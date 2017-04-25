@@ -1,6 +1,11 @@
 
 
 
+#' Modify a Design
+#'
+#' @param design A design created by \code{\link{declare_design}}.
+#' @param ... A set of modifications to a design.
+#'
 #' @export
 modify_design <- function(design, ...) {
   from_to_list <- eval(substitute(alist(...)))

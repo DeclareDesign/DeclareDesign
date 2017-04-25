@@ -1,12 +1,47 @@
 
 
 
+#' Diagnose the Design
+#'
+#' @param design A design created by \code{\link{declare_design}}.
+#'
+#' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
+#'
+#' @param sims The number of simulations, defaulting to 500.
+#'
 #' @importFrom dplyr bind_rows group_by_ left_join summarize_
 #' @export
+#'
+#' @examples
+#' #' my_population <- declare_population(N = 500, noise = rnorm(N))
+#'
+#' my_potential_outcomes <- declare_potential_outcomes(
+#'   Y_Z_0 = noise, Y_Z_1 = noise +
+#'   rnorm(N, mean = 2, sd = 2))
+#'
+#' my_sampling <- declare_sampling(n = 250)
+#'
+#' my_assignment <- declare_assignment(m = 25)
+#'
+#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+#'
+#' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+#'
+#' design <- declare_design(my_population,
+#'                          my_potential_outcomes,
+#'                          my_sampling,
+#'                          my_estimand,
+#'                          dplyr::mutate(noise_sq = noise^2),
+#'                          my_assignment,
+#'                          reveal_outcomes,
+#'                          my_estimator)
+#'
+#' diagnosis <- diagnose_design(design)
+#'
 diagnose_design <-
   function(design,
            diagnosands = default_diagnosands,
-           sims = 100) {
+           sims = 500) {
     ##if(getDoParWorkers() == 1){
     ##  registerDoSEQ()
     ##}
