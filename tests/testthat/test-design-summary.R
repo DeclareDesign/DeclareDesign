@@ -23,7 +23,6 @@ test_that("Basic design summary", {
                            reveal_outcomes,
                            my_estimator)
 
-
   summary(design)
 
 })

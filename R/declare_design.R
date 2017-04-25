@@ -55,6 +55,8 @@
 #'
 #' diagnosis <- diagnose_design(design)
 #'
+#' summary(design)
+#'
 declare_design <- function(...) {
 
   # Some preprocessing
@@ -183,11 +185,11 @@ declare_design <- function(...) {
 
   summary_function <- function() {
 
-    variables_added <- quantities_added <- list()
+    variables_added <- quantities_added <- vector("list", length(causal_order))
 
     current_df <- process_population(causal_order[[1]])
 
-    variables_added[[1]] <- paste(summarize_step(current_df = current_df), collapse = ", ")
+    variables_added[[1]] <- lapply(current_df, describe_variable)
 
     estimates_df <- estimands_df <- data.frame()
 
@@ -202,7 +204,9 @@ declare_design <- function(...) {
 
           current_df <- causal_order[[i]](last_df)
 
-          variables_added[[i]] <- paste(summarize_step(last_df = last_df, current_df = current_df), collapse = ", ")
+          variables_added_names <- summarize_step(last_df = last_df, current_df = current_df)
+
+          variables_added[[i]] <- lapply(current_df[, variables_added_names, drop = FALSE], describe_variable)
 
           if (!is.null(attributes(causal_order[[i]])$summary_function)) {
             quantities_added[[i]] <- capture.output(attributes(causal_order[[i]])$summary_function(last_df))
@@ -249,40 +253,74 @@ print.design <- function(x, ...) {
   invisible(summary(x))
 }
 
-#' @export
+#' Text Summary of a Design
+#'
+#' @param object
+#'
+#' @param ...
+#'
+#' @examples
+#'
+#' #' my_population <- declare_population(N = 500, noise = rnorm(N))
+#'
+#' my_potential_outcomes <- declare_potential_outcomes(
+#'   Y_Z_0 = noise, Y_Z_1 = noise +
+#'   rnorm(N, mean = 2, sd = 2))
+#'
+#' my_sampling <- declare_sampling(n = 250)
+#'
+#' my_assignment <- declare_assignment(m = 25)
+#'
+#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+#'
+#' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+#'
+#' design <- declare_design(my_population,
+#'                          my_potential_outcomes,
+#'                          my_sampling,
+#'                          my_estimand,
+#'                          dplyr::mutate(noise_sq = noise^2),
+#'                          my_assignment,
+#'                          reveal_outcomes,
+#'                          my_estimator)
+#'
+#' summary(design)
 summary.design <- function(object, ...) {
-  summ <- design$summary_function()
+  summ <- object$summary_function()
   structure(list(variables_added = summ$variables_added,
                  quantities_added = summ$quantities_added,
-                 causal_order = design$causal_order,
-                 causal_order_types = design$causal_order_types,
-                 function_types = design$function_types),
+                 causal_order = object$causal_order,
+                 causal_order_types = object$causal_order_types,
+                 function_types = object$function_types),
             class = c("summary.design", "list"))
 }
 
 #' @export
 print.summary.design <- function(x, ...) {
-  for (i in seq_along(x$variables_added)) {
-    step_name <- deparse(x$causal_order[[i]])
-    cat("Step ", i, ": ", step_name, " ", paste0(rep("-", 80 - 7 - nchar(i) - nchar(step_name)), collapse = ""), "\n\n", sep = "")
 
-    if (x$function_types[[i]] != "unknown") {
-      cat("This step is a ", gsub("_", " ", x$function_types[[i]]), " step.\n\n", sep = "")
-    } else {
-      cat("This is a custom step that modifies the data.\n\n")
-    }
+  cat("\nDesign Summary\n\n")
+
+  for (i in 1:max(length(x$variables_added), length(x$quantities_added))) {
+    step_name <- deparse(x$causal_order[[i]])
+    step_class <- ifelse(x$function_types[[i]] != "unknown", gsub("_", " ", x$function_types[[i]]), "custom data modification")
+    cat("Step ", i, " (", step_class, "): ", step_name, " ", paste0(rep("-", 80 - 11 - nchar(i) - nchar(step_class) - nchar(step_name)), collapse = ""), "\n\n", sep = "")
+
     if (!is.null(x$quantities_added[[i]])) {
       if (class(x$quantities_added[[i]]) == "data.frame") {
-        cat("Below is one draw of the ", x$function_types[[i]], ":\n", sep = "")
-        print(x$quantities_added[[i]])
+        cat("A single draw of the ", x$function_types[[i]], ":\n", sep = "")
+        print(x$quantities_added[[i]], row.names = FALSE)
         cat("\n")
       } else {
         cat(x$quantities_added[[i]], sep = "\n")
         cat("\n")
       }
     }
-    if (length(x$variables_added[[i]]) != 0) {
-      cat("Variables added: ", x$variables_added[[i]], "\n\n", sep = "")
+    if (!is.null(x$variables_added[[i]])) {
+      for (j in seq_along(x$variables_added[[i]])) {
+        cat("Added variable: ", names(x$variables_added[[i]])[j], "\n")
+        print(x$variables_added[[i]][[j]], row.names = FALSE)
+        cat("\n")
+      }
     }
   }
   invisible(x)

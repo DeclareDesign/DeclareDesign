@@ -60,4 +60,6 @@ estimands <- get_estimands(design)
 
 diagnosis <- diagnose_design(design)
 
+summary(design)
+
 }
