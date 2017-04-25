@@ -1,6 +1,12 @@
+#' Compare the Properties of Several Research Designs
+#'
+#' @param ... A set of designs created by \code{\link{declare_design}}.
+#'
+#' @param sims The number of simulations, defaulting to 500.
+#'
 #' @importFrom dplyr '%>%'
 #' @export
-compare_designs <- function(..., sims = 100) {
+compare_designs <- function(..., sims = 500) {
   designs <- list(...)
 
   if (!all(sapply(designs, class) == "design")) {

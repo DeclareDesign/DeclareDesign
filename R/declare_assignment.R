@@ -34,7 +34,7 @@
 #' my_assignment_custom <- declare_assignment(
 #'    assignment_function = my_assignment_function)
 #'
-#' df <- my_custom_assignment(pop)
+#' df <- my_assignment_custom(df)
 #' head(df)
 #' table(df$Z)
 declare_assignment <- function(..., assignment_function = assignment_function_default) {
