@@ -1,11 +1,42 @@
 
 
-
-## declare_estimand(ATE = mean(Y_Z_1-Y_Z_0)) ## ATE
-
+#' Declare Estimand
+#'
+#' @param ... Arguments to the estimand function. For example, you might specify ATE = mean(Y_Z_1 - Y_Z_0), which would declare the estimand to be named ATE and to be the mean of the difference in the control and treatment potential outcome.
+#' @param estimand_function A function that takes a data.frame as an argument and returns a data.frame with the estimand and a label. By default, the estimand function accepts an expression such as ATE = mean(Y_Z_1-Y_Z_0).
+#' @param label An optional label to name the estimand, such as ATE. Typically, the label is inferred from how you specify the estimand in \code{...}, i.e. if you specify ATE = mean(Y_Z_1 - Y_Z_0) the estimand label will be ATE.
+#'
 #' @importFrom lazyeval lazy_dots make_call lazy_eval call_modify
 #' @export
-declare_estimand <- function(..., label = NULL, estimand_function = estimand_function_default) {
+#'
+#' @examples
+#'
+#' my_population <- declare_population(N = 100)
+#'
+#' my_potential_outcomes <- declare_potential_outcomes(
+#'   formula = Y ~ .25 * Z,
+#'   condition_names = c(0, 1))
+#'
+#' df <- my_potential_outcomes(my_population())
+#'
+#' # Use the default estimand setup to
+#' # declare an average treatment effect estimand
+#'
+#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+#'
+#' my_estimand(df)
+#'
+#' # Custom random assignment functions
+#'
+#' my_estimand_function <- function(data) {
+#'   with(data, median(Y_Z_1 - Y_Z_0))
+#' }
+#' my_estimand_custom <- declare_estimand(
+#'   estimand_function = my_estimand_function, label = medianTE)
+#'
+#' my_estimand_custom(df)
+#'
+declare_estimand <- function(..., estimand_function = estimand_function_default, label = NULL) {
   args <- eval(substitute(alist(...)))
   env <- freeze_environment(parent.frame())
   func <- eval(estimand_function)

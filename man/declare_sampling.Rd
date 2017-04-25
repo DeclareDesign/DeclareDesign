@@ -12,7 +12,7 @@ declare_sampling(..., sampling_function = sampling_function_default)
 \item{sampling_function}{A function that takes a data.frame, subsets to sampled observations and optionally adds sampling probabilities or other relevant quantities, and returns a data.frame. By default, the sampling_function uses the \code{randomizr} functions \code{\link{draw_rs}} and \code{\link{obtain_inclusion_probabilities}} to conduct random sampling and obtain the probability of inclusion in the sample.}
 }
 \value{
-data.frame
+a function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
 }
 \description{
 Declare Sampling Procedure

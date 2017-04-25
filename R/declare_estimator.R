@@ -1,9 +1,66 @@
 
-#' @importFrom DDestimate difference_in_means
+#' Declare an Estimator
+#'
+#' @param ... Arguments to the estimand function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.
+#'
+#' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label. By default, the estimator function is the \code{\link{difference_in_means}} function from the \link{DDestimate} package.
+#' @param estimand An estimand object created using \code{\link{declare_estimand}}. Estimates from this estimator function will be associated with the estimand, for example for calculating the bias and coverage of the estimator.
+#' @param label An optional label to name the estimator, such as DIM.
+#'
 #' @export
-declare_estimator <- function(..., label = my_estimator,
+#' @importFrom DDestimate difference_in_means
+#'
+#' @examples
+#'
+#' my_population <- declare_population(N = 100)
+#'
+#' my_potential_outcomes <- declare_potential_outcomes(
+#'   formula = Y ~ .25 * Z,
+#'   condition_names = c(0, 1))
+#'
+#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+#'
+#' my_assignment <- declare_assignment(m = 50)
+#'
+#' design <- declare_design(
+#'  my_population, my_potential_outcomes,
+#'  my_estimand, my_assignment, reveal_outcomes
+#' )
+#'
+#' df <- draw_data(design)
+#'
+#' my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
+#'
+#' my_estimator_dim(df)
+#'
+#' # Use the linear regression (lm) function
+#' # with robust standard errors from the DDestimate package
+#'
+#' my_estimator_lm <-
+#'  declare_estimator(Y ~ Z,
+#'                    estimator_function = DDestimate::lm_robust_se,
+#'                    coefficient_name = "Z",
+#'                    estimand = my_estimand)
+#'
+#' my_estimator_lm(df)
+#'
+#' # Use a custom estimator function
+#'
+#' my_estimator_function <- function(formula, data){
+#'   data.frame(est = with(data, mean(Y)))
+#' }
+#'
+#' my_estimator_custom <-
+#'   declare_estimator(Y ~ Z,
+#'                     estimator_function = my_estimator_function,
+#'                     estimand = my_estimand)
+#'
+#' my_estimator_custom(df)
+#'
+declare_estimator <- function(...,
                               estimator_function = DDestimate::difference_in_means,
-                              estimand = NULL) {
+                              estimand = NULL,
+                              label = my_estimator) {
   args <- eval(substitute(alist(...)))
   env <- freeze_environment(parent.frame())
   func <- eval(estimator_function)

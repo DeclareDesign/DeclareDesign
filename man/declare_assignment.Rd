@@ -7,12 +7,12 @@
 declare_assignment(..., assignment_function = assignment_function_default)
 }
 \arguments{
-\item{...}{Arguments to the assignment function}
+\item{...}{Arguments to the assignment function.}
 
-\item{assignment_function}{A function that takes a data.frame, adds an assignment variable and optionally assignment probabilities or other relevant quantities, and returns a data.frame. By default, the assignment_function uses the \code{randomizr} functions \code{\link{conduct_ra}} and \code{\link{obtain_condition_probabilities}} to conduct random assignment and obtain the probabilities of assignment to each condition.}
+\item{assignment_function}{A function that takes a data.frame, adds an assignment variable and optionally assignment probabilities or other relevant quantities, and returns a data.frame. By default, the assignment_function uses the \link{randomizr} functions \code{\link{conduct_ra}} and \code{\link{obtain_condition_probabilities}} to conduct random assignment and obtain the probabilities of assignment to each condition.}
 }
 \value{
-data.frame
+a function that takes a data.frame as an argument and returns a data.frame with additional columns appended including an assignment variable and (optionally) probabilities of assignment.
 }
 \description{
 Declare Assignment Procedure
