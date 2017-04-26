@@ -57,7 +57,7 @@
 #'
 #' summary(design)
 #'
-declare_design <- function(..., characteristics = NULL) {
+declare_design <- function(...) {
 
   # Some preprocessing
 
@@ -243,7 +243,6 @@ declare_design <- function(..., characteristics = NULL) {
       causal_order_env = causal_order_env,
       function_types = function_types,
       causal_order_types = causal_order_types,
-      characteristics = characteristics,
       call = match.call()
     ),
     class = "design"

@@ -31,7 +31,8 @@ quick_design <- function(template = NULL, ...){
   designs <- list()
   for (i in seq_along(template_args_list)) {
     designs[[i]] <- do.call(template, args = template_args_list[[i]])
-    designs[[i]]$characteristics <- c(designs[[i]]$characteristics, unlist(template_args_list[[i]]))
+    designs[[i]]$characteristics <-
+      c(designs[[i]]$characteristics, unlist(template_args_list[[i]]))
   }
 
   if (length(designs) == 1) {
