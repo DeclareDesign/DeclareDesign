@@ -4,8 +4,9 @@ test_that("test the full declare design setup", {
 
   library(DDestimate)
   library(dplyr)
+  N <- 500
 
-  my_population <- declare_population(N = 500, noise = rnorm(N))
+  my_population <- declare_population(N = N, noise = rnorm(N))
 
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
@@ -19,8 +20,6 @@ test_that("test the full declare design setup", {
 
   my_population() %>% my_potential_outcomes
 
-
-  de
   design <- declare_design(my_population,
                            my_potential_outcomes,
                            my_sampling,
@@ -38,3 +37,7 @@ test_that("test the full declare design setup", {
 
 
 })
+
+
+
+

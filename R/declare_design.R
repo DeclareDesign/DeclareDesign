@@ -61,6 +61,8 @@ declare_design <- function(...) {
 
   # Some preprocessing
 
+  causal_order_env <- freeze_environment(parent.frame())
+
   dots <- lazy_dots(...)
 
   dots_classes <- sapply(dots, function(x) class(x$expr))
@@ -238,6 +240,7 @@ declare_design <- function(...) {
       design_function = design_function,
       summary_function = summary_function,
       causal_order = causal_order_text,
+      causal_order_env = causal_order_env,
       function_types = function_types,
       causal_order_types = causal_order_types,
       call = match.call()

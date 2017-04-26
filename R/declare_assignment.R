@@ -59,6 +59,7 @@ declare_assignment <- function(..., assignment_function = assignment_function_de
 
     randomizr_summary <- function(data){
       args$N <- nrow(data)
+      args$assignment_variable_name <- NULL
 
       ra_declaration <- do.call(randomizr::declare_ra, args = args, envir = list2env(data))
 

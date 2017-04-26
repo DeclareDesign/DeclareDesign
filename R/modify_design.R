@@ -1,42 +1,91 @@
 
 
 
-#' Modify a Design
-#'
-#' @param design A design created by \code{\link{declare_design}}.
-#' @param ... A set of modifications to a design.
-#'
+#' @importFrom lazyeval lazy_dots
 #' @export
 modify_design <- function(design, ...) {
-  from_to_list <- eval(substitute(alist(...)))
-  from_to_list_names <- paste(from_to_list)
+  causal_order <- design$causal_order
+  original_env <- design$causal_order_env
 
-  ## change so it pulls out the expr from the lazy expression
-  ## then recreates but retains the environment
+  dots <- lazy_dots(...)
+  dots_funcs <- sapply(dots, function(x)
+    deparse(x$expr[[1]]))
 
-  # it has two arguments and neither are tofrom, overwrite from_to_list
-  if (length(from_to_list_names) == 2 &
-      !any(startsWith(from_to_list_names, "from_to("))) {
-    from_to_list <- list(do.call(from_to, args = from_to_list))
-  } else if (all(startsWith(from_to_list_names, "from_to("))) {
-    from_to_list <- lapply(from_to_list, eval)
+  for (i in seq_along(dots)) {
+
+
+    ## add step
+    if (dots_funcs[i] ==  "add_step") {
+    step_names <- names(dots[[i]]$expr)
+    location <-
+      which(causal_order == dots[[i]]$expr[[length(step_names)]])
+      before <- step_names[length(step_names)] == "before"
+
+      if (before) {
+        causal_order <-
+          c(causal_order[1:(location - 1)],
+            as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
+            causal_order[location:length(causal_order)])
+      } else {
+        causal_order <-
+          c(causal_order[1:(location)],
+            as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
+            causal_order[(location + 1):length(causal_order)])
+      }
+
+    }
+
+    ## remove step
+
+    if (dots_funcs[i] == "remove_step") {
+      location <-
+        which(causal_order == dots[[i]]$expr[[2]])
+      causal_order[[location]] <- NULL
+    }
+
+    ## replace step
+
+    if (dots_funcs[i] == "replace_step") {
+      location <-
+        which(causal_order == dots[[i]]$expr[[length(dots[[i]]$expr)]])
+
+      causal_order <-
+        c(causal_order[1:(location - 1)],
+          as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
+          causal_order[(location + 1):length(causal_order)])
+
+    }
+
   }
 
-  design_call <- design$call
-  design_call_names <- paste(design_call)
-
-  for (i in 1:length(from_to_list)) {
-    design_call[[which(design_call_names == from_to_list[[i]]["from"])]] <-
-      from_to_list[[i]]["to"]$to
-
-  }
-  return(eval(design_call))
+  new_design <- do.call(what = declare_design,
+                        args = causal_order,
+                        envir = original_env)
+  new_design
 }
 
-# this is a helper function that allows the syntax
-# modify_design(design, from_to(sate, pate))
-# to work
+#' @importFrom lazyeval lazy_dots
 #' @export
-from_to <- function(from, to) {
-  return(list(from = substitute(from), to = substitute(to)))
+add_step <- function(..., before = NULL, after = NULL) {
+  obj <- list(
+    additions = lazy_dots(...),
+    before = lazy_dots(before),
+    after = lazy_dots(after)
+  )
+  return(obj)
+}
+
+#' @importFrom lazyeval lazy_dots
+#' @export
+remove_step <- function(...) {
+  obj <- list(removals = lazy_dots(...))
+  return(obj)
+}
+
+#' @importFrom lazyeval lazy_dots
+#' @export
+replace_step <- function(..., replace) {
+  obj <- list(replacements = lazy_dots(...),
+              replace = lazy_dots(replace))
+  return(obj)
 }
