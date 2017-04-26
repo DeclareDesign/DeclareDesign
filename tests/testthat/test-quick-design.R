@@ -106,9 +106,12 @@ test_that("power curve", {
 
   diagnosis <- diagnose_design(design, sims = 100)
 
-  power_curve <- get_diagnosands(diagnosis)[, c("power", "N")]
-
-
+  # library(ggplot2)
+  # ggplot(get_diagnosands(diagnosis), aes(x = N, y = power)) +
+  #   geom_point() +
+  #   geom_line() +
+  #   theme_bw()
+  #
 
 })
 
