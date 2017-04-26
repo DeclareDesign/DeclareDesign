@@ -1,34 +1,45 @@
 
+#' @importFrom lazyeval lazy_dots
 #' @export
 quick_design <- function(template = NULL, ...){
-  do.call(template, args = list(...))
+
+  # figure out what's in ...
+  dots <- lazy_dots(...)
+
+  args_list <- lapply(dots, function(x) {
+    e <- as.list(x$expr)
+    if (length(e) > 1) {
+      return(e[seq_along(e)[-1]])
+    } else{
+      e
+    }
+  })
+
+  template_args_matrix <- data.matrix(expand.grid(args_list))
+
+  template_args_list <- lapply(split(template_args_matrix,
+                                     f = row(template_args_matrix)),
+                               FUN = function(y){
+                                 x <- as.list(y)
+                                 names(x) <- colnames(template_args_matrix)
+                                 x
+                               })
+
+  designs <- lapply(template_args_list, function(x)
+    do.call(template, args = x))
+
+  designs <- list()
+  for (i in seq_along(template_args_list)) {
+    designs[[i]] <- do.call(template, args = template_args_list[[i]])
+    designs[[i]]$characteristics <- c(designs[[i]]$characteristics, unlist(template_args_list[[i]]))
+  }
+
+  if (length(designs) == 1) {
+    designs[[1]]
+  } else {
+    designs
+  }
+
 }
 
 
-
-#
-#
-# m_arm_trial <- function(N){
-#
-#   my_population <- declare_population(N = N, noise = rnorm(N))
-#
-#   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
-#
-#   my_assignment <- declare_assignment(m = N/2)
-#
-#   pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = pate)
-#
-#   pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = pate)
-#
-#   my_design <- declare_design(my_population(),
-#                         my_potential_outcomes,
-#                         pate,
-#                         my_assignment,
-#                         reveal_outcomes,
-#                         pate_estimator)
-#
-#   return(my_design)
-# }
-#
-#
-#

@@ -57,11 +57,22 @@ declare_assignment <- function(..., assignment_function = assignment_function_de
   if (from_package(assignment_function, "DeclareDesign") &
       substitute(assignment_function) == "assignment_function_default") {
 
-    randomizr_summary <- function(data){
-      args$N <- nrow(data)
-      args$assignment_variable_name <- NULL
+    args_lazy <- lazy_dots(...)
 
-      ra_declaration <- do.call(randomizr::declare_ra, args = args, envir = list2env(data))
+    randomizr_summary <- function(data){
+      if (length(args_lazy) > 0) {
+        args_lazy$N <- as.lazy(nrow(data), env = args_lazy[[1]]$env)
+      } else {
+        args_lazy$N <- as.lazy(nrow(data))
+      }
+      if (any(names(args_lazy) == "assignment_variable_name")) {
+        args_lazy$assignment_variable_name <-
+          args_lazy[-which(names(args_lazy) == "assignment_variable_name")]
+      }
+
+      mcall <- make_call(quote(randomizr::declare_ra), args = args_lazy)
+
+      ra_declaration <- lazy_eval(mcall, data = data)
 
       return(print(ra_declaration))
     }

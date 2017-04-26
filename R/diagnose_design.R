@@ -3,7 +3,7 @@
 
 #' Diagnose the Design
 #'
-#' @param design A design created by \code{\link{declare_design}}.
+#' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{quick_design}}.
 #'
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
 #'
@@ -35,14 +35,19 @@
 #'
 #' diagnosis <- diagnose_design(design)
 #'
-#' @importFrom dplyr bind_rows group_by_ left_join summarize_
-#' @importFrom dplyr '%>%'
+#' @importFrom dplyr bind_rows group_by_ left_join summarize_ '%>%'
 #' @export
 diagnose_design <- function(..., diagnosands = default_diagnosands, sims = 500) {
 
   designs <- list(...)
 
-  if (!all(sapply(designs, class) == "design")) {
+  ## three cases:
+  ## 1. send one or more design objects created by declare_design
+  ## 2. send a single list of design objects created by quick_design
+  ## 3. do not allow sending more than one object if any of them aren't design objects.
+  if (length(designs) == 1 & class(designs[[1]]) == "list") {
+    designs <- designs[[1]]
+  } else if (!all(sapply(designs, class) == "design")) {
     stop("Please only send design objects to diagnose_design.")
   }
 
@@ -53,7 +58,7 @@ diagnose_design <- function(..., diagnosands = default_diagnosands, sims = 500) 
   comparison_sims <- lapply(designs, diagnose_design_single_design,
                             diagnosands = diagnosands, sims = sims)
 
-  if(length(comparison_sims) > 1){
+  if (length(comparison_sims) > 1) {
     simulations_df <-
       lapply(comparison_sims, function(x)
         x$simulations) %>% bind_rows(.id = "design_ID")
@@ -61,8 +66,8 @@ diagnose_design <- function(..., diagnosands = default_diagnosands, sims = 500) 
       lapply(comparison_sims, function(x)
         x$diagnosands) %>% bind_rows(.id = "design_ID")
   } else {
-    simulations_df <- comparison_sims$simulations
-    diagnosands_df <- comparison_sims$diagnosands
+    simulations_df <- comparison_sims[[1]]$simulations
+    diagnosands_df <- comparison_sims[[1]]$diagnosands
   }
 
   return(structure(
@@ -71,6 +76,17 @@ diagnose_design <- function(..., diagnosands = default_diagnosands, sims = 500) 
   ))
 
 }
+
+#' @export
+get_diagnosands <- function(diagnosis){
+  diagnosis$diagnosands
+}
+
+#' @export
+get_simulations <- function(diagnosis){
+  diagnosis$simulations
+}
+
 
 diagnose_design_single_design <-
   function(design,
@@ -113,6 +129,7 @@ diagnose_design_single_design <-
       simulations_df <- estimates_df
     }
 
+
     group_by_set <- c("estimand_label", "estimator_label")[
       which(c("estimand_label", "estimator_label") %in% colnames(simulations_df))]
 
@@ -121,6 +138,16 @@ diagnose_design_single_design <-
       group_by_(.dots = group_by_set) %>%
       diagnosands %>%
       data.frame(stringsAsFactors = FALSE)
+
+    characteristics <- design$characteristics
+
+    if (!is.null(characteristics)) {
+      for(i in seq_along(characteristics)){
+        simulations_df[,names(characteristics)[i]] <- characteristics[i]
+        diagnosands_df[,names(characteristics)[i]] <- characteristics[i]
+      }
+    }
+
 
     return(structure(
       list(simulations = simulations_df, diagnosands = diagnosands_df),
@@ -156,3 +183,5 @@ print.summary.diagnosis <- function(x, ...) {
   cat("\n")
   invisible(x)
 }
+
+

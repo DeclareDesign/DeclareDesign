@@ -54,10 +54,18 @@ declare_sampling <- function(..., sampling_function = sampling_function_default)
   if (from_package(sampling_function, "DeclareDesign") &
       substitute(sampling_function) == "sampling_function_default") {
 
-    randomizr_summary <- function(data){
-      args$N <- nrow(data)
+    args_lazy <- lazy_dots(...)
 
-      rs_declaration <- do.call(randomizr::declare_rs, args = args, envir = list2env(data))
+    randomizr_summary <- function(data){
+      if (length(args_lazy) > 0) {
+        args_lazy$N <- as.lazy(nrow(data), env = args_lazy[[1]]$env)
+      } else {
+        args_lazy$N <- as.lazy(nrow(data))
+      }
+
+      mcall <- make_call(quote(randomizr::declare_rs), args = args_lazy)
+
+      rs_declaration <- lazy_eval(mcall, data = data)
 
       return(print(rs_declaration))
     }

@@ -5,7 +5,8 @@ test_that("quick_design works", {
   m_arm_trial <- function(N){
 
     my_population <- declare_population(N = N, noise = rnorm(N))
-    my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+    my_potential_outcomes <- declare_potential_outcomes(
+      Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
     my_assignment <- declare_assignment(m = N/2)
     pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = pate)
     pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = pate)
@@ -18,7 +19,7 @@ test_that("quick_design works", {
     return(my_design)
   }
 
-  draw_data(m_arm_trial(100))
+  draw_data(m_arm_trial(N = 100))
 
   design <- quick_design(template = m_arm_trial, N = 100)
 
@@ -43,13 +44,71 @@ test_that("quick_design works some more", {
     return(my_design)
   }
 
-m_arm_trial(N = 5)$data_function()
-m_arm_trial(N = 15)$data_function()
+  m_arm_trial(N = 5)$data_function()
+  m_arm_trial(N = 15)$data_function()
 
 
-a_quick_design <- quick_design(template = m_arm_trial, N = 100)
+  a_quick_design <- quick_design(template = m_arm_trial, N = 100)
 
-a_quick_design$design_function()
+  a_quick_design$design_function()
 
-diagnose_design(a_quick_design, sims = 20)
+  diagnose_design(a_quick_design, sims = 5)
 })
+
+
+test_that("vary works", {
+
+  m_arm_trial <- function(N, noise_sd){
+
+    my_population <- declare_population(N = N, noise = rnorm(N, sd = noise_sd))
+    my_potential_outcomes <- declare_potential_outcomes(
+      Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+    my_assignment <- declare_assignment(m = N/2)
+    pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = pate)
+    pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = pate)
+    my_design <- declare_design(my_population,
+                                my_potential_outcomes,
+                                pate,
+                                my_assignment,
+                                reveal_outcomes,
+                                pate_estimator)
+    return(my_design)
+  }
+
+  design <- quick_design(template = m_arm_trial,
+                         N = vary(100, 200, 300), noise_sd = 1)
+
+  diagnose_design(design, sims = 5)
+
+})
+
+test_that("power curve", {
+
+  m_arm_trial <- function(N){
+
+    my_population <- declare_population(N = N, noise = rnorm(N))
+    my_potential_outcomes <- declare_potential_outcomes(
+      Y_Z_0 = noise, Y_Z_1 = noise + .25)
+    my_assignment <- declare_assignment(m = N/2)
+    pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = pate)
+    pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = pate)
+    my_design <- declare_design(my_population,
+                                my_potential_outcomes,
+                                pate,
+                                my_assignment,
+                                reveal_outcomes,
+                                pate_estimator)
+    return(my_design)
+  }
+
+  design <- quick_design(template = m_arm_trial,
+                         N = vary(100, 200, 300, 500, 1000))
+
+  diagnosis <- diagnose_design(design, sims = 100)
+
+  power_curve <- get_diagnosands(diagnosis)[, c("power", "N")]
+
+
+
+})
+
