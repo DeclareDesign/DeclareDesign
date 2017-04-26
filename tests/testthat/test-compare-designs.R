@@ -36,10 +36,10 @@ test_that("compare_designs works", {
   diagnosis_2 <- diagnose_design(my_design_2, sims = 10)
 
   #debugonce(compare_designs)
-  comparison <- compare_designs(my_design_1, my_design_2, sims = 10)
+  comparison <- diagnose_design(my_design_1, my_design_2, sims = 10)
   comparison
 
-  comparison <- compare_designs(first_design = my_design_1, my_design_2, sims = 10)
+  comparison <- diagnose_design(first_design = my_design_1, my_design_2, sims = 10)
   comparison
 
 })

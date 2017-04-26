@@ -9,9 +9,6 @@
 #'
 #' @param sims The number of simulations, defaulting to 500.
 #'
-#' @importFrom dplyr bind_rows group_by_ left_join summarize_
-#' @export
-#'
 #' @examples
 #' #' my_population <- declare_population(N = 500, noise = rnorm(N))
 #'
@@ -38,7 +35,44 @@
 #'
 #' diagnosis <- diagnose_design(design)
 #'
-diagnose_design <-
+#' @importFrom dplyr bind_rows group_by_ left_join summarize_
+#' @importFrom dplyr '%>%'
+#' @export
+diagnose_design <- function(..., diagnosands = default_diagnosands, sims = 500) {
+
+  designs <- list(...)
+
+  if (!all(sapply(designs, class) == "design")) {
+    stop("Please only send design objects to diagnose_design.")
+  }
+
+  inferred_names <- paste(substitute(list(...)))[-1]
+  names(designs)[names(designs) == ""] <-
+    inferred_names[names(designs) == ""]
+
+  comparison_sims <- lapply(designs, diagnose_design_single_design,
+                            diagnosands = diagnosands, sims = sims)
+
+  if(length(comparison_sims) > 1){
+    simulations_df <-
+      lapply(comparison_sims, function(x)
+        x$simulations) %>% bind_rows(.id = "design_ID")
+    diagnosands_df <-
+      lapply(comparison_sims, function(x)
+        x$diagnosands) %>% bind_rows(.id = "design_ID")
+  } else {
+    simulations_df <- comparison_sims$simulations
+    diagnosands_df <- comparison_sims$diagnosands
+  }
+
+  return(structure(
+    list(simulations = simulations_df, diagnosands = diagnosands_df),
+    class = "diagnosis"
+  ))
+
+}
+
+diagnose_design_single_design <-
   function(design,
            diagnosands = default_diagnosands,
            sims = 500) {
