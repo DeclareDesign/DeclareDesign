@@ -16,7 +16,7 @@
 #' # use any arguments you would use in conduct_ra.
 #'
 #' my_assignment <- declare_assignment(m = 50)
-#' df <- my_assignment(pop)
+#' df <- my_assignment(df)
 #' head(df)
 #' table(df$Z)
 #'
