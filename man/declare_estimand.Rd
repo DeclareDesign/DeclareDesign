@@ -14,6 +14,9 @@ declare_estimand(..., estimand_function = estimand_function_default,
 
 \item{label}{An optional label to name the estimand, such as ATE. Typically, the label is inferred from how you specify the estimand in \code{...}, i.e. if you specify ATE = mean(Y_Z_1 - Y_Z_0) the estimand label will be ATE.}
 }
+\value{
+a function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimand.
+}
 \description{
 Declare Estimand
 }

@@ -10,6 +10,8 @@
 #' @export
 #' @importFrom DDestimate difference_in_means
 #'
+#' @return a function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimator and associated statistics.
+#'
 #' @examples
 #'
 #' my_population <- declare_population(N = 100)

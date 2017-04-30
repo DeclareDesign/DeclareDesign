@@ -1,15 +1,24 @@
 
 
-#' @param ...
+#' Potential Outcomes
+#' @param ... Arguments to the potential_outcomes_function
 #'
-#' @param potential_outcomes_function
+#' @param potential_outcomes_function A function that accepts a data.frame as an argument and returns a data.frame with potential outcomes columns appended. See the examples for the behavior of the default function.
+#'
+#' @return a function that returns a data.frame
 #'
 #' @export
 #'
 #'
 #' @details
 #'
-#' A `declare_potential_outcomes` declaration returns a function. That function takes data and returns data with potential outcomes columns appended. There are two ways of declaring potential outcomes: as separate variables or as a formule.
+#' A `declare_potential_outcomes` declaration returns a function. That function takes data and returns data with potential outcomes columns appended. These columns describe the outcomes that each unit would express if that unit were in the corresponding treatment condition.
+#'
+#' The potential outcomes function can sometimes be a stumbling block for users, as some are uncomfortable asserting anything in particular about the very causal process that they are conducting a study to learn about! We recommend trying to imagine what your preferred theory would predict, what an alternative theory would predict, and what your study would reveal if there were no differences in potential outcomes for any unit (i.e., all treatment effects are zero).
+#'
+#'
+#'
+#'
 #'
 #' @examples
 #' my_population <-
@@ -18,6 +27,7 @@
 #'                    age = sample(18:95, N, replace = T))
 #' pop <- my_population()
 #'
+#' # By default, there are two ways of declaring potential outcomes: as separate variables or using a formula:
 #'
 #' # As separate variables
 #'

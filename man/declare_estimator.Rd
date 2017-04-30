@@ -16,6 +16,9 @@ declare_estimator(..., estimator_function = DDestimate::difference_in_means,
 
 \item{label}{An optional label to name the estimator, such as DIM.}
 }
+\value{
+a function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimator and associated statistics.
+}
 \description{
 Declare an Estimator
 }

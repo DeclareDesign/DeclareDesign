@@ -1,8 +1,22 @@
 
 
 
+#' Modify a design object
+#' @param design a design object, usually created by \code{\link{declare_design}}, \code{\link{quick_design}}, or \code{\link{download_design}}.
+#'
+#' @param ... a series of calls to \code{\link{add_step}}, \code{\link{remove_step}}, or \code{\link{replace_step}}
+#'
+#' @return A design object. See \code{\link{declare_design}} for details.
+#'
 #' @importFrom lazyeval lazy_dots
 #' @export
+#'
+#' @examples
+#'
+#'
+#'
+#'
+#'
 modify_design <- function(design, ...) {
   causal_order <- design$causal_order
   original_env <- design$causal_order_env
@@ -16,23 +30,38 @@ modify_design <- function(design, ...) {
 
     ## add step
     if (dots_funcs[i] ==  "add_step") {
-    step_names <- names(dots[[i]]$expr)
-    location <-
-      which(causal_order == dots[[i]]$expr[[length(step_names)]])
+      step_names <- names(dots[[i]]$expr)
+      location <-
+        which(causal_order == dots[[i]]$expr[[length(step_names)]])
       before <- step_names[length(step_names)] == "before"
 
       if (before) {
-        causal_order <-
-          c(causal_order[1:(location - 1)],
-            as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
-            causal_order[location:length(causal_order)])
-      } else {
-        causal_order <-
-          c(causal_order[1:(location)],
-            as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
-            causal_order[(location + 1):length(causal_order)])
-      }
 
+        if (location == 1) {
+          causal_order <-
+            c(as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
+              causal_order)
+        }else{
+          causal_order <-
+            c(causal_order[1:(location - 1)],
+              as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
+              causal_order[location:length(causal_order)])
+        }
+
+      } else {
+        if(location == length(causal_order)){
+          causal_order <-
+            c(causal_order,
+              as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)])
+
+        }else{
+          causal_order <-
+            c(causal_order[1:(location)],
+              as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
+              causal_order[(location + 1):length(causal_order)])
+        }
+
+      }
     }
 
     ## remove step
@@ -49,15 +78,25 @@ modify_design <- function(design, ...) {
       location <-
         which(causal_order == dots[[i]]$expr[[length(dots[[i]]$expr)]])
 
-      causal_order <-
-        c(causal_order[1:(location - 1)],
-          as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
-          causal_order[(location + 1):length(causal_order)])
+      if (location == 1) {
+        causal_order <-
+          c(as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
+            causal_order[(location + 1):length(causal_order)])
+      } else if (location == length(causal_order)) {
+        causal_order <-
+          c(causal_order[1:(location - 1)],
+            as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)])
+      } else{
+
+        causal_order <-
+          c(causal_order[1:(location - 1)],
+            as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
+            causal_order[(location + 1):length(causal_order)])
+
+      }
 
     }
-
   }
-
   new_design <- do.call(what = declare_design,
                         args = causal_order,
                         envir = original_env)
@@ -65,6 +104,7 @@ modify_design <- function(design, ...) {
 }
 
 #' @importFrom lazyeval lazy_dots
+#' @rdname modify_design
 #' @export
 add_step <- function(..., before = NULL, after = NULL) {
   obj <- list(
@@ -76,6 +116,7 @@ add_step <- function(..., before = NULL, after = NULL) {
 }
 
 #' @importFrom lazyeval lazy_dots
+#' @rdname modify_design
 #' @export
 remove_step <- function(...) {
   obj <- list(removals = lazy_dots(...))
@@ -83,6 +124,7 @@ remove_step <- function(...) {
 }
 
 #' @importFrom lazyeval lazy_dots
+#' @rdname modify_design
 #' @export
 replace_step <- function(..., replace) {
   obj <- list(replacements = lazy_dots(...),
