@@ -2,18 +2,9 @@
 % Please edit documentation in R/modify_design.R
 \name{modify_design}
 \alias{modify_design}
-\alias{add_step}
-\alias{remove_step}
-\alias{replace_step}
-\title{Modify a design object}
+\title{Modify a Design}
 \usage{
 modify_design(design, ...)
-
-add_step(..., before = NULL, after = NULL)
-
-remove_step(...)
-
-replace_step(..., replace)
 }
 \arguments{
 \item{design}{a design object, usually created by \code{\link{declare_design}}, \code{\link{quick_design}}, or \code{\link{download_design}}.}
@@ -24,12 +15,29 @@ replace_step(..., replace)
 A design object. See \code{\link{declare_design}} for details.
 }
 \description{
-Modify a design object
+Modify a Design
 }
 \examples{
 
+ my_population <- declare_population(N = 100, noise = rnorm(N))
 
+ my_potential_outcomes <-
+   declare_potential_outcomes(Y_Z_0 = noise,
+                              Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
+ my_assignment <- declare_assignment(m = 50)
+ my_assignment_2 <- declare_assignment(m = 25)
 
+ design <- declare_design(my_population,
+                          my_potential_outcomes,
+                          my_assignment)
 
+ design
+
+ modify_design(design, replace_step(my_assignment_2, replace = my_assignment))
+
+ modify_design(design, add_step(dplyr::mutate(income = noise^2), after = my_assignment))
+ modify_design(design, add_step(dplyr::mutate(income = noise^2), before = my_assignment))
+
+ modify_design(design, remove_step(my_assignment))
 }

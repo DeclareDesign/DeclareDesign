@@ -1,5 +1,34 @@
 
+#' Reveal Observed Outcomes
+#' @param data A data.frame containing columns of potential outcomes and an assignment variable
+#'
+#' @param outcome_variable_name The outcome prefix of the potential outcomes outcomes
+#' @param assignment_variable_name The bare (unquote) name of the assignment variable
+#' @param attrition_variable_name The bare (unquote) name of the attrition variable
+#'
+#' @details
+#'
+#' Typically, a design includes a potential outcomes declaration and an assignment declaration. Reveal outcomes uses the random assignment to pluck out the correct potential outcomes. This is analogous to the "switching equation" (Gerber and Green 2012, Chapter 2).
+#'
+#'
 #' @export
+#'
+#' @examples
+#'
+#' my_population <- declare_population(N = 100, noise = rnorm(N))
+#'
+#' my_potential_outcomes <- declare_potential_outcomes(
+#'   Y_Z_0 = noise, Y_Z_1 = noise +
+#'   rnorm(N, mean = 2, sd = 2))
+#'
+#' my_assignment <- declare_assignment(m = 50)
+#'
+#' design <- declare_design(my_population,
+#'                          my_potential_outcomes,
+#'                          my_assignment,
+#'                          reveal_outcomes)
+#'
+#' design
 reveal_outcomes <- function(data, outcome_variable_name = Y, assignment_variable_name = Z, attrition_variable_name = NULL){
 
   variable_names <- names(data)

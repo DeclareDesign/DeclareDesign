@@ -1,7 +1,7 @@
 
 
 
-#' Modify a design object
+#' Modify a Design
 #' @param design a design object, usually created by \code{\link{declare_design}}, \code{\link{quick_design}}, or \code{\link{download_design}}.
 #'
 #' @param ... a series of calls to \code{\link{add_step}}, \code{\link{remove_step}}, or \code{\link{replace_step}}
@@ -13,10 +13,27 @@
 #'
 #' @examples
 #'
+#'  my_population <- declare_population(N = 100, noise = rnorm(N))
 #'
+#'  my_potential_outcomes <-
+#'    declare_potential_outcomes(Y_Z_0 = noise,
+#'                               Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 #'
+#'  my_assignment <- declare_assignment(m = 50)
+#'  my_assignment_2 <- declare_assignment(m = 25)
 #'
+#'  design <- declare_design(my_population,
+#'                           my_potential_outcomes,
+#'                           my_assignment)
 #'
+#'  design
+#'
+#'  modify_design(design, replace_step(my_assignment_2, replace = my_assignment))
+#'
+#'  modify_design(design, add_step(dplyr::mutate(income = noise^2), after = my_assignment))
+#'  modify_design(design, add_step(dplyr::mutate(income = noise^2), before = my_assignment))
+#'
+#'  modify_design(design, remove_step(my_assignment))
 modify_design <- function(design, ...) {
   causal_order <- design$causal_order
   original_env <- design$causal_order_env
@@ -103,8 +120,15 @@ modify_design <- function(design, ...) {
   new_design
 }
 
+#' Modify a Design by Adding Steps
+#' @param ... steps to add to a design
+#'
+#' @param before bare (unquoted) name of the step before which to add steps.
+#' @param after bare (unquoted) name of the step after which to add steps.
+#'
 #' @importFrom lazyeval lazy_dots
-#' @rdname modify_design
+#' @details see \code{\link{modify_design}} for details.
+#'
 #' @export
 add_step <- function(..., before = NULL, after = NULL) {
   obj <- list(
@@ -115,16 +139,27 @@ add_step <- function(..., before = NULL, after = NULL) {
   return(obj)
 }
 
+#' Modify a Design by Removing Steps
+#' @param ... bare (unquoted) names of steps to remove
+#'
 #' @importFrom lazyeval lazy_dots
-#' @rdname modify_design
+#'
+#' @details see \code{\link{modify_design}} for details.
 #' @export
 remove_step <- function(...) {
   obj <- list(removals = lazy_dots(...))
   return(obj)
 }
 
+#' Modify a Design by Replacing a Step
+#' @param ... replacement step(s)
+#'
+#' @param replace step to be replaced
+#'
 #' @importFrom lazyeval lazy_dots
-#' @rdname modify_design
+#'
+#' @details see \code{\link{modify_design}} for details.
+#'
 #' @export
 replace_step <- function(..., replace) {
   obj <- list(replacements = lazy_dots(...),
