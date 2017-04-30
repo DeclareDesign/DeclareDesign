@@ -288,6 +288,7 @@ print.design <- function(x, ...) {
 #'                          my_estimator)
 #'
 #' summary(design)
+#' @export
 summary.design <- function(object, ...) {
   summ <- object$summary_function()
   structure(list(variables_added = summ$variables_added,
