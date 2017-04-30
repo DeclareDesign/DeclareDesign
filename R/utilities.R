@@ -8,7 +8,7 @@ from_package <- function(func, package){
   ifelse(is.null(func_package), FALSE, func_package == package)
 }
 
-
+#' @export
 wrap_step_ <- function(...){
 
   ## this function allows you to put any R expression
