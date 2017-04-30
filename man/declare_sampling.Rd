@@ -33,7 +33,7 @@ df <- my_sampling(df)
 dim(df)
 head(df)
 
-Stratified random sampling
+# Stratified random sampling
 my_stratified_sampling <- declare_sampling(strata_var = female)
 df <- my_population()
 table(df$female)

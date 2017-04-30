@@ -10,3 +10,4 @@ builtin_diagnosands
 CONDUCT.md
 ^docs$
 _pkgdown.yml
+deploy.sh

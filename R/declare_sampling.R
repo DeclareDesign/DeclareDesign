@@ -8,7 +8,7 @@
 #' @export
 #' @details
 #'
-#' While declare_sampling can work with any sampling_function that takes data and returns data, most random sampling procedures can be easily implemented with randomizr. The arguments to \code{\link{draw_rs}} can include N, strata_var, clust_var, n, prob, strata_n, and strata_prob. The arguments you need to specify are different for different designs. Check the help files for \code{\link{complete_rs}}, \code{\link{strata_rs}}, \code{\link{cluster_rs}}, or \code{\link{stra_and_cluster_ra}} for details on how to execute many common designs.
+#' While declare_sampling can work with any sampling_function that takes data and returns data, most random sampling procedures can be easily implemented with randomizr. The arguments to \code{\link{draw_rs}} can include N, strata_var, clust_var, n, prob, strata_n, and strata_prob. The arguments you need to specify are different for different designs. Check the help files for \code{\link{complete_rs}}, \code{\link{strata_rs}}, \code{\link{cluster_rs}}, or \code{\link{strata_and_cluster_ra}} for details on how to execute many common designs.
 #' @examples
 #'
 #' my_population <- declare_population(N = 100, female = rbinom(N, 1, .5))
@@ -22,7 +22,7 @@
 #' dim(df)
 #' head(df)
 #'
-#' Stratified random sampling
+#' # Stratified random sampling
 #' my_stratified_sampling <- declare_sampling(strata_var = female)
 #' df <- my_population()
 #' table(df$female)
