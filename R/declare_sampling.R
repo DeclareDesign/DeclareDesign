@@ -16,7 +16,7 @@
 #' # use any arguments you would use in draw_rs.
 #'
 #' my_sampling <- declare_sampling(n = 50)
-#' df <- my_sampling(pop)
+#' df <- my_sampling(df)
 #' dim(df)
 #' head(df)
 #'
@@ -34,7 +34,7 @@
 #' my_sampling_custom <- declare_sampling(
 #'    sampling_function = my_sampling_function)
 #'
-#' df <- my_custom_sampling(pop)
+#' df <- my_sampling_custom(df)
 #' dim(df)
 #' head(df)
 declare_sampling <- function(..., sampling_function = sampling_function_default) {

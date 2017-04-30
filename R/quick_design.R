@@ -1,4 +1,10 @@
 
+#' Declare a Design via a Template Function
+#'
+#' @param template An R function that takes a set of options and returns a design created by declare_design().
+#'
+#' @param ... Options sent to the template.
+#'
 #' @importFrom lazyeval lazy_dots
 #' @export
 quick_design <- function(template = NULL, ...){
