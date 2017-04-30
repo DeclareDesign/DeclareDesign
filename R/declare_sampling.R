@@ -6,10 +6,12 @@
 #'
 #' @return a function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
 #' @export
+#' @details
 #'
+#' While declare_sampling can work with any sampling_function that takes data and returns data, most random sampling procedures can be easily implemented with randomizr. The arguments to \code{\link{draw_rs}} can include N, strata_var, clust_var, n, prob, strata_n, and strata_prob. The arguments you need to specify are different for different designs. Check the help files for \code{\link{complete_rs}}, \code{\link{strata_rs}}, \code{\link{cluster_rs}}, or \code{\link{stra_and_cluster_ra}} for details on how to execute many common designs.
 #' @examples
 #'
-#' my_population <- declare_population(N = 100)
+#' my_population <- declare_population(N = 100, female = rbinom(N, 1, .5))
 #' df <- my_population()
 #'
 #' # Simple random sampling using randomizr
@@ -20,7 +22,14 @@
 #' dim(df)
 #' head(df)
 #'
-#' # Custom random assignment functions
+#' Stratified random sampling
+#' my_stratified_sampling <- declare_sampling(strata_var = female)
+#' df <- my_population()
+#' table(df$female)
+#' df <- my_stratified_sampling(df)
+#' table(df$female)
+#'
+#' # Custom random sampling functions
 #'
 #' df <- my_population()
 #'

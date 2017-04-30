@@ -1,6 +1,47 @@
 
 
+#' @param ...
+#'
+#' @param potential_outcomes_function
+#'
 #' @export
+#'
+#'
+#' @details
+#'
+#' A `declare_potential_outcomes` declaration returns a function. That function takes data and returns data with potential outcomes columns appended. There are two ways of declaring potential outcomes: as separate variables or as a formule.
+#'
+#' @examples
+#' my_population <-
+#' declare_population(N = 1000,
+#'                    income = rnorm(N),
+#'                    age = sample(18:95, N, replace = T))
+#' pop <- my_population()
+#'
+#'
+#' # As separate variables
+#'
+#' my_potential_outcomes <-
+#'      declare_potential_outcomes(
+#'         Y_Z_0 = .05,
+#'         Y_Z_1 = .30 + .01 * age)
+#'
+#' head(my_potential_outcomes(pop))
+#'
+#' # Using a formula
+#'  my_potential_outcomes <- declare_potential_outcomes(
+#'  formula = Y ~ .25 * Z + .01 * age * Z)
+#'  pop_pos <- my_potential_outcomes(pop)
+#'  head(pop_pos)
+#'
+#'  # condition_names defines the "range" of the potential outcomes function
+#'  my_potential_outcomes <-
+#'       declare_potential_outcomes(
+#'       formula = Y ~ .25 * Z + .01 * age * Z,
+#'       condition_names = 1:4)
+#'
+#' head(my_potential_outcomes(pop))
+#'
 declare_potential_outcomes <- function(..., potential_outcomes_function = potential_outcomes_function_default) {
   args <- eval(substitute(alist(...)))
   env <- freeze_environment(parent.frame())

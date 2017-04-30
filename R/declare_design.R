@@ -17,6 +17,8 @@
 #'
 #' Designs declared with declare_design can be investigated with a series of post-declaration commands, such as \code{\link{draw_data}}, \code{\link{get_estimands}}, \code{\link{get_estimates}}, and \code{\link{diagnose_design}}.
 #'
+#' The print and summary methods for a design object return some helpful descriptions of the steps in your research design. If randomizr functions are used for any assignment or sampling steps, additional details about those steps are provided.
+#'
 #' @return a list of two functions, the \code{design_function} and the \code{data_function}. The \code{design_function} runs the design once, i.e. draws the data and calculates any estimates and estimands defined in \code{...}, returned separately as two \code{data.frame}'s. The \code{data_function} runs the design once also, but only returns the final data.
 #'
 #' @importFrom lazyeval lazy_dots lazy_eval
@@ -48,6 +50,8 @@
 #'                          reveal_outcomes,
 #'                          my_estimator)
 #'
+#' design
+#'
 #' df <- draw_data(design)
 #'
 #' estimates <- get_estimates(design)
@@ -55,7 +59,7 @@
 #'
 #' diagnosis <- diagnose_design(design)
 #'
-#' summary(design)
+#' summary(diagnosis)
 #'
 declare_design <- function(...) {
 
