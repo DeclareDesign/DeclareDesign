@@ -9,3 +9,4 @@ appveyor.yml
 builtin_diagnosands
 CONDUCT.md
 ^docs$
+_pkgdown.yml

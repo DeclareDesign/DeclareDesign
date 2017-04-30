@@ -1,0 +1,15 @@
+navbar:
+  type: default
+  left:
+  - text: "Getting Started"
+    href: articles/DeclareDesign.html
+  - text: Reference
+    href: reference/index.html
+  - text: "Companion Packages"
+    menu:
+      - text: randomizr
+        href: http://randomizr.declaredesign.org
+      - text: fabricatr
+        href: http://randomizr.declaredesign.org
+      - text: estimatr
+        href: http://estimatr.declaredesign.org
