@@ -27,10 +27,11 @@ The potential outcomes function can sometimes be a stumbling block for users, as
 my_population <-
 declare_population(N = 1000,
                    income = rnorm(N),
-                   age = sample(18:95, N, replace = T))
+                   age = sample(18:95, N, replace = TRUE))
 pop <- my_population()
 
-# By default, there are two ways of declaring potential outcomes: as separate variables or using a formula:
+# By default, there are two ways of declaring potential outcomes:
+# as separate variables or using a formula:
 
 # As separate variables
 
