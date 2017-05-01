@@ -9,5 +9,5 @@ options(repos = r)
 
 install.packages("estimatr")
 install.packages("fabricatr")
-rinstall.packages("randomizr")
+install.packages("randomizr")
 install.packages("DeclareDesign")
