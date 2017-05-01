@@ -195,7 +195,7 @@ Using our simple `lm` function with built-in robust standard errors (HC2! or you
 ```{r}
 my_estimator_lm <- 
   declare_estimator(Y ~ Z, 
-                    estimator_function = DDestimate::lm_robust_se, 
+                    estimator_function = estimatr::lm_robust_se, 
                     coefficient_name = "Z", 
                     estimand = my_estimand)
 
@@ -441,7 +441,7 @@ The three packages are:
 
 `randomizr` works by default as described above in `declare_assignment()` -- in fact appears to the user similarly to the old version -- but is entirely separate now. The set of sampling functions that mimic the assignment functions are now also built in to `randomizr`, including simple, clustered, stratified, and clustered-and-stratified sampling. The next step is to rewrite some of these into C++ to see if we can speed a few of them up. Based on our understanding of Rcpp, the speedup gains here may be minor.
 
-## `DDestimate`
+## `estimatr`
 
-The `C++` version of lm with robust standard errors described above as well as the difference-in-means and blocked difference-in-means functions are the core of `DDestimate` now, but it can be built up with further fast estimators.
+The `C++` version of lm with robust standard errors described above as well as the difference-in-means and blocked difference-in-means functions are the core of `estimatr` now, but it can be built up with further fast estimators.
 

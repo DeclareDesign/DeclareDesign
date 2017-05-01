@@ -8,7 +8,7 @@
 #' @name DeclareDesign
 NULL
 
-load <- c("fabricatr", "DDestimate", "randomizr")
+load <- c("fabricatr", "estimatr", "randomizr")
 
 .onAttach <- function(...) {
   needed <- load[!is_attached(load)]

@@ -85,7 +85,7 @@ my_estimator_dim(smp)
 ## ------------------------------------------------------------------------
 my_estimator_lm <- 
   declare_estimator(Y ~ Z, 
-                    estimator_function = DDestimate::lm_robust_se, 
+                    estimator_function = estimatr::lm_robust_se, 
                     coefficient_name = "Z", 
                     estimand = my_estimand)
 

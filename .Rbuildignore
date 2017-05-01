@@ -11,3 +11,4 @@ CONDUCT.md
 ^docs$
 _pkgdown.yml
 deploy.sh
+install.R

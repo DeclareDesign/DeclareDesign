@@ -19,8 +19,8 @@ Imports:
     lazyeval,
     randomizr,
     fabricatr,
-    DDestimate
-Remotes: DeclareDesign/DDestimate,
+    estimatr
+Remotes: DeclareDesign/estimatr,
     DeclareDesign/fabricatr,
     DeclareDesign/randomizr
 License: All rights reserved

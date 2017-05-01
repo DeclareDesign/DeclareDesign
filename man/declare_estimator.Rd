@@ -4,13 +4,13 @@
 \alias{declare_estimator}
 \title{Declare an Estimator}
 \usage{
-declare_estimator(..., estimator_function = DDestimate::difference_in_means,
+declare_estimator(..., estimator_function = estimatr::difference_in_means,
   estimand = NULL, label = my_estimator)
 }
 \arguments{
 \item{...}{Arguments to the estimand function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.}
 
-\item{estimator_function}{A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label. By default, the estimator function is the \code{\link{difference_in_means}} function from the \link{DDestimate} package.}
+\item{estimator_function}{A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label. By default, the estimator function is the \code{\link{difference_in_means}} function from the \link{estimatr} package.}
 
 \item{estimand}{An estimand object created using \code{\link{declare_estimand}}. Estimates from this estimator function will be associated with the estimand, for example for calculating the bias and coverage of the estimator.}
 
@@ -46,11 +46,11 @@ my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
 my_estimator_dim(df)
 
 # Use the linear regression (lm) function
-# with robust standard errors from the DDestimate package
+# with robust standard errors from the estimatr package
 
 my_estimator_lm <-
  declare_estimator(Y ~ Z,
-                   estimator_function = DDestimate::lm_robust_se,
+                   estimator_function = estimatr::lm_robust_se,
                    coefficient_name = "Z",
                    estimand = my_estimand)
 

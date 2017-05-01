@@ -16,6 +16,6 @@ DeclareDesign consists of a core package, documented on this web site, as well a
 
 This software is in alpha release. Please contact the authors before using in experiments or published work.
 
-This project is generously supported by a grant from the [Laura and John Arnold Foundation](http://www.arnoldfoundation.org) and seeding funding from [EGAP](http://egap.org).
+This project is generously supported by a grant from the [Laura and John Arnold Foundation](http://www.arnoldfoundation.org) and seed funding from [EGAP](http://egap.org).
  
 (c) 2017 Graeme Blair, Jasper Cooper, Alexander Coppock, and Macartan Humphreys. All rights reserved.

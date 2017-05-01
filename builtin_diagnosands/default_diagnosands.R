@@ -12,5 +12,5 @@ default_diagnosands <- declare_diagnosands(
   type_s_rate = mean((sign(est) != sign(estimand)) & p < .05),
   mean_estimand = mean(estimand))
 
-save(default_diagnosands, file = "R/sysdata.rda", envir = new.env())
+save(default_diagnosands, file = "R/sysdata.rda")
 
