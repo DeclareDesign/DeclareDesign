@@ -14,6 +14,13 @@ DeclareDesign consists of a core package, documented on this web site, as well a
 2. [fabricatr](http://fabricatr.declaredesign.org): Tools for fabricating data to enable frontloading analysis decisions in social science research.
 3. [estimatr](http://estimatr.declaredesign.org): Fast estimators for social science research.
 
+To install all of the packages, use:
+
+```
+install.packages("devtools")
+devtools::install_github("DeclareDesign/DeclareDesign")
+```
+
 This software is in alpha release. Please contact the authors before using in experiments or published work.
 
 This project is generously supported by a grant from the [Laura and John Arnold Foundation](http://www.arnoldfoundation.org) and seed funding from [EGAP](http://egap.org).
