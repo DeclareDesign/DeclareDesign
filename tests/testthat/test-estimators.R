@@ -71,3 +71,102 @@ test_that("regression from estimatr works as an estimator", {
   diagnosis
 
 })
+
+
+
+test_that("multiple estimator declarations work", {
+
+  population <- declare_population(
+    N = 10^3,
+    noise = rnorm(N)
+  )
+
+  potential_outcomes <- declare_potential_outcomes(
+    formula = Y ~ noise + Z*.5)
+
+  pop <- potential_outcomes(population())
+
+
+  sampling <- declare_sampling(
+    n = 100
+  )
+
+
+  assignment <- declare_assignment(
+    N = 50
+  )
+
+  sate <- declare_estimand(SATE = mean(Y_Z_1 - Y_Z_0))
+
+  estimator_1 <-
+    declare_estimator(formula = Y ~ Z,
+                      estimator_function = estimatr::lm_robust_se,
+                      estimand = sate,
+                      label = estimator_1)
+
+  estimator_2 <-
+    declare_estimator(formula = Y ~ Z,
+                      estimator_function = estimatr::lm_robust_se,
+                      estimand = sate,
+                      label = estimator_2)
+
+  declare_design(population,
+                           potential_outcomes,
+                           sampling,
+                           sate,
+                           assignment,
+                           reveal_outcomes,
+                           estimator_1,
+                           estimator_2
+  )
+
+  estimator_3 <-
+    declare_estimator(formula = Y ~ Z,
+                      estimator_function = estimatr::lm_robust_se,
+                      estimand = sate,
+                      label = "estimator_3")
+
+  estimator_4 <-
+    declare_estimator(formula = Y ~ Z,
+                      estimator_function = estimatr::lm_robust_se,
+                      estimand = sate,
+                      label = "estimator_4")
+
+  declare_design(population,
+                           potential_outcomes,
+                           sampling,
+                           sate,
+                           assignment,
+                           reveal_outcomes,
+                           estimator_3,
+                           estimator_4
+  )
+
+
+  estimator_5 <-
+    declare_estimator(formula = Y ~ Z,
+                      estimator_function = estimatr::lm_robust_se,
+                      estimand = sate)
+
+  estimator_6 <-
+    declare_estimator(formula = Y ~ Z,
+                      estimator_function = estimatr::lm_robust_se,
+                      estimand = sate)
+
+  # This could eventually be fixed so that the estimator names are inherited
+  expect_error({
+    design <- declare_design(population,
+                             potential_outcomes,
+                             sampling,
+                             sate,
+                             assignment,
+                             reveal_outcomes,
+                             estimator_5,
+                             estimator_6
+    )
+  }
+  )
+
+
+
+})
