@@ -83,7 +83,7 @@ declare_estimator <- function(...,
   }
 
   attributes(estimator_function_internal) <-
-    list(call = match.call(), type = "estimator")
+    list(call = match.call(), type = "estimator", label = label)
 
   return(estimator_function_internal)
 }
