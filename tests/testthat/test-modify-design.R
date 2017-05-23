@@ -17,6 +17,8 @@ test_that("test the full declare design setup", {
                            dplyr::mutate(q = 5),
                            my_assignment)
 
+  test <- modify_design(design, replace_step(my_assignment_2, replace = my_assignment))
+
   test <- modify_design(design, add_step(dplyr::mutate(blah = 6), before = my_potential_outcomes))
 
   test <- modify_design(design, add_step(dplyr::mutate(blah = 6), after = my_potential_outcomes))
