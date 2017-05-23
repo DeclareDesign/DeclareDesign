@@ -177,7 +177,7 @@ declare_design <- function(...) {
         }
       }
     }
-    return(list(estimates_df = estimates_df, estimands_df = estimands_df))
+    return(list(estimates_df = estimates_df, estimands_df = estimands_df, data = current_df))
   }
 
   summarize_step <- function(last_df = NULL, current_df){
@@ -247,6 +247,7 @@ declare_design <- function(...) {
       causal_order_env = causal_order_env,
       function_types = function_types,
       causal_order_types = causal_order_types,
+      meta_design = FALSE,
       call = match.call()
     ),
     class = "design"
