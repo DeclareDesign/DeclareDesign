@@ -38,35 +38,35 @@ modify_design <- function(design, ...) {
   causal_order <- design$causal_order
   original_env <- design$causal_order_env
 
-  # modify_env <- freeze_environment(parent.frame())
+  modify_env <- freeze_environment(parent.frame())
 
-  # overlap_names <-
-  #   ls(modify_env)[ls(modify_env) %in% ls(original_env)]
-  #
-  # ## show warning if there is any overlap in objects, say they will NOT be replaced
-  # if (length(overlap_names) > 0) {
-  #   warning(
-  #     paste0(
-  #       "Note that some of the objects in your global environment currently were also used in your original design. The version of ",
-  #       paste(overlap_names, collapse = ", "),
-  #       " created before declare_design will be used."
-  #     )
-  #   )
-  # }
-  #
-  # ## add any parts of modify_env to original_env that are NOT in original env
-  #
-  # ##for(ls(modify_env)[!(ls(modify_env) %in% overlap_names)])
-  #
-  # ## for(n in ls(e1, all.names = TRUE)) assign(n, get(n, e1), e2)
-  #
+  ## check whether objects with overlapping names are identical
+
+  overlap_names <-
+    ls(modify_env)[ls(modify_env) %in% ls(original_env)]
+
+  overlap_identical <- sapply(overlap_names, function(i) identical(get(i, envir = original_env), get(i, envir = modify_env)))
+
+  ## throw warning if any overlapping object *has changed*
+
+  if(any(overlap_identical == FALSE)){
+    warning(paste0("Some of the objects in your workspace have changed since you declared the design, including ",
+                   paste(overlap_names[overlap_identical == FALSE], collapse = ","), ". The original object will be used from when you declared the design."))
+  }
+
+  ## add objects that are not in the original env (do not overwrite modified objects)
+
+  new_objects_modify <- ls(modify_env)[!(ls(modify_env) %in% ls(original_env))]
+
+  for(n in new_objects_modify) {
+    assign(n, get(n, modify_env), original_env)
+  }
 
   dots <- lazy_dots(...)
   dots_funcs <- sapply(dots, function(x)
     deparse(x$expr[[1]]))
 
   for (i in seq_along(dots)) {
-
 
     ## add step
     if (dots_funcs[i] ==  "add_step") {
@@ -137,10 +137,13 @@ modify_design <- function(design, ...) {
 
     }
   }
+
   new_design <- do.call(what = declare_design,
                         args = causal_order,
                         envir = original_env)
-  new_design
+
+  return(new_design)
+
 }
 
 #' Modify a Design by Adding Steps
