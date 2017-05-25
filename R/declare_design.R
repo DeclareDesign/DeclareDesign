@@ -23,6 +23,7 @@
 #'
 #' @importFrom lazyeval lazy_dots lazy_eval
 #' @importFrom dplyr bind_rows
+#' @importFrom fabricatr describe_variable
 #' @export
 #'
 #' @examples
@@ -262,9 +263,8 @@ print.design <- function(x, ...) {
 
 #' Text Summary of a Design
 #'
-#' @param object
-#'
-#' @param ...
+#' @param object a design object created by \code{\link{declare_design}}
+#' @param ... optional arguments to be sent to summary function
 #'
 #' @examples
 #'
