@@ -69,25 +69,21 @@ declare_meta_analysis <- function(designs, type = data, ...){
   }
 
   design_function <- function(){
-    design_output_list <- list()
-    for (i in seq_along(designs)) {
-      design_output_list[[i]] <- designs[[i]]$design_function()
-    }
-
-    meta_data <- lapply(design_output_list, function(i) i$data) %>%
-      bind_rows(.id = "design_ID")
-    estimates_df <- lapply(design_output_list, function(i) i$estimates_df) %>%
-      bind_rows(.id = "design_ID")
-    estimands_df <- lapply(design_output_list, function(i) i$estimands_df) %>%
-      bind_rows(.id = "design_ID")
 
     ## start dd function from other file
 
     if (type == "data") {
-      current_df <- meta_data
+      current_df <- data_function()
     } else if (type == "estimates") {
-      current_df <- estimates_df
+      design_output_list <- list()
+      for (i in seq_along(designs)) {
+        design_output_list[[i]] <- designs[[i]]$design_function()
+      }
+      current_df <- lapply(design_output_list, function(i) i$estimates_df) %>%
+        bind_rows(.id = "design_ID")
     }
+
+    estimates_df <- estimands_df <- data.frame()
 
     for (i in seq_along(causal_order)) {
 
@@ -109,27 +105,28 @@ declare_meta_analysis <- function(designs, type = data, ...){
       }
     }
 
-    estimates_df$design_ID[is.na(estimates_df$design_ID)] <- "meta_analysis"
-    estimands_df$design_ID[is.na(estimands_df$design_ID)] <- "meta_analysis"
+    return(list(estimates_df = estimates_df, estimands_df = estimands_df))
 
-    return(list(estimates_df = estimates_df, estimands_df = estimands_df,
-                data = current_df))
+  }
 
+  summary_function <- function(){
+    structure(list(variables_added = NULL,
+                   quantities_added = NULL), class = "design_summary")
   }
 
   return(structure(
     list(
       data_function = data_function,
       design_function = design_function,
+      summary_function = summary_function,
       designs = designs,
       causal_order = causal_order_text,
       causal_order_env = causal_order_env,
       function_types = function_types,
       causal_order_types = causal_order_types,
-      meta_design = TRUE,
       call = match.call()
     ),
-    class = "metadesign"
+    class = "design"
   ))
 
 }
