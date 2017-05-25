@@ -94,3 +94,74 @@ test_that("declare estimand", {
 
 })
 
+
+test_that("multiple estimand declarations work", {
+
+  population <- declare_population(
+      N = 10^3,
+      noise = rnorm(N)
+  )
+
+  potential_outcomes <- declare_potential_outcomes(
+    formula = Y ~ noise + Z*.5)
+
+  pop <- potential_outcomes(population())
+
+
+  sampling <- declare_sampling(
+    n = 100
+  )
+
+
+  assignment <- declare_assignment(
+    N = 50
+  )
+
+  # No explicit label, should inherit
+  sate <- declare_estimand(SATE = mean(Y_Z_1 - Y_Z_0))
+  pate <- declare_estimand(PATE = mean(Y_Z_1 - Y_Z_0))
+  # Explicit label, should not inherit
+  sate_label <- declare_estimand(mean(Y_Z_1 - Y_Z_0),label = "The SATE")
+  pate_label <- declare_estimand(mean(Y_Z_1 - Y_Z_0),label = "The PATE")
+  # No labeling whatsoever
+  sate_nolabel <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
+  pate_nolabel <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
+
+  estimator <-
+    declare_estimator(formula = Y ~ Z,
+                      estimator_function = estimatr::lm_robust_se,
+                      estimand = sate,
+                      label = simple)
+
+  design_1 <- declare_design(population,
+                           potential_outcomes,
+                           pate,
+                           sampling,
+                           sate,
+                           assignment,
+                           reveal_outcomes,
+                           estimator
+  )
+  design_2 <-  declare_design(population,
+                              potential_outcomes,
+                              pate_label,
+                              sampling,
+                              sate_label,
+                              assignment,
+                              reveal_outcomes,
+                              estimator
+  )
+  # This could eventually be fixed so that the estimand object names are inherited
+  expect_error({
+    design_3 <-  declare_design(population,
+                                potential_outcomes,
+                                pate_nolabel,
+                                sampling,
+                                sate_nolabel,
+                                assignment,
+                                reveal_outcomes,
+                                estimator
+    )
+  })
+
+})

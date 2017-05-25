@@ -7,9 +7,9 @@
 \method{summary}{design}(object, ...)
 }
 \arguments{
-\item{object}{}
+\item{object}{a design object created by \code{\link{declare_design}}}
 
-\item{...}{}
+\item{...}{optional arguments to be sent to summary function}
 }
 \description{
 Text Summary of a Design

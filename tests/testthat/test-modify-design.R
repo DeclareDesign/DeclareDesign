@@ -10,12 +10,15 @@ test_that("test the full declare design setup", {
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
   my_assignment <- declare_assignment(m = 25)
-  my_assignment_2 <- declare_assignment(m = 25, assignment_variable_name = "Z2")
 
   design <- declare_design(my_population,
                            my_potential_outcomes,
                            dplyr::mutate(q = 5),
                            my_assignment)
+
+  my_assignment_2 <- declare_assignment(m = 25, assignment_variable_name = "Z2")
+
+  test <- modify_design(design, replace_step(my_assignment_2, replace = my_assignment))
 
   test <- modify_design(design, add_step(dplyr::mutate(blah = 6), before = my_potential_outcomes))
 
@@ -36,6 +39,7 @@ test_that("test the full declare design setup", {
   test <- modify_design(design, remove_step(dplyr::mutate(q = 5)))
   ##debugonce(modify_design)
 })
+
 
 
 test_that("placement doesn't matter", {

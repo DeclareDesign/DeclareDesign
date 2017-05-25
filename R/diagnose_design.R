@@ -81,11 +81,23 @@ diagnose_design <- function(..., diagnosands = default_diagnosands, sims = 500) 
 
 }
 
+#' Get the diagnosands data frame from a diagnosis
+#'
+#' @param diagnosis A diagnosis object created by \code{\link{diagnose_design}}.
+#'
+#' @return a \code{data.frame} of the diagnosand values from a diagnosis
+#'
 #' @export
 get_diagnosands <- function(diagnosis){
   diagnosis$diagnosands
 }
 
+#' Get the simulations data frame from a diagnosis
+#'
+#' @param diagnosis A diagnosis object created by \code{\link{diagnose_design}}.
+#'
+#' @return a \code{data.frame} of the simulations from a diagnosis
+#'
 #' @export
 get_simulations <- function(diagnosis){
   diagnosis$simulations
