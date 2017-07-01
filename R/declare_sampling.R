@@ -100,6 +100,13 @@ sampling_function_default <- function(data, ..., sampling_variable_name = "S"){
     options$N <- as.lazy(nrow(data))
   }
 
+  sampling_variable_name <- substitute(sampling_variable_name)
+  if (!is.null(sampling_variable_name)) {
+    sampling_variable_name <- as.character(sampling_variable_name)
+  } else {
+    stop("Please provide a name for the sampling variable as sampling_variable_name.")
+  }
+
   mcall <- make_call(quote(randomizr::draw_rs), args = options)
 
   data[,sampling_variable_name] <- lazy_eval(mcall, data = data)
