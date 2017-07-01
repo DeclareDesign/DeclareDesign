@@ -18,26 +18,26 @@ test_that("test the full declare design setup", {
 
   my_assignment_2 <- declare_assignment(m = 25, assignment_variable_name = "Z2")
 
-  test <- modify_design(design, replace_step(my_assignment_2, replace = my_assignment))
+  modify_design(design, replace_step(my_assignment_2, replace = my_assignment))
 
-  test <- modify_design(design, add_step(dplyr::mutate(blah = 6), before = my_potential_outcomes))
+  modify_design(design, add_step(dplyr::mutate(blah = 6), before = my_potential_outcomes))
 
-  test <- modify_design(design, add_step(dplyr::mutate(blah = 6), after = my_potential_outcomes))
+  modify_design(design, add_step(dplyr::mutate(blah = 6), after = my_potential_outcomes))
 
-  test <- modify_design(design, replace_step(dplyr::mutate(blah = 10), replace = dplyr::mutate(q = 5)))
+  modify_design(design, replace_step(dplyr::mutate(blah = 10), replace = dplyr::mutate(q = 5)))
 
-  test <- modify_design(design, remove_step(dplyr::mutate(q = 5)))
+  modify_design(design, remove_step(dplyr::mutate(q = 5)))
 
   #multiples
 
-  test <- modify_design(design, add_step(dplyr::mutate(blah = 6),
+  modify_design(design, add_step(dplyr::mutate(blah = 6),
                                          my_assignment_2,
                                          after = my_potential_outcomes))
 
-  test <- modify_design(design, replace_step(dplyr::mutate(blah = 10), my_assignment_2, replace = dplyr::mutate(q = 5)))
+  modify_design(design, replace_step(dplyr::mutate(blah = 10), my_assignment_2, replace = dplyr::mutate(q = 5)))
 
-  test <- modify_design(design, remove_step(dplyr::mutate(q = 5)))
-  ##debugonce(modify_design)
+  modify_design(design, remove_step(dplyr::mutate(q = 5)))
+
 })
 
 
