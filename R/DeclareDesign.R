@@ -10,6 +10,13 @@ NULL
 
 load <- c("fabricatr", "estimatr", "randomizr")
 
+.onLoad <- function(libname, pkgname) {
+  repos = getOption("repos")
+  repos["declaredesign"] = "https://declaredesign.github.io"
+  options(repos = repos)
+  invisible(repos)
+}
+
 .onAttach <- function(...) {
   needed <- load[!is_attached(load)]
 
