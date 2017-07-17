@@ -122,7 +122,6 @@ test_that("use custom data with declare_population", {
   declare_population(
     regions = level(level_data = region_data, gdp = rnorm(N),
                     ID_label = regions),
-    bob = runif(N),
     villages = level(level_data = villages_data,
                      by = regions, subways = rnorm(N, mean = gdp)))() %>% head
 
