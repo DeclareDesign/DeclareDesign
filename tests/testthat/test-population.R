@@ -88,7 +88,7 @@ test_that("custom declare", {
 
 
 test_that("use custom data with declare_population", {
-  region_data <- data.frame(regions_ID = as.character(26:30), capital = c(1, 0, 0, 0, 0), stringsAsFactors = FALSE)
+  region_data <- data.frame(regions = as.character(26:30), capital = c(1, 0, 0, 0, 0), stringsAsFactors = FALSE)
 
   ## create single-level data taking user data
   declare_population(data = region_data)() %>% head
@@ -98,15 +98,25 @@ test_that("use custom data with declare_population", {
 
   ## create multi-level data with data only at the top level, adding variables at each level
   #debugonce(level)
-  declare_population(regions = level(level_data = region_data, gdp = rnorm(N), ID_label = "regions_ID"),
-                     villages = level(N = 12, subways = rnorm(N, mean = gdp)))() %>% head
+  declare_population(
+    regions = level(level_data = region_data,
+                    gdp = rnorm(N), ID_label = regions),
+    villages = level(N = 12, subways = rnorm(N, mean = gdp)))() %>% head
 
   ## create multi-level data with data at each level, merging on the ID variables of upper levels
-  villages_data <- data.frame(regions_ID = as.character(rep(26:30, each = 5)),
+  villages_data <- data.frame(regions = as.character(rep(1:5, each = 5)),
                               altitude = rnorm(5*5), stringsAsFactors = FALSE)
 
-  declare_population(regions = level(level_data = region_data, gdp = rnorm(N), ID_label = "regions_ID"),
-                     villages = level(level_data = villages_data, by = regions_ID, subways = rnorm(N, mean = gdp)))() %>% head
+  declare_population(
+    regions = level(level_data = region_data, gdp = rnorm(N),
+                    ID_label = regions),
+    villages = level(level_data = villages_data,
+                     by = regions, subways = rnorm(N, mean = gdp)))() %>% head
+
+  ## also should work with a single level
+  declare_population(
+    regions = level(level_data = region_data, gdp = rnorm(N),
+                    ID_label = regions))() %>% head
 })
 
 

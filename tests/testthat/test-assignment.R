@@ -43,7 +43,7 @@ test_that("test assignment and probability functions", {
                                         size = N, prob = c(.2, .3, .5), replace = TRUE))
   )
 
-  sampling <- declare_sampling(n = 10, clust_var = villages_ID)
+  sampling <- declare_sampling(n = 10, clust_var = villages)
 
   potential_outcomes <- declare_potential_outcomes(formula = Y ~ 5 + .5*(Z==1) + .9*(Z==2) + .2*Z*elevation + noise,
                                                    condition_names = c(0, 1, 2),
@@ -72,17 +72,17 @@ test_that("test assignment and probability functions", {
 
 
   # Clustered assignments
-  assignment_10 <- declare_assignment(clust_var = villages_ID)
-  assignment_11 <- declare_assignment(clust_var = villages_ID, condition_names = c(0, 1))
-  assignment_12 <- declare_assignment(clust_var = villages_ID, prob_each = c(.1, .3, .6))
+  assignment_10 <- declare_assignment(clust_var = villages)
+  assignment_11 <- declare_assignment(clust_var = villages, condition_names = c(0, 1))
+  assignment_12 <- declare_assignment(clust_var = villages, prob_each = c(.1, .3, .6))
 
   # Blocked and Clustered assignments
-  assignment_13 <- declare_assignment(clust_var = villages_ID,
+  assignment_13 <- declare_assignment(clust_var = villages,
                                       block_var = high_elevation)
 
-  assignment_14 <- declare_assignment(clust_var = villages_ID,
+  assignment_14 <- declare_assignment(clust_var = villages,
                                       block_var = high_elevation, condition_names = c(0,1))
-  assignment_15 <- declare_assignment(clust_var = villages_ID,
+  assignment_15 <- declare_assignment(clust_var = villages,
                                       block_var = high_elevation, prob_each = c(.1, .3, .6))
 
   # Draw Data
@@ -101,12 +101,12 @@ test_that("test assignment and probability functions", {
   smp_draw %>% assignment_7() %$% table(ideo_3, Z)
   smp_draw %>% assignment_8() %$% table(ideo_3, Z)
   smp_draw %>% assignment_9() %$% table(ideo_3, Z)
-  smp_draw %>% assignment_10() %$% table(villages_ID, Z)
-  smp_draw %>% assignment_11() %$% table(villages_ID, Z)
-  smp_draw %>% assignment_12() %$% table(villages_ID, Z)
-  smp_draw %>% assignment_13() %$% table(villages_ID, Z)
-  smp_draw %>% assignment_14() %$% table(villages_ID, Z)
-  smp_draw %>% assignment_15() %$% table(villages_ID, Z)
+  smp_draw %>% assignment_10() %$% table(villages, Z)
+  smp_draw %>% assignment_11() %$% table(villages, Z)
+  smp_draw %>% assignment_12() %$% table(villages, Z)
+  smp_draw %>% assignment_13() %$% table(villages, Z)
+  smp_draw %>% assignment_14() %$% table(villages, Z)
+  smp_draw %>% assignment_15() %$% table(villages, Z)
 
   # Obtain Treatment Probabilities
   smp_draw %>% assignment_0() %$% Z_cond_prob %>% head()

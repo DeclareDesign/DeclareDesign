@@ -47,10 +47,10 @@ test_that("test sampling and probability functions", {
                                  strata_n = c(10, 10, 10))
 
   # Clustered sampling
-  sampling_6 <- declare_sampling(clust_var = villages_ID)
+  sampling_6 <- declare_sampling(clust_var = villages)
 
   # Stratified and Clustered assignments
-  sampling_7 <- declare_sampling(clust_var = villages_ID,
+  sampling_7 <- declare_sampling(clust_var = villages,
                                       strata_var = high_elevation)
 
   # Draw Data
@@ -64,8 +64,8 @@ test_that("test sampling and probability functions", {
   smp_draw %>% sampling_3() %$% table(ideo_3)
   smp_draw %>% sampling_4() %$% table(ideo_3)
   smp_draw %>% sampling_5() %$% table(ideo_3)
-  smp_draw %>% sampling_6() %$% table(villages_ID)
-  smp_draw %>% sampling_7() %$% table(villages_ID, high_elevation)
+  smp_draw %>% sampling_6() %$% table(villages)
+  smp_draw %>% sampling_7() %$% table(villages, high_elevation)
 
   # Obtain Treatment Probabilities
   smp_draw %>% sampling_1() %$% S_inclusion_prob %>% head()
