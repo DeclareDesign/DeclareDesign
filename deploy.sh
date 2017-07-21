@@ -11,7 +11,7 @@ cd repo
 git init
 git config user.name "DeclareDesign Travis"
 git config user.email "team@declaredesign.org"
-git config --global push.default simple
+git config push.default simple
 
 ## Get drat repo
 git remote add upstream "https://$GH_TOKEN@github.com/DeclareDesign/declaredesign.github.io.git"
