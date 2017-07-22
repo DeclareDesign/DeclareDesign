@@ -4,7 +4,7 @@ navbar:
   - text: "Getting Started"
     href: articles/DeclareDesign.html
   - text: Reference
-    href: reference/index.html
+    href: reference/
   - text: "Packages"
     menu:
       - text: DeclareDesign
