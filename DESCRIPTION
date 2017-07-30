@@ -22,7 +22,7 @@ Imports:
     estimatr
 Remotes: DeclareDesign/estimatr,
     DeclareDesign/fabricatr
-Additional_repositories: https://declaredesign.github.io
+Additional_repositories: http://install.declaredesign.org
 License: All rights reserved
 URL: https://declaredesign.org, https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues
