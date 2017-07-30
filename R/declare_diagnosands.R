@@ -43,16 +43,19 @@
 #'                          reveal_outcomes,
 #'                          my_estimator)
 #'
+#' \dontrun{
 #' # using built-in defaults:
 #' diagnosis <- diagnose_design(design)
 #' diagnosis
+#' }
 #'
 #' # using a user-defined diagnosand
 #' my_diagnosand <- declare_diagnosands(absolute_error = mean(abs(est - estimand)))
 #'
+#' \dontrun{
 #' diagnosis <- diagnose_design(design, diagnosands = my_diagnosand)
 #' diagnosis
-#'
+#' }
 #'
 #' # this is the code that makes the default diagnsoands.
 #' # Use these as a model when writing your own diagnosands.

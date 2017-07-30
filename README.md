@@ -17,8 +17,8 @@ DeclareDesign consists of a core package, documented on this web site, as well a
 To install all of the packages, use:
 
 ```
-install.packages("devtools")
-devtools::install_github("DeclareDesign/DeclareDesign")
+install.packages("DeclareDesign", dependencies = TRUE,
+  repos = c("http://install.declaredesign.org", "https://cloud.r-project.org"))
 ```
 
 This software is in alpha release. Please contact the authors before using in experiments or published work.

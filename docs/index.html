@@ -93,8 +93,8 @@
 <a href="http://estimatr.declaredesign.org">estimatr</a>: Fast estimators for social science research.</li>
 </ol>
 <p>To install all of the packages, use:</p>
-<pre><code>install.packages("devtools")
-devtools::install_github("DeclareDesign/DeclareDesign")</code></pre>
+<pre><code>install.packages("DeclareDesign", dependencies = TRUE,
+  repos = c("http://install.declaredesign.org", "https://cloud.r-project.org"))</code></pre>
 <p>This software is in alpha release. Please contact the authors before using in experiments or published work.</p>
 <p>This project is generously supported by a grant from the <a href="http://www.arnoldfoundation.org">Laura and John Arnold Foundation</a> and seed funding from <a href="http://egap.org">EGAP</a>.</p>
 <p>(c) 2017 Graeme Blair, Jasper Cooper, Alexander Coppock, and Macartan Humphreys. All rights reserved.</p>

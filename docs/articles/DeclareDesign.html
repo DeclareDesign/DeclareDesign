@@ -81,7 +81,7 @@
       <h1>Diagnosing Research Designs with DeclareDesign</h1>
                         <h4 class="author">Graeme Blair, Jasper Cooper, Alexander Coppock, and Macartan Humphreys</h4>
             
-            <h4 class="date">2017-07-22</h4>
+            <h4 class="date">2017-07-30</h4>
           </div>
 
     
@@ -141,12 +141,12 @@
 pop &lt;-<span class="st"> </span><span class="kw">my_population</span>()
 <span class="kw">head</span>(pop)</code></pre></div>
 <pre><code>##     ID     income age
-## 1 0001 -1.0134549  66
-## 2 0002 -1.1455315  29
-## 3 0003  0.2767489  50
-## 4 0004  1.4634655  43
-## 5 0005  1.5898646  48
-## 6 0006  0.7600144  41</code></pre>
+## 1 0001  1.3709584  95
+## 2 0002 -0.5646982  52
+## 3 0003  0.3631284  72
+## 4 0004  0.6328626  87
+## 5 0005  0.4042683  83
+## 6 0006 -0.1061245  75</code></pre>
 <p>Multi-level datasets are also easy to use. You set the <code>N</code> of each level in a call to <code>level()</code>. The <code>level</code> function is neat – if the previous level has data, it merges so that there are N entries for each of the units at the higher level. We can handle non-fixed number of units at each level too. In the <code>individuals</code> line, we’ve drawn a random number of individuals that are in each village.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_population_nested &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_population.html">declare_population</a></span>(
   <span class="dt">districts =</span> <span class="kw">level</span>(<span class="dt">N =</span> <span class="dv">25</span>, <span class="dt">urban =</span> <span class="kw">sample</span>(<span class="dv">0</span>:<span class="dv">1</span>, N, <span class="dt">replace =</span> <span class="ot">TRUE</span>)),
@@ -163,12 +163,12 @@ pop_level_data &lt;-<span class="st"> </span><span class="kw"><a href="../refere
 
 <span class="kw">head</span>(<span class="kw">pop_level_data</span>())</code></pre></div>
 <pre><code>##   capital regions       gdp cities  subways
-## 1       1       1 0.5552097     01 6.031948
-## 2       1       1 0.5552097     02 7.397766
-## 3       0       2 0.7320341     03 4.406440
-## 4       0       2 0.7320341     04 5.297014
-## 5       0       3 0.9642097     05 2.745528
-## 6       0       3 0.9642097     06 4.706986</code></pre>
+## 1       1       1 0.2737925     01 5.504524
+## 2       1       1 0.2737925     02 5.750711
+## 3       0       2 0.9441967     03 4.171185
+## 4       0       2 0.9441967     04 5.709549
+## 5       0       3 0.4459833     05 5.949915
+## 6       0       3 0.4459833     06 4.421144</code></pre>
 <p>Similarly, you can easily declare your existing data as the population:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">country_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(
   <span class="dt">cow_code =</span> <span class="kw">c</span>(<span class="dv">504</span>, <span class="dv">15</span>, <span class="dv">100</span>, <span class="dv">90</span>),
@@ -187,9 +187,9 @@ pop_data &lt;-<span class="st"> </span><span class="kw"><a href="../reference/de
 
 <span class="kw">head</span>(<span class="kw">pop_data_bootstrap</span>())</code></pre></div>
 <pre><code>##   cow_code polity_iv
-## 1       15         7
-## 2       15         7
-## 3      504        -9
+## 1      504        -9
+## 2       90         3
+## 3       90         3
 ## 4       15         7</code></pre>
 <p>Note that <code>fabricatr</code> is one of the helper packages that come along with <code>DeclareDesign</code>. <code>fabricatr</code> helps you simulate population data or resample from existing data.</p>
 </div>
@@ -205,24 +205,24 @@ pop_data &lt;-<span class="st"> </span><span class="kw"><a href="../reference/de
 pop_pos &lt;-<span class="st"> </span><span class="kw">my_potential_outcomes</span>(pop)
 <span class="kw">head</span>(pop_pos)</code></pre></div>
 <pre><code>##     ID     income age Y_Z_0 Y_Z_1
-## 1 0001 -1.0134549  66     0  0.91
-## 2 0002 -1.1455315  29     0  0.54
-## 3 0003  0.2767489  50     0  0.75
-## 4 0004  1.4634655  43     0  0.68
-## 5 0005  1.5898646  48     0  0.73
-## 6 0006  0.7600144  41     0  0.66</code></pre>
+## 1 0001  1.3709584  95     0  1.20
+## 2 0002 -0.5646982  52     0  0.77
+## 3 0003  0.3631284  72     0  0.97
+## 4 0004  0.6328626  87     0  1.12
+## 5 0005  0.4042683  83     0  1.08
+## 6 0006 -0.1061245  75     0  1.00</code></pre>
 <p>This has defaults set for condition_names (0, 1) and the assignment variable name (Z). You can set the “domain” of the potential outcomes function with <code>condition_names</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_potential_outcomes &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
   <span class="dt">formula =</span> Y ~<span class="st"> </span>.<span class="dv">25</span> *<span class="st"> </span>Z +<span class="st"> </span>.<span class="dv">01</span> *<span class="st"> </span>age *<span class="st"> </span>Z,
   <span class="dt">condition_names =</span> <span class="dv">1</span>:<span class="dv">4</span>)
 <span class="kw">head</span>(<span class="kw">my_potential_outcomes</span>(pop))</code></pre></div>
 <pre><code>##     ID     income age Y_Z_1 Y_Z_2 Y_Z_3 Y_Z_4
-## 1 0001 -1.0134549  66  0.91  1.82  2.73  3.64
-## 2 0002 -1.1455315  29  0.54  1.08  1.62  2.16
-## 3 0003  0.2767489  50  0.75  1.50  2.25  3.00
-## 4 0004  1.4634655  43  0.68  1.36  2.04  2.72
-## 5 0005  1.5898646  48  0.73  1.46  2.19  2.92
-## 6 0006  0.7600144  41  0.66  1.32  1.98  2.64</code></pre>
+## 1 0001  1.3709584  95  1.20  2.40  3.60  4.80
+## 2 0002 -0.5646982  52  0.77  1.54  2.31  3.08
+## 3 0003  0.3631284  72  0.97  1.94  2.91  3.88
+## 4 0004  0.6328626  87  1.12  2.24  3.36  4.48
+## 5 0005  0.4042683  83  1.08  2.16  3.24  4.32
+## 6 0006 -0.1061245  75  1.00  2.00  3.00  4.00</code></pre>
 </div>
 <div id="as-separate-variables" class="section level3">
 <h3 class="hasAnchor">
@@ -235,12 +235,12 @@ pop_pos &lt;-<span class="st"> </span><span class="kw">my_potential_outcomes</sp
 
 <span class="kw">head</span>(<span class="kw">my_potential_outcomes</span>(pop))</code></pre></div>
 <pre><code>##     ID     income age Y_Z_0 Y_Z_1
-## 1 0001 -1.0134549  66  0.05  0.96
-## 2 0002 -1.1455315  29  0.05  0.59
-## 3 0003  0.2767489  50  0.05  0.80
-## 4 0004  1.4634655  43  0.05  0.73
-## 5 0005  1.5898646  48  0.05  0.78
-## 6 0006  0.7600144  41  0.05  0.71</code></pre>
+## 1 0001  1.3709584  95  0.05  1.25
+## 2 0002 -0.5646982  52  0.05  0.82
+## 3 0003  0.3631284  72  0.05  1.02
+## 4 0004  0.6328626  87  0.05  1.17
+## 5 0005  0.4042683  83  0.05  1.13
+## 6 0006 -0.1061245  75  0.05  1.05</code></pre>
 </div>
 </div>
 <div id="sampling" class="section level2">
@@ -263,13 +263,13 @@ smp &lt;-<span class="st"> </span><span class="kw">my_assignment</span>(smp)
 ##   0   1 
 ## 225  25</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(smp)</code></pre></div>
-<pre><code>##      ID     income age Y_Z_0 Y_Z_1 S_inclusion_prob Z Z_cond_prob
-## 2  0002 -1.1455315  29     0  0.54             0.25 0         0.9
-## 7  0007 -0.4517131  29     0  0.54             0.25 0         0.9
-## 8  0008 -2.4595391  38     0  0.63             0.25 0         0.9
-## 10 0010 -0.6864108  31     0  0.56             0.25 0         0.9
-## 12 0012 -0.4404616  73     0  0.98             0.25 0         0.9
-## 19 0019  0.9004096  67     0  0.92             0.25 0         0.9</code></pre>
+<pre><code>##      ID      income age Y_Z_0 Y_Z_1 S_inclusion_prob Z Z_cond_prob
+## 4  0004  0.63286260  87     0  1.12             0.25 0         0.9
+## 7  0007  1.51152200  68     0  0.93             0.25 0         0.9
+## 8  0008 -0.09465904  83     0  1.08             0.25 1         0.1
+## 14 0014 -0.27878877  70     0  0.95             0.25 1         0.1
+## 17 0017 -0.28425292  33     0  0.58             0.25 1         0.1
+## 20 0020  1.32011335  92     0  1.17             0.25 1         0.1</code></pre>
 </div>
 <div id="estimands" class="section level2">
 <h2 class="hasAnchor">
@@ -278,7 +278,7 @@ smp &lt;-<span class="st"> </span><span class="kw">my_assignment</span>(smp)
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(<span class="dt">ATE =</span> <span class="kw">mean</span>(Y_Z_1 -<span class="st"> </span>Y_Z_0))
 <span class="kw">my_estimand</span>(pop_pos)</code></pre></div>
 <pre><code>##   estimand_label estimand
-## 1            ATE   0.8128</code></pre>
+## 1            ATE  0.81926</code></pre>
 <p>The only part baked in to <code>DeclareDesign</code> is the naming structure, outcome_assignment_condition. You could write your own potential outcomes function to avoid this (and in most cases this would also require writing your own reveal_outcomes function).</p>
 </div>
 <div id="estimators" class="section level2">
@@ -288,8 +288,8 @@ smp &lt;-<span class="st"> </span><span class="kw">my_assignment</span>(smp)
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">smp &lt;-<span class="st"> </span><span class="kw"><a href="../reference/reveal_outcomes.html">reveal_outcomes</a></span>(smp)
 my_estimator_dim &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y ~<span class="st"> </span>Z, <span class="dt">estimand =</span> my_estimand)
 <span class="kw">my_estimator_dim</span>(smp)</code></pre></div>
-<pre><code>##   estimator_label    est         se            p  ci_lower  ci_upper  df
-## 1    my_estimator 0.7692 0.05269383 2.969653e-35 0.6654155 0.8729845 248
+<pre><code>##   estimator_label   est         se           p ci_lower ci_upper  df
+## 1    my_estimator 0.822 0.04678319 1.92319e-45 0.729857 0.914143 248
 ##   estimand_label
 ## 1            ATE</code></pre>
 <p>Using our simple <code>lm</code> function with built-in robust standard errors (HC2! or your choice of other HC’s) is similarly straightforward (it’s also fast! in RCPP!).</p>
@@ -300,10 +300,10 @@ my_estimator_dim &lt;-<span class="st"> </span><span class="kw"><a href="../refe
                     <span class="dt">estimand =</span> my_estimand)
 
 <span class="kw">my_estimator_lm</span>(smp)</code></pre></div>
-<pre><code>##   estimator_label variable_names    est         se            p  ci_lower
-## 2    my_estimator              Z 0.7692 0.05269383 2.969653e-35 0.6654155
-##    ci_upper estimand_label
-## 2 0.8729845            ATE</code></pre>
+<pre><code>##   estimator_label variable_names   est         se           p ci_lower
+## 2    my_estimator              Z 0.822 0.04678319 1.92319e-45 0.729857
+##   ci_upper estimand_label
+## 2 0.914143            ATE</code></pre>
 </div>
 </div>
 <div id="declaring-designs" class="section level1">
@@ -328,29 +328,29 @@ my_estimator_dim &lt;-<span class="st"> </span><span class="kw"><a href="../refe
 <p>You can run them directly via:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat &lt;-<span class="st"> </span><span class="kw"><a href="../reference/draw_data.html">draw_data</a></span>(design)
 <span class="kw">head</span>(dat)</code></pre></div>
-<pre><code>##      ID      income age Y_Z_0 Y_Z_1  big_income S_inclusion_prob Z
-## 1  0001  0.42449772  53  0.05  0.83   2.1224886             0.25 0
-## 12 0012  0.69705775  39  0.05  0.69   3.4852887             0.25 0
-## 20 0020  0.05887295  91  0.05  1.21   0.2943648             0.25 0
-## 25 0025  0.45242236  54  0.05  0.84   2.2621118             0.25 0
-## 27 0027 -2.17656938  86  0.05  1.16 -10.8828469             0.25 0
-## 30 0030  2.46178808  45  0.05  0.75  12.3089404             0.25 0
+<pre><code>##      ID     income age Y_Z_0 Y_Z_1 big_income S_inclusion_prob Z
+## 1  0001  0.4593641  57  0.05  0.87  2.2968204             0.25 0
+## 3  0003 -1.4463914  59  0.05  0.89 -7.2319569             0.25 0
+## 10 0010  0.1161173  61  0.05  0.91  0.5805867             0.25 0
+## 19 0019 -0.3130718  46  0.05  0.76 -1.5653592             0.25 0
+## 24 0024 -0.5810718  33  0.05  0.63 -2.9053589             0.25 0
+## 30 0030 -1.4011209  45  0.05  0.75 -7.0056043             0.25 0
 ##    Z_cond_prob    Y
 ## 1          0.9 0.05
-## 12         0.9 0.05
-## 20         0.9 0.05
-## 25         0.9 0.05
-## 27         0.9 0.05
+## 3          0.9 0.05
+## 10         0.9 0.05
+## 19         0.9 0.05
+## 24         0.9 0.05
 ## 30         0.9 0.05</code></pre>
 <p>and</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/get_estimates.html">get_estimates</a></span>(design)</code></pre></div>
-<pre><code>##   estimator_label    est         se            p  ci_lower  ci_upper  df
-## 1    my_estimator 0.8256 0.04368478 5.977113e-50 0.7395595 0.9116405 248
+<pre><code>##   estimator_label   est         se            p  ci_lower  ci_upper  df
+## 1    my_estimator 0.822 0.04767249 2.528631e-44 0.7281054 0.9158946 248
 ##   estimand_label
 ## 1            ATE</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/get_estimands.html">get_estimands</a></span>(design)</code></pre></div>
 <pre><code>##   estimand_label estimand
-## 1            ATE  0.82079</code></pre>
+## 1            ATE  0.78985</code></pre>
 </div>
 <div id="custom-functions" class="section level1">
 <h1 class="hasAnchor">
@@ -370,13 +370,13 @@ my_population_custom &lt;-<span class="st"> </span><span class="kw"><a href="../
 pop_custom &lt;-<span class="st"> </span><span class="kw">my_population_custom</span>()
 
 <span class="kw">head</span>(pop_custom)</code></pre></div>
-<pre><code>##             u
-## 1  0.68661989
-## 2  1.64826918
-## 3  0.01744842
-## 4  0.71065070
-## 5 -0.51228808
-## 6  0.63300474</code></pre>
+<pre><code>##            u
+## 1  1.6621024
+## 2 -0.5557050
+## 3 -1.1643612
+## 4  0.1145226
+## 5  1.9966502
+## 6  0.8037155</code></pre>
 </div>
 <div id="custom-potential-outcomes" class="section level2">
 <h2 class="hasAnchor">
@@ -394,13 +394,13 @@ my_potential_outcomes_custom &lt;-<span class="st"> </span><span class="kw"><a h
 pop_pos_custom &lt;-<span class="st"> </span><span class="kw">my_potential_outcomes_custom</span>(pop_custom)
 
 <span class="kw">head</span>(pop_pos_custom[, <span class="kw">c</span>(<span class="st">"u"</span>, <span class="st">"Y_Z_0"</span>, <span class="st">"Y_Z_1"</span>)])</code></pre></div>
-<pre><code>##             u       Y_Z_0      Y_Z_1
-## 1  0.68661989  0.68661989  0.9366199
-## 2  1.64826918  1.64826918  1.8982692
-## 3  0.01744842  0.01744842  0.2674484
-## 4  0.71065070  0.71065070  0.9606507
-## 5 -0.51228808 -0.51228808 -0.2622881
-## 6  0.63300474  0.63300474  0.8830047</code></pre>
+<pre><code>##            u      Y_Z_0      Y_Z_1
+## 1  1.6621024  1.6621024  1.9121024
+## 2 -0.5557050 -0.5557050 -0.3057050
+## 3 -1.1643612 -1.1643612 -0.9143612
+## 4  0.1145226  0.1145226  0.3645226
+## 5  1.9966502  1.9966502  2.2466502
+## 6  0.8037155  0.8037155  1.0537155</code></pre>
 </div>
 <div id="custom-sampling" class="section level2">
 <h2 class="hasAnchor">
@@ -419,7 +419,7 @@ my_sampling_custom &lt;-<span class="st"> </span><span class="kw"><a href="../re
 smp_custom &lt;-<span class="st"> </span><span class="kw">my_sampling_custom</span>(pop_pos)
 
 <span class="kw">nrow</span>(smp_custom)</code></pre></div>
-<pre><code>## [1] 89</code></pre>
+<pre><code>## [1] 105</code></pre>
 </div>
 <div id="custom-assignment" class="section level2">
 <h2 class="hasAnchor">
@@ -436,7 +436,7 @@ my_assignment_custom &lt;-<span class="st"> </span><span class="kw"><a href="../
 <span class="kw">table</span>(<span class="kw">my_assignment_custom</span>(pop_pos)$Z)</code></pre></div>
 <pre><code>## 
 ##   0   1 
-## 477 523</code></pre>
+## 501 499</code></pre>
 </div>
 <div id="custom-estimand" class="section level2">
 <h2 class="hasAnchor">
@@ -449,7 +449,7 @@ my_estimand_custom &lt;-<span class="st"> </span><span class="kw"><a href="../re
 
 <span class="kw">my_estimand_custom</span>(pop_pos)</code></pre></div>
 <pre><code>##   estimand_label estimand
-## 1       medianTE     0.81</code></pre>
+## 1       medianTE     0.82</code></pre>
 </div>
 <div id="custom-estimator" class="section level2">
 <h2 class="hasAnchor">
@@ -464,8 +464,8 @@ my_estimator_custom &lt;-<span class="st"> </span>
                     <span class="dt">estimand =</span> my_estimand)
 
 <span class="kw">my_estimator_custom</span>(smp)</code></pre></div>
-<pre><code>##   estimator_label     est estimand_label
-## 1    my_estimator 0.07692            ATE</code></pre>
+<pre><code>##   estimator_label    est estimand_label
+## 1    my_estimator 0.0822            ATE</code></pre>
 </div>
 </div>
 <div id="features" class="section level1">
@@ -497,13 +497,13 @@ my_estimator_custom &lt;-<span class="st"> </span>
 
 my_1000_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/quick_design.html">quick_design</a></span>(<span class="dt">template =</span> m_arm_trial, <span class="dt">numb =</span> <span class="dv">1000</span>)
 <span class="kw">head</span>(<span class="kw"><a href="../reference/draw_data.html">draw_data</a></span>(my_1000_design))</code></pre></div>
-<pre><code>##      ID     income age Y_Z_0 Y_Z_1 S_inclusion_prob Z Z_cond_prob    Y
-## 2  0002 -2.2377323  74     0  0.99             0.25 0         0.9 0.00
-## 9  0009 -2.4532134  25     0  0.50             0.25 0         0.9 0.00
-## 10 0010 -0.2653166  50     0  0.75             0.25 1         0.1 0.75
-## 12 0012 -0.9094961  20     0  0.45             0.25 0         0.9 0.00
-## 13 0013 -1.4684470  43     0  0.68             0.25 0         0.9 0.00
-## 17 0017  0.7146283  38     0  0.63             0.25 0         0.9 0.00</code></pre>
+<pre><code>##      ID      income age Y_Z_0 Y_Z_1 S_inclusion_prob Z Z_cond_prob Y
+## 1  0001 -0.28818473  63     0  0.88             0.25 0         0.9 0
+## 7  0007  0.01710038  49     0  0.74             0.25 0         0.9 0
+## 9  0009  2.71790043  19     0  0.44             0.25 0         0.9 0
+## 15 0015  0.28570612  59     0  0.84             0.25 0         0.9 0
+## 17 0017  1.55832326  78     0  1.03             0.25 0         0.9 0
+## 18 0018  0.23281194  32     0  0.57             0.25 0         0.9 0</code></pre>
 </div>
 <div id="continuous-potential-outcomes" class="section level2">
 <h2 class="hasAnchor">
@@ -524,20 +524,20 @@ my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
                             reveal_outcomes)
 
 <span class="kw">head</span>(<span class="kw"><a href="../reference/draw_data.html">draw_data</a></span>(my_design))</code></pre></div>
-<pre><code>##     ID       income age Y_Z_0 Y_Z_0.1 Y_Z_0.2 Y_Z_0.3 Y_Z_0.4 Y_Z_0.5
-## 1 0001 -0.003388557  18     0   0.043   0.086   0.129   0.172   0.215
-## 2 0002  0.831896277  73     0   0.098   0.196   0.294   0.392   0.490
-## 3 0003  0.702331966  22     0   0.047   0.094   0.141   0.188   0.235
-## 4 0004 -0.838640700  71     0   0.096   0.192   0.288   0.384   0.480
-## 5 0005 -1.386823743  28     0   0.053   0.106   0.159   0.212   0.265
-## 6 0006  1.123572693  75     0   0.100   0.200   0.300   0.400   0.500
-##   Y_Z_0.6 Y_Z_0.7 Y_Z_0.8 Y_Z_0.9 Y_Z_1   Z     Y
-## 1   0.258   0.301   0.344   0.387  0.43 0.3 0.129
-## 2   0.588   0.686   0.784   0.882  0.98 0.3 0.294
-## 3   0.282   0.329   0.376   0.423  0.47 0.4 0.188
-## 4   0.576   0.672   0.768   0.864  0.96 0.6 0.576
-## 5   0.318   0.371   0.424   0.477  0.53 0.7 0.371
-## 6   0.600   0.700   0.800   0.900  1.00 0.6 0.600</code></pre>
+<pre><code>##     ID    income age Y_Z_0 Y_Z_0.1 Y_Z_0.2 Y_Z_0.3 Y_Z_0.4 Y_Z_0.5 Y_Z_0.6
+## 1 0001 1.1543236  68     0   0.093   0.186   0.279   0.372   0.465   0.558
+## 2 0002 0.3877885  86     0   0.111   0.222   0.333   0.444   0.555   0.666
+## 3 0003 0.6217400  34     0   0.059   0.118   0.177   0.236   0.295   0.354
+## 4 0004 2.3430092  82     0   0.107   0.214   0.321   0.428   0.535   0.642
+## 5 0005 0.6073704  48     0   0.073   0.146   0.219   0.292   0.365   0.438
+## 6 0006 0.8070361  19     0   0.044   0.088   0.132   0.176   0.220   0.264
+##   Y_Z_0.7 Y_Z_0.8 Y_Z_0.9 Y_Z_1   Z     Y
+## 1   0.651   0.744   0.837  0.93 0.2 0.186
+## 2   0.777   0.888   0.999  1.11 0.6 0.666
+## 3   0.413   0.472   0.531  0.59 0.4 0.236
+## 4   0.749   0.856   0.963  1.07 0.4 0.428
+## 5   0.511   0.584   0.657  0.73 0.6 0.438
+## 6   0.308   0.352   0.396  0.44 0.1 0.044</code></pre>
 </div>
 <div id="attrition" class="section level2">
 <h2 class="hasAnchor">
@@ -555,12 +555,12 @@ my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
 
 <span class="kw">head</span>(<span class="kw"><a href="../reference/draw_data.html">draw_data</a></span>(my_design)[, <span class="kw">c</span>(<span class="st">"ID"</span>, <span class="st">"Y_Z_0"</span>, <span class="st">"Y_Z_1"</span>, <span class="st">"R_Z_0"</span>, <span class="st">"R_Z_1"</span>, <span class="st">"Z"</span>, <span class="st">"R"</span>, <span class="st">"Y"</span>)])</code></pre></div>
 <pre><code>##     ID Y_Z_0 Y_Z_1 R_Z_0 R_Z_1 Z R    Y
-## 1 0001  0.05  0.91     1     1 0 1 0.05
-## 2 0002  0.05  1.16     0     1 0 0   NA
-## 3 0003  0.05  1.09     1     0 0 1 0.05
-## 4 0004  0.05  0.61     0     0 0 0   NA
-## 5 0005  0.05  0.68     1     1 0 1 0.05
-## 6 0006  0.05  1.18     0     1 0 0   NA</code></pre>
+## 1 0001  0.05  0.52     0     1 0 0   NA
+## 2 0002  0.05  0.48     1     0 0 1 0.05
+## 3 0003  0.05  0.49     0     1 0 0   NA
+## 4 0004  0.05  0.57     1     1 0 1 0.05
+## 5 0005  0.05  1.04     1     0 0 1 0.05
+## 6 0006  0.05  0.78     0     1 0 0   NA</code></pre>
 </div>
 <div id="stochastic-population-sizes" class="section level2">
 <h2 class="hasAnchor">
@@ -572,7 +572,7 @@ my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
 <span class="kw">c</span>(<span class="kw">nrow</span>(<span class="kw">stochastic_population</span>()), 
   <span class="kw">nrow</span>(<span class="kw">stochastic_population</span>()), 
   <span class="kw">nrow</span>(<span class="kw">stochastic_population</span>()))</code></pre></div>
-<pre><code>## [1] 899 566 799</code></pre>
+<pre><code>## [1] 658 691 788</code></pre>
 </div>
 </div>
 <div id="three-companion-packages" class="section level1">

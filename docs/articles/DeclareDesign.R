@@ -1,6 +1,7 @@
 ## ---- echo = FALSE, message = FALSE, error = FALSE, warning = FALSE, output = FALSE----
 library(DeclareDesign)
 library(magrittr)
+set.seed(42)
 
 ## ------------------------------------------------------------------------
 my_population <-

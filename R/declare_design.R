@@ -58,9 +58,11 @@
 #' estimates <- get_estimates(design)
 #' estimands <- get_estimands(design)
 #'
+#' \dontrun{
 #' diagnosis <- diagnose_design(design)
 #'
 #' summary(diagnosis)
+#' }
 #'
 declare_design <- function(...) {
 

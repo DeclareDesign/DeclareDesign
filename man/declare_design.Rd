@@ -62,8 +62,10 @@ df <- draw_data(design)
 estimates <- get_estimates(design)
 estimands <- get_estimands(design)
 
+\dontrun{
 diagnosis <- diagnose_design(design)
 
 summary(diagnosis)
+}
 
 }
