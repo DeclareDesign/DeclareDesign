@@ -64,7 +64,25 @@
 #' summary(diagnosis)
 #' }
 #'
-declare_design <- function(...) {
+declare_design <- function(
+  ..., title = NULL, authors = NULL, description = NULL, citation = NULL) {
+
+  # process bibtex
+
+  timestamp <- Sys.time()
+
+  if ((is.null(citation) | class(citation) == "character") &
+      !is.null(title) & !is.null(authors)) {
+    citation <- bibentry(
+      "unpublished",
+      title = title,
+      author = authors,
+      note = "Unpublished research design declaration.",
+      month = format(timestamp, "%b"),
+      year = format(timestamp, "%Y"),
+      textVersion = citation
+    )
+  }
 
   # Some preprocessing
 
@@ -250,11 +268,22 @@ declare_design <- function(...) {
       causal_order_env = causal_order_env,
       function_types = function_types,
       causal_order_types = causal_order_types,
+      title = title,
+      authors = authors,
+      description = description,
+      citation = citation,
+      timestamp = timestamp,
       call = match.call()
     ),
     class = "design"
   ))
 
+}
+
+#' @export
+cite_design <- function(x, ...) {
+  print(x$citation, ... = ...)
+  invisible(x)
 }
 
 #' @export
