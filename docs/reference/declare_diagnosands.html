@@ -64,7 +64,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="https://declaredesign.org">DeclareDesign</a>
+      <a href="http://declaredesign.org">DeclareDesign</a>
     </li>
     <li>
       <a href="http://randomizr.declaredesign.org">randomizr</a>
@@ -157,29 +157,19 @@ mean_estimand = mean(estimand)</p>
                          <span class='no'>reveal_outcomes</span>,
                          <span class='no'>my_estimator</span>)
 
-
-<span class='co'># using built-in defaults:</span>
-<span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='diagnose_design.html'>diagnose_design</a></span>(<span class='no'>design</span>)
-<span class='no'>diagnosis</span></div><div class='output co'>#&gt; 
-#&gt; Research design diagnosis
-#&gt; 
-#&gt;  Estimand Label Estimator Label        Bias     Rmse Power Coverage
-#&gt;             ATE    my_estimator 0.002997595 0.129554     1    0.978
-#&gt;  Mean Estimate Sd Estimate Type S Rate Mean Estimand
-#&gt;       2.005587   0.1583157           0      2.002589
-#&gt; </div><div class='input'>
+<span class='fu'>not_run</span>({
+  <span class='co'># using built-in defaults:</span>
+  <span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='diagnose_design.html'>diagnose_design</a></span>(<span class='no'>design</span>)
+  <span class='no'>diagnosis</span>
+})
 
 <span class='co'># using a user-defined diagnosand</span>
 <span class='no'>my_diagnosand</span> <span class='kw'>&lt;-</span> <span class='fu'>declare_diagnosands</span>(<span class='kw'>absolute_error</span> <span class='kw'>=</span> <span class='fu'>mean</span>(<span class='fu'>abs</span>(<span class='no'>est</span> - <span class='no'>estimand</span>)))
 
-
-<span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='diagnose_design.html'>diagnose_design</a></span>(<span class='no'>design</span>, <span class='kw'>diagnosands</span> <span class='kw'>=</span> <span class='no'>my_diagnosand</span>)
-<span class='no'>diagnosis</span></div><div class='output co'>#&gt; 
-#&gt; Research design diagnosis
-#&gt; 
-#&gt;  Estimand Label Estimator Label Absolute Error
-#&gt;             ATE    my_estimator      0.1062624
-#&gt; </div><div class='input'>
+<span class='fu'>not_run</span>({
+  <span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='diagnose_design.html'>diagnose_design</a></span>(<span class='no'>design</span>, <span class='kw'>diagnosands</span> <span class='kw'>=</span> <span class='no'>my_diagnosand</span>)
+  <span class='no'>diagnosis</span>
+})
 
 <span class='co'># this is the code that makes the default diagnsoands.</span>
 <span class='co'># Use these as a model when writing your own diagnosands.</span>

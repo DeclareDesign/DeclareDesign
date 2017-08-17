@@ -1,0 +1,448 @@
+---
+title: "Diagnosing Research Designs with DeclareDesign"
+author: "Graeme Blair, Jasper Cooper, Alexander Coppock, and Macartan Humphreys"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Diagnosing Research Designs with DeclareDesign}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, echo = FALSE, message = FALSE, error = FALSE, warning = FALSE, output = FALSE}
+library(DeclareDesign)
+library(magrittr)
+set.seed(42)
+```
+
+# Overview
+
+The `DeclareDesign` package has only about 10 functions. 
+
+The core functions represent key steps in a research design, some of which may be used more than once, such as if you have two random assignment steps or multiple estimators.
+
+1. `declare_population`
+2. `declare_potential_outcomes`
+3. `declare_sampling`
+4. `declare_assignment`
+5. `declare_estimand`
+6. `declare_estimator`
+
+The function `declare_design` can take any of these six functions, plus any R function that takes data and returns data.
+
+The post-design-declaration commands are:
+
+1. `modify_design` (takes a design and a set of modifications, returns a design)
+2. `diagnose_design` (takes a design, returns simulations and diagnosis)
+3. `compare_designs` (takes a list of designs and diagnoses them all)
+4. `draw_data` (takes a design and returns a single draw of the data)
+5. `get_estimates`(takes a design a returns a single simulation of estimates)
+6. `get_estimands`(takes a design a returns a single simulation of estimands)
+
+There are a few other features:
+
+1. A template is a function that takes parameters (e.g., `N`) and returns a design. `quick_design` is a function of a template and parameters that returns a design.
+2. We can easily `declare_diagnosands`, which are things like power and bias, but the package defaults to the usual suspects.
+3. `reveal_outcomes` implements a general switching equation, which allows you to reveal outcomes from potential outcomes and a treatment assignment.
+
+# The Six Steps
+
+Each of the `declare_*` functions returns a **function**. 
+
+In addition to using them to declare the design, you can just run them yourself, i.e. `your_potential_outcomes(your_population())`.
+
+## Population
+
+You can easily define a single-level population (i.e. just individuals). You can use any R function to create a variable, with `N` being the only privileged name. The output is a function, so calling `my_population()` makes a data.frame.
+
+```{r}
+my_population <-
+  declare_population(N = 1000,
+  income = rnorm(N),
+  age = sample(18:95, N, replace = T))
+
+pop <- my_population()
+head(pop)
+```
+
+Multi-level datasets are also easy to use. You set the `N` of each level in a call to `level()`. The `level` function is neat -- if the previous level has data, it merges so that there are N entries for each of the units at the higher level. We can handle non-fixed number of units at each level too.  In the `individuals` line, we've drawn a random number of individuals that are in each village.
+
+```{r}
+my_population_nested <- declare_population(
+  districts = level(N = 25, urban = sample(0:1, N, replace = TRUE)),
+  villages = level(N = 10, altitude = rnorm(N)),
+  individuals = level(N = sample(100:200, size = 250, replace = TRUE), 
+                      income = rnorm(N),
+                      age = sample(18:95, N, replace = TRUE)))
+
+```
+
+This says that there are 25 districts, 10 villages per districts, and then between 100 and 200 individuals per village. It creates districts first, then merges in villages, then merges in individuals using ID variables created at the level above it. 
+
+Within those levels, you can easily include existing data (and also add variables to them if you wish):
+
+```{r}
+region_data <- data.frame(capital = c(1, 0, 0, 0, 0))
+pop_level_data <- declare_population(
+  regions = level(level_data = region_data, gdp = runif(5)),
+  cities = level(N = 2, subways = rnorm(N, mean = 5)))
+
+head(pop_level_data())
+```
+
+Similarly, you can easily declare your existing data as the population:
+
+```{r}
+country_data <- data.frame(
+  cow_code = c(504, 15, 100, 90),
+  polity_iv = c(-9, 7, -1, 3))
+pop_data <- declare_population(data = country_data)
+
+head(pop_data())
+```
+
+If you don't want your data to be fixed, you can resample from it, i.e.
+
+```{r}
+pop_data_bootstrap <- declare_population(
+  data = country_data, population_function = fabricatr::resample_data)
+
+head(pop_data_bootstrap())
+```
+
+Note that `fabricatr` is one of the helper packages that come along with `DeclareDesign`. `fabricatr` helps you simulate population data or resample from existing data. 
+
+## Potential outcomes
+
+A `declare_potential_outcomes` declaration returns a function. That function takes data and returns data with potential outcomes columns appended. There are two ways of declaring potential outcomes: a formula or as separate variables (as in `declare_population`).
+
+### In a formula
+
+```{r}
+my_potential_outcomes <- declare_potential_outcomes(
+  formula = Y ~ .25 * Z + .01 * age * Z)
+pop_pos <- my_potential_outcomes(pop)
+head(pop_pos)
+```
+
+This has defaults set for condition_names (0, 1) and the assignment variable name (Z). You can set the "domain" of the potential outcomes function with `condition_names`.
+
+```{r}
+my_potential_outcomes <- declare_potential_outcomes(
+  formula = Y ~ .25 * Z + .01 * age * Z,
+  condition_names = 1:4)
+head(my_potential_outcomes(pop))
+```
+
+### As separate variables
+
+The second way, which some may prefer, is to define each potential outcome yourself. This bakes in the condition names and assignment variable.
+
+```{r}
+my_potential_outcomes <-
+  declare_potential_outcomes(
+    Y_Z_0 = .05,
+    Y_Z_1 = .30 + .01 * age)
+
+head(my_potential_outcomes(pop))
+```
+
+## Sampling
+
+A sampling function takes data and returns a sampled subset of the data. By default, `declare_sampling` understands arguments passed to `...` as `randomizr` arguments, but it's easy to supply your own function instead.
+
+```{r}
+my_sampling <- declare_sampling(n = 250)
+smp <- my_sampling(pop_pos)
+nrow(smp)
+```
+
+## Assignment
+
+Assignment declarations return functions of data that return data. If you use the `randomizr` defaults, then it appends to the dataset an assignment draw and a vector of observed probability weights.
+
+```{r}
+my_assignment <- declare_assignment(m = 25)
+smp <- my_assignment(smp)
+table(smp$Z)
+head(smp)
+```
+
+
+## Estimands
+
+Estimands run on data that includes potential outcomes, drawn earlier using a declare_potential_outcomes call.
+
+```{r}
+my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+my_estimand(pop_pos)
+```
+
+The only part baked in to `DeclareDesign` is the naming structure, outcome_assignment_condition. You could write your own potential outcomes function to avoid this (and in most cases this would also require writing your own reveal_outcomes function).
+
+## Estimators
+
+To declare an estimator, you declare an estimator function, a difference_in_means by default. Optionally you also declare an estimand that is attached to the estimator.
+
+```{r}
+smp <- reveal_outcomes(smp)
+my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
+my_estimator_dim(smp)
+```
+
+Using our simple `lm` function with built-in robust standard errors (HC2! or your choice of other HC's) is similarly straightforward (it's also fast! in RCPP!).
+
+```{r}
+my_estimator_lm <- 
+  declare_estimator(Y ~ Z, 
+                    estimator_function = estimatr::lm_robust_se, 
+                    coefficient_name = "Z", 
+                    estimand = my_estimand)
+
+my_estimator_lm(smp)
+```
+
+# Declaring Designs
+
+Instead of defining your population, potential outcomes, and so on, you simply give us a set of functions in the order of your DAG, i.e. beginning with a population, then potential outcomes, sampling, and so on. You can also put any `R` function in causal order that takes data and returns data -- including all the nice functions in `dplyr` like `mutate`, to allow you to create new variables and do things like collapse clusters
+
+```{r}
+design <- declare_design(my_population,
+                         my_potential_outcomes,
+                         my_estimand,
+                         dplyr::mutate(big_income = 5*income), 
+                         my_sampling,
+                         my_assignment,
+                         reveal_outcomes,
+                         my_estimator_dim)
+```
+
+Remarks re: `declare_design`:
+
+1. The first argument must always be a dataset or create one.
+2. Your estimand is placed where you want to define it, i.e. here we are defining a PATE by placing the estimand just after population and before sampling or assignment. 
+3. `declare_design` produces two things: a "dgp function" and a "design function."  The dgp function draws a dataset and the design function returns an estimands dataframe and an estimates data frame. It simulates the design from population through estimates, in whatever order you tell it -- meaning it carefully separates the data generating parts of the design and the calculation of estimates and estimands.
+
+You can run them directly via:
+
+```{r}
+dat <- draw_data(design)
+head(dat)
+```
+
+and
+
+```{r}
+get_estimates(design)
+
+get_estimands(design)
+```
+
+
+# Custom functions
+
+Because all steps are functions, it's easy for you to provide custom functions instead of using our defaults.
+
+## Custom Population
+
+You can use a custom function to generate your population entirely on your own, too:
+
+```{r}
+my_population_function <- function(N) {
+  data.frame(u = rnorm(N))
+}
+
+my_population_custom <- declare_population(
+  population_function = my_population_function, N = 100)
+
+pop_custom <- my_population_custom()
+
+head(pop_custom)
+```
+
+## Custom Potential Outcomes
+
+```{r}
+my_potential_outcomes_function <-
+  function(data) {
+    data$Y_Z_0 <- with(data, u)
+    data$Y_Z_1 <- with(data, 0.25 + u)
+    data
+  }
+my_potential_outcomes_custom <- declare_potential_outcomes(
+  potential_outcomes_function = my_potential_outcomes_function
+)
+
+pop_pos_custom <- my_potential_outcomes_custom(pop_custom)
+
+head(pop_pos_custom[, c("u", "Y_Z_0", "Y_Z_1")])
+```
+
+## Custom Sampling
+
+Again, you can still use a totally separate custom sampling function easily. In this case, you are asked to provide a function that takes population data and returns sampled data, i.e. you draw the sample and then subset. You can also include inclusion weights if you wish in the function (as the default function does). 
+
+```{r}
+my_sampling_function <- function(data) {
+     data$S <- rbinom(n = nrow(data),
+            size = 1,
+            prob = 0.1)
+     data[data$S == 1, ]
+}
+
+my_sampling_custom <- declare_sampling(
+  sampling_function = my_sampling_function)
+
+smp_custom <- my_sampling_custom(pop_pos)
+
+nrow(smp_custom)
+```
+
+
+## Custom Assignment
+
+```{r}
+my_assignment_function <- function(data) {
+  data$Z <- rbinom(n = nrow(data),
+         size = 1,
+         prob = 0.5)
+  data
+}
+my_assignment_custom <- declare_assignment(
+  assignment_function = my_assignment_function)
+
+table(my_assignment_custom(pop_pos)$Z)
+```
+
+## Custom Estimand
+
+```{r}
+my_estimand_function <- function(data) {
+  with(data, median(Y_Z_1 - Y_Z_0))
+}
+my_estimand_custom <- declare_estimand(
+  estimand_function = my_estimand_function, label = medianTE)
+
+my_estimand_custom(pop_pos)
+```
+
+
+## Custom Estimator
+
+```{r}
+my_estimator_function <- function(formula, data){
+  data.frame(est = with(data, mean(Y)))
+}
+
+my_estimator_custom <- 
+  declare_estimator(Y ~ Z, 
+                    estimator_function = my_estimator_function, 
+                    estimand = my_estimand)
+
+my_estimator_custom(smp)
+```
+
+# Features
+
+## Quick design
+
+You can also write a design maker function that declares a design based on a set of parameters like N, the number of clusters, etc. and use the function `quick_design` to make designs using just those parameters.
+
+```{r}
+m_arm_trial <- function(numb){
+  my_population <- declare_population(
+    N = numb, income = rnorm(N), age = sample(18:95, N, replace = T))
+
+  my_potential_outcomes <- declare_potential_outcomes(
+    formula = Y ~ .25 * Z + .01 * age * Z)
+  my_sampling <- declare_sampling(n = 250)
+  my_assignment <- declare_assignment(m = 25)
+  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+  my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
+  my_design <- declare_design(my_population,
+                              my_potential_outcomes,
+                              my_estimand,
+                              my_sampling,
+                              my_assignment,
+                              reveal_outcomes,
+                              my_estimator_dim)
+  return(my_design)
+}
+
+my_1000_design <- quick_design(template = m_arm_trial, numb = 1000)
+head(draw_data(my_1000_design))
+```
+
+## Continuous potential outcomes
+
+```{r}
+my_potential_outcomes_continuous <- declare_potential_outcomes(
+  formula = Y ~ .25 * Z + .01 * age * Z, condition_names = seq(0, 1, by = .1))
+
+continuous_treatment_function <- function(data){
+ data$Z <- sample(seq(0, 1, by = .1), size = nrow(data), replace = TRUE)
+ data
+}
+
+my_assignment_continuous <- declare_assignment(assignment_function = continuous_treatment_function)
+
+my_design <- declare_design(my_population(),
+                            my_potential_outcomes_continuous,
+                            my_assignment_continuous,
+                            reveal_outcomes)
+
+head(draw_data(my_design))
+```
+
+## Attrition
+
+Just another potential outcome!
+
+```{r}
+my_potential_outcomes_attrition <- declare_potential_outcomes(
+  formula = R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
+
+my_design <- declare_design(my_population(),
+                            my_potential_outcomes,
+                            my_potential_outcomes_attrition,
+                            my_assignment,
+                            reveal_outcomes(outcome_variable_name = "R"),
+                            reveal_outcomes(attrition_variable_name = "R"))
+
+head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
+```
+
+## Stochastic population sizes
+
+The population (or any level of the population) can have stochastic population sizes. (In fact, N can be a number, a fixed vector of numbers, or an expression that returns a stochastic number or vector of numbers.)
+
+```{r}
+stochastic_population <- declare_population(
+  N = sample(500:1000, 1), income = rnorm(N), age = sample(18:95, N, replace = TRUE))
+
+c(nrow(stochastic_population()), 
+  nrow(stochastic_population()), 
+  nrow(stochastic_population()))
+```
+
+# Three companion packages
+
+All built-in default functions are in three standalone packages that can be used to support DeclareDesign or on their own. This enables the simplicity of the six key functions in `declare_design` and a minimal number of dependencies.
+
+For now, make sure you have the development versions of each package from Github, not the version of randomizr on CRAN.
+
+The three packages are:
+
+## `fabricatr`
+
+`fabricatr`, includes data creation features described above. It's main function, `fabricate_data`, creates simulated data as in the above examples in `declare_population`. It can do single level data creation or multilevel creation using `level()` within `fabricate_data`. As it turns out, it is also the backbone of `declare_potential_outcomes` default function that creates each PO as an expression described above (i.e. where you define `Y_Z_1 = 0.5 + Z`). The second main function is `bootstrap_data` which resamples your data in a way that respects hierarchy. We expect this package will be built up further, including with proportional outcomes functions. 
+
+## `randomizr`
+
+`randomizr` works by default as described above in `declare_assignment()` -- in fact appears to the user similarly to the old version -- but is entirely separate now. The set of sampling functions that mimic the assignment functions are now also built in to `randomizr`, including simple, clustered, stratified, and clustered-and-stratified sampling. The next step is to rewrite some of these into C++ to see if we can speed a few of them up. Based on our understanding of Rcpp, the speedup gains here may be minor.
+
+## `estimatr`
+
+The `C++` version of lm with robust standard errors described above as well as the difference-in-means and blocked difference-in-means functions are the core of `estimatr` now, but it can be built up with further fast estimators.
+

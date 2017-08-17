@@ -18,7 +18,7 @@ To install all of the packages, use:
 
 ```
 install.packages("DeclareDesign", dependencies = TRUE,
-  repos = c("http://install.declaredesign.org", "https://cloud.r-project.org"))
+  repos = c("http://R.declaredesign.org", "https://cloud.r-project.org"))
 ```
 
 This software is in alpha release. Please contact the authors before using in experiments or published work.

@@ -64,7 +64,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="https://declaredesign.org">DeclareDesign</a>
+      <a href="http://declaredesign.org">DeclareDesign</a>
     </li>
     <li>
       <a href="http://randomizr.declaredesign.org">randomizr</a>
@@ -159,18 +159,18 @@
 #&gt;          0      500
 #&gt; 
 #&gt; Added variable:  noise 
-#&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -3.23   0.02 -0.02 2.72 0.98         0      500
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.53   0.01 0.01 3.21 0.95         0      500
 #&gt; 
 #&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
 #&gt; 
 #&gt; Added variable:  Y_Z_0 
-#&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -3.23   0.02 -0.02 2.72 0.98         0      500
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.53   0.01 0.01 3.21 0.95         0      500
 #&gt; 
 #&gt; Added variable:  Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -4.48   1.75 1.76 7.26 2.26         0      500
+#&gt;  -4.16   1.96 1.96 7.79 2.29         0      500
 #&gt; 
 #&gt; Step 3 (sampling): my_sampling -------------------------------------------------
 #&gt; 
@@ -188,13 +188,13 @@
 #&gt; 
 #&gt; A single draw of the estimand:
 #&gt;  estimand_label estimand
-#&gt;             ATE 1.669259
+#&gt;             ATE 1.945732
 #&gt; 
 #&gt; Step 5 (custom data modification): dplyr::mutate(noise_sq = noise^2) -----------
 #&gt; 
 #&gt; Added variable:  noise_sq 
 #&gt;   min median mean   max   sd N_missing N_unique
-#&gt;  0.00   0.56 1.07 10.41 1.49         0      250
+#&gt;  0.00   0.45 0.91 10.29 1.30         0      250
 #&gt; 
 #&gt; Step 6 (assignment): my_assignment ---------------------------------------------
 #&gt; 
@@ -219,13 +219,13 @@
 #&gt; 
 #&gt; Added variable:  Y 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.73   0.06 0.12 5.63 1.29         0      250
+#&gt;  -3.04  -0.04 0.16 6.86 1.34         0      250
 #&gt; 
 #&gt; Step 8 (estimator): my_estimator -----------------------------------------------
 #&gt; 
 #&gt; A single draw of the estimator:
-#&gt;  estimator_label      est       se           p  ci_lower ci_upper  df
-#&gt;     my_estimator 1.343188 0.496138 0.007255215 0.3660068  2.32037 248
+#&gt;  estimator_label      est        se            p ci_lower ci_upper  df
+#&gt;     my_estimator 1.959232 0.5184168 0.0001970694 0.938171 2.980293 248
 #&gt;  estimand_label
 #&gt;             ATE
 #&gt; </div></pre>

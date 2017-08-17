@@ -64,7 +64,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="https://declaredesign.org">DeclareDesign</a>
+      <a href="http://declaredesign.org">DeclareDesign</a>
     </li>
     <li>
       <a href="http://randomizr.declaredesign.org">randomizr</a>
@@ -243,19 +243,11 @@
 <span class='no'>estimates</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='get_estimates.html'>get_estimates</a></span>(<span class='no'>design</span>)
 <span class='no'>estimands</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='get_estimands.html'>get_estimands</a></span>(<span class='no'>design</span>)
 
+<span class='fu'>not_run</span>({
+  <span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='diagnose_design.html'>diagnose_design</a></span>(<span class='no'>design</span>)
 
-<span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='diagnose_design.html'>diagnose_design</a></span>(<span class='no'>design</span>)
-
-<span class='fu'>summary</span>(<span class='no'>diagnosis</span>)</div><div class='output co'>#&gt; 
-#&gt; Research design diagnosis
-#&gt; 
-#&gt;  Estimand Label Estimator Label       Bias      Rmse Power Coverage
-#&gt;             ATE    my_estimator 0.01376767 0.4250835 0.994    0.952
-#&gt;  Mean Estimate Sd Estimate Type S Rate Mean Estimand
-#&gt;       2.007359   0.4464943           0      1.993592
-#&gt; </div><div class='input'>
-
-</div></pre>
+  <span class='fu'>summary</span>(<span class='no'>diagnosis</span>)
+})</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

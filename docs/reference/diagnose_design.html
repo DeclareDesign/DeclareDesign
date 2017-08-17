@@ -64,7 +64,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="https://declaredesign.org">DeclareDesign</a>
+      <a href="http://declaredesign.org">DeclareDesign</a>
     </li>
     <li>
       <a href="http://randomizr.declaredesign.org">randomizr</a>
@@ -147,31 +147,19 @@
                          <span class='no'>reveal_outcomes</span>,
                          <span class='no'>my_estimator</span>)
 
-
-<span class='co'># using built-in defaults:</span>
-<span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'>diagnose_design</span>(<span class='no'>design</span>)
-<span class='no'>diagnosis</span></div><div class='output co'>#&gt; 
-#&gt; Research design diagnosis
-#&gt; 
-#&gt;  Estimand Label Estimator Label        Bias      Rmse Power Coverage
-#&gt;             ATE    my_estimator 0.002785162 0.1239394     1    0.982
-#&gt;  Mean Estimate Sd Estimate Type S Rate Mean Estimand
-#&gt;       2.007155   0.1557829           0       2.00437
-#&gt; </div><div class='input'>
+<span class='fu'>not_run</span>({
+  <span class='co'># using built-in defaults:</span>
+  <span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'>diagnose_design</span>(<span class='no'>design</span>)
+  <span class='no'>diagnosis</span>
+})
 
 <span class='co'># using a user-defined diagnosand</span>
 <span class='no'>my_diagnosand</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_diagnosands.html'>declare_diagnosands</a></span>(<span class='kw'>absolute_error</span> <span class='kw'>=</span> <span class='fu'>mean</span>(<span class='fu'>abs</span>(<span class='no'>est</span> - <span class='no'>estimand</span>)))
 
-
-<span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'>diagnose_design</span>(<span class='no'>design</span>, <span class='kw'>diagnosands</span> <span class='kw'>=</span> <span class='no'>my_diagnosand</span>)
-<span class='no'>diagnosis</span></div><div class='output co'>#&gt; 
-#&gt; Research design diagnosis
-#&gt; 
-#&gt;  Estimand Label Estimator Label Absolute Error
-#&gt;             ATE    my_estimator     0.09954615
-#&gt; </div><div class='input'>
-
-</div></pre>
+<span class='fu'>not_run</span>({
+  <span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'>diagnose_design</span>(<span class='no'>design</span>, <span class='kw'>diagnosands</span> <span class='kw'>=</span> <span class='no'>my_diagnosand</span>)
+  <span class='no'>diagnosis</span>
+})</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

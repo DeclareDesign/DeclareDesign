@@ -1,0 +1,17 @@
+citHeader("To cite list in publications use:")
+
+citEntry(entry = "misc",
+  title        = "Declaring and Diagnosing Research Designs",
+  author       = personList(as.person("Graeme Blair"), as.person("Jasper Cooper"),
+                            as.person("Alexander Coppock"), as.person("Macartan Humphreys")),
+  howpublished = "Working paper",
+  year         = "2017",
+  url          = "http://declaredesign.org/paper.pdf",
+
+  textVersion  =
+  paste("Graeme Blair, Jasper Cooper, Alexander Coppock, and Macartan Humphreys (2017).",
+        "``Declaring and Diagnosing Research Designs.''",
+        "Working paper.",
+        "URL http://declaredesign.org/paper.pdf")
+)
+

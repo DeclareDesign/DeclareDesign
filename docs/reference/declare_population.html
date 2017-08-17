@@ -64,7 +64,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="https://declaredesign.org">DeclareDesign</a>
+      <a href="http://declaredesign.org">DeclareDesign</a>
     </li>
     <li>
       <a href="http://randomizr.declaredesign.org">randomizr</a>
@@ -144,12 +144,12 @@
   <span class='kw'>height_ft</span> <span class='kw'>=</span> <span class='fu'>runif</span>(<span class='no'>N</span>, <span class='fl'>3.5</span>, <span class='fl'>8</span>)
 )
 <span class='fu'>head</span>(<span class='fu'>my_population</span>())</div><div class='output co'>#&gt;    ID height_ft
-#&gt; 1 001  7.122286
-#&gt; 2 002  4.079349
-#&gt; 3 003  7.815917
-#&gt; 4 004  4.519523
-#&gt; 5 005  6.196260
-#&gt; 6 006  7.123799</div><div class='input'>
+#&gt; 1 001  7.935305
+#&gt; 2 002  5.595434
+#&gt; 3 003  3.977096
+#&gt; 4 004  3.646102
+#&gt; 5 005  5.838234
+#&gt; 6 006  6.406051</div><div class='input'>
 <span class='co'># Declare a two-level hierarchical population</span>
 <span class='co'># containing cities within regions</span>
 
@@ -157,12 +157,12 @@
  <span class='kw'>regions</span> <span class='kw'>=</span> <span class='fu'>level</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>5</span>),
  <span class='kw'>cities</span> <span class='kw'>=</span> <span class='fu'>level</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>pollution</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='no'>N</span>, <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>5</span>)))
 <span class='fu'>head</span>(<span class='fu'>my_population</span>())</div><div class='output co'>#&gt;    ID height_ft
-#&gt; 1 001  7.024077
-#&gt; 2 002  6.361128
-#&gt; 3 003  7.626477
-#&gt; 4 004  5.579781
-#&gt; 5 005  3.527535
-#&gt; 6 006  6.966079</div><div class='input'>
+#&gt; 1 001  4.450439
+#&gt; 2 002  3.827070
+#&gt; 3 003  6.531343
+#&gt; 4 004  3.830122
+#&gt; 5 005  6.289362
+#&gt; 6 006  5.743892</div><div class='input'>
 <span class='co'># Custom population functions</span>
 
 <span class='no'>my_population_function</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>N</span>) {
@@ -173,12 +173,12 @@
   <span class='kw'>population_function</span> <span class='kw'>=</span> <span class='no'>my_population_function</span>, <span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>)
 
 <span class='fu'>head</span>(<span class='fu'>my_population_custom</span>())</div><div class='output co'>#&gt;            u
-#&gt; 1 -0.9455454
-#&gt; 2  2.1888964
-#&gt; 3 -2.1081467
-#&gt; 4 -2.4998123
-#&gt; 5 -0.3028554
-#&gt; 6  0.1868019</div></pre>
+#&gt; 1 -0.5216951
+#&gt; 2 -0.6057789
+#&gt; 3 -1.8325568
+#&gt; 4 -1.5274199
+#&gt; 5  0.8160126
+#&gt; 6 -1.5401548</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
