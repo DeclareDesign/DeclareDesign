@@ -196,7 +196,7 @@ Using our simple `lm` function with built-in robust standard errors (HC2! or you
 ```{r}
 my_estimator_lm <- 
   declare_estimator(Y ~ Z, 
-                    estimator_function = estimatr::lm_robust_se, 
+                    estimator_function = estimatr::lm_robust, 
                     coefficient_name = "Z", 
                     estimand = my_estimand)
 
