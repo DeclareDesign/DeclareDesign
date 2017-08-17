@@ -7,9 +7,12 @@ test_that("test with generated citation", {
   my_assignment <- declare_assignment(m = 25)
 
   design <- declare_design(
-    my_population, my_assignment, authors = "set of authors", title = "my design")
+    my_population, my_assignment, authors = "set of authors", title = "my design",
+    description = "this is my text description of design")
 
   cite_design(design)
+
+  summary(design)
 
 })
 

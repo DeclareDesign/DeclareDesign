@@ -330,7 +330,11 @@ summary.design <- function(object, ...) {
                  quantities_added = summ$quantities_added,
                  causal_order = object$causal_order,
                  causal_order_types = object$causal_order_types,
-                 function_types = object$function_types),
+                 function_types = object$function_types,
+                 title = object$title,
+                 authors = object$authors,
+                 description = object$description,
+                 citation = object$citation),
             class = c("summary.design", "list"))
 }
 
@@ -338,6 +342,19 @@ summary.design <- function(object, ...) {
 print.summary.design <- function(x, ...) {
 
   cat("\nDesign Summary\n\n")
+
+  if (!is.null(x$title)) {
+    cat("Study title: ", x$title, ifelse(is.null(x$authors), "\n\n", ""), sep = "")
+  }
+
+  if (!is.null(x$authors)) {
+    cat(ifelse(!is.null(x$title), "\n", ""),
+        "Authors: ", paste0(x$authors, collapse = ", "), "\n\n", sep = "")
+  }
+
+  if (!is.null(x$description)) {
+    cat(x$description, "\n\n")
+  }
 
   for (i in 1:max(length(x$variables_added), length(x$quantities_added))) {
     step_name <- deparse(x$causal_order[[i]])
@@ -362,6 +379,12 @@ print.summary.design <- function(x, ...) {
       }
     }
   }
+
+  if (!is.null(x$citation)) {
+    cat("Citation:\n")
+    print(x$citation)
+  }
+
   invisible(x)
 }
 
