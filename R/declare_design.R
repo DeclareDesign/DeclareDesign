@@ -2,6 +2,10 @@
 #' Declare Design
 #'
 #' @param ... A set of steps in a research design, beginning with a \code{data.frame} representing the population or a function that draws the population. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a \code{data.frame} as an argument and return a \code{data.frame}. Typically, many steps are declared using the \code{declare_} functions, i.e., \code{\link{declare_population}}, \code{\link{declare_population}}, \code{\link{declare_sampling}}, \code{\link{declare_potential_outcomes}}, \code{\link{declare_estimand}}, \code{\link{declare_assignment}}, and \code{\link{declare_estimator}}. Functions from the \code{dplyr} package such as \code{\link{mutate}} can also be usefully included.
+#' @param title (optional) The title of the study, as a character string.
+#' @param authors (optional) The authors of the study, as a character string.
+#' @param description (optional) A description of the design in words, as a character string, stored alongside the declaration in code.
+#' @param citation (optional) The preferred citation for the design, as a character string. Either include the full citation in text, or paste a BibTeX entry. If title and authors are specified and you leave citation empty, a BibTeX entry will be created automatically.
 #'
 #' @details
 #'
@@ -24,6 +28,7 @@
 #' @importFrom lazyeval lazy_dots lazy_eval
 #' @importFrom dplyr bind_rows
 #' @importFrom fabricatr describe_variable
+#' @importFrom utils bibentry
 #' @export
 #'
 #' @examples
@@ -280,8 +285,14 @@ declare_design <- function(
 
 }
 
+#' Obtain the preferred citation for a design
+#'
+#' @param design a design object created by \code{declare_design}
+#'
+#' @param ... options for printing the citation if it is a BibTeX entry
+#'
 #' @export
-cite_design <- function(x, ...) {
+cite_design <- function(design, ...) {
   print(x$citation, ... = ...)
   invisible(x)
 }
