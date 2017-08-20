@@ -165,3 +165,4 @@ test_that("multiple estimand declarations work", {
   })
 
 })
+

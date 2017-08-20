@@ -82,10 +82,10 @@ declare_estimand <-
     return(estimand_function_internal)
   }
 
-#' @importFrom lazyeval lazy_eval lazy_dots
+#' @importFrom rlang eval_tidy quos
 #' @export
 estimand_function_default <- function(data, ..., subset = NULL) {
-  options <- lazy_dots(...)
+  options <- quos(...)
   if (length(options) > 1) {
     stop("Please only provide a single estimand to declare_estimand.")
   }
@@ -95,5 +95,6 @@ estimand_function_default <- function(data, ..., subset = NULL) {
     data <- data[eval(condition_call, data), , drop = FALSE]
   }
 
-  lazy_eval(options[[1]], data = data)
+  eval_tidy(options[[1]], data = data)
+
 }
