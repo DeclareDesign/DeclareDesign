@@ -50,7 +50,7 @@ my_estimator_dim(df)
 
 my_estimator_lm <-
  declare_estimator(Y ~ Z,
-                   estimator_function = estimatr::lm_robust_se,
+                   estimator_function = estimatr::lm_robust,
                    coefficient_name = "Z",
                    estimand = my_estimand)
 

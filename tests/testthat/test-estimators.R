@@ -11,11 +11,11 @@ test_that("test the estimators", {
   my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes %>% my_estimator
 
   ## lm with robust ses
-  my_estimator <- declare_estimator(Y ~ Z, estimator_function = lm_robust_se)
+  my_estimator <- declare_estimator(Y ~ Z, estimator_function = lm_robust)
   my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes %>% my_estimator
 
   ## lm with HC3 robust ses
-  my_estimator <- declare_estimator(Y ~ Z, estimator_function = lm_robust_se, se_type = "HC3")
+  my_estimator <- declare_estimator(Y ~ Z, estimator_function = lm_robust, se_type = "HC3")
   my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes %>% my_estimator
 
   ## custom estimator function
@@ -54,7 +54,7 @@ test_that("regression from estimatr works as an estimator", {
   my_assignment <- declare_assignment(m = 100)
   pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = pate)
   pate_estimator <- declare_estimator(Y ~ Z + noise,
-                                      estimator_function = lm_robust_se,
+                                      estimator_function = lm_robust,
                                       coefficient_name = "noise",
                                       estimand = pate, label = pate)
 
@@ -100,13 +100,13 @@ test_that("multiple estimator declarations work", {
 
   estimator_1 <-
     declare_estimator(formula = Y ~ Z,
-                      estimator_function = estimatr::lm_robust_se,
+                      estimator_function = estimatr::lm_robust,
                       estimand = sate,
                       label = estimator_1)
 
   estimator_2 <-
     declare_estimator(formula = Y ~ Z,
-                      estimator_function = estimatr::lm_robust_se,
+                      estimator_function = estimatr::lm_robust,
                       estimand = sate,
                       label = estimator_2)
 
@@ -122,13 +122,13 @@ test_that("multiple estimator declarations work", {
 
   estimator_3 <-
     declare_estimator(formula = Y ~ Z,
-                      estimator_function = estimatr::lm_robust_se,
+                      estimator_function = estimatr::lm_robust,
                       estimand = sate,
                       label = "estimator_3")
 
   estimator_4 <-
     declare_estimator(formula = Y ~ Z,
-                      estimator_function = estimatr::lm_robust_se,
+                      estimator_function = estimatr::lm_robust,
                       estimand = sate,
                       label = "estimator_4")
 
@@ -145,12 +145,12 @@ test_that("multiple estimator declarations work", {
 
   estimator_5 <-
     declare_estimator(formula = Y ~ Z,
-                      estimator_function = estimatr::lm_robust_se,
+                      estimator_function = estimatr::lm_robust,
                       estimand = sate)
 
   estimator_6 <-
     declare_estimator(formula = Y ~ Z,
-                      estimator_function = estimatr::lm_robust_se,
+                      estimator_function = estimatr::lm_robust,
                       estimand = sate)
 
   # This could eventually be fixed so that the estimator names are inherited

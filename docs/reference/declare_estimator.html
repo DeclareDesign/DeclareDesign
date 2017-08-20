@@ -164,10 +164,12 @@
 
 <span class='no'>my_estimator_lm</span> <span class='kw'>&lt;-</span>
  <span class='fu'>declare_estimator</span>(<span class='no'>Y</span> ~ <span class='no'>Z</span>,
-                   <span class='kw'>estimator_function</span> <span class='kw'>=</span> <span class='kw'>estimatr</span><span class='kw'>::</span><span class='no'>lm_robust_se</span>,
+                   <span class='kw'>estimator_function</span> <span class='kw'>=</span> <span class='kw'>estimatr</span><span class='kw'>::</span><span class='no'>lm_robust</span>,
                    <span class='kw'>coefficient_name</span> <span class='kw'>=</span> <span class='st'>"Z"</span>,
-                   <span class='kw'>estimand</span> <span class='kw'>=</span> <span class='no'>my_estimand</span>)</div><div class='output co'>#&gt; <span class='error'>Error: 'lm_robust_se' is not an exported object from 'namespace:estimatr'</span></div><div class='input'>
-<span class='fu'>my_estimator_lm</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; <span class='error'>Error in my_estimator_lm(df): could not find function "my_estimator_lm"</span></div><div class='input'>
+                   <span class='kw'>estimand</span> <span class='kw'>=</span> <span class='no'>my_estimand</span>)
+
+<span class='fu'>my_estimator_lm</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt;   estimator_label variable_names  est se p ci_lower ci_upper estimand_label
+#&gt; 2    my_estimator              Z 0.25  0 0     0.25     0.25            ATE</div><div class='input'>
 <span class='co'># Use a custom estimator function</span>
 
 <span class='no'>my_estimator_function</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>formula</span>, <span class='no'>data</span>){

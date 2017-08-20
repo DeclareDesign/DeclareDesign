@@ -39,7 +39,7 @@ test_that("quick_design works some more", {
                               Z = rbinom(N, 1, .5))
     my_estimand <- declare_estimand(mean(Y))
     my_estimator <-
-      declare_estimator(Y ~ Z, estimator_function = lm_robust_se, coefficient_name = "Z", estimand = my_estimand)
+      declare_estimator(Y ~ Z, estimator_function = lm_robust, coefficient_name = "Z", estimand = my_estimand)
     my_design <- declare_design(pop, my_estimand, my_estimator)
     return(my_design)
   }
