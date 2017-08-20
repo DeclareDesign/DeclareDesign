@@ -1,8 +1,6 @@
 rm(list = ls())
 
-library(DeclareDesign)
-
-default_diagnosands <- declare_diagnosands(
+default_diagnosands <- DeclareDesign::declare_diagnosands(
   bias = mean(est - estimand),
   rmse = sqrt(mean((est - estimand)^2)),
   power = mean(p < .05),
@@ -11,6 +9,8 @@ default_diagnosands <- declare_diagnosands(
   sd_estimate = sd(est),
   type_s_rate = mean((sign(est) != sign(estimand)) & p < .05),
   mean_estimand = mean(estimand))
+
+environment(default_diagnosands) <- globalenv()
 
 save(default_diagnosands, file = "R/sysdata.rda")
 
