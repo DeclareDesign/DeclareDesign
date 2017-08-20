@@ -4,7 +4,7 @@
 \alias{diagnose_design}
 \title{Diagnose the Design}
 \usage{
-diagnose_design(..., diagnosands = default_diagnosands, sims = 500)
+diagnose_design(..., diagnosands = NULL, sims = 500)
 }
 \arguments{
 \item{...}{A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{quick_design}}.}

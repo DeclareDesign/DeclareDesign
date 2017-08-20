@@ -49,8 +49,22 @@
 #' @export
 diagnose_design <-
   function(...,
-           diagnosands = default_diagnosands,
+           diagnosands = NULL,
            sims = 500) {
+
+    if(is.null(diagnosands)){
+      diagnosands <- declare_diagnosands(
+        bias = mean(est - estimand),
+        rmse = sqrt(mean((est - estimand) ^ 2)),
+        power = mean(p < .05),
+        coverage = mean(estimand <= ci_upper & estimand >= ci_lower),
+        mean_estimate = mean(est),
+        sd_estimate = sd(est),
+        type_s_rate = mean((sign(est) != sign(estimand)) & p < .05),
+        mean_estimand = mean(estimand)
+      )
+    }
+
     designs <- list(...)
 
     ## three cases:
@@ -114,7 +128,7 @@ get_simulations <- function(diagnosis) {
 }
 
 #' @importFrom rlang !! !!!
-#' @importFrom dplyr group_by left_join bind_rows
+#' @importFrom dplyr group_by left_join bind_rows group_by_ summarize_
 diagnose_design_single_design <-
   function(design,
            diagnosands = default_diagnosands,
@@ -157,12 +171,12 @@ diagnose_design_single_design <-
     }
 
 
-    group_by_set <-
-      c("estimand_label", "estimator_label")[which(c("estimand_label", "estimator_label") %in% colnames(simulations_df))]
+    group_by_set <- c("estimand_label", "estimator_label")[
+      which(c("estimand_label", "estimator_label") %in% colnames(simulations_df))]
 
     diagnosands_df <-
       simulations_df %>%
-      group_by(!!!group_by_set) %>%
+      group_by_(.dots = group_by_set) %>%
       diagnosands %>%
       data.frame(stringsAsFactors = FALSE)
 

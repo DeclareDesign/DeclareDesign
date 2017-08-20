@@ -2,8 +2,6 @@ context("declare design")
 
 test_that("test the full declare design setup", {
 
-  library(estimatr)
-  library(dplyr)
   N <- 500
 
   my_population <- declare_population(N = N, noise = rnorm(N))
@@ -30,10 +28,7 @@ test_that("test the full declare design setup", {
   head(design$data_function())
   design$design_function()
 
-  #debugonce(diagnose_design)
-  #debugonce(DeclareDesign:::diagnose_design_single_design)
-  diagnosis <- diagnose_design(design, sims = 3)
-
+  diagnose_design(design, sims = 3)
 
 })
 
