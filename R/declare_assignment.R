@@ -103,19 +103,13 @@ declare_assignment <-
     return(assignment_function_internal)
   }
 
-#' @importFrom lazyeval make_call lazy_eval as.lazy
+#' @importFrom rlang quos !!! lang_modify eval_tidy quo
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
 assignment_function_default <-
   function(data, ..., assignment_variable_name = "Z") {
     ## draw assignment
 
-    options <- lazy_dots(...)
-
-    if (length(options) > 0) {
-      options$N <- as.lazy(nrow(data), env = options[[1]]$env)
-    } else {
-      options$N <- as.lazy(nrow(data))
-    }
+    options <- quos(...)
 
     assignment_variable_name <- substitute(assignment_variable_name)
     if (!is.null(assignment_variable_name)) {
@@ -124,26 +118,18 @@ assignment_function_default <-
       stop("Please provide a name for the assignment variable as assignment_variable_name.")
     }
 
-    mcall <- make_call(quote(randomizr::conduct_ra), args = options)
+    ra_call <- quo(conduct_ra(!!! options))
+    ra_call <- lang_modify(ra_call, N = nrow(data))
 
-    data[, assignment_variable_name] <- lazy_eval(mcall, data = data)
+    data[, assignment_variable_name] <- eval_tidy(ra_call, data = data)
 
     ## obtain condition probabilities
 
-    options <- lazy_dots(...)
-
-    if (length(options) > 0) {
-      options$assignment <-
-        as.lazy(assignment_variable_name, env = options[[1]]$env)
-    } else {
-      options$assignment <- as.lazy(assignment_variable_name)
-    }
-
-    mcall <-
-      make_call(quote(randomizr::obtain_condition_probabilities), args = options)
+    prob_call <- quo(obtain_condition_probabilities(!!! options))
+    prob_call <- lang_modify(prob_call, assignment = data[, assignment_variable_name])
 
     data[, paste0(assignment_variable_name, "_cond_prob")] <-
-      lazy_eval(mcall, data = data)
+      eval_tidy(prob_call, data = data)
 
     return(data)
 

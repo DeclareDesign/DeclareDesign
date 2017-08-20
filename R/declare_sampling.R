@@ -89,19 +89,13 @@ declare_sampling <-
     return(sampling_function_internal)
   }
 
-#' @importFrom lazyeval make_call lazy_eval as.lazy
+#' @importFrom rlang quos !!! lang_modify eval_tidy quo
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
 sampling_function_default <-
   function(data, ..., sampling_variable_name = "S") {
     ## draw sample
 
-    options <- lazy_dots(...)
-
-    if (length(options) > 0) {
-      options$N <- as.lazy(nrow(data), env = options[[1]]$env)
-    } else {
-      options$N <- as.lazy(nrow(data))
-    }
+    options <- quos(...)
 
     sampling_variable_name <- substitute(sampling_variable_name)
     if (!is.null(sampling_variable_name)) {
@@ -110,20 +104,21 @@ sampling_function_default <-
       stop("Please provide a name for the sampling variable as sampling_variable_name.")
     }
 
-    mcall <- make_call(quote(randomizr::draw_rs), args = options)
+    rs_call <- quo(draw_rs(!!! options))
+    rs_call <- lang_modify(rs_call, N = nrow(data))
 
-    data[, sampling_variable_name] <- lazy_eval(mcall, data = data)
+    data[, sampling_variable_name] <- eval_tidy(rs_call, data = data)
 
     ## obtain inclusion probabilities
 
-    mcall <-
-      make_call(quote(randomizr::obtain_inclusion_probabilities),
-                args = options)
+    prob_call <- quo(obtain_inclusion_probabilities(!!! options))
+    prob_call <- lang_modify(prob_call, N = nrow(data))
 
     data[, paste0(sampling_variable_name, "_inclusion_prob")] <-
-      lazy_eval(mcall, data = data)
+      eval_tidy(prob_call, data = data)
 
     ## subset to the sampled observations and remove the sampling variable
     data[data[, sampling_variable_name] == 1,-which(names(data) %in% sampling_variable_name), drop = FALSE]
 
   }
+
