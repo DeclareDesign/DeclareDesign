@@ -73,13 +73,12 @@ test_that("PO as a formula works", {
   ##  exp(x) / (1 + exp(x))
   ## including logistic below does not work. why?
 
-  my_potential_outcomes <- declare_potential_outcomes(bob = level(N = 5,
+  my_potential_outcomes <- declare_potential_outcomes(
     Y_Z_0 = income,
-    Y_Z_1 = income + 5))
+    Y_Z_1 = income + 5)
 
   declare_potential_outcomes(Y_Z_0 = income,
-                             Y_Z_1 = income + 5,
-                             level = cities)
+                             Y_Z_1 = income + 5)
 
   head(my_potential_outcomes(pop))
 
