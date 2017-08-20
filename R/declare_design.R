@@ -2,6 +2,10 @@
 #' Declare Design
 #'
 #' @param ... A set of steps in a research design, beginning with a \code{data.frame} representing the population or a function that draws the population. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a \code{data.frame} as an argument and return a \code{data.frame}. Typically, many steps are declared using the \code{declare_} functions, i.e., \code{\link{declare_population}}, \code{\link{declare_population}}, \code{\link{declare_sampling}}, \code{\link{declare_potential_outcomes}}, \code{\link{declare_estimand}}, \code{\link{declare_assignment}}, and \code{\link{declare_estimator}}. Functions from the \code{dplyr} package such as \code{\link{mutate}} can also be usefully included.
+#' @param title (optional) The title of the study, as a character string.
+#' @param authors (optional) The authors of the study, as a character string.
+#' @param description (optional) A description of the design in words, as a character string, stored alongside the declaration in code.
+#' @param citation (optional) The preferred citation for the design, as a character string. Either include the full citation in text, or paste a BibTeX entry. If title and authors are specified and you leave citation empty, a BibTeX entry will be created automatically.
 #'
 #' @details
 #'
@@ -24,6 +28,7 @@
 #' @importFrom lazyeval lazy_dots lazy_eval
 #' @importFrom dplyr bind_rows
 #' @importFrom fabricatr describe_variable
+#' @importFrom utils bibentry
 #' @export
 #'
 #' @examples
@@ -64,7 +69,25 @@
 #' summary(diagnosis)
 #' }
 #'
-declare_design <- function(...) {
+declare_design <- function(
+  ..., title = NULL, authors = NULL, description = NULL, citation = NULL) {
+
+  # process bibtex
+
+  timestamp <- Sys.time()
+
+  if ((is.null(citation) | class(citation) == "character") &
+      !is.null(title) & !is.null(authors)) {
+    citation <- bibentry(
+      "unpublished",
+      title = title,
+      author = authors,
+      note = "Unpublished research design declaration.",
+      month = format(timestamp, "%b"),
+      year = format(timestamp, "%Y"),
+      textVersion = citation
+    )
+  }
 
   # Some preprocessing
 
@@ -250,11 +273,28 @@ declare_design <- function(...) {
       causal_order_env = causal_order_env,
       function_types = function_types,
       causal_order_types = causal_order_types,
+      title = title,
+      authors = authors,
+      description = description,
+      citation = citation,
+      timestamp = timestamp,
       call = match.call()
     ),
     class = "design"
   ))
 
+}
+
+#' Obtain the preferred citation for a design
+#'
+#' @param design a design object created by \code{declare_design}
+#'
+#' @param ... options for printing the citation if it is a BibTeX entry
+#'
+#' @export
+cite_design <- function(design, ...) {
+  print(x$citation, ... = ...)
+  invisible(x)
 }
 
 #' @export
@@ -301,7 +341,11 @@ summary.design <- function(object, ...) {
                  quantities_added = summ$quantities_added,
                  causal_order = object$causal_order,
                  causal_order_types = object$causal_order_types,
-                 function_types = object$function_types),
+                 function_types = object$function_types,
+                 title = object$title,
+                 authors = object$authors,
+                 description = object$description,
+                 citation = object$citation),
             class = c("summary.design", "list"))
 }
 
@@ -309,6 +353,19 @@ summary.design <- function(object, ...) {
 print.summary.design <- function(x, ...) {
 
   cat("\nDesign Summary\n\n")
+
+  if (!is.null(x$title)) {
+    cat("Study title: ", x$title, ifelse(is.null(x$authors), "\n\n", ""), sep = "")
+  }
+
+  if (!is.null(x$authors)) {
+    cat(ifelse(!is.null(x$title), "\n", ""),
+        "Authors: ", paste0(x$authors, collapse = ", "), "\n\n", sep = "")
+  }
+
+  if (!is.null(x$description)) {
+    cat(x$description, "\n\n")
+  }
 
   for (i in 1:max(length(x$variables_added), length(x$quantities_added))) {
     step_name <- deparse(x$causal_order[[i]])
@@ -333,6 +390,12 @@ print.summary.design <- function(x, ...) {
       }
     }
   }
+
+  if (!is.null(x$citation)) {
+    cat("Citation:\n")
+    print(x$citation)
+  }
+
   invisible(x)
 }
 
