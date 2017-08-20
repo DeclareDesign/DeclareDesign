@@ -309,8 +309,12 @@ declare_design <- function(...,
 #'
 #' @export
 cite_design <- function(design, ...) {
-  print(x$citation, ... = ...)
-  invisible(x)
+  if(class(design$citation) == "bibentry") {
+    print(design$citation, style = "bibtex", ... = ...)
+    cat("\n")
+  }
+  print(design$citation, style = "text", ... = ...)
+  invisible(design)
 }
 
 #' @export
