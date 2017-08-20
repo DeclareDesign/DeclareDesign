@@ -45,7 +45,7 @@
 #' diagnosis
 #' }
 #'
-#' @importFrom dplyr bind_rows group_by_ left_join summarize_ '%>%'
+#' @importFrom dplyr bind_rows '%>%'
 #' @export
 diagnose_design <-
   function(...,
@@ -113,7 +113,8 @@ get_simulations <- function(diagnosis) {
   diagnosis$simulations
 }
 
-
+#' @importFrom rlang !! !!!
+#' @importFrom dplyr group_by left_join bind_rows
 diagnose_design_single_design <-
   function(design,
            diagnosands = default_diagnosands,
@@ -161,7 +162,7 @@ diagnose_design_single_design <-
 
     diagnosands_df <-
       simulations_df %>%
-      group_by_(.dots = group_by_set) %>%
+      group_by(!!!group_by_set) %>%
       diagnosands %>%
       data.frame(stringsAsFactors = FALSE)
 
