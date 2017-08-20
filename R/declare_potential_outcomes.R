@@ -1,5 +1,6 @@
 
 
+
 #' Potential Outcomes
 #' @param ... Arguments to the potential_outcomes_function
 #'
@@ -53,25 +54,26 @@
 #'
 #' head(my_potential_outcomes(pop))
 #'
-declare_potential_outcomes <- function(..., potential_outcomes_function = potential_outcomes_function_default) {
-  args <- eval(substitute(alist(...)))
-  env <- freeze_environment(parent.frame())
-  func <- eval(potential_outcomes_function)
+declare_potential_outcomes <-
+  function(..., potential_outcomes_function = potential_outcomes_function_default) {
+    args <- eval(substitute(alist(...)))
+    env <- freeze_environment(parent.frame())
+    func <- eval(potential_outcomes_function)
 
-  if (!("data" %in% names(formals(func)))) {
-    stop("Please provide a potential_outcomes_function with a data argument.")
+    if (!("data" %in% names(formals(func)))) {
+      stop("Please provide a potential_outcomes_function with a data argument.")
+    }
+
+    potential_outcomes_function_internal <- function(data) {
+      args$data <- data
+      do.call(func, args = args, envir = env)
+    }
+
+    attributes(potential_outcomes_function_internal) <-
+      list(call = match.call(), type = "potential_outcomes")
+
+    return(potential_outcomes_function_internal)
   }
-
-  potential_outcomes_function_internal <- function(data) {
-    args$data <- data
-    do.call(func, args = args, envir = env)
-  }
-
-  attributes(potential_outcomes_function_internal) <-
-    list(call = match.call(), type = "potential_outcomes")
-
-  return(potential_outcomes_function_internal)
-}
 
 #' @importFrom lazyeval lazy_dots make_call lazy_eval as.lazy
 #' @export
@@ -80,16 +82,18 @@ potential_outcomes_function_default <-
            assignment_variable_name = "Z",
            condition_names = c(0, 1),
            ...) {
-
     options <- lazy_dots(...)
     #options_text <- eval(substitute(alist(...)))
 
     if ("formula" %in% names(options)) {
       # TODO: checks re: condition names and assignment variable names
-      mcall <- make_call(quote(DeclareDesign:::potential_outcomes_function_formula), args = options)
+      mcall <-
+        make_call(quote(DeclareDesign:::potential_outcomes_function_formula),
+                  args = options)
 
       mcall$expr$data <- data
-      mcall$expr$assignment_variable_name <- assignment_variable_name
+      mcall$expr$assignment_variable_name <-
+        assignment_variable_name
       mcall$expr$condition_names <- condition_names
 
       return(lazy_eval(mcall))
@@ -102,7 +106,9 @@ potential_outcomes_function_default <-
       #     ... = ...
       #   )
     } else{
-      mcall <- make_call(quote(DeclareDesign:::potential_outcomes_function_discrete), args = options)
+      mcall <-
+        make_call(quote(DeclareDesign:::potential_outcomes_function_discrete),
+                  args = options)
       mcall$expr$data <- data
 
       return(lazy_eval(mcall))
@@ -150,7 +156,8 @@ potential_outcomes_function_discrete <- function(data, ...) {
     stop("All of the variable names you create should begin with the same prefix, i.e. Y_Z_")
   }
 
-  mcall <- make_call(quote(fabricatr::fabricate_data), args = options)
+  mcall <-
+    make_call(quote(fabricatr::fabricate_data), args = options)
   mcall$expr$data <- data
 
   return(lazy_eval(mcall))

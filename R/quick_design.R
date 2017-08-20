@@ -1,4 +1,5 @@
 
+
 #' Declare a Design via a Template Function
 #'
 #' @param template An R function that takes a set of options and returns a design created by declare_design().
@@ -7,8 +8,7 @@
 #'
 #' @importFrom lazyeval lazy_dots
 #' @export
-quick_design <- function(template = NULL, ...){
-
+quick_design <- function(template = NULL, ...) {
   # figure out what's in ...
   dots <- lazy_dots(...)
 
@@ -23,13 +23,16 @@ quick_design <- function(template = NULL, ...){
 
   template_args_matrix <- data.matrix(expand.grid(args_list))
 
-  template_args_list <- lapply(split(template_args_matrix,
-                                     f = row(template_args_matrix)),
-                               FUN = function(y){
-                                 x <- as.list(y)
-                                 names(x) <- colnames(template_args_matrix)
-                                 x
-                               })
+  template_args_list <- lapply(
+    split(template_args_matrix,
+          f = row(template_args_matrix)),
+    FUN = function(y) {
+      x <- as.list(y)
+      names(x) <-
+        colnames(template_args_matrix)
+      x
+    }
+  )
 
   designs <- lapply(template_args_list, function(x)
     do.call(template, args = x))
@@ -48,5 +51,3 @@ quick_design <- function(template = NULL, ...){
   }
 
 }
-
-

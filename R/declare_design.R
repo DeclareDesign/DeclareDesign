@@ -1,4 +1,5 @@
 
+
 #' Declare Design
 #'
 #' @param ... A set of steps in a research design, beginning with a \code{data.frame} representing the population or a function that draws the population. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a \code{data.frame} as an argument and return a \code{data.frame}. Typically, many steps are declared using the \code{declare_} functions, i.e., \code{\link{declare_population}}, \code{\link{declare_population}}, \code{\link{declare_sampling}}, \code{\link{declare_potential_outcomes}}, \code{\link{declare_estimand}}, \code{\link{declare_assignment}}, and \code{\link{declare_estimator}}. Functions from the \code{dplyr} package such as \code{\link{mutate}} can also be usefully included.
@@ -69,9 +70,11 @@
 #' summary(diagnosis)
 #' }
 #'
-declare_design <- function(
-  ..., title = NULL, authors = NULL, description = NULL, citation = NULL) {
-
+declare_design <- function(...,
+                           title = NULL,
+                           authors = NULL,
+                           description = NULL,
+                           citation = NULL) {
   # process bibtex
 
   timestamp <- Sys.time()
@@ -95,7 +98,8 @@ declare_design <- function(
 
   dots <- lazy_dots(...)
 
-  dots_classes <- sapply(dots, function(x) class(x$expr))
+  dots_classes <- sapply(dots, function(x)
+    class(x$expr))
 
   ## wrap any call in wrap_step_()
   if (length(dots) > 1) {
@@ -115,58 +119,71 @@ declare_design <- function(
   function_types <- rep("", length(causal_order))
 
   function_types[name_or_call == "name"] <-
-    sapply(causal_order[name_or_call == "name"], function(x){
+    sapply(causal_order[name_or_call == "name"], function(x) {
       type <- attributes(eval(x))$type
       return(ifelse(!is.null(type), type, "unknown"))
     })
-  function_types[name_or_call == "call" & function_types == ""] <- "unknown"
+  function_types[name_or_call == "call" &
+                   function_types == ""] <- "unknown"
 
   causal_order_types <- function_types
   causal_order_types[!function_types %in% c("estimand", "estimator")] <-
     "dgp"
 
-  estimand_labels <- sapply(causal_order[function_types == "estimand"], function(x) attributes(x)$label)
+  estimand_labels <-
+    sapply(causal_order[function_types == "estimand"], function(x)
+      attributes(x)$label)
   if (length(unique(estimand_labels)) != length(estimand_labels)) {
-    stop("You have estimands with identical labels. Please provide estimands with unique labels.")
+    stop(
+      "You have estimands with identical labels. Please provide estimands with unique labels."
+    )
   }
 
-  estimator_labels <- sapply(causal_order[function_types == "estimator"], function(x) attributes(x)$label)
+  estimator_labels <-
+    sapply(causal_order[function_types == "estimator"], function(x)
+      attributes(x)$label)
   if (length(unique(estimator_labels)) != length(estimator_labels)) {
-    stop("You have estimators with identical labels. Please provide estimators with unique labels.")
+    stop(
+      "You have estimators with identical labels. Please provide estimators with unique labels."
+    )
   }
 
-  process_population <- function(population){
+  process_population <- function(population) {
     ## the first part of the DGP must be a data.frame. Take what the user creates and turn it into a data.frame.
     if (class(population) == "data.frame") {
       current_df <- population
     } else if (class(population) == "call") {
       try(current_df <- population, silent = TRUE)
-      if (!exists("current_df") | class(current_df) != "data.frame") {
-        stop("The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame.")
+      if (!exists("current_df") |
+          class(current_df) != "data.frame") {
+        stop(
+          "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame."
+        )
       }
     } else if (class(population) == "function") {
       try(current_df <- population(), silent = TRUE)
-      if (!exists("current_df") | class(current_df) != "data.frame") {
-        stop("The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame.")
+      if (!exists("current_df") |
+          class(current_df) != "data.frame") {
+        stop(
+          "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame."
+        )
       }
     } else {
-      stop("The first element of your design must be a data.frame or a function that returns a data.frame.")
+      stop(
+        "The first element of your design must be a data.frame or a function that returns a data.frame."
+      )
     }
     return(current_df)
   }
 
   # this extracts the "DGP" parts of the causal order and runs them.
   data_function <- function() {
-
     current_df <- process_population(causal_order[[1]])
 
     if (length(causal_order) > 1) {
-
       for (i in 2:length(causal_order)) {
-
         # if it's a dgp
         if (causal_order_types[i] == "dgp") {
-
           current_df <- causal_order[[i]](current_df)
         }
       }
@@ -177,28 +194,25 @@ declare_design <- function(
   # This does causal order step by step; saving calculated estimands and estimates along the way
 
   design_function <- function() {
-
     current_df <- process_population(causal_order[[1]])
 
     estimates_df <- estimands_df <- data.frame()
 
     if (length(causal_order) > 1) {
       for (i in 2:length(causal_order)) {
-
         # if it's a dgp
         if (causal_order_types[i] == "dgp") {
-
           current_df <- causal_order[[i]](current_df)
 
         } else if (causal_order_types[i] == "estimand") {
-
           # if it's an estimand
-          estimands_df <- bind_rows(estimands_df, causal_order[[i]](current_df))
+          estimands_df <-
+            bind_rows(estimands_df, causal_order[[i]](current_df))
 
         } else if (causal_order_types[i] == "estimator") {
-
           # if it's an estimator
-          estimates_df <- bind_rows(estimates_df, causal_order[[i]](current_df))
+          estimates_df <-
+            bind_rows(estimates_df, causal_order[[i]](current_df))
 
         }
       }
@@ -206,7 +220,7 @@ declare_design <- function(
     return(list(estimates_df = estimates_df, estimands_df = estimands_df))
   }
 
-  summarize_step <- function(last_df = NULL, current_df){
+  summarize_step <- function(last_df = NULL, current_df) {
     current_names <- names(current_df)
     if (is.null(last_df)) {
       return(current_names)
@@ -216,8 +230,8 @@ declare_design <- function(
   }
 
   summary_function <- function() {
-
-    variables_added <- quantities_added <- vector("list", length(causal_order))
+    variables_added <-
+      quantities_added <- vector("list", length(causal_order))
 
     current_df <- process_population(causal_order[[1]])
 
@@ -228,40 +242,42 @@ declare_design <- function(
     last_df <- current_df
 
     if (length(causal_order) > 1) {
-
       for (i in 2:length(causal_order)) {
-
         # if it's a dgp
         if (causal_order_types[i] == "dgp") {
-
           current_df <- causal_order[[i]](last_df)
 
-          variables_added_names <- summarize_step(last_df = last_df, current_df = current_df)
+          variables_added_names <-
+            summarize_step(last_df = last_df, current_df = current_df)
 
-          variables_added[[i]] <- lapply(current_df[, variables_added_names, drop = FALSE], describe_variable)
+          variables_added[[i]] <-
+            lapply(current_df[, variables_added_names, drop = FALSE], describe_variable)
 
           if (!is.null(attributes(causal_order[[i]])$summary_function)) {
-            quantities_added[[i]] <- capture.output(attributes(causal_order[[i]])$summary_function(last_df))
+            quantities_added[[i]] <-
+              capture.output(attributes(causal_order[[i]])$summary_function(last_df))
           }
 
           last_df <- current_df
 
         } else if (causal_order_types[i] == "estimand") {
-
           quantities_added[[i]] <- causal_order[[i]](current_df)
 
         } else if (causal_order_types[i] == "estimator") {
-
           # if it's an estimator
-          estimates_df <- bind_rows(estimates_df, causal_order[[i]](current_df))
+          estimates_df <-
+            bind_rows(estimates_df, causal_order[[i]](current_df))
 
           quantities_added[[i]] <- causal_order[[i]](current_df)
 
         }
       }
     }
-    structure(list(variables_added = variables_added,
-                   quantities_added = quantities_added), class = "design_summary")
+    structure(
+      list(variables_added = variables_added,
+           quantities_added = quantities_added),
+      class = "design_summary"
+    )
   }
 
   return(structure(
@@ -337,21 +353,24 @@ print.design <- function(x, ...) {
 #' @export
 summary.design <- function(object, ...) {
   summ <- object$summary_function()
-  structure(list(variables_added = summ$variables_added,
-                 quantities_added = summ$quantities_added,
-                 causal_order = object$causal_order,
-                 causal_order_types = object$causal_order_types,
-                 function_types = object$function_types,
-                 title = object$title,
-                 authors = object$authors,
-                 description = object$description,
-                 citation = object$citation),
-            class = c("summary.design", "list"))
+  structure(
+    list(
+      variables_added = summ$variables_added,
+      quantities_added = summ$quantities_added,
+      causal_order = object$causal_order,
+      causal_order_types = object$causal_order_types,
+      function_types = object$function_types,
+      title = object$title,
+      authors = object$authors,
+      description = object$description,
+      citation = object$citation
+    ),
+    class = c("summary.design", "list")
+  )
 }
 
 #' @export
 print.summary.design <- function(x, ...) {
-
   cat("\nDesign Summary\n\n")
 
   if (!is.null(x$title)) {
@@ -359,8 +378,13 @@ print.summary.design <- function(x, ...) {
   }
 
   if (!is.null(x$authors)) {
-    cat(ifelse(!is.null(x$title), "\n", ""),
-        "Authors: ", paste0(x$authors, collapse = ", "), "\n\n", sep = "")
+    cat(
+      ifelse(!is.null(x$title), "\n", ""),
+      "Authors: ",
+      paste0(x$authors, collapse = ", "),
+      "\n\n",
+      sep = ""
+    )
   }
 
   if (!is.null(x$description)) {
@@ -369,8 +393,26 @@ print.summary.design <- function(x, ...) {
 
   for (i in 1:max(length(x$variables_added), length(x$quantities_added))) {
     step_name <- deparse(x$causal_order[[i]])
-    step_class <- ifelse(x$function_types[[i]] != "unknown", gsub("_", " ", x$function_types[[i]]), "custom data modification")
-    cat("Step ", i, " (", step_class, "): ", step_name, " ", paste0(rep("-", 80 - 11 - nchar(i) - nchar(step_class) - nchar(step_name)), collapse = ""), "\n\n", sep = "")
+    step_class <-
+      ifelse(
+        x$function_types[[i]] != "unknown",
+        gsub("_", " ", x$function_types[[i]]),
+        "custom data modification"
+      )
+    cat(
+      "Step ",
+      i,
+      " (",
+      step_class,
+      "): ",
+      step_name,
+      " ",
+      paste0(rep(
+        "-", 80 - 11 - nchar(i) - nchar(step_class) - nchar(step_name)
+      ), collapse = ""),
+      "\n\n",
+      sep = ""
+    )
 
     if (!is.null(x$quantities_added[[i]])) {
       if (class(x$quantities_added[[i]]) == "data.frame") {
@@ -398,5 +440,3 @@ print.summary.design <- function(x, ...) {
 
   invisible(x)
 }
-
-

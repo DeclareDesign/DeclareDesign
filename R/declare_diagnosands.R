@@ -85,4 +85,3 @@ declare_diagnosands <- function(...) {
 
   return(diagnosand_function_internal)
 }
-

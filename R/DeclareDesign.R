@@ -24,9 +24,12 @@ load <- c("fabricatr", "estimatr", "randomizr")
     return()
 
   packageStartupMessage(paste0("Loading DeclareDesign: ", needed, collapse = "\n"))
-  suppressPackageStartupMessages(
-    lapply(needed, library, character.only = TRUE, warn.conflicts = FALSE)
-  )
+  suppressPackageStartupMessages(lapply(
+    needed,
+    library,
+    character.only = TRUE,
+    warn.conflicts = FALSE
+  ))
 
   ##declaredesign_conflicts()
 }

@@ -1,5 +1,6 @@
 
 
+
 #' Declare Estimand
 #'
 #' @param ... Arguments to the estimand function. For example, you might specify ATE = mean(Y_Z_1 - Y_Z_0), which would declare the estimand to be named ATE and to be the mean of the difference in the control and treatment potential outcome.
@@ -39,42 +40,51 @@
 #'
 #' my_estimand_custom(df)
 #'
-declare_estimand <- function(..., estimand_function = estimand_function_default, label = NULL) {
-  args <- eval(substitute(alist(...)))
-  env <- freeze_environment(parent.frame())
-  func <- eval(estimand_function)
+declare_estimand <-
+  function(...,
+           estimand_function = estimand_function_default,
+           label = NULL) {
+    args <- eval(substitute(alist(...)))
+    env <- freeze_environment(parent.frame())
+    func <- eval(estimand_function)
 
-  ## handles four uses cases of labeling so it's really easy to label without specifying
-  ## would be great to clean up the next 10 lines
-  label_internal <- NULL
-  if (substitute(estimand_function) == "estimand_function_default" &
-      from_package(estimand_function, "DeclareDesign")) {
-    label_internal <- names(args)[1]
-  }
-
-  if (!exists("label_internal") | is.null(label_internal)) {
-    label_internal <- substitute(label)
-    if (!is.null(label_internal)) {
-      label_internal <- as.character(label_internal)
-    } else {
-      label_internal <- "my_estimand"
+    ## handles four uses cases of labeling so it's really easy to label without specifying
+    ## would be great to clean up the next 10 lines
+    label_internal <- NULL
+    if (substitute(estimand_function) == "estimand_function_default" &
+        from_package(estimand_function, "DeclareDesign")) {
+      label_internal <- names(args)[1]
     }
-  }
 
-  estimand_function_internal <- function(data) {
-    args$data <- data
-    value <- do.call(func, args = args, envir = env)
-    data.frame(estimand_label = label_internal, estimand = value, stringsAsFactors = FALSE)
-  }
-  attributes(estimand_function_internal) <-
-    list(call = match.call(), type = "estimand", label = label_internal)
+    if (!exists("label_internal") | is.null(label_internal)) {
+      label_internal <- substitute(label)
+      if (!is.null(label_internal)) {
+        label_internal <- as.character(label_internal)
+      } else {
+        label_internal <- "my_estimand"
+      }
+    }
 
-  return(estimand_function_internal)
-}
+    estimand_function_internal <- function(data) {
+      args$data <- data
+      value <- do.call(func, args = args, envir = env)
+      data.frame(
+        estimand_label = label_internal,
+        estimand = value,
+        stringsAsFactors = FALSE
+      )
+    }
+    attributes(estimand_function_internal) <-
+      list(call = match.call(),
+           type = "estimand",
+           label = label_internal)
+
+    return(estimand_function_internal)
+  }
 
 #' @importFrom lazyeval lazy_eval lazy_dots
 #' @export
-estimand_function_default <- function(data, ..., subset = NULL){
+estimand_function_default <- function(data, ..., subset = NULL) {
   options <- lazy_dots(...)
   if (length(options) > 1) {
     stop("Please only provide a single estimand to declare_estimand.")

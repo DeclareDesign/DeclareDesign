@@ -1,4 +1,5 @@
 
+
 #' Declare Sampling Procedure
 #'
 #' @param ... Arguments to the sampling function
@@ -46,84 +47,83 @@
 #' df <- my_sampling_custom(df)
 #' dim(df)
 #' head(df)
-declare_sampling <- function(..., sampling_function = sampling_function_default) {
-  args <- eval(substitute(alist(...)))
-  env <- freeze_environment(parent.frame())
-  func <- eval(sampling_function)
-  if (!("data" %in% names(formals(func)))) {
-    stop("Please choose a sampling_function with a data argument.")
-  }
-  sampling_function_internal <- function(data) {
-    args$data <- data
-    do.call(func, args = args, envir = env)
-  }
-  attributes(sampling_function_internal) <-
-    list(call = match.call(), type = "sampling")
+declare_sampling <-
+  function(..., sampling_function = sampling_function_default) {
+    args <- eval(substitute(alist(...)))
+    env <- freeze_environment(parent.frame())
+    func <- eval(sampling_function)
+    if (!("data" %in% names(formals(func)))) {
+      stop("Please choose a sampling_function with a data argument.")
+    }
+    sampling_function_internal <- function(data) {
+      args$data <- data
+      do.call(func, args = args, envir = env)
+    }
+    attributes(sampling_function_internal) <-
+      list(call = match.call(), type = "sampling")
 
-  if (from_package(sampling_function, "DeclareDesign") &
-      substitute(sampling_function) == "sampling_function_default") {
+    if (from_package(sampling_function, "DeclareDesign") &
+        substitute(sampling_function) == "sampling_function_default") {
+      args_lazy <- lazy_dots(...)
 
-    args_lazy <- lazy_dots(...)
+      randomizr_summary <- function(data) {
+        if (length(args_lazy) > 0) {
+          args_lazy$N <- as.lazy(nrow(data), env = args_lazy[[1]]$env)
+        } else {
+          args_lazy$N <- as.lazy(nrow(data))
+        }
 
-    randomizr_summary <- function(data){
-      if (length(args_lazy) > 0) {
-        args_lazy$N <- as.lazy(nrow(data), env = args_lazy[[1]]$env)
-      } else {
-        args_lazy$N <- as.lazy(nrow(data))
+        mcall <-
+          make_call(quote(randomizr::declare_rs), args = args_lazy)
+
+        rs_declaration <- lazy_eval(mcall, data = data)
+
+        return(print(rs_declaration))
       }
 
-      mcall <- make_call(quote(randomizr::declare_rs), args = args_lazy)
+      attributes(sampling_function_internal)$summary_function <-
+        randomizr_summary
 
-      rs_declaration <- lazy_eval(mcall, data = data)
-
-      return(print(rs_declaration))
     }
 
-    attributes(sampling_function_internal)$summary_function <- randomizr_summary
-
+    return(sampling_function_internal)
   }
-
-  return(sampling_function_internal)
-}
 
 #' @importFrom lazyeval make_call lazy_eval as.lazy
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
-sampling_function_default <- function(data, ..., sampling_variable_name = "S"){
+sampling_function_default <-
+  function(data, ..., sampling_variable_name = "S") {
+    ## draw sample
 
-  ## draw sample
+    options <- lazy_dots(...)
 
-  options <- lazy_dots(...)
+    if (length(options) > 0) {
+      options$N <- as.lazy(nrow(data), env = options[[1]]$env)
+    } else {
+      options$N <- as.lazy(nrow(data))
+    }
 
-  if (length(options) > 0) {
-    options$N <- as.lazy(nrow(data), env = options[[1]]$env)
-  } else {
-    options$N <- as.lazy(nrow(data))
+    sampling_variable_name <- substitute(sampling_variable_name)
+    if (!is.null(sampling_variable_name)) {
+      sampling_variable_name <- as.character(sampling_variable_name)
+    } else {
+      stop("Please provide a name for the sampling variable as sampling_variable_name.")
+    }
+
+    mcall <- make_call(quote(randomizr::draw_rs), args = options)
+
+    data[, sampling_variable_name] <- lazy_eval(mcall, data = data)
+
+    ## obtain inclusion probabilities
+
+    mcall <-
+      make_call(quote(randomizr::obtain_inclusion_probabilities),
+                args = options)
+
+    data[, paste0(sampling_variable_name, "_inclusion_prob")] <-
+      lazy_eval(mcall, data = data)
+
+    ## subset to the sampled observations and remove the sampling variable
+    data[data[, sampling_variable_name] == 1,-which(names(data) %in% sampling_variable_name), drop = FALSE]
+
   }
-
-  sampling_variable_name <- substitute(sampling_variable_name)
-  if (!is.null(sampling_variable_name)) {
-    sampling_variable_name <- as.character(sampling_variable_name)
-  } else {
-    stop("Please provide a name for the sampling variable as sampling_variable_name.")
-  }
-
-  mcall <- make_call(quote(randomizr::draw_rs), args = options)
-
-  data[,sampling_variable_name] <- lazy_eval(mcall, data = data)
-
-  ## obtain inclusion probabilities
-
-  mcall <- make_call(quote(randomizr::obtain_inclusion_probabilities),
-                     args = options)
-
-  data[,paste0(sampling_variable_name, "_inclusion_prob")] <-
-    lazy_eval(mcall, data = data)
-
-  ## subset to the sampled observations and remove the sampling variable
-  data[data[, sampling_variable_name] == 1,
-       -which(names(data) %in% sampling_variable_name), drop = FALSE]
-
-}
-
-
-

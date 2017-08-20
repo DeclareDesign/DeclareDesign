@@ -1,6 +1,7 @@
 
 
 
+
 #' Modify a Design
 #' @param design a design object, usually created by \code{\link{declare_design}}, \code{\link{quick_design}}, or \code{\link{download_design}}.
 #'
@@ -45,20 +46,28 @@ modify_design <- function(design, ...) {
   overlap_names <-
     ls(modify_env)[ls(modify_env) %in% ls(original_env)]
 
-  overlap_identical <- sapply(overlap_names, function(i) identical(get(i, envir = original_env), get(i, envir = modify_env)))
+  overlap_identical <-
+    sapply(overlap_names, function(i)
+      identical(get(i, envir = original_env), get(i, envir = modify_env)))
 
   ## throw warning if any overlapping object *has changed*
 
-  if(any(overlap_identical == FALSE)){
-    warning(paste0("Some of the objects in your workspace have changed since you declared the design, including ",
-                   paste(overlap_names[overlap_identical == FALSE], collapse = ","), ". The original object will be used from when you declared the design."))
+  if (any(overlap_identical == FALSE)) {
+    warning(
+      paste0(
+        "Some of the objects in your workspace have changed since you declared the design, including ",
+        paste(overlap_names[overlap_identical == FALSE], collapse = ","),
+        ". The original object will be used from when you declared the design."
+      )
+    )
   }
 
   ## add objects that are not in the original env (do not overwrite modified objects)
 
-  new_objects_modify <- ls(modify_env)[!(ls(modify_env) %in% ls(original_env))]
+  new_objects_modify <-
+    ls(modify_env)[!(ls(modify_env) %in% ls(original_env))]
 
-  for(n in new_objects_modify) {
+  for (n in new_objects_modify) {
     assign(n, get(n, modify_env), original_env)
   }
 
@@ -67,7 +76,6 @@ modify_design <- function(design, ...) {
     deparse(x$expr[[1]]))
 
   for (i in seq_along(dots)) {
-
     ## add step
     if (dots_funcs[i] ==  "add_step") {
       step_names <- names(dots[[i]]$expr)
@@ -76,12 +84,11 @@ modify_design <- function(design, ...) {
       before <- step_names[length(step_names)] == "before"
 
       if (before) {
-
         if (location == 1) {
           causal_order <-
             c(as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
               causal_order)
-        }else{
+        } else{
           causal_order <-
             c(causal_order[1:(location - 1)],
               as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
@@ -89,12 +96,12 @@ modify_design <- function(design, ...) {
         }
 
       } else {
-        if(location == length(causal_order)){
+        if (location == length(causal_order)) {
           causal_order <-
             c(causal_order,
               as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)])
 
-        }else{
+        } else{
           causal_order <-
             c(causal_order[1:(location)],
               as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
@@ -127,7 +134,6 @@ modify_design <- function(design, ...) {
           c(causal_order[1:(location - 1)],
             as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)])
       } else{
-
         causal_order <-
           c(causal_order[1:(location - 1)],
             as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],

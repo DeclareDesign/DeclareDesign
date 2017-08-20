@@ -1,11 +1,12 @@
 
 
+
 #' Draw Data from a Design
 #'
 #' @param design A design created by \code{\link{declare_design}}.
 #'
 #' @export
-draw_data <- function(design){
+draw_data <- function(design) {
   design$data_function()
 }
 
@@ -16,7 +17,7 @@ draw_data <- function(design){
 #' @return a \code{data.frame} of estimates calculated from a designs estimators.
 #'
 #' @export
-get_estimates <- function(design){
+get_estimates <- function(design) {
   design$design_function()$estimates_df
 }
 
@@ -27,6 +28,6 @@ get_estimates <- function(design){
 #' @return a \code{data.frame} of estimands.
 #'
 #' @export
-get_estimands <- function(design){
+get_estimands <- function(design) {
   design$design_function()$estimands_df
 }

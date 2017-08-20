@@ -3,14 +3,18 @@ freeze_environment <- function(x) {
   list2env(as.list(x, all.names = TRUE), parent = parent.env(x))
 }
 
-from_package <- function(func, package){
-  func_package <- tryCatch(getNamespaceName(environment(func)), error = function(e) NULL)
+from_package <- function(func, package) {
+  func_package <-
+    tryCatch(
+      getNamespaceName(environment(func)),
+      error = function(e)
+        NULL
+    )
   ifelse(is.null(func_package), FALSE, func_package == package)
 }
 
 #' @export
-wrap_step_ <- function(...){
-
+wrap_step_ <- function(...) {
   ## this function allows you to put any R expression
   ## such a dplyr call mutate
   ## into the causal order, i.e.

@@ -1,4 +1,5 @@
 
+
 #' Declare an Estimator
 #'
 #' @param ... Arguments to the estimand function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.
@@ -75,7 +76,10 @@ declare_estimator <- function(...,
   estimator_function_internal <- function(data) {
     args$data <- data
     results <- do.call(func, args = args, envir = env)
-    return_data <- data.frame(estimator_label = label, results, stringsAsFactors = FALSE)
+    return_data <-
+      data.frame(estimator_label = label,
+                 results,
+                 stringsAsFactors = FALSE)
     if (!is.null(estimand)) {
       return_data$estimand_label <- attributes(estimand)$label
     }
@@ -83,7 +87,9 @@ declare_estimator <- function(...,
   }
 
   attributes(estimator_function_internal) <-
-    list(call = match.call(), type = "estimator", label = label)
+    list(call = match.call(),
+         type = "estimator",
+         label = label)
 
   return(estimator_function_internal)
 }
