@@ -150,37 +150,37 @@
         <span class='kw'>Y_Z_0</span> <span class='kw'>=</span> <span class='fl'>.05</span>,
         <span class='kw'>Y_Z_1</span> <span class='kw'>=</span> <span class='fl'>.30</span> + <span class='fl'>.01</span> * <span class='no'>age</span>)
 
-<span class='fu'>head</span>(<span class='fu'>my_potential_outcomes</span>(<span class='no'>pop</span>))</div><div class='output co'>#&gt;     ID      income age Y_Z_0 Y_Z_1
-#&gt; 1 0001  0.51284650  68  0.05  0.98
-#&gt; 2 0002  2.69205188  88  0.05  1.18
-#&gt; 3 0003 -0.06992481  18  0.05  0.48
-#&gt; 4 0004 -1.26151744  95  0.05  1.25
-#&gt; 5 0005 -1.23598445  45  0.05  0.75
-#&gt; 6 0006 -0.27499519  70  0.05  1.00</div><div class='input'>
+<span class='fu'>head</span>(<span class='fu'>my_potential_outcomes</span>(<span class='no'>pop</span>))</div><div class='output co'>#&gt;     ID     income age Y_Z_0 Y_Z_1
+#&gt; 1 0001 -0.1478888  39  0.05  0.69
+#&gt; 2 0002 -0.5980440  92  0.05  1.22
+#&gt; 3 0003 -0.3238154  95  0.05  1.25
+#&gt; 4 0004 -0.1182236  80  0.05  1.10
+#&gt; 5 0005 -1.2907442  83  0.05  1.13
+#&gt; 6 0006 -0.2049537  21  0.05  0.51</div><div class='input'>
 <span class='co'># Using a formula</span>
  <span class='no'>my_potential_outcomes</span> <span class='kw'>&lt;-</span> <span class='fu'>declare_potential_outcomes</span>(
  <span class='kw'>formula</span> <span class='kw'>=</span> <span class='no'>Y</span> ~ <span class='fl'>.25</span> * <span class='no'>Z</span> + <span class='fl'>.01</span> * <span class='no'>age</span> * <span class='no'>Z</span>)
  <span class='no'>pop_pos</span> <span class='kw'>&lt;-</span> <span class='fu'>my_potential_outcomes</span>(<span class='no'>pop</span>)
- <span class='fu'>head</span>(<span class='no'>pop_pos</span>)</div><div class='output co'>#&gt;     ID      income age Y_Z_0 Y_Z_1
-#&gt; 1 0001  0.51284650  68     0  0.93
-#&gt; 2 0002  2.69205188  88     0  1.13
-#&gt; 3 0003 -0.06992481  18     0  0.43
-#&gt; 4 0004 -1.26151744  95     0  1.20
-#&gt; 5 0005 -1.23598445  45     0  0.70
-#&gt; 6 0006 -0.27499519  70     0  0.95</div><div class='input'>
+ <span class='fu'>head</span>(<span class='no'>pop_pos</span>)</div><div class='output co'>#&gt;     ID     income age Y_Z_0 Y_Z_1
+#&gt; 1 0001 -0.1478888  39     0  0.64
+#&gt; 2 0002 -0.5980440  92     0  1.17
+#&gt; 3 0003 -0.3238154  95     0  1.20
+#&gt; 4 0004 -0.1182236  80     0  1.05
+#&gt; 5 0005 -1.2907442  83     0  1.08
+#&gt; 6 0006 -0.2049537  21     0  0.46</div><div class='input'>
  <span class='co'># condition_names defines the "range" of the potential outcomes function</span>
  <span class='no'>my_potential_outcomes</span> <span class='kw'>&lt;-</span>
       <span class='fu'>declare_potential_outcomes</span>(
       <span class='kw'>formula</span> <span class='kw'>=</span> <span class='no'>Y</span> ~ <span class='fl'>.25</span> * <span class='no'>Z</span> + <span class='fl'>.01</span> * <span class='no'>age</span> * <span class='no'>Z</span>,
       <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>4</span>)
 
-<span class='fu'>head</span>(<span class='fu'>my_potential_outcomes</span>(<span class='no'>pop</span>))</div><div class='output co'>#&gt;     ID      income age Y_Z_1 Y_Z_2 Y_Z_3 Y_Z_4
-#&gt; 1 0001  0.51284650  68  0.93  1.86  2.79  3.72
-#&gt; 2 0002  2.69205188  88  1.13  2.26  3.39  4.52
-#&gt; 3 0003 -0.06992481  18  0.43  0.86  1.29  1.72
-#&gt; 4 0004 -1.26151744  95  1.20  2.40  3.60  4.80
-#&gt; 5 0005 -1.23598445  45  0.70  1.40  2.10  2.80
-#&gt; 6 0006 -0.27499519  70  0.95  1.90  2.85  3.80</div><div class='input'>
+<span class='fu'>head</span>(<span class='fu'>my_potential_outcomes</span>(<span class='no'>pop</span>))</div><div class='output co'>#&gt;     ID     income age Y_Z_1 Y_Z_2 Y_Z_3 Y_Z_4
+#&gt; 1 0001 -0.1478888  39  0.64  1.28  1.92  2.56
+#&gt; 2 0002 -0.5980440  92  1.17  2.34  3.51  4.68
+#&gt; 3 0003 -0.3238154  95  1.20  2.40  3.60  4.80
+#&gt; 4 0004 -0.1182236  80  1.05  2.10  3.15  4.20
+#&gt; 5 0005 -1.2907442  83  1.08  2.16  3.24  4.32
+#&gt; 6 0006 -0.2049537  21  0.46  0.92  1.38  1.84</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Modify a Design by Replacing a Step — replace_step • DeclareDesign</title>
+<title>Replace a step in an existing design — replace_step • DeclareDesign</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -100,11 +100,11 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Modify a Design by Replacing a Step</h1>
+    <h1>Replace a step in an existing design</h1>
     </div>
 
     
-    <p>Modify a Design by Replacing a Step</p>
+    <p>Replace a step in an existing design</p>
     
 
     <pre class="usage"><span class='fu'>replace_step</span>(<span class='no'>...</span>, <span class='no'>replace</span>)</pre>
@@ -114,11 +114,11 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>...</th>
-      <td><p>replacement step(s)</p></td>
+      <td><p>bare (unquoted) names of step(s) to replace in a design</p></td>
     </tr>
     <tr>
       <th>replace</th>
-      <td><p>step to be replaced</p></td>
+      <td><p>bare (unquoted) name of step to be replaced</p></td>
     </tr>
     </table>
     
@@ -127,6 +127,223 @@
     <p>see <code><a href='modify_design.html'>modify_design</a></code> for details.</p>
     
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'>
+ <span class='no'>my_population</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_population.html'>declare_population</a></span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>noise</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='no'>N</span>))
+
+ <span class='no'>my_potential_outcomes</span> <span class='kw'>&lt;-</span>
+   <span class='fu'><a href='declare_potential_outcomes.html'>declare_potential_outcomes</a></span>(<span class='kw'>Y_Z_0</span> <span class='kw'>=</span> <span class='no'>noise</span>,
+                              <span class='kw'>Y_Z_1</span> <span class='kw'>=</span> <span class='no'>noise</span> + <span class='fu'>rnorm</span>(<span class='no'>N</span>, <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>2</span>))
+
+ <span class='no'>my_assignment</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_assignment.html'>declare_assignment</a></span>(<span class='kw'>m</span> <span class='kw'>=</span> <span class='fl'>50</span>)
+ <span class='no'>my_assignment_2</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_assignment.html'>declare_assignment</a></span>(<span class='kw'>m</span> <span class='kw'>=</span> <span class='fl'>25</span>)
+
+ <span class='no'>design</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_design.html'>declare_design</a></span>(<span class='no'>my_population</span>,
+                          <span class='no'>my_potential_outcomes</span>,
+                          <span class='no'>my_assignment</span>)
+
+ <span class='no'>design</span></div><div class='output co'>#&gt; 
+#&gt; Design Summary
+#&gt; 
+#&gt; Step 1 (population): my_population ---------------------------------------------
+#&gt; 
+#&gt; Added variable:  ID 
+#&gt;  N_missing N_unique
+#&gt;          0      100
+#&gt; 
+#&gt; Added variable:  noise 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.17   0.06 0.16 2.72 1.03         0      100
+#&gt; 
+#&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
+#&gt; 
+#&gt; Added variable:  Y_Z_0 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.17   0.06 0.16 2.72 1.03         0      100
+#&gt; 
+#&gt; Added variable:  Y_Z_1 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -5.93   2.38 2.47 8.30 2.47         0      100
+#&gt; 
+#&gt; Step 3 (assignment): my_assignment ---------------------------------------------
+#&gt; 
+#&gt; 
+#&gt; Random assignment procedure: Complete random assignment 
+#&gt; Number of units: 100 
+#&gt; Number of treatment arms: 2 
+#&gt; The possible treatment categories are 0 and 1.
+#&gt; The probabilities of assignment are constant across units.
+#&gt; 
+#&gt; Added variable:  Z 
+#&gt;                0    1
+#&gt;   Frequency   50   50
+#&gt;  Proportion 0.50 0.50
+#&gt; 
+#&gt; Added variable:  Z_cond_prob 
+#&gt;              0.5
+#&gt;   Frequency  100
+#&gt;  Proportion 1.00
+#&gt; </div><div class='input'>
+ <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'>replace_step</span>(<span class='no'>my_assignment_2</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
+#&gt; Design Summary
+#&gt; 
+#&gt; Step 1 (population): my_population ---------------------------------------------
+#&gt; 
+#&gt; Added variable:  ID 
+#&gt;  N_missing N_unique
+#&gt;          0      100
+#&gt; 
+#&gt; Added variable:  noise 
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.43   0.03 -0.00 2.36 1.08         0      100
+#&gt; 
+#&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
+#&gt; 
+#&gt; Added variable:  Y_Z_0 
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.43   0.03 -0.00 2.36 1.08         0      100
+#&gt; 
+#&gt; Added variable:  Y_Z_1 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -3.03   1.56 1.89 7.25 2.16         0      100
+#&gt; 
+#&gt; Step 3 (assignment): my_assignment_2 -------------------------------------------
+#&gt; 
+#&gt; 
+#&gt; Random assignment procedure: Complete random assignment 
+#&gt; Number of units: 100 
+#&gt; Number of treatment arms: 2 
+#&gt; The possible treatment categories are 0 and 1.
+#&gt; The probabilities of assignment are constant across units.
+#&gt; 
+#&gt; Added variable:  Z 
+#&gt;                0    1
+#&gt;   Frequency   75   25
+#&gt;  Proportion 0.75 0.25
+#&gt; 
+#&gt; Added variable:  Z_cond_prob 
+#&gt;             0.25 0.75
+#&gt;   Frequency   25   75
+#&gt;  Proportion 0.25 0.75
+#&gt; </div><div class='input'>
+ <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw'>dplyr</span><span class='kw'>::</span><span class='fu'>mutate</span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>after</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
+#&gt; Design Summary
+#&gt; 
+#&gt; Step 1 (population): my_population ---------------------------------------------
+#&gt; 
+#&gt; Added variable:  ID 
+#&gt;  N_missing N_unique
+#&gt;          0      100
+#&gt; 
+#&gt; Added variable:  noise 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -3.04   0.25 0.14 2.44 1.02         0      100
+#&gt; 
+#&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
+#&gt; 
+#&gt; Added variable:  Y_Z_0 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -3.04   0.25 0.14 2.44 1.02         0      100
+#&gt; 
+#&gt; Added variable:  Y_Z_1 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -3.66   2.02 1.97 7.66 2.36         0      100
+#&gt; 
+#&gt; Step 3 (assignment): my_assignment ---------------------------------------------
+#&gt; 
+#&gt; 
+#&gt; Random assignment procedure: Complete random assignment 
+#&gt; Number of units: 100 
+#&gt; Number of treatment arms: 2 
+#&gt; The possible treatment categories are 0 and 1.
+#&gt; The probabilities of assignment are constant across units.
+#&gt; 
+#&gt; Added variable:  Z 
+#&gt;                0    1
+#&gt;   Frequency   50   50
+#&gt;  Proportion 0.50 0.50
+#&gt; 
+#&gt; Added variable:  Z_cond_prob 
+#&gt;              0.5
+#&gt;   Frequency  100
+#&gt;  Proportion 1.00
+#&gt; 
+#&gt; Step 4 (custom data modification): dplyr::mutate(income = noise^2) -------------
+#&gt; 
+#&gt; Added variable:  income 
+#&gt;   min median mean  max   sd N_missing N_unique
+#&gt;  0.00   0.48 1.06 9.23 1.55         0      100
+#&gt; </div><div class='input'> <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw'>dplyr</span><span class='kw'>::</span><span class='fu'>mutate</span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>before</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
+#&gt; Design Summary
+#&gt; 
+#&gt; Step 1 (population): my_population ---------------------------------------------
+#&gt; 
+#&gt; Added variable:  ID 
+#&gt;  N_missing N_unique
+#&gt;          0      100
+#&gt; 
+#&gt; Added variable:  noise 
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -3.10  -0.13 -0.10 2.38 0.98         0      100
+#&gt; 
+#&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
+#&gt; 
+#&gt; Added variable:  Y_Z_0 
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -3.10  -0.13 -0.10 2.38 0.98         0      100
+#&gt; 
+#&gt; Added variable:  Y_Z_1 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -3.42   1.70 1.85 8.30 2.24         0      100
+#&gt; 
+#&gt; Step 3 (custom data modification): dplyr::mutate(income = noise^2) -------------
+#&gt; 
+#&gt; Added variable:  income 
+#&gt;   min median mean  max   sd N_missing N_unique
+#&gt;  0.00   0.38 0.96 9.58 1.50         0      100
+#&gt; 
+#&gt; Step 4 (assignment): my_assignment ---------------------------------------------
+#&gt; 
+#&gt; 
+#&gt; Random assignment procedure: Complete random assignment 
+#&gt; Number of units: 100 
+#&gt; Number of treatment arms: 2 
+#&gt; The possible treatment categories are 0 and 1.
+#&gt; The probabilities of assignment are constant across units.
+#&gt; 
+#&gt; Added variable:  Z 
+#&gt;                0    1
+#&gt;   Frequency   50   50
+#&gt;  Proportion 0.50 0.50
+#&gt; 
+#&gt; Added variable:  Z_cond_prob 
+#&gt;              0.5
+#&gt;   Frequency  100
+#&gt;  Proportion 1.00
+#&gt; </div><div class='input'>
+ <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='remove_step.html'>remove_step</a></span>(<span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
+#&gt; Design Summary
+#&gt; 
+#&gt; Step 1 (population): my_population ---------------------------------------------
+#&gt; 
+#&gt; Added variable:  ID 
+#&gt;  N_missing N_unique
+#&gt;          0      100
+#&gt; 
+#&gt; Added variable:  noise 
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.09  -0.18 -0.10 2.18 0.94         0      100
+#&gt; 
+#&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
+#&gt; 
+#&gt; Added variable:  Y_Z_0 
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.09  -0.18 -0.10 2.18 0.94         0      100
+#&gt; 
+#&gt; Added variable:  Y_Z_1 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -4.13   1.68 1.58 6.31 2.27         0      100
+#&gt; </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -134,7 +351,9 @@
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#details">Details</a></li>
-          </ul>
+      
+      <li><a href="#examples">Examples</a></li>
+    </ul>
 
   </div>
 </div>
