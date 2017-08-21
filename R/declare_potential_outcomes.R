@@ -130,20 +130,7 @@ potential_outcomes_function_formula <-
 #' @importFrom fabricatr fabricate_data
 potential_outcomes_function_discrete <- function(data, ...) {
   options <- quos(...)
-
-  variable_names <- sapply(
-    names(options),
-    FUN =
-      function(x)
-        paste(strsplit(x, split = "_")[[1]][1], strsplit(x, split = "_")[[1]][2], sep = "_")
-  )
-
-  if (!all(variable_names == variable_names[1])) {
-    stop("All of the variable names you create should begin with the same prefix, i.e. Y_Z_")
-  }
-
   po_call <- quo(fabricate_data(!!! options))
   po_call <- lang_modify(po_call, data = data)
-
   return(eval_tidy(po_call))
 }
