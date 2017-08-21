@@ -16,7 +16,6 @@ Depends:
 Imports:
     dplyr,
     foreach,
-    lazyeval,
     randomizr,
     fabricatr,
     estimatr
