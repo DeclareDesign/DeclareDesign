@@ -10,6 +10,9 @@
 #' @details
 #'
 #' While declare_sampling can work with any sampling_function that takes data and returns data, most random sampling procedures can be easily implemented with randomizr. The arguments to \code{\link{draw_rs}} can include N, strata_var, clust_var, n, prob, strata_n, and strata_prob. The arguments you need to specify are different for different designs. Check the help files for \code{\link{complete_rs}}, \code{\link{strata_rs}}, \code{\link{cluster_rs}}, or \code{\link{strata_and_cluster_rs}} for details on how to execute many common designs.
+#'
+#' @importFrom rlang quos quo lang_modify eval_tidy !!!
+#'
 #' @examples
 #'
 #' my_population <- declare_population(N = 100, female = rbinom(N, 1, .5))
@@ -62,26 +65,17 @@ declare_sampling <-
     attributes(sampling_function_internal) <-
       list(call = match.call(), type = "sampling")
 
-    if (from_package(sampling_function, "DeclareDesign") &
-        substitute(sampling_function) == "sampling_function_default") {
-      args_lazy <- lazy_dots(...)
+    if (from_package(assignment_function, "DeclareDesign") &
+        substitute(assignment_function) == "sampling_function_default") {
+      args_randomizr <- quos(...)
 
       randomizr_summary <- function(data) {
-        if (length(args_lazy) > 0) {
-          args_lazy$N <- as.lazy(nrow(data), env = args_lazy[[1]]$env)
-        } else {
-          args_lazy$N <- as.lazy(nrow(data))
-        }
-
-        mcall <-
-          make_call(quote(randomizr::declare_rs), args = args_lazy)
-
-        rs_declaration <- lazy_eval(mcall, data = data)
-
-        return(print(rs_declaration))
+        randomizr_call <- quo(declare_rs(!!! args_randomizr))
+        randomizr_call <- lang_modify(randomizr_call, N = nrow(data))
+        return(print(eval_tidy(randomizr_call, data = data)))
       }
 
-      attributes(sampling_function_internal)$summary_function <-
+      attributes(assignment_function_internal)$summary_function <-
         randomizr_summary
 
     }

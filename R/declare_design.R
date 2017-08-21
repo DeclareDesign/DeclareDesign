@@ -26,7 +26,7 @@
 #'
 #' @return a list of two functions, the \code{design_function} and the \code{data_function}. The \code{design_function} runs the design once, i.e. draws the data and calculates any estimates and estimands defined in \code{...}, returned separately as two \code{data.frame}'s. The \code{data_function} runs the design once also, but only returns the final data.
 #'
-#' @importFrom lazyeval lazy_dots lazy_eval as.lazy
+#' @importFrom rlang quos quo_expr eval_tidy quo_text
 #' @importFrom dplyr bind_rows
 #' @importFrom fabricatr describe_variable
 #' @importFrom utils bibentry
@@ -96,25 +96,24 @@ declare_design <- function(...,
 
   causal_order_env <- freeze_environment(parent.frame())
 
-  dots <- lazy_dots(...)
+  dots <- quos(...)
 
-  dots_classes <- sapply(dots, function(x)
-    class(x$expr))
+  dots_classes <- sapply(dots, function(x) class(quo_expr(x)))
 
   ## wrap any call in wrap_step_()
   if (length(dots) > 1) {
     for (i in 2:length(dots)) {
       if (dots_classes[[i]] == "call") {
-        dots[[i]]$expr <- call("wrap_step_", dots[[i]]$expr)
+        dots[[i]] <- quo(wrap_step_(!! dots[[i]]))  ##call("wrap_step_", quo_expr(dots[[i]]))
       }
     }
   }
 
-  causal_order <- lazy_eval(dots)
+  causal_order <- eval_tidy(dots)
 
-  causal_order_text <- eval(substitute(alist(...)))
+  causal_order_text <- sapply(dots, quo_text)
 
-  name_or_call <- sapply(causal_order_text, class)
+  name_or_call <- dots_classes ##sapply(causal_order_text, class)
 
   function_types <- rep("", length(causal_order))
 

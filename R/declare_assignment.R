@@ -12,6 +12,7 @@
 #'
 #' While declare_assignment can work with any assignment_function that takes data and returns data, most random assignment procedures can be easily implemented with randomizr. The arguments to \code{\link{conduct_ra}} can include N, block_var, clust_var, m, m_each, prob, prob_each, block_m, block_m_each = NULL, block_prob, block_prob_each, num_arms, and condition_names. The arguments you need to specify are different for different designs. Check the help files for \code{\link{complete_ra}}, \code{\link{block_ra}}, \code{\link{cluster_ra}}, or \code{\link{block_and_cluster_ra}} for details on how to execute many common designs.
 #'
+#' @importFrom rlang quos quo lang_modify eval_tidy !!!
 #'
 #' @examples
 #'
@@ -74,25 +75,12 @@ declare_assignment <-
 
     if (from_package(assignment_function, "DeclareDesign") &
         substitute(assignment_function) == "assignment_function_default") {
-      args_lazy <- lazy_dots(...)
+      args_randomizr <- quos(...)
 
       randomizr_summary <- function(data) {
-        if (length(args_lazy) > 0) {
-          args_lazy$N <- as.lazy(nrow(data), env = args_lazy[[1]]$env)
-        } else {
-          args_lazy$N <- as.lazy(nrow(data))
-        }
-        if (any(names(args_lazy) == "assignment_variable_name")) {
-          args_lazy$assignment_variable_name <-
-            args_lazy[-which(names(args_lazy) == "assignment_variable_name")]
-        }
-
-        mcall <-
-          make_call(quote(randomizr::declare_ra), args = args_lazy)
-
-        ra_declaration <- lazy_eval(mcall, data = data)
-
-        return(print(ra_declaration))
+        randomizr_call <- quo(declare_ra(!!! args_randomizr))
+        randomizr_call <- lang_modify(randomizr_call, N = nrow(data))
+        return(print(eval_tidy(randomizr_call, data = data)))
       }
 
       attributes(assignment_function_internal)$summary_function <-

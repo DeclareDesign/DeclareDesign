@@ -7,8 +7,6 @@
 #' @param estimand_function A function that takes a data.frame as an argument and returns a data.frame with the estimand and a label. By default, the estimand function accepts an expression such as ATE = mean(Y_Z_1-Y_Z_0).
 #' @param label An optional label to name the estimand, such as ATE. Typically, the label is inferred from how you specify the estimand in \code{...}, i.e. if you specify ATE = mean(Y_Z_1 - Y_Z_0) the estimand label will be ATE.
 #'
-#' @importFrom lazyeval lazy_dots make_call lazy_eval call_modify
-#'
 #' @return a function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimand.
 #'
 #' @export

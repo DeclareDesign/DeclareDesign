@@ -13,6 +13,7 @@ from_package <- function(func, package) {
   ifelse(is.null(func_package), FALSE, func_package == package)
 }
 
+#' @importFrom rlang quos lang_fn lang_modify eval_tidy
 #' @export
 wrap_step_ <- function(...) {
   ## this function allows you to put any R expression
@@ -20,18 +21,19 @@ wrap_step_ <- function(...) {
   ## into the causal order, i.e.
   ## declare_design(pop(), po, declare_step(mutate(q = 5)))
 
-  mcall <- lazy_dots(...)[[1]]
+  step_call <- quos(...)[[1]]
 
-  arg_names <- names(formals(eval(mcall$expr[[1]])))
+  arg_names <- names(formals(lang_fn(step_call)))
 
   declare_step_function_internal <- function(data) {
     if (".data" %in% arg_names) {
-      mcall$expr$.data <- data
+      step_call <- lang_modify(step_call, .data = data)
     } else if ("data" %in% arg_names) {
-      mcall$expr$data <- data
+      step_call <- lang_modify(step_call, data = data)
     }
-    lazy_eval(mcall)
+    eval_tidy(step_call)
   }
+
   attributes(declare_step_function_internal) <-
     list(call = match.call(), type = "declare_step")
 
