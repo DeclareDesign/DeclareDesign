@@ -45,6 +45,10 @@
 #' diagnosis
 #' }
 #'
+#' get_diagnonds(diagnosis)
+#'
+#' get_simulations(diagnosis)
+#'
 #' @importFrom dplyr bind_rows '%>%'
 #' @export
 diagnose_design <-

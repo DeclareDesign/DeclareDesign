@@ -1,20 +1,56 @@
-#' Get the diagnosands data frame from a diagnosis
+
+#' Explore your design diagnosis
 #'
-#' @param diagnosis A diagnosis object created by \code{\link{diagnose_design}}.
+#' @param diagnosis A design diagnosis created by \code{\link{diagnose_design}}.
 #'
-#' @return a \code{data.frame} of the diagnosand values from a diagnosis
+#' @examples
+#' my_population <- declare_population(N = 500, noise = rnorm(N))
 #'
+#' my_potential_outcomes <- declare_potential_outcomes(
+#'   Y_Z_0 = noise, Y_Z_1 = noise +
+#'   rnorm(N, mean = 2, sd = 2))
+#'
+#' my_assignment <- declare_assignment()
+#'
+#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+#'
+#' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+#'
+#' design <- declare_design(my_population,
+#'                          my_potential_outcomes,
+#'                          my_estimand,
+#'                          my_assignment,
+#'                          reveal_outcomes,
+#'                          my_estimator)
+#'
+#' \dontrun{
+#' # using built-in defaults:
+#' diagnosis <- diagnose_design(design)
+#' diagnosis
+#' }
+#'
+#' # using a user-defined diagnosand
+#' my_diagnosand <- declare_diagnosands(absolute_error = mean(abs(est - estimand)))
+#'
+#' \dontrun{
+#' diagnosis <- diagnose_design(design, diagnosands = my_diagnosand)
+#' diagnosis
+#' }
+#'
+#' get_diagnonds(diagnosis)
+#'
+#' get_simulations(diagnosis)
+#'
+#' @name diagnosis_helpers
+NULL
+
+#' @rdname diagnosis_helpers
 #' @export
 get_diagnosands <- function(diagnosis) {
   diagnosis$diagnosands
 }
 
-#' Get the simulations data frame from a diagnosis
-#'
-#' @param diagnosis A diagnosis object created by \code{\link{diagnose_design}}.
-#'
-#' @return a \code{data.frame} of the simulations from a diagnosis
-#'
+#' @rdname diagnosis_helpers
 #' @export
 get_simulations <- function(diagnosis) {
   diagnosis$simulations
