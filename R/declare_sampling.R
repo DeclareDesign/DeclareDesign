@@ -69,8 +69,12 @@ declare_sampling <-
         substitute(assignment_function) == "sampling_function_default") {
       args_randomizr <- quos(...)
 
+      if (any(names(args_randomizr) == "sampling_variable_name")) {
+        args_randomizr$sampling_variable_name <- NULL
+      }
+      randomizr_call <- quo(declare_rs(!!! args_randomizr))
+
       randomizr_summary <- function(data) {
-        randomizr_call <- quo(declare_rs(!!! args_randomizr))
         randomizr_call <- lang_modify(randomizr_call, N = nrow(data))
         return(print(eval_tidy(randomizr_call, data = data)))
       }

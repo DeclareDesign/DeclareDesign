@@ -98,22 +98,20 @@ declare_design <- function(...,
 
   dots <- quos(...)
 
-  dots_classes <- sapply(dots, function(x) class(quo_expr(x)))
+  causal_order_expr <- sapply(dots, quo_expr)
+
+  name_or_call <- sapply(causal_order_expr, class)
 
   ## wrap any call in wrap_step_()
   if (length(dots) > 1) {
     for (i in 2:length(dots)) {
-      if (dots_classes[[i]] == "call") {
+      if (name_or_call[[i]] == "call") {
         dots[[i]] <- quo(wrap_step_(!! dots[[i]]))  ##call("wrap_step_", quo_expr(dots[[i]]))
       }
     }
   }
 
   causal_order <- eval_tidy(dots)
-
-  causal_order_text <- sapply(dots, quo_text)
-
-  name_or_call <- dots_classes ##sapply(causal_order_text, class)
 
   function_types <- rep("", length(causal_order))
 
@@ -284,7 +282,7 @@ declare_design <- function(...,
       data_function = data_function,
       design_function = design_function,
       summary_function = summary_function,
-      causal_order = causal_order_text,
+      causal_order_expr = causal_order_expr,
       causal_order_env = causal_order_env,
       function_types = function_types,
       causal_order_types = causal_order_types,
@@ -360,7 +358,7 @@ summary.design <- function(object, ...) {
     list(
       variables_added = summ$variables_added,
       quantities_added = summ$quantities_added,
-      causal_order = object$causal_order,
+      causal_order_expr = object$causal_order_expr,
       causal_order_types = object$causal_order_types,
       function_types = object$function_types,
       title = object$title,
@@ -395,7 +393,7 @@ print.summary.design <- function(x, ...) {
   }
 
   for (i in 1:max(length(x$variables_added), length(x$quantities_added))) {
-    step_name <- deparse(x$causal_order[[i]])
+    step_name <- deparse(x$causal_order_expr[[i]])
     step_class <-
       ifelse(
         x$function_types[[i]] != "unknown",

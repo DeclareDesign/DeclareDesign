@@ -1,6 +1,6 @@
-context("declare design")
+context("modify design")
 
-test_that("test the full declare design setup", {
+test_that("test modify declare design ", {
 
   library(dplyr)
   N <- 500
@@ -28,6 +28,7 @@ test_that("test the full declare design setup", {
 
   modify_design(design, remove_step(dplyr::mutate(q = 5)))
 
+
   #multiples
 
   modify_design(design, add_step(dplyr::mutate(blah = 6),
@@ -35,8 +36,6 @@ test_that("test the full declare design setup", {
                                          after = my_potential_outcomes))
 
   modify_design(design, replace_step(dplyr::mutate(blah = 10), my_assignment_2, replace = dplyr::mutate(q = 5)))
-
-  modify_design(design, remove_step(dplyr::mutate(q = 5)))
 
 })
 

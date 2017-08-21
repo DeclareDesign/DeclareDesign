@@ -77,8 +77,12 @@ declare_assignment <-
         substitute(assignment_function) == "assignment_function_default") {
       args_randomizr <- quos(...)
 
+      if (any(names(args_randomizr) == "assignment_variable_name")) {
+        args_randomizr$assignment_variable_name <- NULL
+      }
+      randomizr_call <- quo(declare_ra(!!! args_randomizr))
+
       randomizr_summary <- function(data) {
-        randomizr_call <- quo(declare_ra(!!! args_randomizr))
         randomizr_call <- lang_modify(randomizr_call, N = nrow(data))
         return(print(eval_tidy(randomizr_call, data = data)))
       }
@@ -91,7 +95,7 @@ declare_assignment <-
     return(assignment_function_internal)
   }
 
-#' @importFrom rlang quos !!! lang_modify eval_tidy quo
+#' @importFrom rlang quos !!! lang_modify eval_tidy quo f_rhs
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
 assignment_function_default <-
   function(data, ..., assignment_variable_name = Z) {

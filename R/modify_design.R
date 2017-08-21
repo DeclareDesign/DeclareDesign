@@ -9,7 +9,8 @@
 #'
 #' @return A design object. See \code{\link{declare_design}} for details.
 #'
-#' @importFrom lazyeval lazy_dots
+#' @importFrom rlang lang_name quos quo_expr
+#'
 #' @export
 #'
 #' @examples
@@ -36,7 +37,7 @@
 #'
 #'  modify_design(design, remove_step(my_assignment))
 modify_design <- function(design, ...) {
-  causal_order <- design$causal_order
+  causal_order_expr <- design$causal_order_expr
   original_env <- design$causal_order_env
 
   modify_env <- freeze_environment(parent.frame())
@@ -56,7 +57,7 @@ modify_design <- function(design, ...) {
     warning(
       paste0(
         "Some of the objects in your workspace have changed since you declared the design, including ",
-        paste(overlap_names[overlap_identical == FALSE], collapse = ","),
+        paste(overlap_names[overlap_identical == FALSE], collapse = ", "),
         ". The original object will be used from when you declared the design."
       )
     )
@@ -71,41 +72,40 @@ modify_design <- function(design, ...) {
     assign(n, get(n, modify_env), original_env)
   }
 
-  dots <- lazy_dots(...)
-  dots_funcs <- sapply(dots, function(x)
-    deparse(x$expr[[1]]))
+  dots <- quos(...)
+  dots_funcs <- sapply(dots, function(x) lang_name(x))
 
   for (i in seq_along(dots)) {
     ## add step
     if (dots_funcs[i] ==  "add_step") {
-      step_names <- names(dots[[i]]$expr)
+      step_names <- quo_expr(dots[[i]])
       location <-
-        which(causal_order == dots[[i]]$expr[[length(step_names)]])
-      before <- step_names[length(step_names)] == "before"
+        which(causal_order_expr == quo_expr(dots[[i]])[[length(step_names)]])
+      before <- names(step_names)[length(step_names)] == "before"
 
       if (before) {
         if (location == 1) {
-          causal_order <-
-            c(as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
-              causal_order)
+          causal_order_expr <-
+            c(as.list(quo_expr(dots[[i]]))[2:(length(quo_expr(dots[[i]])) - 1)],
+              causal_order_expr)
         } else{
-          causal_order <-
-            c(causal_order[1:(location - 1)],
-              as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
-              causal_order[location:length(causal_order)])
+          causal_order_expr <-
+            c(causal_order_expr[1:(location - 1)],
+              as.list(quo_expr(dots[[i]]))[2:(length(quo_expr(dots[[i]])) - 1)],
+              causal_order_expr[location:length(causal_order_expr)])
         }
 
       } else {
-        if (location == length(causal_order)) {
-          causal_order <-
-            c(causal_order,
-              as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)])
+        if (location == length(causal_order_expr)) {
+          causal_order_expr <-
+            c(causal_order_expr,
+              as.list(quo_expr(dots[[i]]))[2:(length(quo_expr(dots[[i]])) - 1)])
 
         } else{
-          causal_order <-
-            c(causal_order[1:(location)],
-              as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
-              causal_order[(location + 1):length(causal_order)])
+          causal_order_expr <-
+            c(causal_order_expr[1:(location)],
+              as.list(quo_expr(dots[[i]]))[2:(length(quo_expr(dots[[i]])) - 1)],
+              causal_order_expr[(location + 1):length(causal_order_expr)])
         }
 
       }
@@ -115,29 +115,29 @@ modify_design <- function(design, ...) {
 
     if (dots_funcs[i] == "remove_step") {
       location <-
-        which(causal_order == dots[[i]]$expr[[2]])
-      causal_order[[location]] <- NULL
+        which(causal_order_expr == quo_expr(dots[[i]])[[2]])
+      causal_order_expr[[location]] <- NULL
     }
 
     ## replace step
 
     if (dots_funcs[i] == "replace_step") {
       location <-
-        which(causal_order == dots[[i]]$expr[[length(dots[[i]]$expr)]])
+        which(causal_order_expr == quo_expr(dots[[i]])[[length(quo_expr(dots[[i]]))]])
 
       if (location == 1) {
-        causal_order <-
-          c(as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
-            causal_order[(location + 1):length(causal_order)])
-      } else if (location == length(causal_order)) {
-        causal_order <-
-          c(causal_order[1:(location - 1)],
-            as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)])
+        causal_order_expr <-
+          c(as.list(quo_expr(dots[[i]]))[2:(length(quo_expr(dots[[i]])) - 1)],
+            causal_order_expr[(location + 1):length(causal_order_expr)])
+      } else if (location == length(causal_order_expr)) {
+        causal_order_expr <-
+          c(causal_order_expr[1:(location - 1)],
+            as.list(quo_expr(dots[[i]]))[2:(length(quo_expr(dots[[i]])) - 1)])
       } else{
-        causal_order <-
-          c(causal_order[1:(location - 1)],
-            as.list(dots[[i]]$expr)[2:(length(dots[[i]]$expr) - 1)],
-            causal_order[(location + 1):length(causal_order)])
+        causal_order_expr <-
+          c(causal_order_expr[1:(location - 1)],
+            as.list(quo_expr(dots[[i]]))[2:(length(quo_expr(dots[[i]])) - 1)],
+            causal_order_expr[(location + 1):length(causal_order_expr)])
 
       }
 
@@ -145,56 +145,35 @@ modify_design <- function(design, ...) {
   }
 
   new_design <- do.call(what = declare_design,
-                        args = causal_order,
+                        args = causal_order_expr,
                         envir = original_env)
 
   return(new_design)
 
 }
 
-#' Modify a Design by Adding Steps
-#' @param ... steps to add to a design
+#' @param ... bare (unquoted) names of step(s) to add to a design
 #'
-#' @param before bare (unquoted) name of the step before which to add steps.
-#' @param after bare (unquoted) name of the step after which to add steps.
+#' @param before bare (unquoted) name of the step before which to add steps
+#' @param after bare (unquoted) name of the step after which to add steps
 #'
-#' @importFrom lazyeval lazy_dots
-#' @details see \code{\link{modify_design}} for details.
+#' @describeIn modify_design
 #'
 #' @export
-add_step <- function(..., before = NULL, after = NULL) {
-  obj <- list(
-    additions = lazy_dots(...),
-    before = lazy_dots(before),
-    after = lazy_dots(after)
-  )
-  return(obj)
-}
+add_step <- function(..., before = NULL, after = NULL) {}
 
-#' Modify a Design by Removing Steps
-#' @param ... bare (unquoted) names of steps to remove
+#' @param ... bare (unquoted) names of step(s) to remove from a design
 #'
-#' @importFrom lazyeval lazy_dots
+#' @describeIn modify_design
 #'
-#' @details see \code{\link{modify_design}} for details.
 #' @export
-remove_step <- function(...) {
-  obj <- list(removals = lazy_dots(...))
-  return(obj)
-}
+remove_step <- function(...) {}
 
-#' Modify a Design by Replacing a Step
-#' @param ... replacement step(s)
+#' @param ... bare (unquoted) names of step(s) to replace in a design
 #'
-#' @param replace step to be replaced
+#' @param replace bare (unquoted) name of step to be replaced
 #'
-#' @importFrom lazyeval lazy_dots
-#'
-#' @details see \code{\link{modify_design}} for details.
+#' @describeIn modify_design
 #'
 #' @export
-replace_step <- function(..., replace) {
-  obj <- list(replacements = lazy_dots(...),
-              replace = lazy_dots(replace))
-  return(obj)
-}
+replace_step <- function(..., replace) {}
