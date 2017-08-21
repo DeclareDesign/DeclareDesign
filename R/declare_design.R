@@ -102,11 +102,11 @@ declare_design <- function(...,
 
   name_or_call <- sapply(causal_order_expr, class)
 
-  ## wrap any call in wrap_step_()
+  ## wrap any call in wrap_step()
   if (length(dots) > 1) {
     for (i in 2:length(dots)) {
       if (name_or_call[[i]] == "call") {
-        dots[[i]] <- quo(wrap_step_(!! dots[[i]]))  ##call("wrap_step_", quo_expr(dots[[i]]))
+        dots[[i]] <- quo(wrap_step(!! dots[[i]]))  ##call("wrap_step", quo_expr(dots[[i]]))
       }
     }
   }

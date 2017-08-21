@@ -14,8 +14,7 @@ from_package <- function(func, package) {
 }
 
 #' @importFrom rlang quos lang_fn lang_modify eval_tidy
-#' @export
-wrap_step_ <- function(...) {
+wrap_step <- function(...) {
   ## this function allows you to put any R expression
   ## such a dplyr call mutate
   ## into the causal order, i.e.
