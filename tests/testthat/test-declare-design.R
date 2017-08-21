@@ -33,5 +33,20 @@ test_that("test the full declare design setup", {
 })
 
 
+test_that("test the full declare design setup", {
+
+  design <- declare_design(declare_population(N = 500, noise = rnorm(N)),
+                           declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)),
+                           declare_sampling(n = 250),
+                           declare_assignment(m = 25),
+                           reveal_outcomes)
+
+  # head(design$data_function())
+  # design$design_function()
+  #
+  # diagnose_design(design, sims = 3)
+
+})
+
 
 
