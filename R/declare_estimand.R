@@ -81,7 +81,6 @@ declare_estimand <-
   }
 
 #' @importFrom rlang eval_tidy quos
-#' @export
 estimand_function_default <- function(data, ..., subset = NULL) {
   options <- quos(...)
   if (length(options) > 1) {

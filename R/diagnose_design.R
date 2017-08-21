@@ -131,7 +131,7 @@ get_simulations <- function(diagnosis) {
 #' @importFrom dplyr group_by left_join bind_rows group_by_ summarize_
 diagnose_design_single_design <-
   function(design,
-           diagnosands = default_diagnosands,
+           diagnosands = NULL,
            sims = 500) {
     ##if(getDoParWorkers() == 1){
     ##  registerDoSEQ()

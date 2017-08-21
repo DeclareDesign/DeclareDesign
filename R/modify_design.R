@@ -152,28 +152,105 @@ modify_design <- function(design, ...) {
 
 }
 
+#' Add a step to an existing design
+#'
 #' @param ... bare (unquoted) names of step(s) to add to a design
 #'
 #' @param before bare (unquoted) name of the step before which to add steps
 #' @param after bare (unquoted) name of the step after which to add steps
 #'
-#' @describeIn modify_design
+#' @details see \code{\link{modify_design}} for details.
+#'
+#' @examples
+#'
+#'  my_population <- declare_population(N = 100, noise = rnorm(N))
+#'
+#'  my_potential_outcomes <-
+#'    declare_potential_outcomes(Y_Z_0 = noise,
+#'                               Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+#'
+#'  my_assignment <- declare_assignment(m = 50)
+#'  my_assignment_2 <- declare_assignment(m = 25)
+#'
+#'  design <- declare_design(my_population,
+#'                           my_potential_outcomes,
+#'                           my_assignment)
+#'
+#'  design
+#'
+#'  modify_design(design, replace_step(my_assignment_2, replace = my_assignment))
+#'
+#'  modify_design(design, add_step(dplyr::mutate(income = noise^2), after = my_assignment))
+#'  modify_design(design, add_step(dplyr::mutate(income = noise^2), before = my_assignment))
+#'
+#'  modify_design(design, remove_step(my_assignment))
 #'
 #' @export
 add_step <- function(..., before = NULL, after = NULL) {}
 
+#' Remove a step from an existing design
+#'
 #' @param ... bare (unquoted) names of step(s) to remove from a design
 #'
-#' @describeIn modify_design
+#' @details see \code{\link{modify_design}} for details.
 #'
 #' @export
+#'
+#' @examples
+#'
+#'  my_population <- declare_population(N = 100, noise = rnorm(N))
+#'
+#'  my_potential_outcomes <-
+#'    declare_potential_outcomes(Y_Z_0 = noise,
+#'                               Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+#'
+#'  my_assignment <- declare_assignment(m = 50)
+#'  my_assignment_2 <- declare_assignment(m = 25)
+#'
+#'  design <- declare_design(my_population,
+#'                           my_potential_outcomes,
+#'                           my_assignment)
+#'
+#'  design
+#'
+#'  modify_design(design, replace_step(my_assignment_2, replace = my_assignment))
+#'
+#'  modify_design(design, add_step(dplyr::mutate(income = noise^2), after = my_assignment))
+#'  modify_design(design, add_step(dplyr::mutate(income = noise^2), before = my_assignment))
+#'
+#'  modify_design(design, remove_step(my_assignment))
 remove_step <- function(...) {}
 
+#' Replace a step in an existing design
+#'
 #' @param ... bare (unquoted) names of step(s) to replace in a design
 #'
 #' @param replace bare (unquoted) name of step to be replaced
 #'
-#' @describeIn modify_design
+#' @details see \code{\link{modify_design}} for details.
 #'
 #' @export
+#' @examples
+#'
+#'  my_population <- declare_population(N = 100, noise = rnorm(N))
+#'
+#'  my_potential_outcomes <-
+#'    declare_potential_outcomes(Y_Z_0 = noise,
+#'                               Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+#'
+#'  my_assignment <- declare_assignment(m = 50)
+#'  my_assignment_2 <- declare_assignment(m = 25)
+#'
+#'  design <- declare_design(my_population,
+#'                           my_potential_outcomes,
+#'                           my_assignment)
+#'
+#'  design
+#'
+#'  modify_design(design, replace_step(my_assignment_2, replace = my_assignment))
+#'
+#'  modify_design(design, add_step(dplyr::mutate(income = noise^2), after = my_assignment))
+#'  modify_design(design, add_step(dplyr::mutate(income = noise^2), before = my_assignment))
+#'
+#'  modify_design(design, remove_step(my_assignment))
 replace_step <- function(..., replace) {}

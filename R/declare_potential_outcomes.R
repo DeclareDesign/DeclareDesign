@@ -76,7 +76,6 @@ declare_potential_outcomes <-
   }
 
 #' @importFrom rlang quos quo lang_modify !!! eval_tidy
-#' @export
 potential_outcomes_function_default <-
   function(data,
            assignment_variable_name = "Z",

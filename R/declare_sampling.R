@@ -12,6 +12,7 @@
 #' While declare_sampling can work with any sampling_function that takes data and returns data, most random sampling procedures can be easily implemented with randomizr. The arguments to \code{\link{draw_rs}} can include N, strata_var, clust_var, n, prob, strata_n, and strata_prob. The arguments you need to specify are different for different designs. Check the help files for \code{\link{complete_rs}}, \code{\link{strata_rs}}, \code{\link{cluster_rs}}, or \code{\link{strata_and_cluster_rs}} for details on how to execute many common designs.
 #'
 #' @importFrom rlang quos quo lang_modify eval_tidy !!!
+#' @importFrom randomizr declare_rs
 #'
 #' @examples
 #'
@@ -65,8 +66,8 @@ declare_sampling <-
     attributes(sampling_function_internal) <-
       list(call = match.call(), type = "sampling")
 
-    if (from_package(assignment_function, "DeclareDesign") &
-        substitute(assignment_function) == "sampling_function_default") {
+    if (from_package(sampling_function, "DeclareDesign") &
+        substitute(sampling_function) == "sampling_function_default") {
       args_randomizr <- quos(...)
 
       if (any(names(args_randomizr) == "sampling_variable_name")) {
@@ -79,7 +80,7 @@ declare_sampling <-
         return(print(eval_tidy(randomizr_call, data = data)))
       }
 
-      attributes(assignment_function_internal)$summary_function <-
+      attributes(sampling_function_internal)$summary_function <-
         randomizr_summary
 
     }

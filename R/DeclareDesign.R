@@ -37,3 +37,5 @@ load <- c("fabricatr", "estimatr", "randomizr")
 is_attached <- function(x) {
   paste0("package:", x) %in% search()
 }
+
+globalVariables(c("Z", "Y", "est", "estimand", "p", "ci_upper", "ci_lower", "my_estimator"))

@@ -2,35 +2,14 @@
 % Please edit documentation in R/modify_design.R
 \name{modify_design}
 \alias{modify_design}
-\alias{add_step}
-\alias{remove_step}
-\alias{replace_step}
 \title{Modify a Design}
 \usage{
 modify_design(design, ...)
-
-add_step(..., before = NULL, after = NULL)
-
-remove_step(...)
-
-replace_step(..., replace)
 }
 \arguments{
 \item{design}{a design object, usually created by \code{\link{declare_design}}, \code{\link{quick_design}}, or \code{\link{download_design}}.}
 
 \item{...}{a series of calls to \code{\link{add_step}}, \code{\link{remove_step}}, or \code{\link{replace_step}}}
-
-\item{before}{bare (unquoted) name of the step before which to add steps}
-
-\item{after}{bare (unquoted) name of the step after which to add steps}
-
-\item{replace}{bare (unquoted) name of step to be replaced}
-
-\item{...}{bare (unquoted) names of step(s) to add to a design}
-
-\item{...}{bare (unquoted) names of step(s) to remove from a design}
-
-\item{...}{bare (unquoted) names of step(s) to replace in a design}
 }
 \value{
 A design object. See \code{\link{declare_design}} for details.
@@ -38,15 +17,6 @@ A design object. See \code{\link{declare_design}} for details.
 \description{
 Modify a Design
 }
-\section{Functions}{
-\itemize{
-\item \code{add_step}: 
-
-\item \code{remove_step}: 
-
-\item \code{replace_step}: 
-}}
-
 \examples{
 
  my_population <- declare_population(N = 100, noise = rnorm(N))

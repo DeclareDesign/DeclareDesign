@@ -5,7 +5,7 @@
 \title{Declare an Estimator}
 \usage{
 declare_estimator(..., estimator_function = estimatr::difference_in_means,
-  estimand = NULL, label = my_estimator)
+  estimand = NULL, label = my_estimand)
 }
 \arguments{
 \item{...}{Arguments to the estimand function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.}
