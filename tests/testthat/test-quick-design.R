@@ -2,7 +2,7 @@ context("Quick Design")
 
 test_that("quick_design works", {
 
-  m_arm_trial <- function(N){
+  two_arm_trial <- function(N){
 
     my_population <- declare_population(N = N, noise = rnorm(N))
     my_potential_outcomes <- declare_potential_outcomes(
@@ -19,9 +19,9 @@ test_that("quick_design works", {
     return(my_design)
   }
 
-  draw_data(m_arm_trial(N = 100))
+  draw_data(two_arm_trial(N = 100))
 
-  design <- quick_design(template = m_arm_trial, N = 100)
+  design <- quick_design(template = two_arm_trial, N = 100)
 
   draw_data(design)
 
@@ -33,7 +33,7 @@ rm(list = ls())
 
 test_that("quick_design works some more", {
 
-  m_arm_trial <- function(N) {
+  two_arm_trial <- function(N) {
     pop <- declare_population(N = N,
                               Y = rnorm(N),
                               Z = rbinom(N, 1, .5))
@@ -44,10 +44,10 @@ test_that("quick_design works some more", {
     return(my_design)
   }
 
-  m_arm_trial(N = 5)$data_function()
-  m_arm_trial(N = 15)$data_function()
+  two_arm_trial(N = 5)$data_function()
+  two_arm_trial(N = 15)$data_function()
 
-  a_quick_design <- quick_design(template = m_arm_trial, N = 100)
+  a_quick_design <- quick_design(template = two_arm_trial, N = 100)
 
   a_quick_design$design_function()
 
@@ -57,7 +57,7 @@ test_that("quick_design works some more", {
 
 test_that("vary works", {
 
-  m_arm_trial <- function(N, noise_sd){
+  two_arm_trial <- function(N, noise_sd){
 
     my_population <- declare_population(N = N, noise = rnorm(N, sd = noise_sd))
     my_potential_outcomes <- declare_potential_outcomes(
@@ -74,7 +74,7 @@ test_that("vary works", {
     return(my_design)
   }
 
-  design <- quick_design(template = m_arm_trial,
+  design <- quick_design(template = two_arm_trial,
                          N = vary(100, 200, 300), noise_sd = 1)
 
   diagnose_design(design, sims = 5)
@@ -83,7 +83,7 @@ test_that("vary works", {
 
 test_that("power curve", {
 
-  m_arm_trial <- function(N){
+  two_arm_trial <- function(N){
 
     my_population <- declare_population(N = N, noise = rnorm(N))
     my_potential_outcomes <- declare_potential_outcomes(
@@ -100,7 +100,7 @@ test_that("power curve", {
     return(my_design)
   }
 
-  design <- quick_design(template = m_arm_trial,
+  design <- quick_design(template = two_arm_trial,
                          N = vary(100, 200, 300, 500, 1000))
 
   diagnosis <- diagnose_design(design, sims = 100)

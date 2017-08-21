@@ -8,11 +8,9 @@
 #'
 #' @export
 download_design <- function(name) {
-  design_library_url_R <- "http://declaredesign.org/library/"
-  design_URL <- paste0(design_library_url_R, name, ".rds")
-  data_URL <- paste0(design_library_url_R, name, ".rdata")
-  suppressWarnings(try(load(url(data_URL)), silent = TRUE)
-  )
+  name <- substitute(name)
+  design_library_url_R <- "http://library.declaredesign.org/designs/"
+  design_URL <- paste0(design_library_url_R, name, ".RDS")
   readRDS(gzcon(url(design_URL)))
 }
 
@@ -24,7 +22,8 @@ download_design <- function(name) {
 #'
 #' @export
 download_template <- function(name) {
-  design_library_url_R <- "http://declaredesign.org/templates/"
-  design_URL <- paste0(design_library_url_R, name, "_template.rds")
+  name <- substitute(name)
+  design_library_url_R <- "http://library.declaredesign.org/templates/"
+  design_URL <- paste0(design_library_url_R, name, ".RDS")
   readRDS(gzcon(url(design_URL)))
 }
