@@ -94,10 +94,21 @@ declare_assignment <-
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
 assignment_function_default <-
-  function(data, ..., assignment_variable_name = "Z") {
+  function(data, ..., assignment_variable_name = Z) {
     ## draw assignment
 
     options <- quos(...)
+
+    if (any(names(options) %in% c("block_var"))) {
+      if (class(f_rhs(options[["block_var"]])) == "character") {
+        stop("Please provide the bare (unquoted) block variable name to block_var.")
+      }
+    }
+    if (any(names(options) %in% c("clust_var"))) {
+      if (class(f_rhs(options[["clust_var"]])) == "character") {
+        stop("Please provide the bare (unquoted) cluster variable name to clust_var.")
+      }
+    }
 
     assignment_variable_name <- substitute(assignment_variable_name)
     if (!is.null(assignment_variable_name)) {

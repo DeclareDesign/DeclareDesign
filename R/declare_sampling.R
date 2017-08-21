@@ -91,6 +91,17 @@ sampling_function_default <-
 
     options <- quos(...)
 
+    if (any(names(options) %in% c("strata_var"))) {
+      if (class(f_rhs(options[["strata_var"]])) == "character") {
+        stop("Please provide the bare (unquoted) strata variable name to strata_var.")
+      }
+    }
+    if (any(names(options) %in% c("clust_var"))) {
+      if (class(f_rhs(options[["clust_var"]])) == "character") {
+        stop("Please provide the bare (unquoted) cluster variable name to clust_var.")
+      }
+    }
+
     sampling_variable_name <- substitute(sampling_variable_name)
     if (!is.null(sampling_variable_name)) {
       sampling_variable_name <- as.character(sampling_variable_name)
