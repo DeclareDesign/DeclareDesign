@@ -47,7 +47,6 @@ test_that("quick_design works some more", {
   m_arm_trial(N = 5)$data_function()
   m_arm_trial(N = 15)$data_function()
 
-
   a_quick_design <- quick_design(template = m_arm_trial, N = 100)
 
   a_quick_design$design_function()
@@ -105,13 +104,13 @@ test_that("power curve", {
                          N = vary(100, 200, 300, 500, 1000))
 
   diagnosis <- diagnose_design(design, sims = 100)
-
-  # library(ggplot2)
-  # ggplot(get_diagnosands(diagnosis), aes(x = N, y = power)) +
-  #   geom_point() +
-  #   geom_line() +
-  #   theme_bw()
-  #
+#
+#   library(ggplot2)
+#   ggplot(get_diagnosands(diagnosis), aes(x = N, y = power)) +
+#     geom_point() +
+#     geom_line() +
+#     theme_bw()
+#
 
 })
 

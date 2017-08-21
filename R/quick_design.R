@@ -6,14 +6,14 @@
 #'
 #' @param ... Options sent to the template.
 #'
-#' @importFrom lazyeval lazy_dots
+#' @importFrom rlang quo_expr quos
 #' @export
 quick_design <- function(template = NULL, ...) {
   # figure out what's in ...
-  dots <- lazy_dots(...)
+  dots <- quos(...)
 
   args_list <- lapply(dots, function(x) {
-    e <- as.list(x$expr)
+    e <- as.list(quo_expr(x))
     if (length(e) > 1) {
       return(e[seq_along(e)[-1]])
     } else{
