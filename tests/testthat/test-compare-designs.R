@@ -29,13 +29,13 @@ test_that("compare_designs works", {
                                 sate_estimator)
 
 
-  diagnosis_1 <- diagnose_design(my_design_1, sims = 10)
-  diagnosis_2 <- diagnose_design(my_design_2, sims = 10)
+  diagnosis_1 <- diagnose_design(my_design_1, sims = 2, bootstrap = FALSE)
+  diagnosis_2 <- diagnose_design(my_design_2, sims = 2, bootstrap = FALSE)
 
-  comparison <- diagnose_design(my_design_1, my_design_2, sims = 10)
+  comparison <- diagnose_design(my_design_1, my_design_2, sims = 2, bootstrap = FALSE)
   comparison
 
-  comparison <- diagnose_design(first_design = my_design_1, my_design_2, sims = 10)
+  comparison <- diagnose_design(first_design = my_design_1, my_design_2, sims = 2, bootstrap = FALSE)
   comparison
 
 })

@@ -67,7 +67,7 @@ test_that("regression from estimatr works as an estimator", {
 
   my_design$design_function()
 
-  diagnosis <- diagnose_design(my_design, sims = 5)
+  diagnosis <- diagnose_design(my_design, sims = 2, bootstrap = FALSE)
   diagnosis
 
 })
@@ -188,17 +188,33 @@ test_that("labels for estimates and estimands work", {
 
   my_assignment <- declare_assignment(m = 25)
 
-  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+  mand_arg_label <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+  mand_explicit_label <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "the_ATE")
+  mand_explicit_label_noquote <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = the_ATE)
 
-  my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+  mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_arg_label)
+  mator_label <- declare_estimator(Y ~ Z, estimand = mand_arg_label, label = "an_estimator")
+  mator_label_noquote <- declare_estimator(Y ~ Z, estimand = mand_arg_label, label = an_estimator)
+  mator_label_null <- declare_estimator(Y ~ Z, estimand = mand_arg_label, label = NULL)
+
+  mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label)
+  mator_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label, label = "an_estimator")
+  mator_label_noquote <- declare_estimator(Y ~ Z, estimand = mand_explicit_label, label = an_estimator)
+  mator_label_null <- declare_estimator(Y ~ Z, estimand = mand_explicit_label, label = NULL)
+
+  mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label_noquote)
+  mator_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label_noquote, label = "an_estimator")
+  mator_label_noquote <- declare_estimator(Y ~ Z, estimand = mand_explicit_label_noquote, label = an_estimator)
+  mator_label_null <- declare_estimator(Y ~ Z, estimand = mand_explicit_label_noquote, label = NULL)
 
   design <- declare_design(my_population,
                            my_potential_outcomes,
-                           my_estimand,
                            my_assignment,
-                           reveal_outcomes,
-                           my_estimator)
-
-
+                           reveal_outcomes)
+  diagnose_design(modify_design(
+    design,
+    add_step(mand_arg_label, after = my_potential_outcomes),
+    add_step(mator_no_label, after = reveal_outcomes)
+  ), sims = 2, bootstrap = FALSE)
 
 })
