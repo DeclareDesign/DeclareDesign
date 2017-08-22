@@ -95,3 +95,14 @@ test_that("custom diagnosand function", {
 
 })
 
+
+test_that("custom diagnosand function", {
+  my_population <- declare_population(N = 500)
+  my_design <- declare_design(my_population)
+  head(draw_data(my_design))
+
+  diagnose_design(my_design)
+
+})
+
+

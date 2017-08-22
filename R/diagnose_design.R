@@ -161,7 +161,11 @@ diagnose_design_single_design <-
     estimands_df <- do.call(rbind, estimands_list)
     estimands_df <- cbind(sim_ID = rep(1:sims, sapply(estimands_list, nrow)), estimands_df)
 
-    if (!any(colnames(estimates_df) == "estimand_label")) {
+    if (nrow(estimates_df) == 0 & nrow(estimands_df) == 0) {
+      stop("No estimates or estimands were declared, so diagnose_design cannot calculate diagnosands.", call. = FALSE)
+    }
+
+    if (!any(colnames(estimates_df) == "estimand_label" & nrow(estimates_df) > 0)) {
       estimates_df$estimand_label <- "no estimand specified"
     }
 
