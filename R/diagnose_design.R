@@ -39,11 +39,12 @@
 #' \dontrun{
 #' diagnosis <- diagnose_design(design, diagnosands = my_diagnosand)
 #' diagnosis
-#' }
 #'
 #' get_diagnosands(diagnosis)
 #'
 #' get_simulations(diagnosis)
+#'
+#' }
 #'
 #' @export
 diagnose_design <-

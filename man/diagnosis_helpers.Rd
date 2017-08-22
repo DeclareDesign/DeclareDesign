@@ -48,10 +48,11 @@ my_diagnosand <- declare_diagnosands(absolute_error = mean(abs(est - estimand)))
 \dontrun{
 diagnosis <- diagnose_design(design, diagnosands = my_diagnosand)
 diagnosis
-}
 
 get_diagnosands(diagnosis)
 
 get_simulations(diagnosis)
+
+}
 
 }
