@@ -21,12 +21,15 @@ test_that("test the full declare design setup", {
                            my_sampling,
                            my_estimand,
                            dplyr::mutate(q = 5),
+                           dplyr::mutate(q = 6),
                            my_assignment,
                            reveal_outcomes,
                            my_estimator)
 
   head(design$data_function())
   design$design_function()
+
+  summary(design)
 
   diagnose_design(design, sims = 3)
 

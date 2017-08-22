@@ -216,7 +216,7 @@ declare_design <- function(...,
     return(list(estimates_df = estimates_df, estimands_df = estimands_df))
   }
 
-  summarize_step <- function(last_df = NULL, current_df) {
+  get_added_variables <- function(last_df = NULL, current_df) {
     current_names <- names(current_df)
     if (is.null(last_df)) {
       return(current_names)
@@ -225,13 +225,31 @@ declare_design <- function(...,
     }
   }
 
+  get_modified_variables <- function(last_df = NULL, current_df) {
+    current_names <- names(current_df)
+    shared_names <-
+      current_names[current_names %in% names(last_df)]
+    variables_modified <- sapply(shared_names, function(var)
+      ifelse(nrow(last_df) != nrow(current_df), FALSE,
+      isTRUE(all.equal(last_df[, var], current_df[, var])) == FALSE))
+    if (any(variables_modified)) {
+      return(shared_names[variables_modified])
+    } else {
+      return(NULL)
+    }
+  }
+
   summary_function <- function() {
-    variables_added <-
-      quantities_added <- vector("list", length(causal_order))
+    variables_added <- variables_modified <-
+      quantities_added <- quantities_modified <-
+      N <-
+      vector("list", length(causal_order))
 
     current_df <- process_population(causal_order[[1]])
 
     variables_added[[1]] <- lapply(current_df, describe_variable)
+
+    N[[1]] <- paste0("N = ", nrow(current_df))
 
     estimates_df <- estimands_df <- data.frame()
 
@@ -244,14 +262,31 @@ declare_design <- function(...,
           current_df <- causal_order[[i]](last_df)
 
           variables_added_names <-
-            summarize_step(last_df = last_df, current_df = current_df)
+            get_added_variables(last_df = last_df, current_df = current_df)
 
-          variables_added[[i]] <-
-            lapply(current_df[, variables_added_names, drop = FALSE], describe_variable)
+          variables_modified_names <-
+            get_modified_variables(last_df = last_df, current_df = current_df)
+
+          if (!is.null(variables_added_names)) {
+            variables_added[[i]] <-
+              lapply(current_df[, variables_added_names, drop = FALSE],
+                     describe_variable)
+          }
+
+          if (!is.null(variables_modified_names)) {
+            variables_modified[[i]] <-
+              lapply(current_df[, variables_modified_names, drop = FALSE],
+                     describe_variable)
+          }
 
           if (!is.null(attributes(causal_order[[i]])$summary_function)) {
             quantities_added[[i]] <-
               capture.output(attributes(causal_order[[i]])$summary_function(last_df))
+          }
+
+          if(nrow(current_df) != nrow(last_df)){
+            N[[i]] <- paste0("N = ", nrow(current_df), " (", abs(nrow(current_df) - nrow(last_df)),
+                             ifelse(nrow(current_df) > nrow(last_df), " added", " subtracted"), ")")
           }
 
           last_df <- current_df
@@ -271,7 +306,9 @@ declare_design <- function(...,
     }
     structure(
       list(variables_added = variables_added,
-           quantities_added = quantities_added),
+           quantities_added = quantities_added,
+           variables_modified = variables_modified,
+           N = N),
       class = "design_summary"
     )
   }

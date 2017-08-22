@@ -1,4 +1,5 @@
 
+
 #' Explore your design
 #'
 #' @param design A design created by \code{\link{declare_design}}.
@@ -119,6 +120,8 @@ summary.design <- function(object, ...) {
     list(
       variables_added = summ$variables_added,
       quantities_added = summ$quantities_added,
+      variables_modified = summ$variables_modified,
+      N = summ$N,
       causal_order_expr = object$causal_order_expr,
       causal_order_types = object$causal_order_types,
       function_types = object$function_types,
@@ -162,7 +165,8 @@ print.summary.design <- function(x, ...) {
         "custom data modification"
       )
 
-    dash_width <- max(c(80 - 11 - nchar(i) - nchar(step_class) - nchar(step_name[1]), 0))
+    dash_width <-
+      max(c(80 - 11 - nchar(i) - nchar(step_class) - nchar(step_name[1]), 0))
 
     cat(
       "Step ",
@@ -176,6 +180,10 @@ print.summary.design <- function(x, ...) {
       "\n\n",
       sep = ""
     )
+
+    if (!is.null(x$N[[i]])) {
+      cat(x$N[[i]], "\n\n")
+    }
 
     if (!is.null(x$quantities_added[[i]])) {
       if (class(x$quantities_added[[i]]) == "data.frame") {
@@ -191,6 +199,15 @@ print.summary.design <- function(x, ...) {
       for (j in seq_along(x$variables_added[[i]])) {
         cat("Added variable: ", names(x$variables_added[[i]])[j], "\n")
         print(x$variables_added[[i]][[j]], row.names = FALSE)
+        cat("\n")
+      }
+    }
+    if (!is.null(x$variables_modified[[i]])) {
+      for (j in seq_along(x$variables_modified[[i]])) {
+        cat("Altered variable: ",
+            names(x$variables_modified[[i]])[j],
+            "\n")
+        print(x$variables_modified[[i]][[j]], row.names = FALSE)
         cat("\n")
       }
     }
