@@ -218,3 +218,4 @@ test_that("labels for estimates and estimands work", {
   ), sims = 2, bootstrap = FALSE)
 
 })
+
