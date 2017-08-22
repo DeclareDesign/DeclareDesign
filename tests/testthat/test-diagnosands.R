@@ -1,7 +1,7 @@
 context("Diagnosands")
 test_that("test diagnosands", {
 
-  my_population <- declare_population(N = 500, noise = rnorm(N))
+  my_population <- declare_population(N = 50, noise = rnorm(N))
 
   my_potential_outcomes <-
     declare_potential_outcomes(Y_Z_0 = noise,
@@ -20,10 +20,10 @@ test_that("test diagnosands", {
                               pate_estimator)
 
   # default set
-  diagnosis <- diagnose_design(my_design, sims = 10)
+  diagnosis <- diagnose_design(my_design, sims = 2)
 
   my_dig <-  declare_diagnosands(bias = mean(est - estimand), sd_bias = sd(estimand))
-  diagnosis <- diagnose_design(my_design, sims = 10, diagnosands = my_dig)
+  diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_dig)
 
   head(diagnosis$simulations)
   diagnosis$diagnosands
@@ -33,7 +33,7 @@ test_that("test diagnosands", {
 
 test_that("test diagnosands without estimands", {
 
-  my_population <- declare_population(N = 500, noise = rnorm(N))
+  my_population <- declare_population(N = 50, noise = rnorm(N))
 
   my_potential_outcomes <-
     declare_potential_outcomes(Y_Z_0 = noise,
@@ -50,7 +50,7 @@ test_that("test diagnosands without estimands", {
                               estimator)
 
   my_dig <-  declare_diagnosands(mean_est = mean(est), sd_est = sd(est))
-  diagnosis <- diagnose_design(my_design, sims = 10, diagnosands = my_dig)
+  diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_dig)
 
   head(diagnosis$simulations)
 
@@ -61,7 +61,7 @@ test_that("test diagnosands without estimands", {
 
 test_that("custom diagnosand function", {
 
-  my_population <- declare_population(N = 500, noise = rnorm(N))
+  my_population <- declare_population(N = 50, noise = rnorm(N))
 
   my_potential_outcomes <-
     declare_potential_outcomes(Y_Z_0 = noise,
@@ -80,14 +80,14 @@ test_that("custom diagnosand function", {
                               pate_estimator)
 
   # default set
-  diagnosis <- diagnose_design(my_design, sims = 10)
+  diagnosis <- diagnose_design(my_design, sims = 2)
 
   mean_custom <- function(x) return(mean(x * 5))
 
   my_dig <-  declare_diagnosands(mean_x5 = mean_custom(est), mean_true = mean(est))
 
   rm(mean_custom)
-  diagnosis <- diagnose_design(my_design, sims = 10, diagnosands = my_dig)
+  diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_dig)
 
   head(diagnosis$simulations)
 
@@ -97,11 +97,11 @@ test_that("custom diagnosand function", {
 
 
 test_that("no estimates, no estimators should error", {
-  my_population <- declare_population(N = 500)
+  my_population <- declare_population(N = 50)
   my_design <- declare_design(my_population)
   head(draw_data(my_design))
 
-  expect_error(diagnose_design(my_design))
+  expect_error(diagnose_design(my_design, sims = 2))
 
 })
 

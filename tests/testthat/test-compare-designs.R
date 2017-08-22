@@ -1,13 +1,11 @@
 context("Compare Designs")
 test_that("compare_designs works", {
 
-  my_population <- declare_population(N = 500, noise = rnorm(N))
-
-  my_sampling <- declare_sampling(n = 150)
+  my_population <- declare_population(N = 50, noise = rnorm(N))
 
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-  my_assignment <- declare_assignment(m = 50)
+  my_assignment <- declare_assignment(m = 25)
 
   pate <- declare_estimand(pate = mean(Y_Z_1 - Y_Z_0))
   sate <- declare_estimand(sate = mean(Y_Z_1 - Y_Z_0))
@@ -25,7 +23,6 @@ test_that("compare_designs works", {
 
   my_design_2 <- declare_design(my_population,
                                 my_potential_outcomes,
-                                my_sampling,
                                 sate,
                                 my_assignment,
                                 reveal_outcomes,

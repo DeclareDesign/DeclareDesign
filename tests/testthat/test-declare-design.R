@@ -31,7 +31,7 @@ test_that("test the full declare design setup", {
 
   summary(design)
 
-  diagnose_design(design, sims = 3)
+  diagnose_design(design, sims = 2)
 
 })
 

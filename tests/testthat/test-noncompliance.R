@@ -2,14 +2,14 @@ context("Noncompliance")
 
 test_that("Noncompliance", {
 
-  my_population <- declare_population(N = 1000, noise = rnorm(N))
+  my_population <- declare_population(N = 100, noise = rnorm(N))
 
   POS_Y <- declare_potential_outcomes(Y_D_0 = noise, Y_D_1 = Y_D_0 + 2)
   POS_Z <- declare_potential_outcomes(
     D_Z_0 = rbinom(n = N, size = 1, prob = pnorm(noise - 1)),
     D_Z_1 = rbinom(n = N, size = 1, prob = pnorm(noise + 1)))
 
-  my_assignment <- declare_assignment(m = 500)
+  my_assignment <- declare_assignment(m = 50)
 
   CACE <- declare_estimand(CACE = mean(Y_D_1[complier == 1] - Y_D_0[complier == 1]))
   ITT_d <- declare_estimand(ITT_d = mean(complier))
@@ -60,7 +60,7 @@ test_that("Noncompliance", {
   df <- design$data_function()
   cace_estimator(df)
 
-  diagnose_design(design, sims = 5)
+  diagnose_design(design, sims = 2)
 
 
 })

@@ -10,7 +10,7 @@ test_that("test with generated citation", {
     my_population, my_assignment, authors = "set of authors", title = "my design",
     description = "this is my text description of design")
 
-  cite_design(design)
+  capture.output(cite_design(design))
 
   summary(design)
 
@@ -25,7 +25,7 @@ test_that("test with user-specified text citation", {
   design <- declare_design(
     my_population, my_assignment, citation = "Set of authors (2017). My custom design.")
 
-  cite_design(design)
+  capture.output(cite_design(design))
 
 })
 

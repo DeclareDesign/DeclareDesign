@@ -78,7 +78,8 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
 
   diagnose_design(
     design = design,
-    diagnosands = diagnosand
+    diagnosands = diagnosand,
+    sims = 2
   )
 
 

@@ -19,7 +19,7 @@ test_that("quick_design works", {
     return(my_design)
   }
 
-  draw_data(two_arm_trial(N = 100))
+  draw_data(two_arm_trial(N = 50))
 
   design <- quick_design(template = two_arm_trial, N = 2)
 
@@ -47,7 +47,7 @@ test_that("quick_design works some more", {
   two_arm_trial(N = 5)$data_function()
   two_arm_trial(N = 15)$data_function()
 
-  a_quick_design <- quick_design(template = two_arm_trial, N = 100)
+  a_quick_design <- quick_design(template = two_arm_trial, N = 50)
 
   a_quick_design$design_function()
 
