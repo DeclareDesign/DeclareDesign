@@ -8,6 +8,8 @@
 #' @param sims The number of simulations, defaulting to 500.
 #' @param bootstrap Option to bootstrap the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{TRUE}.
 #' @param bootstrap_sims The number of bootstrap replicates of the diagnosands, defaulting to 100.
+#' @param parallel Logical indicating whether to run the diagnoses in parallel. Defaults to TRUE.
+#' @param parallel_cores Number of CPU cores to use. Defaults to all available cores.
 #'
 #' @examples
 #' my_population <- declare_population(N = 500, noise = rnorm(N))
@@ -55,7 +57,7 @@ diagnose_design <-
            sims = 500,
            bootstrap = TRUE,
            bootstrap_sims = 100,
-           parallel = FALSE,
+           parallel = TRUE,
            parallel_cores = detectCores(logical = TRUE)) {
 
     if (is.null(diagnosands)) {
@@ -148,7 +150,7 @@ diagnose_design_single_design <-
            sims = 500,
            bootstrap = TRUE,
            bootstrap_sims = 100,
-           parallel = FALSE,
+           parallel = TRUE,
            parallel_cores = detectCores(logical = TRUE)) {
 
     if (parallel) {
@@ -220,9 +222,12 @@ diagnose_design_single_design <-
         calculate_diagnosands(simulations_df[boot_indicies, ], diagnosands)
       }
 
-      diagnosand_replicates <-
-        replicate(bootstrap_sims, expr = boot_function(), simplify = FALSE)
-      diagnosand_replicates <- do.call(rbind, diagnosand_replicates)
+      diagnosand_replicates <- foreach(i = seq_len(bootstrap_sims), .combine = rbind) %dorng%
+        boot_function()
+
+      # diagnosand_replicates <-
+      #   replicate(bootstrap_sims, expr = boot_function(), simplify = FALSE)
+      # diagnosand_replicates <- do.call(rbind, diagnosand_replicates)
 
       group_by_set <- c("estimand_label", "estimator_label")
       group_by_set <-

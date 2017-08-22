@@ -5,7 +5,7 @@
 \title{Diagnose the Design}
 \usage{
 diagnose_design(..., diagnosands = NULL, sims = 500, bootstrap = TRUE,
-  bootstrap_sims = 100, parallel = FALSE,
+  bootstrap_sims = 100, parallel = TRUE,
   parallel_cores = detectCores(logical = TRUE))
 }
 \arguments{
@@ -18,6 +18,10 @@ diagnose_design(..., diagnosands = NULL, sims = 500, bootstrap = TRUE,
 \item{bootstrap}{Option to bootstrap the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{TRUE}.}
 
 \item{bootstrap_sims}{The number of bootstrap replicates of the diagnosands, defaulting to 100.}
+
+\item{parallel}{Logical indicating whether to run the diagnoses in parallel. Defaults to TRUE.}
+
+\item{parallel_cores}{Number of CPU cores to use. Defaults to all available cores.}
 }
 \description{
 Diagnose the Design
