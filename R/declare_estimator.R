@@ -68,7 +68,7 @@ declare_estimator <- function(...,
   env <- freeze_environment(parent.frame())
   func <- eval(estimator_function)
   label <- as.character(substitute(label))
-  estimand <- eval_tidy(quos(estimand), env = env)
+  estimand <- eval_tidy(quo(estimand), env = env)
 
   if (!("data" %in% names(formals(func)))) {
     stop("Please provide an estimator function with a data argument.")
