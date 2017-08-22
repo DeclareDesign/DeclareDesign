@@ -12,6 +12,8 @@
 #' Typically, a design includes a potential outcomes declaration and an assignment declaration. Reveal outcomes uses the random assignment to pluck out the correct potential outcomes. This is analogous to the "switching equation" (Gerber and Green 2012, Chapter 2).
 #'
 #'
+#' @importFrom rlang enexpr lang_args expr_text
+#'
 #' @export
 #'
 #' @examples
@@ -37,8 +39,18 @@ reveal_outcomes <-
            attrition_variable_name = NULL) {
     variable_names <- names(data)
 
-    outcome_variable_name <-
-      as.character(substitute(outcome_variable_name))
+    if (length(substitute(outcome_variable_name)) > 1) {
+      outcome_variable_name <-
+        sapply(lang_args(enexpr(outcome_variable_name)), function(x)
+          if (class(x) != "character") {
+            expr_text(x)
+          } else {
+            x
+          })
+    } else {
+      outcome_variable_name <-
+        as.character(substitute(outcome_variable_name))
+    }
     assignment_variable_name <-
       as.character(substitute(assignment_variable_name))
     attrition_variable_name <- substitute(attrition_variable_name)
