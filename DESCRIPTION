@@ -14,7 +14,6 @@ Description: Tools for characterizing, diagnosing, and pre-registering research
 Depends:
     R (>= 3.3.0)
 Imports:
-    dplyr,
     rlang,
     foreach,
     randomizr,
@@ -34,5 +33,5 @@ Suggests:
     knitr,
     rmarkdown,
     AER,
-    magrittr
+    dplyr
 VignetteBuilder: knitr

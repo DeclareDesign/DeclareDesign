@@ -161,6 +161,9 @@ print.summary.design <- function(x, ...) {
         gsub("_", " ", x$function_types[[i]]),
         "custom data modification"
       )
+
+    dash_width <- max(c(80 - 11 - nchar(i) - nchar(step_class) - nchar(step_name[1]), 0))
+
     cat(
       "Step ",
       i,
@@ -169,9 +172,7 @@ print.summary.design <- function(x, ...) {
       "): ",
       step_name,
       " ",
-      paste0(rep(
-        "-", 80 - 11 - nchar(i) - nchar(step_class) - nchar(step_name)
-      ), collapse = ""),
+      paste0(rep("-", dash_width), collapse = ""),
       "\n\n",
       sep = ""
     )

@@ -13,7 +13,9 @@ test_that("Factorial", {
 
   my_estimand <- declare_estimand(interaction = mean(Y_Z_T4 - Y_Z_T3) - mean(Y_Z_T2 - Y_Z_T1))
 
-  my_estimator <- declare_estimator(Y ~ Z1 + Z2 + Z1*Z2, estimator_function = lm_robust, coefficient_name = "Z1:Z2")
+  my_estimator <- declare_estimator(Y ~ Z1 + Z2 + Z1*Z2,
+                                    estimator_function = lm_robust,
+                                    coefficient_name = "Z1:Z2")
 
   my_design <-
     declare_design(
@@ -30,10 +32,8 @@ test_that("Factorial", {
   my_design$data_function() %>% head
   my_design$design_function()
 
-  #df <- my_design$data_function()
-  #my_estimator(df)
-  #commarobust::commarobust(lm(Y ~ Z1*Z2, data = df))
+  my_design
 
   diagnosis <- diagnose_design(my_design, sims = 5)
-  diagnosis
+  diagnosis$simulations
 })

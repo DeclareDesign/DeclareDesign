@@ -11,7 +11,7 @@ get_diagnosands(diagnosis)
 get_simulations(diagnosis)
 }
 \arguments{
-\item{design}{A design created by \code{\link{declare_design}}.}
+\item{diagnosis}{A design diagnosis created by \code{\link{diagnose_design}}.}
 }
 \description{
 Explore your design diagnosis

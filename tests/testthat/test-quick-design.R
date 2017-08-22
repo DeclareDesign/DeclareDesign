@@ -21,7 +21,7 @@ test_that("quick_design works", {
 
   draw_data(two_arm_trial(N = 100))
 
-  design <- quick_design(template = two_arm_trial, N = 100)
+  design <- quick_design(template = two_arm_trial, N = 2)
 
   draw_data(design)
 
@@ -51,7 +51,7 @@ test_that("quick_design works some more", {
 
   a_quick_design$design_function()
 
-  diagnose_design(a_quick_design, sims = 5)
+  diagnose_design(a_quick_design, sims = 2)
 })
 
 
@@ -77,7 +77,7 @@ test_that("vary works", {
   design <- quick_design(template = two_arm_trial,
                          N = vary(100, 200, 300), noise_sd = 1)
 
-  diagnose_design(design, sims = 5)
+  diagnose_design(design, sims = 2)
 
 })
 
@@ -103,7 +103,7 @@ test_that("power curve", {
   design <- quick_design(template = two_arm_trial,
                          N = vary(100, 200, 300, 500, 1000))
 
-  diagnosis <- diagnose_design(design, sims = 100)
+  diagnosis <- diagnose_design(design, sims = 2)
 #
 #   library(ggplot2)
 #   ggplot(get_diagnosands(diagnosis), aes(x = N, y = power)) +

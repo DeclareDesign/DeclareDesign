@@ -1,8 +1,4 @@
 
-
-
-
-
 #' Diagnose the Design
 #'
 #' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{quick_design}}.
@@ -49,19 +45,19 @@
 #'
 #' get_simulations(diagnosis)
 #'
-#' @importFrom dplyr bind_rows '%>%'
 #' @export
 diagnose_design <-
   function(...,
            diagnosands = NULL,
            sims = 500) {
 
-    if(is.null(diagnosands)){
+    if (is.null(diagnosands)) {
       diagnosands <- declare_diagnosands(
         bias = mean(est - estimand),
         rmse = sqrt(mean((est - estimand) ^ 2)),
         power = mean(p < .05),
-        coverage = mean(estimand <= ci_upper & estimand >= ci_lower),
+        coverage = mean(estimand <= ci_upper &
+                          estimand >= ci_lower),
         mean_estimate = mean(est),
         sd_estimate = sd(est),
         type_s_rate = mean((sign(est) != sign(estimand)) & p < .05),
@@ -71,19 +67,31 @@ diagnose_design <-
 
     designs <- list(...)
 
+    inferred_names <- paste(substitute(list(...)))[-1]
+
     ## three cases:
     ## 1. send one or more design objects created by declare_design
     ## 2. send a single list of design objects created by quick_design
     ## 3. do not allow sending more than one object if any of them aren't design objects.
     if (length(designs) == 1 & class(designs[[1]]) == "list") {
+      ## this unpacks designs if a list of designs was sent as a single list object, i.e.
+      ##   as created by quick_design
       designs <- designs[[1]]
+      if (!is.null(names(designs))) {
+        inferred_names <- names(designs)
+      } else {
+        inferred_names <- paste0("design_", 1:length(designs))
+      }
     } else if (!all(sapply(designs, class) == "design")) {
       stop("Please only send design objects to diagnose_design.")
     }
 
-    inferred_names <- paste(substitute(list(...)))[-1]
-    names(designs)[names(designs) == ""] <-
-      inferred_names[names(designs) == ""]
+    if (is.null(names(designs))) {
+      names(designs) <- inferred_names
+    } else{
+      names(designs)[names(designs) == ""] <-
+        inferred_names[names(designs) == ""]
+    }
 
     comparison_sims <- lapply(designs,
                               diagnose_design_single_design,
@@ -91,12 +99,21 @@ diagnose_design <-
                               sims = sims)
 
     if (length(comparison_sims) > 1) {
-      simulations_df <-
-        lapply(comparison_sims, function(x)
-          x$simulations) %>% bind_rows(.id = "design_ID")
-      diagnosands_df <-
-        lapply(comparison_sims, function(x)
-          x$diagnosands) %>% bind_rows(.id = "design_ID")
+
+      simulations_list <- lapply(comparison_sims, function(x) x$simulations)
+      diagnosands_list <- lapply(comparison_sims, function(x) x$diagnosands)
+
+      for(i in 1:length(simulations_list)){
+        simulations_list[[i]] <- cbind(design_ID = names(simulations_list)[i], simulations_list[[i]])
+        diagnosands_list[[i]] <- cbind(design_ID = names(diagnosands_list)[i], diagnosands_list[[i]])
+      }
+
+      simulations_df <- do.call(rbind, simulations_list)
+      diagnosands_df <- do.call(rbind, diagnosands_list)
+
+      rownames(simulations_df) <- NULL
+      rownames(diagnosands_df) <- NULL
+
     } else {
       simulations_df <- comparison_sims[[1]]$simulations
       diagnosands_df <- comparison_sims[[1]]$diagnosands
@@ -110,7 +127,6 @@ diagnose_design <-
   }
 
 #' @importFrom rlang !! !!!
-#' @importFrom dplyr group_by left_join bind_rows group_by_ summarize_
 diagnose_design_single_design <-
   function(design,
            diagnosands = NULL,
@@ -135,31 +151,49 @@ diagnose_design_single_design <-
     ##  design$design_function()
     ##}
 
-    sims <- lapply(1:sims, function(x)
-      design$design_function())
+    results_list <- replicate(sims, design$design_function(), simplify = FALSE)
 
-    estimates_df <-
-      lapply(sims, function(x)
-        x$estimates_df) %>% bind_rows(.id = "sim_ID")
-    estimands_df <-
-      lapply(sims, function(x)
-        x$estimands_df) %>% bind_rows(.id = "sim_ID")
+    estimates_list <- lapply(results_list, function(x) x$estimates_df)
+    estimates_df <- do.call(rbind, estimates_list)
+    estimates_df <- cbind(sim_ID = rep(1:sims, sapply(estimates_list, nrow)), estimates_df)
 
-    simulations_df <-
-      suppressMessages(left_join(estimands_df, estimates_df))
+    estimands_list <- lapply(results_list, function(x) x$estimands_df)
+    estimands_df <- do.call(rbind, estimands_list)
+    estimands_df <- cbind(sim_ID = rep(1:sims, sapply(estimands_list, nrow)), estimands_df)
 
-    if (nrow(simulations_df) == 0 & nrow(estimates_df) > 1) {
-      simulations_df <- estimates_df
+    if (!any(colnames(estimates_df) == "estimand_label")) {
+      estimates_df$estimand_label <- "no estimand specified"
     }
 
-    group_by_set <- c("estimand_label", "estimator_label")[
-      which(c("estimand_label", "estimator_label") %in% colnames(simulations_df))]
+    if (nrow(estimands_df) == 0 & nrow(estimates_df) > 0) {
+      simulations_df <- estimates_df
+    } else if (nrow(estimands_df) > 0 & nrow(estimates_df) == 0) {
+      simulations_df <- estimands_df
+    } else {
+      simulations_df <-
+        merge(
+          estimands_df,
+          estimates_df,
+          by = c("sim_ID", "estimand_label"),
+          all = TRUE,
+          sort = FALSE
+        )
+    }
 
-    diagnosands_df <-
-      simulations_df %>%
-      group_by_(.dots = group_by_set) %>%
-      diagnosands %>%
-      data.frame(stringsAsFactors = FALSE)
+    group_by_set <- c("estimand_label", "estimator_label")
+    group_by_set <- group_by_set[which(group_by_set %in% colnames(simulations_df))]
+    group_by_list <- as.list(simulations_df[, group_by_set])
+
+    labels_df <- split(simulations_df[, group_by_set], group_by_list)
+    labels_df <- lapply(labels_df, unique)
+    labels_df <- do.call(rbind, labels_df)
+
+    diagnosands_df <- split(simulations_df, group_by_list)
+    diagnosands_df <- lapply(diagnosands_df, FUN = diagnosands)
+    diagnosands_df <- do.call(rbind, diagnosands_df)
+
+    diagnosands_df <- merge(labels_df, diagnosands_df, by = "row.names", all = TRUE, sort = FALSE)
+    diagnosands_df$Row.names <- NULL
 
     characteristics <- design$characteristics
 
@@ -170,7 +204,6 @@ diagnose_design_single_design <-
           characteristics[i]
       }
     }
-
 
     return(structure(
       list(simulations = simulations_df, diagnosands = diagnosands_df),

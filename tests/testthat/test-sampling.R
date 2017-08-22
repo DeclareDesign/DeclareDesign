@@ -61,20 +61,20 @@ test_that("test sampling and probability functions", {
   smp_draw %>% nrow
   smp_draw %>% sampling_1() %>% nrow
   smp_draw %>% sampling_2() %>% nrow
-  smp_draw %>% sampling_3() %$% table(ideo_3)
-  smp_draw %>% sampling_4() %$% table(ideo_3)
-  smp_draw %>% sampling_5() %$% table(ideo_3)
-  smp_draw %>% sampling_6() %$% table(villages)
-  smp_draw %>% sampling_7() %$% table(villages, high_elevation)
+  smp_draw %>% sampling_3() %>% with(.,table(ideo_3))
+  smp_draw %>% sampling_4() %>% with(.,table(ideo_3))
+  smp_draw %>% sampling_5() %>% with(.,table(ideo_3))
+  smp_draw %>% sampling_6() %>% with(.,table(villages))
+  smp_draw %>% sampling_7() %>% with(.,table(villages, high_elevation))
 
   # Obtain Treatment Probabilities
-  smp_draw %>% sampling_1() %$% S_inclusion_prob %>% head()
-  smp_draw %>% sampling_2() %$% S_inclusion_prob %>% head()
-  smp_draw %>% sampling_3() %$% S_inclusion_prob %>% head()
-  smp_draw %>% sampling_4() %$% S_inclusion_prob %>% head()
-  smp_draw %>% sampling_5() %$% S_inclusion_prob %>% head()
-  smp_draw %>% sampling_6() %$% S_inclusion_prob %>% head()
-  smp_draw %>% sampling_7() %$% S_inclusion_prob %>% head()
+  smp_draw %>% sampling_1() %>% .$S_inclusion_prob %>% head()
+  smp_draw %>% sampling_2() %>% .$S_inclusion_prob %>% head()
+  smp_draw %>% sampling_3() %>% .$S_inclusion_prob %>% head()
+  smp_draw %>% sampling_4() %>% .$S_inclusion_prob %>% head()
+  smp_draw %>% sampling_5() %>% .$S_inclusion_prob %>% head()
+  smp_draw %>% sampling_6() %>% .$S_inclusion_prob %>% head()
+  smp_draw %>% sampling_7() %>% .$S_inclusion_prob %>% head()
 
 })
 
