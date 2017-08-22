@@ -27,7 +27,6 @@
 #' @return a list of two functions, the \code{design_function} and the \code{data_function}. The \code{design_function} runs the design once, i.e. draws the data and calculates any estimates and estimands defined in \code{...}, returned separately as two \code{data.frame}'s. The \code{data_function} runs the design once also, but only returns the final data.
 #'
 #' @importFrom rlang quos quo_expr eval_tidy quo_text
-#' @importFrom dplyr bind_rows
 #' @importFrom fabricatr describe_variable
 #' @importFrom utils bibentry
 #' @export
@@ -204,12 +203,12 @@ declare_design <- function(...,
         } else if (causal_order_types[i] == "estimand") {
           # if it's an estimand
           estimands_df <-
-            bind_rows(estimands_df, causal_order[[i]](current_df))
+            rbind(estimands_df, causal_order[[i]](current_df))
 
         } else if (causal_order_types[i] == "estimator") {
           # if it's an estimator
           estimates_df <-
-            bind_rows(estimates_df, causal_order[[i]](current_df))
+            rbind(estimates_df, causal_order[[i]](current_df))
 
         }
       }
@@ -263,7 +262,7 @@ declare_design <- function(...,
         } else if (causal_order_types[i] == "estimator") {
           # if it's an estimator
           estimates_df <-
-            bind_rows(estimates_df, causal_order[[i]](current_df))
+            rbind(estimates_df, causal_order[[i]](current_df))
 
           quantities_added[[i]] <- causal_order[[i]](current_df)
 

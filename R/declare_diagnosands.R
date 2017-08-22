@@ -19,7 +19,8 @@
 #'
 #' @return a function that returns a data.frame
 #'
-#' @importFrom dplyr summarize
+#' @importFrom rlang eval_tidy
+#'
 #' @export
 #'
 #' @examples
@@ -73,11 +74,10 @@
 declare_diagnosands <- function(...) {
   args <- eval(substitute(alist(...)))
   env <- freeze_environment(parent.frame())
-  func <- eval(summarize)
 
   diagnosand_function_internal <- function(data) {
-    args$.data <- data
-    do.call(func, args = args, envir = env)
+    diagnosands_list <- lapply(args, function(i) eval_tidy(i, data = data, env = env))
+    data.frame(diagnosands_list)
   }
 
   attributes(diagnosand_function_internal) <-
@@ -85,3 +85,4 @@ declare_diagnosands <- function(...) {
 
   return(diagnosand_function_internal)
 }
+
