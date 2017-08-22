@@ -77,7 +77,7 @@ test_that("regression from estimatr works as an estimator", {
 test_that("multiple estimator declarations work", {
 
   population <- declare_population(
-    N = 10^3,
+    N = 200,
     noise = rnorm(N)
   )
 
@@ -166,6 +166,38 @@ test_that("multiple estimator declarations work", {
     )
   }
   )
+
+
+
+})
+
+
+test_that("labels for estimates and estimands work", {
+
+# no mands, one mator,
+# one mand one mator,
+# two mands one mator,
+#
+# no mands, two mators,
+# one mand two mators,
+# two mands two mators
+
+  my_population <- declare_population(N = 50, noise = rnorm(N))
+
+  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+
+  my_assignment <- declare_assignment(m = 25)
+
+  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+
+  my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+
+  design <- declare_design(my_population,
+                           my_potential_outcomes,
+                           my_estimand,
+                           my_assignment,
+                           reveal_outcomes,
+                           my_estimator)
 
 
 
