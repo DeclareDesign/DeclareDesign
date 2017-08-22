@@ -34,7 +34,6 @@ test_that("randomizr works through declare_assignment", {
 
 test_that("test assignment and probability functions", {
 
-  library(magrittr)
   population <- declare_population(
     villages = level(N = 100, elevation = rnorm(N),
                      high_elevation = as.numeric(elevation > 0)),

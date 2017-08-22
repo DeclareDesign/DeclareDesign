@@ -27,7 +27,6 @@ test_that("randomizr works through declare_sampling", {
 
 test_that("test sampling and probability functions", {
 
-  library(magrittr)
   population <- declare_population(
     villages = level(N = 100, elevation = rnorm(N),
                      high_elevation = as.numeric(elevation > 0)),

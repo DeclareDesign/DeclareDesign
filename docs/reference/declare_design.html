@@ -115,7 +115,7 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>...</th>
-      <td><p>A set of steps in a research design, beginning with a <code>data.frame</code> representing the population or a function that draws the population. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a <code>data.frame</code> as an argument and return a <code>data.frame</code>. Typically, many steps are declared using the <code>declare_</code> functions, i.e., <code><a href='declare_population.html'>declare_population</a></code>, <code><a href='declare_population.html'>declare_population</a></code>, <code><a href='declare_sampling.html'>declare_sampling</a></code>, <code><a href='declare_potential_outcomes.html'>declare_potential_outcomes</a></code>, <code><a href='declare_estimand.html'>declare_estimand</a></code>, <code><a href='declare_assignment.html'>declare_assignment</a></code>, and <code><a href='declare_estimator.html'>declare_estimator</a></code>. Functions from the <code>dplyr</code> package such as <code>mutate</code> can also be usefully included.</p></td>
+      <td><p>A set of steps in a research design, beginning with a <code>data.frame</code> representing the population or a function that draws the population. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a <code>data.frame</code> as an argument and return a <code>data.frame</code>. Typically, many steps are declared using the <code>declare_</code> functions, i.e., <code><a href='declare_population.html'>declare_population</a></code>, <code><a href='declare_population.html'>declare_population</a></code>, <code><a href='declare_sampling.html'>declare_sampling</a></code>, <code><a href='declare_potential_outcomes.html'>declare_potential_outcomes</a></code>, <code><a href='declare_estimand.html'>declare_estimand</a></code>, <code><a href='declare_assignment.html'>declare_assignment</a></code>, and <code><a href='declare_estimator.html'>declare_estimator</a></code>. Functions from the <code>dplyr</code> package such as mutate can also be usefully included.</p></td>
     </tr>
     <tr>
       <th>title</th>
@@ -146,7 +146,7 @@
 <p>2. Estimand functions.</p>
 <p>3. Estimator functions.</p>
 <p>The location of the estimand and estimator functions in the chain of functions determine *when* the values of the estimand and estimator are calculated. This allows users to, for example, differentiate between a population average treatment effect and a sample average treatment effect by placing the estimand function before or after sampling.</p>
-<p>Designs declared with declare_design can be investigated with a series of post-declaration commands, such as <code><a href='draw_data.html'>draw_data</a></code>, <code><a href='get_estimands.html'>get_estimands</a></code>, <code><a href='get_estimates.html'>get_estimates</a></code>, and <code><a href='diagnose_design.html'>diagnose_design</a></code>.</p>
+<p>Designs declared with declare_design can be investigated with a series of post-declaration commands, such as <code><a href='post_design.html'>draw_data</a></code>, <code><a href='post_design.html'>get_estimands</a></code>, <code><a href='post_design.html'>get_estimates</a></code>, and <code><a href='diagnose_design.html'>diagnose_design</a></code>.</p>
 <p>The print and summary methods for a design object return some helpful descriptions of the steps in your research design. If randomizr functions are used for any assignment or sampling steps, additional details about those steps are provided.</p>
     
 
@@ -255,10 +255,10 @@
 #&gt;  estimand_label
 #&gt;             ATE
 #&gt; </div><div class='input'>
-<span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='draw_data.html'>draw_data</a></span>(<span class='no'>design</span>)
+<span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='post_design.html'>draw_data</a></span>(<span class='no'>design</span>)
 
-<span class='no'>estimates</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='get_estimates.html'>get_estimates</a></span>(<span class='no'>design</span>)
-<span class='no'>estimands</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='get_estimands.html'>get_estimands</a></span>(<span class='no'>design</span>)
+<span class='no'>estimates</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='post_design.html'>get_estimates</a></span>(<span class='no'>design</span>)
+<span class='no'>estimands</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='post_design.html'>get_estimands</a></span>(<span class='no'>design</span>)
 
 <span class='fu'>not_run</span>({
   <span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='diagnose_design.html'>diagnose_design</a></span>(<span class='no'>design</span>)

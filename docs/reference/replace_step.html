@@ -153,17 +153,17 @@
 #&gt; 
 #&gt; Added variable:  noise 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -2.17   0.06 0.16 2.72 1.03         0      100
+#&gt;  -2.20   0.10 0.05 2.42 0.98         0      100
 #&gt; 
 #&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
 #&gt; 
 #&gt; Added variable:  Y_Z_0 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -2.17   0.06 0.16 2.72 1.03         0      100
+#&gt;  -2.20   0.10 0.05 2.42 0.98         0      100
 #&gt; 
 #&gt; Added variable:  Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -5.93   2.38 2.47 8.30 2.47         0      100
+#&gt;  -3.02   1.94 2.14 9.04 2.33         0      100
 #&gt; 
 #&gt; Step 3 (assignment): my_assignment ---------------------------------------------
 #&gt; 
@@ -194,18 +194,18 @@
 #&gt;          0      100
 #&gt; 
 #&gt; Added variable:  noise 
-#&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -2.43   0.03 -0.00 2.36 1.08         0      100
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.84   0.01 0.07 2.23 0.98         0      100
 #&gt; 
 #&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
 #&gt; 
 #&gt; Added variable:  Y_Z_0 
-#&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -2.43   0.03 -0.00 2.36 1.08         0      100
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.84   0.01 0.07 2.23 0.98         0      100
 #&gt; 
 #&gt; Added variable:  Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.03   1.56 1.89 7.25 2.16         0      100
+#&gt;  -3.30   1.82 1.89 7.89 2.12         0      100
 #&gt; 
 #&gt; Step 3 (assignment): my_assignment_2 -------------------------------------------
 #&gt; 
@@ -236,18 +236,18 @@
 #&gt;          0      100
 #&gt; 
 #&gt; Added variable:  noise 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.04   0.25 0.14 2.44 1.02         0      100
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.40  -0.14 -0.06 2.06 0.95         0      100
 #&gt; 
 #&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
 #&gt; 
 #&gt; Added variable:  Y_Z_0 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.04   0.25 0.14 2.44 1.02         0      100
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.40  -0.14 -0.06 2.06 0.95         0      100
 #&gt; 
 #&gt; Added variable:  Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.66   2.02 1.97 7.66 2.36         0      100
+#&gt;  -2.74   2.03 2.19 7.59 2.02         0      100
 #&gt; 
 #&gt; Step 3 (assignment): my_assignment ---------------------------------------------
 #&gt; 
@@ -272,7 +272,7 @@
 #&gt; 
 #&gt; Added variable:  income 
 #&gt;   min median mean  max   sd N_missing N_unique
-#&gt;  0.00   0.48 1.06 9.23 1.55         0      100
+#&gt;  0.00   0.37 0.90 5.78 1.18         0      100
 #&gt; </div><div class='input'> <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw'>dplyr</span><span class='kw'>::</span><span class='fu'>mutate</span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>before</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
 #&gt; Design Summary
 #&gt; 
@@ -284,23 +284,23 @@
 #&gt; 
 #&gt; Added variable:  noise 
 #&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -3.10  -0.13 -0.10 2.38 0.98         0      100
+#&gt;  -2.81  -0.12 -0.06 2.79 1.04         0      100
 #&gt; 
 #&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
 #&gt; 
 #&gt; Added variable:  Y_Z_0 
 #&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -3.10  -0.13 -0.10 2.38 0.98         0      100
+#&gt;  -2.81  -0.12 -0.06 2.79 1.04         0      100
 #&gt; 
 #&gt; Added variable:  Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.42   1.70 1.85 8.30 2.24         0      100
+#&gt;  -6.21   2.36 1.98 8.01 2.50         0      100
 #&gt; 
 #&gt; Step 3 (custom data modification): dplyr::mutate(income = noise^2) -------------
 #&gt; 
 #&gt; Added variable:  income 
 #&gt;   min median mean  max   sd N_missing N_unique
-#&gt;  0.00   0.38 0.96 9.58 1.50         0      100
+#&gt;  0.00   0.53 1.08 7.88 1.51         0      100
 #&gt; 
 #&gt; Step 4 (assignment): my_assignment ---------------------------------------------
 #&gt; 
@@ -332,17 +332,17 @@
 #&gt; 
 #&gt; Added variable:  noise 
 #&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -2.09  -0.18 -0.10 2.18 0.94         0      100
+#&gt;  -2.99   0.04 -0.06 2.20 1.03         0      100
 #&gt; 
 #&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
 #&gt; 
 #&gt; Added variable:  Y_Z_0 
 #&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -2.09  -0.18 -0.10 2.18 0.94         0      100
+#&gt;  -2.99   0.04 -0.06 2.20 1.03         0      100
 #&gt; 
 #&gt; Added variable:  Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -4.13   1.68 1.58 6.31 2.27         0      100
+#&gt;  -4.54   2.23 2.00 8.45 2.49         0      100
 #&gt; </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

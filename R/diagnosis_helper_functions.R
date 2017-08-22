@@ -37,7 +37,7 @@
 #' diagnosis
 #' }
 #'
-#' get_diagnonds(diagnosis)
+#' get_diagnosands(diagnosis)
 #'
 #' get_simulations(diagnosis)
 #'

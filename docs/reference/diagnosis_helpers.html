@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Diagnose the Design — diagnose_design • DeclareDesign</title>
+<title>Explore your design diagnosis — diagnosis_helpers • DeclareDesign</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -100,29 +100,23 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Diagnose the Design</h1>
+    <h1>Explore your design diagnosis</h1>
     </div>
 
     
-    <p>Diagnose the Design</p>
+    <p>Explore your design diagnosis</p>
     
 
-    <pre class="usage"><span class='fu'>diagnose_design</span>(<span class='no'>...</span>, <span class='kw'>diagnosands</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>sims</span> <span class='kw'>=</span> <span class='fl'>500</span>)</pre>
+    <pre class="usage"><span class='fu'>get_diagnosands</span>(<span class='no'>diagnosis</span>)
+
+<span class='fu'>get_simulations</span>(<span class='no'>diagnosis</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>...</th>
-      <td><p>A design created by <code><a href='declare_design.html'>declare_design</a></code>, or a set of designs. You can also provide a single list of designs, for example one created by <code><a href='quick_design.html'>quick_design</a></code>.</p></td>
-    </tr>
-    <tr>
-      <th>diagnosands</th>
-      <td><p>A set of diagnosands created by <code><a href='declare_diagnosands.html'>declare_diagnosands</a></code>. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).</p></td>
-    </tr>
-    <tr>
-      <th>sims</th>
-      <td><p>The number of simulations, defaulting to 500.</p></td>
+      <th>diagnosis</th>
+      <td><p>A design diagnosis created by <code><a href='diagnose_design.html'>diagnose_design</a></code>.</p></td>
     </tr>
     </table>
     
@@ -149,7 +143,7 @@
 
 <span class='fu'>not_run</span>({
   <span class='co'># using built-in defaults:</span>
-  <span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'>diagnose_design</span>(<span class='no'>design</span>)
+  <span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='diagnose_design.html'>diagnose_design</a></span>(<span class='no'>design</span>)
   <span class='no'>diagnosis</span>
 })
 
@@ -157,12 +151,12 @@
 <span class='no'>my_diagnosand</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_diagnosands.html'>declare_diagnosands</a></span>(<span class='kw'>absolute_error</span> <span class='kw'>=</span> <span class='fu'>mean</span>(<span class='fu'>abs</span>(<span class='no'>est</span> - <span class='no'>estimand</span>)))
 
 <span class='fu'>not_run</span>({
-  <span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'>diagnose_design</span>(<span class='no'>design</span>, <span class='kw'>diagnosands</span> <span class='kw'>=</span> <span class='no'>my_diagnosand</span>)
+  <span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='diagnose_design.html'>diagnose_design</a></span>(<span class='no'>design</span>, <span class='kw'>diagnosands</span> <span class='kw'>=</span> <span class='no'>my_diagnosand</span>)
   <span class='no'>diagnosis</span>
 })
 
-<span class='fu'><a href='diagnosis_helpers.html'>get_diagnosands</a></span>(<span class='no'>diagnosis</span>)</div><div class='output co'>#&gt; <span class='error'>Error in get_diagnosands(diagnosis): object 'diagnosis' not found</span></div><div class='input'>
-<span class='fu'><a href='diagnosis_helpers.html'>get_simulations</a></span>(<span class='no'>diagnosis</span>)</div><div class='output co'>#&gt; <span class='error'>Error in get_simulations(diagnosis): object 'diagnosis' not found</span></div><div class='input'>
+<span class='fu'>get_diagnosands</span>(<span class='no'>diagnosis</span>)</div><div class='output co'>#&gt; <span class='error'>Error in get_diagnosands(diagnosis): object 'diagnosis' not found</span></div><div class='input'>
+<span class='fu'>get_simulations</span>(<span class='no'>diagnosis</span>)</div><div class='output co'>#&gt; <span class='error'>Error in get_simulations(diagnosis): object 'diagnosis' not found</span></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

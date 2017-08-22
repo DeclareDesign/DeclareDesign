@@ -326,7 +326,7 @@ my_estimator_dim &lt;-<span class="st"> </span><span class="kw"><a href="../refe
 <code>declare_design</code> produces two things: a “dgp function” and a “design function.” The dgp function draws a dataset and the design function returns an estimands dataframe and an estimates data frame. It simulates the design from population through estimates, in whatever order you tell it – meaning it carefully separates the data generating parts of the design and the calculation of estimates and estimands.</li>
 </ol>
 <p>You can run them directly via:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat &lt;-<span class="st"> </span><span class="kw"><a href="../reference/draw_data.html">draw_data</a></span>(design)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat &lt;-<span class="st"> </span><span class="kw"><a href="../reference/post_design.html">draw_data</a></span>(design)
 <span class="kw">head</span>(dat)</code></pre></div>
 <pre><code>##      ID     income age Y_Z_0 Y_Z_1 big_income S_inclusion_prob Z
 ## 1  0001  0.4593641  57  0.05  0.87  2.2968204             0.25 0
@@ -343,12 +343,12 @@ my_estimator_dim &lt;-<span class="st"> </span><span class="kw"><a href="../refe
 ## 24         0.9 0.05
 ## 30         0.9 0.05</code></pre>
 <p>and</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/get_estimates.html">get_estimates</a></span>(design)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/post_design.html">get_estimates</a></span>(design)</code></pre></div>
 <pre><code>##   estimator_label   est         se            p  ci_lower  ci_upper  df
 ## 1    my_estimator 0.822 0.04767249 2.528631e-44 0.7281054 0.9158946 248
 ##   estimand_label
 ## 1            ATE</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/get_estimands.html">get_estimands</a></span>(design)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/post_design.html">get_estimands</a></span>(design)</code></pre></div>
 <pre><code>##   estimand_label estimand
 ## 1            ATE  0.78985</code></pre>
 </div>
@@ -496,7 +496,7 @@ my_estimator_custom &lt;-<span class="st"> </span>
 }
 
 my_1000_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/quick_design.html">quick_design</a></span>(<span class="dt">template =</span> m_arm_trial, <span class="dt">numb =</span> <span class="dv">1000</span>)
-<span class="kw">head</span>(<span class="kw"><a href="../reference/draw_data.html">draw_data</a></span>(my_1000_design))</code></pre></div>
+<span class="kw">head</span>(<span class="kw"><a href="../reference/post_design.html">draw_data</a></span>(my_1000_design))</code></pre></div>
 <pre><code>##      ID      income age Y_Z_0 Y_Z_1 S_inclusion_prob Z Z_cond_prob Y
 ## 1  0001 -0.28818473  63     0  0.88             0.25 0         0.9 0
 ## 7  0007  0.01710038  49     0  0.74             0.25 0         0.9 0
@@ -523,7 +523,7 @@ my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
                             my_assignment_continuous,
                             reveal_outcomes)
 
-<span class="kw">head</span>(<span class="kw"><a href="../reference/draw_data.html">draw_data</a></span>(my_design))</code></pre></div>
+<span class="kw">head</span>(<span class="kw"><a href="../reference/post_design.html">draw_data</a></span>(my_design))</code></pre></div>
 <pre><code>##     ID    income age Y_Z_0 Y_Z_0.1 Y_Z_0.2 Y_Z_0.3 Y_Z_0.4 Y_Z_0.5 Y_Z_0.6
 ## 1 0001 1.1543236  68     0   0.093   0.186   0.279   0.372   0.465   0.558
 ## 2 0002 0.3877885  86     0   0.111   0.222   0.333   0.444   0.555   0.666
@@ -553,7 +553,7 @@ my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
                             <span class="kw"><a href="../reference/reveal_outcomes.html">reveal_outcomes</a></span>(<span class="dt">outcome_variable_name =</span> <span class="st">"R"</span>),
                             <span class="kw"><a href="../reference/reveal_outcomes.html">reveal_outcomes</a></span>(<span class="dt">attrition_variable_name =</span> <span class="st">"R"</span>))
 
-<span class="kw">head</span>(<span class="kw"><a href="../reference/draw_data.html">draw_data</a></span>(my_design)[, <span class="kw">c</span>(<span class="st">"ID"</span>, <span class="st">"Y_Z_0"</span>, <span class="st">"Y_Z_1"</span>, <span class="st">"R_Z_0"</span>, <span class="st">"R_Z_1"</span>, <span class="st">"Z"</span>, <span class="st">"R"</span>, <span class="st">"Y"</span>)])</code></pre></div>
+<span class="kw">head</span>(<span class="kw"><a href="../reference/post_design.html">draw_data</a></span>(my_design)[, <span class="kw">c</span>(<span class="st">"ID"</span>, <span class="st">"Y_Z_0"</span>, <span class="st">"Y_Z_1"</span>, <span class="st">"R_Z_0"</span>, <span class="st">"R_Z_1"</span>, <span class="st">"Z"</span>, <span class="st">"R"</span>, <span class="st">"Y"</span>)])</code></pre></div>
 <pre><code>##     ID Y_Z_0 Y_Z_1 R_Z_0 R_Z_1 Z R    Y
 ## 1 0001  0.05  0.52     0     1 0 0   NA
 ## 2 0002  0.05  0.48     1     0 0 1 0.05
