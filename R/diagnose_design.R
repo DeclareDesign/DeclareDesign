@@ -54,7 +54,10 @@ diagnose_design <-
            diagnosands = NULL,
            sims = 500,
            bootstrap = TRUE,
-           bootstrap_sims = 100) {
+           bootstrap_sims = 100,
+           parallel = FALSE,
+           parallel_cores = detectCores(logical = TRUE),
+           random_seed = FALSE) {
 
     if (is.null(diagnosands)) {
       diagnosands <- declare_diagnosands(
@@ -103,14 +106,17 @@ diagnose_design <-
                               diagnosands = diagnosands,
                               sims = sims,
                               bootstrap = bootstrap,
-                              bootstrap_sims = bootstrap_sims)
+                              bootstrap_sims = bootstrap_sims,
+                              parallel = parallel,
+                              parallel_cores = parallel_cores,
+                              random_seed = random_seed)
 
     if (length(comparison_sims) > 1) {
 
       simulations_list <- lapply(comparison_sims, function(x) x$simulations)
       diagnosands_list <- lapply(comparison_sims, function(x) x$diagnosands)
 
-      for(i in 1:length(simulations_list)){
+      for (i in 1:length(simulations_list)) {
         simulations_list[[i]] <- cbind(design_ID = names(simulations_list)[i], simulations_list[[i]])
         diagnosands_list[[i]] <- cbind(design_ID = names(diagnosands_list)[i], diagnosands_list[[i]])
       }
@@ -134,33 +140,49 @@ diagnose_design <-
   }
 
 #' @importFrom rlang !! !!!
+#' @importFrom parallel detectCores makeCluster clusterSetRNGStream stopCluster clusterEvalQ clusterExport
+#' @importFrom pbapply pbsapply
 diagnose_design_single_design <-
   function(design,
            diagnosands = NULL,
            sims = 500,
            bootstrap = TRUE,
-           bootstrap_sims = 100) {
-    ##if(getDoParWorkers() == 1){
-    ##  registerDoSEQ()
-    ##}
+           bootstrap_sims = 100,
+           parallel = FALSE,
+           parallel_cores = detectCores(logical = TRUE),
+           random_seed = NULL) {
 
-    ##sims <- parLapply(1:sims, function(x) design$design_function())
+    if (parallel) {
+      cl <- makeCluster(parallel_cores)
 
-    ##pb <- txtProgressBar(min = 0, max = sims, initial = 0,
-    ##                     char = "=", width = 20, style = 3)
+      clusterEvalQ(cl, library(DeclareDesign))
+      clusterExport(cl, varlist = "design", envir = environment())
 
-    # importFrom foreach registerDoSEQ getDoParWorkers
-    # importFrom tcltk tkProgressBar setTkProgressBar
-    # importFrom utils txtProgressBar setTxtProgressBar
-    # importFrom doRNG %dorng%
+      if (!is.null(random_seed)) {
+        clusterSetRNGStream(cl, random_seed)
+      }
+      results_list <-
+        pbsapply(
+          X = seq_len(sims),
+          FUN = function(x)
+            design$design_function(),
+          simplify = FALSE,
+          cl = cl
+        )
+      stopCluster(cl)
+    } else {
+      results_list <-
+        pbsapply(
+          X = seq_len(sims),
+          FUN = function(x)
+            design$design_function(),
+          simplify = FALSE
+        )
+    }
 
-    ##sims <- foreach(i = 1:sims) %do% {
-    ##  info <- sprintf("%d%% done", round(i/sims))
-    ##  setTxtProgressBar(pb, i, sprintf("test (%s)", info), info)
-    ##  design$design_function()
-    ##}
-
-    results_list <- replicate(sims, design$design_function(), simplify = FALSE)
+    # } else {
+    #   results_list <- replicate(sims, design$design_function(), simplify = FALSE)
+    # }
 
     estimates_list <- lapply(results_list, function(x) x$estimates_df)
     estimates_df <- do.call(rbind, estimates_list)

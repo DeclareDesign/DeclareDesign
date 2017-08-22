@@ -15,10 +15,11 @@ Depends:
     R (>= 3.3.0)
 Imports:
     rlang,
-    foreach,
     randomizr,
     fabricatr,
-    estimatr
+    estimatr,
+    pbapply, 
+    parallel
 Remotes: DeclareDesign/estimatr,
     DeclareDesign/fabricatr
 Additional_repositories: http://install.declaredesign.org
