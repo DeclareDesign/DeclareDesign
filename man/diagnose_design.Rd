@@ -4,7 +4,8 @@
 \alias{diagnose_design}
 \title{Diagnose the Design}
 \usage{
-diagnose_design(..., diagnosands = NULL, sims = 500)
+diagnose_design(..., diagnosands = NULL, sims = 500, bootstrap = TRUE,
+  bootstrap_sims = 100)
 }
 \arguments{
 \item{...}{A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{quick_design}}.}
@@ -12,6 +13,10 @@ diagnose_design(..., diagnosands = NULL, sims = 500)
 \item{diagnosands}{A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).}
 
 \item{sims}{The number of simulations, defaulting to 500.}
+
+\item{bootstrap}{Option to bootstrap the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{TRUE}.}
+
+\item{bootstrap_sims}{The number of bootstrap replicates of the diagnosands, defaulting to 100.}
 }
 \description{
 Diagnose the Design
