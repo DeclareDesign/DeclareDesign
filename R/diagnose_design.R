@@ -56,8 +56,7 @@ diagnose_design <-
            bootstrap = TRUE,
            bootstrap_sims = 100,
            parallel = FALSE,
-           parallel_cores = detectCores(logical = TRUE),
-           random_seed = FALSE) {
+           parallel_cores = detectCores(logical = TRUE)) {
 
     if (is.null(diagnosands)) {
       diagnosands <- declare_diagnosands(
@@ -108,8 +107,7 @@ diagnose_design <-
                               bootstrap = bootstrap,
                               bootstrap_sims = bootstrap_sims,
                               parallel = parallel,
-                              parallel_cores = parallel_cores,
-                              random_seed = random_seed)
+                              parallel_cores = parallel_cores)
 
     if (length(comparison_sims) > 1) {
 
@@ -140,8 +138,10 @@ diagnose_design <-
   }
 
 #' @importFrom rlang !! !!!
-#' @importFrom parallel detectCores makeCluster clusterSetRNGStream stopCluster clusterEvalQ clusterExport
-#' @importFrom pbapply pbsapply
+#' @importFrom foreach registerDoSEQ getDoParWorkers foreach %dopar%
+#' @importFrom doRNG %dorng%
+#' @importFrom doParallel registerDoParallel
+#' @importFrom parallel detectCores
 diagnose_design_single_design <-
   function(design,
            diagnosands = NULL,
@@ -149,40 +149,15 @@ diagnose_design_single_design <-
            bootstrap = TRUE,
            bootstrap_sims = 100,
            parallel = FALSE,
-           parallel_cores = detectCores(logical = TRUE),
-           random_seed = NULL) {
+           parallel_cores = detectCores(logical = TRUE)) {
 
     if (parallel) {
-      cl <- makeCluster(parallel_cores)
-
-      clusterEvalQ(cl, library(DeclareDesign))
-      clusterExport(cl, varlist = "design", envir = environment())
-
-      if (!is.null(random_seed)) {
-        clusterSetRNGStream(cl, random_seed)
-      }
-      results_list <-
-        pbsapply(
-          X = seq_len(sims),
-          FUN = function(x)
-            design$design_function(),
-          simplify = FALSE,
-          cl = cl
-        )
-      stopCluster(cl)
+      registerDoParallel(cores = parallel_cores)
     } else {
-      results_list <-
-        pbsapply(
-          X = seq_len(sims),
-          FUN = function(x)
-            design$design_function(),
-          simplify = FALSE
-        )
+      registerDoSEQ()
     }
 
-    # } else {
-    #   results_list <- replicate(sims, design$design_function(), simplify = FALSE)
-    # }
+    results_list <- foreach(i = seq_len(sims)) %dorng% design$design_function()
 
     estimates_list <- lapply(results_list, function(x) x$estimates_df)
     estimates_df <- do.call(rbind, estimates_list)

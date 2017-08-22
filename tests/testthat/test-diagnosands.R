@@ -1,5 +1,5 @@
 context("Diagnosands")
-test_that("test diagnosands", {
+test_that("parallel works.", {
 
   my_population <- declare_population(N = 50, noise = rnorm(N))
 
@@ -19,16 +19,9 @@ test_that("test diagnosands", {
                               reveal_outcomes(),
                               pate_estimator)
 
-  # default set
-  ##debugonce(DeclareDesign:::diagnose_design_single_design)
-  #rm(list = ls()[-which(ls() %in% "my_design")])
-  diagnose_design(my_design, sims = 20, bootstrap = FALSE, parallel = TRUE)
+  diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = TRUE)
 
-  my_dig <-  declare_diagnosands(bias = mean(est - estimand), sd_bias = sd(estimand))
-  diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_dig, bootstrap = FALSE)
-
-  head(diagnosis$simulations)
-  diagnosis$diagnosands
+  diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = FALSE)
 
 })
 

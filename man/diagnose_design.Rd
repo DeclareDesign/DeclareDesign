@@ -6,7 +6,7 @@
 \usage{
 diagnose_design(..., diagnosands = NULL, sims = 500, bootstrap = TRUE,
   bootstrap_sims = 100, parallel = FALSE,
-  parallel_cores = detectCores(logical = TRUE), random_seed = FALSE)
+  parallel_cores = detectCores(logical = TRUE))
 }
 \arguments{
 \item{...}{A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{quick_design}}.}

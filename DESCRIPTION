@@ -18,7 +18,9 @@ Imports:
     randomizr,
     fabricatr,
     estimatr,
-    pbapply, 
+    doParallel,
+    foreach,
+    doRNG,
     parallel
 Remotes: DeclareDesign/estimatr,
     DeclareDesign/fabricatr
