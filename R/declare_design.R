@@ -146,12 +146,12 @@ declare_design <- function(...,
 
   process_population <- function(population) {
     ## the first part of the DGP must be a data.frame. Take what the user creates and turn it into a data.frame.
-    if (class(population) == "data.frame") {
+    if (any(class(population) == "data.frame")) {
       current_df <- population
     } else if (class(population) == "call") {
       try(current_df <- population, silent = TRUE)
       if (!exists("current_df") |
-          class(current_df) != "data.frame") {
+          !any(class(current_df) == "data.frame")) {
         stop(
           "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame."
         )
@@ -159,7 +159,7 @@ declare_design <- function(...,
     } else if (class(population) == "function") {
       try(current_df <- population(), silent = TRUE)
       if (!exists("current_df") |
-          class(current_df) != "data.frame") {
+          !any(class(current_df) == "data.frame")) {
         stop(
           "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame."
         )

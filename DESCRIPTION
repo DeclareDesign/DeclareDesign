@@ -33,5 +33,7 @@ Suggests:
     knitr,
     rmarkdown,
     AER,
-    dplyr
+    dplyr,
+    data.table,
+    sf
 VignetteBuilder: knitr
