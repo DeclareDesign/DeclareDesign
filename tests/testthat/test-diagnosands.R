@@ -19,8 +19,6 @@ test_that("parallel works.", {
                               reveal_outcomes(),
                               pate_estimator)
 
-  diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = TRUE)
-
   diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = FALSE)
 
 })
@@ -45,7 +43,7 @@ test_that("test diagnosands without estimands", {
                               estimator)
 
   my_dig <-  declare_diagnosands(mean_est = mean(est), sd_est = sd(est))
-  diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_dig, bootstrap = FALSE)
+  diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_dig, bootstrap = FALSE, parallel = FALSE)
 
   head(diagnosis$simulations)
 
@@ -75,14 +73,14 @@ test_that("custom diagnosand function", {
                               pate_estimator)
 
   # default set
-  diagnosis <- diagnose_design(my_design, sims = 2, bootstrap = FALSE)
+  diagnosis <- diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = FALSE)
 
   mean_custom <- function(x) return(mean(x * 5))
 
   my_dig <-  declare_diagnosands(mean_x5 = mean_custom(est), mean_true = mean(est))
 
   rm(mean_custom)
-  diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_dig, bootstrap = FALSE)
+  diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_dig, bootstrap = FALSE, parallel = FALSE)
 
   head(diagnosis$simulations)
 
@@ -96,7 +94,7 @@ test_that("no estimates, no estimators should error", {
   my_design <- declare_design(my_population)
   head(draw_data(my_design))
 
-  expect_error(diagnose_design(my_design, sims = 2, bootstrap = FALSE))
+  expect_error(diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = FALSE))
 
 })
 

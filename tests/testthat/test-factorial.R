@@ -34,6 +34,6 @@ test_that("Factorial", {
 
   my_design
 
-  diagnosis <- diagnose_design(my_design, sims = 2, bootstrap = FALSE)
+  diagnosis <- diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = FALSE)
   diagnosis$simulations
 })

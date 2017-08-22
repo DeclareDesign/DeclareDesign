@@ -67,7 +67,7 @@ test_that("regression from estimatr works as an estimator", {
 
   my_design$design_function()
 
-  diagnosis <- diagnose_design(my_design, sims = 2, bootstrap = FALSE)
+  diagnosis <- diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = FALSE)
   diagnosis
 
 })
@@ -215,7 +215,7 @@ test_that("labels for estimates and estimands work", {
     design,
     add_step(mand_arg_label, after = my_potential_outcomes),
     add_step(mator_no_label, after = reveal_outcomes)
-  ), sims = 2, bootstrap = FALSE)
+  ), sims = 2, bootstrap = FALSE, parallel = FALSE)
 
 })
 

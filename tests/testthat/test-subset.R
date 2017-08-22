@@ -30,7 +30,7 @@ test_that("Test Subsetting", {
   head(design$data_function())
   design$design_function()
 
-  diagnose_design(design, sims = 2, bootstrap = FALSE)
+  diagnose_design(design, sims = 2, bootstrap = FALSE, parallel = FALSE)
 
 
 })

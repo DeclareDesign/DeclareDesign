@@ -21,6 +21,6 @@ test_that("send estimand to estimator works", {
                               pate_estimator)
 
   rm(list = ls()[-which(ls() %in% "my_design")])
-  diagnose_design(my_design, sims = 2, bootstrap_sims = 2)
+  diagnose_design(my_design, sims = 2, bootstrap_sims = 2, parallel = FALSE)
 
 })

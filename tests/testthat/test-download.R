@@ -16,7 +16,7 @@ test_that("download design", {
                                    reveal_outcomes,
                                    ate_estimator)
 
- diagnose_design(two_arm_design, sims = 2)
+ diagnose_design(two_arm_design, sims = 2, parallel = FALSE)
 })
 
 test_that("download template", {
@@ -43,6 +43,6 @@ test_that("download template", {
 
  two_arm_design <- quick_design(N = 10, template = two_arm_template)
 
- diagnose_design(two_arm_design, sims = 2)
+ diagnose_design(two_arm_design, sims = 2, parallel = FALSE)
 
 })
