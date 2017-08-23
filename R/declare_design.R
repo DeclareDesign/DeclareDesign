@@ -275,8 +275,10 @@ declare_design <- function(...,
 
           if (!is.null(variables_modified_names)) {
             variables_modified[[i]] <-
-              lapply(current_df[, variables_modified_names, drop = FALSE],
-                     describe_variable)
+              lapply(variables_modified_names,
+                     function(var) list(before = describe_variable(last_df[, var, drop = FALSE]),
+                                      after = describe_variable(current_df[, var, drop = FALSE])))
+            names(variables_modified[[i]]) <- variables_modified_names
           }
 
           if (!is.null(attributes(causal_order[[i]])$summary_function)) {
@@ -284,7 +286,7 @@ declare_design <- function(...,
               capture.output(attributes(causal_order[[i]])$summary_function(last_df))
           }
 
-          if(nrow(current_df) != nrow(last_df)){
+          if (nrow(current_df) != nrow(last_df)) {
             N[[i]] <- paste0("N = ", nrow(current_df), " (", abs(nrow(current_df) - nrow(last_df)),
                              ifelse(nrow(current_df) > nrow(last_df), " added", " subtracted"), ")")
           }

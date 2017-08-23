@@ -197,17 +197,19 @@ print.summary.design <- function(x, ...) {
     }
     if (!is.null(x$variables_added[[i]])) {
       for (j in seq_along(x$variables_added[[i]])) {
-        cat("Added variable: ", names(x$variables_added[[i]])[j], "\n")
+        cat("Added variable:", names(x$variables_added[[i]])[j], "\n")
         print(x$variables_added[[i]][[j]], row.names = FALSE)
         cat("\n")
       }
     }
     if (!is.null(x$variables_modified[[i]])) {
       for (j in seq_along(x$variables_modified[[i]])) {
-        cat("Altered variable: ",
+        cat("Altered variable:",
             names(x$variables_modified[[i]])[j],
-            "\n")
-        print(x$variables_modified[[i]][[j]], row.names = FALSE)
+            "\n  Before: \n")
+        print(x$variables_modified[[i]][[j]][["before"]], row.names = FALSE)
+        cat("\n  After:\n")
+        print(x$variables_modified[[i]][[j]][["after"]], row.names = FALSE)
         cat("\n")
       }
     }
