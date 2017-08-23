@@ -21,6 +21,8 @@ test_that("parallel works.", {
 
   diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = FALSE)
 
+  ## diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = TRUE)
+
 })
 
 
