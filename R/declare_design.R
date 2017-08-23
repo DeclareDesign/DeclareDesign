@@ -26,7 +26,7 @@
 #'
 #' @return a list of two functions, the \code{design_function} and the \code{data_function}. The \code{design_function} runs the design once, i.e. draws the data and calculates any estimates and estimands defined in \code{...}, returned separately as two \code{data.frame}'s. The \code{data_function} runs the design once also, but only returns the final data.
 #'
-#' @importFrom rlang quos quo_expr eval_tidy quo_text
+#' @importFrom rlang quos quo_expr eval_tidy quo_text lang_args is_formula
 #' @importFrom utils bibentry
 #' @export
 #'
@@ -104,7 +104,8 @@ declare_design <- function(...,
   if (length(dots) > 1) {
     for (i in 2:length(dots)) {
       if (name_or_call[[i]] == "call") {
-        dots[[i]] <- quo(wrap_step(!! dots[[i]]))  ##call("wrap_step", quo_expr(dots[[i]]))
+        dots[[i]] <-
+          quo(wrap_step(!!dots[[i]]))  ##call("wrap_step", quo_expr(dots[[i]]))
       }
     }
   }
@@ -238,11 +239,30 @@ declare_design <- function(...,
     }
   }
 
+  get_formula_from_step <- function(step){
+    call <- attributes(step)$call
+    type <- attributes(step)$type
+    if (!is.null(call) & !is.null(type) & type != "declare_step") {
+      args <- lang_args(call)
+      has_formula <- sapply(args, is_formula)
+      formulae <- args[has_formula]
+      if (length(formulae) == 1) {
+        return(formulae[[1]])
+      } else {
+        return(NULL)
+      }
+    } else {
+      return(NULL)
+    }
+  }
+
   summary_function <- function() {
     variables_added <- variables_modified <-
       quantities_added <- quantities_modified <-
       N <-
       vector("list", length(causal_order))
+
+    formulae <- lapply(causal_order, get_formula_from_step)
 
     current_df <- process_population(causal_order[[1]])
 
@@ -309,7 +329,8 @@ declare_design <- function(...,
       list(variables_added = variables_added,
            quantities_added = quantities_added,
            variables_modified = variables_modified,
-           N = N),
+           N = N,
+           formulae = formulae),
       class = "design_summary"
     )
   }

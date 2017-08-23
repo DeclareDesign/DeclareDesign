@@ -122,6 +122,7 @@ summary.design <- function(object, ...) {
       quantities_added = summ$quantities_added,
       variables_modified = summ$variables_modified,
       N = summ$N,
+      formulae = summ$formulae,
       causal_order_expr = object$causal_order_expr,
       causal_order_types = object$causal_order_types,
       function_types = object$function_types,
@@ -183,6 +184,10 @@ print.summary.design <- function(x, ...) {
 
     if (!is.null(x$N[[i]])) {
       cat(x$N[[i]], "\n\n")
+    }
+
+    if (!is.null(x$formulae[[i]])) {
+      cat("Formula:", deparse(x$formula[[i]]), "\n\n")
     }
 
     if (!is.null(x$quantities_added[[i]])) {
