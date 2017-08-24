@@ -23,8 +23,7 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -170,7 +169,6 @@
 #&gt; 
 #&gt; Step 3 (assignment): my_assignment ---------------------------------------------
 #&gt; 
-#&gt; 
 #&gt; Random assignment procedure: Complete random assignment 
 #&gt; Number of units: 100 
 #&gt; Number of treatment arms: 2 
@@ -214,7 +212,6 @@
 #&gt; 
 #&gt; Step 3 (assignment): my_assignment_2 -------------------------------------------
 #&gt; 
-#&gt; 
 #&gt; Random assignment procedure: Complete random assignment 
 #&gt; Number of units: 100 
 #&gt; Number of treatment arms: 2 
@@ -231,7 +228,7 @@
 #&gt;   Frequency   25   75
 #&gt;  Proportion 0.25 0.75
 #&gt; </div><div class='input'>
- <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/dplyr/topics/mutate'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>after</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
+ <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw'>dplyr</span><span class='kw'>::</span><span class='fu'>mutate</span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>after</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
 #&gt; Design Summary
 #&gt; 
 #&gt; Step 1 (population): my_population ---------------------------------------------
@@ -258,7 +255,6 @@
 #&gt; 
 #&gt; Step 3 (assignment): my_assignment ---------------------------------------------
 #&gt; 
-#&gt; 
 #&gt; Random assignment procedure: Complete random assignment 
 #&gt; Number of units: 100 
 #&gt; Number of treatment arms: 2 
@@ -280,7 +276,7 @@
 #&gt; Added variable: income 
 #&gt;   min median mean  max   sd N_missing N_unique
 #&gt;  0.00   0.37 0.90 5.78 1.18         0      100
-#&gt; </div><div class='input'> <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/dplyr/topics/mutate'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>before</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
+#&gt; </div><div class='input'> <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw'>dplyr</span><span class='kw'>::</span><span class='fu'>mutate</span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>before</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
 #&gt; Design Summary
 #&gt; 
 #&gt; Step 1 (population): my_population ---------------------------------------------
@@ -312,7 +308,6 @@
 #&gt;  0.00   0.53 1.08 7.88 1.51         0      100
 #&gt; 
 #&gt; Step 4 (assignment): my_assignment ---------------------------------------------
-#&gt; 
 #&gt; 
 #&gt; Random assignment procedure: Complete random assignment 
 #&gt; Number of units: 100 

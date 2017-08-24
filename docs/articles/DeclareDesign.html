@@ -136,7 +136,7 @@
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_population &lt;-
 <span class="st">  </span><span class="kw"><a href="../reference/declare_population.html">declare_population</a></span>(<span class="dt">N =</span> <span class="dv">1000</span>,
   <span class="dt">income =</span> <span class="kw">rnorm</span>(N),
-  <span class="dt">age =</span> <span class="kw">sample</span>(<span class="dv">18</span><span class="op">:</span><span class="dv">95</span>, N, <span class="dt">replace =</span> T))
+  <span class="dt">age =</span> <span class="kw">sample</span>(<span class="dv">18</span>:<span class="dv">95</span>, N, <span class="dt">replace =</span> T))
 
 pop &lt;-<span class="st"> </span><span class="kw">my_population</span>()
 <span class="kw">head</span>(pop)</code></pre></div>
@@ -149,11 +149,11 @@ pop &lt;-<span class="st"> </span><span class="kw">my_population</span>()
 ## 6 0006 -0.1061245  75</code></pre>
 <p>Multi-level datasets are also easy to use. You set the <code>N</code> of each level in a call to <code>level()</code>. The <code>level</code> function is neat – if the previous level has data, it merges so that there are N entries for each of the units at the higher level. We can handle non-fixed number of units at each level too. In the <code>individuals</code> line, we’ve drawn a random number of individuals that are in each village.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_population_nested &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_population.html">declare_population</a></span>(
-  <span class="dt">districts =</span> <span class="kw">level</span>(<span class="dt">N =</span> <span class="dv">25</span>, <span class="dt">urban =</span> <span class="kw">sample</span>(<span class="dv">0</span><span class="op">:</span><span class="dv">1</span>, N, <span class="dt">replace =</span> <span class="ot">TRUE</span>)),
+  <span class="dt">districts =</span> <span class="kw">level</span>(<span class="dt">N =</span> <span class="dv">25</span>, <span class="dt">urban =</span> <span class="kw">sample</span>(<span class="dv">0</span>:<span class="dv">1</span>, N, <span class="dt">replace =</span> <span class="ot">TRUE</span>)),
   <span class="dt">villages =</span> <span class="kw">level</span>(<span class="dt">N =</span> <span class="dv">10</span>, <span class="dt">altitude =</span> <span class="kw">rnorm</span>(N)),
-  <span class="dt">individuals =</span> <span class="kw">level</span>(<span class="dt">N =</span> <span class="kw">sample</span>(<span class="dv">100</span><span class="op">:</span><span class="dv">200</span>, <span class="dt">size =</span> <span class="dv">250</span>, <span class="dt">replace =</span> <span class="ot">TRUE</span>), 
+  <span class="dt">individuals =</span> <span class="kw">level</span>(<span class="dt">N =</span> <span class="kw">sample</span>(<span class="dv">100</span>:<span class="dv">200</span>, <span class="dt">size =</span> <span class="dv">250</span>, <span class="dt">replace =</span> <span class="ot">TRUE</span>), 
                       <span class="dt">income =</span> <span class="kw">rnorm</span>(N),
-                      <span class="dt">age =</span> <span class="kw">sample</span>(<span class="dv">18</span><span class="op">:</span><span class="dv">95</span>, N, <span class="dt">replace =</span> <span class="ot">TRUE</span>)))</code></pre></div>
+                      <span class="dt">age =</span> <span class="kw">sample</span>(<span class="dv">18</span>:<span class="dv">95</span>, N, <span class="dt">replace =</span> <span class="ot">TRUE</span>)))</code></pre></div>
 <p>This says that there are 25 districts, 10 villages per districts, and then between 100 and 200 individuals per village. It creates districts first, then merges in villages, then merges in individuals using ID variables created at the level above it.</p>
 <p>Within those levels, you can easily include existing data (and also add variables to them if you wish):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">region_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">capital =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>))
@@ -170,18 +170,18 @@ pop_level_data &lt;-<span class="st"> </span><span class="kw"><a href="../refere
 <p>Similarly, you can easily declare your existing data as the population:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">country_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(
   <span class="dt">cow_code =</span> <span class="kw">c</span>(<span class="dv">504</span>, <span class="dv">15</span>, <span class="dv">100</span>, <span class="dv">90</span>),
-  <span class="dt">polity_iv =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">9</span>, <span class="dv">7</span>, <span class="op">-</span><span class="dv">1</span>, <span class="dv">3</span>))
+  <span class="dt">polity_iv =</span> <span class="kw">c</span>(-<span class="dv">9</span>, <span class="dv">7</span>, -<span class="dv">1</span>, <span class="dv">3</span>))
 pop_data &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_population.html">declare_population</a></span>(<span class="dt">data =</span> country_data)
 
 <span class="kw">head</span>(<span class="kw">pop_data</span>())</code></pre></div>
-<pre><code>##   cow_code polity_iv
-## 1      504        -9
-## 2       15         7
-## 3      100        -1
-## 4       90         3</code></pre>
+<pre><code>##   cow_code polity_iv ID
+## 1      504        -9  1
+## 2       15         7  2
+## 3      100        -1  3
+## 4       90         3  4</code></pre>
 <p>If you don’t want your data to be fixed, you can resample from it, i.e.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pop_data_bootstrap &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_population.html">declare_population</a></span>(
-  <span class="dt">data =</span> country_data, <span class="dt">population_function =</span> fabricatr<span class="op">::</span>resample_data)
+  <span class="dt">data =</span> country_data, <span class="dt">population_function =</span> fabricatr::resample_data)
 
 <span class="kw">head</span>(<span class="kw">pop_data_bootstrap</span>())</code></pre></div>
 <pre><code>##   cow_code polity_iv
@@ -199,7 +199,7 @@ pop_data &lt;-<span class="st"> </span><span class="kw"><a href="../reference/de
 <h3 class="hasAnchor">
 <a href="#in-a-formula" class="anchor"></a>In a formula</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_potential_outcomes &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
-  <span class="dt">formula =</span> Y <span class="op">~</span><span class="st"> </span>.<span class="dv">25</span> <span class="op">*</span><span class="st"> </span>Z <span class="op">+</span><span class="st"> </span>.<span class="dv">01</span> <span class="op">*</span><span class="st"> </span>age <span class="op">*</span><span class="st"> </span>Z)
+  <span class="dt">formula =</span> Y ~<span class="st"> </span>.<span class="dv">25</span> *<span class="st"> </span>Z +<span class="st"> </span>.<span class="dv">01</span> *<span class="st"> </span>age *<span class="st"> </span>Z)
 pop_pos &lt;-<span class="st"> </span><span class="kw">my_potential_outcomes</span>(pop)
 <span class="kw">head</span>(pop_pos)</code></pre></div>
 <pre><code>##     ID     income age Y_Z_0 Y_Z_1
@@ -211,8 +211,8 @@ pop_pos &lt;-<span class="st"> </span><span class="kw">my_potential_outcomes</sp
 ## 6 0006 -0.1061245  75     0  1.00</code></pre>
 <p>This has defaults set for condition_names (0, 1) and the assignment variable name (Z). You can set the “domain” of the potential outcomes function with <code>condition_names</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_potential_outcomes &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
-  <span class="dt">formula =</span> Y <span class="op">~</span><span class="st"> </span>.<span class="dv">25</span> <span class="op">*</span><span class="st"> </span>Z <span class="op">+</span><span class="st"> </span>.<span class="dv">01</span> <span class="op">*</span><span class="st"> </span>age <span class="op">*</span><span class="st"> </span>Z,
-  <span class="dt">condition_names =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>)
+  <span class="dt">formula =</span> Y ~<span class="st"> </span>.<span class="dv">25</span> *<span class="st"> </span>Z +<span class="st"> </span>.<span class="dv">01</span> *<span class="st"> </span>age *<span class="st"> </span>Z,
+  <span class="dt">condition_names =</span> <span class="dv">1</span>:<span class="dv">4</span>)
 <span class="kw">head</span>(<span class="kw">my_potential_outcomes</span>(pop))</code></pre></div>
 <pre><code>##     ID     income age Y_Z_1 Y_Z_2 Y_Z_3 Y_Z_4
 ## 1 0001  1.3709584  95  1.20  2.40  3.60  4.80
@@ -229,7 +229,7 @@ pop_pos &lt;-<span class="st"> </span><span class="kw">my_potential_outcomes</sp
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_potential_outcomes &lt;-
 <span class="st">  </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
     <span class="dt">Y_Z_0 =</span> .<span class="dv">05</span>,
-    <span class="dt">Y_Z_1 =</span> .<span class="dv">30</span> <span class="op">+</span><span class="st"> </span>.<span class="dv">01</span> <span class="op">*</span><span class="st"> </span>age)
+    <span class="dt">Y_Z_1 =</span> .<span class="dv">30</span> +<span class="st"> </span>.<span class="dv">01</span> *<span class="st"> </span>age)
 
 <span class="kw">head</span>(<span class="kw">my_potential_outcomes</span>(pop))</code></pre></div>
 <pre><code>##     ID     income age Y_Z_0 Y_Z_1
@@ -256,7 +256,7 @@ smp &lt;-<span class="st"> </span><span class="kw">my_sampling</span>(pop_pos)
 <p>Assignment declarations return functions of data that return data. If you use the <code>randomizr</code> defaults, then it appends to the dataset an assignment draw and a vector of observed probability weights.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_assignment &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_assignment.html">declare_assignment</a></span>(<span class="dt">m =</span> <span class="dv">25</span>)
 smp &lt;-<span class="st"> </span><span class="kw">my_assignment</span>(smp)
-<span class="kw">table</span>(smp<span class="op">$</span>Z)</code></pre></div>
+<span class="kw">table</span>(smp$Z)</code></pre></div>
 <pre><code>## 
 ##   0   1 
 ## 225  25</code></pre>
@@ -273,7 +273,7 @@ smp &lt;-<span class="st"> </span><span class="kw">my_assignment</span>(smp)
 <h2 class="hasAnchor">
 <a href="#estimands" class="anchor"></a>Estimands</h2>
 <p>Estimands run on data that includes potential outcomes, drawn earlier using a declare_potential_outcomes call.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(<span class="dt">ATE =</span> <span class="kw">mean</span>(Y_Z_<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>Y_Z_<span class="dv">0</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(<span class="dt">ATE =</span> <span class="kw">mean</span>(Y_Z_1 -<span class="st"> </span>Y_Z_0))
 <span class="kw">my_estimand</span>(pop_pos)</code></pre></div>
 <pre><code>##   estimand_label estimand
 ## 1            ATE  0.81926</code></pre>
@@ -284,7 +284,7 @@ smp &lt;-<span class="st"> </span><span class="kw">my_assignment</span>(smp)
 <a href="#estimators" class="anchor"></a>Estimators</h2>
 <p>To declare an estimator, you declare an estimator function, a difference_in_means by default. Optionally you also declare an estimand that is attached to the estimator.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">smp &lt;-<span class="st"> </span><span class="kw"><a href="../reference/reveal_outcomes.html">reveal_outcomes</a></span>(smp)
-my_estimator_dim &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y <span class="op">~</span><span class="st"> </span>Z, <span class="dt">estimand =</span> my_estimand)
+my_estimator_dim &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y ~<span class="st"> </span>Z, <span class="dt">estimand =</span> my_estimand)
 <span class="kw">my_estimator_dim</span>(smp)</code></pre></div>
 <pre><code>##   estimator_label    est         se            p  ci_lower  ci_upper  df
 ## 1    my_estimator 0.8868 0.04431223 1.103823e-53 0.7995237 0.9740763 248
@@ -292,8 +292,8 @@ my_estimator_dim &lt;-<span class="st"> </span><span class="kw"><a href="../refe
 ## 1            ATE</code></pre>
 <p>Using our simple <code>lm</code> function with built-in robust standard errors (HC2! or your choice of other HC’s) is similarly straightforward (it’s also fast! in RCPP!).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_estimator_lm &lt;-<span class="st"> </span>
-<span class="st">  </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y <span class="op">~</span><span class="st"> </span>Z, 
-                    <span class="dt">estimator_function =</span> estimatr<span class="op">::</span>lm_robust, 
+<span class="st">  </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y ~<span class="st"> </span>Z, 
+                    <span class="dt">estimator_function =</span> estimatr::lm_robust, 
                     <span class="dt">coefficient_name =</span> <span class="st">"Z"</span>, 
                     <span class="dt">estimand =</span> my_estimand)
 
@@ -311,7 +311,7 @@ my_estimator_dim &lt;-<span class="st"> </span><span class="kw"><a href="../refe
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_design.html">declare_design</a></span>(my_population,
                          my_potential_outcomes,
                          my_estimand,
-                         dplyr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/dplyr/topics/mutate">mutate</a></span>(<span class="dt">big_income =</span> <span class="dv">5</span><span class="op">*</span>income), 
+                         dplyr::<span class="kw">mutate</span>(<span class="dt">big_income =</span> <span class="dv">5</span>*income), 
                          my_sampling,
                          my_assignment,
                          reveal_outcomes,
@@ -358,7 +358,7 @@ my_estimator_dim &lt;-<span class="st"> </span><span class="kw"><a href="../refe
 <h2 class="hasAnchor">
 <a href="#custom-population" class="anchor"></a>Custom Population</h2>
 <p>You can use a custom function to generate your population entirely on your own, too:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_population_function &lt;-<span class="st"> </span><span class="cf">function</span>(N) {
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_population_function &lt;-<span class="st"> </span>function(N) {
   <span class="kw">data.frame</span>(<span class="dt">u =</span> <span class="kw">rnorm</span>(N))
 }
 
@@ -380,9 +380,9 @@ pop_custom &lt;-<span class="st"> </span><span class="kw">my_population_custom</
 <h2 class="hasAnchor">
 <a href="#custom-potential-outcomes" class="anchor"></a>Custom Potential Outcomes</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_potential_outcomes_function &lt;-
-<span class="st">  </span><span class="cf">function</span>(data) {
-    data<span class="op">$</span>Y_Z_<span class="dv">0</span> &lt;-<span class="st"> </span><span class="kw">with</span>(data, u)
-    data<span class="op">$</span>Y_Z_<span class="dv">1</span> &lt;-<span class="st"> </span><span class="kw">with</span>(data, <span class="fl">0.25</span> <span class="op">+</span><span class="st"> </span>u)
+<span class="st">  </span>function(data) {
+    data$Y_Z_0 &lt;-<span class="st"> </span><span class="kw">with</span>(data, u)
+    data$Y_Z_1 &lt;-<span class="st"> </span><span class="kw">with</span>(data, <span class="fl">0.25</span> +<span class="st"> </span>u)
     data
   }
 my_potential_outcomes_custom &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
@@ -404,11 +404,11 @@ pop_pos_custom &lt;-<span class="st"> </span><span class="kw">my_potential_outco
 <h2 class="hasAnchor">
 <a href="#custom-sampling" class="anchor"></a>Custom Sampling</h2>
 <p>Again, you can still use a totally separate custom sampling function easily. In this case, you are asked to provide a function that takes population data and returns sampled data, i.e. you draw the sample and then subset. You can also include inclusion weights if you wish in the function (as the default function does).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_sampling_function &lt;-<span class="st"> </span><span class="cf">function</span>(data) {
-     data<span class="op">$</span>S &lt;-<span class="st"> </span><span class="kw">rbinom</span>(<span class="dt">n =</span> <span class="kw">nrow</span>(data),
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_sampling_function &lt;-<span class="st"> </span>function(data) {
+     data$S &lt;-<span class="st"> </span><span class="kw">rbinom</span>(<span class="dt">n =</span> <span class="kw">nrow</span>(data),
             <span class="dt">size =</span> <span class="dv">1</span>,
             <span class="dt">prob =</span> <span class="fl">0.1</span>)
-     data[data<span class="op">$</span>S <span class="op">==</span><span class="st"> </span><span class="dv">1</span>, ]
+     data[data$S ==<span class="st"> </span><span class="dv">1</span>, ]
 }
 
 my_sampling_custom &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_sampling.html">declare_sampling</a></span>(
@@ -422,8 +422,8 @@ smp_custom &lt;-<span class="st"> </span><span class="kw">my_sampling_custom</sp
 <div id="custom-assignment" class="section level2">
 <h2 class="hasAnchor">
 <a href="#custom-assignment" class="anchor"></a>Custom Assignment</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_assignment_function &lt;-<span class="st"> </span><span class="cf">function</span>(data) {
-  data<span class="op">$</span>Z &lt;-<span class="st"> </span><span class="kw">rbinom</span>(<span class="dt">n =</span> <span class="kw">nrow</span>(data),
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_assignment_function &lt;-<span class="st"> </span>function(data) {
+  data$Z &lt;-<span class="st"> </span><span class="kw">rbinom</span>(<span class="dt">n =</span> <span class="kw">nrow</span>(data),
          <span class="dt">size =</span> <span class="dv">1</span>,
          <span class="dt">prob =</span> <span class="fl">0.5</span>)
   data
@@ -431,7 +431,7 @@ smp_custom &lt;-<span class="st"> </span><span class="kw">my_sampling_custom</sp
 my_assignment_custom &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_assignment.html">declare_assignment</a></span>(
   <span class="dt">assignment_function =</span> my_assignment_function)
 
-<span class="kw">table</span>(<span class="kw">my_assignment_custom</span>(pop_pos)<span class="op">$</span>Z)</code></pre></div>
+<span class="kw">table</span>(<span class="kw">my_assignment_custom</span>(pop_pos)$Z)</code></pre></div>
 <pre><code>## 
 ##   0   1 
 ## 501 499</code></pre>
@@ -439,8 +439,8 @@ my_assignment_custom &lt;-<span class="st"> </span><span class="kw"><a href="../
 <div id="custom-estimand" class="section level2">
 <h2 class="hasAnchor">
 <a href="#custom-estimand" class="anchor"></a>Custom Estimand</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_estimand_function &lt;-<span class="st"> </span><span class="cf">function</span>(data) {
-  <span class="kw">with</span>(data, <span class="kw">median</span>(Y_Z_<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>Y_Z_<span class="dv">0</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_estimand_function &lt;-<span class="st"> </span>function(data) {
+  <span class="kw">with</span>(data, <span class="kw">median</span>(Y_Z_1 -<span class="st"> </span>Y_Z_0))
 }
 my_estimand_custom &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(
   <span class="dt">estimand_function =</span> my_estimand_function, <span class="dt">label =</span> medianTE)
@@ -452,12 +452,12 @@ my_estimand_custom &lt;-<span class="st"> </span><span class="kw"><a href="../re
 <div id="custom-estimator" class="section level2">
 <h2 class="hasAnchor">
 <a href="#custom-estimator" class="anchor"></a>Custom Estimator</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_estimator_function &lt;-<span class="st"> </span><span class="cf">function</span>(formula, data){
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_estimator_function &lt;-<span class="st"> </span>function(formula, data){
   <span class="kw">data.frame</span>(<span class="dt">est =</span> <span class="kw">with</span>(data, <span class="kw">mean</span>(Y)))
 }
 
 my_estimator_custom &lt;-<span class="st"> </span>
-<span class="st">  </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y <span class="op">~</span><span class="st"> </span>Z, 
+<span class="st">  </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y ~<span class="st"> </span>Z, 
                     <span class="dt">estimator_function =</span> my_estimator_function, 
                     <span class="dt">estimand =</span> my_estimand)
 
@@ -473,16 +473,16 @@ my_estimator_custom &lt;-<span class="st"> </span>
 <h2 class="hasAnchor">
 <a href="#quick-design" class="anchor"></a>Quick design</h2>
 <p>You can also write a design maker function that declares a design based on a set of parameters like N, the number of clusters, etc. and use the function <code>quick_design</code> to make designs using just those parameters.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m_arm_trial &lt;-<span class="st"> </span><span class="cf">function</span>(numb){
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m_arm_trial &lt;-<span class="st"> </span>function(numb){
   my_population &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_population.html">declare_population</a></span>(
-    <span class="dt">N =</span> numb, <span class="dt">income =</span> <span class="kw">rnorm</span>(N), <span class="dt">age =</span> <span class="kw">sample</span>(<span class="dv">18</span><span class="op">:</span><span class="dv">95</span>, N, <span class="dt">replace =</span> T))
+    <span class="dt">N =</span> numb, <span class="dt">income =</span> <span class="kw">rnorm</span>(N), <span class="dt">age =</span> <span class="kw">sample</span>(<span class="dv">18</span>:<span class="dv">95</span>, N, <span class="dt">replace =</span> T))
 
   my_potential_outcomes &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
-    <span class="dt">formula =</span> Y <span class="op">~</span><span class="st"> </span>.<span class="dv">25</span> <span class="op">*</span><span class="st"> </span>Z <span class="op">+</span><span class="st"> </span>.<span class="dv">01</span> <span class="op">*</span><span class="st"> </span>age <span class="op">*</span><span class="st"> </span>Z)
+    <span class="dt">formula =</span> Y ~<span class="st"> </span>.<span class="dv">25</span> *<span class="st"> </span>Z +<span class="st"> </span>.<span class="dv">01</span> *<span class="st"> </span>age *<span class="st"> </span>Z)
   my_sampling &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_sampling.html">declare_sampling</a></span>(<span class="dt">n =</span> <span class="dv">250</span>)
   my_assignment &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_assignment.html">declare_assignment</a></span>(<span class="dt">m =</span> <span class="dv">25</span>)
-  my_estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(<span class="dt">ATE =</span> <span class="kw">mean</span>(Y_Z_<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>Y_Z_<span class="dv">0</span>))
-  my_estimator_dim &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y <span class="op">~</span><span class="st"> </span>Z, <span class="dt">estimand =</span> my_estimand)
+  my_estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(<span class="dt">ATE =</span> <span class="kw">mean</span>(Y_Z_1 -<span class="st"> </span>Y_Z_0))
+  my_estimator_dim &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y ~<span class="st"> </span>Z, <span class="dt">estimand =</span> my_estimand)
   my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_design.html">declare_design</a></span>(my_population,
                               my_potential_outcomes,
                               my_estimand,
@@ -507,10 +507,10 @@ my_1000_design &lt;-<span class="st"> </span><span class="kw"><a href="../refere
 <h2 class="hasAnchor">
 <a href="#continuous-potential-outcomes" class="anchor"></a>Continuous potential outcomes</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_potential_outcomes_continuous &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
-  <span class="dt">formula =</span> Y <span class="op">~</span><span class="st"> </span>.<span class="dv">25</span> <span class="op">*</span><span class="st"> </span>Z <span class="op">+</span><span class="st"> </span>.<span class="dv">01</span> <span class="op">*</span><span class="st"> </span>age <span class="op">*</span><span class="st"> </span>Z, <span class="dt">condition_names =</span> <span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>))
+  <span class="dt">formula =</span> Y ~<span class="st"> </span>.<span class="dv">25</span> *<span class="st"> </span>Z +<span class="st"> </span>.<span class="dv">01</span> *<span class="st"> </span>age *<span class="st"> </span>Z, <span class="dt">condition_names =</span> <span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>))
 
-continuous_treatment_function &lt;-<span class="st"> </span><span class="cf">function</span>(data){
- data<span class="op">$</span>Z &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>), <span class="dt">size =</span> <span class="kw">nrow</span>(data), <span class="dt">replace =</span> <span class="ot">TRUE</span>)
+continuous_treatment_function &lt;-<span class="st"> </span>function(data){
+ data$Z &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>), <span class="dt">size =</span> <span class="kw">nrow</span>(data), <span class="dt">replace =</span> <span class="ot">TRUE</span>)
  data
 }
 
@@ -542,7 +542,7 @@ my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
 <a href="#attrition" class="anchor"></a>Attrition</h2>
 <p>Just another potential outcome!</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_potential_outcomes_attrition &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
-  <span class="dt">formula =</span> R <span class="op">~</span><span class="st"> </span><span class="kw">rbinom</span>(<span class="dt">n =</span> N, <span class="dt">size =</span> <span class="dv">1</span>, <span class="dt">prob =</span> <span class="kw">pnorm</span>(Y_Z_<span class="dv">0</span>)))
+  <span class="dt">formula =</span> R ~<span class="st"> </span><span class="kw">rbinom</span>(<span class="dt">n =</span> N, <span class="dt">size =</span> <span class="dv">1</span>, <span class="dt">prob =</span> <span class="kw">pnorm</span>(Y_Z_0)))
 
 my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_design.html">declare_design</a></span>(<span class="kw">my_population</span>(),
                             my_potential_outcomes,
@@ -565,7 +565,7 @@ my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
 <a href="#stochastic-population-sizes" class="anchor"></a>Stochastic population sizes</h2>
 <p>The population (or any level of the population) can have stochastic population sizes. (In fact, N can be a number, a fixed vector of numbers, or an expression that returns a stochastic number or vector of numbers.)</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stochastic_population &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_population.html">declare_population</a></span>(
-  <span class="dt">N =</span> <span class="kw">sample</span>(<span class="dv">500</span><span class="op">:</span><span class="dv">1000</span>, <span class="dv">1</span>), <span class="dt">income =</span> <span class="kw">rnorm</span>(N), <span class="dt">age =</span> <span class="kw">sample</span>(<span class="dv">18</span><span class="op">:</span><span class="dv">95</span>, N, <span class="dt">replace =</span> <span class="ot">TRUE</span>))
+  <span class="dt">N =</span> <span class="kw">sample</span>(<span class="dv">500</span>:<span class="dv">1000</span>, <span class="dv">1</span>), <span class="dt">income =</span> <span class="kw">rnorm</span>(N), <span class="dt">age =</span> <span class="kw">sample</span>(<span class="dv">18</span>:<span class="dv">95</span>, N, <span class="dt">replace =</span> <span class="ot">TRUE</span>))
 
 <span class="kw">c</span>(<span class="kw">nrow</span>(<span class="kw">stochastic_population</span>()), 
   <span class="kw">nrow</span>(<span class="kw">stochastic_population</span>()), 
@@ -603,8 +603,7 @@ my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
         <div id="tocnav">
-      <h2 class="hasAnchor">
-<a href="#tocnav" class="anchor"></a>Contents</h2>
+      <h2>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
 <li><a href="#overview">Overview</a></li>
       <li>

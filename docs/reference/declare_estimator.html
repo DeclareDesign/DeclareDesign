@@ -23,8 +23,7 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -108,7 +107,7 @@
     <p>Declare an Estimator</p>
     
 
-    <pre class="usage"><span class='fu'>declare_estimator</span>(<span class='no'>...</span>, <span class='kw'>estimator_function</span> <span class='kw'>=</span> <span class='kw pkg'>estimatr</span><span class='kw ns'>::</span><span class='no'><a href='http://www.rdocumentation.org/packages/estimatr/topics/difference_in_means'>difference_in_means</a></span>,
+    <pre class="usage"><span class='fu'>declare_estimator</span>(<span class='no'>...</span>, <span class='kw'>estimator_function</span> <span class='kw'>=</span> <span class='kw'>estimatr</span><span class='kw'>::</span><span class='no'>difference_in_means</span>,
   <span class='kw'>estimand</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='no'>my_estimator</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
@@ -165,7 +164,7 @@
 
 <span class='no'>my_estimator_lm</span> <span class='kw'>&lt;-</span>
  <span class='fu'>declare_estimator</span>(<span class='no'>Y</span> ~ <span class='no'>Z</span>,
-                   <span class='kw'>estimator_function</span> <span class='kw'>=</span> <span class='kw pkg'>estimatr</span><span class='kw ns'>::</span><span class='no'><a href='http://www.rdocumentation.org/packages/estimatr/topics/lm_robust'>lm_robust</a></span>,
+                   <span class='kw'>estimator_function</span> <span class='kw'>=</span> <span class='kw'>estimatr</span><span class='kw'>::</span><span class='no'>lm_robust</span>,
                    <span class='kw'>coefficient_name</span> <span class='kw'>=</span> <span class='st'>"Z"</span>,
                    <span class='kw'>estimand</span> <span class='kw'>=</span> <span class='no'>my_estimand</span>)
 

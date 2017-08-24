@@ -23,8 +23,7 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -164,22 +163,26 @@
                          <span class='no'>my_estimand</span>,
                          <span class='no'>my_assignment</span>,
                          <span class='no'>reveal_outcomes</span>,
-                         <span class='no'>my_estimator</span>)</div><span class='co'># NOT RUN {</span>
-<span class='co'># using built-in defaults:</span>
-<span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'>diagnose_design</span>(<span class='no'>design</span>)
-<span class='no'>diagnosis</span>
-<span class='co'># }</span><div class='input'>
+                         <span class='no'>my_estimator</span>)
+
+<span class='fu'>not_run</span>({
+  <span class='co'># using built-in defaults:</span>
+  <span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'>diagnose_design</span>(<span class='no'>design</span>)
+  <span class='no'>diagnosis</span>
+})
+
 <span class='co'># using a user-defined diagnosand</span>
-<span class='no'>my_diagnosand</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_diagnosands.html'>declare_diagnosands</a></span>(<span class='kw'>absolute_error</span> <span class='kw'>=</span> <span class='fu'>mean</span>(<span class='fu'>abs</span>(<span class='no'>est</span> - <span class='no'>estimand</span>)))</div><span class='co'># NOT RUN {</span>
-<span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'>diagnose_design</span>(<span class='no'>design</span>, <span class='kw'>diagnosands</span> <span class='kw'>=</span> <span class='no'>my_diagnosand</span>)
-<span class='no'>diagnosis</span>
+<span class='no'>my_diagnosand</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_diagnosands.html'>declare_diagnosands</a></span>(<span class='kw'>absolute_error</span> <span class='kw'>=</span> <span class='fu'>mean</span>(<span class='fu'>abs</span>(<span class='no'>est</span> - <span class='no'>estimand</span>)))
 
-<span class='fu'><a href='diagnosis_helpers.html'>get_diagnosands</a></span>(<span class='no'>diagnosis</span>)
+<span class='fu'>not_run</span>({
+  <span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'>diagnose_design</span>(<span class='no'>design</span>, <span class='kw'>diagnosands</span> <span class='kw'>=</span> <span class='no'>my_diagnosand</span>)
+  <span class='no'>diagnosis</span>
 
-<span class='fu'><a href='diagnosis_helpers.html'>get_simulations</a></span>(<span class='no'>diagnosis</span>)
+  <span class='fu'><a href='diagnosis_helpers.html'>get_diagnosands</a></span>(<span class='no'>diagnosis</span>)
 
-<span class='co'># }</span><div class='input'>
-</div></pre>
+  <span class='fu'><a href='diagnosis_helpers.html'>get_simulations</a></span>(<span class='no'>diagnosis</span>)
+
+})</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
