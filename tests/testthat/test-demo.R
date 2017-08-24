@@ -23,7 +23,7 @@ test_that("demo runs", {
   ## ------------------------------------------------------------------------
   region_data <- data.frame(capital = c(1, 0, 0, 0, 0))
   pop_level_data <- declare_population(
-    regions = level(data = region_data, gdp = runif(5)),
+    regions = level(N = 2, gdp = runif(N)),
     cities = level(N = 2, subways = rnorm(N, mean = 5)))
 
   head(pop_level_data())

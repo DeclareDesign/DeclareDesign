@@ -80,21 +80,34 @@ potential_outcomes_function_default <-
   function(data,
            assignment_variable_name = "Z",
            condition_names = c(0, 1),
+           level = NULL,
            ...) {
     options <- quos(...)
 
+    level <- substitute(level)
+    if (!is.null(level)) {
+      level <- as.character(level)
+    }
+
     if ("formula" %in% names(options)) {
       # TODO: checks re: condition names and assignment variable names
+
       po_call <- quo(potential_outcomes_function_formula(!!! options))
       po_call <- lang_modify(po_call, data = data, assignment_variable_name = assignment_variable_name,
                              condition_names = condition_names)
+      if (!is.null(level)) {
+        po_call <- lang_modify(po_call, level = level)
+      }
 
       return(eval_tidy(po_call))
 
-    } else{
+    } else {
 
       po_call <- quo(potential_outcomes_function_discrete(!!! options))
       po_call <- lang_modify(po_call, data = data)
+      if (!is.null(level)) {
+        po_call <- lang_modify(po_call, level = level)
+      }
 
       return(eval_tidy(po_call))
     }
@@ -104,8 +117,30 @@ potential_outcomes_function_formula <-
   function(data,
            formula,
            condition_names,
-           assignment_variable_name) {
+           assignment_variable_name,
+           level = NULL) {
     outcome_variable_name <- as.character(formula[[2]])
+
+    # edit data to be at the level
+
+    has_level <- !is.null(level)
+    if (has_level) {
+
+      # this code lifted from level() in fabricatr
+
+      # get the set of variable names that are unique within the level you are adding vars to
+      #  so the new vars can be a function of existing ones
+      level_variables <-
+        get_unique_variables_by_level(data = data, ID_label = level)
+
+      data_full <- data
+
+      # construct a dataset with only those variables at this level
+      data <-
+        unique(data[, unique(c(level, level_variables)),
+                    drop = FALSE])
+
+    }
 
     for (cond in condition_names) {
       ## make a dataset that we manipulate to make PO columns
@@ -122,14 +157,40 @@ potential_outcomes_function_formula <-
         eval(expr = formula[[3]], envir = data_environment)
     }
 
+    # merge the data back
+
+    if (has_level) {
+      data <-
+        merge(data_full[, colnames(data_full)[!(colnames(data_full) %in%
+                                                  level_variables)], drop = FALSE],
+              data,
+              by = level,
+              all = TRUE,
+              sort = FALSE)
+    }
+
     return(data)
   }
 
-#' @importFrom rlang quos quo lang_modify !!! eval_tidy
-#' @importFrom fabricatr fabricate_data
-potential_outcomes_function_discrete <- function(data, ...) {
-  options <- quos(...)
-  po_call <- quo(fabricate_data(!!! options))
-  po_call <- lang_modify(po_call, data = data)
-  return(eval_tidy(po_call))
-}
+#' @importFrom rlang quos quo lang_modify !!! eval_tidy !! :=
+#' @importFrom fabricatr fabricate_data level
+potential_outcomes_function_discrete <-
+  function(data, level = NULL, ...) {
+    options <- quos(...)
+
+    if (!is.null(level)) {
+      # if user sends a variable name in level, draw POs at the level
+      #   defined by that variable. to do this, we send the options that
+      #   were sent to fabricate_data to level first
+      po_call <-
+        quo(fabricate_data(!!level := !!!quo(level(!!!options))))
+    } else {
+      po_call <- quo(fabricate_data(!!!options))
+
+    }
+
+    po_call <- lang_modify(po_call, data = data)
+
+    return(eval_tidy(po_call))
+
+  }

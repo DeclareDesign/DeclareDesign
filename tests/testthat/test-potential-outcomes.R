@@ -57,7 +57,7 @@ test_that("declare_potential_outcomes", {
 
 
 
-test_that("PO as a formula works", {
+test_that("PO as discrete variables works", {
 
   N <- 1000
 
@@ -96,12 +96,80 @@ test_that("PO as a formula works", {
 
   pop <- my_population()
 
-  my_potential_outcomes <-
+  my_potential_outcomes_explicit <-
     declare_potential_outcomes(
       formula = R ~ rbinom(n = N, size = 1, prob = pnorm(.025 * Z)
       ))
 
+  my_potential_outcomes_implicit <-
+    declare_potential_outcomes(
+      R ~ rbinom(n = N, size = 1, prob = pnorm(.025 * Z)
+      ))
+
   ##debugonce(DeclareDesign:::potential_outcomes_function_formula)
-  head(my_potential_outcomes(pop))
+
+
+    head(my_potential_outcomes_explicit(pop))
+    head(my_potential_outcomes_implicit(pop))
 
 })
+
+
+test_that("POs at a higher level",{
+
+  library(dplyr)
+  my_population <- declare_population(
+    villages = level(N = 3, elevation = rnorm(N)),
+    citizens = level(N = 4, income = runif(N))
+  )
+
+  pop <- my_population()
+
+  # Four ways of doing the same thing
+
+  # with "level" argument in a "formula" version
+  my_potential_outcomes_formula <-
+    declare_potential_outcomes(
+        formula = Y_vil ~ elevation + 5 + 2*Z,
+        level = villages
+      )
+  my_potential_outcomes_formula(pop)
+
+
+  # with "level" argument in a "discrete" version
+  my_potential_outcomes_discrete <-
+    declare_potential_outcomes(
+      Y_vil_Z_0 = elevation + 5,
+      Y_vil_Z_1 = elevation + 5 + 2,
+      level = villages
+    )
+
+  my_potential_outcomes_discrete(pop)
+
+  # with custom function
+  my_custom_PO <- function(data){
+    data %>%
+    group_by(villages) %>%
+      mutate(Y_vil_Z_0 = elevation + 5,
+             Y_vil_Z_1 = elevation + 5 + 2)
+  }
+
+
+  my_custom_PO(pop)
+
+  my_potential_outcomes <-
+    declare_potential_outcomes(
+      formula = Y_vil ~ elevation + 5 + 2*Z
+    )
+
+  my_design <-
+    declare_design(
+      pop,
+      group_by(villages),
+      my_potential_outcomes
+    )
+
+  draw_data(my_design)
+
+})
+

@@ -99,7 +99,7 @@ test_that("use custom data with declare_population", {
   ## create multi-level data with data only at the top level, adding variables at each level
   #debugonce(level)
   declare_population(
-    regions = level(data = region_data,
+    regions = level(N = 2,
                     gdp = rnorm(N), ID_label = regions),
     villages = level(N = 12, subways = rnorm(N, mean = gdp)))() %>% head
 
@@ -108,21 +108,21 @@ test_that("use custom data with declare_population", {
                               altitude = rnorm(5*5), stringsAsFactors = FALSE)
 
   declare_population(
-    regions = level(data = region_data, gdp = rnorm(N),
+    regions = level(N = 2, gdp = rnorm(N),
                     ID_label = regions),
-    villages = level(data = villages_data,
+    villages = level(N = 2,
                      by = regions, subways = rnorm(N, mean = gdp)))() %>% head
 
   ## also should work with a single level
   declare_population(
-    regions = level(data = region_data, gdp = rnorm(N),
+    regions = level(N = 2, gdp = rnorm(N),
                     ID_label = regions))() %>% head
 
   # and you can mix level( with other things
   declare_population(
-    regions = level(data = region_data, gdp = rnorm(N),
+    regions = level(N = 2, gdp = rnorm(N),
                     ID_label = regions),
-    villages = level(data = villages_data,
+    villages = level(N = 3,
                      by = regions, subways = rnorm(N, mean = gdp)))() %>% head
 
 })

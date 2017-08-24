@@ -93,3 +93,14 @@ describe_variable <- function(x) {
   rownames(obj) <- NULL
   return(obj)
 }
+
+get_unique_variables_by_level <- function(data, ID_label) {
+  ## identify variables that do not vary within ID_label
+  ## maybe there is a faster way to do this?
+  level_variables <-
+    sapply(colnames(data)[!colnames(data) %in% ID_label], function(i)
+      max(tapply(data[, i], list(data[, ID_label]),
+                 function(x)
+                   length(unique(x)))) == 1)
+  return(names(level_variables)[level_variables])
+}
