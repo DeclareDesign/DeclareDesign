@@ -15,7 +15,7 @@ head(pop)
 my_population_nested <- declare_population(
   districts = level(N = 25, urban = sample(0:1, N, replace = TRUE)),
   villages = level(N = 10, altitude = rnorm(N)),
-  individuals = level(N = sample(100:200, size = 250, replace = TRUE),
+  individuals = level(N = sample(100:200, size = 250, replace = TRUE), 
                       income = rnorm(N),
                       age = sample(18:95, N, replace = TRUE)))
 
@@ -23,7 +23,7 @@ my_population_nested <- declare_population(
 ## ------------------------------------------------------------------------
 region_data <- data.frame(capital = c(1, 0, 0, 0, 0))
 pop_level_data <- declare_population(
-  regions = level(level_data = region_data, gdp = runif(5)),
+  regions = level(N = 2, gdp = runif(N)),
   cities = level(N = 2, subways = rnorm(N, mean = 5)))
 
 head(pop_level_data())
@@ -83,10 +83,10 @@ my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
 my_estimator_dim(smp)
 
 ## ------------------------------------------------------------------------
-my_estimator_lm <-
-  declare_estimator(Y ~ Z,
-                    estimator_function = estimatr::lm_robust,
-                    coefficient_name = "Z",
+my_estimator_lm <- 
+  declare_estimator(Y ~ Z, 
+                    estimator_function = estimatr::lm_robust, 
+                    coefficient_name = "Z", 
                     estimand = my_estimand)
 
 my_estimator_lm(smp)
@@ -95,7 +95,7 @@ my_estimator_lm(smp)
 design <- declare_design(my_population,
                          my_potential_outcomes,
                          my_estimand,
-                         dplyr::mutate(big_income = 5*income),
+                         dplyr::mutate(big_income = 5*income), 
                          my_sampling,
                          my_assignment,
                          reveal_outcomes,
@@ -178,9 +178,9 @@ my_estimator_function <- function(formula, data){
   data.frame(est = with(data, mean(Y)))
 }
 
-my_estimator_custom <-
-  declare_estimator(Y ~ Z,
-                    estimator_function = my_estimator_function,
+my_estimator_custom <- 
+  declare_estimator(Y ~ Z, 
+                    estimator_function = my_estimator_function, 
                     estimand = my_estimand)
 
 my_estimator_custom(smp)
@@ -244,7 +244,7 @@ head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R"
 stochastic_population <- declare_population(
   N = sample(500:1000, 1), income = rnorm(N), age = sample(18:95, N, replace = TRUE))
 
-c(nrow(stochastic_population()),
-  nrow(stochastic_population()),
+c(nrow(stochastic_population()), 
+  nrow(stochastic_population()), 
   nrow(stochastic_population()))
 

@@ -23,7 +23,8 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-
+  
+  
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -107,7 +108,9 @@
     <p>Diagnose the Design</p>
     
 
-    <pre class="usage"><span class='fu'>diagnose_design</span>(<span class='no'>...</span>, <span class='kw'>diagnosands</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>sims</span> <span class='kw'>=</span> <span class='fl'>500</span>)</pre>
+    <pre class="usage"><span class='fu'>diagnose_design</span>(<span class='no'>...</span>, <span class='kw'>diagnosands</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>sims</span> <span class='kw'>=</span> <span class='fl'>500</span>, <span class='kw'>bootstrap</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>bootstrap_sims</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>parallel</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>parallel_cores</span> <span class='kw'>=</span> <span class='fu'>detectCores</span>(<span class='kw'>logical</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>))</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -123,6 +126,22 @@
     <tr>
       <th>sims</th>
       <td><p>The number of simulations, defaulting to 500.</p></td>
+    </tr>
+    <tr>
+      <th>bootstrap</th>
+      <td><p>Option to bootstrap the diagnosands to obtain the standard errors of the diagnosands, defaulting to <code>TRUE</code>.</p></td>
+    </tr>
+    <tr>
+      <th>bootstrap_sims</th>
+      <td><p>The number of bootstrap replicates of the diagnosands, defaulting to 100.</p></td>
+    </tr>
+    <tr>
+      <th>parallel</th>
+      <td><p>Logical indicating whether to run the diagnoses in parallel. Defaults to TRUE.</p></td>
+    </tr>
+    <tr>
+      <th>parallel_cores</th>
+      <td><p>Number of CPU cores to use. Defaults to all available cores.</p></td>
     </tr>
     </table>
     
@@ -145,24 +164,21 @@
                          <span class='no'>my_estimand</span>,
                          <span class='no'>my_assignment</span>,
                          <span class='no'>reveal_outcomes</span>,
-                         <span class='no'>my_estimator</span>)
-
-<span class='fu'>not_run</span>({
-  <span class='co'># using built-in defaults:</span>
-  <span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'>diagnose_design</span>(<span class='no'>design</span>)
-  <span class='no'>diagnosis</span>
-})
-
+                         <span class='no'>my_estimator</span>)</div><span class='co'># NOT RUN {</span>
+<span class='co'># using built-in defaults:</span>
+<span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'>diagnose_design</span>(<span class='no'>design</span>)
+<span class='no'>diagnosis</span>
+<span class='co'># }</span><div class='input'>
 <span class='co'># using a user-defined diagnosand</span>
-<span class='no'>my_diagnosand</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_diagnosands.html'>declare_diagnosands</a></span>(<span class='kw'>absolute_error</span> <span class='kw'>=</span> <span class='fu'>mean</span>(<span class='fu'>abs</span>(<span class='no'>est</span> - <span class='no'>estimand</span>)))
+<span class='no'>my_diagnosand</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_diagnosands.html'>declare_diagnosands</a></span>(<span class='kw'>absolute_error</span> <span class='kw'>=</span> <span class='fu'>mean</span>(<span class='fu'>abs</span>(<span class='no'>est</span> - <span class='no'>estimand</span>)))</div><span class='co'># NOT RUN {</span>
+<span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'>diagnose_design</span>(<span class='no'>design</span>, <span class='kw'>diagnosands</span> <span class='kw'>=</span> <span class='no'>my_diagnosand</span>)
+<span class='no'>diagnosis</span>
 
-<span class='fu'>not_run</span>({
-  <span class='no'>diagnosis</span> <span class='kw'>&lt;-</span> <span class='fu'>diagnose_design</span>(<span class='no'>design</span>, <span class='kw'>diagnosands</span> <span class='kw'>=</span> <span class='no'>my_diagnosand</span>)
-  <span class='no'>diagnosis</span>
-})
+<span class='fu'><a href='diagnosis_helpers.html'>get_diagnosands</a></span>(<span class='no'>diagnosis</span>)
 
-<span class='fu'><a href='diagnosis_helpers.html'>get_diagnosands</a></span>(<span class='no'>diagnosis</span>)</div><div class='output co'>#&gt; <span class='error'>Error in get_diagnosands(diagnosis): object 'diagnosis' not found</span></div><div class='input'>
-<span class='fu'><a href='diagnosis_helpers.html'>get_simulations</a></span>(<span class='no'>diagnosis</span>)</div><div class='output co'>#&gt; <span class='error'>Error in get_simulations(diagnosis): object 'diagnosis' not found</span></div><div class='input'>
+<span class='fu'><a href='diagnosis_helpers.html'>get_simulations</a></span>(<span class='no'>diagnosis</span>)
+
+<span class='co'># }</span><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

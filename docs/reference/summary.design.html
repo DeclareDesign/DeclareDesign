@@ -23,7 +23,8 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-
+  
+  
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -144,7 +145,7 @@
                          <span class='no'>my_potential_outcomes</span>,
                          <span class='no'>my_sampling</span>,
                          <span class='no'>my_estimand</span>,
-                         <span class='kw'>dplyr</span><span class='kw'>::</span><span class='fu'>mutate</span>(<span class='kw'>noise_sq</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>),
+                         <span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/dplyr/topics/mutate'>mutate</a></span>(<span class='kw'>noise_sq</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>),
                          <span class='no'>my_assignment</span>,
                          <span class='no'>reveal_outcomes</span>,
                          <span class='no'>my_estimator</span>)
@@ -154,32 +155,36 @@
 #&gt; 
 #&gt; Step 1 (population): my_population ---------------------------------------------
 #&gt; 
-#&gt; Added variable:  ID 
+#&gt; N = 500 
+#&gt; 
+#&gt; Added variable: ID 
 #&gt;  N_missing N_unique
 #&gt;          0      500
 #&gt; 
-#&gt; Added variable:  noise 
+#&gt; Added variable: noise 
 #&gt;    min median mean  max   sd N_missing N_unique
 #&gt;  -3.24   0.11 0.03 2.86 1.04         0      500
 #&gt; 
 #&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
 #&gt; 
-#&gt; Added variable:  Y_Z_0 
+#&gt; Added variable: Y_Z_0 
 #&gt;    min median mean  max   sd N_missing N_unique
 #&gt;  -3.24   0.11 0.03 2.86 1.04         0      500
 #&gt; 
-#&gt; Added variable:  Y_Z_1 
+#&gt; Added variable: Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
 #&gt;  -4.57   2.13 2.02 8.16 2.29         0      500
 #&gt; 
 #&gt; Step 3 (sampling): my_sampling -------------------------------------------------
+#&gt; 
+#&gt; N = 250 (250 subtracted) 
 #&gt; 
 #&gt; 
 #&gt; Random sampling procedure: Complete random sampling 
 #&gt; Number of units: 500 
 #&gt; The inclusion probabilities are constant across units.
 #&gt; 
-#&gt; Added variable:  S_inclusion_prob 
+#&gt; Added variable: S_inclusion_prob 
 #&gt;              0.5
 #&gt;   Frequency  250
 #&gt;  Proportion 1.00
@@ -192,7 +197,7 @@
 #&gt; 
 #&gt; Step 5 (custom data modification): dplyr::mutate(noise_sq = noise^2) -----------
 #&gt; 
-#&gt; Added variable:  noise_sq 
+#&gt; Added variable: noise_sq 
 #&gt;   min median mean  max   sd N_missing N_unique
 #&gt;  0.00   0.52 1.05 8.19 1.30         0      250
 #&gt; 
@@ -205,23 +210,25 @@
 #&gt; The possible treatment categories are 0 and 1.
 #&gt; The probabilities of assignment are constant across units.
 #&gt; 
-#&gt; Added variable:  Z 
+#&gt; Added variable: Z 
 #&gt;                0    1
 #&gt;   Frequency  225   25
 #&gt;  Proportion 0.90 0.10
 #&gt; 
-#&gt; Added variable:  Z_cond_prob 
+#&gt; Added variable: Z_cond_prob 
 #&gt;              0.1  0.9
 #&gt;   Frequency   25  225
 #&gt;  Proportion 0.10 0.90
 #&gt; 
 #&gt; Step 7 (reveal outcomes): reveal_outcomes --------------------------------------
 #&gt; 
-#&gt; Added variable:  Y 
+#&gt; Added variable: Y 
 #&gt;    min median mean  max   sd N_missing N_unique
 #&gt;  -2.56   0.20 0.23 6.12 1.29         0      250
 #&gt; 
 #&gt; Step 8 (estimator): my_estimator -----------------------------------------------
+#&gt; 
+#&gt; Formula: Y ~ Z 
 #&gt; 
 #&gt; A single draw of the estimator:
 #&gt;  estimator_label     est        se            p  ci_lower ci_upper  df

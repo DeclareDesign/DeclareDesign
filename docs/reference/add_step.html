@@ -23,7 +23,8 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-
+  
+  
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -151,21 +152,23 @@
 #&gt; 
 #&gt; Step 1 (population): my_population ---------------------------------------------
 #&gt; 
-#&gt; Added variable:  ID 
+#&gt; N = 100 
+#&gt; 
+#&gt; Added variable: ID 
 #&gt;  N_missing N_unique
 #&gt;          0      100
 #&gt; 
-#&gt; Added variable:  noise 
+#&gt; Added variable: noise 
 #&gt;    min median mean  max   sd N_missing N_unique
 #&gt;  -2.61   0.09 0.07 2.76 1.05         0      100
 #&gt; 
 #&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
 #&gt; 
-#&gt; Added variable:  Y_Z_0 
+#&gt; Added variable: Y_Z_0 
 #&gt;    min median mean  max   sd N_missing N_unique
 #&gt;  -2.61   0.09 0.07 2.76 1.05         0      100
 #&gt; 
-#&gt; Added variable:  Y_Z_1 
+#&gt; Added variable: Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
 #&gt;  -2.76   2.30 2.30 7.40 2.26         0      100
 #&gt; 
@@ -178,12 +181,12 @@
 #&gt; The possible treatment categories are 0 and 1.
 #&gt; The probabilities of assignment are constant across units.
 #&gt; 
-#&gt; Added variable:  Z 
+#&gt; Added variable: Z 
 #&gt;                0    1
 #&gt;   Frequency   50   50
 #&gt;  Proportion 0.50 0.50
 #&gt; 
-#&gt; Added variable:  Z_cond_prob 
+#&gt; Added variable: Z_cond_prob 
 #&gt;              0.5
 #&gt;   Frequency  100
 #&gt;  Proportion 1.00
@@ -193,21 +196,23 @@
 #&gt; 
 #&gt; Step 1 (population): my_population ---------------------------------------------
 #&gt; 
-#&gt; Added variable:  ID 
+#&gt; N = 100 
+#&gt; 
+#&gt; Added variable: ID 
 #&gt;  N_missing N_unique
 #&gt;          0      100
 #&gt; 
-#&gt; Added variable:  noise 
+#&gt; Added variable: noise 
 #&gt;    min median  mean  max   sd N_missing N_unique
 #&gt;  -2.45  -0.17 -0.16 2.48 0.99         0      100
 #&gt; 
 #&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
 #&gt; 
-#&gt; Added variable:  Y_Z_0 
+#&gt; Added variable: Y_Z_0 
 #&gt;    min median  mean  max   sd N_missing N_unique
 #&gt;  -2.45  -0.17 -0.16 2.48 0.99         0      100
 #&gt; 
-#&gt; Added variable:  Y_Z_1 
+#&gt; Added variable: Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
 #&gt;  -4.20   2.14 1.95 6.39 2.23         0      100
 #&gt; 
@@ -220,36 +225,38 @@
 #&gt; The possible treatment categories are 0 and 1.
 #&gt; The probabilities of assignment are constant across units.
 #&gt; 
-#&gt; Added variable:  Z 
+#&gt; Added variable: Z 
 #&gt;                0    1
 #&gt;   Frequency   75   25
 #&gt;  Proportion 0.75 0.25
 #&gt; 
-#&gt; Added variable:  Z_cond_prob 
+#&gt; Added variable: Z_cond_prob 
 #&gt;             0.25 0.75
 #&gt;   Frequency   25   75
 #&gt;  Proportion 0.25 0.75
 #&gt; </div><div class='input'>
- <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'>add_step</span>(<span class='kw'>dplyr</span><span class='kw'>::</span><span class='fu'>mutate</span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>after</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
+ <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'>add_step</span>(<span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/dplyr/topics/mutate'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>after</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
 #&gt; Design Summary
 #&gt; 
 #&gt; Step 1 (population): my_population ---------------------------------------------
 #&gt; 
-#&gt; Added variable:  ID 
+#&gt; N = 100 
+#&gt; 
+#&gt; Added variable: ID 
 #&gt;  N_missing N_unique
 #&gt;          0      100
 #&gt; 
-#&gt; Added variable:  noise 
+#&gt; Added variable: noise 
 #&gt;    min median  mean  max   sd N_missing N_unique
 #&gt;  -1.95  -0.02 -0.09 3.11 0.99         0      100
 #&gt; 
 #&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
 #&gt; 
-#&gt; Added variable:  Y_Z_0 
+#&gt; Added variable: Y_Z_0 
 #&gt;    min median  mean  max   sd N_missing N_unique
 #&gt;  -1.95  -0.02 -0.09 3.11 0.99         0      100
 #&gt; 
-#&gt; Added variable:  Y_Z_1 
+#&gt; Added variable: Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
 #&gt;  -2.90   2.01 2.08 6.66 1.89         0      100
 #&gt; 
@@ -262,47 +269,49 @@
 #&gt; The possible treatment categories are 0 and 1.
 #&gt; The probabilities of assignment are constant across units.
 #&gt; 
-#&gt; Added variable:  Z 
+#&gt; Added variable: Z 
 #&gt;                0    1
 #&gt;   Frequency   50   50
 #&gt;  Proportion 0.50 0.50
 #&gt; 
-#&gt; Added variable:  Z_cond_prob 
+#&gt; Added variable: Z_cond_prob 
 #&gt;              0.5
 #&gt;   Frequency  100
 #&gt;  Proportion 1.00
 #&gt; 
 #&gt; Step 4 (custom data modification): dplyr::mutate(income = noise^2) -------------
 #&gt; 
-#&gt; Added variable:  income 
+#&gt; Added variable: income 
 #&gt;   min median mean  max   sd N_missing N_unique
 #&gt;  0.00   0.48 0.99 9.67 1.39         0      100
-#&gt; </div><div class='input'> <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'>add_step</span>(<span class='kw'>dplyr</span><span class='kw'>::</span><span class='fu'>mutate</span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>before</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
+#&gt; </div><div class='input'> <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'>add_step</span>(<span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/dplyr/topics/mutate'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>before</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
 #&gt; Design Summary
 #&gt; 
 #&gt; Step 1 (population): my_population ---------------------------------------------
 #&gt; 
-#&gt; Added variable:  ID 
+#&gt; N = 100 
+#&gt; 
+#&gt; Added variable: ID 
 #&gt;  N_missing N_unique
 #&gt;          0      100
 #&gt; 
-#&gt; Added variable:  noise 
+#&gt; Added variable: noise 
 #&gt;    min median  mean  max   sd N_missing N_unique
 #&gt;  -2.27  -0.04 -0.04 2.32 0.97         0      100
 #&gt; 
 #&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
 #&gt; 
-#&gt; Added variable:  Y_Z_0 
+#&gt; Added variable: Y_Z_0 
 #&gt;    min median  mean  max   sd N_missing N_unique
 #&gt;  -2.27  -0.04 -0.04 2.32 0.97         0      100
 #&gt; 
-#&gt; Added variable:  Y_Z_1 
+#&gt; Added variable: Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
 #&gt;  -3.05   1.77 1.86 6.81 2.25         0      100
 #&gt; 
 #&gt; Step 3 (custom data modification): dplyr::mutate(income = noise^2) -------------
 #&gt; 
-#&gt; Added variable:  income 
+#&gt; Added variable: income 
 #&gt;   min median mean  max   sd N_missing N_unique
 #&gt;  0.00   0.48 0.93 5.37 1.15         0      100
 #&gt; 
@@ -315,12 +324,12 @@
 #&gt; The possible treatment categories are 0 and 1.
 #&gt; The probabilities of assignment are constant across units.
 #&gt; 
-#&gt; Added variable:  Z 
+#&gt; Added variable: Z 
 #&gt;                0    1
 #&gt;   Frequency   50   50
 #&gt;  Proportion 0.50 0.50
 #&gt; 
-#&gt; Added variable:  Z_cond_prob 
+#&gt; Added variable: Z_cond_prob 
 #&gt;              0.5
 #&gt;   Frequency  100
 #&gt;  Proportion 1.00
@@ -330,21 +339,23 @@
 #&gt; 
 #&gt; Step 1 (population): my_population ---------------------------------------------
 #&gt; 
-#&gt; Added variable:  ID 
+#&gt; N = 100 
+#&gt; 
+#&gt; Added variable: ID 
 #&gt;  N_missing N_unique
 #&gt;          0      100
 #&gt; 
-#&gt; Added variable:  noise 
+#&gt; Added variable: noise 
 #&gt;    min median mean  max   sd N_missing N_unique
 #&gt;  -2.25   0.11 0.06 3.10 1.02         0      100
 #&gt; 
 #&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
 #&gt; 
-#&gt; Added variable:  Y_Z_0 
+#&gt; Added variable: Y_Z_0 
 #&gt;    min median mean  max   sd N_missing N_unique
 #&gt;  -2.25   0.11 0.06 3.10 1.02         0      100
 #&gt; 
-#&gt; Added variable:  Y_Z_1 
+#&gt; Added variable: Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
 #&gt;  -4.42   2.01 2.13 8.58 2.24         0      100
 #&gt; </div><div class='input'>
