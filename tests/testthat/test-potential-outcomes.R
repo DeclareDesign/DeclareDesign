@@ -77,9 +77,6 @@ test_that("PO as discrete variables works", {
     Y_Z_0 = income,
     Y_Z_1 = income + 5)
 
-  declare_potential_outcomes(Y_Z_0 = income,
-                             Y_Z_1 = income + 5)
-
   head(my_potential_outcomes(pop))
 
 })
