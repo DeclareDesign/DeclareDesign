@@ -75,13 +75,14 @@ declare_potential_outcomes <-
     return(potential_outcomes_function_internal)
   }
 
-#' @importFrom rlang quos quo lang_modify !!! eval_tidy
+#' @importFrom rlang quos quo lang_modify !!! eval_tidy is_formula quo_expr
 potential_outcomes_function_default <-
-  function(data,
+  function(...,
+           data,
            assignment_variable_name = "Z",
            condition_names = c(0, 1),
-           level = NULL,
-           ...) {
+           level = NULL
+           ) {
     options <- quos(...)
 
     level <- substitute(level)
@@ -89,7 +90,10 @@ potential_outcomes_function_default <-
       level <- as.character(level)
     }
 
-    if ("formula" %in% names(options)) {
+
+    has_formula <- any(sapply(options, function(x) is_formula(quo_expr(x))))
+
+    if (has_formula) {
       # TODO: checks re: condition names and assignment variable names
 
       po_call <- quo(potential_outcomes_function_formula(!!! options))
@@ -132,6 +136,22 @@ potential_outcomes_function_formula <-
       #  so the new vars can be a function of existing ones
       level_variables <-
         get_unique_variables_by_level(data = data, ID_label = level)
+
+      formula_variables <- all.vars(f_rhs(formula))
+      formula_variables <- formula_variables[!formula_variables %in% assignment_variable_name]
+      formula_variables_not_in_level <-
+        !formula_variables %in% level_variables
+      if (any(formula_variables_not_in_level)) {
+        stop(
+          paste0(
+            "You provided the variables ",
+            paste(formula_variables[formula_variables_not_in_level], collapse = ", "),
+            " to formula is not constant within level ",
+            level,
+            "."
+          )
+        )
+      }
 
       data_full <- data
 

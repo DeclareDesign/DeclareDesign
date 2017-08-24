@@ -101,12 +101,15 @@ test_that("PO as a formula works", {
       formula = R ~ rbinom(n = N, size = 1, prob = pnorm(.025 * Z)
       ))
 
+
+  #debugonce(declare_potential_outcomes)
   my_potential_outcomes_implicit <-
     declare_potential_outcomes(
       R ~ rbinom(n = N, size = 1, prob = pnorm(.025 * Z)
       ))
 
   ##debugonce(DeclareDesign:::potential_outcomes_function_formula)
+  #debugonce(DeclareDesign:::potential_outcomes_function_default)
 
 
     head(my_potential_outcomes_explicit(pop))
@@ -133,6 +136,14 @@ test_that("POs at a higher level",{
         formula = Y_vil ~ elevation + 5 + 2*Z,
         level = villages
       )
+  my_potential_outcomes_formula(pop)
+
+  # with "level" argument in a "formula" version
+  my_potential_outcomes_formula <-
+    declare_potential_outcomes(
+      formula = Y_vil ~ elevation + 5 + 2*Z,
+      level = villages
+    )
   my_potential_outcomes_formula(pop)
 
 
@@ -173,3 +184,22 @@ test_that("POs at a higher level",{
 
 })
 
+
+test_that("error if you try to draw POs at a level using a variable that doesn't exist at that level",{
+
+  my_population <- declare_population(
+    villages = level(N = 3, elevation = rnorm(N)),
+    citizens = level(N = 4, income = runif(N))
+  )
+
+  pop <- my_population()
+
+  my_potential_outcomes_formula <-
+    declare_potential_outcomes(
+      formula = Y_vil ~ elevation + income + 5,
+      level = villages
+    )
+
+  expect_error(my_potential_outcomes_formula(pop))
+
+})
