@@ -435,7 +435,7 @@ The three packages are:
 
 ## `fabricatr`
 
-`fabricatr`, includes data creation features described above. It's main function, `fabricate_data`, creates simulated data as in the above examples in `declare_population`. It can do single level data creation or multilevel creation using `level()` within `fabricate_data`. As it turns out, it is also the backbone of `declare_potential_outcomes` default function that creates each PO as an expression described above (i.e. where you define `Y_Z_1 = 0.5 + Z`). The second main function is `bootstrap_data` which resamples your data in a way that respects hierarchy. We expect this package will be built up further, including with proportional outcomes functions. 
+`fabricatr`, includes data creation features described above. It's main function, `fabricate`, creates simulated data as in the above examples in `declare_population`. It can do single level data creation or multilevel creation using `level()` within `fabricate`. As it turns out, it is also the backbone of `declare_potential_outcomes` default function that creates each PO as an expression described above (i.e. where you define `Y_Z_1 = 0.5 + Z`). The second main function is `bootstrap_data` which resamples your data in a way that respects hierarchy. We expect this package will be built up further, including with proportional outcomes functions. 
 
 ## `randomizr`
 

@@ -81,7 +81,7 @@
       <h1>Diagnosing Research Designs with DeclareDesign</h1>
                         <h4 class="author">Graeme Blair, Jasper Cooper, Alexander Coppock, and Macartan Humphreys</h4>
             
-            <h4 class="date">2017-08-24</h4>
+            <h4 class="date">2017-08-25</h4>
           </div>
 
     
@@ -174,11 +174,11 @@ pop_level_data &lt;-<span class="st"> </span><span class="kw"><a href="../refere
 pop_data &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_population.html">declare_population</a></span>(<span class="dt">data =</span> country_data)
 
 <span class="kw">head</span>(<span class="kw">pop_data</span>())</code></pre></div>
-<pre><code>##   cow_code polity_iv ID
-## 1      504        -9  1
-## 2       15         7  2
-## 3      100        -1  3
-## 4       90         3  4</code></pre>
+<pre><code>##   cow_code polity_iv
+## 1      504        -9
+## 2       15         7
+## 3      100        -1
+## 4       90         3</code></pre>
 <p>If you don’t want your data to be fixed, you can resample from it, i.e.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pop_data_bootstrap &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_population.html">declare_population</a></span>(
   <span class="dt">data =</span> country_data, <span class="dt">population_function =</span> fabricatr::resample_data)
@@ -583,7 +583,7 @@ my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
 <h2 class="hasAnchor">
 <a href="#fabricatr" class="anchor"></a><code>fabricatr</code>
 </h2>
-<p><code>fabricatr</code>, includes data creation features described above. It’s main function, <code>fabricate_data</code>, creates simulated data as in the above examples in <code>declare_population</code>. It can do single level data creation or multilevel creation using <code>level()</code> within <code>fabricate_data</code>. As it turns out, it is also the backbone of <code>declare_potential_outcomes</code> default function that creates each PO as an expression described above (i.e. where you define <code>Y_Z_1 = 0.5 + Z</code>). The second main function is <code>bootstrap_data</code> which resamples your data in a way that respects hierarchy. We expect this package will be built up further, including with proportional outcomes functions.</p>
+<p><code>fabricatr</code>, includes data creation features described above. It’s main function, <code>fabricate</code>, creates simulated data as in the above examples in <code>declare_population</code>. It can do single level data creation or multilevel creation using <code>level()</code> within <code>fabricate</code>. As it turns out, it is also the backbone of <code>declare_potential_outcomes</code> default function that creates each PO as an expression described above (i.e. where you define <code>Y_Z_1 = 0.5 + Z</code>). The second main function is <code>bootstrap_data</code> which resamples your data in a way that respects hierarchy. We expect this package will be built up further, including with proportional outcomes functions.</p>
 </div>
 <div id="randomizr" class="section level2">
 <h2 class="hasAnchor">

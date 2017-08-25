@@ -1,7 +1,9 @@
-## this function is from lazyeval version git version, commit c155c3d
+# this function is from lazyeval version git version, commit c155c3d
 freeze_environment <- function(x) {
   list2env(as.list(x, all.names = TRUE), parent = parent.env(x))
 }
+
+
 
 from_package <- function(func, package) {
   func_package <-

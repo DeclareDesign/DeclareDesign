@@ -4,12 +4,12 @@
 \alias{declare_population}
 \title{Declare the Size and Features of the Population}
 \usage{
-declare_population(..., population_function = fabricate_data)
+declare_population(..., population_function = fabricate)
 }
 \arguments{
 \item{...}{Arguments to the population function}
 
-\item{population_function}{A function that generates a data.frame containing features of the population. By default, the \link{fabricatr} function \code{\link{fabricate_data}} function is used, which allows you to draw single or multi-level hierarchical population data.}
+\item{population_function}{A function that generates a data.frame containing features of the population. By default, the \link{fabricatr} function \code{\link{fabricate}} function is used, which allows you to draw single or multi-level hierarchical population data.}
 }
 \value{
 a function that returns a data.frame

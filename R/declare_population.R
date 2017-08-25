@@ -1,11 +1,11 @@
 #' Declare the Size and Features of the Population
 #'
 #' @param ... Arguments to the population function
-#' @param population_function A function that generates a data.frame containing features of the population. By default, the \link{fabricatr} function \code{\link{fabricate_data}} function is used, which allows you to draw single or multi-level hierarchical population data.
+#' @param population_function A function that generates a data.frame containing features of the population. By default, the \link{fabricatr} function \code{\link{fabricate}} function is used, which allows you to draw single or multi-level hierarchical population data.
 #'
 #' @return a function that returns a data.frame
 #' @export
-#' @importFrom fabricatr fabricate_data
+#' @importFrom fabricatr fabricate
 #'
 #' @examples
 #'
@@ -40,7 +40,7 @@
 #' head(my_population_custom())
 declare_population <-
   function(...,
-           population_function = fabricate_data) {
+           population_function = fabricate) {
     args <- eval(substitute(alist(...)))
     env <- freeze_environment(parent.frame())
     func <- eval(population_function)
