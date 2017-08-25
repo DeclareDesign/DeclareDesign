@@ -1,5 +1,6 @@
 
 
+
 #' Reveal Observed Outcomes
 #' @param data A data.frame containing columns of potential outcomes and an assignment variable
 #'
@@ -33,84 +34,75 @@
 #'
 #' design
 reveal_outcomes <-
-  function(data,
-           outcome_variable_name = Y,
-           assignment_variable_name = Z,
-           attrition_variable_name = NULL) {
-    variable_names <- names(data)
+  function(data = NULL,
+           outcome_variable_names = Y,
+           assignment_variable_names = Z,
+           attrition_variable_name = NULL,
+           outcome_function = NULL) {
 
-    if (length(substitute(outcome_variable_name)) > 1) {
-      outcome_variable_name <-
-        sapply(lang_args(enexpr(outcome_variable_name)), function(x)
+    if (is.null(data)) {
+      stop("Data can't be null.")
+    }
+
+    # Setup to handle NSE
+
+    if (length(substitute(outcome_variable_names)) > 1) {
+      outcome_variable_names <-
+        sapply(lang_args(enexpr(outcome_variable_names)), function(x)
           if (class(x) != "character") {
             expr_text(x)
           } else {
             x
           })
     } else {
-      outcome_variable_name <-
-        as.character(substitute(outcome_variable_name))
+      outcome_variable_names <-
+        as.character(substitute(outcome_variable_names))
     }
-    assignment_variable_name <-
-      as.character(substitute(assignment_variable_name))
+
+    if (length(substitute(assignment_variable_names)) > 1) {
+      assignment_variable_names <-
+        sapply(lang_args(enexpr(assignment_variable_names)), function(x)
+          if (class(x) != "character") {
+            expr_text(x)
+          } else {
+            x
+          })
+    } else {
+      assignment_variable_names <-
+        as.character(substitute(assignment_variable_names))
+    }
+
     attrition_variable_name <- substitute(attrition_variable_name)
     if (!is.null(attrition_variable_name)) {
       attrition_variable_name <- as.character(attrition_variable_name)
     }
 
-    for (outcome_variable in outcome_variable_name) {
-      for (assignment_variable in assignment_variable_name) {
-        potential_outcome_variable_names <-
-          variable_names[startsWith(variable_names,
-                                    paste0(outcome_variable, "_", assignment_variable, "_"))]
 
-        condition_names_potential_outcome_columns <-
-          sapply(
-            potential_outcome_variable_names,
-            FUN = function(x)
-              substr(x, nchar(
-                paste0(outcome_variable, "_", assignment_variable, "_")
-              ) + 1, nchar(x))
+    for (outcome_variable_name in outcome_variable_names) {
+      # Two Cases: Switching or Outcome Function
+
+      if (is.null(outcome_function)) {
+        data[, outcome_variable_name] <-
+          switching_equation(
+            data = data,
+            outcome_variable_name = outcome_variable_name,
+            assignment_variable_names = assignment_variable_names
           )
 
-        condition_names_assignment_variable <-
-          unique(data[, assignment_variable])
-
-        conditions_without_columns <-
-          condition_names_assignment_variable[!(
-            condition_names_assignment_variable %in% condition_names_potential_outcome_columns
-          )]
-
-        if (length(conditions_without_columns) > 0) {
-          stop(
-            paste0(
-              "The conditions in the assignment variable labeled ",
-              paste0(conditions_without_columns, collapse = ", "),
-              " do not have corresponding potential outcome columns. They should be named ",
-              paste0(
-                paste0(
-                  outcome_variable,
-                  "_",
-                  assignment_variable,
-                  "_",
-                  conditions_without_columns
-                ),
-                collapse = " and "
-              ),
-              ". "
-            )
-          )
-        }
-
-        data[, outcome_variable] <- NA
-        for (cond in condition_names_assignment_variable) {
-          data[data[, assignment_variable] == cond, outcome_variable] <-
-            data[data[, assignment_variable] == cond, paste0(outcome_variable, "_", assignment_variable, "_", cond), drop = FALSE]
-        }
+      } else {
+        data <- outcome_function(data)
       }
 
       if (!is.null(attrition_variable_name)) {
-        data[data[, attrition_variable_name] == 0, outcome_variable] <- NA
+        response_vec <-
+          switching_equation(
+            data = data,
+            outcome_variable_name = attrition_variable_name,
+            assignment_variable_names = assignment_variable_names
+          )
+
+        data[response_vec == 0, outcome_variable_name] <- NA
+
       }
     }
 
@@ -119,3 +111,47 @@ reveal_outcomes <-
   }
 
 attributes(reveal_outcomes) <- list(type = "reveal_outcomes")
+
+
+
+
+switching_equation <- function(data,
+                               outcome_variable_name,
+                               assignment_variable_names) {
+  assignment_variable_df <-
+    data[, assignment_variable_names, drop = FALSE]
+
+  condition_combinations <-
+    apply(
+      X = assignment_variable_df,
+      MARGIN = 1,
+      FUN =  function(x) {
+        paste0(paste0(assignment_variable_names, "_"), x, collapse = "_")
+      }
+    )
+
+  potential_outcome_variable_names <-
+    paste0(outcome_variable_name, "_", condition_combinations)
+
+  if (!all(potential_outcome_variable_names %in% colnames(data))) {
+    stop("Somethings WRONG with your variable names")
+  } else {
+    data_list <- split(data, potential_outcome_variable_names)
+
+    data_list <-
+      mapply(
+        FUN = function(df, cond) {
+          df[, outcome_variable_name] <- df[, cond]
+          return(df)
+        },
+        data_list,
+        names(data_list),
+        SIMPLIFY = FALSE
+      )
+
+    data <- do.call(rbind, data_list)
+    rownames(data) <- NULL
+
+  }
+  return(data[, outcome_variable_name, drop = TRUE])
+}

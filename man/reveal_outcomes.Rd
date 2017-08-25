@@ -4,17 +4,18 @@
 \alias{reveal_outcomes}
 \title{Reveal Observed Outcomes}
 \usage{
-reveal_outcomes(data, outcome_variable_name = Y,
-  assignment_variable_name = Z, attrition_variable_name = NULL)
+reveal_outcomes(data = NULL, outcome_variable_names = Y,
+  assignment_variable_names = Z, attrition_variable_name = NULL,
+  outcome_function = NULL)
 }
 \arguments{
 \item{data}{A data.frame containing columns of potential outcomes and an assignment variable}
 
+\item{attrition_variable_name}{The bare (unquote) name of the attrition variable}
+
 \item{outcome_variable_name}{The outcome prefix of the potential outcomes outcomes}
 
 \item{assignment_variable_name}{The bare (unquote) name of the assignment variable}
-
-\item{attrition_variable_name}{The bare (unquote) name of the attrition variable}
 }
 \description{
 Reveal Observed Outcomes

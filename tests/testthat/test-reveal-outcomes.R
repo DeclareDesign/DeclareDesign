@@ -19,8 +19,8 @@ test_that("Reveal Outcomes", {
   design <- declare_design(my_population,
                            my_potential_outcomes,
                            my_assignment,
-                           reveal_outcomes(assignment_variable_name = Z,
-                                           outcome_variable_name = Y))
+                           reveal_outcomes(assignment_variable_names = Z,
+                                           outcome_variable_names = Y))
 
   head(design$data_function())
 
@@ -56,3 +56,26 @@ test_that("reveal multiple outcomes works", {
   draw_data(design)
 
 })
+
+test_that("outcome functions works", {
+
+  N <- 25
+
+  my_population <- declare_population(N = N, noise = rnorm(N))
+  my_assignment <- declare_assignment(m = 10)
+
+  my_outcome_function <- function(data){
+    data$Y <- rnorm(nrow(data))
+    return(data)
+  }
+
+  design <- declare_design(my_population,
+                           my_assignment,
+                           reveal_outcomes(outcome_function = my_outcome_function))
+  draw_data(design)
+
+})
+
+
+
+
