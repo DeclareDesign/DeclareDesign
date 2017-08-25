@@ -1,10 +1,13 @@
 
 
+
 #' Declare an Estimator
 #'
 #' @param ... Arguments to the estimand function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.
 #'
 #' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label. By default, the estimator function is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
+#' @param model A model function, e.g. lm or glm. If model is specified, the estimator_function argument is ignored.
+#' @param coefficient_name A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a \code{model} is chosen or for some \code{estimator_function}'s such as \code{difference_in_means} and \code{lm_robust}.
 #' @param estimand An estimand object created using \code{\link{declare_estimand}}. Estimates from this estimator function will be associated with the estimand, for example for calculating the bias and coverage of the estimator.
 #' @param label An optional label to name the estimator, such as DIM.
 #'
@@ -62,29 +65,73 @@
 #'
 declare_estimator <- function(...,
                               estimator_function = estimatr::difference_in_means,
+                              model = NULL,
+                              coefficient_name = Z,
                               estimand = NULL,
                               label = my_estimator) {
   args <- eval(substitute(alist(...)))
   env <- freeze_environment(parent.frame())
   func <- eval(estimator_function)
-  label <- as.character(substitute(label))
+  label <- substitute(label)
+  if (!is.null(label)) {
+    label <- as.character(label)
+  }
+  coefficient_name <- substitute(coefficient_name)
+  if (!is.null(label)) {
+    coefficient_name <- as.character(coefficient_name)
+  }
   estimand <- eval_tidy(quo(estimand), env = env)
 
   if (!("data" %in% names(formals(func)))) {
     stop("Please provide an estimator function with a data argument.")
   }
 
-  estimator_function_internal <- function(data) {
-    args$data <- data
-    results <- do.call(func, args = args, envir = env)
-    return_data <-
-      data.frame(estimator_label = label,
-                 results,
-                 stringsAsFactors = FALSE)
-    if (!is.null(estimand)) {
-      return_data$estimand_label <- attributes(estimand)$label
+  if (is.null(model)) {
+    estimator_function_internal <- function(data) {
+      args$data <- data
+      if ("coefficient_name" %in% names(formals(func))) {
+        args$coefficient_name <- coefficient_name
+      }
+      results <- do.call(func, args = args, envir = env)
+      return_data <-
+        data.frame(estimator_label = label,
+                   results,
+                   stringsAsFactors = FALSE)
+      if (!is.null(estimand)) {
+        return_data$estimand_label <- attributes(estimand)$label
+      }
+      return_data
     }
-    return_data
+  } else {
+    estimator_function_internal <- function(data) {
+      args$data <- data
+
+      fit <- do.call(model, args = args, envir = env)
+
+      summ <- summary(fit)$coefficients
+      summ <-
+        summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr(")]
+      ci <- suppressMessages(confint(fit))
+      return_data <-
+        data.frame(estimator_label = label,
+                   coefficient_name = rownames(summ),
+                   summ,
+                   ci,
+                   stringsAsFactors = FALSE)
+      colnames(return_data)[3:ncol(return_data)] <- c("est", "se", "p", "ci_lower", "ci_upper")
+
+      if (!is.null(estimand)) {
+        return_data$estimand_label <- attributes(estimand)$label
+      }
+
+      if (!is.null(coefficient_name)) {
+        return_data <- return_data[, return_data$coefficient_name %in% coefficient_name]
+      }
+
+      rownames(return_data) <- NULL
+
+      return(return_data)
+    }
   }
 
   attributes(estimator_function_internal) <-
