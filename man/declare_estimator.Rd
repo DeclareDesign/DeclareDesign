@@ -61,6 +61,20 @@ my_estimator_lm <-
 
 my_estimator_lm(df)
 
+# Use R's built-in lm function via model
+
+estimator_lm <- declare_estimator(Y ~ Z, model = lm)
+
+# Run a probit regression using glm via model
+
+estimator_probit <-
+  declare_estimator(
+    Y ~ Z,
+    model = glm,
+    family = binomial(link = "probit"),
+    coefficient_name = "Z"
+ )
+
 # Use a custom estimator function
 
 my_estimator_function <- function(formula, data){
