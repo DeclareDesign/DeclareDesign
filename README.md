@@ -6,7 +6,7 @@
 
 DeclareDesign is statistical software to aid researchers in characterizing and diagnosing research designs — including experiments, quasi-experiments, and observational studies.
 
-The motivation for the software is described in a [working paper](/paper.pdf) by the authors.
+The motivation for the software is described in a [working paper](http://declaredesign.org/paper.pdf) by the authors.
 
 DeclareDesign consists of a core package, documented on this web site, as well as three companion packages that stand on their own but can also be used to complement the core package. They are:
 
