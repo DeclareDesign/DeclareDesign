@@ -4,9 +4,10 @@
 #' Reveal Observed Outcomes
 #' @param data A data.frame containing columns of potential outcomes and an assignment variable
 #'
-#' @param outcome_variable_name The outcome prefix of the potential outcomes outcomes
-#' @param assignment_variable_name The bare (unquote) name of the assignment variable
+#' @param outcome_variable_names The outcome prefix of the potential outcomes outcomes
+#' @param assignment_variable_names The bare (unquote) name of the assignment variable
 #' @param attrition_variable_name The bare (unquote) name of the attrition variable
+#' @param outcome_function If specified, \code{reveal_outcomes} draws outcomes using \code{outcome_function} rather than the switching equation.
 #'
 #' @details
 #'
@@ -41,7 +42,7 @@ reveal_outcomes <-
            outcome_function = NULL) {
 
     if (is.null(data)) {
-      stop("Data can't be null.")
+      stop("Please provide data to reveal_outcomes.")
     }
 
     # Setup to handle NSE
@@ -134,7 +135,7 @@ switching_equation <- function(data,
     paste0(outcome_variable_name, "_", condition_combinations)
 
   if (!all(potential_outcome_variable_names %in% colnames(data))) {
-    stop("Somethings WRONG with your variable names")
+    stop(paste0("You did not provide all the potential outcomes columns required to draw the outcome ", outcome_variable_name, "."))
   } else {
     data_list <- split(data, potential_outcome_variable_names)
 

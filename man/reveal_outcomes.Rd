@@ -11,11 +11,13 @@ reveal_outcomes(data = NULL, outcome_variable_names = Y,
 \arguments{
 \item{data}{A data.frame containing columns of potential outcomes and an assignment variable}
 
+\item{outcome_variable_names}{The outcome prefix of the potential outcomes outcomes}
+
+\item{assignment_variable_names}{The bare (unquote) name of the assignment variable}
+
 \item{attrition_variable_name}{The bare (unquote) name of the attrition variable}
 
-\item{outcome_variable_name}{The outcome prefix of the potential outcomes outcomes}
-
-\item{assignment_variable_name}{The bare (unquote) name of the assignment variable}
+\item{outcome_function}{If specified, \code{reveal_outcomes} draws outcomes using \code{outcome_function} rather than the switching equation.}
 }
 \description{
 Reveal Observed Outcomes
