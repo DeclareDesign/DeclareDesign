@@ -4,8 +4,8 @@
 #' Reveal Observed Outcomes
 #' @param data A data.frame containing columns of potential outcomes and an assignment variable
 #'
-#' @param outcome_variable_names The outcome prefix of the potential outcomes outcomes
-#' @param assignment_variable_names The bare (unquote) name of the assignment variable
+#' @param outcome_variable_names The outcome prefix(es) of the potential outcomes
+#' @param assignment_variable_names The bare (unquote) name(s) of the assignment variable
 #' @param attrition_variable_name The bare (unquote) name of the attrition variable
 #' @param outcome_function If specified, \code{reveal_outcomes} draws outcomes using \code{outcome_function} rather than the switching equation.
 #'
