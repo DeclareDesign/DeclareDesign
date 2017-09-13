@@ -64,7 +64,9 @@ declare_estimand <-
     }
 
     estimand_function_internal <- function(data) {
-      args$data <- data
+      if ("data" %in% names(formals(func))) {
+        args$data <- data
+      }
       value <- do.call(func, args = args, envir = env)
       data.frame(
         estimand_label = label_internal,
