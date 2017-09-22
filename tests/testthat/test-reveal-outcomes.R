@@ -1,6 +1,40 @@
 context("Reveal Outcomes")
 
+
+
+
+
 test_that("Reveal Outcomes", {
+
+  my_population <- declare_population(N = 1000, u = rnorm(N))
+
+  my_sampling <- declare_sampling(n = 100)
+
+  my_assignment <- declare_assignment(m = 50)
+
+  my_potential_outcomes <-
+    declare_potential_outcomes(Y_Z_0 = u,
+                               Y_Z_1 = u + .25)
+
+  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+
+  my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+
+  #debugonce(DeclareDesign:::switching_equation)
+
+  my_design <- declare_design(
+    my_population,
+    my_potential_outcomes,
+    my_estimand,
+    my_sampling,
+    my_assignment,
+    reveal_outcomes,
+    my_estimator)
+
+  dat <- draw_data(my_design)
+
+
+
 
 
   my_population <- declare_population(N = 500, noise = rnorm(N))

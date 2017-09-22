@@ -119,6 +119,9 @@ attributes(reveal_outcomes) <- list(type = "reveal_outcomes")
 switching_equation <- function(data,
                                outcome_variable_name,
                                assignment_variable_names) {
+
+  data[,"_local_id"] <- 1:nrow(data)
+
   assignment_variable_df <-
     data[, assignment_variable_names, drop = FALSE]
 
@@ -151,6 +154,8 @@ switching_equation <- function(data,
       )
 
     data <- do.call(rbind, data_list)
+    data <- data[order(data$`_local_id`),]
+
     rownames(data) <- NULL
 
   }
