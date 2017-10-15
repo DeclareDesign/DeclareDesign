@@ -85,7 +85,7 @@ test_that("demo runs", {
   ## ------------------------------------------------------------------------
   my_estimator_lm <-
     declare_estimator(Y ~ Z,
-                      estimator_function = estimatr::lm_robust,
+                      model = estimatr::lm_robust,
                       coefficient_name = "Z",
                       estimand = my_estimand)
 

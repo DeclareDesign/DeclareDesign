@@ -83,6 +83,10 @@ declare_estimator <- function(...,
                               coefficient_name = Z,
                               estimand = NULL,
                               label = my_estimator) {
+  if(!is.null(estimator_function)){
+    model <- NULL
+  }
+
   args <- eval(substitute(alist(...)))
   env <- freeze_environment(parent.frame())
   label <- substitute(label)

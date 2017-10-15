@@ -35,7 +35,7 @@ test_that("test the estimators", {
     declare_estimator(Y ~ Z,
                       model = lm_robust,
                       coefficient_name = "Z")
-  debugonce(estimator_lm_robust)
+
   estimator_lm_robust(dat)
 
 
