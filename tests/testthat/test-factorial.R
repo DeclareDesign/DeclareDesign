@@ -14,7 +14,7 @@ test_that("Factorial", {
   my_estimand <- declare_estimand(interaction = mean(Y_Z_T4 - Y_Z_T3) - mean(Y_Z_T2 - Y_Z_T1))
 
   my_estimator <- declare_estimator(Y ~ Z1 + Z2 + Z1*Z2,
-                                    estimator_function = lm_robust,
+                                    model = lm_robust,
                                     coefficient_name = "Z1:Z2")
 
   my_design <-

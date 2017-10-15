@@ -4,16 +4,16 @@
 \alias{declare_estimator}
 \title{Declare an Estimator}
 \usage{
-declare_estimator(..., estimator_function = estimatr::difference_in_means,
-  model = NULL, coefficient_name = Z, estimand = NULL,
+declare_estimator(..., model = estimatr::difference_in_means,
+  estimator_function = NULL, coefficient_name = Z, estimand = NULL,
   label = my_estimator)
 }
 \arguments{
 \item{...}{Arguments to the estimand function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.}
 
-\item{estimator_function}{A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label. By default, the estimator function is the \code{\link{difference_in_means}} function from the \link{estimatr} package.}
-
 \item{model}{A model function, e.g. lm or glm. If model is specified, the estimator_function argument is ignored.}
+
+\item{estimator_function}{A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label. By default, the estimator function is the \code{\link{difference_in_means}} function from the \link{estimatr} package.}
 
 \item{coefficient_name}{A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a \code{model} is chosen or for some \code{estimator_function}'s such as \code{difference_in_means} and \code{lm_robust}.}
 

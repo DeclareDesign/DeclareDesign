@@ -11,11 +11,11 @@ test_that("test the estimators", {
   my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes %>% my_estimator
 
   ## lm with robust ses
-  my_estimator <- declare_estimator(Y ~ Z, estimator_function = lm_robust)
+  my_estimator <- declare_estimator(Y ~ Z, model = lm_robust)
   my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes %>% my_estimator
 
   ## lm with HC3 robust ses
-  my_estimator <- declare_estimator(Y ~ Z, estimator_function = lm_robust, se_type = "HC3")
+  my_estimator <- declare_estimator(Y ~ Z, model = lm_robust, se_type = "HC3")
   my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes %>% my_estimator
 
   ## custom estimator function
@@ -54,7 +54,7 @@ test_that("regression from estimatr works as an estimator", {
   my_assignment <- declare_assignment(m = 100)
   pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = pate)
   pate_estimator <- declare_estimator(Y ~ Z + noise,
-                                      estimator_function = lm_robust,
+                                      model = lm_robust,
                                       coefficient_name = "noise",
                                       estimand = pate, label = pate)
 
