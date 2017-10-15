@@ -200,10 +200,10 @@ diagnose_design_single_design <-
 
       labels_df <- split(simulations_df[, group_by_set], group_by_list)
       labels_df <- lapply(labels_df, unique)
-      labels_df <- do.call(rbind, labels_df)
+      labels_df <- do.call(rbind, labels_df[lapply(labels_df, nrow) != 0])
 
       diagnosands_df <- split(simulations_df, group_by_list)
-      diagnosands_df <- lapply(diagnosands_df, FUN = diagnosands)
+      diagnosands_df <- lapply(diagnosands_df[lapply(diagnosands_df, nrow) != 0], FUN = diagnosands)
       diagnosands_df <- do.call(rbind, diagnosands_df)
 
       diagnosands_df <- merge(labels_df, diagnosands_df, by = "row.names", all = TRUE, sort = FALSE)
@@ -238,7 +238,7 @@ diagnose_design_single_design <-
       labels_df <-
         split(diagnosand_replicates[, group_by_set], group_by_list)
       labels_df <- lapply(labels_df, unique)
-      labels_df <- do.call(rbind, labels_df)
+      labels_df <- do.call(rbind, labels_df[lapply(labels_df, nrow) != 0])
 
       diagnosands_se_df <-
         split(diagnosand_replicates, group_by_list)
