@@ -33,8 +33,9 @@ test_that("test the estimators", {
 
   estimator_lm_robust <-
     declare_estimator(Y ~ Z,
-                      estimator_function = lm_robust,
+                      model = lm_robust,
                       coefficient_name = "Z")
+  debugonce(estimator_lm_robust)
   estimator_lm_robust(dat)
 
 

@@ -139,7 +139,7 @@ declare_estimator <- function(...,
       }
 
       if (!is.null(coefficient_name)) {
-        return_data <- return_data[, return_data$coefficient_name %in% coefficient_name]
+        return_data <- return_data[return_data$coefficient_name %in% coefficient_name, ,drop = FALSE]
       }
 
       rownames(return_data) <- NULL
