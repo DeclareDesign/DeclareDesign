@@ -78,14 +78,13 @@
 #' my_estimator_custom(df)
 #'
 declare_estimator <- function(...,
-                              estimator_function = estimatr::difference_in_means,
-                              model = NULL,
+                              model = estimatr::difference_in_means,
+                              estimator_function = NULL,
                               coefficient_name = Z,
                               estimand = NULL,
                               label = my_estimator) {
   args <- eval(substitute(alist(...)))
   env <- freeze_environment(parent.frame())
-  func <- eval(estimator_function)
   label <- substitute(label)
   if (!is.null(label)) {
     label <- as.character(label)
@@ -96,11 +95,17 @@ declare_estimator <- function(...,
   }
   estimand <- eval_tidy(quo(estimand), env = env)
 
-  if (!("data" %in% names(formals(func)))) {
-    stop("Please provide an estimator function with a data argument.")
+  if (is.null(model) & is.null(estimator_function)) {
+    stop("Please provide either an estimator function or a model.")
   }
 
   if (is.null(model)) {
+
+    func <- eval(estimator_function)
+    if (!("data" %in% names(formals(func)))) {
+      stop("Please provide an estimator function with a data argument.")
+    }
+
     estimator_function_internal <- function(data) {
       args$data <- data
       if ("coefficient_name" %in% names(formals(func))) {
@@ -117,14 +122,19 @@ declare_estimator <- function(...,
       return_data
     }
   } else {
+    func <- eval(model)
+    if (!("data" %in% names(formals(func)))) {
+      stop("Please provide an estimator function with a data argument.")
+    }
+
     estimator_function_internal <- function(data) {
       args$data <- data
 
-      fit <- do.call(model, args = args, envir = env)
+      fit <- do.call(func, args = args, envir = env)
 
       summ <- summary(fit)$coefficients
       summ <-
-        summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr(")]
+        summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
       ci <- suppressMessages(confint(fit))
       return_data <-
         data.frame(estimator_label = label,
