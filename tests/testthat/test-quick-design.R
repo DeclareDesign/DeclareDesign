@@ -79,6 +79,19 @@ test_that("vary works", {
 
   diagnose_design(design, sims = 2, bootstrap = FALSE, parallel = FALSE)
 
+  design <- quick_design(template = two_arm_trial,
+                         N = c(100, 200, 300), noise_sd = c(.1, .2, .3))
+
+  diagnose_design(design, sims = 2, bootstrap = FALSE, parallel = FALSE)
+
+  design <- quick_design(template = two_arm_trial, expand = FALSE,
+                         N = c(100, 200, 300), noise_sd = c(.1, .2, .3))
+
+  diagnose_design(design, sims = 2, bootstrap = FALSE, parallel = FALSE)
+
+  expect_error(quick_design(template = two_arm_trial, expand = FALSE,
+                         N = c(100, 200, 300), noise_sd = c(.1, .2)))
+
 })
 
 test_that("power curve", {
@@ -113,4 +126,9 @@ test_that("power curve", {
 #
 
 })
+
+
+
+
+
 

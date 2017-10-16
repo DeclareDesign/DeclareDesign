@@ -8,7 +8,7 @@
 #'
 #' @importFrom rlang quo_expr quos
 #' @export
-quick_design <- function(template = NULL, ...) {
+quick_design <- function(template = NULL, expand = TRUE, ...) {
   # figure out what's in ...
   # dots <- quos(...)
   #
@@ -23,7 +23,15 @@ quick_design <- function(template = NULL, ...) {
 
   args_list <- list(...)
 
-  template_args_matrix <- data.matrix(expand.grid(args_list))
+  if (expand) {
+    template_args_matrix <- data.matrix(expand.grid(args_list))
+  } else{
+    args_lengths <- sapply(args_list, length)
+    if (any(args_lengths != args_lengths[1])) {
+      stop("If you set expand to FALSE, all arguments you provide must be of the same length.")
+    }
+    template_args_matrix <- do.call(cbind, args_list)
+  }
 
   template_args_list <- lapply(
     split(template_args_matrix,
