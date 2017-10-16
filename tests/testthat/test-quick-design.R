@@ -75,7 +75,7 @@ test_that("vary works", {
   }
 
   design <- quick_design(template = two_arm_trial,
-                         N = vary(100, 200, 300), noise_sd = 1)
+                         N = c(100, 200, 300), noise_sd = 1)
 
   diagnose_design(design, sims = 2, bootstrap = FALSE, parallel = FALSE)
 
@@ -101,7 +101,7 @@ test_that("power curve", {
   }
 
   design <- quick_design(template = two_arm_trial,
-                         N = vary(100, 200, 300, 500, 1000))
+                         N = c(100, 200, 300, 500, 1000))
 
   diagnosis <- diagnose_design(design, sims = 2, bootstrap = FALSE, parallel = FALSE)
 #

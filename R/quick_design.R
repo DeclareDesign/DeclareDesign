@@ -10,16 +10,18 @@
 #' @export
 quick_design <- function(template = NULL, ...) {
   # figure out what's in ...
-  dots <- quos(...)
+  # dots <- quos(...)
+  #
+  # args_list <- lapply(dots, function(x) {
+  #   e <- as.list(quo_expr(x))
+  #   if (length(e) > 1) {
+  #     return(e[seq_along(e)[-1]])
+  #   } else{
+  #     e
+  #   }
+  # })
 
-  args_list <- lapply(dots, function(x) {
-    e <- as.list(quo_expr(x))
-    if (length(e) > 1) {
-      return(e[seq_along(e)[-1]])
-    } else{
-      e
-    }
-  })
+  args_list <- list(...)
 
   template_args_matrix <- data.matrix(expand.grid(args_list))
 
