@@ -4,7 +4,7 @@
 \alias{quick_design}
 \title{Declare a Design via a Template Function}
 \usage{
-quick_design(template = NULL, ...)
+quick_design(template = NULL, expand = TRUE, ...)
 }
 \arguments{
 \item{template}{An R function that takes a set of options and returns a design created by declare_design().}

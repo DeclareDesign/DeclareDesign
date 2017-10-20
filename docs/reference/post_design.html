@@ -226,10 +226,10 @@
 #&gt; Formula: Y ~ Z 
 #&gt; 
 #&gt; A single draw of the estimator:
-#&gt;  estimator_label      est        se            p ci_lower ci_upper  df
-#&gt;     my_estimator 2.618961 0.3877942 1.018979e-10 1.855171 3.382751 248
-#&gt;  estimand_label
-#&gt;             ATE
+#&gt;  estimator_label coefficient_name      est        se            p ci_lower
+#&gt;     my_estimator                Z 2.618961 0.3877942 3.958254e-07 1.821186
+#&gt;  ci_upper estimand_label
+#&gt;  3.416736            ATE
 #&gt; </div><div class='input'>
 <span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'>draw_data</span>(<span class='no'>design</span>)
 

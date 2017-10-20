@@ -107,8 +107,9 @@
     <p>Declare an Estimator</p>
     
 
-    <pre class="usage"><span class='fu'>declare_estimator</span>(<span class='no'>...</span>, <span class='kw'>estimator_function</span> <span class='kw'>=</span> <span class='kw'>estimatr</span><span class='kw'>::</span><span class='no'>difference_in_means</span>,
-  <span class='kw'>estimand</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='no'>my_estimator</span>)</pre>
+    <pre class="usage"><span class='fu'>declare_estimator</span>(<span class='no'>...</span>, <span class='kw'>model</span> <span class='kw'>=</span> <span class='kw'>estimatr</span><span class='kw'>::</span><span class='no'>difference_in_means</span>,
+  <span class='kw'>estimator_function</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>coefficient_name</span> <span class='kw'>=</span> <span class='no'>Z</span>, <span class='kw'>estimand</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>label</span> <span class='kw'>=</span> <span class='no'>my_estimator</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -118,8 +119,16 @@
       <td><p>Arguments to the estimand function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.</p></td>
     </tr>
     <tr>
+      <th>model</th>
+      <td><p>A model function, e.g. lm or glm. If model is specified, the estimator_function argument is ignored.</p></td>
+    </tr>
+    <tr>
       <th>estimator_function</th>
       <td><p>A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label. By default, the estimator function is the <code>difference_in_means</code> function from the estimatr package.</p></td>
+    </tr>
+    <tr>
+      <th>coefficient_name</th>
+      <td><p>A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a <code>model</code> is chosen or for some <code>estimator_function</code>'s such as <code>difference_in_means</code> and <code>lm_robust</code>.</p></td>
     </tr>
     <tr>
       <th>estimand</th>
@@ -157,8 +166,8 @@
 
 <span class='no'>my_estimator_dim</span> <span class='kw'>&lt;-</span> <span class='fu'>declare_estimator</span>(<span class='no'>Y</span> ~ <span class='no'>Z</span>, <span class='kw'>estimand</span> <span class='kw'>=</span> <span class='no'>my_estimand</span>)
 
-<span class='fu'>my_estimator_dim</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt;   estimator_label  est se p ci_lower ci_upper df estimand_label
-#&gt; 1    my_estimator 0.25  0 0     0.25     0.25 98            ATE</div><div class='input'>
+<span class='fu'>my_estimator_dim</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt;   estimator_label coefficient_name  est se p ci_lower ci_upper estimand_label
+#&gt; 1    my_estimator                Z 0.25  0 0     0.25     0.25            ATE</div><div class='input'>
 <span class='co'># Use the linear regression (lm) function</span>
 <span class='co'># with robust standard errors from the estimatr package</span>
 
@@ -168,8 +177,21 @@
                    <span class='kw'>coefficient_name</span> <span class='kw'>=</span> <span class='st'>"Z"</span>,
                    <span class='kw'>estimand</span> <span class='kw'>=</span> <span class='no'>my_estimand</span>)
 
-<span class='fu'>my_estimator_lm</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt;   estimator_label variable_names  est se p ci_lower ci_upper estimand_label
-#&gt; 2    my_estimator              Z 0.25  0 0     0.25     0.25            ATE</div><div class='input'>
+<span class='fu'>my_estimator_lm</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; <span class='error'>Error in as.data.frame.default(x[[i]], optional = TRUE, stringsAsFactors = stringsAsFactors): cannot coerce class ""lm_robust"" to a data.frame</span></div><div class='input'>
+<span class='co'># Use R's built-in lm function via model</span>
+
+<span class='no'>estimator_lm</span> <span class='kw'>&lt;-</span> <span class='fu'>declare_estimator</span>(<span class='no'>Y</span> ~ <span class='no'>Z</span>, <span class='kw'>model</span> <span class='kw'>=</span> <span class='no'>lm</span>)
+
+<span class='co'># Run a probit regression using glm via model</span>
+
+<span class='no'>estimator_probit</span> <span class='kw'>&lt;-</span>
+  <span class='fu'>declare_estimator</span>(
+    <span class='no'>Y</span> ~ <span class='no'>Z</span>,
+    <span class='kw'>model</span> <span class='kw'>=</span> <span class='no'>glm</span>,
+    <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'>binomial</span>(<span class='kw'>link</span> <span class='kw'>=</span> <span class='st'>"probit"</span>),
+    <span class='kw'>coefficient_name</span> <span class='kw'>=</span> <span class='st'>"Z"</span>
+ )
+
 <span class='co'># Use a custom estimator function</span>
 
 <span class='no'>my_estimator_function</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>formula</span>, <span class='no'>data</span>){

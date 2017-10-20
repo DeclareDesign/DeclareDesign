@@ -107,8 +107,9 @@
     <p>Reveal Observed Outcomes</p>
     
 
-    <pre class="usage"><span class='fu'>reveal_outcomes</span>(<span class='no'>data</span>, <span class='kw'>outcome_variable_name</span> <span class='kw'>=</span> <span class='no'>Y</span>,
-  <span class='kw'>assignment_variable_name</span> <span class='kw'>=</span> <span class='no'>Z</span>, <span class='kw'>attrition_variable_name</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>reveal_outcomes</span>(<span class='kw'>data</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>outcome_variable_names</span> <span class='kw'>=</span> <span class='no'>Y</span>,
+  <span class='kw'>assignment_variable_names</span> <span class='kw'>=</span> <span class='no'>Z</span>, <span class='kw'>attrition_variable_name</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>outcome_function</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -118,16 +119,20 @@
       <td><p>A data.frame containing columns of potential outcomes and an assignment variable</p></td>
     </tr>
     <tr>
-      <th>outcome_variable_name</th>
-      <td><p>The outcome prefix of the potential outcomes outcomes</p></td>
+      <th>outcome_variable_names</th>
+      <td><p>The outcome prefix(es) of the potential outcomes</p></td>
     </tr>
     <tr>
-      <th>assignment_variable_name</th>
-      <td><p>The bare (unquote) name of the assignment variable</p></td>
+      <th>assignment_variable_names</th>
+      <td><p>The bare (unquote) name(s) of the assignment variable</p></td>
     </tr>
     <tr>
       <th>attrition_variable_name</th>
       <td><p>The bare (unquote) name of the attrition variable</p></td>
+    </tr>
+    <tr>
+      <th>outcome_function</th>
+      <td><p>If specified, <code>reveal_outcomes</code> draws outcomes using <code>outcome_function</code> rather than the switching equation.</p></td>
     </tr>
     </table>
     
