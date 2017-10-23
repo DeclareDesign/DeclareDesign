@@ -31,5 +31,6 @@ notifications:
     recipients:
     - graeme.blair@ucla.edu
     - alex.coppock@yale.edu
+    - nfultz@gmail.com
     on_success: change
     on_failure: change
