@@ -9,6 +9,7 @@ addons:
   apt:
     packages:
     - libudunits2-dev
+    - libgdal-dev
 os:
 - linux
 - osx
