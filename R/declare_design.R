@@ -293,10 +293,13 @@ declare_design <- function(...,
               capture.output(attributes(causal_order[[i]])$summary_function(last_df))
           }
 
-          if (nrow(current_df) != nrow(last_df)) {
-            N[[i]] <- paste0("N = ", nrow(current_df), " (", abs(nrow(current_df) - nrow(last_df)),
-                             ifelse(nrow(current_df) > nrow(last_df), " added", " subtracted"), ")")
-          }
+          N[i] <- local({
+            c_row <- nrow(current_df)
+            l_row <- nrow(last_df)
+            if(c_row == l_row) NULL else
+                sprintf("N = %d (%d %s)", c_row, abs(c_row - l_row),
+                       ifelse(c_row > l_row, "added", "subtracted"))
+          })
 
           last_df <- current_df
 
