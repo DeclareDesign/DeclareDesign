@@ -112,30 +112,28 @@ declare_design <- function(...,
 
   causal_order <- eval_tidy(dots)
 
-  function_types <- rep("", length(causal_order))
-
-  function_types[name_or_call == "name"] <-
-    sapply(causal_order[name_or_call == "name"], function(x) {
-      type <- attributes(eval(x))$type
-      return(ifelse(!is.null(type), type, "unknown"))
+  # Special case for initializing with a data.frame
+  if("data.frame" %in% class(causal_order[[1]])){
+    causal_order[[1]] <- local({
+      df <- causal_order[[1]]
+      function(data) df
     })
-  function_types[name_or_call == "call" &
-                   function_types == ""] <- "unknown"
+  }
+
+
+  function_types <- lapply(causal_order, attr, "type")
 
   causal_order_types <- function_types
-  causal_order_types[!function_types %in% c("estimand", "estimator")] <-
-    "dgp"
+  causal_order_types[!function_types %in% c("estimand", "estimator")] <- "dgp"
 
-  estimand_labels <-
-    sapply(causal_order[function_types == "estimand"], attr, "label")
+  estimand_labels <- sapply(causal_order[function_types == "estimand"], attr, "label")
   if (anyDuplicated(estimand_labels)) {
     stop(
       "You have estimands with identical labels. Please provide estimands with unique labels."
     )
   }
 
-  estimator_labels <-
-    sapply(causal_order[function_types == "estimator"], attr, "label")
+  estimator_labels <- sapply(causal_order[function_types == "estimator"], attr, "label")
   if (anyDuplicated(estimator_labels)) {
     stop(
       "You have estimators with identical labels. Please provide estimators with unique labels."
