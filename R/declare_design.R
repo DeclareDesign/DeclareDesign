@@ -323,13 +323,13 @@ process_population <- function(population) {
   ## the first part of the DGP must be a data.frame. Take what the user creates and turn it into a data.frame.
   if ("data.frame" %in% class(population)) {
     current_df <- population
-  } else if (class(population) == "call") {
-    tryCatch(current_df <- population, error=function(e)stop("The first element of your design must be a data.frame or a function that returns a data.frame. The population call provided failed:", e))
-    if (!"data.frame" %in% class(current_df)) {
-      stop(
-        "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a called that did not return a data.frame."
-      )
-    }
+  # } else if (class(population) == "call") {
+  #   tryCatch(current_df <- population, error=function(e)stop("The first element of your design must be a data.frame or a function that returns a data.frame. The population call provided failed:", e))
+  #   if (!"data.frame" %in% class(current_df)) {
+  #     stop(
+  #       "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a called that did not return a data.frame."
+  #     )
+  #   }
   } else if (class(population) == "function") {
     tryCatch(current_df <- population(), error=function(e)stop("The first element of your design must be a data.frame or a function that returns a data.frame. The population function provided failed:", e))
     if (!exists("current_df") |
