@@ -251,7 +251,7 @@ summary_function <- function(causal_order, causal_order_types) {
 
   current_df <- process_population(causal_order[[1]])
 
-  variables_added[[1]] <- lapply(current_df, describe_variable)
+  var_desc <- variables_added[[1]] <- lapply(current_df, describe_variable)
 
   N[[1]] <- paste0("N = ", nrow(current_df))
 
@@ -275,20 +275,29 @@ summary_function <- function(causal_order, causal_order_types) {
           variables_added[[i]] <-
             lapply(current_df[, variables_added_names, drop = FALSE],
                    describe_variable)
+          var_desc[variables_added_names] <- variables_added[[i]]
         }
 
         if (!is.null(variables_modified_names)) {
-          variables_modified[[i]] <-
-            lapply(variables_modified_names,
-                   function(var) list(before = describe_variable(last_df[, var, drop = FALSE]),
-                                      after = describe_variable(current_df[, var, drop = FALSE])))
-          names(variables_modified[[i]]) <- variables_modified_names
+          v_mod <- lapply(current_df[, variables_modified_names, drop=FALSE],
+                          describe_variable)
+          variables_modified[[i]] <- mapply(list,
+                                            before=var_desc[variables_modified_names],
+                                            after=v_mod,
+                                            SIMPLIFY = FALSE, USE.NAMES = TRUE)
+          var_desc[variables_modified_names] <- v_mod
+
+          # variables_modified[[i]] <-
+          #   lapply(setNames(nm=variables_modified_names),
+          #          function(var) list(before = describe_variable(last_df[, var, drop = FALSE]),
+          #                             after = describe_variable(current_df[, var, drop = FALSE])))
         }
 
-        if (!is.null(attributes(causal_order[[i]])$summary_function)) {
-          quantities_added[[i]] <-
-            capture.output(attributes(causal_order[[i]])$summary_function(last_df))
-        }
+        # NJF 10/25 Dead Feature???
+        # if (!is.null(attributes(causal_order[[i]])$summary_function)) {
+        #   quantities_added[[i]] <-
+        #     capture.output(attributes(causal_order[[i]])$summary_function(last_df))
+        # }
 
         N[i] <- local({
           c_row <- nrow(current_df)
