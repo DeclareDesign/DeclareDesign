@@ -5,8 +5,8 @@
 #'
 #' @param ... Arguments to the estimand function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.
 #'
-#' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label. By default, the estimator function is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
-#' @param model A model function, e.g. lm or glm. If model is specified, the estimator_function argument is ignored.
+#' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.
+#' @param model A model function, e.g. lm or glm. If model is specified, the estimator_function argument is ignored.By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
 #' @param coefficient_name A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a \code{model} is chosen or for some \code{estimator_function}'s such as \code{difference_in_means} and \code{lm_robust}.
 #' @param estimand An estimand object created using \code{\link{declare_estimand}}. Estimates from this estimator function will be associated with the estimand, for example for calculating the bias and coverage of the estimator.
 #' @param label An optional label to name the estimator, such as DIM.
@@ -15,6 +15,12 @@
 #' @importFrom estimatr difference_in_means
 #'
 #' @return a function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimator and associated statistics.
+#'
+#' @section Custom Estimators:
+#'
+#' \code{estimator_functions} implementations should be tidy (accept and return a data.frame)
+#'
+#' \code{model} implementations should at the miminum provide S3 methods for \code{summary} and \code{confint}.
 #'
 #' @examples
 #'

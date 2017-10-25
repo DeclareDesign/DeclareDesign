@@ -11,9 +11,9 @@ declare_estimator(..., model = estimatr::difference_in_means,
 \arguments{
 \item{...}{Arguments to the estimand function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.}
 
-\item{model}{A model function, e.g. lm or glm. If model is specified, the estimator_function argument is ignored.}
+\item{model}{A model function, e.g. lm or glm. If model is specified, the estimator_function argument is ignored.By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.}
 
-\item{estimator_function}{A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label. By default, the estimator function is the \code{\link{difference_in_means}} function from the \link{estimatr} package.}
+\item{estimator_function}{A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.}
 
 \item{coefficient_name}{A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a \code{model} is chosen or for some \code{estimator_function}'s such as \code{difference_in_means} and \code{lm_robust}.}
 
@@ -27,6 +27,14 @@ a function that accepts a data.frame as an argument and returns a data.frame con
 \description{
 Declare an Estimator
 }
+\section{Custom Estimators}{
+
+
+\code{estimator_functions} implementations should be tidy (accept and return a data.frame)
+
+\code{model} implementations should at the miminum provide S3 methods for \code{summary} and \code{confint}.
+}
+
 \examples{
 
 my_population <- declare_population(N = 100)
