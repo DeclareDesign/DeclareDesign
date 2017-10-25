@@ -1,6 +1,3 @@
-
-
-
 #' Declare an Estimator
 #'
 #' @param ... Arguments to the estimand function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.
@@ -89,89 +86,81 @@ declare_estimator <- function(...,
                               coefficient_name = Z,
                               estimand = NULL,
                               label = my_estimator) {
-  if(!is.null(estimator_function)){
-    model <- NULL
-  }
+  model <- if(is.null(estimator_function)) model else NULL
 
   args <- eval(substitute(alist(...)))
   env <- freeze_environment(parent.frame())
-  label <- substitute(label)
-  if (!is.null(label)) {
-    label <- as.character(label)
-  }
-  coefficient_name <- substitute(coefficient_name)
-  if (!is.null(label)) {
-    coefficient_name <- as.character(coefficient_name)
-  }
-  estimand <- eval_tidy(quo(estimand), env = env)
 
-  if (is.null(model) & is.null(estimator_function)) {
+  label <- to_char_except_null(substitute(label))
+
+  coefficient_name <- to_char_except_null(substitute(coefficient_name))
+
+
+  if (is.null(model) == is.null(estimator_function)) {
     stop("Please provide either an estimator function or a model.")
+  } else if(!is.null(model)) {
+    lbl <- 'a model'
+    func <- match.fun(model)
+    clean <- fit2tidy #todo could generify this...
+  } else if(!is.null(estimator_function)) {
+    lbl <- 'an estimator'
+    func <- match.fun(estimator_function)
+    clean <- function(x,y)x # no work needed after evaluated
   }
 
-  if (is.null(model)) {
+  if (!("data" %in% names(formals(func)))) {
+    stop("Please provide ", lbl, " function with a data argument.")
+  }
 
-    func <- eval(estimator_function)
-    if (!("data" %in% names(formals(func)))) {
-      stop("Please provide an estimator function with a data argument.")
+  estimand_label <- if(is.null(estimand)) NULL else attributes(estimand)$label
+
+  estimator_function_internal <- function(data) {
+    args$data <- data
+    if ("coefficient_name" %in% names(formals(func))) {
+      args$coefficient_name <- coefficient_name
     }
+    results <- do.call(func, args = args, envir = env)
+    results <- clean(results, coefficient_name) # fit2tidy if a model function, ow I
+    return_data <-
+      data.frame(estimator_label = label,
+                 results,
+                 stringsAsFactors = FALSE)
 
-    estimator_function_internal <- function(data) {
-      args$data <- data
-      if ("coefficient_name" %in% names(formals(func))) {
-        args$coefficient_name <- coefficient_name
-      }
-      results <- do.call(func, args = args, envir = env)
-      return_data <-
-        data.frame(estimator_label = label,
-                   results,
-                   stringsAsFactors = FALSE)
-      if (!is.null(estimand)) {
-        return_data$estimand_label <- attributes(estimand)$label
-      }
-      return_data
-    }
-  } else {
-    func <- eval(model)
-    if (!("data" %in% names(formals(func)))) {
-      stop("Please provide an estimator function with a data argument.")
-    }
+    return_data[['estimand_label']] <- estimand_label
 
-    estimator_function_internal <- function(data) {
-      args$data <- data
-
-      fit <- do.call(func, args = args, envir = env)
-
-      summ <- summary(fit)$coefficients
-      summ <-
-        summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
-      ci <- suppressMessages(confint(fit))
-      return_data <-
-        data.frame(estimator_label = label,
-                   coefficient_name = rownames(summ),
-                   summ,
-                   ci,
-                   stringsAsFactors = FALSE)
-      colnames(return_data)[3:ncol(return_data)] <- c("est", "se", "p", "ci_lower", "ci_upper")
-
-      if (!is.null(estimand)) {
-        return_data$estimand_label <- attributes(estimand)$label
-      }
-
-      if (!is.null(coefficient_name)) {
-        return_data <- return_data[return_data$coefficient_name %in% coefficient_name, ,drop = FALSE]
-      }
-
-      rownames(return_data) <- NULL
-
-      return(return_data)
-    }
+    return_data
   }
 
   attributes(estimator_function_internal) <-
     list(call = match.call(),
          type = "estimator",
-         label = label)
+         label = label,
+         estimand_label = estimand_label)
 
   return(estimator_function_internal)
+}
+
+fit2tidy <- function(fit, coefficient_name = NULL) {
+  summ <- summary(fit)$coefficients
+  summ <-
+    summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
+  ci <- suppressMessages(as.data.frame(confint(fit)))
+  return_data <-
+    data.frame(coefficient_name = rownames(summ),
+               summ,
+               ci,
+               stringsAsFactors = FALSE, row.names = NULL)
+  colnames(return_data) <- c("coefficient_name","est", "se", "p", "ci_lower", "ci_upper")
+
+
+  if (!is.null(coefficient_name)) {
+    return_data <- return_data[return_data$coefficient_name %in% coefficient_name, ,drop = FALSE]
+  }
+
+  return_data
+}
+
+#todo migrate to utils.R
+to_char_except_null <- function(x){
+  if(is.null(x)) NULL else as.character(x)
 }
