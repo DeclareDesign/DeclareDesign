@@ -127,18 +127,16 @@ declare_design <- function(...,
     "dgp"
 
   estimand_labels <-
-    sapply(causal_order[function_types == "estimand"], function(x)
-      attributes(x)$label)
-  if (length(unique(estimand_labels)) != length(estimand_labels)) {
+    sapply(causal_order[function_types == "estimand"], attr, "label")
+  if (anyDuplicated(estimand_labels)) {
     stop(
       "You have estimands with identical labels. Please provide estimands with unique labels."
     )
   }
 
   estimator_labels <-
-    sapply(causal_order[function_types == "estimator"], function(x)
-      attributes(x)$label)
-  if (length(unique(estimator_labels)) != length(estimator_labels)) {
+    sapply(causal_order[function_types == "estimator"], attr, "label")
+  if (anyDuplicated(estimator_labels)) {
     stop(
       "You have estimators with identical labels. Please provide estimators with unique labels."
     )
@@ -194,7 +192,6 @@ declare_design <- function(...,
     list(
       data_function = data_function,
       design_function = design_function,
-      summary_function = summary_function,
       causal_order_expr = causal_order_expr,
       causal_order_env = causal_order_env,
       function_types = function_types,
