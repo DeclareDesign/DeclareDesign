@@ -296,7 +296,7 @@ summary_function <- function(causal_order, causal_order_types) {
         N[i] <- local({
           c_row <- nrow(current_df)
           l_row <- nrow(last_df)
-          if(c_row == l_row) NULL else
+          if(c_row == l_row) list(NULL) else
             sprintf("N = %d (%d %s)", c_row, abs(c_row - l_row),
                     ifelse(c_row > l_row, "added", "subtracted"))
         })
