@@ -147,15 +147,12 @@ declare_design <- function(...,
   data_function <- function() {
     current_df <- process_population(causal_order[[1]])
 
-    if (length(causal_order) > 1) {
-      for (i in 2:length(causal_order)) {
-        # if it's a dgp
-        if (causal_order_types[i] == "dgp") {
-          current_df <- causal_order[[i]](current_df)
-        }
-      }
-    }
-    return(current_df)
+    dgp <- setdiff(which(causal_order_types == "dgp"), 1)
+
+    for(f in causal_order[dgp])
+      current_df <- f(current_df)
+
+    current_df
   }
 
   # This does causal order step by step; saving calculated estimands and estimates along the way
@@ -163,28 +160,29 @@ declare_design <- function(...,
   design_function <- function() {
     current_df <- process_population(causal_order[[1]])
 
-    estimates_df <- estimands_df <- data.frame()
+    estimates <- estimands <- vector("list", length(causal_order))
 
     if (length(causal_order) > 1) {
       for (i in 2:length(causal_order)) {
+        df <- causal_order[[i]](current_df)
         # if it's a dgp
         if (causal_order_types[i] == "dgp") {
-          current_df <- causal_order[[i]](current_df)
+          current_df <- df
+          df <- NULL
 
         } else if (causal_order_types[i] == "estimand") {
           # if it's an estimand
-          estimands_df <-
-            rbind(estimands_df, causal_order[[i]](current_df))
+          estimands[[i]] <- df
 
         } else if (causal_order_types[i] == "estimator") {
           # if it's an estimator
-          estimates_df <-
-            rbind(estimates_df, causal_order[[i]](current_df))
+          estimates[[i]] <- df
 
         }
       }
     }
-    return(list(estimates_df = estimates_df, estimands_df = estimands_df))
+    list(estimates_df = do.call(rbind, estimates),
+         estimands_df = do.call(rbind, estimands))
   }
 
 
@@ -287,10 +285,6 @@ summary_function <- function(causal_order, causal_order_types) {
                                             SIMPLIFY = FALSE, USE.NAMES = TRUE)
           var_desc[variables_modified_names] <- v_mod
 
-          # variables_modified[[i]] <-
-          #   lapply(setNames(nm=variables_modified_names),
-          #          function(var) list(before = describe_variable(last_df[, var, drop = FALSE]),
-          #                             after = describe_variable(current_df[, var, drop = FALSE])))
         }
 
         # NJF 10/25 Dead Feature???
@@ -327,18 +321,17 @@ summary_function <- function(causal_order, causal_order_types) {
 
 process_population <- function(population) {
   ## the first part of the DGP must be a data.frame. Take what the user creates and turn it into a data.frame.
-  if (any(class(population) == "data.frame")) {
+  if ("data.frame" %in% class(population)) {
     current_df <- population
   } else if (class(population) == "call") {
-    try(current_df <- population, silent = TRUE)
-    if (!exists("current_df") |
-        !any(class(current_df) == "data.frame")) {
+    tryCatch(current_df <- population, error=function(e)stop("The first element of your design must be a data.frame or a function that returns a data.frame. The population call provided failed:", e))
+    if (!"data.frame" %in% class(current_df)) {
       stop(
-        "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame."
+        "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a called that did not return a data.frame."
       )
     }
   } else if (class(population) == "function") {
-    try(current_df <- population(), silent = TRUE)
+    tryCatch(current_df <- population(), error=function(e)stop("The first element of your design must be a data.frame or a function that returns a data.frame. The population function provided failed:", e))
     if (!exists("current_df") |
         !any(class(current_df) == "data.frame")) {
       stop(
