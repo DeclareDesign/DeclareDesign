@@ -221,17 +221,10 @@ declare_design <- function(...,
   }
 
   get_modified_variables <- function(last_df = NULL, current_df) {
-    current_names <- names(current_df)
-    shared_names <-
-      current_names[current_names %in% names(last_df)]
-    variables_modified <- sapply(shared_names, function(var)
-      ifelse(nrow(last_df) != nrow(current_df), FALSE,
-      isTRUE(all.equal(last_df[, var], current_df[, var])) == FALSE))
-    if (any(variables_modified)) {
-      return(shared_names[variables_modified])
-    } else {
-      return(NULL)
-    }
+    is_modified <- function(j) !isTRUE(all.equal(last_df[[j]], current_df[[j]]))
+    shared <- intersect(names(current_df), names(last_df))
+
+    Filter(is_modified, shared)
   }
 
   get_formula_from_step <- function(step){
