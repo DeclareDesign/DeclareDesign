@@ -184,13 +184,13 @@ diagnose_design_single_design <-
       stop("No estimates or estimands were declared, so diagnose_design cannot calculate diagnosands.", call. = FALSE)
     }
 
-    if (!any(colnames(estimates_df) == "estimand_label" & nrow(estimates_df) > 0)) {
+    if (!"estimand_label" %in% colnames(estimates_df) && nrow(estimates_df) > 0) {
       estimates_df$estimand_label <- "no estimand specified"
     }
 
-    if (nrow(estimands_df) == 0 & nrow(estimates_df) > 0) {
+    if (nrow(estimands_df) == 0 && nrow(estimates_df) > 0) {
       simulations_df <- estimates_df
-    } else if (nrow(estimands_df) > 0 & nrow(estimates_df) == 0) {
+    } else if (nrow(estimands_df) > 0 && nrow(estimates_df) == 0) {
       simulations_df <- estimands_df
     } else {
       simulations_df <-
