@@ -116,7 +116,7 @@ declare_design <- function(...,
   if("data.frame" %in% class(causal_order[[1]])){
     causal_order[[1]] <- local({
       df <- causal_order[[1]]
-      function(data) df
+      structure(function(data) df, type='seed.data')
     })
   }
 
@@ -126,28 +126,31 @@ declare_design <- function(...,
   causal_order_types <- function_types
   causal_order_types[!function_types %in% c("estimand", "estimator")] <- "dgp"
 
-  estimand_labels <- sapply(causal_order[function_types == "estimand"], attr, "label")
-  if (anyDuplicated(estimand_labels)) {
-    stop(
-      "You have estimands with identical labels. Please provide estimands with unique labels."
-    )
-  }
+  local({
 
-  estimator_labels <- sapply(causal_order[function_types == "estimator"], attr, "label")
-  if (anyDuplicated(estimator_labels)) {
-    stop(
-      "You have estimators with identical labels. Please provide estimators with unique labels."
-    )
-  }
+    labels <- sapply(causal_order, attr, "label")
 
+    check_unique_labels <- function(labels, types, what){
+      ss <- labels[types == what]
+      if(anyDuplicated(ss)) stop(
+        "You have ", what, "s with identical labels: ",
+        unique(ss[duplicated(ss)]),
+        "\nPlease provide ", what, "s with unique labels"
+
+        )
+
+    }
+
+    check_unique_labels(labels, function_types, "estimand")
+    check_unique_labels(labels, function_types, "estimator")
+
+  })
 
   # this extracts the "DGP" parts of the causal order and runs them.
   data_function <- function() {
-    current_df <- process_population(causal_order[[1]])
+    current_df <- NULL
 
-    dgp <- setdiff(which(causal_order_types == "dgp"), 1)
-
-    for(f in causal_order[dgp])
+    for(f in causal_order[causal_order_types == "dgp"])
       current_df <- f(current_df)
 
     current_df
@@ -156,31 +159,24 @@ declare_design <- function(...,
   # This does causal order step by step; saving calculated estimands and estimates along the way
 
   design_function <- function() {
-    current_df <- process_population(causal_order[[1]])
+    current_df <- NULL
 
-    estimates <- estimands <- vector("list", length(causal_order))
+    results <- list(estimand=vector("list", length(causal_order)),
+                    estimator=vector("list", length(causal_order)))
 
-    if (length(causal_order) > 1) {
-      for (i in 2:length(causal_order)) {
-        df <- causal_order[[i]](current_df)
-        # if it's a dgp
-        if (causal_order_types[i] == "dgp") {
-          current_df <- df
-          df <- NULL
+    for (i in seq_along(causal_order)) {
+      function_type <- causal_order_types[[i]]
+      df <- causal_order[[i]](current_df)
 
-        } else if (causal_order_types[i] == "estimand") {
-          # if it's an estimand
-          estimands[[i]] <- df
-
-        } else if (causal_order_types[i] == "estimator") {
-          # if it's an estimator
-          estimates[[i]] <- df
-
-        }
+      # if it's a dgp
+      if (function_type == "dgp") {
+        current_df <- df
+      } else {
+        results[[function_type]][[i]] <- df
       }
     }
-    list(estimates_df = do.call(rbind, estimates),
-         estimands_df = do.call(rbind, estimands))
+    list(estimates_df = do.call(rbind.data.frame, results[["estimator"]]),
+         estimands_df = do.call(rbind.data.frame, results[["estimand"]]))
   }
 
 
