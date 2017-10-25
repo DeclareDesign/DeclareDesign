@@ -217,12 +217,7 @@ declare_design <- function(...,
   }
 
   get_added_variables <- function(last_df = NULL, current_df) {
-    current_names <- names(current_df)
-    if (is.null(last_df)) {
-      return(current_names)
-    } else {
-      return(current_names[!current_names %in% names(last_df)])
-    }
+    setdiff(names(current_df), names(last_df))
   }
 
   get_modified_variables <- function(last_df = NULL, current_df) {
