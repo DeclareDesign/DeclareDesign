@@ -100,7 +100,7 @@ declare_estimator <- function(...,
     label <- as.character(label)
   }
   coefficient_name <- substitute(coefficient_name)
-  if (!is.null(label)) {
+  if (!is.null(coefficient_name)) {
     coefficient_name <- as.character(coefficient_name)
   }
   estimand <- eval_tidy(quo(estimand), env = env)

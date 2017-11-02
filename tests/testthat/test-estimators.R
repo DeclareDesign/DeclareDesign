@@ -219,3 +219,17 @@ test_that("labels for estimates and estimands work", {
 
 })
 
+test_that("coefficient_name = NULL returns all coefficients", {
+  tst <- data.frame(x = runif(100), y = runif(100), wt = runif(100), clust = sample(1:10, 100, replace = TRUE))
+
+  est4 <- declare_estimator(
+      y ~ x + as.factor(clust),
+      cluster_variable_name = clust,
+      weights = wt,
+      model = lm_robust,
+      coefficient_name = NULL)
+
+  result <- est4(tst)
+
+  expect_gt(nrow(result), 0)
+})
