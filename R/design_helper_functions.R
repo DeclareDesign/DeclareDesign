@@ -1,5 +1,3 @@
-
-
 #' Explore your design
 #'
 #' @param design A design created by \code{\link{declare_design}}.
@@ -79,7 +77,7 @@ cite_design <- function(design, ...) {
 #' @export
 print.design <- function(x, ...) {
   print(summary(x))
-  invisible(summary(x))
+  # invisible(summary(x))
 }
 
 #' Text Summary of a Design
@@ -115,7 +113,7 @@ print.design <- function(x, ...) {
 #' summary(design)
 #' @export
 summary.design <- function(object, ...) {
-  summ <- object$summary_function()
+  summ <- summary_function(object$causal_order, object$causal_order_types)
   structure(
     list(
       variables_added = summ$variables_added,

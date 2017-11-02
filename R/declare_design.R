@@ -112,133 +112,110 @@ declare_design <- function(...,
 
   causal_order <- eval_tidy(dots)
 
-  function_types <- rep("", length(causal_order))
-
-  function_types[name_or_call == "name"] <-
-    sapply(causal_order[name_or_call == "name"], function(x) {
-      type <- attributes(eval(x))$type
-      return(ifelse(!is.null(type), type, "unknown"))
+  # Special case for initializing with a data.frame
+  if("data.frame" %in% class(causal_order[[1]])){
+    causal_order[[1]] <- local({
+      df <- causal_order[[1]]
+      structure(function(data) df, type='seed.data')
     })
-  function_types[name_or_call == "call" &
-                   function_types == ""] <- "unknown"
+  }
+
+
+  function_types <- lapply(causal_order, attr, "type")
 
   causal_order_types <- function_types
-  causal_order_types[!function_types %in% c("estimand", "estimator")] <-
-    "dgp"
+  causal_order_types[!function_types %in% c("estimand", "estimator")] <- "dgp"
 
-  estimand_labels <-
-    sapply(causal_order[function_types == "estimand"], function(x)
-      attributes(x)$label)
-  if (length(unique(estimand_labels)) != length(estimand_labels)) {
-    stop(
-      "You have estimands with identical labels. Please provide estimands with unique labels."
-    )
-  }
+  local({
 
-  estimator_labels <-
-    sapply(causal_order[function_types == "estimator"], function(x)
-      attributes(x)$label)
-  if (length(unique(estimator_labels)) != length(estimator_labels)) {
-    stop(
-      "You have estimators with identical labels. Please provide estimators with unique labels."
-    )
-  }
+    labels <- sapply(causal_order, attr, "label")
 
-  process_population <- function(population) {
-    ## the first part of the DGP must be a data.frame. Take what the user creates and turn it into a data.frame.
-    if (any(class(population) == "data.frame")) {
-      current_df <- population
-    } else if (class(population) == "call") {
-      try(current_df <- population, silent = TRUE)
-      if (!exists("current_df") |
-          !any(class(current_df) == "data.frame")) {
-        stop(
-          "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame."
+    check_unique_labels <- function(labels, types, what){
+      ss <- labels[types == what]
+      if(anyDuplicated(ss)) stop(
+        "You have ", what, "s with identical labels: ",
+        unique(ss[duplicated(ss)]),
+        "\nPlease provide ", what, "s with unique labels"
+
         )
-      }
-    } else if (class(population) == "function") {
-      try(current_df <- population(), silent = TRUE)
-      if (!exists("current_df") |
-          !any(class(current_df) == "data.frame")) {
-        stop(
-          "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame."
-        )
-      }
-    } else {
-      stop(
-        "The first element of your design must be a data.frame or a function that returns a data.frame."
-      )
+
     }
-    return(current_df)
-  }
+
+    check_unique_labels(labels, function_types, "estimand")
+    check_unique_labels(labels, function_types, "estimator")
+
+  })
 
   # this extracts the "DGP" parts of the causal order and runs them.
   data_function <- function() {
-    current_df <- process_population(causal_order[[1]])
+    current_df <- NULL
 
-    if (length(causal_order) > 1) {
-      for (i in 2:length(causal_order)) {
-        # if it's a dgp
-        if (causal_order_types[i] == "dgp") {
-          current_df <- causal_order[[i]](current_df)
-        }
-      }
-    }
-    return(current_df)
+    for(f in causal_order[causal_order_types == "dgp"])
+      current_df <- f(current_df)
+
+    current_df
   }
 
   # This does causal order step by step; saving calculated estimands and estimates along the way
 
   design_function <- function() {
-    current_df <- process_population(causal_order[[1]])
+    current_df <- NULL
 
-    estimates_df <- estimands_df <- data.frame()
+    results <- list(estimand=vector("list", length(causal_order)),
+                    estimator=vector("list", length(causal_order)))
 
-    if (length(causal_order) > 1) {
-      for (i in 2:length(causal_order)) {
-        # if it's a dgp
-        if (causal_order_types[i] == "dgp") {
-          current_df <- causal_order[[i]](current_df)
+    for (i in seq_along(causal_order)) {
+      function_type <- causal_order_types[[i]]
+      df <- causal_order[[i]](current_df)
 
-        } else if (causal_order_types[i] == "estimand") {
-          # if it's an estimand
-          estimands_df <-
-            rbind(estimands_df, causal_order[[i]](current_df))
-
-        } else if (causal_order_types[i] == "estimator") {
-          # if it's an estimator
-          estimates_df <-
-            rbind(estimates_df, causal_order[[i]](current_df))
-
-        }
+      # if it's a dgp
+      if (function_type == "dgp") {
+        current_df <- df
+      } else {
+        results[[function_type]][[i]] <- df
       }
     }
-    return(list(estimates_df = estimates_df, estimands_df = estimands_df))
+    list(estimates_df = do.call(rbind.data.frame, results[["estimator"]]),
+         estimands_df = do.call(rbind.data.frame, results[["estimand"]]))
   }
 
-  get_added_variables <- function(last_df = NULL, current_df) {
-    current_names <- names(current_df)
-    if (is.null(last_df)) {
-      return(current_names)
-    } else {
-      return(current_names[!current_names %in% names(last_df)])
-    }
-  }
 
-  get_modified_variables <- function(last_df = NULL, current_df) {
-    current_names <- names(current_df)
-    shared_names <-
-      current_names[current_names %in% names(last_df)]
-    variables_modified <- sapply(shared_names, function(var)
-      ifelse(nrow(last_df) != nrow(current_df), FALSE,
-      isTRUE(all.equal(last_df[, var], current_df[, var])) == FALSE))
-    if (any(variables_modified)) {
-      return(shared_names[variables_modified])
-    } else {
-      return(NULL)
-    }
-  }
+  return(structure(
+    list(
+      data_function = data_function,
+      design_function = design_function,
+      causal_order_expr = causal_order_expr,
+      causal_order_env = causal_order_env,
+      function_types = function_types,
+      causal_order_types = causal_order_types,
+      causal_order = causal_order,
+      title = title,
+      authors = authors,
+      description = description,
+      citation = citation,
+      timestamp = timestamp,
+      call = match.call()
+    ),
+    class = "design"
+  ))
 
+}
+
+#TODO move to utils
+get_added_variables <- function(last_df = NULL, current_df) {
+  setdiff(names(current_df), names(last_df))
+}
+
+get_modified_variables <- function(last_df = NULL, current_df) {
+  is_modified <- function(j) !isTRUE(all.equal(last_df[[j]], current_df[[j]]))
+  shared <- intersect(names(current_df), names(last_df))
+
+  Filter(is_modified, shared)
+}
+
+
+
+summary_function <- function(causal_order, causal_order_types) {
   get_formula_from_step <- function(step){
     call <- attributes(step)$call
     type <- attributes(step)$type
@@ -256,103 +233,110 @@ declare_design <- function(...,
     }
   }
 
-  summary_function <- function() {
-    variables_added <- variables_modified <-
-      quantities_added <- quantities_modified <-
-      N <-
-      vector("list", length(causal_order))
 
-    formulae <- lapply(causal_order, get_formula_from_step)
+  variables_added <- variables_modified <-
+    quantities_added <- quantities_modified <-
+    N <-
+    vector("list", length(causal_order))
 
-    current_df <- process_population(causal_order[[1]])
+  formulae <- lapply(causal_order, get_formula_from_step)
 
-    variables_added[[1]] <- lapply(current_df, describe_variable)
+  current_df <- process_population(causal_order[[1]])
 
-    N[[1]] <- paste0("N = ", nrow(current_df))
+  var_desc <- variables_added[[1]] <- lapply(current_df, describe_variable)
 
-    estimates_df <- estimands_df <- data.frame()
+  N[[1]] <- paste0("N = ", nrow(current_df))
 
-    last_df <- current_df
+  estimates_df <- estimands_df <- data.frame()
 
-    if (length(causal_order) > 1) {
-      for (i in 2:length(causal_order)) {
-        # if it's a dgp
-        if (causal_order_types[i] == "dgp") {
-          current_df <- causal_order[[i]](last_df)
+  last_df <- current_df
 
-          variables_added_names <-
-            get_added_variables(last_df = last_df, current_df = current_df)
+  if (length(causal_order) > 1) {
+    for (i in 2:length(causal_order)) {
+      # if it's a dgp
+      if (causal_order_types[i] == "dgp") {
+        current_df <- causal_order[[i]](last_df)
 
-          variables_modified_names <-
-            get_modified_variables(last_df = last_df, current_df = current_df)
+        variables_added_names <-
+          get_added_variables(last_df = last_df, current_df = current_df)
 
-          if (!is.null(variables_added_names)) {
-            variables_added[[i]] <-
-              lapply(current_df[, variables_added_names, drop = FALSE],
-                     describe_variable)
-          }
+        variables_modified_names <-
+          get_modified_variables(last_df = last_df, current_df = current_df)
 
-          if (!is.null(variables_modified_names)) {
-            variables_modified[[i]] <-
-              lapply(variables_modified_names,
-                     function(var) list(before = describe_variable(last_df[, var, drop = FALSE]),
-                                      after = describe_variable(current_df[, var, drop = FALSE])))
-            names(variables_modified[[i]]) <- variables_modified_names
-          }
+        if (!is.null(variables_added_names)) {
+          variables_added[[i]] <-
+            lapply(current_df[, variables_added_names, drop = FALSE],
+                   describe_variable)
+          var_desc[variables_added_names] <- variables_added[[i]]
+        }
 
-          if (!is.null(attributes(causal_order[[i]])$summary_function)) {
-            quantities_added[[i]] <-
-              capture.output(attributes(causal_order[[i]])$summary_function(last_df))
-          }
-
-          if (nrow(current_df) != nrow(last_df)) {
-            N[[i]] <- paste0("N = ", nrow(current_df), " (", abs(nrow(current_df) - nrow(last_df)),
-                             ifelse(nrow(current_df) > nrow(last_df), " added", " subtracted"), ")")
-          }
-
-          last_df <- current_df
-
-        } else if (causal_order_types[i] == "estimand") {
-          quantities_added[[i]] <- causal_order[[i]](current_df)
-
-        } else if (causal_order_types[i] == "estimator") {
-          # if it's an estimator
-          estimates_df <-
-            rbind(estimates_df, causal_order[[i]](current_df))
-
-          quantities_added[[i]] <- causal_order[[i]](current_df)
+        if (!is.null(variables_modified_names)) {
+          v_mod <- lapply(current_df[, variables_modified_names, drop=FALSE],
+                          describe_variable)
+          variables_modified[[i]] <- mapply(list,
+                                            before=var_desc[variables_modified_names],
+                                            after=v_mod,
+                                            SIMPLIFY = FALSE, USE.NAMES = TRUE)
+          var_desc[variables_modified_names] <- v_mod
 
         }
+
+        # NJF 10/25 Dead Feature???
+        # if (!is.null(attributes(causal_order[[i]])$summary_function)) {
+        #   quantities_added[[i]] <-
+        #     capture.output(attributes(causal_order[[i]])$summary_function(last_df))
+        # }
+
+        N[i] <- local({
+          c_row <- nrow(current_df)
+          l_row <- nrow(last_df)
+          if(c_row == l_row) list(NULL) else
+            sprintf("N = %d (%d %s)", c_row, abs(c_row - l_row),
+                    ifelse(c_row > l_row, "added", "subtracted"))
+        })
+
+        last_df <- current_df
+
+      } else if (causal_order_types[i] %in% c("estimand", "estimator")) {
+        quantities_added[[i]] <- causal_order[[i]](current_df)
       }
     }
-    structure(
-      list(variables_added = variables_added,
-           quantities_added = quantities_added,
-           variables_modified = variables_modified,
-           N = N,
-           formulae = formulae),
-      class = "design_summary"
+  }
+  structure(
+    list(variables_added = variables_added,
+         quantities_added = quantities_added,
+         variables_modified = variables_modified,
+         N = N,
+         formulae = formulae),
+    class = "design_summary"
+  )
+}
+
+
+process_population <- function(population) {
+  ## the first part of the DGP must be a data.frame. Take what the user creates and turn it into a data.frame.
+  if ("data.frame" %in% class(population)) {
+    current_df <- population
+  # } else if (class(population) == "call") {
+  #   tryCatch(current_df <- population, error=function(e)stop("The first element of your design must be a data.frame or a function that returns a data.frame. The population call provided failed:", e))
+  #   if (!"data.frame" %in% class(current_df)) {
+  #     stop(
+  #       "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a called that did not return a data.frame."
+  #     )
+  #   }
+  } else if (class(population) == "function") {
+    tryCatch(current_df <- population(), error=function(e)stop("The first element of your design must be a data.frame or a function that returns a data.frame. The population function provided failed:", e))
+    if (!exists("current_df") |
+        !any(class(current_df) == "data.frame")) {
+      stop(
+        "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame."
+      )
+    }
+  } else {
+    stop(
+      "The first element of your design must be a data.frame or a function that returns a data.frame."
     )
   }
-
-  return(structure(
-    list(
-      data_function = data_function,
-      design_function = design_function,
-      summary_function = summary_function,
-      causal_order_expr = causal_order_expr,
-      causal_order_env = causal_order_env,
-      function_types = function_types,
-      causal_order_types = causal_order_types,
-      title = title,
-      authors = authors,
-      description = description,
-      citation = citation,
-      timestamp = timestamp,
-      call = match.call()
-    ),
-    class = "design"
-  ))
-
+  return(current_df)
 }
 

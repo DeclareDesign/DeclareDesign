@@ -161,25 +161,36 @@ diagnose_design_single_design <-
 
     results_list <- foreach(i = seq_len(sims)) %dorng% design$design_function()
 
-    estimates_list <- lapply(results_list, function(x) x$estimates_df)
-    estimates_df <- do.call(rbind, estimates_list)
-    estimates_df <- cbind(sim_ID = rep(1:sims, sapply(estimates_list, nrow)), estimates_df)
+    results2x <- function(results_list, what) {
+      subresult <- lapply(results_list, `[[`, what)
+      df <- do.call(rbind.data.frame, subresult)
+      if(nrow(df) == 0) return(df)
 
-    estimands_list <- lapply(results_list, function(x) x$estimands_df)
-    estimands_df <- do.call(rbind, estimands_list)
-    estimands_df <- cbind(sim_ID = rep(1:sims, sapply(estimands_list, nrow)), estimands_df)
+      df <- cbind(sim_ID = rep(1:sims, sapply(subresult, nrow)), df)
+    }
 
+
+    # estimates_list <- lapply(results_list, function(x) x$estimates_df)
+    # estimates_df <- do.call(rbind, estimates_list)
+    # estimates_df <- cbind(sim_ID = rep(1:sims, sapply(estimates_list, nrow)), estimates_df)
+    #
+    # estimands_list <- lapply(results_list, function(x) x$estimands_df)
+    # estimands_df <- do.call(rbind, estimands_list)
+    # estimands_df <- cbind(sim_ID = rep(1:sims, sapply(estimands_list, nrow)), estimands_df)
+
+    estimates_df <- results2x(results_list, "estimates_df")
+    estimands_df <- results2x(results_list, "estimands_df")
     if (nrow(estimates_df) == 0 & nrow(estimands_df) == 0) {
       stop("No estimates or estimands were declared, so diagnose_design cannot calculate diagnosands.", call. = FALSE)
     }
 
-    if (!any(colnames(estimates_df) == "estimand_label" & nrow(estimates_df) > 0)) {
+    if (!"estimand_label" %in% colnames(estimates_df) && nrow(estimates_df) > 0) {
       estimates_df$estimand_label <- "no estimand specified"
     }
 
-    if (nrow(estimands_df) == 0 & nrow(estimates_df) > 0) {
+    if (nrow(estimands_df) == 0 && nrow(estimates_df) > 0) {
       simulations_df <- estimates_df
-    } else if (nrow(estimands_df) > 0 & nrow(estimates_df) == 0) {
+    } else if (nrow(estimands_df) > 0 && nrow(estimates_df) == 0) {
       simulations_df <- estimands_df
     } else {
       simulations_df <-
