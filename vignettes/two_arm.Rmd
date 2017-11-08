@@ -13,7 +13,7 @@ vignette: >
 ```{r MIDA, echo = FALSE}
 library(DeclareDesign)
 
-two_arm_template <- function(N = 500, n = 250, m = 100, tau = 1, sigma = 3) {
+two_arm_template <- function(N = 500, n = 250, m = 100, tau = 1, sigma = 1) {
 	population <- declare_population(N = N, noise = rnorm(N))
 	potential_outcomes <- declare_potential_outcomes(
 		Y_Z_0 = noise, 
@@ -82,13 +82,13 @@ two_arm <- declare_design(population, potential_outcomes, sampling,
 ### Takeaways 
 
 ```{r,eval = FALSE, echo = FALSE}
-diagnosis <- diagnose_design(two_arm, sims = 3000, bootstrap_sims = 1000)
+diagnosis <- diagnose_design(two_arm, sims = 10000, bootstrap_sims = 1000)
 saveRDS(diagnosis,"two_arm_diagnosis.RDS")
 ```
 
 
 ```{r,eval = FALSE, echo = TRUE}
-diagnosis <- diagnose_design(two_arm, sims = 3000, bootstrap_sims = 1000)
+diagnosis <- diagnose_design(two_arm, sims = 10000, bootstrap_sims = 1000)
 ```
 
 ```{r,echo = FALSE}
