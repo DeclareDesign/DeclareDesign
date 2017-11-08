@@ -120,11 +120,11 @@
     </tr>
     <tr>
       <th>model</th>
-      <td><p>A model function, e.g. lm or glm. If model is specified, the estimator_function argument is ignored.</p></td>
+      <td><p>A model function, e.g. lm or glm. If model is specified, the estimator_function argument is ignored.By default, the model is the <code>difference_in_means</code> function from the estimatr package.</p></td>
     </tr>
     <tr>
       <th>estimator_function</th>
-      <td><p>A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label. By default, the estimator function is the <code>difference_in_means</code> function from the estimatr package.</p></td>
+      <td><p>A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.</p></td>
     </tr>
     <tr>
       <th>coefficient_name</th>
@@ -143,6 +143,12 @@
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>a function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimator and associated statistics.</p>
+    
+    <h2 class="hasAnchor" id="custom-estimators"><a class="anchor" href="#custom-estimators"></a>Custom Estimators</h2>
+
+    
+    <p><code>estimator_functions</code> implementations should be tidy (accept and return a data.frame)
+    <code>model</code> implementations should at the miminum provide S3 methods for <code>summary</code> and <code>confint</code>.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
@@ -173,11 +179,12 @@
 
 <span class='no'>my_estimator_lm</span> <span class='kw'>&lt;-</span>
  <span class='fu'>declare_estimator</span>(<span class='no'>Y</span> ~ <span class='no'>Z</span>,
-                   <span class='kw'>estimator_function</span> <span class='kw'>=</span> <span class='kw'>estimatr</span><span class='kw'>::</span><span class='no'>lm_robust</span>,
+                   <span class='kw'>model</span> <span class='kw'>=</span> <span class='kw'>estimatr</span><span class='kw'>::</span><span class='no'>lm_robust</span>,
                    <span class='kw'>coefficient_name</span> <span class='kw'>=</span> <span class='st'>"Z"</span>,
                    <span class='kw'>estimand</span> <span class='kw'>=</span> <span class='no'>my_estimand</span>)
 
-<span class='fu'>my_estimator_lm</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; <span class='error'>Error in as.data.frame.default(x[[i]], optional = TRUE, stringsAsFactors = stringsAsFactors): cannot coerce class ""lm_robust"" to a data.frame</span></div><div class='input'>
+<span class='fu'>my_estimator_lm</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt;   estimator_label coefficient_name  est se p ci_lower ci_upper estimand_label
+#&gt; 1    my_estimator                Z 0.25  0 0     0.25     0.25            ATE</div><div class='input'>
 <span class='co'># Use R's built-in lm function via model</span>
 
 <span class='no'>estimator_lm</span> <span class='kw'>&lt;-</span> <span class='fu'>declare_estimator</span>(<span class='no'>Y</span> ~ <span class='no'>Z</span>, <span class='kw'>model</span> <span class='kw'>=</span> <span class='no'>lm</span>)
@@ -213,6 +220,8 @@
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
+
+      <li><a href="#custom-estimators">Custom Estimators</a></li>
       
       <li><a href="#examples">Examples</a></li>
     </ul>

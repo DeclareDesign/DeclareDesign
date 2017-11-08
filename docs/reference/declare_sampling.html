@@ -142,21 +142,21 @@
 <span class='no'>my_sampling</span> <span class='kw'>&lt;-</span> <span class='fu'>declare_sampling</span>(<span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>50</span>)
 <span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'>my_sampling</span>(<span class='no'>df</span>)
 <span class='fu'>dim</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; [1] 50  3</div><div class='input'><span class='fu'>head</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt;     ID female S_inclusion_prob
+#&gt; 1  001      0              0.5
 #&gt; 2  002      1              0.5
-#&gt; 4  004      0              0.5
-#&gt; 7  007      1              0.5
-#&gt; 9  009      0              0.5
-#&gt; 11 011      1              0.5
-#&gt; 12 012      0              0.5</div><div class='input'>
+#&gt; 5  005      0              0.5
+#&gt; 6  006      0              0.5
+#&gt; 10 010      1              0.5
+#&gt; 13 013      1              0.5</div><div class='input'>
 <span class='co'># Stratified random sampling</span>
 <span class='no'>my_stratified_sampling</span> <span class='kw'>&lt;-</span> <span class='fu'>declare_sampling</span>(<span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='no'>female</span>)
 <span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'>my_population</span>()
 <span class='fu'>table</span>(<span class='no'>df</span>$<span class='no'>female</span>)</div><div class='output co'>#&gt; 
 #&gt;  0  1 
-#&gt; 54 46 </div><div class='input'><span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'>my_stratified_sampling</span>(<span class='no'>df</span>)
+#&gt; 51 49 </div><div class='input'><span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'>my_stratified_sampling</span>(<span class='no'>df</span>)
 <span class='fu'>table</span>(<span class='no'>df</span>$<span class='no'>female</span>)</div><div class='output co'>#&gt; 
 #&gt;  0  1 
-#&gt; 27 23 </div><div class='input'>
+#&gt; 26 25 </div><div class='input'>
 <span class='co'># Custom random sampling functions</span>
 
 <span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'>my_population</span>()
@@ -172,13 +172,13 @@
    <span class='kw'>sampling_function</span> <span class='kw'>=</span> <span class='no'>my_sampling_function</span>)
 
 <span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'>my_sampling_custom</span>(<span class='no'>df</span>)
-<span class='fu'>dim</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; [1] 46  3</div><div class='input'><span class='fu'>head</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt;     ID female S
-#&gt; 4  004      0 1
-#&gt; 6  006      1 1
+<span class='fu'>dim</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; [1] 49  3</div><div class='input'><span class='fu'>head</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt;     ID female S
 #&gt; 7  007      1 1
-#&gt; 9  009      1 1
+#&gt; 8  008      1 1
 #&gt; 10 010      1 1
-#&gt; 14 014      0 1</div></pre>
+#&gt; 11 011      1 1
+#&gt; 14 014      0 1
+#&gt; 16 016      0 1</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

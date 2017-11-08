@@ -187,51 +187,77 @@
 #&gt;          0      500
 #&gt; 
 #&gt; Added variable: noise 
-#&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -2.90  -0.04 -0.06 3.59 0.95         0      500
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.42  -0.02 0.03 2.84 0.95         0      500
 #&gt; 
 #&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
 #&gt; 
 #&gt; Added variable: Y_Z_0 
-#&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -2.90  -0.04 -0.06 3.59 0.95         0      500
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.42  -0.02 0.03 2.84 0.95         0      500
 #&gt; 
 #&gt; Added variable: Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -4.16   1.96 1.98 9.30 2.28         0      500
+#&gt;  -5.51   2.08 2.05 9.77 2.19         0      500
 #&gt; 
 #&gt; Step 3 (sampling): my_sampling -------------------------------------------------
 #&gt; 
 #&gt; N = 250 (250 subtracted) 
-#&gt; 
-#&gt; Random sampling procedure: Complete random sampling 
-#&gt; Number of units: 500 
-#&gt; The inclusion probabilities are constant across units.
 #&gt; 
 #&gt; Added variable: S_inclusion_prob 
 #&gt;              0.5
 #&gt;   Frequency  250
 #&gt;  Proportion 1.00
 #&gt; 
+#&gt; Altered variable: ID 
+#&gt;   Before: 
+#&gt;  N_missing N_unique
+#&gt;          0      500
+#&gt; 
+#&gt;   After:
+#&gt;  N_missing N_unique
+#&gt;          0      250
+#&gt; 
+#&gt; Altered variable: noise 
+#&gt;   Before: 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.42  -0.02 0.03 2.84 0.95         0      500
+#&gt; 
+#&gt;   After:
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.27   0.09 0.14 2.84 0.94         0      250
+#&gt; 
+#&gt; Altered variable: Y_Z_0 
+#&gt;   Before: 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.42  -0.02 0.03 2.84 0.95         0      500
+#&gt; 
+#&gt;   After:
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.27   0.09 0.14 2.84 0.94         0      250
+#&gt; 
+#&gt; Altered variable: Y_Z_1 
+#&gt;   Before: 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -5.51   2.08 2.05 9.77 2.19         0      500
+#&gt; 
+#&gt;   After:
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -4.10   2.03 2.13 8.85 2.21         0      250
+#&gt; 
 #&gt; Step 4 (estimand): my_estimand -------------------------------------------------
 #&gt; 
 #&gt; A single draw of the estimand:
 #&gt;  estimand_label estimand
-#&gt;             ATE 2.088682
+#&gt;             ATE 1.988531
 #&gt; 
-#&gt; Step 5 (custom data modification): dplyr::mutate(noise_sq = noise^2) -----------
+#&gt; Step 5 (declare step): dplyr::mutate(noise_sq = noise^2) -----------------------
 #&gt; 
 #&gt; Added variable: noise_sq 
 #&gt;   min median mean  max   sd N_missing N_unique
-#&gt;  0.00   0.35 0.84 7.72 1.18         0      250
+#&gt;  0.00   0.42 0.90 8.06 1.26         0      250
 #&gt; 
 #&gt; Step 6 (assignment): my_assignment ---------------------------------------------
-#&gt; 
-#&gt; Random assignment procedure: Complete random assignment 
-#&gt; Number of units: 250 
-#&gt; Number of treatment arms: 2 
-#&gt; The possible treatment categories are 0 and 1.
-#&gt; The probabilities of assignment are constant across units.
 #&gt; 
 #&gt; Added variable: Z 
 #&gt;                0    1
@@ -247,17 +273,17 @@
 #&gt; 
 #&gt; Added variable: Y 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -2.78  -0.01 0.09 4.92 1.18         0      250
+#&gt;  -4.10   0.10 0.32 6.68 1.36         0      250
 #&gt; 
 #&gt; Step 8 (estimator): my_estimator -----------------------------------------------
 #&gt; 
 #&gt; Formula: Y ~ Z 
 #&gt; 
 #&gt; A single draw of the estimator:
-#&gt;  estimator_label coefficient_name      est       se            p ci_lower
-#&gt;     my_estimator                Z 1.959293 0.340372 4.867716e-06 1.259174
+#&gt;  estimator_label coefficient_name      est       se            p  ci_lower
+#&gt;     my_estimator                Z 2.050421 0.532321 0.0007364653 0.9533854
 #&gt;  ci_upper estimand_label
-#&gt;  2.659413            ATE
+#&gt;  3.147456            ATE
 #&gt; </div><div class='input'>
 <span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='post_design.html'>draw_data</a></span>(<span class='no'>design</span>)
 

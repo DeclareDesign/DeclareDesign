@@ -85,7 +85,7 @@ my_estimator_dim(smp)
 ## ------------------------------------------------------------------------
 my_estimator_lm <- 
   declare_estimator(Y ~ Z, 
-                    estimator_function = estimatr::lm_robust, 
+                    model = lm_robust, 
                     coefficient_name = "Z", 
                     estimand = my_estimand)
 
