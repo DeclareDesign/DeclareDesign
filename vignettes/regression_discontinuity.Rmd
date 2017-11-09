@@ -3,6 +3,7 @@ title: "Regression Discontinuity"
 author: "Graeme Blair, Jasper Cooper, Alexander Coppock, and Macartan Humphreys"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
+bibliography: bib.bib
 vignette: >
   %\VignetteIndexEntry{Regression Discontinuity}
   %\VignetteEngine{knitr::rmarkdown}
@@ -226,6 +227,4 @@ Geographic regression discontinuity designs use distance to a border as the runn
 4. Redefine the population function so that units with higher potential outcome are more likely to locate just above the cutoff than below it. Assess whether and how this affects the bias of the design.
 
 
-
-
-
+## References {-}
