@@ -54,20 +54,8 @@
         <li>
   <a href="../articles/DeclareDesign.html">Getting Started</a>
 </li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Design Library
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/two_arm.html">Two Arm Experiment</a>
-    </li>
-    <li>
-      <a href="../articles/regression_discontinuity.html">Regression Discontinuity</a>
-    </li>
-  </ul>
+<li>
+  <a href="../articles/design_library.html">Design Library</a>
 </li>
 <li>
   <a href="../reference/">Reference</a>
@@ -184,12 +172,10 @@
  <span class='no'>my_estimand</span>, <span class='no'>my_assignment</span>, <span class='no'>reveal_outcomes</span>
 )
 
-<span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='post_design.html'>draw_data</a></span>(<span class='no'>design</span>)
-
+<span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='post_design.html'>draw_data</a></span>(<span class='no'>design</span>)</div><div class='output co'>#&gt; <span class='error'>Error: could not find function "f"</span></div><div class='input'>
 <span class='no'>my_estimator_dim</span> <span class='kw'>&lt;-</span> <span class='fu'>declare_estimator</span>(<span class='no'>Y</span> ~ <span class='no'>Z</span>, <span class='kw'>estimand</span> <span class='kw'>=</span> <span class='no'>my_estimand</span>)
 
-<span class='fu'>my_estimator_dim</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt;   estimator_label coefficient_name  est se p ci_lower ci_upper estimand_label
-#&gt; 1    my_estimator                Z 0.25  0 0     0.25     0.25            ATE</div><div class='input'>
+<span class='fu'>my_estimator_dim</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; <span class='error'>Error in as.data.frame.default(data, optional = TRUE): cannot coerce class ""function"" to a data.frame</span></div><div class='input'>
 <span class='co'># Use the linear regression (lm) function</span>
 <span class='co'># with robust standard errors from the estimatr package</span>
 
@@ -199,8 +185,7 @@
                    <span class='kw'>coefficient_name</span> <span class='kw'>=</span> <span class='st'>"Z"</span>,
                    <span class='kw'>estimand</span> <span class='kw'>=</span> <span class='no'>my_estimand</span>)
 
-<span class='fu'>my_estimator_lm</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt;   estimator_label coefficient_name  est se p ci_lower ci_upper estimand_label
-#&gt; 1    my_estimator                Z 0.25  0 0     0.25     0.25            ATE</div><div class='input'>
+<span class='fu'>my_estimator_lm</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; <span class='error'>Error in as.data.frame.default(data, optional = TRUE): cannot coerce class ""function"" to a data.frame</span></div><div class='input'>
 <span class='co'># Use R's built-in lm function via model</span>
 
 <span class='no'>estimator_lm</span> <span class='kw'>&lt;-</span> <span class='fu'>declare_estimator</span>(<span class='no'>Y</span> ~ <span class='no'>Z</span>, <span class='kw'>model</span> <span class='kw'>=</span> <span class='no'>lm</span>)
@@ -226,8 +211,7 @@
                     <span class='kw'>estimator_function</span> <span class='kw'>=</span> <span class='no'>my_estimator_function</span>,
                     <span class='kw'>estimand</span> <span class='kw'>=</span> <span class='no'>my_estimand</span>)
 
-<span class='fu'>my_estimator_custom</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt;   estimator_label   est estimand_label
-#&gt; 1    my_estimator 0.125            ATE</div><div class='input'>
+<span class='fu'>my_estimator_custom</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; <span class='error'>Error in eval(substitute(expr), data, enclos = parent.frame()): invalid 'envir' argument of type 'closure'</span></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

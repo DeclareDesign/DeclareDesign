@@ -54,20 +54,8 @@
         <li>
   <a href="../articles/DeclareDesign.html">Getting Started</a>
 </li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Design Library
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/two_arm.html">Two Arm Experiment</a>
-    </li>
-    <li>
-      <a href="../articles/regression_discontinuity.html">Regression Discontinuity</a>
-    </li>
-  </ul>
+<li>
+  <a href="../articles/design_library.html">Design Library</a>
 </li>
 <li>
   <a href="../reference/">Reference</a>
@@ -172,49 +160,7 @@
                          <span class='no'>my_assignment</span>,
                          <span class='no'>reveal_outcomes</span>)
 
-<span class='no'>design</span></div><div class='output co'>#&gt; 
-#&gt; Design Summary
-#&gt; 
-#&gt; Step 1 (population): my_population ---------------------------------------------
-#&gt; 
-#&gt; N = 100 
-#&gt; 
-#&gt; Added variable: ID 
-#&gt;  N_missing N_unique
-#&gt;          0      100
-#&gt; 
-#&gt; Added variable: noise 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.36   0.07 0.00 3.36 1.11         0      100
-#&gt; 
-#&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
-#&gt; 
-#&gt; Added variable: Y_Z_0 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.36   0.07 0.00 3.36 1.11         0      100
-#&gt; 
-#&gt; Added variable: Y_Z_1 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.37   1.67 1.81 7.17 2.32         0      100
-#&gt; 
-#&gt; Step 3 (assignment): my_assignment ---------------------------------------------
-#&gt; 
-#&gt; Added variable: Z 
-#&gt;                0    1
-#&gt;   Frequency   50   50
-#&gt;  Proportion 0.50 0.50
-#&gt; 
-#&gt; Added variable: Z_cond_prob 
-#&gt;              0.5
-#&gt;   Frequency  100
-#&gt;  Proportion 1.00
-#&gt; 
-#&gt; Step 4 (reveal outcomes): reveal_outcomes --------------------------------------
-#&gt; 
-#&gt; Added variable: Y 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.37   0.45 0.97 7.17 2.02         0      100
-#&gt; </div></pre>
+<span class='no'>design</span></div><div class='output co'>#&gt; <span class='error'>Error in if (!is.null(call) &amp; !is.null(type) &amp; type != "declare_step") {    args &lt;- lang_args(call)    has_formula &lt;- sapply(args, is_formula)    formulae &lt;- args[has_formula]    if (length(formulae) == 1) {        return(formulae[[1]])    }    else {        return(NULL)    }} else {    return(NULL)}: argument is of length zero</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
