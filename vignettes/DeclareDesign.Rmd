@@ -1,6 +1,5 @@
 ---
 title: "Diagnosing Research Designs with DeclareDesign"
-author: "Graeme Blair, Jasper Cooper, Alexander Coppock, and Macartan Humphreys"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Diagnosing Research Designs with DeclareDesign}
