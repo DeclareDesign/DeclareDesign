@@ -1,7 +1,6 @@
 ---
 title: "Two-Arm Experiment"
 author: "Graeme Blair, Jasper Cooper, Alexander Coppock, and Macartan Humphreys"
-date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 bibliography: bib.bib
 vignette: >
