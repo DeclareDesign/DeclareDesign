@@ -3,6 +3,12 @@ navbar:
   left:
   - text: "Getting Started"
     href: articles/DeclareDesign.html
+  - text: "Design Library"
+    menu:
+      - text: Two Arm Experiment
+        href: articles/two_arm.html
+      - text: Regression Discontinuity
+        href: articles/regression_discontinuity.html
   - text: Reference
     href: reference/
   - text: "Packages"

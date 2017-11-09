@@ -31,6 +31,21 @@
 <li>
   <a href="../articles/DeclareDesign.html">Getting Started</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Design Library
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+<li>
+      <a href="../articles/two_arm.html">Two Arm Experiment</a>
+    </li>
+    <li>
+      <a href="../articles/regression_discontinuity.html">Regression Discontinuity</a>
+    </li>
+  </ul>
+</li>
 <li>
   <a href="../reference/">Reference</a>
 </li>
@@ -81,7 +96,7 @@
       <h1>Regression Discontinuity</h1>
                         <h4 class="author">Graeme Blair, Jasper Cooper, Alexander Coppock, and Macartan Humphreys</h4>
             
-            <h4 class="date">2017-11-08</h4>
+            <h4 class="date">2017-11-09</h4>
           </div>
 
     
@@ -177,26 +192,53 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <td align="right">0.002</td>
 </tr></tbody>
 </table>
-<p>We highlight three takeaways. First, the power of this design is very low: with 1,000 units we do not achieve even 10% statistical power. However, our estimates of the uncertainty are not too wide: the coverage probability indicates that our confidence intervals indeed contain the estimand 95% of the time as they should. Our answer strategy is highly uncertain because the fourth-order polynomial specification in regression model gives weights to the data that greatly increase the variance of the estimator (<span class="citation">@gelman2017high</span>). In the exercises we explore alternative answer strategies that perform better.</p>
-<p>Second, the design is biased because polynomial approximations of the average effect at exactly the point of the threshold will be inaccurate in small samples (<span class="citation">@sekhontitiunik2017</span>), especially as units farther away from the cutoff are incorporated into the answer strategy. We know that the estimated bias is not due to simulation error by examining the bootstrapped standard error of the bias estimates.</p>
+<p>We highlight three takeaways. First, the power of this design is very low: with 1,000 units we do not achieve even 10% statistical power. However, our estimates of the uncertainty are not too wide: the coverage probability indicates that our confidence intervals indeed contain the estimand 95% of the time as they should. Our answer strategy is highly uncertain because the fourth-order polynomial specification in regression model gives weights to the data that greatly increase the variance of the estimator (<span class="citation">Gelman and Imbens (2017)</span>). In the exercises we explore alternative answer strategies that perform better.</p>
+<p>Second, the design is biased because polynomial approximations of the average effect at exactly the point of the threshold will be inaccurate in small samples (<span class="citation">Sekhon and Titiunik (2017)</span>), especially as units farther away from the cutoff are incorporated into the answer strategy. We know that the estimated bias is not due to simulation error by examining the bootstrapped standard error of the bias estimates.</p>
 <p>Finally, from the figure, we can see how poorly the average effect at the threshold approximates the average effect for all units. The average treatment effect among the treated (to the right of the threshold in the figure) is negative, whereas at the threshold it is positive. This clarifies that the estimand of the regression discontinuity design, the difference at the cutoff, is only relevant for a small – and possibly empty – set of units very close to the cutoff.</p>
 </div>
 <div id="further-reading" class="section level3">
 <h3 class="hasAnchor">
 <a href="#further-reading" class="anchor"></a>Further Reading</h3>
-<p>Since its rediscovery by social scientists in the late 1990s, the regression discontinuity design has been widely used to study diverse causal effects such as: prison on recidivism (<span class="citation">@Ojmarrh2017</span>); China’s one child policy on human capital (<span class="citation">@qin2017</span>); eligibility for World Bank loans on political liberalization (<span class="citation">@carnegie2017international</span>); and anti-discrimination laws on minority employment (<span class="citation">@hahn1999evaluating</span>).</p>
+<p>Since its rediscovery by social scientists in the late 1990s, the regression discontinuity design has been widely used to study diverse causal effects such as: prison on recidivism (<span class="citation">Mitchell et al. (2017)</span>); China’s one child policy on human capital (<span class="citation">Qin, Zhuang, and Yang (2017)</span>); eligibility for World Bank loans on political liberalization (<span class="citation">Carnegie and Samii (2017)</span>); and anti-discrimination laws on minority employment (<span class="citation">Hahn, Todd, and Van der Klaauw (1999)</span>).</p>
 <p>We’ve discussed a “sharp” regression discontinuity design in which all units above the threshold were treated and all units below were untreated. In fuzzy regression discontinuity designs, some units above the cutoff remain untreated or some units below take treatment. This setting is analogous to experiments that experience noncompliance and may require instrumental variables approaches to the answer strategy (see <strong>Compliance is a Potential Outcome</strong>).</p>
-<p>Geographic regression discontinuity designs use distance to a border as the running variable: units on one side of the border are treated and units on the other are untreated. <span class="citation">@keele2016natural</span> use such a design to study whether voters are more likely to turn out when they have the opportunity to vote directly on legislation on so-called ballot initiatives. A complication of this design is how to measure distance to the border in two dimensions.</p>
+<p>Geographic regression discontinuity designs use distance to a border as the running variable: units on one side of the border are treated and units on the other are untreated. <span class="citation">Keele and Titiunik (2016)</span> use such a design to study whether voters are more likely to turn out when they have the opportunity to vote directly on legislation on so-called ballot initiatives. A complication of this design is how to measure distance to the border in two dimensions.</p>
 </div>
 <div id="exercises" class="section level3">
 <h3 class="hasAnchor">
 <a href="#exercises" class="anchor"></a>Exercises</h3>
 <ol style="list-style-type: decimal">
-<li><p><span class="citation">@gelman2017high</span> point out that higher order polynomial regression specifications lead to extreme regression weights. One approach to obtaining better estimates is to select a bandwidth, <span class="math inline">\(h\)</span>, around the cutoff, and run a linear regression. Declare a sampling procedure that subsets the data to a bandwidth around the threshold, as well as a first order linear regression specification, and analyze how the power, bias, RMSE, and coverage of the design vary as a function of the bandwidth.</p></li>
+<li><p><span class="citation">Gelman and Imbens (2017)</span> point out that higher order polynomial regression specifications lead to extreme regression weights. One approach to obtaining better estimates is to select a bandwidth, <span class="math inline">\(h\)</span>, around the cutoff, and run a linear regression. Declare a sampling procedure that subsets the data to a bandwidth around the threshold, as well as a first order linear regression specification, and analyze how the power, bias, RMSE, and coverage of the design vary as a function of the bandwidth.</p></li>
 <li><p>The <code>rdrobust</code> estimator in the <code>rdrobust</code> package implements a local polynomial estimator that automatically selects a bandwidth for the RD analysis and bias-corrected confidence intervals. Declare another estimator using the <code>rdrobust</code> function and add it to the design. How does the coverage and bias of this estimator compare to the regression approaches declared above?</p></li>
 <li><p>Reduce the number of polynomial terms of the the <code>treatment()</code> and <code>control()</code> functions and assess how the bias of the design changes as the potential outcomes become increasingly linear as a function of the running variable.</p></li>
 <li><p>Redefine the population function so that units with higher potential outcome are more likely to locate just above the cutoff than below it. Assess whether and how this affects the bias of the design.</p></li>
 </ol>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2 class="hasAnchor">
+<a href="#references" class="anchor"></a>References</h2>
+<div id="refs" class="references">
+<div id="ref-carnegie2017international">
+<p>Carnegie, Allison, and Cyrus Samii. 2017. “International Institutions and Political Liberalization: Evidence from the World Bank Loans Program.” <em>British Journal of Political Science</em>. Cambridge University Press, 1–23.</p>
+</div>
+<div id="ref-gelman2017high">
+<p>Gelman, Andrew, and Guido Imbens. 2017. “Why High-Order Polynomials Should Not Be Used in Regression Discontinuity Designs.” <em>Journal of Business &amp; Economic Statistics</em>, no. Forthcoming.</p>
+</div>
+<div id="ref-hahn1999evaluating">
+<p>Hahn, Jinyong, Petra Todd, and Wilbert Van der Klaauw. 1999. “Evaluating the Effect of an Antidiscrimination Law Using a Regression-Discontinuity Design.” National Bureau of Economic Research.</p>
+</div>
+<div id="ref-keele2016natural">
+<p>Keele, Luke, and Rocío Titiunik. 2016. “Natural Experiments Based on Geography.” <em>Political Science Research and Methods</em> 4 (1). Cambridge University Press: 65–95.</p>
+</div>
+<div id="ref-Ojmarrh2017">
+<p>Mitchell, Ojmarrh, Joshua C. Cochran, Daniel P. Mears, and William D. Bales. 2017. “Examining Prison Effects on Recidivism: A Regression Discontinuity Approach.” <em>Justice Quarterly</em> 34 (4). Routledge: 571–96.</p>
+</div>
+<div id="ref-qin2017">
+<p>Qin, Xuezheng, Castiel Chen Zhuang, and Rudai Yang. 2017. “Does the One-Child Policy Improve Children’s Human Capital in Urban China? A Regression Discontinuity Design.” <em>Journal of Comparative Economics</em> 45 (2): 287–303.</p>
+</div>
+<div id="ref-sekhontitiunik2017">
+<p>Sekhon, Jasjeet S., and Rocío Titiunik. 2017. “On Interpreting the Regression Discontinuity Design as a Local Experiment.” In <em>Regression Discontinuity Designs</em>, 1–28.</p>
+</div>
+</div>
 </div>
 <div class="footnotes">
 <hr>
@@ -208,6 +250,13 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
+        <div id="tocnav">
+      <h2 class="hasAnchor">
+<a href="#tocnav" class="anchor"></a>Contents</h2>
+      <ul class="nav nav-pills nav-stacked">
+<li><a href="#references">References</a></li>
+      </ul>
+</div>
       </div>
 
 </div>

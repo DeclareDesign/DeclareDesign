@@ -31,6 +31,21 @@
 <li>
   <a href="../articles/DeclareDesign.html">Getting Started</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Design Library
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+<li>
+      <a href="../articles/two_arm.html">Two Arm Experiment</a>
+    </li>
+    <li>
+      <a href="../articles/regression_discontinuity.html">Regression Discontinuity</a>
+    </li>
+  </ul>
+</li>
 <li>
   <a href="../reference/">Reference</a>
 </li>
@@ -81,15 +96,15 @@
       <h1>Two-Arm Experiment</h1>
                         <h4 class="author">Graeme Blair, Jasper Cooper, Alexander Coppock, and Macartan Humphreys</h4>
             
-            <h4 class="date">2017-11-08</h4>
+            <h4 class="date">2017-11-09</h4>
           </div>
 
     
     
 <div class="contents">
-<p>Often we want to learn about the causal effect of one thing on something else – say, the effect of taking a pill on a person becoming healthy. We can define the effect of a cause on an outcome as the difference of the outcomes under two states of the world: the potential outcome in a world where the cause is present and the potential outcome in a world where it is absent. Were we able to observe that a person was sick in a world where they took the pill <em>and</em> sick in a world where they didn’t, for example, we would infer that the pill did not have any causal effect on their health.</p>
-<p>The problem is, we can never observe our world in two counterfactual states at once, and so we can never estimate the effect of a cause on any particular individual person or thing. We can, however, estimate an <em>average</em> of individual causal effects, which we refer to as the average treatment effect (ATE). The simplest design for inferring an ATE is the two-arm experiment: some people are assigned at random to a treatment (the first arm), and the rest are assigned to the control (the second arm). The difference in the averages of the two groups gives us an unbiased estimate of the true ATE.</p>
-<p>How does this design work? One way to think about it is to compare the random assignment of the treatment to a random sampling procedure: in this design it is as though we take a representative sample from the two counterfactual states of the world. Seen in this way, it is as though the treatment and control groups are ‘random samples’ from the potential outcomes in a world where the cause is present and one in which it is absent. By taking the mean of the group that represents the treated potential outcomes and comparing it to the mean of the group that represents the untreated potential outcomes, we can construct a representative guess of the true average difference in the two states of the world would be. Just like in random sampling, as the size of our experiment grows our guess of the ATE will converge to the true ATE, implying that our design is unbiased. As we shall see, however, characterizing our uncertainty about our guesses can be complicated, even in such a simple design.</p>
+<p>Often we want to learn about the causal effect of one thing on something else – say, the effect of taking a pill on a person becoming healthy. We can define the effect of a cause on an outcome as the difference of the how the outcomes potentially would have looked under two states of the world: the potential outcome in a world where the cause is present and the potential outcome in a world where it is absent. Were we able to observe that a person was sick in a world where they took the pill <em>and</em> sick in a world where they didn’t, for example, we would infer that the pill did not have any causal effect on their health.</p>
+<p>The problem is we can never observe our world in two counterfactual states at once, and so we can never estimate the effect of a cause on any particular individual person or thing. We can, however, estimate an <em>average</em> of individual causal effects, which we refer to as the average treatment effect (ATE). The simplest design for inferring an ATE is the two-arm experiment: some people are assigned at random to a treatment (the first arm), and the rest are assigned to the control (the second arm). The difference in the averages of the two groups gives us an unbiased estimate of the true ATE.</p>
+<p>How does this design work? One way to think about it is to compare the random assignment of the treatment to a random sampling procedure: in this design it is as though we take a representative sample from the two counterfactual states of the world. Seen in this way, the treatment and control groups are ‘random samples’ from the potential outcomes in a world where the cause is present and one in which it is absent. By taking the mean of the group that represents the treated potential outcomes and comparing it to the mean of the group that represents the untreated potential outcomes, we can construct a representative guess of the true average difference in the two states of the world. Just like in random sampling, as the size of our experiment grows our guess of the ATE will converge to the true ATE, implying that our design is unbiased. As we shall see, however, characterizing our uncertainty about our guesses can be complicated, even in such a simple design.</p>
 <div id="design-declaration" class="section level3">
 <h3 class="hasAnchor">
 <a href="#design-declaration" class="anchor"></a>Design Declaration</h3>
@@ -166,12 +181,12 @@ two_arm &lt;-<span class="st"> </span><span class="kw"><a href="../reference/dec
 </table>
 <p>The diagnosis indicates that our two-arm design recovers an unbiased estimate of the average treatment effect in our sample. The average estimate is 0.998 and the mean estimand is 0.999. Our estimate of the bias is thus very close to 0, at -0.002, and the standard errors from the bootstrap of our simulations suggest that the fact that the bias is not exactly 0 is due to simulation error.</p>
 <p>The power of our design is good: if this simulation were to faithfully represent how the study will work in practice, we would have a roughly 86% chance of correctly rejecting the null hypothesis of an average treatment effect of 0.</p>
-<p>Note, however, that the coverage of the estimator is too high: our 95% confidence intervals include the true effect 98% of the time. This implies that our intervals are too wide, which in turn implies that our estimates of the variance of the difference in means are higher than they should be, leading us to fail to reject the null more often than we should. Why might this be the case? Recall for starters that if two variables are correlated, the variance of their difference is equal to the sum of their respective variances and their covariance. While it is easy enough to estimate the population variance of the treatment group or the control group using the sample variance estimators, estimating the population covariance is very difficult because we never observe the treated and control potential outcomes simultaneously. It turns out that common estimators of the variance of a difference in means rely on a conservative rule of thumb to estimate the covariance of the potential outcomes: since the covariance cannot be any larger than the sum of the variances, conventional estimators simply sum the two sample variances.</p>
+<p>Note, however, that the coverage of the estimator is too high: our 95% confidence intervals include the true effect 98% of the time. This implies that our intervals are too wide, which in turn implies that our estimates of the variance of the difference in means are higher than they should be, leading us to fail to reject the null more often than we should. Why might this be the case? Recall for starters that if two variables are correlated, the variance of the difference of their means is equal to the sum of their respective variances and their covariance. While it is easy enough to estimate the population variance of the treatment group or the control group using the sample variance estimators, estimating the population covariance is very difficult because we never observe the treated and control potential outcomes simultaneously. It turns out that common estimators of the variance of a difference in means rely on a conservative rule of thumb to estimate the covariance of the potential outcomes: since the covariance cannot be any larger than the sum of the variances, conventional estimators often use the sum the two sample variances as an upper bound for the covariance.</p>
 </div>
 <div id="further-reading" class="section level3">
 <h3 class="hasAnchor">
 <a href="#further-reading" class="anchor"></a>Further Reading</h3>
-<p>To learn more about two-arm designs and the tradeoffs involved in designing them, see Gerber and Green (2012). For a discussion of why conventional estimators of the variance of the difference in means are biased, and what to do about it, see Aronow, Green and Lee (2014).</p>
+<p>To learn more about two-arm designs and the tradeoffs involved in designing them, see <span class="citation">Gerber and Green (2012)</span>. For a discussion of why conventional estimators of the variance of the difference in means are conservatively biased, and what to do about it, see <span class="citation">Aronow et al. (2014)</span>.</p>
 </div>
 <div id="exercises" class="section level3">
 <h3 class="hasAnchor">
@@ -179,13 +194,32 @@ two_arm &lt;-<span class="st"> </span><span class="kw"><a href="../reference/dec
 <ul>
 <li><p>Modify the estimator in the design to use the <code>lm_robust</code> function from the <code>estimatr</code> package. What happens to the coverage and power, and why?</p></li>
 <li><p>Modify the design so that the variance of the treatment effect is 0. What happens to the coverage of the estimator? Why?</p></li>
-<li><p>Returning the original design, try increasing or decreasing the relative proportion of units treated, <span class="math inline">\(m/n\)</span>. How does this affect power and coverage? Explain.</p></li>
+<li><p>Returning to the original design, try increasing or decreasing the relative proportion of units treated, <span class="math inline">\(m/n\)</span>. How does this affect power and coverage? Explain.</p></li>
 </ul>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2 class="hasAnchor">
+<a href="#references" class="anchor"></a>References</h2>
+<div id="refs" class="references">
+<div id="ref-aronow2014sharp">
+<p>Aronow, Peter M, Donald P Green, Donald KK Lee, and others. 2014. “Sharp Bounds on the Variance in Randomized Experiments.” <em>The Annals of Statistics</em> 42 (3). Institute of Mathematical Statistics: 850–71.</p>
+</div>
+<div id="ref-Gerber2012">
+<p>Gerber, Alan S., and Donald P. Green. 2012. <em>Field Experiments: Design, Analysis, and Interpretation</em>. New York: W.W. Norton.</p>
+</div>
+</div>
 </div>
 </div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
+        <div id="tocnav">
+      <h2 class="hasAnchor">
+<a href="#tocnav" class="anchor"></a>Contents</h2>
+      <ul class="nav nav-pills nav-stacked">
+<li><a href="#references">References</a></li>
+      </ul>
+</div>
       </div>
 
 </div>

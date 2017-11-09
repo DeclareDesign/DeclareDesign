@@ -23,7 +23,8 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-
+  
+  
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -52,6 +53,21 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../articles/DeclareDesign.html">Getting Started</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Design Library
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/two_arm.html">Two Arm Experiment</a>
+    </li>
+    <li>
+      <a href="../articles/regression_discontinuity.html">Regression Discontinuity</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="../reference/">Reference</a>
@@ -144,7 +160,7 @@
                          <span class='no'>my_potential_outcomes</span>,
                          <span class='no'>my_sampling</span>,
                          <span class='no'>my_estimand</span>,
-                         <span class='kw'>dplyr</span><span class='kw'>::</span><span class='fu'>mutate</span>(<span class='kw'>noise_sq</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>),
+                         <span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span>(<span class='kw'>noise_sq</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>),
                          <span class='no'>my_assignment</span>,
                          <span class='no'>reveal_outcomes</span>,
                          <span class='no'>my_estimator</span>)
