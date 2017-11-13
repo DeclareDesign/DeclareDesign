@@ -96,7 +96,10 @@ declare_design <- function(...,
 
   dots <- quos(...)
 
-  causal_order_expr <- sapply(dots, quo_expr)
+  causal_order <- list()
+  causal_order_expr <- list()
+  for(i in seq_along(dots))
+    causal_order_expr[[i]] <- quo_expr(dots[[i]])
 
   name_or_call <- sapply(causal_order_expr, class)
 
@@ -110,7 +113,8 @@ declare_design <- function(...,
     }
   }
 
-  causal_order <- eval_tidy(dots)
+  for(i in seq_along(dots))
+    causal_order[[i]] <- eval_tidy(dots[[i]])
 
   # Special case for initializing with a data.frame
   if("data.frame" %in% class(causal_order[[1]])){
