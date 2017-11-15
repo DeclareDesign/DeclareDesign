@@ -18,11 +18,12 @@ two_way_factorial_template <- function(N=c(30, 100, 500, 1000),
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_T1 = noise,
                                                       Y_Z_T2 = noise + beta_A,
                                                       Y_Z_T3 = noise + beta_B,
-                                                      Y_Z_T4 = noise + gamma_AB)
+                                                      Y_Z_T4 = noise + gamma_AB,
+                                                      gamma_AB = gamma_AB)
 
   my_assignment <- declare_assignment(num_arms = 4)
 
-  my_estimand <- declare_estimand(interaction = mean(Y_Z_T4 - Y_Z_T3) - mean(Y_Z_T2 - Y_Z_T1), label = "interaction")
+  my_estimand <- declare_estimand(interaction = gamma_AB, label = "interaction")
 
   my_estimator <- declare_estimator(Y ~ Z1 + Z2 + Z1*Z2,
                                     model = lm_robust,
@@ -42,7 +43,7 @@ two_way_factorial_template <- function(N=c(30, 100, 500, 1000),
 
   my_design
 }
-attr(two_arm_template, "tips") <- c(
+attr(two_way_factorial_template, "tips") <- c(
   "N"="Size of population",
   "beta_A"="Main effect of A",
   "beta_B"="Main effect of B",
@@ -68,10 +69,10 @@ attr(two_arm_template, "tips") <- c(
 #  saveRDS(diagnosis,"two_way_factorial_diagnosis.RDS")
 
 ## ----eval = FALSE, echo = TRUE-------------------------------------------
-#  diagnosis <- diagnose_design(two_arm, sims = 10000, bootstrap_sims = 1000)
+#  diagnosis <- diagnose_design(two_way_factorial_template(), sims = 10000, bootstrap_sims = 1000)
 
 ## ----echo = FALSE--------------------------------------------------------
-if(file.exists("two_way_factorial_diagnosis.RDS")) diagnosis <- readRDS("two_arm_diagnosis.RDS")
+if(file.exists("two_way_factorial_diagnosis.RDS")) diagnosis <- readRDS("two_way_factorial_diagnosis.RDS")
 if(exists("diagnosis")) {
   diagnosands <- get_diagnosands(diagnosis)
   # diagnosis_table <- diagnosands[,c("mean_estimate","mean_estimand","bias","se(bias)","power","se(power)","coverage","se(coverage)")]

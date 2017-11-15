@@ -54,7 +54,7 @@ two_way_factorial_template <- function(N=c(30, 100, 500, 1000),
 
   my_design
 }
-attr(two_arm_template, "tips") <- c(
+attr(two_way_factorial_template, "tips") <- c(
   "N"="Size of population",
   "beta_A"="Main effect of A",
   "beta_B"="Main effect of B",
@@ -106,11 +106,11 @@ saveRDS(diagnosis,"two_way_factorial_diagnosis.RDS")
 
 
 ```{r,eval = FALSE, echo = TRUE}
-diagnosis <- diagnose_design(two_arm, sims = 10000, bootstrap_sims = 1000)
+diagnosis <- diagnose_design(two_way_factorial_template(), sims = 10000, bootstrap_sims = 1000)
 ```
 
 ```{r,echo = FALSE}
-if(file.exists("two_way_factorial_diagnosis.RDS")) diagnosis <- readRDS("two_arm_diagnosis.RDS")
+if(file.exists("two_way_factorial_diagnosis.RDS")) diagnosis <- readRDS("two_way_factorial_diagnosis.RDS")
 if(exists("diagnosis")) {
   diagnosands <- get_diagnosands(diagnosis)
   # diagnosis_table <- diagnosands[,c("mean_estimate","mean_estimand","bias","se(bias)","power","se(power)","coverage","se(coverage)")]
