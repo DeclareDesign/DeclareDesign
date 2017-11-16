@@ -36,7 +36,7 @@ test_that("test the estimators", {
   my_assignment <- declare_assignment(block_var = block_var)
 
   ## lm with HC3 robust ses
-  my_estimator_blocked <- declare_estimator(Y ~ Z, model = difference_in_means, block_variable_name = block_var)
+  my_estimator_blocked <- declare_estimator(Y ~ Z, model = difference_in_means, blocks = block_var)
   df <- my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes
   my_estimator_notblocked <- declare_estimator(Y ~ Z)
 
@@ -224,7 +224,7 @@ test_that("coefficient_name = NULL returns all coefficients", {
 
   est4 <- declare_estimator(
       y ~ x + as.factor(clust),
-      cluster_variable_name = clust,
+      clusters = clust,
       weights = wt,
       model = lm_robust,
       coefficient_name = NULL)
