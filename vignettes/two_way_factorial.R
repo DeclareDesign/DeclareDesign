@@ -2,9 +2,9 @@
 library(DeclareDesign)
 
 two_way_factorial_template <- function(N=c(30, 100, 500, 1000),
-                             beta_A=c(-1, 0, 1),
+                             beta_A=c(1, -1, 0),
                              beta_B=c(-1, 0, 1),
-                             gamma_AB=c(-1, -.5, 0, .5, 1))
+                             gamma_AB=c(.5, -1, -.5, 0, 1))
 {
   N <- as.numeric(N[1])
   beta_A <- as.numeric(beta_A[1])
@@ -18,11 +18,12 @@ two_way_factorial_template <- function(N=c(30, 100, 500, 1000),
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_T1 = noise,
                                                       Y_Z_T2 = noise + beta_A,
                                                       Y_Z_T3 = noise + beta_B,
-                                                      Y_Z_T4 = noise + gamma_AB,
-                                                      gamma_AB = gamma_AB)
+                                                      Y_Z_T4 = noise + gamma_AB
+                                                      )
 
   my_assignment <- declare_assignment(num_arms = 4)
 
+  # Note need to return scalar below, otherwise it is bad. DO NOT INCLUDE gamma_AB in potential_outcomes call above, it will make a new column. --NJF 11/15
   my_estimand <- declare_estimand(interaction = gamma_AB, label = "interaction")
 
   my_estimator <- declare_estimator(Y ~ Z1 + Z2 + Z1*Z2,
