@@ -104,17 +104,21 @@ declare_design <- function(...,
   name_or_call <- sapply(causal_order_expr, class)
 
   ## wrap any call in wrap_step()
-  if (length(dots) > 1) {
-    for (i in 2:length(dots)) {
-      if (name_or_call[[i]] == "call") {
-        dots[[i]] <-
-          quo(wrap_step(!!dots[[i]]))  ##call("wrap_step", quo_expr(dots[[i]]))
-      }
-    }
-  }
+  # if (length(dots) > 1) {
+  #   for (i in 2:length(dots)) {
+  #     if (name_or_call[[i]] == "call") {
+  #       dots[[i]] <-
+  #         quo(wrap_step(!!dots[[i]]))  ##call("wrap_step", quo_expr(dots[[i]]))
+  #     }
+  #   }
+  # }
 
-  for(i in seq_along(dots))
-    causal_order[[i]] <- eval_tidy(dots[[i]])
+  for(i in seq_along(dots)) {
+    causal_order[[i]] <- tryCatch(
+       eval_tidy(dots[[i]]),
+      error = function(e) eval_tidy(wrap_step(!!dots[[i]]))
+    )
+  }
 
   # Special case for initializing with a data.frame
   if("data.frame" %in% class(causal_order[[1]])){
@@ -125,7 +129,7 @@ declare_design <- function(...,
   }
 
 
-  function_types <- lapply(causal_order, attr, "type")
+  function_types <- vapply(causal_order, attr, NA_character_, "type")
 
   causal_order_types <- function_types
   causal_order_types[!function_types %in% c("estimand", "estimator")] <- "dgp"

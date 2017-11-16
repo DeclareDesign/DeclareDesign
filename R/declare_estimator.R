@@ -112,7 +112,7 @@ declare_estimator <- function(...,
     stop("Please provide ", lbl, " function with a data argument.")
   }
 
-  estimand_label <- if(is.null(estimand)) NULL else attributes(estimand)$label
+  estimand_label <- switch(class(estimand), "character"=estimand, "function"=attributes(estimand)$label)
 
   estimator_function_internal <- function(data) {
     args$data <- data
