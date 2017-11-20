@@ -1,11 +1,6 @@
 ---
 title: "Two-Arm Experiment"
-output: rmarkdown::html_vignette
 bibliography: bib.bib
-vignette: >
-  %\VignetteIndexEntry{Two-Arm Experiment}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 

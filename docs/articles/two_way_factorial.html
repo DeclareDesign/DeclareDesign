@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Design Library • DeclareDesign</title>
+<title>Two-Way Factorial Experiment • DeclareDesign</title>
 <!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
@@ -90,27 +90,52 @@
       </header><div class="row">
   <div class="col-md-9">
     <div class="page-header toc-ignore">
-      <h1>Design Library</h1>
+      <h1>Two-Way Factorial Experiment</h1>
             
           </div>
 
     
     
 <div class="contents">
-<p>Our design library characterizes designs informally and in code using the <span class="math inline">\(&lt;M,I,D,A&gt;\)</span> framework (for more on this framework, see <a href="http://declaredesign.org/paper.pdf">our paper</a>):</p>
+<div id="design-declaration" class="section level3">
+<h3 class="hasAnchor">
+<a href="#design-declaration" class="anchor"></a>Design Declaration</h3>
 <ul>
-<li><p>A <strong>model</strong>, <em>M</em>, of how the world works. The model specifies the moving parts — the variables — and how these are causally related to each other. In this sense the model provides the context of a study, but also a speculation about the world.</p></li>
-<li><p>An <strong>inquiry</strong>, <em>I</em>, about the distribution of variables, perhaps given interventions on some variables. In many applications <em>I</em> might be thought of as the ‘’estimand.’’ Some inquiries are statements about the values of variables, others about the causal relations between variables. In all cases however the inquiry should be answerable given the model.</p></li>
-<li><p>A  strategy, <em>D</em>, generates data on variables. Note that implicitly the data strategy includes case selection, or sampling decisions, but it also represents interventions such as assignment of treatments or measurement strategies. A model <em>M</em> tells you what sort of data you might observe if you employ data strategy <em>D</em>.</p></li>
-<li><p>An  strategy, <em>A</em>, that uses data to generate an answer.</p></li>
+<li><p><strong>M</strong>odel:</p></li>
+<li><p><strong>I</strong>nquiry:</p></li>
+<li><p><strong>D</strong>ata strategy:</p></li>
+<li><p><strong>A</strong>nswer strategy:</p></li>
 </ul>
-<div id="designs" class="section level1">
-<h1 class="hasAnchor">
-<a href="#designs" class="anchor"></a>Designs</h1>
-<ul>
-<li><p><a href="http://declaredesign.org/articles/two_arm.html">Two-Arm Experiment</a></p></li>
-<li><p><a href="http://declaredesign.org/articles/regression_discontinuity.html">Regression Discontinuity</a></p></li>
-</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Model ------------------------------------------------------------------------</span>
+
+<span class="co"># Inquiry ----------------------------------------------------------------------</span>
+
+<span class="co"># Data Strategy ----------------------------------------------------------------</span>
+
+<span class="co"># Answer Strategy --------------------------------------------------------------</span>
+
+<span class="co"># Design -----------------------------------------------------------------------</span></code></pre></div>
+</div>
+<div id="takeaways" class="section level3">
+<h3 class="hasAnchor">
+<a href="#takeaways" class="anchor"></a>Takeaways</h3>
+<p>With the design declared we can run a diagnosis from Monte Carlo simulations of the design:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">diagnosis &lt;-<span class="st"> </span><span class="kw"><a href="../reference/diagnose_design.html">diagnose_design</a></span>(<span class="kw">two_way_factorial_template</span>(), <span class="dt">sims =</span> <span class="dv">10000</span>, <span class="dt">bootstrap_sims =</span> <span class="dv">1000</span>)</code></pre></div>
+<p>TODO</p>
+</div>
+<div id="further-reading" class="section level3">
+<h3 class="hasAnchor">
+<a href="#further-reading" class="anchor"></a>Further Reading</h3>
+<p>TODO</p>
+</div>
+<div id="exercises" class="section level3">
+<h3 class="hasAnchor">
+<a href="#exercises" class="anchor"></a>Exercises</h3>
+<p>TODO</p>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2 class="hasAnchor">
+<a href="#references" class="anchor"></a>References</h2>
 </div>
 </div>
   </div>
@@ -120,7 +145,7 @@
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li><a href="#designs">Designs</a></li>
+<li><a href="#references">References</a></li>
       </ul>
 </div>
       </div>

@@ -54,8 +54,17 @@
         <li>
   <a href="../articles/DeclareDesign.html">Getting Started</a>
 </li>
-<li>
-  <a href="../articles/design_library.html">Design Library</a>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Design Library
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/two_arm.html">Two arm experiment</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="../reference/">Reference</a>
@@ -151,10 +160,120 @@
                          <span class='no'>reveal_outcomes</span>,
                          <span class='no'>my_estimator</span>)
 
-<span class='no'>design</span></div><div class='output co'>#&gt; <span class='error'>Error in if (!is.null(call) &amp; !is.null(type) &amp; type != "declare_step") {    args &lt;- lang_args(call)    has_formula &lt;- sapply(args, is_formula)    formulae &lt;- args[has_formula]    if (length(formulae) == 1) {        return(formulae[[1]])    }    else {        return(NULL)    }} else {    return(NULL)}: argument is of length zero</span></div><div class='input'>
-<span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'>draw_data</span>(<span class='no'>design</span>)</div><div class='output co'>#&gt; <span class='error'>Error: could not find function "f"</span></div><div class='input'>
-<span class='no'>estimates</span> <span class='kw'>&lt;-</span> <span class='fu'>get_estimates</span>(<span class='no'>design</span>)</div><div class='output co'>#&gt; <span class='error'>Error: attempt to apply non-function</span></div><div class='input'><span class='no'>estimands</span> <span class='kw'>&lt;-</span> <span class='fu'>get_estimands</span>(<span class='no'>design</span>)</div><div class='output co'>#&gt; <span class='error'>Error: attempt to apply non-function</span></div><div class='input'>
-</div></pre>
+<span class='no'>design</span></div><div class='output co'>#&gt; 
+#&gt; Design Summary
+#&gt; 
+#&gt; Step 1 (population): my_population ---------------------------------------------
+#&gt; 
+#&gt; N = 500 
+#&gt; 
+#&gt; Added variable: ID 
+#&gt;  N_missing N_unique
+#&gt;          0      500
+#&gt; 
+#&gt; Added variable: noise 
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -3.31  -0.03 -0.04 3.41 1.03         0      500
+#&gt; 
+#&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
+#&gt; 
+#&gt; Added variable: Y_Z_0 
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -3.31  -0.03 -0.04 3.41 1.03         0      500
+#&gt; 
+#&gt; Added variable: Y_Z_1 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -6.06   1.82 1.90 9.55 2.17         0      500
+#&gt; 
+#&gt; Step 3 (sampling): my_sampling -------------------------------------------------
+#&gt; 
+#&gt; N = 250 (250 subtracted) 
+#&gt; 
+#&gt; Added variable: S_inclusion_prob 
+#&gt;              0.5   NA
+#&gt;   Frequency  250    0
+#&gt;  Proportion 1.00 0.00
+#&gt; 
+#&gt; Altered variable: ID 
+#&gt;   Before: 
+#&gt;  N_missing N_unique
+#&gt;          0      500
+#&gt; 
+#&gt;   After:
+#&gt;  N_missing N_unique
+#&gt;          0      250
+#&gt; 
+#&gt; Altered variable: noise 
+#&gt;   Before: 
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -3.31  -0.03 -0.04 3.41 1.03         0      500
+#&gt; 
+#&gt;   After:
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.45  -0.10 -0.06 2.74 1.02         0      250
+#&gt; 
+#&gt; Altered variable: Y_Z_0 
+#&gt;   Before: 
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -3.31  -0.03 -0.04 3.41 1.03         0      500
+#&gt; 
+#&gt;   After:
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.45  -0.10 -0.06 2.74 1.02         0      250
+#&gt; 
+#&gt; Altered variable: Y_Z_1 
+#&gt;   Before: 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -6.06   1.82 1.90 9.55 2.17         0      500
+#&gt; 
+#&gt;   After:
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -6.06   1.95 1.87 9.55 2.13         0      250
+#&gt; 
+#&gt; Step 4 (estimand): my_estimand -------------------------------------------------
+#&gt; 
+#&gt; A single draw of the estimand:
+#&gt;  estimand_label estimand
+#&gt;             ATE 1.936796
+#&gt; 
+#&gt; Step 5 (declare step): dplyr::mutate(noise_sq = noise^2) -----------------------
+#&gt; 
+#&gt; Added variable: noise_sq 
+#&gt;   min median mean  max   sd N_missing N_unique
+#&gt;  0.00   0.53 1.03 7.53 1.35         0      250
+#&gt; 
+#&gt; Step 6 (assignment): my_assignment ---------------------------------------------
+#&gt; 
+#&gt; Added variable: Z 
+#&gt;                0    1   NA
+#&gt;   Frequency  225   25    0
+#&gt;  Proportion 0.90 0.10 0.00
+#&gt; 
+#&gt; Added variable: Z_cond_prob 
+#&gt;              0.1  0.9   NA
+#&gt;   Frequency   25  225    0
+#&gt;  Proportion 0.10 0.90 0.00
+#&gt; 
+#&gt; Step 7 (reveal outcomes): reveal_outcomes --------------------------------------
+#&gt; 
+#&gt; Added variable: Y 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -3.17   0.03 0.05 6.89 1.25         0      250
+#&gt; 
+#&gt; Step 8 (estimator): my_estimator -----------------------------------------------
+#&gt; 
+#&gt; Formula: Y ~ Z 
+#&gt; 
+#&gt; A single draw of the estimator:
+#&gt;  estimator_label coefficient_name      est        se           p  ci_lower
+#&gt;     my_estimator                Z 1.383675 0.4407977 0.004291352 0.4761421
+#&gt;  ci_upper estimand_label
+#&gt;  2.291207            ATE
+#&gt; </div><div class='input'>
+<span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'>draw_data</span>(<span class='no'>design</span>)
+
+<span class='no'>estimates</span> <span class='kw'>&lt;-</span> <span class='fu'>get_estimates</span>(<span class='no'>design</span>)
+<span class='no'>estimands</span> <span class='kw'>&lt;-</span> <span class='fu'>get_estimands</span>(<span class='no'>design</span>)</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

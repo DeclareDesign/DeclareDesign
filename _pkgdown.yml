@@ -5,6 +5,11 @@ navbar:
     href: articles/DeclareDesign.html
   - text: "Design Library"
     href: articles/design_library.html
+    menu:
+     - text: "Two arm experiment"
+       href: articles/two_arm.html
+     - text: "Regression discontinuity"
+       href: articles/regression_discontinuity.html
   - text: Reference
     href: reference/
   - text: "Packages"
