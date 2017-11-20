@@ -29,7 +29,7 @@ two_way_factorial_template <- function(N=c(30, 100, 500, 1000),
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_T1 = noise,
                                                       Y_Z_T2 = noise + beta_A,
                                                       Y_Z_T3 = noise + beta_B,
-                                                      Y_Z_T4 = noise + gamma_AB
+                                                      Y_Z_T4 = noise + (beta_A + beta_B + gamma_AB)
                                                       )
 
   my_assignment <- declare_assignment(num_arms = 4)
