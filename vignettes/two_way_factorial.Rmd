@@ -71,13 +71,13 @@ attr(two_way_factorial_template, "tips") <- c(
 
 
 <div class="btn-group">
-  <a class="btn btn-lg btn-primary" href="http://declaredesign.org/articles/two_way_factorial.R">
+  <a class="btn btn-primary" href="http://declaredesign.org/articles/two_way_factorial.R">
     <i class="fa fa-code" title = "Download code for design" fa-2x></i> Download code
   </a>
-  <a class="btn btn-lg btn-primary" href="http://declaredesign.org/articles/two_way_factorial_template.RDS">
+  <a class="btn btn-primary" href="http://declaredesign.org/articles/two_way_factorial_template.RDS">
     <i class="fa fa-clipboard" title = "Download template for design" fa-2x></i> Download template
   </a>
-  <a class="btn btn-lg btn-primary" href="http://shiny.declaredesign.org:8000/">
+  <a class="btn btn-primary" href="http://shiny.declaredesign.org:8000/">
     <i class="fa fa-area-chart" title = "Go to the design inspector" fa-2x></i> Inspect design
   </a>
 </div>

@@ -161,6 +161,28 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <h2 class="hasAnchor">
 <a href="#takeaways" class="anchor"></a>Takeaways</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">diagnosis &lt;-<span class="st"> </span><span class="kw"><a href="../reference/diagnose_design.html">diagnose_design</a></span>(rd_design, <span class="dt">sims =</span> <span class="dv">10000</span>, <span class="dt">bootstrap_sims =</span> <span class="dv">1000</span>)</code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th align="right">Mean Estimate</th>
+<th align="right">Mean Estimand</th>
+<th align="right">Bias</th>
+<th align="right">SE(bias)</th>
+<th align="right">Power</th>
+<th align="right">SE(Power)</th>
+<th align="right">Coverage</th>
+<th align="right">SE(Coverage)</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="right">0.104</td>
+<td align="right">0.15</td>
+<td align="right">-0.046</td>
+<td align="right">0.008</td>
+<td align="right">0.051</td>
+<td align="right">0.002</td>
+<td align="right">0.951</td>
+<td align="right">0.002</td>
+</tr></tbody>
+</table>
 <p>We highlight three takeaways. First, the power of this design is very low: with 1,000 units we do not achieve even 10% statistical power. However, our estimates of the uncertainty are not too wide: the coverage probability indicates that our confidence intervals indeed contain the estimand 95% of the time as they should. Our answer strategy is highly uncertain because the fourth-order polynomial specification in regression model gives weights to the data that greatly increase the variance of the estimator (<span class="citation">Gelman and Imbens (2017)</span>). In the exercises we explore alternative answer strategies that perform better.</p>
 <p>Second, the design is biased because polynomial approximations of the average effect at exactly the point of the threshold will be inaccurate in small samples (<span class="citation">Sekhon and Titiunik (2017)</span>), especially as units farther away from the cutoff are incorporated into the answer strategy. We know that the estimated bias is not due to simulation error by examining the bootstrapped standard error of the bias estimates.</p>
 <p>Finally, from the figure, we can see how poorly the average effect at the threshold approximates the average effect for all units. The average treatment effect among the treated (to the right of the threshold in the figure) is negative, whereas at the threshold it is positive. This clarifies that the estimand of the regression discontinuity design, the difference at the cutoff, is only relevant for a small – and possibly empty – set of units very close to the cutoff.</p>
