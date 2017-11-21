@@ -1,11 +1,11 @@
 ---
 title: "Two-Arm Experiment"
-editor_options:
-  chunk_output_type: inline
-output:
-  html_document:
-    df_print: paged
+output: rmarkdown::html_vignette
 bibliography: bib.bib
+vignette: >
+  %\VignetteIndexEntry{Two-Way Factorial Experiment}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 
