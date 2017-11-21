@@ -67,6 +67,13 @@ attr(two_way_factorial_template, "tips") <- c(
   "beta_B" = "Main effect of B",
   "beta_AB" = "Interaction effect of A and B"
 )
+attr(two_way_factorial_template, "description") <- "
+<p> A two way factorial design with a size <code>N</code>, 
+    main effects <code>beta_A</code> and <code>beta_B</code>, 
+    and interaction <code>beta_AB</code>. 
+
+<p> Estimand is the average interaction effect.
+"
 ```
 
 
