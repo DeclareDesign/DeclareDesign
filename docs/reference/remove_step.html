@@ -58,7 +58,7 @@
   <a href="../articles/design_library.html">Design Library</a>
 </li>
 <li>
-  <a href="../reference/">Reference</a>
+  <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -142,10 +142,190 @@
                           <span class='no'>my_potential_outcomes</span>,
                           <span class='no'>my_assignment</span>)
 
- <span class='no'>design</span></div><div class='output co'>#&gt; <span class='error'>Error in if (!is.null(call) &amp; !is.null(type) &amp; type != "declare_step") {    args &lt;- lang_args(call)    has_formula &lt;- sapply(args, is_formula)    formulae &lt;- args[has_formula]    if (length(formulae) == 1) {        return(formulae[[1]])    }    else {        return(NULL)    }} else {    return(NULL)}: argument is of length zero</span></div><div class='input'>
- <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='replace_step.html'>replace_step</a></span>(<span class='no'>my_assignment_2</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; <span class='error'>Error in if (!is.null(call) &amp; !is.null(type) &amp; type != "declare_step") {    args &lt;- lang_args(call)    has_formula &lt;- sapply(args, is_formula)    formulae &lt;- args[has_formula]    if (length(formulae) == 1) {        return(formulae[[1]])    }    else {        return(NULL)    }} else {    return(NULL)}: argument is of length zero</span></div><div class='input'>
- <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/dplyr/topics/mutate'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>after</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; <span class='error'>Error in if (!is.null(call) &amp; !is.null(type) &amp; type != "declare_step") {    args &lt;- lang_args(call)    has_formula &lt;- sapply(args, is_formula)    formulae &lt;- args[has_formula]    if (length(formulae) == 1) {        return(formulae[[1]])    }    else {        return(NULL)    }} else {    return(NULL)}: argument is of length zero</span></div><div class='input'> <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/dplyr/topics/mutate'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>before</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; <span class='error'>Error in if (!is.null(call) &amp; !is.null(type) &amp; type != "declare_step") {    args &lt;- lang_args(call)    has_formula &lt;- sapply(args, is_formula)    formulae &lt;- args[has_formula]    if (length(formulae) == 1) {        return(formulae[[1]])    }    else {        return(NULL)    }} else {    return(NULL)}: argument is of length zero</span></div><div class='input'>
- <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'>remove_step</span>(<span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; <span class='error'>Error in if (!is.null(call) &amp; !is.null(type) &amp; type != "declare_step") {    args &lt;- lang_args(call)    has_formula &lt;- sapply(args, is_formula)    formulae &lt;- args[has_formula]    if (length(formulae) == 1) {        return(formulae[[1]])    }    else {        return(NULL)    }} else {    return(NULL)}: argument is of length zero</span></div></pre>
+ <span class='no'>design</span></div><div class='output co'>#&gt; 
+#&gt; Design Summary
+#&gt; 
+#&gt; Step 1 (population): my_population ---------------------------------------------
+#&gt; 
+#&gt; N = 100 
+#&gt; 
+#&gt; Added variable: ID 
+#&gt;  N_missing N_unique
+#&gt;          0      100
+#&gt; 
+#&gt; Added variable: noise 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.67   0.07 0.14 2.67 0.99         0      100
+#&gt; 
+#&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
+#&gt; 
+#&gt; Added variable: Y_Z_0 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.67   0.07 0.14 2.67 0.99         0      100
+#&gt; 
+#&gt; Added variable: Y_Z_1 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -4.43   2.05 2.07 7.69 2.53         0      100
+#&gt; 
+#&gt; Step 3 (assignment): my_assignment ---------------------------------------------
+#&gt; 
+#&gt; Added variable: Z 
+#&gt;                0    1   NA
+#&gt;   Frequency   50   50    0
+#&gt;  Proportion 0.50 0.50 0.00
+#&gt; 
+#&gt; Added variable: Z_cond_prob 
+#&gt;              0.5   NA
+#&gt;   Frequency  100    0
+#&gt;  Proportion 1.00 0.00
+#&gt; </div><div class='input'>
+ <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='replace_step.html'>replace_step</a></span>(<span class='no'>my_assignment_2</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
+#&gt; Design Summary
+#&gt; 
+#&gt; Step 1 (population): my_population ---------------------------------------------
+#&gt; 
+#&gt; N = 100 
+#&gt; 
+#&gt; Added variable: ID 
+#&gt;  N_missing N_unique
+#&gt;          0      100
+#&gt; 
+#&gt; Added variable: noise 
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.44   0.05 -0.00 2.24 0.92         0      100
+#&gt; 
+#&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
+#&gt; 
+#&gt; Added variable: Y_Z_0 
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.44   0.05 -0.00 2.24 0.92         0      100
+#&gt; 
+#&gt; Added variable: Y_Z_1 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -4.09   2.14 2.20 7.72 1.99         0      100
+#&gt; 
+#&gt; Step 3 (assignment): my_assignment_2 -------------------------------------------
+#&gt; 
+#&gt; Added variable: Z 
+#&gt;                0    1   NA
+#&gt;   Frequency   75   25    0
+#&gt;  Proportion 0.75 0.25 0.00
+#&gt; 
+#&gt; Added variable: Z_cond_prob 
+#&gt;             0.25 0.75   NA
+#&gt;   Frequency   25   75    0
+#&gt;  Proportion 0.25 0.75 0.00
+#&gt; </div><div class='input'>
+ <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/dplyr/topics/mutate'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>after</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
+#&gt; Design Summary
+#&gt; 
+#&gt; Step 1 (population): my_population ---------------------------------------------
+#&gt; 
+#&gt; N = 100 
+#&gt; 
+#&gt; Added variable: ID 
+#&gt;  N_missing N_unique
+#&gt;          0      100
+#&gt; 
+#&gt; Added variable: noise 
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.18  -0.10 -0.12 2.19 0.97         0      100
+#&gt; 
+#&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
+#&gt; 
+#&gt; Added variable: Y_Z_0 
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.18  -0.10 -0.12 2.19 0.97         0      100
+#&gt; 
+#&gt; Added variable: Y_Z_1 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -4.08   1.77 1.69 7.66 2.06         0      100
+#&gt; 
+#&gt; Step 3 (assignment): my_assignment ---------------------------------------------
+#&gt; 
+#&gt; Added variable: Z 
+#&gt;                0    1   NA
+#&gt;   Frequency   50   50    0
+#&gt;  Proportion 0.50 0.50 0.00
+#&gt; 
+#&gt; Added variable: Z_cond_prob 
+#&gt;              0.5   NA
+#&gt;   Frequency  100    0
+#&gt;  Proportion 1.00 0.00
+#&gt; 
+#&gt; Step 4 (declare step): dplyr::mutate(income = noise^2) -------------------------
+#&gt; 
+#&gt; Added variable: income 
+#&gt;   min median mean  max   sd N_missing N_unique
+#&gt;  0.00   0.49 0.95 4.78 1.18         0      100
+#&gt; </div><div class='input'> <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/dplyr/topics/mutate'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>before</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
+#&gt; Design Summary
+#&gt; 
+#&gt; Step 1 (population): my_population ---------------------------------------------
+#&gt; 
+#&gt; N = 100 
+#&gt; 
+#&gt; Added variable: ID 
+#&gt;  N_missing N_unique
+#&gt;          0      100
+#&gt; 
+#&gt; Added variable: noise 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.71   0.11 0.07 2.49 0.92         0      100
+#&gt; 
+#&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
+#&gt; 
+#&gt; Added variable: Y_Z_0 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.71   0.11 0.07 2.49 0.92         0      100
+#&gt; 
+#&gt; Added variable: Y_Z_1 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.55   2.57 2.42 8.21 2.07         0      100
+#&gt; 
+#&gt; Step 3 (declare step): dplyr::mutate(income = noise^2) -------------------------
+#&gt; 
+#&gt; Added variable: income 
+#&gt;   min median mean  max   sd N_missing N_unique
+#&gt;  0.00   0.51 0.85 7.34 1.16         0      100
+#&gt; 
+#&gt; Step 4 (assignment): my_assignment ---------------------------------------------
+#&gt; 
+#&gt; Added variable: Z 
+#&gt;                0    1   NA
+#&gt;   Frequency   50   50    0
+#&gt;  Proportion 0.50 0.50 0.00
+#&gt; 
+#&gt; Added variable: Z_cond_prob 
+#&gt;              0.5   NA
+#&gt;   Frequency  100    0
+#&gt;  Proportion 1.00 0.00
+#&gt; </div><div class='input'>
+ <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'>remove_step</span>(<span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
+#&gt; Design Summary
+#&gt; 
+#&gt; Step 1 (population): my_population ---------------------------------------------
+#&gt; 
+#&gt; N = 100 
+#&gt; 
+#&gt; Added variable: ID 
+#&gt;  N_missing N_unique
+#&gt;          0      100
+#&gt; 
+#&gt; Added variable: noise 
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.51  -0.20 -0.16 2.84 1.00         0      100
+#&gt; 
+#&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
+#&gt; 
+#&gt; Added variable: Y_Z_0 
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.51  -0.20 -0.16 2.84 1.00         0      100
+#&gt; 
+#&gt; Added variable: Y_Z_1 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -3.01   1.94 1.97 6.14 2.00         0      100
+#&gt; </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

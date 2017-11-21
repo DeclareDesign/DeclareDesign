@@ -6,7 +6,7 @@ navbar:
   - text: "Design Library"
     href: articles/design_library.html
   - text: Reference
-    href: reference/
+    href: reference/index.html
   - text: "Packages"
     menu:
       - text: DeclareDesign
