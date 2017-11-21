@@ -21,14 +21,15 @@ Our design library characterizes designs informally and in code using the $<M,I,
 
 # Designs
 
-
-------------- ---------------- ---------------------------
-Experimental  Causal inference [Two-Arm Experiment](../articles/two_arm.html)
-
-Experimental  Causal inference [Two-Way Factorial Experiment](../articles/two_way_factorial.html)
-                             
-Observational Causal inference [Regression Discontinuity](../articles/regression_discontinuity.html)
-------------- ---------------- ---------------------------
+--------------------------- -----------------------------------------------------------------------------------------------------------------------
+Goal                        Strategy      Design                                                                  Download 
+--------------------------- ------------- ----------------------------------------------------------------------- --------------------------------
+Causal inference            Experimental  [Two-Arm Experiment](../articles/two_arm.html)                          <a class="btn btn-default" href="http://declaredesign.org/articles/two_arm.R"><i class="fa fa-code" title = "Download code for design"></i></a> <a class="btn btn-default" href="http://declaredesign.org/articles/two_arm_template.Rds"><i class="fa fa-clipboard" title = "Download template for design"></i></a>
+                                                                                                                   
+Causal inference            Experimental  [Two-Way Factorial Experiment](../articles/two_way_factorial.html)      <a class="btn btn-default" href="http://declaredesign.org/articles/two_way_factorial.R"><i class="fa fa-code" title = "Download code for design"></i></a> <a class="btn btn-default" href="http://declaredesign.org/articles/two_way_factorial_template.Rds"><i class="fa fa-clipboard" title = "Download template for design"></i></a>
+                                                         
+Causal inference            Observational [Regression Discontinuity](../articles/regression_discontinuity.html)   <a class="btn btn-default" href="http://declaredesign.org/articles/regression_discontinuity.R"><i class="fa fa-code" title = "Download code for design"></i></a> <a class="btn btn-default" href="http://declaredesign.org/articles/regression_discontinuity_template.Rds"><i class="fa fa-clipboard" title = "Download template for design"></i></a>
+--------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
