@@ -71,13 +71,13 @@ attr(two_way_factorial_template, "tips") <- c(
 
 [Download code for design](http://declaredesign.org/articles/two_way_factorial.R)
 
-Often we wish to know whether the effect of some causal factor increases or decreases in the presence of another causal factor. For example, when seeking to increase voter turnout among disadvantaged groups, is the effect of phone calls larger or smaller when voters have already received mail bearing the same message? If the message is made more convincing through repetition then we may expect phone calls increase turnout more effectively when voters have already received mail. However, a phone call might also be less effective when someone has already received mail, because the person becomes over-saturated with messages (@green2013field). 
+Often we wish to know whether the effect of some causal factor increases or decreases in the presence of another causal factor. For example, when seeking to increase voter turnout, is the effect of phone calls larger or smaller when voters have already received mail bearing the same message? If the message is made more convincing through repetition then we may expect phone calls increase turnout more effectively when voters have already received mail. However, a phone call might also be less effective when someone has already received mail, because the person becomes over-saturated with messages (@green2013field). 
 
 When the effect of $A$ is bigger in the presence of $B$ we call this a positive interaction, and when it is smaller in the presence of $B$ we call it a negative interaction. Note that the direction of the interaction depends on the difference in the effects. Suppose, for example, that the effect of $A$ when $B$ is absent is -10 and when $B$ is present it is -7. Even though these effects are negative, the interaction is positive because the presence of $B$ increases the effect of $A$ by 3. 
 
-The most straightforward way to investigate interactions is through the two-way factorial design. Participants in a study are assigned -- usually in equal proportions -- to one of four conditions: 1) neither $A$ nor $B$; 2) $A$ only; 3) $B$ only; or, 4) both $A$ and $B$. Those assigned to condition 1 don't receive any effects, those assigned to 2 experience the effects of $A$ only, those assigned to 3 receive the effects of $B$ only, and those assigned to 4 receive both the effects of $A$ and $B$, as well as whatever extra effect the combination of $A$ and $B$ produce (the interaction). To isolate the interaction, we must firstly use the groups 1 and 2 to estimate the 'pure' effect of $A$ and groups 1 and 3 to estimate the 'pure' effect of $B$. When we subtract these two estimates from group 4, we are thus left with the interaction. 
+The most straightforward way to investigate interactions is through the two-way factorial design. Participants in a study are assigned -- usually in equal proportions -- to one of four conditions: 1) neither $A$ nor $B$; 2) $A$ only; 3) $B$ only; or, 4) both $A$ and $B$. Those assigned to condition 1 don't receive any effects, those assigned to 2 experience the effects of $A$ only, those assigned to 3 receive the effects of $B$ only, and those assigned to 4 receive both the effects of $A$ and $B$, as well as whatever extra effect the combination of $A$ and $B$ produce (the interaction). To isolate the interaction, we must firstly use the groups 1 and 2 to estimate the 'pure' effect of $A$ and groups 1 and 3 to estimate the 'pure' effect of $B$. When we subtract these two estimates from group 4, we are left with the interaction. 
 
-As may be clear from this description, however, estimating all of these quantities at once requires a lot of data to achieve statistical precision. Exactly how big does a researcher's design have to have at least 80\% probability of rejecting the null hypothesis of no effect for a given effect size? This is a surprisingly difficult question to answer, because answering it accurately depends upon the specific model of the potential outcomes the researcher has in mind. As a result, many researchers use rules of thumb that may lead to systematic over- or under-confidence. Using the MIDA framework and design simulation, however, we can provide a flexible answer to this question that does not rely on rules of thumb. 
+As may be clear from this description, however, estimating all of these quantities at once requires a lot of data to achieve statistical precision. Exactly how big does a researcher's design have to be in order to have at least 80\% probability of rejecting the null hypothesis of no effect for a given effect size? This is a surprisingly difficult question to answer, because answering it accurately depends upon the specific model of the potential outcomes the researcher has in mind. As a result, many researchers use rules of thumb that may lead to systematic over- or under-confidence. Using the MIDA framework and design simulation, however, we can provide a flexible answer to this question that does not rely on rules of thumb. 
 
 ## Design Declaration
 
@@ -152,13 +152,13 @@ designs <- quick_design(two_way_factorial_template,
                         beta_B = 0,
                         beta_AB = .25)
 diagnoses_N <- diagnose_design(designs, sims = 1000, bootstrap = FALSE)
-diagnosis <- diagnose_design(design, sims = 1000, bootstrap_sims = 1000)
+diagnosis <- diagnose_design(design, sims = 10000, bootstrap_sims = 1000)
 saveRDS(diagnoses_N,"two_way_factorial_diagnoses_N.RDS")
 saveRDS(diagnosis,"two_way_factorial_diagnosis.RDS")
 ```
 
 ```{r,eval = FALSE, echo = TRUE}
-diagnosis <- diagnose_design(design, sims = 1000, bootstrap_sims = 1000)
+diagnosis <- diagnose_design(design, sims = 10000, bootstrap_sims = 1000)
 ```
 
 ```{r,echo = FALSE}
