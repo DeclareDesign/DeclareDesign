@@ -21,10 +21,14 @@ Our design library characterizes designs informally and in code using the $<M,I,
 
 # Designs
 
-  - [Two-Arm Experiment](../articles/two_arm.html)
 
-  - [Regression Discontinuity](../articles/regression_discontinuity.html)
+------------- ---------------- ---------------------------
+Experimental  Causal inference [Two-Arm Experiment](../articles/two_arm.html)
 
+Experimental  Causal inference [Two-Way Factorial Experiment](../articles/two_way_factorial.html)
+                             
+Observational Causal inference [Regression Discontinuity](../articles/regression_discontinuity.html)
+------------- ---------------- ---------------------------
 
 
 
