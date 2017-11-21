@@ -99,7 +99,7 @@ As may be clear from this description, however, estimating all of these quantiti
 
 - **I**nquiry: 
 
-    We wish to know the true average interaction, $E[\beta_{AB}]$. Note $Y_{AB} - Y_B = \beta_{AB} + \beta_A$, and $Y_{A} - Y_{0} = \beta_A$. Thus, the expected difference of these terms is equal to the interaction: $E[(Y_{AB} - Y_B) - (Y_A - Y_0)] = \beta_{AB}$.  
+    We wish to know the true average interaction, $\beta_{AB}$. Note $Y_{AB} - Y_B = \beta_{AB} + \beta_A$, and $Y_{A} - Y_{0} = \beta_A$. Thus, the expected difference of these terms is equal to the interaction: $E[(Y_{AB} - Y_B) - (Y_A - Y_0)] = \beta_{AB}$.  
 
 - **D**ata strategy: 
     
