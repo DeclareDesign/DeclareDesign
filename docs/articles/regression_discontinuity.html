@@ -93,17 +93,19 @@
 <p>Thistlewhite and Campbell introduced the regression discontinuity design in the 1960s to study the impact of scholarships on academic success. Their insight was that students with a test score just above a scholarship cutoff were plausibly comparable to students whose scores were just below the cutoff, so any differences in future academic success could be attributed to the scholarship itself.</p>
 <p>Regression discontinuity designs identify a <em>local</em> average treatment effect: the average effect of treatment <em>exactly at the cutoff</em>. The main trouble with the design is that there is vanishingly little data exactly at the cutoff, so any answer strategy needs to use data that is some distance away from the cutoff. The further away from the cutoff we move, the larger the threat of bias.</p>
 <p>We’ll consider an application of the regression discontinuity design that examines party incumbency advantage – the effect of a party winning an election on its vote margin in the next election.</p>
-<div id="design-declaration" class="section level3">
-<h3 class="hasAnchor">
-<a href="#design-declaration" class="anchor"></a>Design Declaration</h3>
+<div id="design-declaration" class="section level2">
+<h2 class="hasAnchor">
+<a href="#design-declaration" class="anchor"></a>Design Declaration</h2>
 <ul>
 <li>
 <p><strong>M</strong>odel:</p>
 <p>Regression discontinuity designs have four components: A running variable, a cutoff, a treatment variable, and an outcome. The cutoff determines which units are treated depending on the value of the running variable.</p>
 <p>In our example, the running variable <span class="math inline">\(X\)</span> is the Democratic party’s margin of victory at time <span class="math inline">\(t-1\)</span>; and the treatment, <span class="math inline">\(Z\)</span>, is whether the Democratic party won the election in time <span class="math inline">\(t-1\)</span>. The outcome, <span class="math inline">\(Y\)</span>, is the Democratic vote margin at time <span class="math inline">\(t\)</span>. We’ll consider a population of 1,000 of these pairs of elections.</p>
 <p>A major assumption required for regression discontinuity is that the conditional expectation functions for both treatment and control potential outcomes are continuous at the cutoff.<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> To satisfy this assumption, we specify two smooth conditional expectation functions, one for each potential outcome. The figure plots <span class="math inline">\(Y\)</span> (the Democratic vote margin at time <span class="math inline">\(t\)</span>) against <span class="math inline">\(X\)</span> (the margin at time <span class="math inline">\(t-1\)</span>). We’ve also plotted the true conditional expectation functions for the treated and control potential outcomes. The solid lines correspond to the observed data and the dashed lines correspond to the unobserved data.</p>
-<p><img src="regression_discontinuity_files/figure-html/unnamed-chunk-3-1.png" width="672"></p>
 </li>
+</ul>
+<p><img src="regression_discontinuity_files/figure-html/unnamed-chunk-3-1.png" width="672"></p>
+<ul>
 <li>
 <p><strong>I</strong>nquiry:</p>
 <p>Our estimand is the effect of a Democratic win in an election on the Democratic vote margin of the next election, when the Democratic vote margin of the first election is zero. Formally, it is the difference in the conditional expectation functions of the control and treatment potential outcomes when the running variable is exactly zero. The black vertical line in the plot shows this difference.</p>
@@ -153,46 +155,24 @@ estimator &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
 design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_design.html">declare_design</a></span>(
  population, potential_outcomes, estimand, sampling, reveal_outcomes, estimator)</code></pre></div>
 </div>
-<div id="takeaways" class="section level3">
-<h3 class="hasAnchor">
-<a href="#takeaways" class="anchor"></a>Takeaways</h3>
+<div id="takeaways" class="section level2">
+<h2 class="hasAnchor">
+<a href="#takeaways" class="anchor"></a>Takeaways</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">diagnosis &lt;-<span class="st"> </span><span class="kw"><a href="../reference/diagnose_design.html">diagnose_design</a></span>(rd_design, <span class="dt">sims =</span> <span class="dv">10000</span>, <span class="dt">bootstrap_sims =</span> <span class="dv">1000</span>)</code></pre></div>
-<table class="table">
-<thead><tr class="header">
-<th align="right">Mean Estimate</th>
-<th align="right">Mean Estimand</th>
-<th align="right">Bias</th>
-<th align="right">SE(bias)</th>
-<th align="right">Power</th>
-<th align="right">SE(Power)</th>
-<th align="right">Coverage</th>
-<th align="right">SE(Coverage)</th>
-</tr></thead>
-<tbody><tr class="odd">
-<td align="right">0.104</td>
-<td align="right">0.15</td>
-<td align="right">-0.046</td>
-<td align="right">0.008</td>
-<td align="right">0.051</td>
-<td align="right">0.002</td>
-<td align="right">0.951</td>
-<td align="right">0.002</td>
-</tr></tbody>
-</table>
 <p>We highlight three takeaways. First, the power of this design is very low: with 1,000 units we do not achieve even 10% statistical power. However, our estimates of the uncertainty are not too wide: the coverage probability indicates that our confidence intervals indeed contain the estimand 95% of the time as they should. Our answer strategy is highly uncertain because the fourth-order polynomial specification in regression model gives weights to the data that greatly increase the variance of the estimator (<span class="citation">Gelman and Imbens (2017)</span>). In the exercises we explore alternative answer strategies that perform better.</p>
 <p>Second, the design is biased because polynomial approximations of the average effect at exactly the point of the threshold will be inaccurate in small samples (<span class="citation">Sekhon and Titiunik (2017)</span>), especially as units farther away from the cutoff are incorporated into the answer strategy. We know that the estimated bias is not due to simulation error by examining the bootstrapped standard error of the bias estimates.</p>
 <p>Finally, from the figure, we can see how poorly the average effect at the threshold approximates the average effect for all units. The average treatment effect among the treated (to the right of the threshold in the figure) is negative, whereas at the threshold it is positive. This clarifies that the estimand of the regression discontinuity design, the difference at the cutoff, is only relevant for a small – and possibly empty – set of units very close to the cutoff.</p>
 </div>
-<div id="further-reading" class="section level3">
-<h3 class="hasAnchor">
-<a href="#further-reading" class="anchor"></a>Further Reading</h3>
+<div id="further-reading" class="section level2">
+<h2 class="hasAnchor">
+<a href="#further-reading" class="anchor"></a>Further Reading</h2>
 <p>Since its rediscovery by social scientists in the late 1990s, the regression discontinuity design has been widely used to study diverse causal effects such as: prison on recidivism (<span class="citation">Mitchell et al. (2017)</span>); China’s one child policy on human capital (<span class="citation">Qin, Zhuang, and Yang (2017)</span>); eligibility for World Bank loans on political liberalization (<span class="citation">Carnegie and Samii (2017)</span>); and anti-discrimination laws on minority employment (<span class="citation">Hahn, Todd, and Van der Klaauw (1999)</span>).</p>
 <p>We’ve discussed a “sharp” regression discontinuity design in which all units above the threshold were treated and all units below were untreated. In fuzzy regression discontinuity designs, some units above the cutoff remain untreated or some units below take treatment. This setting is analogous to experiments that experience noncompliance and may require instrumental variables approaches to the answer strategy (see <strong>Compliance is a Potential Outcome</strong>).</p>
 <p>Geographic regression discontinuity designs use distance to a border as the running variable: units on one side of the border are treated and units on the other are untreated. <span class="citation">Keele and Titiunik (2016)</span> use such a design to study whether voters are more likely to turn out when they have the opportunity to vote directly on legislation on so-called ballot initiatives. A complication of this design is how to measure distance to the border in two dimensions.</p>
 </div>
-<div id="exercises" class="section level3">
-<h3 class="hasAnchor">
-<a href="#exercises" class="anchor"></a>Exercises</h3>
+<div id="exercises" class="section level2">
+<h2 class="hasAnchor">
+<a href="#exercises" class="anchor"></a>Exercises</h2>
 <ol style="list-style-type: decimal">
 <li><p><span class="citation">Gelman and Imbens (2017)</span> point out that higher order polynomial regression specifications lead to extreme regression weights. One approach to obtaining better estimates is to select a bandwidth, <span class="math inline">\(h\)</span>, around the cutoff, and run a linear regression. Declare a sampling procedure that subsets the data to a bandwidth around the threshold, as well as a first order linear regression specification, and analyze how the power, bias, RMSE, and coverage of the design vary as a function of the bandwidth.</p></li>
 <li><p>The <code>rdrobust</code> estimator in the <code>rdrobust</code> package implements a local polynomial estimator that automatically selects a bandwidth for the RD analysis and bias-corrected confidence intervals. Declare another estimator using the <code>rdrobust</code> function and add it to the design. How does the coverage and bias of this estimator compare to the regression approaches declared above?</p></li>
@@ -241,7 +221,11 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li><a href="#references">References</a></li>
+<li><a href="#design-declaration">Design Declaration</a></li>
+      <li><a href="#takeaways">Takeaways</a></li>
+      <li><a href="#further-reading">Further Reading</a></li>
+      <li><a href="#exercises">Exercises</a></li>
+      <li><a href="#references">References</a></li>
       </ul>
 </div>
       </div>
