@@ -71,10 +71,10 @@ attr(regression_discontinuity_template,"tips") <-
 
 
 <div class="btn-group">
-  <a class="btn btn-primary" href="http://declaredesign.org/articles/regression_discontinuity_factorial.R">
+  <a class="btn btn-primary" href="http://declaredesign.org/articles/regression_discontinuity.R">
     <i class="fa fa-code" title = "Download code for design" fa-2x></i> Download code
   </a>
-  <a class="btn btn-primary" href="http://declaredesign.org/articles/regression_discontinuity_template.Rds">
+  <a class="btn btn-primary" href="http://declaredesign.org/articles/regression_discontinuity_template.RDS">
     <i class="fa fa-clipboard" title = "Download template for design" fa-2x></i> Download template
   </a>
   <a class="btn btn-primary" href="http://shiny.declaredesign.org:8000/">

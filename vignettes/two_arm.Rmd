@@ -53,7 +53,7 @@ attr(two_arm_template,"tips") <- c(
   <a class="btn btn-lg btn-primary" href="http://declaredesign.org/articles/two_arm.R">
     <i class="fa fa-code" title = "Download code for design" fa-2x></i> Download code
   </a>
-  <a class="btn btn-lg btn-primary" href="http://declaredesign.org/articles/two_arm_template.Rds">
+  <a class="btn btn-lg btn-primary" href="http://declaredesign.org/articles/two_arm_template.RDS">
     <i class="fa fa-clipboard" title = "Download template for design" fa-2x></i> Download template
   </a>
   <a class="btn btn-lg btn-primary" href="http://shiny.declaredesign.org:8000/">
