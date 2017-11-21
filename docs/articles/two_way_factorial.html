@@ -105,7 +105,7 @@
 </li>
 <li>
 <p><strong>I</strong>nquiry:</p>
-<p>We wish to know the true average interaction, <span class="math inline">\(E[\beta_{AB}]\)</span>. Note <span class="math inline">\(Y_{AB} + Y_0 = \beta_A + \beta_B + \beta_{AB} + 2\epsilon\)</span>, and <span class="math inline">\(Y_{A} + Y_{B} = \beta_A + \beta_B + 2\epsilon\)</span>. Thus, the expected difference of these terms is equal to the interaction: <span class="math inline">\(E[(Y_{AB} + Y_0) - (Y_A + Y_B)] = E[\beta_{AB}]\)</span>.</p>
+<p>We wish to know the true average interaction, <span class="math inline">\(E[\beta_{AB}]\)</span>. Note <span class="math inline">\(Y_{AB} - Y_B = \beta_{AB} + \beta_A\)</span>, and <span class="math inline">\(Y_{A} - Y_{0} = \beta_A\)</span>. Thus, the expected difference of these terms is equal to the interaction: <span class="math inline">\(E[(Y_{AB} - Y_B) - (Y_A - Y_0)] = \beta_{AB}\)</span>.</p>
 </li>
 <li>
 <p><strong>D</strong>ata strategy:</p>
@@ -133,7 +133,7 @@ potential_outcomes &lt;-<span class="st"> </span><span class="kw"><a href="../re
 
 <span class="co"># Inquiry ----------------------------------------------------------------------</span>
 estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(
-  <span class="dt">interaction =</span> <span class="kw">mean</span>((Y_Z_T4 <span class="op">+</span><span class="st"> </span>Y_Z_T1) <span class="op">-</span><span class="st"> </span>(Y_Z_T2 <span class="op">+</span><span class="st"> </span>Y_Z_T3)), 
+  <span class="dt">interaction =</span> <span class="kw">mean</span>((Y_Z_T4 <span class="op">-</span><span class="st"> </span>Y_Z_T3) <span class="op">-</span><span class="st"> </span>(Y_Z_T2 <span class="op">-</span><span class="st"> </span>Y_Z_T1)), 
   <span class="dt">label =</span> <span class="st">"interaction"</span>)
 
 <span class="co"># Data Strategy ----------------------------------------------------------------</span>
@@ -184,7 +184,7 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 </tr></tbody>
 </table>
 <p>The first thing to note about the design is that it produces an unbiased estimate of the quantity we care about: the average estimate is equal to the average estimand, at 0.25. The design exhibits good coverage too, with the estimand falling within the estimated confidence intervals roughly 95% of the time.</p>
-<p>Note, however, that the power of this design is very low. Even with 1000 subjects, at 50% power, whether or not we detect the reasonably large one-quarter standard deviation effect is essentially a coin toss. Half of the time we run the risk of erroneously concluding that the treatments have no effect overall, whereas in combination they do in fact produce a fairly large effect.</p>
+<p>Note, however, that the power of this design is very low. Even with 1000 subjects, at 50% power, whether or not we detect the reasonably large one-quarter standard deviation effect is essentially a coin toss. Half of the time we run the risk of erroneously maintaining a null of no effect, whereas in combination the treatments do in fact produce a fairly large effect.</p>
 <p>We can use the design template <code>two_way_factorial_template</code> to quickly declare an array of designs that increment the <span class="math inline">\(N\)</span> from 150 to 3,000 by increments of 150. Diagnosing and plotting the results of this exercise reveals that we would require over 2,000 respondents to reach statistical power at the conventional 80% level.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">designs &lt;-<span class="st"> </span><span class="kw"><a href="../reference/quick_design.html">quick_design</a></span>(two_way_factorial_template,
                         <span class="dt">N =</span> <span class="kw">seq</span>(<span class="dv">150</span>,<span class="dv">3000</span>,<span class="dv">150</span>),  
