@@ -36,7 +36,7 @@ two_way_factorial_template <- function(N = c(30, 100, 500, 1000),
   
   # Inquiry ----------------------------------------------------------------------
   estimand <- declare_estimand(
-    interaction = mean((Y_Z_T4 + Y_Z_T1) - (Y_Z_T2 + Y_Z_T3)), 
+    interaction = mean((Y_Z_T4 - Y_Z_T3) - (Y_Z_T2 - Y_Z_T1)), 
     label = "interaction")
   
   # Data Strategy ----------------------------------------------------------------
@@ -99,7 +99,7 @@ As may be clear from this description, however, estimating all of these quantiti
 
 - **I**nquiry: 
 
-    We wish to know the true average interaction, $E[\beta_{AB}]$. Note $Y_{AB} + Y_0 = \beta_A + \beta_B + \beta_{AB} + 2\epsilon$, and $Y_{A} + Y_{B} = \beta_A + \beta_B + 2\epsilon$. Thus, the expected difference of these terms is equal to the interaction: $E[(Y_{AB} + Y_0) - (Y_A + Y_B)] = E[\beta_{AB}]$.  
+    We wish to know the true average interaction, $E[\beta_{AB}]$. Note $Y_{AB} - Y_B = \beta_{AB} + \beta_A$, and $Y_{A} - Y_{0} = \beta_A$. Thus, the expected difference of these terms is equal to the interaction: $E[(Y_{AB} - Y_B) - (Y_A - Y_0)] = \beta_{AB}$.  
 
 - **D**ata strategy: 
     
@@ -128,7 +128,7 @@ potential_outcomes <- declare_potential_outcomes(
 
 # Inquiry ----------------------------------------------------------------------
 estimand <- declare_estimand(
-  interaction = mean((Y_Z_T4 + Y_Z_T1) - (Y_Z_T2 + Y_Z_T3)), 
+  interaction = mean((Y_Z_T4 - Y_Z_T3) - (Y_Z_T2 - Y_Z_T1)), 
   label = "interaction")
 
 # Data Strategy ----------------------------------------------------------------
@@ -202,7 +202,7 @@ if(exists("diagnosis")) {
 
 The first thing to note about the design is that it produces an unbiased estimate of the quantity we care about: the average estimate is equal to the average estimand, at `r mean_estimate`. The design exhibits good coverage too, with the estimand falling within the estimated confidence intervals roughly `r coverage`% of the time.
   
-Note, however, that the power of this design is very low. Even with 1000 subjects, at `r power`% power, whether or not we detect the reasonably large one-quarter standard deviation effect is essentially a coin toss. Half of the time we run the risk of erroneously concluding that the treatments have no effect overall, whereas in combination they do in fact produce a fairly large effect.
+Note, however, that the power of this design is very low. Even with 1000 subjects, at `r power`% power, whether or not we detect the reasonably large one-quarter standard deviation effect is essentially a coin toss. Half of the time we run the risk of erroneously maintaining a null of no effect, whereas in combination the treatments do in fact produce a fairly large effect.
   
 We can use the design template `two_way_factorial_template` to quickly declare an array of designs that increment the $N$ from 150 to 3,000 by increments of 150. Diagnosing and plotting the results of this exercise reveals that we would require over 2,000 respondents to reach statistical power at the conventional 80% level.
 
@@ -230,7 +230,9 @@ ggplot(
 geom_point(color = "#C67800") +
 geom_smooth(se = FALSE, size = .5, color = "#205C8A", method = "loess") +
 scale_y_continuous(name = "Power",limits = c(0,1.1),breaks = c(seq(0,1,.25),.8),minor_breaks = NULL) +
-scale_x_continuous(name = "N",breaks = c(seq(0,3000,500),min_sample)) + 
+scale_x_continuous(name = "N",breaks = c(500,1000,1500,2000,min_sample,2500,3000), 
+labels =  c(500,1000,1500,2000,paste0("\n",min_sample),2500,3000)
+) + 
 geom_hline(yintercept = .8,size = .1) +
 geom_vline(xintercept = min_sample,size = .1) +
    theme_bw() +
