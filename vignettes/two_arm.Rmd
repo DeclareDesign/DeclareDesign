@@ -49,8 +49,18 @@ attr(two_arm_template,"tips") <- c(
 
 ```
 
+<div class="btn-group">
+  <a class="btn btn-lg btn-primary" href="http://declaredesign.org/articles/two_arm.R">
+    <i class="fa fa-code" title = "Download code for design" fa-2x></i> Download code
+  </a>
+  <a class="btn btn-lg btn-primary" href="http://declaredesign.org/articles/two_arm_template.Rds">
+    <i class="fa fa-clipboard" title = "Download template for design" fa-2x></i> Download template
+  </a>
+  <a class="btn btn-lg btn-primary" href="http://shiny.declaredesign.org:8000/">
+    <i class="fa fa-area-chart" title = "Go to the design inspector" fa-2x></i> Inspect design
+  </a>
+</div>
 
-[Download code for design](http://declaredesign.org/articles/two_arm.R)
 
 Often we want to learn about the causal effect of one thing on something else -- say, the effect of taking a pill on a person becoming healthy. We can define the effect of a cause on an outcome as the difference of the how the outcomes potentially would have looked under two states of the world: the potential outcome in a world where the cause is present and the potential outcome in a world where it is absent. Were we able to observe that a person was sick in a world where they took the pill *and* sick in a world where they didn't, for example, we would infer that the pill did not have any causal effect on their health.
 

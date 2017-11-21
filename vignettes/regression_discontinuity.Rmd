@@ -69,7 +69,18 @@ attr(regression_discontinuity_template,"tips") <-
 		)
 ```
 
-[Download code for design](http://declaredesign.org/articles/regression_discontinuity.R)
+
+<div class="btn-group">
+  <a class="btn btn-primary" href="http://declaredesign.org/articles/regression_discontinuity_factorial.R">
+    <i class="fa fa-code" title = "Download code for design" fa-2x></i> Download code
+  </a>
+  <a class="btn btn-primary" href="http://declaredesign.org/articles/regression_discontinuity_template.Rds">
+    <i class="fa fa-clipboard" title = "Download template for design" fa-2x></i> Download template
+  </a>
+  <a class="btn btn-primary" href="http://shiny.declaredesign.org:8000/">
+    <i class="fa fa-area-chart" title = "Go to the design inspector" fa-2x></i> Inspect design
+  </a>
+</div>
 
 
 Regression discontinuity designs exploit substantive knowledge that treatment is assigned in a particular way: everyone above a threshold is assigned to treatment and everyone below it is not. Even though researchers do not control the assignment, substantive knowledge about the threshold serves as a basis for a strong identification claim.
