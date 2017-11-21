@@ -88,7 +88,9 @@
     
     
 <div class="contents">
-<p><a href="http://declaredesign.org/articles/regression_discontinuity.R">Download code for design</a></p>
+<div class="btn-group">
+<p><a class="btn btn-primary" href="http://declaredesign.org/articles/regression_discontinuity_factorial.R"> <i class="fa fa-code" title="Download code for design" fa-2x></i> Download code </a> <a class="btn btn-primary" href="http://declaredesign.org/articles/regression_discontinuity_template.Rds"> <i class="fa fa-clipboard" title="Download template for design" fa-2x></i> Download template </a> <a class="btn btn-primary" href="http://shiny.declaredesign.org:8000/"> <i class="fa fa-area-chart" title="Go to the design inspector" fa-2x></i> Inspect design </a></p>
+</div>
 <p>Regression discontinuity designs exploit substantive knowledge that treatment is assigned in a particular way: everyone above a threshold is assigned to treatment and everyone below it is not. Even though researchers do not control the assignment, substantive knowledge about the threshold serves as a basis for a strong identification claim.</p>
 <p>Thistlewhite and Campbell introduced the regression discontinuity design in the 1960s to study the impact of scholarships on academic success. Their insight was that students with a test score just above a scholarship cutoff were plausibly comparable to students whose scores were just below the cutoff, so any differences in future academic success could be attributed to the scholarship itself.</p>
 <p>Regression discontinuity designs identify a <em>local</em> average treatment effect: the average effect of treatment <em>exactly at the cutoff</em>. The main trouble with the design is that there is vanishingly little data exactly at the cutoff, so any answer strategy needs to use data that is some distance away from the cutoff. The further away from the cutoff we move, the larger the threat of bias.</p>
