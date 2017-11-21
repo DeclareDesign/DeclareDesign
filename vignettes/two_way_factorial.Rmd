@@ -69,6 +69,7 @@ attr(two_way_factorial_template, "tips") <- c(
 )
 ```
 
+[Download code for design](http://declaredesign.org/articles/two_way_factorial.R)
 
 Often we wish to know whether the effect of some causal factor increases or decreases in the presence of another causal factor. For example, when seeking to increase voter turnout among disadvantaged groups, is the effect of phone calls larger or smaller when voters have already received mail bearing the same message? If the message is made more convincing through repetition then we may expect phone calls increase turnout more effectively when voters have already received mail. However, a phone call might also be less effective when someone has already received mail, because the person becomes over-saturated with messages (@green2013field). 
 
