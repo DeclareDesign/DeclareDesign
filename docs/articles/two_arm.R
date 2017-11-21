@@ -35,7 +35,6 @@ attr(two_arm_template,"tips") <- c(
 	sigma = "Additional (square root of) variance added by treatment"
 )
 
-saveRDS(two_arm_template,"two_arm_template.RDS")
 
 
 ## ------------------------------------------------------------------------
@@ -78,12 +77,13 @@ if(exists("diagnosis")) {
   diagnosands <- get_diagnosands(diagnosis)
   diagnosis_table <- diagnosands[,c("mean_estimate","mean_estimand","bias","se(bias)","power","se(power)","coverage","se(coverage)")]
   names(diagnosis_table) <- c("Mean Estimate", "Mean Estimand", "Bias", "SE(Bias)", "Power", "SE(Power)", "Coverage", "SE(Coverage)")
-  knitr::kable(diagnosis_table,digits = 3)
   
   mean_estimate <- round(diagnosands[1,"mean_estimate"],3)
   mean_estimand <- round(diagnosands[1,"mean_estimand"],3)
   bias <- round(diagnosands[1,"bias"],3)
   power <- round(diagnosands[1,"power"],2)*100
   coverage <- round(diagnosands[1,"coverage"],2)*100
+  
+  knitr::kable(diagnosis_table,digits = 3)
 }
 

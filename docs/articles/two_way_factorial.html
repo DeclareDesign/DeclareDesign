@@ -35,7 +35,7 @@
   <a href="../articles/design_library.html">Design Library</a>
 </li>
 <li>
-  <a href="../reference/">Reference</a>
+  <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -88,6 +88,7 @@
     
     
 <div class="contents">
+<p><a href="http://declaredesign.org/articles/two_way_factorial.R">Download code for design</a></p>
 <p>Often we wish to know whether the effect of some causal factor increases or decreases in the presence of another causal factor. For example, when seeking to increase voter turnout among disadvantaged groups, is the effect of phone calls larger or smaller when voters have already received mail bearing the same message? If the message is made more convincing through repetition then we may expect phone calls increase turnout more effectively when voters have already received mail. However, a phone call might also be less effective when someone has already received mail, because the person becomes over-saturated with messages (<span class="citation">Green, McGrath, and Aronow (2013)</span>).</p>
 <p>When the effect of <span class="math inline">\(A\)</span> is bigger in the presence of <span class="math inline">\(B\)</span> we call this a positive interaction, and when it is smaller in the presence of <span class="math inline">\(B\)</span> we call it a negative interaction. Note that the direction of the interaction depends on the difference in the effects. Suppose, for example, that the effect of <span class="math inline">\(A\)</span> when <span class="math inline">\(B\)</span> is absent is -10 and when <span class="math inline">\(B\)</span> is present it is -7. Even though these effects are negative, the interaction is positive because the presence of <span class="math inline">\(B\)</span> increases the effect of <span class="math inline">\(A\)</span> by 3.</p>
 <p>The most straightforward way to investigate interactions is through the two-way factorial design. Participants in a study are assigned – usually in equal proportions – to one of four conditions: 1) neither <span class="math inline">\(A\)</span> nor <span class="math inline">\(B\)</span>; 2) <span class="math inline">\(A\)</span> only; 3) <span class="math inline">\(B\)</span> only; or, 4) both <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>. Those assigned to condition 1 don’t receive any effects, those assigned to 2 experience the effects of <span class="math inline">\(A\)</span> only, those assigned to 3 receive the effects of <span class="math inline">\(B\)</span> only, and those assigned to 4 receive both the effects of <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>, as well as whatever extra effect the combination of <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> produce (the interaction). To isolate the interaction, we must firstly use the groups 1 and 2 to estimate the ‘pure’ effect of <span class="math inline">\(A\)</span> and groups 1 and 3 to estimate the ‘pure’ effect of <span class="math inline">\(B\)</span>. When we subtract these two estimates from group 4, we are thus left with the interaction.</p>

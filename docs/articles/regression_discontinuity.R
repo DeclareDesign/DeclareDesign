@@ -17,7 +17,6 @@ tau = as.numeric(tau[1])
 cutoff = as.numeric(cutoff[1])
 bandwidth = as.numeric(bandwidth[1])
 poly_order = as.numeric(poly_order[1])
-
   
 # Model -------------------------------------------------------------------
 control <- function(X) {
@@ -57,7 +56,6 @@ attr(regression_discontinuity_template,"tips") <-
 		bandwidth = "Bandwidth around threshold from which to include units", 
 		poly_order = "Order of the polynomial regression used to estimate the jump at the cutoff"
 		)
-# saveRDS(regression_discontinuity_template,"regression_discontinuity_template.RDS") 
 
 ## ----include=FALSE-------------------------------------------------------
 control <- function(X) {
@@ -91,14 +89,15 @@ ggplot(plot_frame,aes(x = X, y = Y, color = as.factor(Z))) +
   xlab("Running Variable") + 
   geom_segment(aes(x = 0,xend = 0, y = control(0),yend = treatment(0)),color = "black") +
    theme_bw() +
-  theme(
-    axis.ticks = element_blank(),
-    axis.line = element_blank(),
-    panel.border = element_blank(),
-    panel.grid.major = element_line(color = '#eeeeee'),
-    strip.background = element_blank(),
-    legend.position = "bottom",
-    text = element_text(family = "Palatino"))
+      theme(
+        axis.ticks = element_blank(),
+        axis.line = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major = element_line(color = '#eeeeee'),
+        strip.background = element_blank(),
+        legend.position = "bottom",
+        text = element_text(family = "Helvetica")
+        )
 
 ## ---- eval = FALSE-------------------------------------------------------
 #  N <- 1000
@@ -139,17 +138,17 @@ ggplot(plot_frame,aes(x = X, y = Y, color = as.factor(Z))) +
 
 ## ----echo = FALSE, eval = FALSE------------------------------------------
 #  diagnosis <- diagnose_design(rd_template(), bootstrap = TRUE, sims = 10000,bootstrap_sims = 1000)
-#  saveRDS(diagnosis, file = "rd_diagnosis.RDS")
+#  saveRDS(diagnosis, file = "regression_discontinuity_diagnosis.RDS")
 
 ## ----echo = FALSE,eval = TRUE, include = FALSE---------------------------
-if(file.exists("rd_diagnosis.RDS")) diagnosis <- readRDS(file = "rd_diagnosis.RDS")
+if(file.exists("regression_discontinuity_diagnosis.RDS")) diagnosis <- readRDS(file = "regression_discontinuity_diagnosis.RDS")
 
 ## ---- eval = FALSE, echo = TRUE------------------------------------------
 #  diagnosis <- diagnose_design(rd_design, sims = 10000, bootstrap_sims = 1000)
 
 ## ----echo = FALSE--------------------------------------------------------
 if(exists("diagnosis")) {
-  cols = c("Mean Estimate"="mean_estimate",
+  cols <- c("Mean Estimate"="mean_estimate",
            "Mean Estimand"="mean_estimand",
            "Bias"="bias",
            "SE(bias)"="se(bias)",
