@@ -1,5 +1,10 @@
 ---
 title: "Two-Arm Experiment"
+editor_options:
+  chunk_output_type: inline
+output:
+  html_document:
+    df_print: paged
 bibliography: bib.bib
 ---
 
@@ -41,10 +46,11 @@ attr(two_arm_template,"tips") <- c(
 	sigma = "Additional (square root of) variance added by treatment"
 )
 
-saveRDS(two_arm_template,"two_arm_template.RDS")
 
 ```
 
+
+[Download code for design](http://declaredesign.org/articles/two_arm.R)
 
 Often we want to learn about the causal effect of one thing on something else -- say, the effect of taking a pill on a person becoming healthy. We can define the effect of a cause on an outcome as the difference of the how the outcomes potentially would have looked under two states of the world: the potential outcome in a world where the cause is present and the potential outcome in a world where it is absent. Were we able to observe that a person was sick in a world where they took the pill *and* sick in a world where they didn't, for example, we would infer that the pill did not have any causal effect on their health.
 
@@ -52,7 +58,7 @@ The problem is we can never observe our world in two counterfactual states at on
 
 How does this design work? One way to think about it is to compare the random assignment of the treatment to a random sampling procedure: in this design it is as though we take a representative sample from the two counterfactual states of the world. Seen in this way, the treatment and control groups are 'random samples' from the potential outcomes in a world where the cause is present and one in which it is absent. By taking the mean of the group that represents the treated potential outcomes and comparing it to the mean of the group that represents the untreated potential outcomes, we can construct a representative guess of the true average difference in the two states of the world. Just like in random sampling, as the size of our experiment grows our guess of the ATE will converge to the true ATE, implying that our design is unbiased. As we shall see, however, characterizing our uncertainty about our guesses can be complicated, even in such a simple design.  
 
-### Design Declaration
+## Design Declaration
 
 - **M**odel: 
     
@@ -100,7 +106,7 @@ two_arm <- declare_design(population, potential_outcomes, sampling,
 ```
 
 
-### Takeaways 
+## Takeaways 
 
 With the design declared we can run a diagnosis from Monte Carlo simulations of the design:
 
@@ -120,13 +126,14 @@ if(exists("diagnosis")) {
   diagnosands <- get_diagnosands(diagnosis)
   diagnosis_table <- diagnosands[,c("mean_estimate","mean_estimand","bias","se(bias)","power","se(power)","coverage","se(coverage)")]
   names(diagnosis_table) <- c("Mean Estimate", "Mean Estimand", "Bias", "SE(Bias)", "Power", "SE(Power)", "Coverage", "SE(Coverage)")
-  knitr::kable(diagnosis_table,digits = 3)
   
   mean_estimate <- round(diagnosands[1,"mean_estimate"],3)
   mean_estimand <- round(diagnosands[1,"mean_estimand"],3)
   bias <- round(diagnosands[1,"bias"],3)
   power <- round(diagnosands[1,"power"],2)*100
   coverage <- round(diagnosands[1,"coverage"],2)*100
+  
+  knitr::kable(diagnosis_table,digits = 3)
 }
 ```
 
@@ -136,11 +143,11 @@ The power of our design is good: if this simulation were to faithfully represent
 
 Note, however, that the coverage of the estimator is too high: our 95\% confidence intervals include the true effect `r coverage`\% of the time. This implies that our intervals are too wide, which in turn implies that our estimates of the variance of the difference in means are higher than they should be, leading us to fail to reject the null more often than we should. Why might this be the case? Recall for starters that if two variables are correlated, the variance of the difference of their means is equal to the sum of their respective variances and their covariance. While it is easy enough to estimate the population variance of the treatment group or the control group using the sample variance estimators, estimating the population covariance is very difficult because we never observe the treated and control potential outcomes simultaneously. It turns out that common estimators of the variance of a difference in means rely on a conservative rule of thumb to estimate the covariance of the potential outcomes: since the covariance cannot be any larger than the sum of the variances, conventional estimators often use the sum the two sample variances as an upper bound for the covariance.  
 
-### Further Reading
+## Further Reading
 
 To learn more about two-arm designs and the tradeoffs involved in designing them, see @Gerber2012. For a discussion of why conventional estimators of the variance of the difference in means are conservatively biased, and what to do about it, see @aronow2014sharp. 
 
-### Exercises
+## Exercises
 
  - Modify the estimator in the design to use the `lm_robust` function from the `estimatr` package. What happens to the coverage and power, and why?
 

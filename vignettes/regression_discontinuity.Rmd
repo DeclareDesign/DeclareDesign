@@ -28,7 +28,6 @@ tau = as.numeric(tau[1])
 cutoff = as.numeric(cutoff[1])
 bandwidth = as.numeric(bandwidth[1])
 poly_order = as.numeric(poly_order[1])
-
   
 # Model -------------------------------------------------------------------
 control <- function(X) {
@@ -68,7 +67,6 @@ attr(regression_discontinuity_template,"tips") <-
 		bandwidth = "Bandwidth around threshold from which to include units", 
 		poly_order = "Order of the polynomial regression used to estimate the jump at the cutoff"
 		)
-# saveRDS(regression_discontinuity_template,"regression_discontinuity_template.RDS") 
 ```
 
 [Download code for design](http://declaredesign.org/articles/regression_discontinuity.R)
@@ -82,7 +80,7 @@ Regression discontinuity designs identify a *local* average treatment effect: th
 
 We'll consider an application of the regression discontinuity design that examines party incumbency advantage -- the effect of a party winning an election on its vote margin in the next election.
 
-### Design Declaration
+## Design Declaration
 
   - **M**odel: 
     
@@ -116,7 +114,7 @@ control_frame <- data.frame(
 plot_frame <- rbind(treatment_frame, control_frame)
 ```
 
-    ```{r,echo=FALSE}
+```{r,echo=FALSE}
 ggplot(plot_frame,aes(x = X, y = Y, color = as.factor(Z))) + 
   geom_line(aes(linetype = observed)) +
   geom_point(data = mock_data, alpha = .2, size = .5) +
@@ -133,7 +131,8 @@ ggplot(plot_frame,aes(x = X, y = Y, color = as.factor(Z))) +
         panel.grid.major = element_line(color = '#eeeeee'),
         strip.background = element_blank(),
         legend.position = "bottom",
-        text = element_text(family = "Palatino"))
+        text = element_text(family = "Helvetica")
+        )
 ```
 
 
@@ -189,15 +188,15 @@ design <- declare_design(
 
 ```{r,echo = FALSE, eval = FALSE}
 diagnosis <- diagnose_design(rd_template(), bootstrap = TRUE, sims = 10000,bootstrap_sims = 1000)
-saveRDS(diagnosis, file = "rd_diagnosis.RDS")
+saveRDS(diagnosis, file = "regression_discontinuity_diagnosis.RDS")
 ```
 
 ```{r,echo = FALSE,eval = TRUE, include = FALSE}
-if(file.exists("rd_diagnosis.RDS")) diagnosis <- readRDS(file = "rd_diagnosis.RDS")
+if(file.exists("regression_discontinuity_diagnosis.RDS")) diagnosis <- readRDS(file = "regression_discontinuity_diagnosis.RDS")
 ```
 
 
-### Takeaways 
+## Takeaways 
 
 ```{r, eval = FALSE, echo = TRUE}
 diagnosis <- diagnose_design(rd_design, sims = 10000, bootstrap_sims = 1000)
@@ -205,7 +204,7 @@ diagnosis <- diagnose_design(rd_design, sims = 10000, bootstrap_sims = 1000)
 
 ```{r,echo = FALSE}
 if(exists("diagnosis")) {
-  cols = c("Mean Estimate"="mean_estimate",
+  cols <- c("Mean Estimate"="mean_estimate",
            "Mean Estimand"="mean_estimand",
            "Bias"="bias",
            "SE(bias)"="se(bias)",
@@ -227,7 +226,7 @@ Second, the design is biased because polynomial approximations of the average ef
 
 Finally, from the figure, we can see how poorly the average effect at the threshold approximates the average effect for all units. The average treatment effect among the treated (to the right of the threshold in the figure) is negative, whereas at the threshold it is positive. This clarifies that the estimand of the regression discontinuity design, the difference at the cutoff, is only relevant for a small -- and possibly empty -- set of units very close to the cutoff.
   
-### Further Reading
+## Further Reading
 
 Since its rediscovery by social scientists in the late 1990s, the regression discontinuity design has been widely used to study diverse causal effects such as: prison on recidivism (@Ojmarrh2017); China's one child policy on human capital (@qin2017); eligibility for World Bank loans on political liberalization (@carnegie2017international); and anti-discrimination laws on minority employment (@hahn1999evaluating). 
 
@@ -235,7 +234,7 @@ We've discussed a "sharp" regression discontinuity design in which all units abo
 
 Geographic regression discontinuity designs use distance to a border as the running variable: units on one side of the border are treated and units on the other are untreated. @keele2016natural use such a design to study whether voters are more likely to turn out when they have the opportunity to vote directly on legislation on so-called ballot initiatives. A complication of this design is how to measure distance to the border in two dimensions.
 
-### Exercises
+## Exercises
 
 1. @gelman2017high point out that higher order polynomial regression specifications lead to extreme regression weights. One approach to obtaining better estimates is to select a bandwidth, $h$, around the cutoff, and run a linear regression. Declare a sampling procedure that subsets the data to a bandwidth around the threshold, as well as a first order linear regression specification, and analyze how the power, bias, RMSE, and coverage of the design vary as a function of the bandwidth. 
   
