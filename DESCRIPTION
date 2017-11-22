@@ -38,5 +38,6 @@ Suggests:
     AER,
     dplyr,
     data.table,
-    sf
+    sf,
+    ggplot2
 VignetteBuilder: knitr

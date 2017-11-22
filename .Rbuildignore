@@ -1,5 +1,8 @@
 ^\.travis\.yml$
 README.md
+README.Rmd
+index.Rmd
+index.md
 ^.*\.Rproj$
 ^\.Rproj\.user$
 builtin_objects
@@ -8,6 +11,7 @@ appveyor.yml
 builtin_diagnosands
 CONDUCT.md
 ^docs$
+^docs/templates/.*$
 _pkgdown.yml
 deploy.sh
 install.R
