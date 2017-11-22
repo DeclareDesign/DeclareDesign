@@ -15,7 +15,7 @@
 <![endif]-->
 </head>
 <body>
-    <div class="container template-home">
+    <div class="container template-vignette">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
@@ -79,41 +79,52 @@
 
       
       </header><div class="row">
-  <div class="contents col-md-9">
-    <div id="declaredesign" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#declaredesign" class="anchor"></a>DeclareDesign</h1></div>
+  <div class="col-md-9">
+    
 
-<p>DeclareDesign is statistical software to aid researchers in characterizing and diagnosing research designs — including experiments, quasi-experiments, and observational studies.</p>
+    
+    
+<div class="contents">
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+<div id="declaredesign-declare-and-diagnose-research-designs-to-understand-and-improve-them-" class="section level1">
+<div class="page-header"><h1 class="hasAnchor">
+<a href="#declaredesign-declare-and-diagnose-research-designs-to-understand-and-improve-them-" class="anchor"></a>DeclareDesign: Declare and diagnose research designs to understand and improve them.</h1></div>
+<p><strong>DeclareDesign</strong> is statistical software to aid researchers in characterizing and diagnosing research designs — including experiments, quasi-experiments, and observational studies.</p>
+<p><strong>DeclareDesign</strong> is statistical software that makes it easier for researchers without advanced programming skills to characterize and and learn about the properties of research designs before implementation. Ex ante declaration and diagnosis of designs can help researchers clarify their limitations and improve their properties. It can make it easier for readers to evaluate a research strategy prior to implementation and without access to results. It can also make it easier for designs to be shared and to be critiqued.</p>
 <p>The motivation for the software is described in a <a href="http://declaredesign.org/paper.pdf">working paper</a> by the authors.</p>
-<p>DeclareDesign consists of a core package, documented on this web site, as well as three companion packages that stand on their own but can also be used to complement the core package. They are:</p>
-<ol>
+<p><strong>DeclareDesign</strong> consists of a core package, which is documented on this web site, as well as three companion packages that stand on their own but can also be used to complement the core package. They are:</p>
+<ol style="list-style-type: decimal">
 <li>
-<a href="http://randomizr.declaredesign.org">randomizr</a>: Easy-to-use tools for common forms of random assignment and sampling.</li>
+<a href="http://randomizr.declaredesign.org">randomizr</a>: Easy to use tools for common forms of random assignment and sampling.</li>
 <li>
-<a href="http://fabricatr.declaredesign.org">fabricatr</a>: Tools for fabricating data to enable frontloading analysis decisions in social science research.</li>
+<a href="http://fabricatr.declaredesign.org">fabricatr</a>: Imagine your data before you collect it.</li>
 <li>
-<a href="http://estimatr.declaredesign.org">estimatr</a>: Fast estimators for social science research.</li>
+<a href="http://estimatr.declaredesign.org">estimatr</a>: Fast estimators for social scientists.</li>
 </ol>
-<p>To install all of the packages, use:</p>
-<pre><code>install.packages("DeclareDesign", dependencies = TRUE,
-  repos = c("http://R.declaredesign.org", "https://cloud.r-project.org"))</code></pre>
-<p>This software is in alpha release. Please contact the authors before using in experiments or published work.</p>
+<p><em>This software is in not yet ready for general release. Please contact the authors before using in experiments or published work. Specifications, names, and arguments of functions are subject to change.</em></p>
+<div id="installing-declaredesign" class="section level3">
+<h3 class="hasAnchor">
+<a href="#installing-declaredesign" class="anchor"></a>Installing DeclareDesign</h3>
+<p>To install the latest development release of all of the packages, please ensure that you are running version 3.3 or later of R and run the following code:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">"DeclareDesign"</span>, <span class="dt">dependencies =</span> <span class="ot">TRUE</span>, 
+                 <span class="dt">repos =</span> <span class="kw">c</span>(<span class="st">"http://R.declaredesign.org"</span>, <span class="st">"https://cloud.r-project.org"</span>))</code></pre></div>
 <p>This project is generously supported by a grant from the <a href="http://www.arnoldfoundation.org">Laura and John Arnold Foundation</a> and seed funding from <a href="http://egap.org">EGAP</a>.</p>
-<p>(c) 2017 Graeme Blair, Jasper Cooper, Alexander Coppock, and Macartan Humphreys. All rights reserved.</p>
+</div>
+</div>
 </div>
   </div>
 
-  <div class="col-md-3" id="sidebar">
-    <h2>Links</h2>
+  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
+    <h2 class="hasAnchor">
+<a href="#sidebar" class="anchor"></a>Links</h2>
 <ul class="list-unstyled">
-<li>Browse source code at <br><a href="https://github.com/DeclareDesign/DeclareDesign">https://​github.com/​DeclareDesign/​DeclareDesign</a>
+<li>
+<a href="https://github.com/DeclareDesign/DeclareDesign/issues">Report a bug</a><br>
 </li>
-<li>Report a bug at <br><a href="https://github.com/DeclareDesign/DeclareDesign/issues">https://​github.com/​DeclareDesign/​DeclareDesign/​issues</a>
+<li>
+<a href="https://github.com/DeclareDesign/DeclareDesign">Help develop DeclareDesign</a><br>
 </li>
 </ul>
-<h2>License</h2>
-<p><a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE.html">LICENSE</a></p>
 <h2>Citation</h2>
 <ul class="list-unstyled">
 <li><a href="authors.html">Citing DeclareDesign</a></li>
@@ -125,18 +136,14 @@
 <li>Alexander Coppock <br><small class="roles"> Author </small> </li>
 <li>Macartan Humphreys <br><small class="roles"> Author </small> </li>
 </ul>
-<h2>Dev status</h2>
-<ul class="list-unstyled">
-<li><a href="https://travis-ci.org/DeclareDesign/DeclareDesign"><img src="https://travis-ci.org/DeclareDesign/DeclareDesign.svg?branch=master" alt="Travis-CI Build Status"></a></li>
-<li><a href="https://ci.appveyor.com/project/DeclareDesign/DeclareDesign"><img src="https://ci.appveyor.com/api/projects/status/github/DeclareDesign/DeclareDesign?branch=master&amp;svg=true" alt="AppVeyor Build Status"></a></li>
-<li><a href="https://coveralls.io/github/DeclareDesign/DeclareDesign?branch=master"><img src="https://coveralls.io/repos/github/DeclareDesign/DeclareDesign/badge.svg?branch=master" alt="Coverage Status"></a></li>
-</ul>
 </div>
+
 </div>
 
 
-      <footer><div class="copyright">
+      <footer><div class="copyright" style="flex:3;">
   <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys.</p>
+  <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 
 <div class="pkgdown">

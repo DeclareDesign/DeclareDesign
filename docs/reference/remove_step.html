@@ -170,14 +170,14 @@
 #&gt; Step 3 (assignment): my_assignment ---------------------------------------------
 #&gt; 
 #&gt; Added variable: Z 
-#&gt;                0    1   NA
-#&gt;   Frequency   50   50    0
-#&gt;  Proportion 0.50 0.50 0.00
+#&gt;                0    1
+#&gt;   Frequency   50   50
+#&gt;  Proportion 0.50 0.50
 #&gt; 
 #&gt; Added variable: Z_cond_prob 
-#&gt;              0.5   NA
-#&gt;   Frequency  100    0
-#&gt;  Proportion 1.00 0.00
+#&gt;              0.5
+#&gt;   Frequency  100
+#&gt;  Proportion 1.00
 #&gt; </div><div class='input'>
  <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='replace_step.html'>replace_step</a></span>(<span class='no'>my_assignment_2</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
 #&gt; Design Summary
@@ -207,16 +207,16 @@
 #&gt; Step 3 (assignment): my_assignment_2 -------------------------------------------
 #&gt; 
 #&gt; Added variable: Z 
-#&gt;                0    1   NA
-#&gt;   Frequency   75   25    0
-#&gt;  Proportion 0.75 0.25 0.00
+#&gt;                0    1
+#&gt;   Frequency   75   25
+#&gt;  Proportion 0.75 0.25
 #&gt; 
 #&gt; Added variable: Z_cond_prob 
-#&gt;             0.25 0.75   NA
-#&gt;   Frequency   25   75    0
-#&gt;  Proportion 0.25 0.75 0.00
+#&gt;             0.25 0.75
+#&gt;   Frequency   25   75
+#&gt;  Proportion 0.25 0.75
 #&gt; </div><div class='input'>
- <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/dplyr/topics/mutate'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>after</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
+ <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>after</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
 #&gt; Design Summary
 #&gt; 
 #&gt; Step 1 (population): my_population ---------------------------------------------
@@ -244,21 +244,21 @@
 #&gt; Step 3 (assignment): my_assignment ---------------------------------------------
 #&gt; 
 #&gt; Added variable: Z 
-#&gt;                0    1   NA
-#&gt;   Frequency   50   50    0
-#&gt;  Proportion 0.50 0.50 0.00
+#&gt;                0    1
+#&gt;   Frequency   50   50
+#&gt;  Proportion 0.50 0.50
 #&gt; 
 #&gt; Added variable: Z_cond_prob 
-#&gt;              0.5   NA
-#&gt;   Frequency  100    0
-#&gt;  Proportion 1.00 0.00
+#&gt;              0.5
+#&gt;   Frequency  100
+#&gt;  Proportion 1.00
 #&gt; 
 #&gt; Step 4 (declare step): dplyr::mutate(income = noise^2) -------------------------
 #&gt; 
 #&gt; Added variable: income 
 #&gt;   min median mean  max   sd N_missing N_unique
 #&gt;  0.00   0.49 0.95 4.78 1.18         0      100
-#&gt; </div><div class='input'> <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/dplyr/topics/mutate'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>before</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
+#&gt; </div><div class='input'> <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>before</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
 #&gt; Design Summary
 #&gt; 
 #&gt; Step 1 (population): my_population ---------------------------------------------
@@ -292,14 +292,14 @@
 #&gt; Step 4 (assignment): my_assignment ---------------------------------------------
 #&gt; 
 #&gt; Added variable: Z 
-#&gt;                0    1   NA
-#&gt;   Frequency   50   50    0
-#&gt;  Proportion 0.50 0.50 0.00
+#&gt;                0    1
+#&gt;   Frequency   50   50
+#&gt;  Proportion 0.50 0.50
 #&gt; 
 #&gt; Added variable: Z_cond_prob 
-#&gt;              0.5   NA
-#&gt;   Frequency  100    0
-#&gt;  Proportion 1.00 0.00
+#&gt;              0.5
+#&gt;   Frequency  100
+#&gt;  Proportion 1.00
 #&gt; </div><div class='input'>
  <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'>remove_step</span>(<span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
 #&gt; Design Summary
@@ -341,8 +341,9 @@
 </div>
 
       <footer>
-      <div class="copyright">
+      <div class="copyright" style="flex:3;">
   <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys.</p>
+  <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 
 <div class="pkgdown">
