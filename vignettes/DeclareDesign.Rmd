@@ -15,20 +15,20 @@ set.seed(42)
 
 # Overview
 
-The `DeclareDesign` package has only about 10 functions. 
+The `DeclareDesign` package has a small set of core functions.  
 
-The core functions represent key steps in a research design, some of which may be used more than once, such as if you have two random assignment steps or multiple estimators.
+Six core functions are used to describe key steps in a research design:
 
-1. `declare_population`
-2. `declare_potential_outcomes`
-3. `declare_sampling`
-4. `declare_assignment`
-5. `declare_estimand`
-6. `declare_estimator`
+1. `declare_population` (describes the context of the design, as a distribution)
+2. `declare_potential_outcomes` (takes a context and adds potential outcomes) 
+3. `declare_sampling` (takes a population and selects a sample)
+4. `declare_assignment` (takes a population or sample and adds treatment assignments)
+5. `declare_estimand` (takes potential outcomes and calculates a quantity of interest)
+6. `declare_estimator` (takes data produced by sampling and assignment and returns estimates)
 
-The function `declare_design` can take any of these six functions, plus any R function that takes data and returns data.
+Each of the `declare_*` functions returns a **function**.  The function `declare_design` can take any of these six functions, plus any R function that takes data and returns data.
 
-The post-design-declaration commands are:
+There are also six core post-design-declaration commands:
 
 1. `modify_design` (takes a design and a set of modifications, returns a design)
 2. `diagnose_design` (takes a design, returns simulations and diagnosis)
@@ -43,27 +43,30 @@ There are a few other features:
 2. We can easily `declare_diagnosands`, which are things like power and bias, but the package defaults to the usual suspects.
 3. `reveal_outcomes` implements a general switching equation, which allows you to reveal outcomes from potential outcomes and a treatment assignment.
 
-# The Six Steps
 
-Each of the `declare_*` functions returns a **function**. 
+# Design Declaration
 
-In addition to using them to declare the design, you can just run them yourself, i.e. `your_potential_outcomes(your_population())`.
+Design declaration is achieved by possibly repeated application of some or all of the declaration functions. We describe the six core functions in turn.
 
 ## Population
 
-You can easily define a single-level population (i.e. just individuals). You can use any R function to create a variable, with `N` being the only privileged name. The output is a function, so calling `my_population()` makes a data.frame.
+The function `declare_population` can be used to define a single-level or multilevel population. The output is another function that produces a dataframe with possibly multiple background variables drawn.
+
+When creating a single level population the only privileged name is `N`, which is used to denote the size of the population. After this, declaration proceeds using existing R functions plus some tailored functions developed as part of `DeclareDesign`.   
+
+Here is an illustration of `declare_population` being used to create a single level dataset:
 
 ```{r}
 my_population <-
   declare_population(N = 1000,
   income = rnorm(N),
-  age = sample(18:95, N, replace = T))
+  age = sample(18:95, N, replace = TRUE))
 
 pop <- my_population()
 head(pop)
 ```
 
-Multi-level datasets are also easy to use. You set the `N` of each level in a call to `level()`. The `level` function is neat -- if the previous level has data, it merges so that there are N entries for each of the units at the higher level. We can handle non-fixed number of units at each level too.  In the `individuals` line, we've drawn a random number of individuals that are in each village.
+Multi-level datasets are also easy to produce. For multilevel data you set the `N` of each level in a call to `level()`. The `level` function is neat -- if the previous level has data, it merges so that there are N entries for each of the units at the higher level. `declare_population`  can handle non-fixed number of units at each level too.  In the example below, we have  drawn a random number of individuals that are in each village (see the `individuals` line).
 
 ```{r}
 my_population_nested <- declare_population(
@@ -75,9 +78,9 @@ my_population_nested <- declare_population(
 
 ```
 
-This says that there are 25 districts, 10 villages per districts, and then between 100 and 200 individuals per village. It creates districts first, then merges in villages, then merges in individuals using ID variables created at the level above it. 
+In this example there are 25 districts, 10 villages per districts, and then between 100 and 200 individuals per village. The function creates districts first, then merges in villages, then merges in individuals using ID variables created at the level above it. 
 
-Within those levels, you can easily include existing data (and also add variables to them if you wish):
+Within those levels, you can add in existing data (and also add new variables to them if you wish):
 
 ```{r}
 region_data <- data.frame(capital = c(1, 0, 0, 0, 0))
@@ -112,7 +115,7 @@ Note that `fabricatr` is one of the helper packages that come along with `Declar
 
 ## Potential outcomes
 
-A `declare_potential_outcomes` declaration returns a function. That function takes data and returns data with potential outcomes columns appended. There are two ways of declaring potential outcomes: a formula or as separate variables (as in `declare_population`).
+A `declare_potential_outcomes` declaration also returns a function. That function takes data and returns data with potential outcomes columns appended. There are two ways of declaring potential outcomes, either as a formula or as separate variables (as in `declare_population`).
 
 ### In a formula
 
@@ -134,7 +137,7 @@ head(my_potential_outcomes(pop))
 
 ### As separate variables
 
-The second way, which some may prefer, is to define each potential outcome yourself. This bakes in the condition names and assignment variable.
+The second way is to define each potential outcome yourself. This bakes in the condition names and assignment variable.
 
 ```{r}
 my_potential_outcomes <-
@@ -149,15 +152,22 @@ head(my_potential_outcomes(pop))
 
 A sampling function takes data and returns a sampled subset of the data. By default, `declare_sampling` understands arguments passed to `...` as `randomizr` arguments, but it's easy to supply your own function instead.
 
+Here we declare simple random sampling of 250 units.
+
 ```{r}
 my_sampling <- declare_sampling(n = 250)
 smp <- my_sampling(pop_pos)
 nrow(smp)
 ```
 
+In more general applications `declare_sampling` can allow for more complex stratified and  clustered sampling.
+
+
 ## Assignment
 
 Assignment declarations return functions of data that return data. If you use the `randomizr` defaults, then it appends to the dataset an assignment draw and a vector of observed probability weights.
+
+Here we declare simple random assignment of 25 units to a binary treatment. 
 
 ```{r}
 my_assignment <- declare_assignment(m = 25)
@@ -167,20 +177,23 @@ head(smp)
 ```
 
 
+
 ## Estimands
 
-Estimands run on data that includes potential outcomes, drawn earlier using a declare_potential_outcomes call.
+Estimands run on data that includes potential outcomes. 
+
+In this example, as in many applications, the estimand is defined as a function of potential outcomes: the average difference between outcomes for each unit when they are in the treatment condition and when they are in the control condition. The information needed to define the estimand is available thanks to the  `declare_potential_outcomes` call even though it will in general not be available in datasets used by researchers conducting estimation.
 
 ```{r}
 my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 my_estimand(pop_pos)
 ```
 
-The only part baked in to `DeclareDesign` is the naming structure, outcome_assignment_condition. You could write your own potential outcomes function to avoid this (and in most cases this would also require writing your own reveal_outcomes function).
+The only part baked in to `DeclareDesign` is the naming structure, outcome_assignment_condition. You could write your own potential outcomes function to avoid this (note though that in most cases this would also require writing your own `reveal_outcomes` function).
 
 ## Estimators
 
-To declare an estimator, you declare an estimator function, a difference_in_means by default. Optionally you also declare an estimand that is attached to the estimator.
+To declare an estimator, you declare an estimator function, a `difference_in_means` by default. Optionally you also declare an estimand that is attached to the estimator.
 
 ```{r}
 smp <- reveal_outcomes(smp)
@@ -188,7 +201,7 @@ my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
 my_estimator_dim(smp)
 ```
 
-Using our simple `lm` function with built-in robust standard errors (HC2! or your choice of other HC's) is similarly straightforward (it's also fast! in RCPP!).
+Using our simple `lm` function with built-in robust standard errors (HC2! or your choice of other HC's) is similarly straightforward (it's also fast, in RCPP!).
 
 ```{r}
 my_estimator_lm <- 
@@ -202,13 +215,14 @@ my_estimator_lm(smp)
 
 # Declaring Designs
 
-Instead of defining your population, potential outcomes, and so on, you simply give us a set of functions in the order of your DAG, i.e. beginning with a population, then potential outcomes, sampling, and so on. You can also put any `R` function in causal order that takes data and returns data -- including all the nice functions in `dplyr` like `mutate`, to allow you to create new variables and do things like collapse clusters
+Instead of defining your population, potential outcomes, and so on, you simply give us an ordered set of functions, e.g. beginning with a population, then potential outcomes, sampling, and so on. You can also put any `R` function in causal order that takes data and returns data -- including all the nice functions in `dplyr` like `mutate`, to allow you to create new variables and do things like collapse clusters.
+
+Here is an example of a design declaration:
 
 ```{r}
 design <- declare_design(my_population,
                          my_potential_outcomes,
                          my_estimand,
-                         dplyr::mutate(big_income = 5*income), 
                          my_sampling,
                          my_assignment,
                          reveal_outcomes,
