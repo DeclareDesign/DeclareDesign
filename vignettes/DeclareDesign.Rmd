@@ -292,7 +292,7 @@ head(pop_pos_custom[, c("u", "Y_Z_0", "Y_Z_1")])
 
 ## Custom Sampling
 
-Again, you can still use a totally separate custom sampling function easily. In this case, you are asked to provide a function that takes population data and returns sampled data, i.e. you draw the sample and then subset. You can also include inclusion weights if you wish in the function (as the default function does). 
+Again, you can still use a custom sampling function easily. In this case, the requirement is simply that the function  takes population data and returns sampled data. You can also include inclusion weights if you wish in the function (as the default function does). 
 
 ```{r}
 my_sampling_function <- function(data) {
@@ -358,7 +358,7 @@ my_estimator_custom(smp)
 
 ## Quick design
 
-You can also write a design maker function that declares a design based on a set of parameters like N, the number of clusters, etc. and use the function `quick_design` to make designs using just those parameters.
+You can also write a design maker function that declares a design based on a set of parameters like `N`, the number of clusters, etc. and use the function `quick_design` to make designs using just those parameters.
 
 ```{r}
 m_arm_trial <- function(numb){
@@ -408,7 +408,7 @@ head(draw_data(my_design))
 
 ## Attrition
 
-Just another potential outcome!
+Attrition can be thought of as just another potential outcome. That is, one describe possible attrition processes, include them in the design, and see how estimation strategies are affected by these processes. Here is an example. 
 
 ```{r}
 my_potential_outcomes_attrition <- declare_potential_outcomes(
