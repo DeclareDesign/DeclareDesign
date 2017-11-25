@@ -4,7 +4,11 @@ template:
 navbar:
   type: default
   left:
-  - text: "Getting Started"
+  - text: "Key Idea"
+    href: articles/key_idea.html
+  - text: "Design Library"
+    href: articles/design_library.html
+  - text: "Using DeclareDesign"
     menu:
       - text: Getting Started
         href: articles/DeclareDesign.html
@@ -14,8 +18,6 @@ navbar:
         href: articles/advanced_features.html
       - text: Companion packages
         href: articles/companion_packages.html
-  - text: "Design Library"
-    href: articles/design_library.html
   - text: Reference
     href: reference/index.html
   - text: "Packages"

@@ -21,11 +21,9 @@ The motivation for the software is described in a [working paper](http://declare
 2. [fabricatr](http://fabricatr.declaredesign.org): Imagine your data before you collect it.
 3. [estimatr](http://estimatr.declaredesign.org): Fast estimators for social scientists.
 
-A [library](http://declaredesign.org/articles/design_library.html) of declared designs is under construction. The library includes canonical designs that users can download, modify, and deploy.
+A [library](http://declaredesign.org/articles/design_library.html) of declared designs is under construction. The library includes canonical designs that users can download, modify, and deploy. To get underway with your own designs, follow the install instructions below and check out our guide on [getting started with DeclareDesign](articles/DeclareDesign.html), which covers the main functionality of the software.
 
 **Note:** *This software is not yet ready for general release. Please contact the authors before using in experiments or published work. Specifications, names, and arguments of functions are subject to change.*
-
-
 
 ## Installing DeclareDesign
 
@@ -35,84 +33,6 @@ To install the latest development release of all of the packages, please ensure 
 install.packages("DeclareDesign", dependencies = TRUE, 
                  repos = c("http://R.declaredesign.org", "https://cloud.r-project.org"))
 ```
-
-
-## Try it out
-
-Once **DeclareDesign** is installed, it is easy to begin working with your own research designs. The below example implements a simple two-arm (treatment and control) experiment. You can copy and paste the code into your R compiler or [click here to download the code <i class="fa fa-code" title = "Download code for design"></i>](http://declaredesign.org/articles/example.R). The example design:
-
-1. Simulates population level data with an average treatment effect of "1 unit". 
-2. Samples from this population and randomly assigns participants to treatment or control. 
-3. Calculates the average treatment effect as the difference in means between those assigned to treatment and those assigned to control. 
-
-```{r echo=TRUE, results="hide", eval=FALSE}
-library(DeclareDesign)
-
-# Model a population with 500 units
-population <- declare_population(N = 500, 
-                                 noise = rnorm(N), 
-                                 treatment_effect = rnorm(N, mean = 1))
-potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, 
-                                                 Y_Z_1 = noise + treatment_effect)
-
-# Inquiry
-estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-
-# Data Strategy
-sampling <- declare_sampling(n = 250) # Sample 250 units
-assignment <- declare_assignment(m = 100) # Assign 100 to treatment 
-
-# Answer Strategy
-estimator <- declare_estimator(Y ~ Z, estimand = estimand)
-
-# Design
-two_arm <- declare_design(population, 
-                          potential_outcomes, 
-                          sampling, 
-                          estimand, 
-                          assignment, 
-                          reveal_outcomes, 
-                          estimator)
-
-```
-
-We use Monte Carlo simulation to determine how well our design performs under repeated experiments, diagnosing features such as: whether our estimates are biased with respect to our estimand; the probability we detect a statistically significant effect; the probability our confidence intervals cover the true effect; the variance of our estimates; and the probability that statistically-significant estimates are signed in the wrong direction.
-
-```{r echo=TRUE, results="hide", eval=FALSE}
-# Diagnose
-diagnosis <- diagnose_design(two_arm, 
-                             sims = 1000, 
-                             bootstrap_sims = 500)
-
-diagnosis
-```
-```{r echo=FALSE}
-# To speed index building
-temp_d = c(c("ATE", "my_estimator"), round(c( -0.002751735, 
-           0.004804101, 0.1501357, 0.003382338, 
-           1, 0, 0.967,
-           0.005855739, 0.9971695, 0.005274545, 
-           0.1646188, 0.003860809, 0, 
-           0, 0.9999212, 0.002032432), 2))
-names(temp_d) = c("Estimand Label", "Estimator Label", "Bias", 
-                  "SE(Bias)", "RMSE", "SE(RMSE)", 
-                  "Power", "SE(Power)", "Coverage", 
-                  "SE(Coverage)", "Mean Estimate", "SE(Mean Estimate)",
-                  "SD Estimate", "SE (SD Estimate)", "Type S Rate", 
-                  "SE(Type S Rate)", "Mean Estimand", "SE(Mean Estimand)")
-
-result = t(data.frame(temp_d))
-rownames(result) = NULL
-knitr::kable(result)
-```
-
-## Go further
-
-To get started declaring and diagnosing your own designs, you can:
-
-  - Check out our guide on [getting started with DeclareDesign](articles/DeclareDesign.html), which covers the main functionality of the software. In addition to the in-build functionality, it's easy to use your own [custom functions](articles/custom_functions.html) with DeclareDesign. Our [advanced features](articles/advanced_features.html) let you investigate complex cases like designs with attrition, unknown sample sizes, and continuous treatments. 
-  
-  - Explore the [Design Library](articles/design_library.html), which contains descriptions and code for a range of canonical designs like the [two-way factorial](articles/two_way_factorial.html) and the [regression discontinuity](articles/regression_discontinuity.html). You can inspect them online using our [design inspector <i class="fa fa-area-chart" title = "Go to the design inspector" ></i>](http://shiny.declaredesign.org:8000/), download the code and templates to build and modify them, and read about them in our vignettes.
 
 ---
 
