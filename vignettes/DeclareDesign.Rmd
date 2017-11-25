@@ -18,8 +18,8 @@ options(digits=2)
 
 The **DeclareDesign** package has a small set of core functions. Six core functions are used to describe key steps in a research design:
 
-1. `declare_population()` (describes the context of the design, as a distribution)
-2. `declare_potential_outcomes()` (takes a context and adds potential outcomes) 
+1. `declare_population()` (describes dimensions and distributions over the variables in the population)
+2. `declare_potential_outcomes()` (takes population or sample and adds potential outcomes produced by interventions) 
 3. `declare_sampling()` (takes a population and selects a sample)
 4. `declare_assignment()` (takes a population or sample and adds treatment assignments)
 5. `declare_estimand()` (takes potential outcomes and calculates a quantity of interest)
