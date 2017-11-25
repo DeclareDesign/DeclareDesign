@@ -1,5 +1,5 @@
 Package: DeclareDesign
-Title: Tools for Improving Research Designs in the Social Sciences
+Title: Declare and diagnose research designs to understand and improve them.
 Version: 1.1.0
 Authors@R: c(person("Graeme", "Blair", email = "graeme.blair@ucla.edu", role = c("aut", "cre")),
              person("Jasper", "Cooper", email = "jjc2247@columbia.edu", role = c("aut")),
