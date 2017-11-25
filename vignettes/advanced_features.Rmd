@@ -34,7 +34,6 @@ my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 smp <- reveal_outcomes(smp)
 ```
 
-
 # Quick design
 
 You can also write a design maker function that declares a design based on a set of parameters like `N`, the number of clusters, etc. and use the function `quick_design()` to make designs using just those parameters.
@@ -67,7 +66,7 @@ head(draw_data(my_1000_design))
 knitr::kable(head(draw_data(my_1000_design)))
 ```
 
-## Continuous potential outcomes
+# Continuous potential outcomes
 
 ```{r echo=TRUE, results="hide"}
 my_potential_outcomes_continuous <- declare_potential_outcomes(
@@ -91,8 +90,7 @@ head(draw_data(my_design))
 knitr::kable(head(draw_data(my_design)))
 ```
 
-
-## Attrition
+# Attrition
 
 Attrition can be thought of as just another potential outcome. That is, one describe possible attrition processes, include them in the design, and see how estimation strategies are affected by these processes. Here is an example. 
 
@@ -113,8 +111,7 @@ head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R"
 knitr::kable(head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")]))
 ```
 
-
-## Stochastic population sizes
+# Stochastic population sizes
 
 The population (or any level of the population) can have stochastic population sizes. (In fact, N can be a number, a fixed vector of numbers, or an expression that returns a stochastic number or vector of numbers.)
 

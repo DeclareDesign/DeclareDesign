@@ -220,9 +220,10 @@ my_1000_design &lt;-<span class="st"> </span><span class="kw"><a href="../refere
 </tr>
 </tbody>
 </table>
-<div id="continuous-potential-outcomes" class="section level2">
-<h2 class="hasAnchor">
-<a href="#continuous-potential-outcomes" class="anchor"></a>Continuous potential outcomes</h2>
+</div>
+<div id="continuous-potential-outcomes" class="section level1">
+<h1 class="hasAnchor">
+<a href="#continuous-potential-outcomes" class="anchor"></a>Continuous potential outcomes</h1>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_potential_outcomes_continuous &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
   <span class="dt">formula =</span> Y <span class="op">~</span><span class="st"> </span>.<span class="dv">25</span> <span class="op">*</span><span class="st"> </span>Z <span class="op">+</span><span class="st"> </span>.<span class="dv">01</span> <span class="op">*</span><span class="st"> </span>age <span class="op">*</span><span class="st"> </span>Z, <span class="dt">condition_names =</span> <span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>))
 
@@ -370,9 +371,9 @@ my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
 </tbody>
 </table>
 </div>
-<div id="attrition" class="section level2">
-<h2 class="hasAnchor">
-<a href="#attrition" class="anchor"></a>Attrition</h2>
+<div id="attrition" class="section level1">
+<h1 class="hasAnchor">
+<a href="#attrition" class="anchor"></a>Attrition</h1>
 <p>Attrition can be thought of as just another potential outcome. That is, one describe possible attrition processes, include them in the design, and see how estimation strategies are affected by these processes. Here is an example.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_potential_outcomes_attrition &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
   <span class="dt">formula =</span> R <span class="op">~</span><span class="st"> </span><span class="kw">rbinom</span>(<span class="dt">n =</span> N, <span class="dt">size =</span> <span class="dv">1</span>, <span class="dt">prob =</span> <span class="kw">pnorm</span>(Y_Z_<span class="dv">0</span>)))
@@ -460,9 +461,9 @@ my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
 </tbody>
 </table>
 </div>
-<div id="stochastic-population-sizes" class="section level2">
-<h2 class="hasAnchor">
-<a href="#stochastic-population-sizes" class="anchor"></a>Stochastic population sizes</h2>
+<div id="stochastic-population-sizes" class="section level1">
+<h1 class="hasAnchor">
+<a href="#stochastic-population-sizes" class="anchor"></a>Stochastic population sizes</h1>
 <p>The population (or any level of the population) can have stochastic population sizes. (In fact, N can be a number, a fixed vector of numbers, or an expression that returns a stochastic number or vector of numbers.)</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stochastic_population &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_population.html">declare_population</a></span>(
   <span class="dt">N =</span> <span class="kw">sample</span>(<span class="dv">500</span><span class="op">:</span><span class="dv">1000</span>, <span class="dv">1</span>), <span class="dt">income =</span> <span class="kw">rnorm</span>(N), <span class="dt">age =</span> <span class="kw">sample</span>(<span class="dv">18</span><span class="op">:</span><span class="dv">95</span>, N, <span class="dt">replace =</span> <span class="ot">TRUE</span>))
@@ -473,7 +474,6 @@ my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
 <p>768, 815, 950</p>
 </div>
 </div>
-</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -481,13 +481,10 @@ my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li>
-<a href="#quick-design">Quick design</a><ul class="nav nav-pills nav-stacked">
-<li><a href="#continuous-potential-outcomes">Continuous potential outcomes</a></li>
+<li><a href="#quick-design">Quick design</a></li>
+      <li><a href="#continuous-potential-outcomes">Continuous potential outcomes</a></li>
       <li><a href="#attrition">Attrition</a></li>
       <li><a href="#stochastic-population-sizes">Stochastic population sizes</a></li>
-      </ul>
-</li>
       </ul>
 </div>
       </div>

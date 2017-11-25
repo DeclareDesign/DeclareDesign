@@ -146,9 +146,10 @@ pop_custom &lt;-<span class="st"> </span><span class="kw">my_population_custom</
 </tr>
 </tbody>
 </table>
-<div id="custom-potential-outcomes" class="section level2">
-<h2 class="hasAnchor">
-<a href="#custom-potential-outcomes" class="anchor"></a>Custom Potential Outcomes</h2>
+</div>
+<div id="custom-potential-outcomes" class="section level1">
+<h1 class="hasAnchor">
+<a href="#custom-potential-outcomes" class="anchor"></a>Custom Potential Outcomes</h1>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_potential_outcomes_function &lt;-
 <span class="st">  </span><span class="cf">function</span>(data) {
     data<span class="op">$</span>Y_Z_<span class="dv">0</span> &lt;-<span class="st"> </span><span class="kw">with</span>(data, u)
@@ -202,9 +203,9 @@ pop_pos_custom &lt;-<span class="st"> </span><span class="kw">my_potential_outco
 </tbody>
 </table>
 </div>
-<div id="custom-sampling" class="section level2">
-<h2 class="hasAnchor">
-<a href="#custom-sampling" class="anchor"></a>Custom Sampling</h2>
+<div id="custom-sampling" class="section level1">
+<h1 class="hasAnchor">
+<a href="#custom-sampling" class="anchor"></a>Custom Sampling</h1>
 <p>Again, you can still use a custom sampling function easily. In this case, the requirement is simply that the function takes population data and returns sampled data. You can also include inclusion weights if you wish in the function (as the default function does).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_sampling_function &lt;-<span class="st"> </span><span class="cf">function</span>(data) {
      data<span class="op">$</span>S &lt;-<span class="st"> </span><span class="kw">rbinom</span>(<span class="dt">n =</span> <span class="kw">nrow</span>(data),
@@ -221,9 +222,9 @@ smp_custom &lt;-<span class="st"> </span><span class="kw">my_sampling_custom</sp
 <span class="kw">nrow</span>(smp_custom)</code></pre></div>
 <p>107</p>
 </div>
-<div id="custom-assignment" class="section level2">
-<h2 class="hasAnchor">
-<a href="#custom-assignment" class="anchor"></a>Custom Assignment</h2>
+<div id="custom-assignment" class="section level1">
+<h1 class="hasAnchor">
+<a href="#custom-assignment" class="anchor"></a>Custom Assignment</h1>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_assignment_function &lt;-<span class="st"> </span><span class="cf">function</span>(data) {
   data<span class="op">$</span>Z &lt;-<span class="st"> </span><span class="kw">rbinom</span>(<span class="dt">n =</span> <span class="kw">nrow</span>(data),
          <span class="dt">size =</span> <span class="dv">1</span>,
@@ -245,9 +246,9 @@ my_assignment_custom &lt;-<span class="st"> </span><span class="kw"><a href="../
 </tr></tbody>
 </table>
 </div>
-<div id="custom-estimand" class="section level2">
-<h2 class="hasAnchor">
-<a href="#custom-estimand" class="anchor"></a>Custom Estimand</h2>
+<div id="custom-estimand" class="section level1">
+<h1 class="hasAnchor">
+<a href="#custom-estimand" class="anchor"></a>Custom Estimand</h1>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_estimand_function &lt;-<span class="st"> </span><span class="cf">function</span>(data) {
   <span class="kw">with</span>(data, <span class="kw">median</span>(Y_Z_<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>Y_Z_<span class="dv">0</span>))
 }
@@ -266,9 +267,9 @@ my_estimand_custom &lt;-<span class="st"> </span><span class="kw"><a href="../re
 </tr></tbody>
 </table>
 </div>
-<div id="custom-estimator" class="section level2">
-<h2 class="hasAnchor">
-<a href="#custom-estimator" class="anchor"></a>Custom Estimator</h2>
+<div id="custom-estimator" class="section level1">
+<h1 class="hasAnchor">
+<a href="#custom-estimator" class="anchor"></a>Custom Estimator</h1>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_estimator_function &lt;-<span class="st"> </span><span class="cf">function</span>(formula, data){
   <span class="kw">data.frame</span>(<span class="dt">est =</span> <span class="kw">with</span>(data, <span class="kw">mean</span>(Y)))
 }
@@ -293,7 +294,6 @@ my_estimator_custom &lt;-<span class="st"> </span>
 </table>
 </div>
 </div>
-</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -301,15 +301,12 @@ my_estimator_custom &lt;-<span class="st"> </span>
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li>
-<a href="#custom-population">Custom Population</a><ul class="nav nav-pills nav-stacked">
-<li><a href="#custom-potential-outcomes">Custom Potential Outcomes</a></li>
+<li><a href="#custom-population">Custom Population</a></li>
+      <li><a href="#custom-potential-outcomes">Custom Potential Outcomes</a></li>
       <li><a href="#custom-sampling">Custom Sampling</a></li>
       <li><a href="#custom-assignment">Custom Assignment</a></li>
       <li><a href="#custom-estimand">Custom Estimand</a></li>
       <li><a href="#custom-estimator">Custom Estimator</a></li>
-      </ul>
-</li>
       </ul>
 </div>
       </div>
