@@ -51,9 +51,15 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li class="dropdown">
+        <li>
+  <a href="../articles/key_idea.html">Key Idea</a>
+</li>
+<li>
+  <a href="../articles/design_library.html">Design Library</a>
+</li>
+<li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Getting Started
+    Using DeclareDesign
      
     <span class="caret"></span>
   </a>
@@ -71,9 +77,6 @@
       <a href="../articles/companion_packages.html">Companion packages</a>
     </li>
   </ul>
-</li>
-<li>
-  <a href="../articles/design_library.html">Design Library</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -243,7 +246,7 @@
 #&gt; 
 #&gt; A single draw of the estimand:
 #&gt;  estimand_label estimand
-#&gt;             ATE 1.936796
+#&gt;             ATE      1.9
 #&gt; 
 #&gt; Step 5 (declare step): dplyr::mutate(noise_sq = noise^2) -----------------------
 #&gt; 
@@ -274,10 +277,10 @@
 #&gt; Formula: Y ~ Z 
 #&gt; 
 #&gt; A single draw of the estimator:
-#&gt;  estimator_label coefficient_name      est        se           p  ci_lower
-#&gt;     my_estimator                Z 1.383675 0.4407977 0.004291352 0.4761421
-#&gt;  ci_upper estimand_label
-#&gt;  2.291207            ATE
+#&gt;  estimator_label coefficient_name est   se      p ci_lower ci_upper
+#&gt;     my_estimator                Z 1.4 0.44 0.0043     0.48      2.3
+#&gt;  estimand_label
+#&gt;             ATE
 #&gt; </div><div class='input'>
 <span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'>draw_data</span>(<span class='no'>design</span>)
 
