@@ -75,12 +75,12 @@ diagnosis
 ```
 ```{r echo=FALSE}
 # To speed index building
-temp_d = c("ATE", "my_estimator", -0.002751735, 
+temp_d = c(c("ATE", "my_estimator"), round(c( -0.002751735, 
            0.004804101, 0.1501357, 0.003382338, 
            1, 0, 0.967,
            0.005855739, 0.9971695, 0.005274545, 
            0.1646188, 0.003860809, 0, 
-           0, 0.9999212, 0.002032432)
+           0, 0.9999212, 0.002032432), 2))
 names(temp_d) = c("Estimand Label", "Estimator Label", "Bias", 
                   "SE(Bias)", "RMSE", "SE(RMSE)", 
                   "Power", "SE(Power)", "Coverage", 
