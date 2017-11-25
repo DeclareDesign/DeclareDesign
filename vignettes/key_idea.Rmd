@@ -1,6 +1,10 @@
 ---
-output:
-  github_document
+title: "Key Idea"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Key Idea}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r include=FALSE}
@@ -8,83 +12,80 @@ set.seed(42)
 options(digits=2)
 library(knitr)
 library(DeclareDesign)
-
-out <- function(d)  kable(head(d), digits = 2)
 ```
-<!-- README.md is generated from README.Rmd. Please edit that file -->
 
+The key idea motivating **DeclareDesign** is that the core analytic features of research designs can be declared in a complete manner and saved as an object. A properly declared design can then easily be shared, modified, improved, and used. The design contains the information needed to implement key parts of data generation and to implement analysis. It also contains enough information to allow researchers or third parties to query it to see whether it can deliver on its promises.
 
-## The Key Idea
-
-The key idea motivating `DeclareDesign` is that the core analytic features of research designs can be declared in a complete manner and saved as an object. A properly declared design can then easily be shared, modified, improved, and used. The design contains the information needed to implement key parts of data generation and to implement analysis. It also contains enough information to allow researchers or third parties to query it to see whether it can deliver on its promises.
-
-### 1. A simple design declaration
+## A simple design declaration
 
 Here is an illustration using a very simple two arm trial. 
 
 ```{r echo=TRUE, eval=TRUE}
 # M -- Model: Speculation on variables and relations between them
-population         <- declare_population(N = 100, u = rnorm(N))
+population <- declare_population(N = 100, u = rnorm(N))
 potential_outcomes <- declare_potential_outcomes(Y_Z_0 = u, 
                                                  Y_Z_1 = 1 - u)
 
 # I -- Inquiry: A query defined in terms of potential outcomes
-estimand           <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
 # D -- Data Strategy: Researcher interventions on the world
-assignment         <- declare_assignment(m = 50) 
+assignment <- declare_assignment(m = 50) 
 
 # A -- Answer Strategy: Conclusiosn to be drawn from data
-estimator          <- declare_estimator(Y ~ Z, estimand = estimand)
+estimator <- declare_estimator(Y ~ Z, estimand = estimand)
 
 # Design: Putting it all together
-my_design            <- declare_design(population, 
-                          potential_outcomes, 
-                          estimand, 
-                          assignment, 
-                          reveal_outcomes, 
-                          estimator,
-                          description = "A very simple design")
+design <- declare_design(population, 
+                         potential_outcomes, 
+                         estimand, 
+                         assignment, 
+                         reveal_outcomes, 
+                         estimator,
+                         description = "A very simple design")
 ```
 
-### 2. Making Use of A Design
+## Making Use of A Design
 
 Use the design object to simulate data, including treatment assignments: 
 
 ```{r}
-my_data <- draw_data(my_design)
+data <- draw_data(design)
 ```
 
 ```{r, echo = FALSE}
-out(my_data)
+kable(head(data),digits = 2)
 ```
 
 Use the design object to implement analysis:
 
 ```{r}
-estimates <- get_estimates(my_design)
+estimates <- get_estimates(design)
 ```
-
 
 ```{r, echo = FALSE}
-out(estimates)
+kable(estimates,digits = 2)
 ```
 
-### 3. Diagnosing a design
+## Diagnosing a design
 
 The fully declared design contains the information needed to diagnose it. 
 
-```{r}
-diagnosis <- diagnose_design(my_design, sims = 1000, bootstrap_sims = 500)
+```{r, eval = FALSE}
+diagnosis <- diagnose_design(design, sims = 10000, bootstrap_sims = 500)
 ```
 
+```{r, echo = FALSE}
+# Speed site building. Run this code to achieve same results:
+# diagnosis <- get_diagnosands(diagnose_design(design, sims = 10000, bootstrap_sims = 500))
+temp_d <- data.frame(c("ATE",NA),c("my_estimator",NA),c(-8.1e-19, 8.9e-19), c(8.6e-17, 8.9e-19),
+ c(1, 0.00037), c(1,0), c(1, 0.002), c(1,0.002), c(0.2, 0.0014), c(0,0))
+colnames(temp_d) <- c("Estimand Label", "Estimate Label", "Bias", "RMSE", "Power", "Coverage","Mean Estimand", "Mean Estimate", "SD Estimate", "Type S-Rate")
+rownames(temp_d) <- c("Estimated Diagnosand", "Boostrapped SE")
 
-
-```{r, include = FALSE}
-out(diagnosis)
+kable(temp_d,digits = 2)
 ```
 
 The diagnosis here confirms the fact that random assignment to treatment allows for unbiased estimates of treatment effects. More surprisingly perhaps, the diagnosis reveals that the statistical inferences are wrong: the 95% confidence intervals do not have 95% coverage, reflecting the fact that standard errors are overly conservative.
 
 
-This project is generously supported by a grant from the [Laura and John Arnold Foundation](http://www.arnoldfoundation.org) and seed funding from [EGAP](http://egap.org).
