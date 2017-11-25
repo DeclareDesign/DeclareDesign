@@ -51,8 +51,26 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li>
-  <a href="../articles/DeclareDesign.html">Getting Started</a>
+        <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Getting Started
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/DeclareDesign.html">Getting Started</a>
+    </li>
+    <li>
+      <a href="../articles/custom_functions.html">Custom functions</a>
+    </li>
+    <li>
+      <a href="../articles/advanced_features.html">Advanced features</a>
+    </li>
+    <li>
+      <a href="../articles/companion_packages.html">Companion packages</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="../articles/design_library.html">Design Library</a>
@@ -227,7 +245,7 @@
 #&gt; 
 #&gt; A single draw of the estimand:
 #&gt;  estimand_label estimand
-#&gt;             ATE 1.982106
+#&gt;             ATE        2
 #&gt; 
 #&gt; Step 5 (declare step): dplyr::mutate(noise_sq = noise^2) -----------------------
 #&gt; 
@@ -258,10 +276,10 @@
 #&gt; Formula: Y ~ Z 
 #&gt; 
 #&gt; A single draw of the estimator:
-#&gt;  estimator_label coefficient_name      est       se          p  ci_lower
-#&gt;     my_estimator                Z 1.147999 0.475402 0.02341815 0.1687111
-#&gt;  ci_upper estimand_label
-#&gt;  2.127286            ATE
+#&gt;  estimator_label coefficient_name est   se     p ci_lower ci_upper
+#&gt;     my_estimator                Z 1.1 0.48 0.023     0.17      2.1
+#&gt;  estimand_label
+#&gt;             ATE
 #&gt; </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

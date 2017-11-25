@@ -1,0 +1,24 @@
+---
+title: "Companion packages"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Custom functions and DeclareDesign}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+All of the built-in default functions used in **DeclareDesign** originate in three standalone packages that can be used as part of **DeclareDesign** or on their own. This allows the core **DeclareDesign** package to have a minimal number of dependencies and a small number of core functions.
+
+The three packages are:
+
+## **fabricatr**
+
+**fabricatr**, includes data creation features described above. Its main function, [`fabricate()`](http://fabricatr.declaredesign.org/reference/fabricate.html), creates simulated data as in the above examples in `declare_population()`. It can do single level data creation or multilevel creation using [`level()`](http://fabricatr.declaredesign.org/reference/level.html) within [`fabricate()`](http://fabricatr.declaredesign.org/reference/fabricate.html). It is also the backbone of `declare_potential_outcomes()` default function that creates each potential outcome as an expression described above (i.e. where you define `Y_Z_1 = 0.5 + Z`). The second main function is `resample_data()` which resamples your data in a way that respects hierarchy. 
+
+## **randomizr**
+
+**randomizr** works by default as described above in `declare_assignment()` -- it was originally part of **DeclareDesign**, but is now entirely separate. The set of sampling functions that mimic the assignment functions are now also built in to **randomizr**, including simple, clustered, stratified, and clustered-and-stratified sampling. The next step is to rewrite some of these into `C++` to see if we can speed a few of them up. Based on our understanding of `Rcpp`, the speedup gains here may be minor.
+
+## **estimatr**
+
+The `C++` version of `lm()` with robust standard errors described above as well as the difference-in-means and blocked difference-in-means functions are the core of **estimatr** now, but it can be built up with further fast estimators.

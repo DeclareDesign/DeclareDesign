@@ -3,6 +3,10 @@ output:
   github_document
 ---
 
+```{r echo=FALSE}
+set.seed(42)
+options(digits=2)
+```
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # DeclareDesign: Declare and diagnose research designs to understand and improve them.
@@ -21,7 +25,7 @@ A [library](http://declaredesign.org/articles/design_library.html) of declared d
 
 **Note:** *This software is not yet ready for general release. Please contact the authors before using in experiments or published work. Specifications, names, and arguments of functions are subject to change.*
 
-### Installing DeclareDesign
+## Installing DeclareDesign
 
 To install the latest development release of all of the packages, please ensure that you are running version 3.3 or later of R and run the following code:
 
@@ -30,5 +34,63 @@ install.packages("DeclareDesign", dependencies = TRUE,
                  repos = c("http://R.declaredesign.org", "https://cloud.r-project.org"))
 ```
 
+## Getting started
+
+Once **DeclareDesign** is installed, it is easy to begin working with your own research designs. The below example implements a simple two-arm (treatment and control) experiment on a population. We simulate population level data and ensure that the treatment effect should be "1 unit" on average. We then sample a sample from this population, randomly assign members of our sample to treatment, and calculate an average treatment effect on the resulting sample. We use Monte Carlo simulation to decide whether, under repeated experiments, we are able to detect the effect we assumed in our population, whether our estimates have bias, what our power to detect a "statistically significant" effect is, and what statistical coverage our estimator displays:
+
+```{r echo=TRUE, results="hide", eval=FALSE}
+library(DeclareDesign)
+
+# Model a population with 500 units
+population <- declare_population(N = 500, 
+                                 noise = rnorm(N), 
+                                 treatment_effect = rnorm(N, mean=1))
+potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, 
+                                                 Y_Z_1 = noise + treatment_effect)
+
+estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+
+# Data Strategy
+sampling <- declare_sampling(n = 250) # Sample of 250 units
+assignment <- declare_assignment(m = 100) # 100 treated units
+
+# Answer Strategy
+estimator <- declare_estimator(Y ~ Z, estimand = estimand)
+
+# Design
+two_arm <- declare_design(population, 
+                          potential_outcomes, 
+                          sampling, 
+                          estimand, 
+                          assignment, 
+                          reveal_outcomes, 
+                          estimator)
+
+# Diagnose
+diagnosis <- diagnose_design(two_arm, 
+                             sims = 1000, 
+                             bootstrap_sims = 500)
+
+diagnosis
+```
+```{r echo=FALSE}
+# To speed index building
+temp_d = c("ATE", "my_estimator", -0.002751735, 
+           0.004804101, 0.1501357, 0.003382338, 
+           1, 0, 0.967,
+           0.005855739, 0.9971695, 0.005274545, 
+           0.1646188, 0.003860809, 0, 
+           0, 0.9999212, 0.002032432)
+names(temp_d) = c("Estimand Label", "Estimator Label", "Bias", 
+                  "SE(Bias)", "RMSE", "SE(RMSE)", 
+                  "Power", "SE(Power)", "Coverage", 
+                  "SE(Coverage)", "Mean Estimatr", "SE(Mean Estimate)",
+                  "SD Estimate", "SE (SD Estimate)", "Type S Rate", 
+                  "SE(Type S Rate)", "Mean Estimand", "SE(Mean Estimand)")
+
+result = t(data.frame(temp_d))
+rownames(result) = NULL
+knitr::kable(result)
+```
 
 This project is generously supported by a grant from the [Laura and John Arnold Foundation](http://www.arnoldfoundation.org) and seed funding from [EGAP](http://egap.org).

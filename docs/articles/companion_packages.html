@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Design Library • DeclareDesign</title>
+<title>Companion packages • DeclareDesign</title>
 <!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
@@ -99,64 +99,32 @@
       </header><div class="row">
   <div class="col-md-9">
     <div class="page-header toc-ignore">
-      <h1>Design Library</h1>
+      <h1>Companion packages</h1>
             
           </div>
 
     
     
 <div class="contents">
-<p>Our design library characterizes designs informally and in code using the <span class="math inline">\(&lt;M,I,D,A&gt;\)</span> framework (for more on this framework, see <a href="http://declaredesign.org/paper.pdf">our paper</a>):</p>
-<ul>
-<li><p>A <strong>model</strong>, <em>M</em>, of how the world works. The model specifies the moving parts — the variables — and how these are causally related to each other. In this sense the model provides the context of a study, but also a speculation about the world.</p></li>
-<li><p>An <strong>inquiry</strong>, <em>I</em>, about the distribution of variables, perhaps given interventions on some variables. In many applications <em>I</em> might be thought of as the “estimand.” Some inquiries are statements about the values of variables, others about the causal relations between variables. In all cases however the inquiry should be answerable given the model.</p></li>
-<li><p>A <strong>data strategy</strong>, <em>D</em>, generates data on variables. Note that implicitly the data strategy includes case selection, or sampling decisions, but it also represents interventions such as assignment of treatments or measurement strategies. A model <em>M</em> tells you what sort of data you might observe if you employ data strategy <em>D</em>.</p></li>
-<li><p>An <strong>answer strategy</strong>, <em>A</em>, that uses data to generate an answer.</p></li>
-</ul>
-<hr>
-<div id="designs" class="section level1">
-<h1 class="hasAnchor">
-<a href="#designs" class="anchor"></a>Designs</h1>
-<table class="table">
-<colgroup>
-<col width="19%">
-<col width="9%">
-<col width="49%">
-<col width="21%">
-</colgroup>
-<thead><tr class="header">
-<th align="left">Goal</th>
-<th align="left">Strategy</th>
-<th align="left">Design</th>
-<th align="left">Download</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">Causal inference</td>
-<td align="left">Experimental</td>
-<td align="left"><a href="../articles/two_arm.html">Two-Arm Experiment</a></td>
-<td align="left">
-<a class="btn btn-default" href="http://declaredesign.org/articles/two_arm.R"><i class="fa fa-code" title="Download code for design"></i></a> <a class="btn btn-default" href="http://declaredesign.org/articles/two_arm_template.RDS"><i class="fa fa-clipboard" title="Download template for design"></i></a>
-</td>
-</tr>
-<tr class="even">
-<td align="left">Causal inference</td>
-<td align="left">Experimental</td>
-<td align="left"><a href="../articles/two_way_factorial.html">Two-Way Factorial Experiment</a></td>
-<td align="left">
-<a class="btn btn-default" href="http://declaredesign.org/articles/two_way_factorial.R"><i class="fa fa-code" title="Download code for design"></i></a> <a class="btn btn-default" href="http://declaredesign.org/articles/two_way_factorial_template.RDS"><i class="fa fa-clipboard" title="Download template for design"></i></a>
-</td>
-</tr>
-<tr class="odd">
-<td align="left">Causal inference</td>
-<td align="left">Observational</td>
-<td align="left"><a href="../articles/regression_discontinuity.html">Regression Discontinuity</a></td>
-<td align="left">
-<a class="btn btn-default" href="http://declaredesign.org/articles/regression_discontinuity.R"><i class="fa fa-code" title="Download code for design"></i></a> <a class="btn btn-default" href="http://declaredesign.org/articles/regression_discontinuity_template.RDS"><i class="fa fa-clipboard" title="Download template for design"></i></a>
-</td>
-</tr>
-</tbody>
-</table>
+<p>All of the built-in default functions used in <strong>DeclareDesign</strong> originate in three standalone packages that can be used as part of <strong>DeclareDesign</strong> or on their own. This allows the core <strong>DeclareDesign</strong> package to have a minimal number of dependencies and a small number of core functions.</p>
+<p>The three packages are:</p>
+<div id="fabricatr" class="section level2">
+<h2 class="hasAnchor">
+<a href="#fabricatr" class="anchor"></a><strong>fabricatr</strong>
+</h2>
+<p><strong>fabricatr</strong>, includes data creation features described above. Its main function, <a href="http://fabricatr.declaredesign.org/reference/fabricate.html"><code>fabricate()</code></a>, creates simulated data as in the above examples in <code><a href="../reference/declare_population.html">declare_population()</a></code>. It can do single level data creation or multilevel creation using <a href="http://fabricatr.declaredesign.org/reference/level.html"><code>level()</code></a> within <a href="http://fabricatr.declaredesign.org/reference/fabricate.html"><code>fabricate()</code></a>. It is also the backbone of <code><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes()</a></code> default function that creates each potential outcome as an expression described above (i.e. where you define <code>Y_Z_1 = 0.5 + Z</code>). The second main function is <code>resample_data()</code> which resamples your data in a way that respects hierarchy.</p>
+</div>
+<div id="randomizr" class="section level2">
+<h2 class="hasAnchor">
+<a href="#randomizr" class="anchor"></a><strong>randomizr</strong>
+</h2>
+<p><strong>randomizr</strong> works by default as described above in <code><a href="../reference/declare_assignment.html">declare_assignment()</a></code> – it was originally part of <strong>DeclareDesign</strong>, but is now entirely separate. The set of sampling functions that mimic the assignment functions are now also built in to <strong>randomizr</strong>, including simple, clustered, stratified, and clustered-and-stratified sampling. The next step is to rewrite some of these into <code>C++</code> to see if we can speed a few of them up. Based on our understanding of <code>Rcpp</code>, the speedup gains here may be minor.</p>
+</div>
+<div id="estimatr" class="section level2">
+<h2 class="hasAnchor">
+<a href="#estimatr" class="anchor"></a><strong>estimatr</strong>
+</h2>
+<p>The <code>C++</code> version of <code>lm()</code> with robust standard errors described above as well as the difference-in-means and blocked difference-in-means functions are the core of <strong>estimatr</strong> now, but it can be built up with further fast estimators.</p>
 </div>
 </div>
   </div>
@@ -166,7 +134,9 @@
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li><a href="#designs">Designs</a></li>
+<li><a href="#fabricatr"><strong>fabricatr</strong></a></li>
+      <li><a href="#randomizr"><strong>randomizr</strong></a></li>
+      <li><a href="#estimatr"><strong>estimatr</strong></a></li>
       </ul>
 </div>
       </div>

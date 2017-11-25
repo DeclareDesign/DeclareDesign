@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tools for Improving Research Designs in the Social Sciences • DeclareDesign</title>
+<title>DeclareDesign: Tools for Improving Research Designs in the Social Sciences • DeclareDesign</title>
 <!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
@@ -28,8 +28,26 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Getting Started
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
 <li>
-  <a href="articles/DeclareDesign.html">Getting Started</a>
+      <a href="articles/DeclareDesign.html">Getting Started</a>
+    </li>
+    <li>
+      <a href="articles/custom_functions.html">Custom functions</a>
+    </li>
+    <li>
+      <a href="articles/advanced_features.html">Advanced features</a>
+    </li>
+    <li>
+      <a href="articles/companion_packages.html">Companion packages</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="articles/design_library.html">Design Library</a>
@@ -89,9 +107,9 @@
 <div id="declaredesign-declare-and-diagnose-research-designs-to-understand-and-improve-them-" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#declaredesign-declare-and-diagnose-research-designs-to-understand-and-improve-them-" class="anchor"></a>DeclareDesign: Declare and diagnose research designs to understand and improve them.</h1></div>
-<p><strong>DeclareDesign</strong> is statistical software that makes it easier for researchers without advanced programming skills to characterize and and learn about the properties of research designs before implementation. Ex ante declaration and diagnosis of designs can help researchers clarify their limitations and improve their properties. It can make it easier for readers to evaluate a research strategy prior to implementation and without access to results. It can also make it easier for designs to be shared and to be critiqued.</p>
+<p><strong>DeclareDesign</strong> is statistical software that makes it easier for researchers to characterize and learn about the properties of research designs before implementation. Ex ante declaration and diagnosis of designs can help researchers clarify the strengths and limitations of their designs and to improve their properties. It can make it easier for readers to evaluate a research strategy prior to implementation and without access to results. It can also make it easier for designs to be shared, replicated, and critiqued.</p>
 <p>The motivation for the software is described in a <a href="http://declaredesign.org/paper.pdf">working paper</a> by the authors.</p>
-<p><strong>DeclareDesign</strong> consists of a core package, which is documented on this web site, as well as three companion packages that stand on their own but can also be used to complement the core package. They are:</p>
+<p><strong>DeclareDesign</strong> consists of a core package, which is documented on this web site, as well as three companion packages that stand on their own but are also called on by the core package. They are:</p>
 <ol style="list-style-type: decimal">
 <li>
 <a href="http://randomizr.declaredesign.org">randomizr</a>: Easy to use tools for common forms of random assignment and sampling.</li>
@@ -100,13 +118,94 @@
 <li>
 <a href="http://estimatr.declaredesign.org">estimatr</a>: Fast estimators for social scientists.</li>
 </ol>
-<p><em>This software is in not yet ready for general release. Please contact the authors before using in experiments or published work. Specifications, names, and arguments of functions are subject to change.</em></p>
-<div id="installing-declaredesign" class="section level3">
-<h3 class="hasAnchor">
-<a href="#installing-declaredesign" class="anchor"></a>Installing DeclareDesign</h3>
+<p>A <a href="http://declaredesign.org/articles/design_library.html">library</a> of declared designs is under construction. The library includes canonical designs which users can download, modify, and deploy.</p>
+<p><strong>Note:</strong> <em>This software is not yet ready for general release. Please contact the authors before using in experiments or published work. Specifications, names, and arguments of functions are subject to change.</em></p>
+<div id="installing-declaredesign" class="section level2">
+<h2 class="hasAnchor">
+<a href="#installing-declaredesign" class="anchor"></a>Installing DeclareDesign</h2>
 <p>To install the latest development release of all of the packages, please ensure that you are running version 3.3 or later of R and run the following code:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">"DeclareDesign"</span>, <span class="dt">dependencies =</span> <span class="ot">TRUE</span>, 
                  <span class="dt">repos =</span> <span class="kw">c</span>(<span class="st">"http://R.declaredesign.org"</span>, <span class="st">"https://cloud.r-project.org"</span>))</code></pre></div>
+</div>
+<div id="getting-started" class="section level2">
+<h2 class="hasAnchor">
+<a href="#getting-started" class="anchor"></a>Getting started</h2>
+<p>Once <strong>DeclareDesign</strong> is installed, it is easy to begin working with your own research designs. The below example implements a simple two-arm (treatment and control) experiment on a population. We simulate population level data and ensure that the treatment effect should be “1 unit” on average. We then sample a sample from this population, randomly assign members of our sample to treatment, and calculate an average treatment effect on the resulting sample. We use Monte Carlo simulation to decide whether, under repeated experiments, we are able to detect the effect we assumed in our population, whether our estimates have bias, what our power to detect a “statistically significant” effect is, and what statistical coverage our estimator displays:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(DeclareDesign)
+
+<span class="co"># Model a population with 500 units</span>
+population &lt;-<span class="st"> </span><span class="kw"><a href="reference/declare_population.html">declare_population</a></span>(<span class="dt">N =</span> <span class="dv">500</span>, 
+                                 <span class="dt">noise =</span> <span class="kw">rnorm</span>(N), 
+                                 <span class="dt">treatment_effect =</span> <span class="kw">rnorm</span>(N, <span class="dt">mean=</span><span class="dv">1</span>))
+potential_outcomes &lt;-<span class="st"> </span><span class="kw"><a href="reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(<span class="dt">Y_Z_0 =</span> noise, 
+                                                 <span class="dt">Y_Z_1 =</span> noise <span class="op">+</span><span class="st"> </span>treatment_effect)
+
+estimand &lt;-<span class="st"> </span><span class="kw"><a href="reference/declare_estimand.html">declare_estimand</a></span>(<span class="dt">ATE =</span> <span class="kw">mean</span>(Y_Z_<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>Y_Z_<span class="dv">0</span>))
+
+<span class="co"># Data Strategy</span>
+sampling &lt;-<span class="st"> </span><span class="kw"><a href="reference/declare_sampling.html">declare_sampling</a></span>(<span class="dt">n =</span> <span class="dv">250</span>) <span class="co"># Sample of 250 units</span>
+assignment &lt;-<span class="st"> </span><span class="kw"><a href="reference/declare_assignment.html">declare_assignment</a></span>(<span class="dt">m =</span> <span class="dv">100</span>) <span class="co"># 100 treated units</span>
+
+<span class="co"># Answer Strategy</span>
+estimator &lt;-<span class="st"> </span><span class="kw"><a href="reference/declare_estimator.html">declare_estimator</a></span>(Y <span class="op">~</span><span class="st"> </span>Z, <span class="dt">estimand =</span> estimand)
+
+<span class="co"># Design</span>
+two_arm &lt;-<span class="st"> </span><span class="kw"><a href="reference/declare_design.html">declare_design</a></span>(population, 
+                          potential_outcomes, 
+                          sampling, 
+                          estimand, 
+                          assignment, 
+                          reveal_outcomes, 
+                          estimator)
+
+<span class="co"># Diagnose</span>
+diagnosis &lt;-<span class="st"> </span><span class="kw"><a href="reference/diagnose_design.html">diagnose_design</a></span>(two_arm, 
+                             <span class="dt">sims =</span> <span class="dv">1000</span>, 
+                             <span class="dt">bootstrap_sims =</span> <span class="dv">500</span>)
+
+diagnosis</code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th align="left">Estimand Label</th>
+<th align="left">Estimator Label</th>
+<th align="left">Bias</th>
+<th align="left">SE(Bias)</th>
+<th align="left">RMSE</th>
+<th align="left">SE(RMSE)</th>
+<th align="left">Power</th>
+<th align="left">SE(Power)</th>
+<th align="left">Coverage</th>
+<th align="left">SE(Coverage)</th>
+<th align="left">Mean Estimatr</th>
+<th align="left">SE(Mean Estimate)</th>
+<th align="left">SD Estimate</th>
+<th align="left">SE (SD Estimate)</th>
+<th align="left">Type S Rate</th>
+<th align="left">SE(Type S Rate)</th>
+<th align="left">Mean Estimand</th>
+<th align="left">SE(Mean Estimand)</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="left">ATE</td>
+<td align="left">my_estimator</td>
+<td align="left">-0.002751735</td>
+<td align="left">0.004804101</td>
+<td align="left">0.1501357</td>
+<td align="left">0.003382338</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">0.967</td>
+<td align="left">0.005855739</td>
+<td align="left">0.9971695</td>
+<td align="left">0.005274545</td>
+<td align="left">0.1646188</td>
+<td align="left">0.003860809</td>
+<td align="left">0</td>
+<td align="left">0</td>
+<td align="left">0.9999212</td>
+<td align="left">0.002032432</td>
+</tr></tbody>
+</table>
 <p>This project is generously supported by a grant from the <a href="http://www.arnoldfoundation.org">Laura and John Arnold Foundation</a> and seed funding from <a href="http://egap.org">EGAP</a>.</p>
 </div>
 </div>
