@@ -166,7 +166,7 @@
                          <span class='no'>my_potential_outcomes</span>,
                          <span class='no'>my_sampling</span>,
                          <span class='no'>my_estimand</span>,
-                         <span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span>(<span class='kw'>noise_sq</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>),
+                         <span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/dplyr/topics/mutate'>mutate</a></span>(<span class='kw'>noise_sq</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>),
                          <span class='no'>my_assignment</span>,
                          <span class='no'>reveal_outcomes</span>,
                          <span class='no'>my_estimator</span>)
@@ -201,9 +201,9 @@
 #&gt; N = 250 (250 subtracted) 
 #&gt; 
 #&gt; Added variable: S_inclusion_prob 
-#&gt;              0.5
-#&gt;   Frequency  250
-#&gt;  Proportion 1.00
+#&gt;              0.5   NA
+#&gt;   Frequency  250    0
+#&gt;  Proportion 1.00 0.00
 #&gt; 
 #&gt; Altered variable: ID 
 #&gt;   Before: 
@@ -245,7 +245,7 @@
 #&gt; 
 #&gt; A single draw of the estimand:
 #&gt;  estimand_label estimand
-#&gt;             ATE        2
+#&gt;             ATE 1.982106
 #&gt; 
 #&gt; Step 5 (declare step): dplyr::mutate(noise_sq = noise^2) -----------------------
 #&gt; 
@@ -256,14 +256,14 @@
 #&gt; Step 6 (assignment): my_assignment ---------------------------------------------
 #&gt; 
 #&gt; Added variable: Z 
-#&gt;                0    1
-#&gt;   Frequency  225   25
-#&gt;  Proportion 0.90 0.10
+#&gt;                0    1   NA
+#&gt;   Frequency  225   25    0
+#&gt;  Proportion 0.90 0.10 0.00
 #&gt; 
 #&gt; Added variable: Z_cond_prob 
-#&gt;              0.1  0.9
-#&gt;   Frequency   25  225
-#&gt;  Proportion 0.10 0.90
+#&gt;              0.1  0.9   NA
+#&gt;   Frequency   25  225    0
+#&gt;  Proportion 0.10 0.90 0.00
 #&gt; 
 #&gt; Step 7 (reveal outcomes): reveal_outcomes --------------------------------------
 #&gt; 
@@ -276,10 +276,10 @@
 #&gt; Formula: Y ~ Z 
 #&gt; 
 #&gt; A single draw of the estimator:
-#&gt;  estimator_label coefficient_name est   se     p ci_lower ci_upper
-#&gt;     my_estimator                Z 1.1 0.48 0.023     0.17      2.1
-#&gt;  estimand_label
-#&gt;             ATE
+#&gt;  estimator_label coefficient_name      est       se          p  ci_lower
+#&gt;     my_estimator                Z 1.147999 0.475402 0.02341815 0.1687111
+#&gt;  ci_upper estimand_label
+#&gt;  2.127286            ATE
 #&gt; </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
