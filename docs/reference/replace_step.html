@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Replace a step in an existing design — replace_step • DeclareDesign</title>
+<title>Replace a step in an existing design � replace_step • DeclareDesign</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -52,7 +52,7 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="../articles/key_idea.html">Key Idea</a>
+  <a href="../articles/key_idea.html">The Idea</a>
 </li>
 <li>
   <a href="../articles/design_library.html">Design Library</a>
@@ -195,14 +195,14 @@
 #&gt; Step 3 (assignment): my_assignment ---------------------------------------------
 #&gt; 
 #&gt; Added variable: Z 
-#&gt;                0    1   NA
-#&gt;   Frequency   50   50    0
-#&gt;  Proportion 0.50 0.50 0.00
+#&gt;                0    1
+#&gt;   Frequency   50   50
+#&gt;  Proportion 0.50 0.50
 #&gt; 
 #&gt; Added variable: Z_cond_prob 
-#&gt;              0.5   NA
-#&gt;   Frequency  100    0
-#&gt;  Proportion 1.00 0.00
+#&gt;              0.5
+#&gt;   Frequency  100
+#&gt;  Proportion 1.00
 #&gt; </div><div class='input'>
  <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'>replace_step</span>(<span class='no'>my_assignment_2</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
 #&gt; Design Summary
@@ -232,16 +232,16 @@
 #&gt; Step 3 (assignment): my_assignment_2 -------------------------------------------
 #&gt; 
 #&gt; Added variable: Z 
-#&gt;                0    1   NA
-#&gt;   Frequency   75   25    0
-#&gt;  Proportion 0.75 0.25 0.00
+#&gt;                0    1
+#&gt;   Frequency   75   25
+#&gt;  Proportion 0.75 0.25
 #&gt; 
 #&gt; Added variable: Z_cond_prob 
-#&gt;             0.25 0.75   NA
-#&gt;   Frequency   25   75    0
-#&gt;  Proportion 0.25 0.75 0.00
+#&gt;             0.25 0.75
+#&gt;   Frequency   25   75
+#&gt;  Proportion 0.25 0.75
 #&gt; </div><div class='input'>
- <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/dplyr/topics/mutate'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>after</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
+ <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>after</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
 #&gt; Design Summary
 #&gt; 
 #&gt; Step 1 (population): my_population ---------------------------------------------
@@ -269,21 +269,21 @@
 #&gt; Step 3 (assignment): my_assignment ---------------------------------------------
 #&gt; 
 #&gt; Added variable: Z 
-#&gt;                0    1   NA
-#&gt;   Frequency   50   50    0
-#&gt;  Proportion 0.50 0.50 0.00
+#&gt;                0    1
+#&gt;   Frequency   50   50
+#&gt;  Proportion 0.50 0.50
 #&gt; 
 #&gt; Added variable: Z_cond_prob 
-#&gt;              0.5   NA
-#&gt;   Frequency  100    0
-#&gt;  Proportion 1.00 0.00
+#&gt;              0.5
+#&gt;   Frequency  100
+#&gt;  Proportion 1.00
 #&gt; 
 #&gt; Step 4 (declare step): dplyr::mutate(income = noise^2) -------------------------
 #&gt; 
 #&gt; Added variable: income 
 #&gt;   min median mean  max   sd N_missing N_unique
 #&gt;  0.00   0.38 0.71 5.87 0.94         0      100
-#&gt; </div><div class='input'> <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/dplyr/topics/mutate'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>before</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
+#&gt; </div><div class='input'> <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='add_step.html'>add_step</a></span>(<span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>before</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
 #&gt; Design Summary
 #&gt; 
 #&gt; Step 1 (population): my_population ---------------------------------------------
@@ -317,14 +317,14 @@
 #&gt; Step 4 (assignment): my_assignment ---------------------------------------------
 #&gt; 
 #&gt; Added variable: Z 
-#&gt;                0    1   NA
-#&gt;   Frequency   50   50    0
-#&gt;  Proportion 0.50 0.50 0.00
+#&gt;                0    1
+#&gt;   Frequency   50   50
+#&gt;  Proportion 0.50 0.50
 #&gt; 
 #&gt; Added variable: Z_cond_prob 
-#&gt;              0.5   NA
-#&gt;   Frequency  100    0
-#&gt;  Proportion 1.00 0.00
+#&gt;              0.5
+#&gt;   Frequency  100
+#&gt;  Proportion 1.00
 #&gt; </div><div class='input'>
  <span class='fu'><a href='modify_design.html'>modify_design</a></span>(<span class='no'>design</span>, <span class='fu'><a href='remove_step.html'>remove_step</a></span>(<span class='no'>my_assignment</span>))</div><div class='output co'>#&gt; 
 #&gt; Design Summary

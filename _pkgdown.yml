@@ -4,7 +4,7 @@ template:
 navbar:
   type: default
   left:
-  - text: "Key Idea"
+  - text: "The Idea"
     href: articles/key_idea.html
   - text: "Design Library"
     href: articles/design_library.html

@@ -29,7 +29,7 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="../articles/key_idea.html">Key Idea</a>
+  <a href="../articles/key_idea.html">The Idea</a>
 </li>
 <li>
   <a href="../articles/design_library.html">Design Library</a>
@@ -172,7 +172,7 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
   potential_outcomes,
   estimand,
   assignment,
-  dplyr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/dplyr/topics/mutate">mutate</a></span>(<span class="dt">A =</span> <span class="kw">as.numeric</span>(Z <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">"T2"</span>, <span class="st">"T4"</span>)),
+  dplyr<span class="op">::</span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>(<span class="dt">A =</span> <span class="kw">as.numeric</span>(Z <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">"T2"</span>, <span class="st">"T4"</span>)),
                 <span class="dt">B =</span> <span class="kw">as.numeric</span>(Z <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">"T3"</span>, <span class="st">"T4"</span>))),
   reveal_outcomes,
   estimator)</code></pre></div>
@@ -213,6 +213,28 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
                         <span class="dt">beta_B =</span> <span class="dv">0</span>,
                         <span class="dt">beta_AB =</span> .<span class="dv">25</span>)
 diagnoses_N &lt;-<span class="st"> </span><span class="kw"><a href="../reference/diagnose_design.html">diagnose_design</a></span>(designs, <span class="dt">sims =</span> <span class="dv">1000</span>, <span class="dt">bootstrap =</span> <span class="ot">FALSE</span>)</code></pre></div>
+<pre><code>## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## font family not found in Windows font database
+
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## font family not found in Windows font database
+
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## font family not found in Windows font database
+
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## font family not found in Windows font database
+
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## font family not found in Windows font database
+
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## font family not found in Windows font database
+
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## font family not found in Windows font database</code></pre>
+<pre><code>## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x
+## $y, : font family not found in Windows font database</code></pre>
 <p><img src="two_way_factorial_files/figure-html/unnamed-chunk-6-1.png" width="672"></p>
 </div>
 <div id="further-reading" class="section level2">
