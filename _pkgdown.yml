@@ -20,6 +20,8 @@ navbar:
         href: articles/companion_packages.html
   - text: Reference
     href: reference/index.html
+  - text: "Ask for Help"
+    href: http://discuss.declaredesign.org
   - text: "Packages"
     menu:
       - text: DeclareDesign
@@ -30,5 +32,4 @@ navbar:
         href: http://fabricatr.declaredesign.org
       - text: estimatr
         href: http://estimatr.declaredesign.org
-  - text: "Discussion Board"
-    href: http://discuss.declaredesign.org
+  
