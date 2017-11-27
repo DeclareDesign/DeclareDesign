@@ -7,15 +7,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-Our design library characterizes designs informally and in code using the $<M,I,D,A>$ framework (for more on this framework, see [our paper](http://declaredesign.org/paper.pdf)):
-
-- A **model**, *M*, of how the world works. The model specifies the moving parts --- the variables --- and how these are causally related to each other. In this sense the model provides the context of a study, but also a speculation about the world.    
-
-- An **inquiry**, *I*, about the distribution of variables, perhaps given interventions on some variables.  In many applications *I* might be thought of as the "estimand." Some inquiries are statements about the values of variables, others about the causal relations between variables. In all cases however the inquiry should be answerable given the model.   
-
-- A **data strategy**, *D*, generates data on variables.  Note that implicitly the data strategy includes case selection, or sampling decisions, but it also represents interventions such as assignment of treatments or measurement strategies. A model *M* tells you what sort of data you might observe if you employ data strategy *D*.  
-
-- An **answer strategy**, *A*, that uses data to generate an answer.  
+Our design library characterizes designs informally and in code using the MIDA framework, described in [The Key Idea](/articles/key_idea.html).
 
 ---
 
@@ -40,4 +32,6 @@ There are three main ways you can learn about the designs in the library:
   2. If you have [installed DeclareDesign](http://declaredesign.org/#installing-declaredesign), download the code for the design or the design template and create your own, modified versions of the designs. Diagnose them on your own computer using `diagnose_design()` (click on the buttons under "Download" in the table above).
   3. Import designs from the library into the [Design Inspector <i class="fa fa-area-chart" title = "Go to the design inspector" fa-2x></i>]("http://shiny.declaredesign.org:8000/") and investigate their properties. You can also download the code for the designs, modify it, and upload the design back into the inspector again. 
 
+## Contribute
 
+We encourage you to contribute your research design declaration to the library so that it can be used by other scholars. [Contact us](mailto:contribute@declaredesign.org) for instructions.

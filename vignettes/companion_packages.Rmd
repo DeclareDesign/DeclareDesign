@@ -7,18 +7,18 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-All of the built-in default functions used in **DeclareDesign** originate in three standalone packages that can be used as part of **DeclareDesign** or on their own. This allows the core **DeclareDesign** package to have a minimal number of dependencies and a small number of core functions.
+All of the built-in default functions used in **DeclareDesign** originate in three standalone packages that can be used as part of **DeclareDesign** or on their own.
 
 The three packages are:
 
 # **fabricatr**
 
-**fabricatr**, includes data creation features described above. Its main function, [`fabricate()`](http://fabricatr.declaredesign.org/reference/fabricate.html), creates simulated data as in the above examples in `declare_population()`. It can do single level data creation or multilevel creation using [`level()`](http://fabricatr.declaredesign.org/reference/level.html) within [`fabricate()`](http://fabricatr.declaredesign.org/reference/fabricate.html). It is also the backbone of `declare_potential_outcomes()` default function that creates each potential outcome as an expression described above (i.e. where you define `Y_Z_1 = 0.5 + Z`). The second main function is `resample_data()` which resamples your data in a way that respects hierarchy. 
+Making decisions about research design and analysis strategies is often difficult before data is collected, because it is hard to imagine the exact form data will take. Instead, researchers typically modify analysis strategies to fit the data. **fabricatr** helps researchers imagine what data will look like before they collect it. Researchers can evaluate alternative analysis strategies, find the best one given how the data will look, and precommit before looking at the realized data.
 
 # **randomizr**
 
-**randomizr** works by default as described above in `declare_assignment()` -- it was originally part of **DeclareDesign**, but is now entirely separate. The set of sampling functions that mimic the assignment functions are now also built in to **randomizr**, including simple, clustered, stratified, and clustered-and-stratified sampling. The next step is to rewrite some of these into `C++` to see if we can speed a few of them up. Based on our understanding of `Rcpp`, the speedup gains here may be minor.
+**randomizr** is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. Social and lab scientists conducting experiments need a process to assign individuals or units of observation to treatment or control wings. Common designs include simple random assignment, complete randomization, block randomization, cluster randomization, and blocked cluster randomization. **randomizr** automates all of these processes and assists scientists in doing transparent, replicable science.
 
 # **estimatr**
 
-The `C++` version of `lm()` with robust standard errors described above as well as the difference-in-means and blocked difference-in-means functions are the core of **estimatr** now, but it can be built up with further fast estimators.
+**estimatr** provides a small set of commonly-used estimators (methods for estimating quantities of interest like treatment effects or regression parameters), with simple, accessible syntax. We include two functions that implement means estimators, [`difference_in_means()`](http://estimatr.declaredesign.org/reference/difference_in_means.html) and [`horvitz_thompson()`](http://estimatr.declaredesign.org/reference/horvitz_thompson.html). In addition, we include two functions for linear regression estimators, [`lm_robust()`](http://estimatr.declaredesign.org/reference/lm_robust.html) and [`lm_lin()`](http://estimatr.declaredesign.org/reference/lm_lin.html). In each case, scientists can choose an estimator to reflect cluster-randomized, block-randomized, and block-and-cluster-randomized designs.

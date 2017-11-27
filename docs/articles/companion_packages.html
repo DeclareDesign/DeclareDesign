@@ -58,6 +58,9 @@
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li>
+  <a href="http://discuss.declaredesign.org">Ask for Help</a>
+</li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     Packages
@@ -78,9 +81,6 @@
       <a href="http://estimatr.declaredesign.org">estimatr</a>
     </li>
   </ul>
-</li>
-<li>
-  <a href="http://discuss.declaredesign.org">Discussion Board</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -109,25 +109,25 @@
     
     
 <div class="contents">
-<p>All of the built-in default functions used in <strong>DeclareDesign</strong> originate in three standalone packages that can be used as part of <strong>DeclareDesign</strong> or on their own. This allows the core <strong>DeclareDesign</strong> package to have a minimal number of dependencies and a small number of core functions.</p>
+<p>All of the built-in default functions used in <strong>DeclareDesign</strong> originate in three standalone packages that can be used as part of <strong>DeclareDesign</strong> or on their own.</p>
 <p>The three packages are:</p>
 <div id="fabricatr" class="section level1">
 <h1 class="hasAnchor">
 <a href="#fabricatr" class="anchor"></a><strong>fabricatr</strong>
 </h1>
-<p><strong>fabricatr</strong>, includes data creation features described above. Its main function, <a href="http://fabricatr.declaredesign.org/reference/fabricate.html"><code>fabricate()</code></a>, creates simulated data as in the above examples in <code><a href="../reference/declare_population.html">declare_population()</a></code>. It can do single level data creation or multilevel creation using <a href="http://fabricatr.declaredesign.org/reference/level.html"><code>level()</code></a> within <a href="http://fabricatr.declaredesign.org/reference/fabricate.html"><code>fabricate()</code></a>. It is also the backbone of <code><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes()</a></code> default function that creates each potential outcome as an expression described above (i.e. where you define <code>Y_Z_1 = 0.5 + Z</code>). The second main function is <code>resample_data()</code> which resamples your data in a way that respects hierarchy.</p>
+<p>Making decisions about research design and analysis strategies is often difficult before data is collected, because it is hard to imagine the exact form data will take. Instead, researchers typically modify analysis strategies to fit the data. <strong>fabricatr</strong> helps researchers imagine what data will look like before they collect it. Researchers can evaluate alternative analysis strategies, find the best one given how the data will look, and precommit before looking at the realized data.</p>
 </div>
 <div id="randomizr" class="section level1">
 <h1 class="hasAnchor">
 <a href="#randomizr" class="anchor"></a><strong>randomizr</strong>
 </h1>
-<p><strong>randomizr</strong> works by default as described above in <code><a href="../reference/declare_assignment.html">declare_assignment()</a></code> – it was originally part of <strong>DeclareDesign</strong>, but is now entirely separate. The set of sampling functions that mimic the assignment functions are now also built in to <strong>randomizr</strong>, including simple, clustered, stratified, and clustered-and-stratified sampling. The next step is to rewrite some of these into <code>C++</code> to see if we can speed a few of them up. Based on our understanding of <code>Rcpp</code>, the speedup gains here may be minor.</p>
+<p><strong>randomizr</strong> is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. Social and lab scientists conducting experiments need a process to assign individuals or units of observation to treatment or control wings. Common designs include simple random assignment, complete randomization, block randomization, cluster randomization, and blocked cluster randomization. <strong>randomizr</strong> automates all of these processes and assists scientists in doing transparent, replicable science.</p>
 </div>
 <div id="estimatr" class="section level1">
 <h1 class="hasAnchor">
 <a href="#estimatr" class="anchor"></a><strong>estimatr</strong>
 </h1>
-<p>The <code>C++</code> version of <code>lm()</code> with robust standard errors described above as well as the difference-in-means and blocked difference-in-means functions are the core of <strong>estimatr</strong> now, but it can be built up with further fast estimators.</p>
+<p><strong>estimatr</strong> provides a small set of commonly-used estimators (methods for estimating quantities of interest like treatment effects or regression parameters), with simple, accessible syntax. We include two functions that implement means estimators, <a href="http://estimatr.declaredesign.org/reference/difference_in_means.html"><code>difference_in_means()</code></a> and <a href="http://estimatr.declaredesign.org/reference/horvitz_thompson.html"><code>horvitz_thompson()</code></a>. In addition, we include two functions for linear regression estimators, <a href="http://estimatr.declaredesign.org/reference/lm_robust.html"><code>lm_robust()</code></a> and <a href="http://estimatr.declaredesign.org/reference/lm_lin.html"><code>lm_lin()</code></a>. In each case, scientists can choose an estimator to reflect cluster-randomized, block-randomized, and block-and-cluster-randomized designs.</p>
 </div>
 </div>
   </div>

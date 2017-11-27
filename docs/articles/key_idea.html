@@ -58,6 +58,9 @@
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li>
+  <a href="http://discuss.declaredesign.org">Ask for Help</a>
+</li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     Packages
@@ -78,9 +81,6 @@
       <a href="http://estimatr.declaredesign.org">estimatr</a>
     </li>
   </ul>
-</li>
-<li>
-  <a href="http://discuss.declaredesign.org">Discussion Board</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -109,7 +109,18 @@
     
     
 <div class="contents">
-<p>The key idea motivating <strong>DeclareDesign</strong> is that the core analytic features of research designs can be declared in a complete manner and saved as an object. A properly declared design can then easily be shared, modified, improved, and used. The design contains the information needed to implement key parts of data generation and to implement analysis. It also contains enough information to allow researchers or third parties to query it to see whether it can deliver on its promises.</p>
+<p>The key idea motivating <strong>DeclareDesign</strong> is that the core analytic features of research designs can be declared in a complete manner and saved as an object. A properly declared design can then easily be shared, modified, improved, and used. The design contains the information needed to implement key parts of data generation and to implement analysis. It also contains enough information to allow researchers or third parties to query it to see whether it can deliver on its promises. We describe this framework in greater detail in <a href="http://declaredesign.org/paper.pdf">our paper</a>.</p>
+<div id="components-of-a-research-design" class="section level2">
+<h2 class="hasAnchor">
+<a href="#components-of-a-research-design" class="anchor"></a>Components of a research design</h2>
+<p>A research design characterized in words or in code should include four components:</p>
+<ul>
+<li><p>A <strong>model</strong>, <em>M</em>, of how the world works. The model specifies the moving parts — the variables — and how these are causally related to each other. In this sense the model provides the context of a study, but also a speculation about the world.</p></li>
+<li><p>An <strong>inquiry</strong>, <em>I</em>, about the distribution of variables, perhaps given interventions on some variables. In many applications <em>I</em> might be thought of as the “estimand.” Some inquiries are statements about the values of variables, others about the causal relations between variables. In all cases however the inquiry should be answerable given the model.</p></li>
+<li><p>A <strong>data strategy</strong>, <em>D</em>, generates data on variables. Note that implicitly the data strategy includes case selection, or sampling decisions, but it also represents interventions such as assignment of treatments or measurement strategies. A model <em>M</em> tells you what sort of data you might observe if you employ data strategy <em>D</em>.</p></li>
+<li><p>An <strong>answer strategy</strong>, <em>A</em>, that uses data to generate an answer.</p></li>
+</ul>
+</div>
 <div id="a-simple-design-declaration" class="section level2">
 <h2 class="hasAnchor">
 <a href="#a-simple-design-declaration" class="anchor"></a>A simple design declaration</h2>
@@ -117,7 +128,7 @@
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># M -- Model: Speculation on variables and relations between them</span>
 population &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_population.html">declare_population</a></span>(<span class="dt">N =</span> <span class="dv">100</span>, <span class="dt">u =</span> <span class="kw">rnorm</span>(N))
 potential_outcomes &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(<span class="dt">Y_Z_0 =</span> u, 
-                                                 <span class="dt">Y_Z_1 =</span> <span class="dv">1</span> <span class="op">-</span><span class="st"> </span>u)
+                                                 <span class="dt">Y_Z_1 =</span> u <span class="op">+</span><span class="st"> </span><span class="dv">1</span>)
 
 <span class="co"># I -- Inquiry: A query defined in terms of potential outcomes</span>
 estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(<span class="dt">ATE =</span> <span class="kw">mean</span>(Y_Z_<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>Y_Z_<span class="dv">0</span>))
@@ -157,34 +168,34 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <td align="left">001</td>
 <td align="right">1.37</td>
 <td align="right">1.37</td>
-<td align="right">-0.37</td>
+<td align="right">2.37</td>
 <td align="right">1</td>
 <td align="right">0.5</td>
-<td align="right">-0.37</td>
+<td align="right">2.37</td>
 </tr>
 <tr class="even">
 <td align="left">002</td>
 <td align="right">-0.56</td>
 <td align="right">-0.56</td>
-<td align="right">1.56</td>
+<td align="right">0.44</td>
 <td align="right">1</td>
 <td align="right">0.5</td>
-<td align="right">1.56</td>
+<td align="right">0.44</td>
 </tr>
 <tr class="odd">
 <td align="left">003</td>
 <td align="right">0.36</td>
 <td align="right">0.36</td>
-<td align="right">0.64</td>
+<td align="right">1.36</td>
 <td align="right">1</td>
 <td align="right">0.5</td>
-<td align="right">0.64</td>
+<td align="right">1.36</td>
 </tr>
 <tr class="even">
 <td align="left">004</td>
 <td align="right">0.63</td>
 <td align="right">0.63</td>
-<td align="right">0.37</td>
+<td align="right">1.63</td>
 <td align="right">0</td>
 <td align="right">0.5</td>
 <td align="right">0.63</td>
@@ -193,7 +204,7 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <td align="left">005</td>
 <td align="right">0.40</td>
 <td align="right">0.40</td>
-<td align="right">0.60</td>
+<td align="right">1.40</td>
 <td align="right">0</td>
 <td align="right">0.5</td>
 <td align="right">0.40</td>
@@ -202,10 +213,10 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <td align="left">006</td>
 <td align="right">-0.11</td>
 <td align="right">-0.11</td>
-<td align="right">1.11</td>
+<td align="right">0.89</td>
 <td align="right">1</td>
 <td align="right">0.5</td>
-<td align="right">1.11</td>
+<td align="right">0.89</td>
 </tr>
 </tbody>
 </table>
@@ -225,11 +236,11 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <tbody><tr class="odd">
 <td align="left">my_estimator</td>
 <td align="left">Z</td>
-<td align="right">1</td>
+<td align="right">0.94</td>
 <td align="right">0.19</td>
 <td align="right">0</td>
-<td align="right">0.64</td>
-<td align="right">1.4</td>
+<td align="right">0.57</td>
+<td align="right">1.3</td>
 <td align="left">ATE</td>
 </tr></tbody>
 </table>
@@ -254,25 +265,25 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <tbody>
 <tr class="odd">
 <td>Diagnosand</td>
-<td align="center">0.00</td>
-<td align="center">0.00</td>
-<td align="center">1.00</td>
-<td align="center">1.00</td>
-<td align="center">1.00</td>
+<td align="center">0</td>
+<td align="center">0.2</td>
+<td align="center">1</td>
+<td align="center">0.95</td>
+<td align="center">1</td>
 <td align="center">1</td>
 <td align="center">0.2</td>
-<td align="center">0.00</td>
+<td align="center">0</td>
 </tr>
 <tr class="even">
 <td>Boostrapped SE</td>
-<td align="center">(0.00)</td>
-<td align="center">(0.00)</td>
-<td align="center">(0.00)</td>
-<td align="center">(0.00)</td>
-<td align="center">(0.00)</td>
-<td align="center">(0.00)</td>
-<td align="center">(0.00)</td>
-<td align="center">(0.00)</td>
+<td align="center">0</td>
+<td align="center">0.0</td>
+<td align="center">0</td>
+<td align="center">0.00</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0.0</td>
+<td align="center">0</td>
 </tr>
 </tbody>
 </table>
@@ -286,7 +297,8 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li><a href="#a-simple-design-declaration">A simple design declaration</a></li>
+<li><a href="#components-of-a-research-design">Components of a research design</a></li>
+      <li><a href="#a-simple-design-declaration">A simple design declaration</a></li>
       <li><a href="#making-use-of-a-design">Making Use of A Design</a></li>
       <li><a href="#diagnosing-a-design">Diagnosing a design</a></li>
       </ul>
