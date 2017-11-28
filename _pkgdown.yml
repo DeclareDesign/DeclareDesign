@@ -47,4 +47,5 @@ navbar:
         href: http://fabricatr.declaredesign.org
       - text: estimatr
         href: http://estimatr.declaredesign.org
-  
+  right:
+  - text: 
