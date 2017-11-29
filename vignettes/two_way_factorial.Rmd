@@ -57,8 +57,16 @@ two_way_factorial_template <- function(N = c(30, 100, 500, 1000),
     dplyr::mutate(A = as.numeric(Z %in% c("T2", "T4")),
                   B = as.numeric(Z %in% c("T3", "T4"))),
     reveal_outcomes,
-    estimator)
-    
+    estimator, 
+    citation = utils::bibentry(bibtype = "Article",
+                                title = "A factorial experiment in teachers’ written feedback on student homework: Changing teacher behavior a little rather than a lot.",
+                                author= "Elawar, Maria C., and Lyn Corno.",
+                                journal= "Journal of educational psychology",
+                                volume = "77.2",
+                                year = "1985",
+                                page = 162)
+    )
+  
   design
 }
 attr(two_way_factorial_template, "tips") <- c(
