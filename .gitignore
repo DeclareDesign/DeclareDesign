@@ -8,8 +8,10 @@
 # produced vignettes
 vignettes/*.html
 vignettes/*.pdf
+###vignettes/*.R #TODO NJF probably shouldn't be here
 vignettes/.*
 .Rproj.user
 tests/testthat/*.pdf
 .DS_Store
 inst/doc
+*.tar.gz
