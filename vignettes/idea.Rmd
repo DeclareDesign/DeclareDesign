@@ -99,4 +99,4 @@ coverage = temp_d[1, 4]
 kable(temp_d, align = c("cccccccc"))
 ```
 
-The diagnosis here confirms the fact that random assignment to treatment allows for unbiased estimates of treatment effects. `r if(coverage>0.95){" We can also observe that under the current design, coverage is higher than the nominal 95% rate. This reflects the fact that the typical standard error estimators are conservative."}`
+The diagnosis here confirms the fact that random assignment to treatment allows for unbiased estimates of treatment effects. We can also observe that under the current design, coverage is higher than the nominal 95% rate. This reflects the fact that the typical standard error estimators are conservative.
