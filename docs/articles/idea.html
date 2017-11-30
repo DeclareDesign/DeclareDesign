@@ -124,8 +124,8 @@
 <p>Here is an illustration using a very simple two arm trial.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># M -- Model: Speculation on variables and relations between them</span>
 population &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_population.html">declare_population</a></span>(<span class="dt">N =</span> <span class="dv">100</span>, <span class="dt">u =</span> <span class="kw">rnorm</span>(N))
-potential_outcomes &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(<span class="dt">Y_Z_0 =</span> u, 
-                                                 <span class="dt">Y_Z_1 =</span> u <span class="op">+</span><span class="st"> </span><span class="dv">1</span>)
+potential_outcomes &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(<span class="dt">Y_Z_0 =</span> <span class="dv">0</span>, 
+                                                 <span class="dt">Y_Z_1 =</span> <span class="dv">1</span> <span class="op">+</span><span class="st"> </span>u)
 
 <span class="co"># I -- Inquiry: A query defined in terms of potential outcomes</span>
 estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(<span class="dt">ATE =</span> <span class="kw">mean</span>(Y_Z_<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>Y_Z_<span class="dv">0</span>))
@@ -164,7 +164,7 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <tr class="odd">
 <td align="left">001</td>
 <td align="right">1.37</td>
-<td align="right">1.37</td>
+<td align="right">0</td>
 <td align="right">2.37</td>
 <td align="right">1</td>
 <td align="right">0.5</td>
@@ -173,7 +173,7 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <tr class="even">
 <td align="left">002</td>
 <td align="right">-0.56</td>
-<td align="right">-0.56</td>
+<td align="right">0</td>
 <td align="right">0.44</td>
 <td align="right">1</td>
 <td align="right">0.5</td>
@@ -182,7 +182,7 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <tr class="odd">
 <td align="left">003</td>
 <td align="right">0.36</td>
-<td align="right">0.36</td>
+<td align="right">0</td>
 <td align="right">1.36</td>
 <td align="right">1</td>
 <td align="right">0.5</td>
@@ -191,25 +191,25 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <tr class="even">
 <td align="left">004</td>
 <td align="right">0.63</td>
-<td align="right">0.63</td>
+<td align="right">0</td>
 <td align="right">1.63</td>
 <td align="right">0</td>
 <td align="right">0.5</td>
-<td align="right">0.63</td>
+<td align="right">0.00</td>
 </tr>
 <tr class="odd">
 <td align="left">005</td>
 <td align="right">0.40</td>
-<td align="right">0.40</td>
+<td align="right">0</td>
 <td align="right">1.40</td>
 <td align="right">0</td>
 <td align="right">0.5</td>
-<td align="right">0.40</td>
+<td align="right">0.00</td>
 </tr>
 <tr class="even">
 <td align="left">006</td>
 <td align="right">-0.11</td>
-<td align="right">-0.11</td>
+<td align="right">0</td>
 <td align="right">0.89</td>
 <td align="right">1</td>
 <td align="right">0.5</td>
@@ -233,11 +233,11 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <tbody><tr class="odd">
 <td align="left">my_estimator</td>
 <td align="left">Z</td>
-<td align="right">0.94</td>
-<td align="right">0.19</td>
+<td align="right">0.96</td>
+<td align="right">0.13</td>
 <td align="right">0</td>
-<td align="right">0.57</td>
-<td align="right">1.3</td>
+<td align="right">0.7</td>
+<td align="right">1.2</td>
 <td align="left">ATE</td>
 </tr></tbody>
 </table>
@@ -263,12 +263,12 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <tr class="odd">
 <td>Diagnosand</td>
 <td align="center">0</td>
-<td align="center">0.2</td>
+<td align="center">0.1</td>
 <td align="center">1</td>
-<td align="center">0.95</td>
+<td align="center">0.99</td>
 <td align="center">1</td>
 <td align="center">1</td>
-<td align="center">0.2</td>
+<td align="center">0.14</td>
 <td align="center">0</td>
 </tr>
 <tr class="even">
@@ -279,12 +279,12 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <td align="center">0.00</td>
 <td align="center">0</td>
 <td align="center">0</td>
-<td align="center">0.0</td>
+<td align="center">0.00</td>
 <td align="center">0</td>
 </tr>
 </tbody>
 </table>
-<p>The diagnosis here confirms the fact that random assignment to treatment allows for unbiased estimates of treatment effects.</p>
+<p>The diagnosis here confirms the fact that random assignment to treatment allows for unbiased estimates of treatment effects. We can also observe that under the current design, coverage is higher than the nominal 95% rate. This reflects the fact that the typical standard error estimators are conservative.</p>
 </div>
 </div>
   </div>
