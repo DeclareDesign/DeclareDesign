@@ -56,7 +56,7 @@ attr(two_arm_template,"tips") <- c(
   <a class="btn btn-primary" href="http://declaredesign.org/articles/two_arm_template.RDS">
     <i class="fa fa-clipboard" title = "Download template for design" fa-2x></i> Download template
   </a>
-  <a class="btn btn-primary" href="http://shiny.declaredesign.org:8000/">
+  <a class="btn btn-primary" href="http://shiny.declaredesign.org/inspector/?topic=two_arm">
     <i class="fa fa-area-chart" title = "Go to the design inspector" fa-2x></i> Inspect design
   </a>
 </div>
