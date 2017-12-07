@@ -26,11 +26,11 @@ Causal inference            Observational [Regression Discontinuity](../articles
 
 ## Using the design library
 
-There are three main ways you can learn about the designs in the library:
+There are two main ways you can learn about the designs in the library:
   
   1. Read through the vignettes (click the links under "Design" in the table above).
   2. If you have [installed DeclareDesign](http://declaredesign.org/#installing-declaredesign), download the code for the design or the design template and create your own, modified versions of the designs. Diagnose them on your own computer using `diagnose_design()` (click on the buttons under "Download" in the table above).
-  3. Import designs from the library into the [Design Inspector <i class="fa fa-area-chart" title = "Go to the design inspector" fa-2x></i>](http://shiny.declaredesign.org/inspector/) and investigate their properties. You can also download the code for the designs, modify it, and upload the design back into the inspector again. 
+<!--  3. Import designs from the library into the [Design Inspector <i class="fa fa-area-chart" title = "Go to the design inspector" fa-2x></i>](http://shiny.declaredesign.org/inspector/) and investigate their properties. You can also download the code for the designs, modify it, and upload the design back into the inspector again. -->
 
 ## Contribute
 

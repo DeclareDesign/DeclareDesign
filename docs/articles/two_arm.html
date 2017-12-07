@@ -107,7 +107,11 @@
     
 <div class="contents">
 <div class="btn-group">
-<p><a class="btn btn-primary" href="http://declaredesign.org/articles/two_arm.R"> <i class="fa fa-code" title="Download code for design" fa-2x></i> Download code </a> <a class="btn btn-primary" href="http://declaredesign.org/articles/two_arm_template.RDS"> <i class="fa fa-clipboard" title="Download template for design" fa-2x></i> Download template </a> <a class="btn btn-primary" href="http://shiny.declaredesign.org/inspector/?topic=two_arm"> <i class="fa fa-area-chart" title="Go to the design inspector" fa-2x></i> Inspect design </a></p>
+<p><a class="btn btn-primary" href="http://declaredesign.org/articles/two_arm.R"> <i class="fa fa-code" title="Download code for design" fa-2x></i> Download code </a> <a class="btn btn-primary" href="http://declaredesign.org/articles/two_arm_template.RDS"> <i class="fa fa-clipboard" title="Download template for design" fa-2x></i> Download template </a> <!--
+  <a class="btn btn-primary" href="http://shiny.declaredesign.org/inspector/?topic=two_arm">
+    <i class="fa fa-area-chart" title = "Go to the design inspector" fa-2x></i> Inspect design
+  </a>
+--></p>
 </div>
 <p>Often we want to learn about the causal effect of one thing on something else – say, the effect of taking a pill on a person becoming healthy. We can define the effect of a cause on an outcome as the difference of the how the outcomes potentially would have looked under two states of the world: the potential outcome in a world where the cause is present and the potential outcome in a world where it is absent. Were we able to observe that a person was sick in a world where they took the pill <em>and</em> sick in a world where they didn’t, for example, we would infer that the pill did not have any causal effect on their health.</p>
 <p>The problem is we can never observe our world in two counterfactual states at once, and so we can never estimate the effect of a cause on any particular individual person or thing. We can, however, estimate an <em>average</em> of individual causal effects, which we refer to as the average treatment effect (ATE). The simplest design for inferring an ATE is the two-arm experiment: some people are assigned at random to a treatment (the first arm), and the rest are assigned to the control (the second arm). The difference in the averages of the two groups gives us an unbiased estimate of the true ATE.</p>

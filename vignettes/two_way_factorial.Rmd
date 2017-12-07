@@ -92,9 +92,11 @@ attr(two_way_factorial_template, "description") <- "
   <a class="btn btn-primary" href="http://declaredesign.org/articles/two_way_factorial_template.RDS">
     <i class="fa fa-clipboard" title = "Download template for design" fa-2x></i> Download template
   </a>
+<!--
   <a class="btn btn-primary" href="http://shiny.declaredesign.org/inspector/?topic=two_way_factorial">
     <i class="fa fa-area-chart" title = "Go to the design inspector" fa-2x></i> Inspect design
   </a>
+-->
 </div>
 
 
