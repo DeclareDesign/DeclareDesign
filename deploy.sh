@@ -4,8 +4,8 @@ PKG_REPO=$PWD
 COMMIT="${TRAVIS_COMMIT:-$APPVEYOR_REPO_COMMIT}"
 cd ..
 
-mkdir repo
-cd repo
+mkdir drat
+cd drat
 
 ## Set up Repo parameters
 git init
@@ -18,7 +18,7 @@ git remote add upstream "https://$GH_TOKEN@github.com/DeclareDesign/declaredesig
 git fetch upstream
 git checkout master
 
-Rscript update_repo.R
+Rscript -e "drat::insertPackage('../$PKG_TARBALL', repodir = './drat')"
 
 git add *
 
