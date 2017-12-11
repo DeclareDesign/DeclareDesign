@@ -29,6 +29,7 @@ test_script:
   - travis-tool.sh run_tests
 
 on_success:
+  - copy *.zip ..
   - sh deploy.sh
 
 on_failure:
