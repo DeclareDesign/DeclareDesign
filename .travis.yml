@@ -22,6 +22,7 @@ r_github_packages:
 - hadley/pkgdown
 r_packages:
 - git2r
+- drat
 after_success:
 - test $TRAVIS_OS_NAME == "linux" && Rscript -e 'covr::coveralls()'
 - test $TRAVIS_OS_NAME == "osx" && Rscript -e "devtools::build(binary = TRUE, args
