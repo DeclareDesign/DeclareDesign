@@ -1,7 +1,5 @@
 #!/bin/bash
 set -o errexit -o nounset
-set -v
-set -x
 PKG_REPO=$PWD
 COMMIT="${TRAVIS_COMMIT:-$APPVEYOR_REPO_COMMIT}"
 
