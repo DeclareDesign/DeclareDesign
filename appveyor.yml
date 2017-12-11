@@ -30,6 +30,7 @@ test_script:
 
 on_success:
   - copy *.zip ..
+  - travis-tool.sh r_install drat
   - sh deploy.sh
 
 on_failure:
