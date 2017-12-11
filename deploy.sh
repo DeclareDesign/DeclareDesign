@@ -18,7 +18,7 @@ git remote add upstream "https://$GH_TOKEN@github.com/DeclareDesign/declaredesig
 git fetch upstream
 git checkout master
 
-Rscript -e "drat::insertPackage('../$PKG_TARBALL', repodir = './drat')"
+Rscript -e "drat::insertPackage('../$PKG_TARBALL', repodir = '.')"
 
 git add *
 
