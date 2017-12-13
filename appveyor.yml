@@ -14,7 +14,7 @@ install:
 # Adapt as necessary starting from here
 environment:
   GH_TOKEN:
-    secure: ok3AShVmBRbyrjNvrhNE/7PcY4o1zoALGDgs1N2SRekhCwAsM2bv1F5oj8i8gA5U
+    secure: 7dAyrUdSY265j0EnmQSBiOa6AtQaTNF25C6v0ntJEejJMMPMB2uOx1yYl/3ro0d9
 
   matrix:
   - R_VERSION: release
@@ -29,9 +29,7 @@ test_script:
   - travis-tool.sh run_tests
 
 on_success:
-  - copy *.zip ..
-  - travis-tool.sh r_install drat
-  - sh deploy.sh
+  - if NOT DEFINED APPVEYOR_PULL_REQUEST_NUMBER (if %APPVEYOR_REPO_BRANCH% == master ( copy *.zip .. && travis-tool.sh r_install drat && sh deploy.sh ) )
 
 on_failure:
   - 7z a failure.zip *.Rcheck\*
