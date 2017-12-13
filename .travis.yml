@@ -10,6 +10,7 @@ matrix:
 
     - os: linux
       r: oldrel
+      r_packages_github: hadley/pkgdown
 
     - os: osx
       r: release
@@ -17,6 +18,7 @@ matrix:
     - os: osx
       osx_image: xcode6.4
       r: oldrel
+      r_packages_github: hadley/pkgdown
 
 
 
