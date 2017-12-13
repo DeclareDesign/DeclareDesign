@@ -14,11 +14,12 @@ matrix:
       r: oldrel
       r_github_packages: 
         - hadley/pkgdown
-
+        - jyypma/nloptr
+        
     - os: osx
       r: release
-      r_packages:
-        - pkgdown
+      r_github_packages:
+        - hadley/pkgdown
         
     - os: osx
       osx_image: xcode6.4
