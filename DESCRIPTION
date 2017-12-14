@@ -22,9 +22,7 @@ Imports:
     foreach,
     doRNG,
     parallel
-Remotes: DeclareDesign/estimatr,
-    DeclareDesign/fabricatr
-Additional_repositories: http://install.declaredesign.org
+Additional_repositories: http://r.declaredesign.org
 License: MIT + file LICENSE
 URL: http://declaredesign.org, https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues
@@ -38,6 +36,5 @@ Suggests:
     AER,
     dplyr,
     data.table,
-    sf,
     ggplot2
 VignetteBuilder: knitr
