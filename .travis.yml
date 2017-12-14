@@ -9,23 +9,30 @@ matrix:
       r: release
       r_packages:
         - pkgdown
+        - git2r
+        - covr
+      r_github_packages:
+      - nfultz/drat
 
     - os: linux
       r: oldrel
       r_github_packages: 
         - hadley/pkgdown
         - jyypma/nloptr
+        - nfultz/drat
         
     - os: osx
       r: release
       r_github_packages:
         - hadley/pkgdown
+        - nfultz/drat
         
     - os: osx
       osx_image: xcode6.4
       r: oldrel
       r_github_packages:
         - hadley/pkgdown
+        - nfultz/drat
 
 
 
@@ -40,8 +47,6 @@ env:
 r_packages:
 - git2r
 - covr
-r_github_packages:
-- nfultz/drat
 after_success:
 - test $TRAVIS_OS_NAME == "linux" && Rscript -e 'covr::coveralls()'
 - test $TRAVIS_OS_NAME == "osx" && Rscript -e "devtools::build(binary = TRUE, args = c('--preclean'))"
