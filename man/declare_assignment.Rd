@@ -4,7 +4,7 @@
 \alias{declare_assignment}
 \title{Declare Assignment Procedure}
 \usage{
-declare_assignment(..., assignment_function = assignment_function_default)
+declare_assignment(..., delegate = assignment_function_default, label)
 }
 \arguments{
 \item{...}{Arguments to the assignment function.}

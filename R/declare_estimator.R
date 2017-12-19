@@ -80,18 +80,14 @@
 #'
 #' my_estimator_custom(df)
 #'
-declare_estimator <- function(...,
+declare_estimator <-make_declarations(estimator_delegate, step_type="estimator", causal_type="estimator", default_label="my_estimator")
+
+estimator_delegate <- function(data, ...,
                               model = estimatr::difference_in_means,
                               estimator_function = NULL,
                               coefficient_name = Z,
-                              estimand = NULL,
-                              label = my_estimator) {
+                              estimand = NULL, label) {
   model <- if(is.null(estimator_function)) model else NULL
-
-  args <- eval(substitute(alist(...)))
-  env <- freeze_environment(parent.frame())
-
-  label <- to_char_except_null(substitute(label))
 
   coefficient_name <- to_char_except_null(substitute(coefficient_name))
 
@@ -114,12 +110,13 @@ declare_estimator <- function(...,
 
   estimand_label <- switch(class(estimand), "character"=estimand, "function"=attributes(estimand)$label)
 
-  estimator_function_internal <- function(data) {
+  # estimator_function_internal <- function(data) {
+    args <- list(...)
     args$data <- data
     if ("coefficient_name" %in% names(formals(func))) {
       args$coefficient_name <- coefficient_name
     }
-    results <- do.call(func, args = args, envir = env)
+    results <- do.call(func, args = args)
     results <- clean(results, coefficient_name) # fit2tidy if a model function, ow I
     return_data <-
       data.frame(estimator_label = label,
@@ -131,14 +128,15 @@ declare_estimator <- function(...,
     return_data
   }
 
-  attributes(estimator_function_internal) <-
-    list(call = match.call(),
-         type = "estimator",
-         label = label,
-         estimand_label = estimand_label)
-
-  return(estimator_function_internal)
-}
+#   attributes(estimator_function_internal) <-
+#     list(call = match.call(),
+#          step_type = "estimator",
+#          causal_type = "estimator",
+#          label = label,
+#          estimand_label = estimand_label)
+#
+#   return(estimator_function_internal)
+# }
 
 fit2tidy <- function(fit, coefficient_name = NULL) {
   summ <- summary(fit)$coefficients

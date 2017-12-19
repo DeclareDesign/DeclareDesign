@@ -5,7 +5,7 @@
 \title{Potential Outcomes}
 \usage{
 declare_potential_outcomes(...,
-  potential_outcomes_function = potential_outcomes_function_default)
+  delegate = potential_outcomes_function_default, label)
 }
 \arguments{
 \item{...}{Arguments to the potential_outcomes_function}

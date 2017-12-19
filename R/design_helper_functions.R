@@ -40,22 +40,53 @@ NULL
 #'
 #' @export
 draw_data <- function(design) {
-  design$data_function()
+    current_df <- NULL
+
+    for(step in design) {
+      if("dgp" %in% attr(step, "causal_type"))
+        current_df <- step(current_df)
+    }
+
+    current_df
+  }
+
+#' @export
+execute_design <- function(design) {
+  current_df <- NULL
+
+  results <- list(estimand=vector("list", length(design)),
+                  estimator=vector("list", length(design)))
+
+  for (i in seq_along(design)) {
+    step <- design[[i]]
+    df <- step(current_df)
+
+    # if it's a dgp
+    if ("dgp" %in% attr(step, "causal_type")) {
+      current_df <- df
+    } else {
+      results[[attr(step, "step_type")]][[i]] <- df
+    }
+  }
+  list(estimates_df = do.call(rbind.data.frame, results[["estimator"]]),
+       estimands_df = do.call(rbind.data.frame, results[["estimand"]]))
 }
+
+
 
 
 #' @rdname post_design
 #'
 #' @export
 get_estimates <- function(design) {
-  design$design_function()$estimates_df
+  execute_design(design)$estimates_df
 }
 
 #' @rdname post_design
 #'
 #' @export
 get_estimands <- function(design) {
-  design$design_function()$estimands_df
+  execute_design(design)$estimands_df
 }
 
 #' Obtain the preferred citation for a design

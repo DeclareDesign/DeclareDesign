@@ -24,7 +24,7 @@ two_way_factorial_template <- function(N = c(30, 100, 500, 1000),
   
   # Inquiry ----------------------------------------------------------------------
   estimand <- declare_estimand(
-    interaction = mean((Y_Z_T4 + Y_Z_T1) - (Y_Z_T2 + Y_Z_T3)), 
+    interaction = mean((Y_Z_T4 - Y_Z_T3) - (Y_Z_T2 - Y_Z_T1)), 
     label = "interaction")
   
   # Data Strategy ----------------------------------------------------------------
@@ -45,8 +45,16 @@ two_way_factorial_template <- function(N = c(30, 100, 500, 1000),
     dplyr::mutate(A = as.numeric(Z %in% c("T2", "T4")),
                   B = as.numeric(Z %in% c("T3", "T4"))),
     reveal_outcomes,
-    estimator)
-    
+    estimator, 
+    citation = utils::bibentry(bibtype = "Article",
+                                title = "A factorial experiment in teachers’ written feedback on student homework: Changing teacher behavior a little rather than a lot.",
+                                author= "Elawar, Maria C., and Lyn Corno.",
+                                journal= "Journal of educational psychology",
+                                volume = "77.2",
+                                year = "1985",
+                                page = 162)
+    )
+  
   design
 }
 attr(two_way_factorial_template, "tips") <- c(
@@ -55,6 +63,13 @@ attr(two_way_factorial_template, "tips") <- c(
   "beta_B" = "Main effect of B",
   "beta_AB" = "Interaction effect of A and B"
 )
+attr(two_way_factorial_template, "description") <- "
+<p> A two way factorial design with a size <code>N</code>, 
+    main effects <code>beta_A</code> and <code>beta_B</code>, 
+    and interaction <code>beta_AB</code>. 
+
+<p> Estimand is the average interaction effect.
+"
 
 ## ------------------------------------------------------------------------
 # Set design parameters --------------------------------------------------------
@@ -74,7 +89,7 @@ potential_outcomes <- declare_potential_outcomes(
 
 # Inquiry ----------------------------------------------------------------------
 estimand <- declare_estimand(
-  interaction = mean((Y_Z_T4 + Y_Z_T1) - (Y_Z_T2 + Y_Z_T3)), 
+  interaction = mean((Y_Z_T4 - Y_Z_T3) - (Y_Z_T2 - Y_Z_T1)), 
   label = "interaction")
 
 # Data Strategy ----------------------------------------------------------------
@@ -104,12 +119,12 @@ design <- declare_design(
 #                          beta_B = 0,
 #                          beta_AB = .25)
 #  diagnoses_N <- diagnose_design(designs, sims = 1000, bootstrap = FALSE)
-#  diagnosis <- diagnose_design(design, sims = 1000, bootstrap_sims = 1000)
+#  diagnosis <- diagnose_design(design, sims = 10000, bootstrap_sims = 1000)
 #  saveRDS(diagnoses_N,"two_way_factorial_diagnoses_N.RDS")
 #  saveRDS(diagnosis,"two_way_factorial_diagnosis.RDS")
 
 ## ----eval = FALSE, echo = TRUE-------------------------------------------
-#  diagnosis <- diagnose_design(design, sims = 1000, bootstrap_sims = 1000)
+#  diagnosis <- diagnose_design(design, sims = 10000, bootstrap_sims = 1000)
 
 ## ----echo = FALSE--------------------------------------------------------
 if(file.exists("two_way_factorial_diagnosis.RDS")) diagnosis <- readRDS("two_way_factorial_diagnosis.RDS")
@@ -159,7 +174,9 @@ ggplot(
 geom_point(color = "#C67800") +
 geom_smooth(se = FALSE, size = .5, color = "#205C8A", method = "loess") +
 scale_y_continuous(name = "Power",limits = c(0,1.1),breaks = c(seq(0,1,.25),.8),minor_breaks = NULL) +
-scale_x_continuous(name = "N",breaks = c(seq(0,3000,500),min_sample)) + 
+scale_x_continuous(name = "N",breaks = c(500,1000,1500,2000,min_sample,2500,3000), 
+labels =  c(500,1000,1500,2000,paste0("\n",min_sample),2500,3000)
+) + 
 geom_hline(yintercept = .8,size = .1) +
 geom_vline(xintercept = min_sample,size = .1) +
    theme_bw() +

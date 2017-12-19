@@ -4,7 +4,7 @@
 \alias{declare_population}
 \title{Declare the Size and Features of the Population}
 \usage{
-declare_population(..., population_function = fabricate)
+declare_population(..., delegate = fabricate, label)
 }
 \arguments{
 \item{...}{Arguments to the population function}

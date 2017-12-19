@@ -51,42 +51,44 @@
 #' df <- my_sampling_custom(df)
 #' dim(df)
 #' head(df)
-declare_sampling <-
-  function(..., sampling_function = sampling_function_default) {
-    args <- eval(substitute(alist(...)))
-    env <- freeze_environment(parent.frame())
-    func <- eval(sampling_function)
-    if (!("data" %in% names(formals(func)))) {
-      stop("Please choose a sampling_function with a data argument.")
-    }
-    sampling_function_internal <- function(data) {
-      args$data <- data
-      do.call(func, args = args, envir = env)
-    }
-    attributes(sampling_function_internal) <-
-      list(call = match.call(), type = "sampling")
+declare_sampling <- make_declarations(sampling_function_default, "sampling")
 
-    if (from_package(sampling_function, "DeclareDesign") &
-        substitute(sampling_function) == "sampling_function_default") {
-      args_randomizr <- quos(...)
-
-      if (any(names(args_randomizr) == "sampling_variable_name")) {
-        args_randomizr$sampling_variable_name <- NULL
-      }
-      randomizr_call <- quo(declare_rs(!!! args_randomizr))
-
-      randomizr_summary <- function(data) {
-        randomizr_call <- lang_modify(randomizr_call, N = nrow(data))
-        return(print(eval_tidy(randomizr_call, data = data)))
-      }
-
-      attributes(sampling_function_internal)$summary_function <-
-        randomizr_summary
-
-    }
-
-    return(sampling_function_internal)
-  }
+# declare_sampling <-
+#   function(..., sampling_function = sampling_function_default) {
+#     args <- eval(substitute(alist(...)))
+#     env <- freeze_environment(parent.frame())
+#     func <- eval(sampling_function)
+#     if (!("data" %in% names(formals(func)))) {
+#       stop("Please choose a sampling_function with a data argument.")
+#     }
+#     sampling_function_internal <- function(data) {
+#       args$data <- data
+#       do.call(func, args = args, envir = env)
+#     }
+#     attributes(sampling_function_internal) <-
+#       list(call = match.call(), type = "sampling")
+#
+#     if (from_package(sampling_function, "DeclareDesign") &
+#         substitute(sampling_function) == "sampling_function_default") {
+#       args_randomizr <- quos(...)
+#
+#       if (any(names(args_randomizr) == "sampling_variable_name")) {
+#         args_randomizr$sampling_variable_name <- NULL
+#       }
+#       randomizr_call <- quo(declare_rs(!!! args_randomizr))
+#
+#       randomizr_summary <- function(data) {
+#         randomizr_call <- lang_modify(randomizr_call, N = nrow(data))
+#         return(print(eval_tidy(randomizr_call, data = data)))
+#       }
+#
+#       attributes(sampling_function_internal)$summary_function <-
+#         randomizr_summary
+#
+#     }
+#
+#     return(sampling_function_internal)
+#   }
 
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities

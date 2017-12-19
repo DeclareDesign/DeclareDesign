@@ -4,8 +4,7 @@
 \alias{declare_design}
 \title{Declare Design}
 \usage{
-declare_design(..., title = NULL, authors = NULL, description = NULL,
-  citation = NULL)
+declare_design(...)
 }
 \arguments{
 \item{...}{A set of steps in a research design, beginning with a \code{data.frame} representing the population or a function that draws the population. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a \code{data.frame} as an argument and return a \code{data.frame}. Typically, many steps are declared using the \code{declare_} functions, i.e., \code{\link{declare_population}}, \code{\link{declare_population}}, \code{\link{declare_sampling}}, \code{\link{declare_potential_outcomes}}, \code{\link{declare_estimand}}, \code{\link{declare_assignment}}, and \code{\link{declare_estimator}}. Functions from the \code{dplyr} package such as mutate can also be usefully included.}

@@ -47,6 +47,9 @@ reveal_outcomes <-
 
     # Setup to handle NSE
 
+    # outcome_variable_names <- rapply(as.list(substitute(outcome_variable_names)),
+    #                                  as.character, classes = c("character", "name"))
+
     if (length(substitute(outcome_variable_names)) > 1) {
       outcome_variable_names <-
         sapply(lang_args(enexpr(outcome_variable_names)), function(x)
@@ -111,7 +114,7 @@ reveal_outcomes <-
 
   }
 
-attributes(reveal_outcomes) <- list(type = "reveal_outcomes")
+attributes(reveal_outcomes) <- list(step_type = "reveal_outcomes", causal_type= "dgp")
 
 
 
@@ -161,3 +164,7 @@ switching_equation <- function(data,
   }
   return(data[, outcome_variable_name, drop = TRUE])
 }
+
+
+#' @export
+declare_reveal <- make_declarations(reveal_outcomes, "reveal_outcomes");
