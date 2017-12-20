@@ -27,10 +27,9 @@ test_that("Test Subsetting", {
                            reveal_outcomes,
                            my_estimator)
 
-  head(design$data_function())
-  design$design_function()
+  head(draw_data(design))
 
-  diagnose_design(design, sims = 2, bootstrap = FALSE, parallel = FALSE)
+  execute_design(design)
 
 
 })

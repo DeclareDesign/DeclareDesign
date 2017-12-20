@@ -99,14 +99,16 @@ declare_estimand <- make_declarations(estimand_function_default, "estimand", cau
 #     return(estimand_function_internal)
 #   }
 
-#' @importFrom rlang eval_tidy quos
+#' @importFrom rlang eval_tidy quos  is_quosure
 estimand_function_default <- function(data, ..., subset = NULL, label) {
   options <- quos(...)
   if(names(options)[1] == "") names(options)[1] <- label
 
-  condition_call <- substitute(subset)
-  if (!is.null(condition_call)) {
-    data <- data[eval(condition_call, data), , drop = FALSE]
+  subset <- substitute(subset)
+  if(is_quosure(subset)) subset <- subset[[2]]
+  idx <- eval_tidy(subset, data = data)
+  if (!is.null(idx)) {
+    data <- data[idx, , drop = FALSE]
   }
 
   ret <- vector("list", length(options))
