@@ -40,15 +40,15 @@ NULL
 #'
 #' @export
 draw_data <- function(design) {
-    current_df <- NULL
+  current_df <- NULL
 
-    for(step in design) {
-      if("dgp" %in% attr(step, "causal_type"))
-        current_df <- step(current_df)
-    }
-
-    current_df
+  for(step in design) {
+    if("dgp" %in% attr(step, "causal_type"))
+      current_df <- step(current_df)
   }
+
+  current_df
+}
 
 #' @export
 execute_design <- function(design) {
