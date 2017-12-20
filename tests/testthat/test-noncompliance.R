@@ -53,11 +53,11 @@ test_that("Noncompliance", {
                            cace_hat)
 
 
-  head(design$data_function())
+  head(draw_data(design))
 
-  design$design_function()
+  execute_design(design)
 
-  df <- design$data_function()
+  df <- draw_data(design)
   cace_estimator(df)
 
   diagnose_design(design, sims = 2, bootstrap = FALSE, parallel = FALSE)

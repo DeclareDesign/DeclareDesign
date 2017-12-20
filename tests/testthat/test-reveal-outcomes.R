@@ -48,7 +48,7 @@ test_that("Reveal Outcomes", {
                            my_assignment,
                            reveal_outcomes)
 
-  head(design$data_function())
+  head(draw_data(design))
 
   design <- declare_design(my_population,
                            my_potential_outcomes,
@@ -56,7 +56,7 @@ test_that("Reveal Outcomes", {
                            reveal_outcomes(assignment_variable_names = Z,
                                            outcome_variable_names = Y))
 
-  head(design$data_function())
+  head(draw_data(design))
 
   design <- declare_design(my_population,
                            my_potential_outcomes,
@@ -64,7 +64,7 @@ test_that("Reveal Outcomes", {
                            reveal_outcomes(assignment_variable_name = "Z",
                                            outcome_variable_name = "Y"))
 
-  head(design$data_function())
+  head(draw_data(design))
 
 })
 

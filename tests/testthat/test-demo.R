@@ -168,7 +168,7 @@ test_that("demo runs", {
     with(data, median(Y_Z_1 - Y_Z_0))
   }
   my_estimand_custom <- declare_estimand(
-    delegate = my_estimand_function, label = medianTE)
+    delegate = my_estimand_function, label = "medianTE")
 
   my_estimand_custom(pop_pos)
 
@@ -179,7 +179,7 @@ test_that("demo runs", {
 
   my_estimator_custom <-
     declare_estimator(Y ~ Z,
-                      delegate = my_estimator_function,
+                      estimator_function = my_estimator_function,
                       estimand = my_estimand)
 
   my_estimator_custom(smp)

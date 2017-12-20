@@ -9,7 +9,7 @@ test_that("declare_potential_outcomes", {
   }
 
   my_population_custom <- declare_population(
-    population_function = my_population_function, N = 100)
+    delegate = my_population_function, N = 100)
 
   rm(my_population_function)
   pop_custom <- my_population_custom()
@@ -26,7 +26,7 @@ test_that("declare_potential_outcomes", {
 
   ##debugonce(declare_potential_outcomes)
   my_po_custom <- declare_potential_outcomes(
-    potential_outcomes_function = my_po_function)
+    delegate = my_po_function)
 
   ##debugonce(my_po_custom)
   rm(my_po_function)
@@ -44,7 +44,7 @@ test_that("declare_potential_outcomes", {
 
   ##debugonce(declare_potential_outcomes)
   my_po_custom <- declare_potential_outcomes(
-    potential_outcomes_function = my_po_function, q = rnorm(1))
+    delegate = my_po_function, q = rnorm(1))
 
   ##debugonce(my_po_custom)
   rm(my_po_function)

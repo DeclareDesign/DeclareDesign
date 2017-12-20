@@ -86,10 +86,7 @@ potential_outcomes_function_default <-
            ) {
     options <- quos(...)
 
-    level <- substitute(level)
-    if (!is.null(level)) {
-      level <- as.character(level)
-    }
+    level <- reveal_nse_helper(substitute(level))
 
 
     has_formula <- any(sapply(options, function(x) is_formula(quo_expr(x))))

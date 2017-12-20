@@ -8,8 +8,8 @@ test_that("quick_design works", {
     my_potential_outcomes <- declare_potential_outcomes(
       Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
     my_assignment <- declare_assignment(m = N/2)
-    pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = pate)
-    pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = pate)
+    pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
+    pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = "pate")
     my_design <- declare_design(my_population,
                                 my_potential_outcomes,
                                 pate,
@@ -44,12 +44,12 @@ test_that("quick_design works some more", {
     return(my_design)
   }
 
-  two_arm_trial(N = 5)$data_function()
-  two_arm_trial(N = 15)$data_function()
+  draw_data(two_arm_trial(N = 5))
+  draw_data(two_arm_trial(N = 15))
 
   a_quick_design <- quick_design(template = two_arm_trial, N = 50)
 
-  a_quick_design$design_function()
+  execute_design(a_quick_design[[1]])
 
   diagnose_design(a_quick_design, sims = 2, bootstrap = FALSE, parallel = FALSE)
 })
@@ -63,8 +63,8 @@ test_that("vary works", {
     my_potential_outcomes <- declare_potential_outcomes(
       Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
     my_assignment <- declare_assignment(m = N/2)
-    pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = pate)
-    pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = pate)
+    pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
+    pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = "pate")
     my_design <- declare_design(my_population,
                                 my_potential_outcomes,
                                 pate,
@@ -102,8 +102,8 @@ test_that("power curve", {
     my_potential_outcomes <- declare_potential_outcomes(
       Y_Z_0 = noise, Y_Z_1 = noise + .25)
     my_assignment <- declare_assignment(m = N/2)
-    pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = pate)
-    pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = pate)
+    pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
+    pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = "pate")
     my_design <- declare_design(my_population,
                                 my_potential_outcomes,
                                 pate,
