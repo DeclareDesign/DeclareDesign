@@ -47,7 +47,7 @@ test_that("test the full declare design setup", {
   head(draw_data(design))
   execute_design(design)
 
-  diagnose_design(design, sims = 3)
+  #diagnose_design(design, sims = 3) - # will fail, no estimands/estimates are declared
 
 })
 

@@ -456,7 +456,7 @@ process_population <- function(population) {
   #   }
   } else if (class(population) == "function") {
     tryCatch(current_df <- population(), error=function(e)stop("The first element of your design must be a data.frame or a function that returns a data.frame. The population function provided failed:", e))
-    if (!exists("current_df") |
+    if (exists("current_df") |
         !any(class(current_df) == "data.frame")) {
       stop(
         "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame."

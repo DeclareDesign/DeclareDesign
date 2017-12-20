@@ -8,7 +8,7 @@ test_that("download design", {
     Y_Z_0 = noise, Y_Z_1 = noise + .25)
   my_assignment <- declare_assignment(m = 100/2)
   ate <- declare_estimand(ate = mean(Y_Z_1 - Y_Z_0))
-  ate_estimator <- declare_estimator(Y ~ Z, estimand = ate, label = ate_hat)
+  ate_estimator <- declare_estimator(Y ~ Z, estimand = ate, label = "ate_hat")
   two_arm_design <- declare_design(my_population,
                                    my_potential_outcomes,
                                    ate,
@@ -30,7 +30,7 @@ test_that("download template", {
       Y_Z_0 = noise, Y_Z_1 = noise + .25)
     my_assignment <- declare_assignment(m = N/2)
     ate <- declare_estimand(ate = mean(Y_Z_1 - Y_Z_0))
-    ate_estimator <- declare_estimator(Y ~ Z, estimand = ate, label = ate_hat)
+    ate_estimator <- declare_estimator(Y ~ Z, estimand = ate, label = "ate_hat")
     my_design <- declare_design(my_population,
                                 my_potential_outcomes,
                                 ate,
