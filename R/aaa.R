@@ -26,14 +26,14 @@ currydata <- function(FUN, dots, addDataArg=TRUE,strictDataParam=TRUE) {
     }
   }
 
-  quoNoData <- quo(UQ(FUN)(!!!dots))
+  quoNoData <- quo((FUN)(!!!dots))
 
   if(addDataArg && !'data' %in% names(dots) && !'.data' %in% names(dots)){
 
     dots <- append(dots, list(data=quote(data)), after=FALSE)
   }
 
-  quo <- quo(UQ(FUN)(!!!dots))
+  quo <- quo((FUN)(!!!dots))
 
   if(isTRUE(strictDataParam)) function(data) eval_tidy(quo, data=list(data=data))
   else  function(data=NULL){
@@ -44,34 +44,32 @@ currydata <- function(FUN, dots, addDataArg=TRUE,strictDataParam=TRUE) {
   }
 }
 
+default_declaration_validation_callback <- function(decl, dots) decl
+
 #' @importFrom rlang enquo
-declaration_template <- function(..., delegate, label){
+declaration_template <- function(..., delegate, label=NULL){
   #message("Declared")
   d <- enquo(delegate);
-  dots <- quos(...)
+
+  dots <- quos(...,label=!!label)
   this <- attributes(sys.function())
 
-  mlabel <- missing(label)
-  label <- substitute(label)
-
-  if(!mlabel) {
-    label <- rapply(as.list(label), as.character, classes = c("character", "name"))
-
-  }
-
-  if("label" %in% names(formals(delegate))){
-    dots$label <- label
+  if(!"label" %in% names(formals(delegate))){
+    dots$label <- NULL
   }
 
 
-  if(is.function(this$validation)) this$validation(..., delegate)
 
 
-  structure(currydata(d, dots, strictDataParam=this$strictDataParam),
-            label=if(!mlabel) label,
+  ret <- structure(currydata(delegate, dots, strictDataParam=this$strictDataParam),
+            label=label,
             step_type=this$step_type,
             causal_type=this$causal_type,
             call=match.call() )
+
+  if(is.function(this$validation)) ret <- this$validation(ret, delegate, dots, label)
+
+  ret
 }
 
 make_declarations <- function(default_delegate, step_type, causal_type='dgp', default_label, validation=NULL, strictDataParam=TRUE) {

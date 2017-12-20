@@ -43,7 +43,7 @@ test_that("custom declare", {
   }
 
   my_population_custom <- declare_population(
-    population_function = my_population_function, N = 100)
+    delegate = my_population_function, N = 100)
 
   ## works
   rm(my_population_function)
@@ -196,18 +196,19 @@ test_that("Population declaration variations", {
   # Way 1
 
   design <- declare_design(my_population, my_potential_outcomes)
-  design$data_function()
+  draw_data(design)
 
   # Way 2
 
   design <- declare_design(my_population(), my_potential_outcomes)
-  design$data_function()
+  draw_data(design)
 
   # Way 3
 
   df <- my_population()
   design <- declare_design(df, my_potential_outcomes)
-  design$data_function()
+  draw_data(design)
+
 
 })
 

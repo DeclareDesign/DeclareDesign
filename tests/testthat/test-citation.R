@@ -1,4 +1,4 @@
-context("declare design")
+context("declare design citation")
 
 test_that("test with generated citation", {
 

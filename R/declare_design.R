@@ -38,14 +38,16 @@ callquos_to_step <- function(step_call) {
 
   })
 
-  fun <- dots[[1]]
+  fun <- eval_tidy(dots[[1]])
   dots <- dots[-1]
 
   dots <- quos(!!data_name := data, !!!dots)
 
   quo <- quo(currydata(fun, !!!dots))
 
-  curried <- eval_tidy(quo)
+  curried <- currydata(fun, dots)
+
+  # curried <- eval_tidy(quo)
 
 
   structure(curried,
@@ -162,6 +164,27 @@ declare_design <- function(...) {
       structure(function(data) df, step_type='seed.data', causal_type='dgp', call=qs[[1]][[2]])
     })
   }
+
+    local({
+
+      labels <- sapply(ret, attr, "label")
+      function_types <- sapply(ret, attr, "step_type")
+
+      check_unique_labels <- function(labels, types, what){
+        ss <- labels[types == what]
+        if(anyDuplicated(ss)) stop(
+          "You have ", what, "s with identical labels: ",
+          unique(ss[duplicated(ss)]),
+          "\nPlease provide ", what, "s with unique labels"
+
+          )
+
+      }
+
+      check_unique_labels(labels, function_types, "estimand")
+      check_unique_labels(labels, function_types, "estimator")
+
+    })
 
   ret
 }

@@ -47,21 +47,21 @@ reveal_outcomes <-
 
     # Setup to handle NSE
 
-    # outcome_variable_names <- rapply(as.list(substitute(outcome_variable_names)),
-    #                                  as.character, classes = c("character", "name"))
+    outcome_variable_names <- rapply(as.list(substitute(outcome_variable_names)),
+                                     as.character, classes = c("character", "name"))
 
-    if (length(substitute(outcome_variable_names)) > 1) {
-      outcome_variable_names <-
-        sapply(lang_args(enexpr(outcome_variable_names)), function(x)
-          if (class(x) != "character") {
-            expr_text(x)
-          } else {
-            x
-          })
-    } else {
-      outcome_variable_names <-
-        as.character(substitute(outcome_variable_names))
-    }
+    # if (length(substitute(outcome_variable_names)) > 1) {
+    #   outcome_variable_names <-
+    #     sapply(lang_args(enexpr(outcome_variable_names)), function(x)
+    #       if (class(x) != "character") {
+    #         expr_text(x)
+    #       } else {
+    #         x
+    #       })
+    # } else {
+    #   outcome_variable_names <-
+    #     as.character(substitute(outcome_variable_names))
+    # }
 
     if (length(substitute(assignment_variable_names)) > 1) {
       assignment_variable_names <-

@@ -39,7 +39,21 @@
 #' my_estimand_custom(df)
 #'
 
-declare_estimand <- make_declarations(estimand_function_default, "estimand", causal_type="estimand")
+declare_estimand <- make_declarations(estimand_function_default, "estimand", causal_type="estimand", default_label="my_estimand",
+  validation=function(ret, delegate, dots, label){
+    force(ret)
+    # add ... labels at build time
+    if(identical(estimand_function_default, delegate)){
+      dotnames <- names(dots)
+
+       maybeDotLabel <- dotnames[! dotnames %in% c("", names(formals(delegate)) )]
+       if(length(maybeDotLabel) == 1){
+         attr(ret, "steplabel") <- attr(ret, "label")
+         attr(ret, "label") <- maybeDotLabel[1]
+       }
+    }
+    ret
+  })
 
 # declare_estimand <-
 #   function(...,
@@ -86,19 +100,23 @@ declare_estimand <- make_declarations(estimand_function_default, "estimand", cau
 #   }
 
 #' @importFrom rlang eval_tidy quos
-estimand_function_default <- function(data, ..., subset = NULL) {
+estimand_function_default <- function(data, ..., subset = NULL, label) {
   options <- quos(...)
-  if (length(options) > 1) {
-    stop("Please only provide a single estimand to declare_estimand.")
-  }
+  if(names(options)[1] == "") names(options)[1] <- label
 
   condition_call <- substitute(subset)
   if (!is.null(condition_call)) {
     data <- data[eval(condition_call, data), , drop = FALSE]
   }
 
+  ret <- vector("list", length(options))
+  for(i in seq_along(options)){
+    ret[i] <- eval_tidy(options[[i]], data=data)
+  }
+  ret <- simplify2array(ret)
+
   data.frame(estimand_label=names(options),
-             estimand=eval_tidy(options[[1]], data = data),
+             estimand=ret,
              stringsAsFactors = FALSE)
 
 }
