@@ -29,8 +29,8 @@ test_that("Factorial", {
       my_estimator
     )
 
-  my_design$data_function() %>% head
-  my_design$design_function()
+  draw_data(my_design) %>% head
+  execute_design(my_design)
 
   my_design
 

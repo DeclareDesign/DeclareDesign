@@ -160,5 +160,5 @@ fit2tidy <- function(fit, coefficient_name = NULL) {
 
 #todo migrate to utils.R
 to_char_except_null <- function(x){
-  if(is.null(x)) NULL else as.character(x)
+  if(is.null(x)) NULL else if(is_quosure(x)) as.character(x[[2]]) else as.character(x)
 }
