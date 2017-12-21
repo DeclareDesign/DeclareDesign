@@ -202,22 +202,20 @@ test_that("labels for estimates and estimands work", {
   # mator_label_noquote <- declare_estimator(Y ~ Z, estimand = mand_explicit_label, label = an_estimator)
   mator_label_null <- declare_estimator(Y ~ Z, estimand = mand_explicit_label, label = NULL)
 
-  mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label_noquote)
+  mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label)
   mator_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label_noquote, label = "an_estimator")
   # mator_label_noquote <- declare_estimator(Y ~ Z, estimand = mand_explicit_label_noquote, label = an_estimator)
   mator_label_null <- declare_estimator(Y ~ Z, estimand = mand_explicit_label_noquote, label = NULL)
 
   design <- declare_design(my_population,
                            my_potential_outcomes,
+                           mand_arg_label,
                            my_assignment,
-                           reveal_outcomes)
-  diagnose_design(modify_design(
-    design,
-    add_step(mand_arg_label, after = my_potential_outcomes),
-    add_step(mator_no_label, after = reveal_outcomes)
-  ), sims = 2, bootstrap = FALSE, parallel = FALSE)
+                           reveal_outcomes,
+                           mator_no_label)
 
-})
+  diagnose_design(    design, sims = 2, bootstrap = FALSE, parallel = FALSE)
+
 
 test_that("coefficient_name = NULL returns all coefficients", {
   tst <- data.frame(x = runif(100), y = runif(100), wt = runif(100), clust = sample(1:10, 100, replace = TRUE))
