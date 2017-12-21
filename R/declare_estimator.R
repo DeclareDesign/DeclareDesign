@@ -89,8 +89,8 @@ estimator_delegate <- function(data, ...,
                               estimand = NULL, label) {
   model <- if(is.null(estimator_function)) model else NULL
 
-  coefficient_name <- to_char_except_null(substitute(coefficient_name))
-
+  # coefficient_name <- to_char_except_null(substitute(coefficient_name))
+  coefficient_name <- reveal_nse_helper(substitute(coefficient_name))
 
   if (is.null(model) == is.null(estimator_function)) {
     stop("Please provide either an estimator function or a model.")
@@ -111,12 +111,15 @@ estimator_delegate <- function(data, ...,
   estimand_label <- switch(class(estimand), "character"=estimand, "function"=attributes(estimand)$label)
 
   # estimator_function_internal <- function(data) {
-    args <- list(...)
+    args <- quos(...)
     args$data <- data
     if ("coefficient_name" %in% names(formals(func))) {
       args$coefficient_name <- coefficient_name
     }
-    results <- do.call(func, args = args)
+    # results <- do.call(func, args = args)
+    # results <- eval_tidy(quo(func(!!!args)))
+    W <- quo(func(!!!args))
+    results <- eval(quo_expr(W))
     results <- clean(results, coefficient_name) # fit2tidy if a model function, ow I
     return_data <-
       data.frame(estimator_label = label,
