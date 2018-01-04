@@ -4,7 +4,8 @@
 \alias{declare_estimand}
 \title{Declare Estimand}
 \usage{
-declare_estimand(..., delegate = estimand_function_default, label)
+declare_estimand(..., delegate = estimand_function_default,
+  label = "my_estimand")
 }
 \arguments{
 \item{...}{Arguments to the estimand function. For example, you might specify ATE = mean(Y_Z_1 - Y_Z_0), which would declare the estimand to be named ATE and to be the mean of the difference in the control and treatment potential outcome.}

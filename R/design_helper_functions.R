@@ -97,11 +97,12 @@ get_estimands <- function(design) {
 #'
 #' @export
 cite_design <- function(design, ...) {
-  if (class(design$citation) == "bibentry") {
-    print(design$citation, style = "bibtex", ... = ...)
+  citation <- Filter(function(step) attr(step, "causal_type") == 'citation', design)[[1]]()
+  if (class(citation) == "bibentry") {
+    print(citation, style = "bibtex", ... = ...)
     cat("\n")
   }
-  print(design$citation, style = "text", ... = ...)
+  print(citation, style = "text", ... = ...)
   invisible(design)
 }
 
@@ -144,24 +145,7 @@ print.design <- function(x, ...) {
 #' summary(design)
 #' @export
 summary.design <- function(object, ...) {
-  summ <- summary_function(object$causal_order, object$causal_order_types)
-  structure(
-    list(
-      variables_added = summ$variables_added,
-      quantities_added = summ$quantities_added,
-      variables_modified = summ$variables_modified,
-      N = summ$N,
-      formulae = summ$formulae,
-      causal_order_expr = object$causal_order_expr,
-      causal_order_types = object$causal_order_types,
-      function_types = object$function_types,
-      title = object$title,
-      authors = object$authors,
-      description = object$description,
-      citation = object$citation
-    ),
-    class = c("summary.design", "list")
-  )
+  summary_function(object)
 }
 
 #' @export
@@ -187,7 +171,7 @@ print.summary.design <- function(x, ...) {
   }
 
   for (i in 1:max(length(x$variables_added), length(x$quantities_added))) {
-    step_name <- deparse(x$causal_order_expr[[i]])
+    step_name <- deparse(x$call[[i]])
     step_class <-
       ifelse(
         x$function_types[[i]] != "unknown",

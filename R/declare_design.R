@@ -345,33 +345,37 @@ get_modified_variables <- function(last_df = NULL, current_df) {
 
 
 
-summary_function <- function(causal_order, causal_order_types) {
+summary_function <- function(design) {
+
+  title = NULL
+  authors = NULL
+  description = NULL
+  citation = NULL #cite_design(design)
+
   get_formula_from_step <- function(step){
     call <- attributes(step)$call
-    type <- attributes(step)$type
-    if (!is.null(call) & !is.null(type) & type != "declare_step") {
-      args <- lang_args(call)
-      has_formula <- sapply(args, is_formula)
-      formulae <- args[has_formula]
+    type <- attributes(step)$step_type
+    if (!is.null(call) & !is.null(type) & type != "wrapped") {
+      formulae <- Filter(is_formula, lang_args(call))
       if (length(formulae) == 1) {
         return(formulae[[1]])
-      } else {
-        return(NULL)
       }
-    } else {
-      return(NULL)
     }
+    return(NULL)
+
   }
 
 
   variables_added <- variables_modified <-
     quantities_added <- quantities_modified <-
     N <-
-    vector("list", length(causal_order))
+    vector("list", length(design))
 
-  formulae <- lapply(causal_order, get_formula_from_step)
+  formulae <- lapply(design, get_formula_from_step)
+  calls <- lapply(design, attr, "call")
 
-  current_df <- process_population(causal_order[[1]])
+
+  current_df <- design[[1]]()
 
   var_desc <- variables_added[[1]] <- lapply(current_df, describe_variable)
 
@@ -381,11 +385,14 @@ summary_function <- function(causal_order, causal_order_types) {
 
   last_df <- current_df
 
-  if (length(causal_order) > 1) {
-    for (i in 2:length(causal_order)) {
+  for (i in 1 + seq_along(design[-1])) {
+      causal_type <- attr(design[[i]], "causal_type")
+      if(is.null(causal_type)) next;
+
+
       # if it's a dgp
-      if (causal_order_types[i] == "dgp") {
-        current_df <- causal_order[[i]](last_df)
+      if (causal_type == "dgp") {
+        current_df <- design[[i]](last_df)
 
         variables_added_names <-
           get_added_variables(last_df = last_df, current_df = current_df)
@@ -427,46 +434,33 @@ summary_function <- function(causal_order, causal_order_types) {
 
         last_df <- current_df
 
-      } else if (causal_order_types[i] %in% c("estimand", "estimator")) {
-        quantities_added[[i]] <- causal_order[[i]](current_df)
+      } else if (causal_type %in% c("estimand", "estimator")) {
+        quantities_added[[i]] <- design[[i]](current_df)
+      } else if (causal_type == "citation") {
+        citation <- design[[i]]()
+        if(!is.character(citation)) {
+          title = citation$title
+          authors = citation$authors
+          description = citation$note
+        }
+        calls[[i]] <- quote(metadata)
       }
-    }
   }
+
   structure(
     list(variables_added = variables_added,
          quantities_added = quantities_added,
          variables_modified = variables_modified,
          N = N,
-         formulae = formulae),
-    class = "design_summary"
+         call = calls,
+         formulae = formulae,
+         title = title,
+         authors = authors,
+         description = description,
+         citation = citation
+    ),
+    class = c("summary.design", "list")
+
   )
-}
-
-
-process_population <- function(population) {
-  ## the first part of the DGP must be a data.frame. Take what the user creates and turn it into a data.frame.
-  if (is.data.frame(population)) {
-    current_df <- population
-  # } else if (class(population) == "call") {
-  #   tryCatch(current_df <- population, error=function(e)stop("The first element of your design must be a data.frame or a function that returns a data.frame. The population call provided failed:", e))
-  #   if (!"data.frame" %in% class(current_df)) {
-  #     stop(
-  #       "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a called that did not return a data.frame."
-  #     )
-  #   }
-  } else if (is.function(population)) {
-    tryCatch(current_df <- population(), error=function(e)stop("The first element of your design must be a data.frame or a function that returns a data.frame. The population function provided failed:", e))
-    if (exists("current_df") ||
-        !is.data.frame(current_df)) {
-      stop(
-        "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame."
-      )
-    }
-  } else {
-    stop(
-      "The first element of your design must be a data.frame or a function that returns a data.frame."
-    )
-  }
-  return(current_df)
 }
 

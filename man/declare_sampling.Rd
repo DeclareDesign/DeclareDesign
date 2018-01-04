@@ -4,7 +4,7 @@
 \alias{declare_sampling}
 \title{Declare Sampling Procedure}
 \usage{
-declare_sampling(..., delegate = sampling_function_default, label)
+declare_sampling(..., delegate = sampling_function_default, label = NULL)
 }
 \arguments{
 \item{...}{Arguments to the sampling function}

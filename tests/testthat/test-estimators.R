@@ -215,6 +215,7 @@ test_that("labels for estimates and estimands work", {
                            mator_no_label)
 
   diagnose_design(    design, sims = 2, bootstrap = FALSE, parallel = FALSE)
+})
 
 
 test_that("coefficient_name = NULL returns all coefficients", {

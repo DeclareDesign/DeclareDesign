@@ -15,6 +15,7 @@ test_that("attrition as a PO", {
 
   my_assignment <- declare_assignment(m = 25)
 
+
   my_design <- declare_design(
     my_population,
     my_potential_outcomes_Y,
