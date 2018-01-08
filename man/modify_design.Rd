@@ -2,20 +2,36 @@
 % Please edit documentation in R/modify_design.R
 \name{modify_design}
 \alias{modify_design}
-\title{Modify a Design}
+\alias{insert_step}
+\alias{delete_step}
+\alias{replace_step}
+\title{Modify a design after the fact}
 \usage{
-modify_design(design, ...)
+insert_step(design, new_step, before = NULL, after = NULL)
+
+delete_step(design, step)
+
+replace_step(design, step, new_step)
 }
 \arguments{
 \item{design}{a design object, usually created by \code{\link{declare_design}}, \code{\link{quick_design}}, or \code{\link{download_design}}.}
 
-\item{...}{a series of calls to \code{\link{add_step}}, \code{\link{remove_step}}, or \code{\link{replace_step}}}
+\item{new_step}{the new step - either a function or a partial call}
+
+\item{before}{the step before which to add steps}
+
+\item{after}{same}
+
+\item{step}{the step to be deleted or replaced}
 }
 \value{
-A design object. See \code{\link{declare_design}} for details.
+A new design object. See \code{\link{declare_design}} for details.
 }
 \description{
-Modify a Design
+Insert, delete and replace steps in an (already declared) design object.
+}
+\details{
+see \code{\link{modify_design}} for details.
 }
 \examples{
 
@@ -34,10 +50,11 @@ Modify a Design
 
  design
 
- modify_design(design, replace_step(my_assignment_2, replace = my_assignment))
 
- modify_design(design, add_step(dplyr::mutate(income = noise^2), after = my_assignment))
- modify_design(design, add_step(dplyr::mutate(income = noise^2), before = my_assignment))
+ insert_step(design, dplyr::mutate(income = noise^2), after = my_assignment)
+ insert_step(design, dplyr::mutate(income = noise^2), before = my_assignment)
 
- modify_design(design, remove_step(my_assignment))
+
+ delete_step(design, my_assignment)
+ replace_step(design, my_assignment, dplyr::mutate(words="HIARYLAH"))
 }
