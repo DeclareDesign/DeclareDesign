@@ -5,7 +5,7 @@ Authors@R: c(person("Graeme", "Blair", email = "graeme.blair@ucla.edu", role = c
              person("Jasper", "Cooper", email = "jjc2247@columbia.edu", role = c("aut")),
              person("Alexander", "Coppock", email = "alex.coppock@yale.edu", role = c("aut")),
              person("Macartan", "Humphreys", email = "macartan@gmail.com", role = c("aut")),
-             person("Neal", "Fultz", email="", role = c("ctb")))
+             person("Neal", "Fultz", email="nfultz@gmail.com", role = c("ctb")))
 Description: Tools for characterizing, diagnosing, and pre-registering research
     designs. This software provides a way for scholars to characterize research
     designs formally, and then to learn about their designs before conducting the
