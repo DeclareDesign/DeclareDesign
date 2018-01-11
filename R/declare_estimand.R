@@ -40,13 +40,13 @@
 #'
 
 declare_estimand <- make_declarations(estimand_function_default, "estimand", causal_type="estimand", default_label="my_estimand",
-  validation=function(ret, delegate, dots, label){
+  validation=function(ret, handler, dots, label){
     force(ret)
     # add ... labels at build time
-    if(identical(estimand_function_default, delegate)){
+    if(identical(estimand_function_default, handler)){
       dotnames <- names(dots)
 
-       maybeDotLabel <- dotnames[! dotnames %in% c("", names(formals(delegate)) )]
+       maybeDotLabel <- dotnames[! dotnames %in% c("", names(formals(handler)) )]
        if(length(maybeDotLabel) == 1){
          attr(ret, "steplabel") <- attr(ret, "label")
          attr(ret, "label") <- maybeDotLabel[1]

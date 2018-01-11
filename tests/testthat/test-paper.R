@@ -9,7 +9,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
   }
 
   population <-
-    declare_population(delegate = my_population, N = 500)
+    declare_population(handler = my_population, N = 500)
 
   my_sampling <- function(data) {
     data$S <- rbinom(n = nrow(data),
@@ -20,7 +20,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
     data
   }
 
-  sampling <- declare_sampling(delegate = my_sampling)
+  sampling <- declare_sampling(handler = my_sampling)
 
   my_assignment <- function(data) {
     data$Z <- rbinom(n = nrow(data),
@@ -30,7 +30,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
   }
 
   assignment <-
-    declare_assignment(delegate = my_assignment)
+    declare_assignment(handler = my_assignment)
 
   my_potential_outcomes <-
     function(data) {
@@ -40,7 +40,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
     }
 
   potential_outcomes <- declare_potential_outcomes(
-    delegate = my_potential_outcomes
+    handler = my_potential_outcomes
   )
 
   my_estimand <- function(data) {
@@ -49,7 +49,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
     )
   }
 
-  estimand <- declare_estimand(delegate = my_estimand)
+  estimand <- declare_estimand(handler = my_estimand)
 
   my_estimator <- function(data) {
     reg <- lm(Y ~ Z, data = data)

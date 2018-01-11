@@ -7,7 +7,7 @@
 #
 # me <- FALSE
 #
-# declare_scale <- make_declarations(default_delegate=scale, step_type="scale")
+# declare_scale <- make_declarations(default_handler=scale, step_type="scale")
 # f <- declare_scale(scale=me)
 #
 # me <- !me

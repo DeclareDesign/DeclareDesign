@@ -80,9 +80,9 @@
 #'
 #' my_estimator_custom(df)
 #'
-declare_estimator <-make_declarations(estimator_delegate, step_type="estimator", causal_type="estimator", default_label="my_estimator")
+declare_estimator <-make_declarations(estimator_handler, step_type="estimator", causal_type="estimator", default_label="my_estimator")
 
-estimator_delegate <- function(data, ...,
+estimator_handler <- function(data, ...,
                               model = estimatr::difference_in_means,
                               estimator_function = NULL,
                               coefficient_name = Z,
