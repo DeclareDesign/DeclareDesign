@@ -31,12 +31,12 @@ test_that("test the estimators", {
 
   ## check blocked d-i-m estimator
 
-  my_population <- declare_population(N = 500, noise = rnorm(N), block_var = sample(rep(c("A", "B"), each = 250), N, replace = F))
-  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2) + 5 * (block_var == "A"))
-  my_assignment <- declare_assignment(block_var = block_var)
+  my_population <- declare_population(N = 500, noise = rnorm(N), blocks = sample(rep(c("A", "B"), each = 250), N, replace = F))
+  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2) + 5 * (blocks == "A"))
+  my_assignment <- declare_assignment(blocks = blocks)
 
   ## lm with HC3 robust ses
-  my_estimator_blocked <- declare_estimator(Y ~ Z, model = difference_in_means, blocks = `block_var`)
+  my_estimator_blocked <- declare_estimator(Y ~ Z, model = difference_in_means, blocks = `blocks`)
   df <- my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes
   my_estimator_notblocked <- declare_estimator(Y ~ Z)
 
