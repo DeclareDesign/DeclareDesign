@@ -4,8 +4,7 @@
 \alias{declare_estimator}
 \title{Declare an Estimator}
 \usage{
-declare_estimator(..., delegate = estimator_delegate,
-  label = "my_estimator")
+declare_estimator(..., handler = estimator_handler, label = "my_estimator")
 }
 \arguments{
 \item{...}{Arguments to the estimand function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.}

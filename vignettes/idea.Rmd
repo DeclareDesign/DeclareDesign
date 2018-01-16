@@ -54,7 +54,7 @@ design <- declare_design(population,
                          assignment, 
                          reveal_outcomes, 
                          estimator,
-                         description = "A very simple design")
+                         declare_citation(description = "A very simple design"))
 ```
 
 ## Making Use of A Design

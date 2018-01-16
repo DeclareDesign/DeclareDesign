@@ -11,7 +11,7 @@
 
 declare_citation <- make_declarations(citation_function_default, "citation", causal_type="citation", strictDataParam=FALSE)
 
-citation_function_default <- function(data=IGNORED, title=NULL, authors=NULL,
+citation_function_default <- function(data=stop("Don't evaluate data argument"), title=NULL, authors=NULL,
                                       description = "Unpublished research design declaration.",
                                       timestamp = Sys.time(), citation=NULL) {
   if("bibentry" %in% class(citation)) return(citation)
