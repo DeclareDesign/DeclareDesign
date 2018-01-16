@@ -43,7 +43,7 @@ test_that("custom declare", {
   }
 
   my_population_custom <- declare_population(
-    delegate = my_population_function, N = 100)
+    handler = my_population_function, N = 100)
 
   ## works
   rm(my_population_function)

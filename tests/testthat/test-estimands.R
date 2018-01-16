@@ -24,7 +24,7 @@ test_that("test the estimands", {
     with(data, median(Y_Z_1 - Y_Z_0))
   }
   my_estimand_custom <- declare_estimand(
-    delegate = my_estimand_function, label = "medianTE")
+    handler = my_estimand_function, label = "medianTE")
 
   my_population() %>% my_potential_outcomes %>% my_estimand_custom
 
@@ -65,7 +65,7 @@ test_that("declare estimand", {
   }
 
   my_population_custom <- declare_population(
-    delegate = my_population_function, N = 100)
+    handler = my_population_function, N = 100)
 
   rm(my_population_function)
   pop_custom <- my_population_custom()
@@ -79,7 +79,7 @@ test_that("declare estimand", {
   }
 
   my_po_custom <- declare_potential_outcomes(
-    delegate  = my_po_function)
+    handler  = my_po_function)
 
   pop_custom <- my_po_custom(pop_custom)
 

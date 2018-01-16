@@ -2,7 +2,7 @@
 #' Declare Research Study Citation
 #'
 #' @param ... Arguments to the citation function
-#' @param delegate A function that takes a data.frame and yield citation data
+#' @param handler A function that takes a data.frame and yield citation data
 #'
 #' @return a function that takes a data.frame as an argument and returns citation data
 #' @export

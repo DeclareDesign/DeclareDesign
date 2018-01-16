@@ -47,37 +47,37 @@ currydata <- function(FUN, dots, addDataArg=TRUE,strictDataParam=TRUE) {
 default_declaration_validation_callback <- function(decl, dots) decl
 
 #' @importFrom rlang enquo
-declaration_template <- function(..., delegate, label=NULL){
+declaration_template <- function(..., handler, label=NULL){
   #message("Declared")
-  d <- enquo(delegate);
+  d <- enquo(handler);
 
   dots <- quos(...,label=!!label)
   this <- attributes(sys.function())
 
-  if(!"label" %in% names(formals(delegate))){
+  if(!"label" %in% names(formals(handler))){
     dots$label <- NULL
   }
 
 
 
 
-  ret <- structure(currydata(delegate, dots, strictDataParam=this$strictDataParam),
+  ret <- structure(currydata(handler, dots, strictDataParam=this$strictDataParam),
             label=label,
             step_type=this$step_type,
             causal_type=this$causal_type,
             call=match.call() )
 
-  if(is.function(this$validation)) ret <- this$validation(ret, delegate, dots, label)
+  if(is.function(this$validation)) ret <- this$validation(ret, handler, dots, label)
 
   ret
 }
 
-make_declarations <- function(default_delegate, step_type, causal_type='dgp', default_label, validation=NULL, strictDataParam=TRUE) {
+make_declarations <- function(default_handler, step_type, causal_type='dgp', default_label, validation=NULL, strictDataParam=TRUE) {
 
   declaration <- declaration_template
 
 
-  formals(declaration)$delegate <- substitute(default_delegate)
+  formals(declaration)$handler <- substitute(default_handler)
   if(!missing(default_label)) formals(declaration)$label <- default_label
 
   structure(declaration,
