@@ -7,7 +7,7 @@ DeclareDesign: Declare and diagnose research designs to understand and improve t
 
 **DeclareDesign** is statistical software that makes it easier for researchers to characterize and learn about the properties of research designs before implementation. Ex ante declaration and diagnosis of designs can help researchers clarify the strengths and limitations of their designs and to improve their properties. It can make it easier for readers to evaluate a research strategy prior to implementation and without access to results. It can also make it easier for designs to be shared, replicated, and critiqued.
 
-Get started with our Web-based [design builder](http://shiny.declaredesign.org:8001) or by reading about [the key idea](articles/key_idea.html).
+Get started <!-- with our Web-based [design builder](http://shiny.declaredesign.org/builder/) or --> by reading about [the idea behind DeclareDesign](articles/idea.html).
 
 The motivation for the software is described in a [working paper](http://declaredesign.org/paper.pdf) by the authors.
 

@@ -56,9 +56,11 @@ attr(two_arm_template,"tips") <- c(
   <a class="btn btn-primary" href="http://declaredesign.org/articles/two_arm_template.RDS">
     <i class="fa fa-clipboard" title = "Download template for design" fa-2x></i> Download template
   </a>
-  <a class="btn btn-primary" href="http://shiny.declaredesign.org:8000/">
+<!--
+  <a class="btn btn-primary" href="http://shiny.declaredesign.org/inspector/?topic=two_arm">
     <i class="fa fa-area-chart" title = "Go to the design inspector" fa-2x></i> Inspect design
   </a>
+-->
 </div>
 
 
@@ -144,7 +146,10 @@ if(exists("diagnosis")) {
   coverage <- round(diagnosands[1,"coverage"],2)*100
   
   knitr::kable(diagnosis_table,digits = 3)
+} else {
+  mean_estimate <- mean_estimand <- bias <- power <- coverage<- NA
 }
+
 ```
 
 The diagnosis indicates that our two-arm design recovers an unbiased estimate of the average treatment effect in our sample. The average estimate is `r mean_estimate` and the mean estimand is `r mean_estimand`. Our estimate of the bias is thus very close to 0, at `r bias`, and the standard errors from the bootstrap of our simulations suggest that the fact that the bias is not exactly 0 is due to simulation error. 

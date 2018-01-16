@@ -1,7 +1,7 @@
 
 #' Diagnose the Design
 #'
-#' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{quick_design}}.
+#' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You dican also provide a single list of designs, for example one created by \code{\link{quick_design}}.
 #'
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
 #'
@@ -252,7 +252,7 @@ diagnose_design_single_design <-
       labels_df <- do.call(rbind, labels_df[lapply(labels_df, nrow) != 0])
 
       diagnosands_se_df <-
-        split(diagnosand_replicates, group_by_list)
+        split(diagnosand_replicates, group_by_list, drop = TRUE)
       diagnosands_se_df <-
         lapply(
           diagnosands_se_df,

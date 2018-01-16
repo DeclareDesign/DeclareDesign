@@ -20,7 +20,7 @@ navbar:
   type: default
   left:
   - text: "The Idea"
-    href: articles/key_idea.html
+    href: articles/idea.html
   - text: "Design Library"
     href: articles/design_library.html
   - text: "Using DeclareDesign"
