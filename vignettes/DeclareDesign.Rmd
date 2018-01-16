@@ -114,7 +114,7 @@ If you don't want your data to be fixed, you can resample from it, i.e.
 
 ```{r echo=TRUE, results="hide"}
 pop_data_bootstrap <- declare_population(
-  data = country_data, population_function = fabricatr::resample_data)
+  data = country_data, handler = fabricatr::resample_data)
 
 head(pop_data_bootstrap())
 ```
