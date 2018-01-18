@@ -191,7 +191,7 @@ potential_outcomes_function_formula <-
   }
 
 #' @importFrom rlang quos quo lang_modify !!! eval_tidy !! :=
-#' @importFrom fabricatr fabricate level
+#' @importFrom fabricatr fabricate add_level
 potential_outcomes_function_discrete <-
   function(data, level = NULL, ...) {
     options <- quos(...)
@@ -200,7 +200,7 @@ potential_outcomes_function_discrete <-
       # if user sends a variable name in level, draw POs at the level
       #   defined by that variable. to do this, we send the options that
       #   were sent to fabricate to level first
-      level_options <- quos(level(!!!options))
+      level_options <- quos(add_level(!!!options, nest=FALSE))
       names(level_options) <- level
       po_call <- quo(fabricate(!!!level_options))
     } else {

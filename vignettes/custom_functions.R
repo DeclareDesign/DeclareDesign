@@ -30,7 +30,7 @@ my_population_function <- function(N) {
 }
 
 my_population_custom <- declare_population(
-  population_function = my_population_function, N = 100)
+  handler = my_population_function, N = 100)
 
 pop_custom <- my_population_custom()
 
@@ -47,7 +47,7 @@ my_potential_outcomes_function <-
     data
   }
 my_potential_outcomes_custom <- declare_potential_outcomes(
-  potential_outcomes_function = my_potential_outcomes_function
+  handler = my_potential_outcomes_function
 )
 
 pop_pos_custom <- my_potential_outcomes_custom(pop_custom)
@@ -66,7 +66,7 @@ my_sampling_function <- function(data) {
 }
 
 my_sampling_custom <- declare_sampling(
-  sampling_function = my_sampling_function)
+  handler = my_sampling_function)
 
 smp_custom <- my_sampling_custom(pop_pos)
 
@@ -80,7 +80,7 @@ my_assignment_function <- function(data) {
   data
 }
 my_assignment_custom <- declare_assignment(
-  assignment_function = my_assignment_function)
+  handler = my_assignment_function)
 
 table(my_assignment_custom(pop_pos)$Z)
 
@@ -88,11 +88,14 @@ table(my_assignment_custom(pop_pos)$Z)
 knitr::kable(t(as.matrix(table(my_assignment_custom(pop_pos)$Z))))
 
 ## ----echo=TRUE, results="hide"-------------------------------------------
-my_estimand_function <- function(data) {
-  with(data, median(Y_Z_1 - Y_Z_0))
+my_estimand_function <- function(data, label) {
+    data.frame(
+      estimand_label=label,
+      estimand=with(data, median(Y_Z_1 - Y_Z_0))
+    )
 }
 my_estimand_custom <- declare_estimand(
-  estimand_function = my_estimand_function, label = medianTE)
+  handler = my_estimand_function, label = "medianTE")
 
 my_estimand_custom(pop_pos)
 

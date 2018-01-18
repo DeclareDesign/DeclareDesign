@@ -4,7 +4,8 @@ Version: 1.1.0
 Authors@R: c(person("Graeme", "Blair", email = "graeme.blair@ucla.edu", role = c("aut", "cre")),
              person("Jasper", "Cooper", email = "jjc2247@columbia.edu", role = c("aut")),
              person("Alexander", "Coppock", email = "alex.coppock@yale.edu", role = c("aut")),
-             person("Macartan", "Humphreys", email = "macartan@gmail.com", role = c("aut")))
+             person("Macartan", "Humphreys", email = "macartan@gmail.com", role = c("aut")),
+             person("Neal", "Fultz", email="nfultz@gmail.com", role = c("ctb")))
 Description: Tools for characterizing, diagnosing, and pre-registering research
     designs. This software provides a way for scholars to characterize research
     designs formally, and then to learn about their designs before conducting the
@@ -22,9 +23,7 @@ Imports:
     foreach,
     doRNG,
     parallel
-Remotes: DeclareDesign/estimatr,
-    DeclareDesign/fabricatr
-Additional_repositories: http://install.declaredesign.org
+Additional_repositories: http://r.declaredesign.org
 License: MIT + file LICENSE
 URL: http://declaredesign.org, https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues
@@ -38,6 +37,5 @@ Suggests:
     AER,
     dplyr,
     data.table,
-    sf,
     ggplot2
 VignetteBuilder: knitr

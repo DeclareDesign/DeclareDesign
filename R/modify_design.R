@@ -103,6 +103,6 @@ delete_step <- function(design, step) {
 #'  replace_step(design, my_assignment, dplyr::mutate(words="HIARYLAH"))
 replace_step <- function(design, step, new_step) {
   delete_step(
-    insert_step_(design, after = step, new_step = enquo(new_step)),
+    insert_step_(design, after = step, new_step_quosure = enquo(new_step)),
     step)
 }

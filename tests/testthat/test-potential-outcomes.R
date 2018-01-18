@@ -119,8 +119,8 @@ test_that("POs at a higher level",{
 
   library(dplyr)
   my_population <- declare_population(
-    villages = level(N = 3, elevation = rnorm(N)),
-    citizens = level(N = 4, income = runif(N))
+    villages = add_level(N = 3, elevation = rnorm(N)),
+    citizens = add_level(N = 4, income = runif(N))
   )
 
   pop <- my_population()
@@ -185,8 +185,8 @@ test_that("POs at a higher level",{
 test_that("error if you try to draw POs at a level using a variable that doesn't exist at that level",{
 
   my_population <- declare_population(
-    villages = level(N = 3, elevation = rnorm(N)),
-    citizens = level(N = 4, income = runif(N))
+    villages = add_level(N = 3, elevation = rnorm(N)),
+    citizens = add_level(N = 4, income = runif(N))
   )
 
   pop <- my_population()

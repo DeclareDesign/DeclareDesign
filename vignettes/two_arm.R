@@ -85,5 +85,8 @@ if(exists("diagnosis")) {
   coverage <- round(diagnosands[1,"coverage"],2)*100
   
   knitr::kable(diagnosis_table,digits = 3)
+} else {
+  mean_estimate <- mean_estimand <- bias <- power <- coverage<- NA
 }
+
 

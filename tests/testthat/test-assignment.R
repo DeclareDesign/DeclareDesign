@@ -35,9 +35,9 @@ test_that("randomizr works through declare_assignment", {
 test_that("test assignment and probability functions", {
 
   population <- declare_population(
-    villages = level(N = 100, elevation = rnorm(N),
+    villages = add_level(N = 100, elevation = rnorm(N),
                      high_elevation = as.numeric(elevation > 0)),
-    individuals = level(N = 10, noise = rnorm(N),
+    individuals = add_level(N = 10, noise = rnorm(N),
                         ideo_3 = sample(c('Liberal', 'Moderate', 'Conservative'),
                                         size = N, prob = c(.2, .3, .5), replace = TRUE))
   )

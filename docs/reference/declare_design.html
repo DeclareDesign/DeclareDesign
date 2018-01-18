@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Declare Design — declare_design • DeclareDesign</title>
+<title>DeclareDesign - Declare Design — declare_design</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -52,7 +52,7 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="../articles/key_idea.html">The Idea</a>
+  <a href="../articles/idea.html">The Idea</a>
 </li>
 <li>
   <a href="../articles/design_library.html">Design Library</a>
@@ -271,7 +271,7 @@
 #&gt; 
 #&gt; A single draw of the estimand:
 #&gt;  estimand_label estimand
-#&gt;             ATE 1.988531
+#&gt;             ATE        2
 #&gt; 
 #&gt; Step 5 (declare step): dplyr::mutate(noise_sq = noise^2) -----------------------
 #&gt; 
@@ -302,10 +302,10 @@
 #&gt; Formula: Y ~ Z 
 #&gt; 
 #&gt; A single draw of the estimator:
-#&gt;  estimator_label coefficient_name      est       se            p  ci_lower
-#&gt;     my_estimator                Z 2.050421 0.532321 0.0007364653 0.9533854
-#&gt;  ci_upper estimand_label
-#&gt;  3.147456            ATE
+#&gt;  estimator_label coefficient_name est   se       p ci_lower ci_upper
+#&gt;     my_estimator                Z 2.1 0.53 0.00074     0.95      3.1
+#&gt;  estimand_label
+#&gt;             ATE
 #&gt; </div><div class='input'>
 <span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='post_design.html'>draw_data</a></span>(<span class='no'>design</span>)
 

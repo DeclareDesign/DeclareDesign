@@ -13,9 +13,9 @@ test_that("demo runs", {
 
   ## ------------------------------------------------------------------------
   my_population_nested <- declare_population(
-    districts = level(N = 25, urban = sample(0:1, N, replace = TRUE)),
-    villages = level(N = 10, altitude = rnorm(N)),
-    individuals = level(N = sample(100:200, size = 250, replace = TRUE),
+    districts = add_level(N = 25, urban = sample(0:1, N, replace = TRUE)),
+    villages =add_level(N = 10, altitude = rnorm(N)),
+    individuals = add_level(N = sample(100:200, size = 250, replace = TRUE),
                         income = rnorm(N),
                         age = sample(18:95, N, replace = TRUE)))
 
@@ -23,8 +23,8 @@ test_that("demo runs", {
   ## ------------------------------------------------------------------------
   region_data <- data.frame(capital = c(1, 0, 0, 0, 0))
   pop_level_data <- declare_population(
-    regions = level(N = 2, gdp = runif(N)),
-    cities = level(N = 2, subways = rnorm(N, mean = 5)))
+    regions = add_level(N = 2, gdp = runif(N)),
+    cities = add_level(N = 2, subways = rnorm(N, mean = 5)))
 
   head(pop_level_data())
 
