@@ -200,7 +200,7 @@ potential_outcomes_function_discrete <-
       # if user sends a variable name in level, draw POs at the level
       #   defined by that variable. to do this, we send the options that
       #   were sent to fabricate to level first
-      level_options <- quos(add_level(!!!options, nest=FALSE))
+      level_options <- quos(modify_level(!!!options))
       names(level_options) <- level
       po_call <- quo(fabricate(!!!level_options))
     } else {

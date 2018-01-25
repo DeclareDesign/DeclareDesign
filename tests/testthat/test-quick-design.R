@@ -19,12 +19,14 @@ test_that("quick_design works", {
     return(my_design)
   }
 
-  draw_data(two_arm_trial(N = 50))
+  set.seed(1999)
+  direct <- draw_data(two_arm_trial(N = 50))
 
-  design <- quick_design(template = two_arm_trial, N = 2)
+  design <- quick_design(template = two_arm_trial, N = 50)[[1]]
+  set.seed(1999)
+  qd <- draw_data(design)
 
-  draw_data(design)
-
+  expect_identical(direct, qd)
 })
 
 
