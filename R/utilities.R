@@ -136,5 +136,6 @@ get_unique_variables_by_level <- function(data, ID_label, superset=NULL) {
       }
     )))
     ]
+
   return(level_variables)
 }
