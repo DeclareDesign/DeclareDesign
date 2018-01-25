@@ -36,7 +36,7 @@ potential_outcomes <- declare_potential_outcomes(
 estimand <- declare_estimand(LATE = treatment(0) - control(0))
 
 # Data Strategy -----------------------------------------------------------
-sampling <- declare_sampling(sampling_function = function(data){
+sampling <- declare_sampling(handler = function(data){
   subset(data,(X > 0 - bandwidth) & X < 0 + bandwidth)})
 
 # Answer Strategy ---------------------------------------------------------
@@ -123,7 +123,7 @@ ggplot(plot_frame,aes(x = X, y = Y, color = as.factor(Z))) +
 #  estimand <- declare_estimand(LATE = treatment(0) - control(0))
 #  
 #  # Data Strategy -----------------------------------------------------------
-#  sampling <- declare_sampling(sampling_function = function(data){
+#  sampling <- declare_sampling(handler = function(data){
 #    subset(data,(X > 0 - bandwidth) & 	X < 0 + bandwidth)})
 #  
 #  # Answer Strategy ---------------------------------------------------------

@@ -1,7 +1,7 @@
 context("Sampling and probability functions")
 
 test_that("randomizr works through declare_sampling", {
-  df <- data.frame(ID = 1:10, strata_var = rep(c("A", "B"), 5, 5))
+  df <- data.frame(ID = 1:10, strata = rep(c("A", "B"), 5, 5))
 
   f_1 <- declare_sampling()
   f_1(df)
@@ -9,7 +9,7 @@ test_that("randomizr works through declare_sampling", {
   f_1 <- declare_sampling(n = 5)
   f_1(df)
 
-  f_1 <- declare_sampling(strata_var = strata_var)
+  f_1 <- declare_sampling(strata = strata)
   f_1(df)
 
 
@@ -28,9 +28,9 @@ test_that("randomizr works through declare_sampling", {
 test_that("test sampling and probability functions", {
 
   population <- declare_population(
-    villages = level(N = 100, elevation = rnorm(N),
+    villages = add_level(N = 100, elevation = rnorm(N),
                      high_elevation = as.numeric(elevation > 0)),
-    individuals = level(N = 10, noise = rnorm(N),
+    individuals = add_level(N = 10, noise = rnorm(N),
                         ideo_3 = sample(c('Liberal', 'Moderate', 'Conservative'),
                                         size = N, prob = c(.2, .3, .5), replace = TRUE))
 )
@@ -39,18 +39,18 @@ test_that("test sampling and probability functions", {
   sampling_2 <- declare_sampling(n = 60)
 
   # stratified sampling
-  sampling_3 <- declare_sampling(strata_var = ideo_3)
-  sampling_4 <- declare_sampling(strata_var = ideo_3, strata_prob = c(.3, .6, .1))
+  sampling_3 <- declare_sampling(strata = ideo_3)
+  sampling_4 <- declare_sampling(strata = ideo_3, strata_prob = c(.3, .6, .1))
 
-  sampling_5 <- declare_sampling(strata_var = ideo_3,
+  sampling_5 <- declare_sampling(strata = ideo_3,
                                  strata_n = c(10, 10, 10))
 
   # Clustered sampling
-  sampling_6 <- declare_sampling(clust_var = villages)
+  sampling_6 <- declare_sampling(clusters = villages)
 
   # Stratified and Clustered assignments
-  sampling_7 <- declare_sampling(clust_var = villages,
-                                      strata_var = high_elevation)
+  sampling_7 <- declare_sampling(clusters = villages,
+                                      strata = high_elevation)
 
   # Draw Data
   smp_draw <- population()

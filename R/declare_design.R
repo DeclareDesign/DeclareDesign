@@ -1,5 +1,67 @@
 
 
+# d1 <- make_declarations(summary, step_type='summary')
+# dd <- d1()
+# dd(sleep)
+#
+#
+# me <- FALSE
+#
+# declare_scale <- make_declarations(default_handler=scale, step_type="scale")
+# f <- declare_scale(scale=me)
+#
+# me <- !me
+# f(mtcars)
+#
+# me <- !me
+# f(mtcars)
+
+#' @importFrom rlang quos lang_fn lang_modify eval_tidy
+callquos_to_step <- function(step_call) {
+  ## this function allows you to put any R expression
+  ## such a dplyr::mutate partial call
+  ## into the causal order, i.e.
+  ## declare_design(pop(), po, mutate(q = 5))
+
+  # match to .data or data, preference to .data
+  data_name <- intersect( names(formals(lang_fn(step_call))),
+                          c(".data", "data") )[1]
+
+  stopifnot(is.character(data_name))
+
+
+  #splits each argument in to own quosure with common parent environment
+  dots <- lapply(step_call[[2]], function(d){
+    dot <- step_call
+    dot[[2]] <- d
+    dot
+
+  })
+
+  fun <- eval_tidy(dots[[1]])
+  dots <- dots[-1]
+
+  dots <- quos(!!data_name := data, !!!dots)
+
+  quo <- quo(currydata(fun, !!!dots))
+
+  curried <- currydata(fun, dots)
+
+  # curried <- eval_tidy(quo)
+
+
+  structure(curried,
+            call = step_call[[2]],
+            step_type = "wrapped",
+            causal_type="dgp")
+
+}
+
+
+
+
+
+
 #' Declare Design
 #'
 #' @param ... A set of steps in a research design, beginning with a \code{data.frame} representing the population or a function that draws the population. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a \code{data.frame} as an argument and return a \code{data.frame}. Typically, many steps are declared using the \code{declare_} functions, i.e., \code{\link{declare_population}}, \code{\link{declare_population}}, \code{\link{declare_sampling}}, \code{\link{declare_potential_outcomes}}, \code{\link{declare_estimand}}, \code{\link{declare_assignment}}, and \code{\link{declare_estimator}}. Functions from the \code{dplyr} package such as mutate can also be usefully included.
@@ -68,146 +130,206 @@
 #' summary(diagnosis)
 #' }
 #'
-declare_design <- function(...,
-                           title = NULL,
-                           authors = NULL,
-                           description = NULL,
-                           citation = NULL) {
-  # process bibtex
+declare_design <- function(...) {
 
-  timestamp <- Sys.time()
+  qs <- quos(...)
+  qnames <- names(qs)
 
-  if ((is.null(citation) | class(citation) == "character") &
-      !is.null(title) & !is.null(authors)) {
-    citation <- bibentry(
-      "unpublished",
-      title = title,
-      author = authors,
-      note = "Unpublished research design declaration.",
-      month = format(timestamp, "%b"),
-      year = format(timestamp, "%Y"),
-      textVersion = citation
+  ret <- structure(list(), class="design")
+
+  if(getOption("DD.debug.declare_design", FALSE)) browser()
+
+  for(i in  seq_along(qs)) {
+
+
+    #wrap step is nasty, converts partial call to curried function
+    ret[[i]] <- tryCatch(
+      eval_tidy(qs[[i]]),
+      error = function(e) callquos_to_step(qs[[i]])
     )
-  }
 
-  # Some preprocessing
+    if(qnames[[i]] != "") {
+      attr(ret[[i]], "label") <- qnames[[i]]
+      names(ret)[i] <- qnames[[i]]
+    }
 
-  causal_order_env <- freeze_environment(parent.frame())
 
-  dots <- quos(...)
 
-  causal_order <- list()
-  causal_order_expr <- list()
-  for(i in seq_along(dots))
-    causal_order_expr[[i]] <- quo_expr(dots[[i]])
-
-  name_or_call <- sapply(causal_order_expr, class)
-
-  ## wrap any call in wrap_step()
-  # if (length(dots) > 1) {
-  #   for (i in 2:length(dots)) {
-  #     if (name_or_call[[i]] == "call") {
-  #       dots[[i]] <-
-  #         quo(wrap_step(!!dots[[i]]))  ##call("wrap_step", quo_expr(dots[[i]]))
-  #     }
-  #   }
-  # }
-
-  for(i in seq_along(dots)) {
-    causal_order[[i]] <- tryCatch(
-       eval_tidy(dots[[i]]),
-      error = function(e) eval_tidy(wrap_step(!!dots[[i]]))
-    )
   }
 
   # Special case for initializing with a data.frame
-  if("data.frame" %in% class(causal_order[[1]])){
-    causal_order[[1]] <- local({
-      df <- causal_order[[1]]
-      structure(function(data) df, type='seed.data')
+  if("data.frame" %in% class(ret[[1]])){
+    ret[[1]] <- local({
+      df <- ret[[1]]
+      structure(function(data) df, step_type='seed.data', causal_type='dgp', call=qs[[1]][[2]])
     })
   }
 
+    local({
 
-  function_types <- vapply(causal_order, attr, NA_character_, "type")
+      labels <- sapply(ret, attr, "label")
+      function_types <- sapply(ret, attr, "step_type")
 
-  causal_order_types <- function_types
-  causal_order_types[!function_types %in% c("estimand", "estimator")] <- "dgp"
+      check_unique_labels <- function(labels, types, what){
+        ss <- labels[types == what]
+        if(anyDuplicated(ss)) stop(
+          "You have ", what, "s with identical labels: ",
+          unique(ss[duplicated(ss)]),
+          "\nPlease provide ", what, "s with unique labels"
 
-  local({
+          )
 
-    labels <- sapply(causal_order, attr, "label")
-
-    check_unique_labels <- function(labels, types, what){
-      ss <- labels[types == what]
-      if(anyDuplicated(ss)) stop(
-        "You have ", what, "s with identical labels: ",
-        unique(ss[duplicated(ss)]),
-        "\nPlease provide ", what, "s with unique labels"
-
-        )
-
-    }
-
-    check_unique_labels(labels, function_types, "estimand")
-    check_unique_labels(labels, function_types, "estimator")
-
-  })
-
-  # this extracts the "DGP" parts of the causal order and runs them.
-  data_function <- function() {
-    current_df <- NULL
-
-    for(f in causal_order[causal_order_types == "dgp"])
-      current_df <- f(current_df)
-
-    current_df
-  }
-
-  # This does causal order step by step; saving calculated estimands and estimates along the way
-
-  design_function <- function() {
-    current_df <- NULL
-
-    results <- list(estimand=vector("list", length(causal_order)),
-                    estimator=vector("list", length(causal_order)))
-
-    for (i in seq_along(causal_order)) {
-      function_type <- causal_order_types[[i]]
-      df <- causal_order[[i]](current_df)
-
-      # if it's a dgp
-      if (function_type == "dgp") {
-        current_df <- df
-      } else {
-        results[[function_type]][[i]] <- df
       }
-    }
-    list(estimates_df = do.call(rbind.data.frame, results[["estimator"]]),
-         estimands_df = do.call(rbind.data.frame, results[["estimand"]]))
-  }
 
+      check_unique_labels(labels, function_types, "estimand")
+      check_unique_labels(labels, function_types, "estimator")
 
-  return(structure(
-    list(
-      data_function = data_function,
-      design_function = design_function,
-      causal_order_expr = causal_order_expr,
-      causal_order_env = causal_order_env,
-      function_types = function_types,
-      causal_order_types = causal_order_types,
-      causal_order = causal_order,
-      title = title,
-      authors = authors,
-      description = description,
-      citation = citation,
-      timestamp = timestamp,
-      call = match.call()
-    ),
-    class = "design"
-  ))
+    })
 
+  ret
 }
+
+
+# declare_design <- function(...,
+#                            title = NULL,
+#                            authors = NULL,
+#                            description = NULL,
+#                            citation = NULL) {
+#   # process bibtex
+#
+#   timestamp <- Sys.time()
+#
+#   if ((is.null(citation) | class(citation) == "character") &
+#       !is.null(title) & !is.null(authors)) {
+#     citation <- bibentry(
+#       "unpublished",
+#       title = title,
+#       author = authors,
+#       note = "Unpublished research design declaration.",
+#       month = format(timestamp, "%b"),
+#       year = format(timestamp, "%Y"),
+#       textVersion = citation
+#     )
+#   }
+#
+#   # Some preprocessing
+#
+#   causal_order_env <- freeze_environment(parent.frame())
+#
+#   dots <- quos(...)
+#
+#   causal_order <- list()
+#   causal_order_expr <- list()
+#   for(i in seq_along(dots))
+#     causal_order_expr[[i]] <- quo_expr(dots[[i]])
+#
+#   name_or_call <- sapply(causal_order_expr, class)
+#
+#   ## wrap any call in wrap_step()
+#   # if (length(dots) > 1) {
+#   #   for (i in 2:length(dots)) {
+#   #     if (name_or_call[[i]] == "call") {
+#   #       dots[[i]] <-
+#   #         quo(wrap_step(!!dots[[i]]))  ##call("wrap_step", quo_expr(dots[[i]]))
+#   #     }
+#   #   }
+#   # }
+#
+#   for(i in seq_along(dots)) {
+#     causal_order[[i]] <- tryCatch(
+#        eval_tidy(dots[[i]]),
+#       error = function(e) eval_tidy(wrap_step(!!dots[[i]]))
+#     )
+#   }
+#
+#   # Special case for initializing with a data.frame
+#   if("data.frame" %in% class(causal_order[[1]])){
+#     causal_order[[1]] <- local({
+#       df <- causal_order[[1]]
+#       structure(function(data) df, type='seed.data')
+#     })
+#   }
+#
+#
+#   function_types <- vapply(causal_order, attr, NA_character_, "type")
+#
+#   causal_order_types <- function_types
+#   causal_order_types[!function_types %in% c("estimand", "estimator")] <- "dgp"
+#
+#   local({
+#
+#     labels <- sapply(causal_order, attr, "label")
+#
+#     check_unique_labels <- function(labels, types, what){
+#       ss <- labels[types == what]
+#       if(anyDuplicated(ss)) stop(
+#         "You have ", what, "s with identical labels: ",
+#         unique(ss[duplicated(ss)]),
+#         "\nPlease provide ", what, "s with unique labels"
+#
+#         )
+#
+#     }
+#
+#     check_unique_labels(labels, function_types, "estimand")
+#     check_unique_labels(labels, function_types, "estimator")
+#
+#   })
+#
+#   # this extracts the "DGP" parts of the causal order and runs them.
+#   data_function <- function() {
+#     current_df <- NULL
+#
+#     for(f in causal_order[causal_order_types == "dgp"])
+#       current_df <- f(current_df)
+#
+#     current_df
+#   }
+#
+#   # This does causal order step by step; saving calculated estimands and estimates along the way
+#
+#   design_function <- function() {
+#     current_df <- NULL
+#
+#     results <- list(estimand=vector("list", length(causal_order)),
+#                     estimator=vector("list", length(causal_order)))
+#
+#     for (i in seq_along(causal_order)) {
+#       function_type <- causal_order_types[[i]]
+#       df <- causal_order[[i]](current_df)
+#
+#       # if it's a dgp
+#       if (function_type == "dgp") {
+#         current_df <- df
+#       } else {
+#         results[[function_type]][[i]] <- df
+#       }
+#     }
+#     list(estimates_df = do.call(rbind.data.frame, results[["estimator"]]),
+#          estimands_df = do.call(rbind.data.frame, results[["estimand"]]))
+#   }
+#
+#
+#   return(structure(
+#     list(
+#       data_function = data_function,
+#       design_function = design_function,
+#       causal_order_expr = causal_order_expr,
+#       causal_order_env = causal_order_env,
+#       function_types = function_types,
+#       causal_order_types = causal_order_types,
+#       causal_order = causal_order,
+#       title = title,
+#       authors = authors,
+#       description = description,
+#       citation = citation,
+#       timestamp = timestamp,
+#       call = match.call()
+#     ),
+#     class = "design"
+#   ))
+#
+# }
 
 #TODO move to utils
 get_added_variables <- function(last_df = NULL, current_df) {
@@ -223,33 +345,37 @@ get_modified_variables <- function(last_df = NULL, current_df) {
 
 
 
-summary_function <- function(causal_order, causal_order_types) {
+summary_function <- function(design) {
+
+  title = NULL
+  authors = NULL
+  description = NULL
+  citation = NULL #cite_design(design)
+
   get_formula_from_step <- function(step){
     call <- attributes(step)$call
-    type <- attributes(step)$type
-    if (!is.null(call) & !is.null(type) & type != "declare_step") {
-      args <- lang_args(call)
-      has_formula <- sapply(args, is_formula)
-      formulae <- args[has_formula]
+    type <- attributes(step)$step_type
+    if (!is.null(call) & !is.null(type) & type != "wrapped") {
+      formulae <- Filter(is_formula, lang_args(call))
       if (length(formulae) == 1) {
         return(formulae[[1]])
-      } else {
-        return(NULL)
       }
-    } else {
-      return(NULL)
     }
+    return(NULL)
+
   }
 
 
   variables_added <- variables_modified <-
     quantities_added <- quantities_modified <-
     N <-
-    vector("list", length(causal_order))
+    vector("list", length(design))
 
-  formulae <- lapply(causal_order, get_formula_from_step)
+  formulae <- lapply(design, get_formula_from_step)
+  calls <- lapply(design, attr, "call")
 
-  current_df <- process_population(causal_order[[1]])
+
+  current_df <- design[[1]]()
 
   var_desc <- variables_added[[1]] <- lapply(current_df, describe_variable)
 
@@ -259,11 +385,14 @@ summary_function <- function(causal_order, causal_order_types) {
 
   last_df <- current_df
 
-  if (length(causal_order) > 1) {
-    for (i in 2:length(causal_order)) {
+  for (i in 1 + seq_along(design[-1])) {
+      causal_type <- attr(design[[i]], "causal_type")
+      if(is.null(causal_type)) next;
+
+
       # if it's a dgp
-      if (causal_order_types[i] == "dgp") {
-        current_df <- causal_order[[i]](last_df)
+      if (causal_type == "dgp") {
+        current_df <- design[[i]](last_df)
 
         variables_added_names <-
           get_added_variables(last_df = last_df, current_df = current_df)
@@ -305,46 +434,33 @@ summary_function <- function(causal_order, causal_order_types) {
 
         last_df <- current_df
 
-      } else if (causal_order_types[i] %in% c("estimand", "estimator")) {
-        quantities_added[[i]] <- causal_order[[i]](current_df)
+      } else if (causal_type %in% c("estimand", "estimator")) {
+        quantities_added[[i]] <- design[[i]](current_df)
+      } else if (causal_type == "citation") {
+        citation <- design[[i]]()
+        if(!is.character(citation)) {
+          title = citation$title
+          authors = citation$authors
+          description = citation$note
+        }
+        calls[[i]] <- quote(metadata)
       }
-    }
   }
+
   structure(
     list(variables_added = variables_added,
          quantities_added = quantities_added,
          variables_modified = variables_modified,
          N = N,
-         formulae = formulae),
-    class = "design_summary"
+         call = calls,
+         formulae = formulae,
+         title = title,
+         authors = authors,
+         description = description,
+         citation = citation
+    ),
+    class = c("summary.design", "list")
+
   )
-}
-
-
-process_population <- function(population) {
-  ## the first part of the DGP must be a data.frame. Take what the user creates and turn it into a data.frame.
-  if ("data.frame" %in% class(population)) {
-    current_df <- population
-  # } else if (class(population) == "call") {
-  #   tryCatch(current_df <- population, error=function(e)stop("The first element of your design must be a data.frame or a function that returns a data.frame. The population call provided failed:", e))
-  #   if (!"data.frame" %in% class(current_df)) {
-  #     stop(
-  #       "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a called that did not return a data.frame."
-  #     )
-  #   }
-  } else if (class(population) == "function") {
-    tryCatch(current_df <- population(), error=function(e)stop("The first element of your design must be a data.frame or a function that returns a data.frame. The population function provided failed:", e))
-    if (!exists("current_df") |
-        !any(class(current_df) == "data.frame")) {
-      stop(
-        "The first element of your design must be a data.frame or a function that returns a data.frame. You provided a function that did not return a data.frame."
-      )
-    }
-  } else {
-    stop(
-      "The first element of your design must be a data.frame or a function that returns a data.frame."
-    )
-  }
-  return(current_df)
 }
 

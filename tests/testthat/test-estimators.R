@@ -31,12 +31,12 @@ test_that("test the estimators", {
 
   ## check blocked d-i-m estimator
 
-  my_population <- declare_population(N = 500, noise = rnorm(N), block_var = sample(rep(c("A", "B"), each = 250), N, replace = F))
-  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2) + 5 * (block_var == "A"))
-  my_assignment <- declare_assignment(block_var = block_var)
+  my_population <- declare_population(N = 500, noise = rnorm(N), blocks = sample(rep(c("A", "B"), each = 250), N, replace = F))
+  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2) + 5 * (blocks == "A"))
+  my_assignment <- declare_assignment(blocks = blocks)
 
   ## lm with HC3 robust ses
-  my_estimator_blocked <- declare_estimator(Y ~ Z, model = difference_in_means, blocks = block_var)
+  my_estimator_blocked <- declare_estimator(Y ~ Z, model = difference_in_means, blocks = `blocks`)
   df <- my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes
   my_estimator_notblocked <- declare_estimator(Y ~ Z)
 
@@ -52,11 +52,11 @@ test_that("regression from estimatr works as an estimator", {
   my_population <- declare_population(N = 500, noise = rnorm(N))
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
   my_assignment <- declare_assignment(m = 100)
-  pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = pate)
+  pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
   pate_estimator <- declare_estimator(Y ~ Z + noise,
                                       model = lm_robust,
                                       coefficient_name = "noise",
-                                      estimand = pate, label = pate)
+                                      estimand = pate, label = "pate")
 
   my_design <- declare_design(my_population,
                               my_potential_outcomes,
@@ -65,7 +65,7 @@ test_that("regression from estimatr works as an estimator", {
                               reveal_outcomes,
                               pate_estimator)
 
-  my_design$design_function()
+  execute_design(my_design)
 
   diagnosis <- diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = FALSE)
   diagnosis
@@ -102,22 +102,22 @@ test_that("multiple estimator declarations work", {
     declare_estimator(formula = Y ~ Z,
                       estimator_function = estimatr::lm_robust,
                       estimand = sate,
-                      label = estimator_1)
+                      label = "estimator_1")
 
   estimator_2 <-
     declare_estimator(formula = Y ~ Z,
                       estimator_function = estimatr::lm_robust,
                       estimand = sate,
-                      label = estimator_2)
+                      label = "estimator_2")
 
   declare_design(population,
-                           potential_outcomes,
-                           sampling,
-                           sate,
-                           assignment,
-                           reveal_outcomes,
-                           estimator_1,
-                           estimator_2
+                 potential_outcomes,
+                 sampling,
+                 sate,
+                 assignment,
+                 reveal_outcomes,
+                 estimator_1,
+                 estimator_2
   )
 
   estimator_3 <-
@@ -190,34 +190,33 @@ test_that("labels for estimates and estimands work", {
 
   mand_arg_label <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
   mand_explicit_label <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "the_ATE")
-  mand_explicit_label_noquote <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = the_ATE)
+  # mand_explicit_label_noquote <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = the_ATE)
 
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_arg_label)
   mator_label <- declare_estimator(Y ~ Z, estimand = mand_arg_label, label = "an_estimator")
-  mator_label_noquote <- declare_estimator(Y ~ Z, estimand = mand_arg_label, label = an_estimator)
+  # mator_label_noquote <- declare_estimator(Y ~ Z, estimand = mand_arg_label, label = an_estimator)
   mator_label_null <- declare_estimator(Y ~ Z, estimand = mand_arg_label, label = NULL)
 
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label)
   mator_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label, label = "an_estimator")
-  mator_label_noquote <- declare_estimator(Y ~ Z, estimand = mand_explicit_label, label = an_estimator)
+  # mator_label_noquote <- declare_estimator(Y ~ Z, estimand = mand_explicit_label, label = an_estimator)
   mator_label_null <- declare_estimator(Y ~ Z, estimand = mand_explicit_label, label = NULL)
 
-  mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label_noquote)
+  mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label)
   mator_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label_noquote, label = "an_estimator")
-  mator_label_noquote <- declare_estimator(Y ~ Z, estimand = mand_explicit_label_noquote, label = an_estimator)
+  # mator_label_noquote <- declare_estimator(Y ~ Z, estimand = mand_explicit_label_noquote, label = an_estimator)
   mator_label_null <- declare_estimator(Y ~ Z, estimand = mand_explicit_label_noquote, label = NULL)
 
   design <- declare_design(my_population,
                            my_potential_outcomes,
+                           mand_arg_label,
                            my_assignment,
-                           reveal_outcomes)
-  diagnose_design(modify_design(
-    design,
-    add_step(mand_arg_label, after = my_potential_outcomes),
-    add_step(mator_no_label, after = reveal_outcomes)
-  ), sims = 2, bootstrap = FALSE, parallel = FALSE)
+                           reveal_outcomes,
+                           mator_no_label)
 
+  diagnose_design(    design, sims = 2, bootstrap = FALSE, parallel = FALSE)
 })
+
 
 test_that("coefficient_name = NULL returns all coefficients", {
   tst <- data.frame(x = runif(100), y = runif(100), wt = runif(100), clust = sample(1:10, 100, replace = TRUE))
@@ -233,3 +232,4 @@ test_that("coefficient_name = NULL returns all coefficients", {
 
   expect_gt(nrow(result), 0)
 })
+

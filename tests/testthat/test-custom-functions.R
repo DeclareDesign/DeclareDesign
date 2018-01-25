@@ -8,7 +8,7 @@ test_that("you can use custom functions for each of the six declare steps", {
   }
 
   my_population_custom <- declare_population(
-    population_function = my_population_function, N = 100)
+    handler  = my_population_function, N = 100)
 
   rm(my_population_function)
   pop_custom <- my_population_custom()
@@ -23,7 +23,7 @@ test_that("you can use custom functions for each of the six declare steps", {
     }
 
   my_potential_outcomes_custom <- declare_potential_outcomes(
-    potential_outcomes_function = my_potential_outcomes_function
+    handler  = my_potential_outcomes_function
   )
 
   rm(my_potential_outcomes_function)
@@ -40,7 +40,7 @@ test_that("you can use custom functions for each of the six declare steps", {
   }
 
   my_sampling_custom <- declare_sampling(
-    sampling_function = my_sampling_function)
+    handler  = my_sampling_function)
 
   smp_custom <- my_sampling_custom(pop_custom)
   smp_custom

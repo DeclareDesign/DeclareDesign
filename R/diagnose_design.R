@@ -82,7 +82,7 @@ diagnose_design <-
     ## 1. send one or more design objects created by declare_design
     ## 2. send a single list of design objects created by quick_design
     ## 3. do not allow sending more than one object if any of them aren't design objects.
-    if (length(designs) == 1 & class(designs[[1]]) == "list") {
+    if (length(designs) == 1 && is.list(designs[[1]]) && !"design" %in% class(designs[[1]]) ) {
       ## this unpacks designs if a list of designs was sent as a single list object, i.e.
       ##   as created by quick_design
       designs <- designs[[1]]
@@ -159,7 +159,7 @@ diagnose_design_single_design <-
       registerDoSEQ()
     }
 
-    results_list <- foreach(i = seq_len(sims)) %dorng% design$design_function()
+    results_list <- foreach(i = seq_len(sims)) %dorng% execute_design(design)
 
     results2x <- function(results_list, what) {
       subresult <- lapply(results_list, `[[`, what)

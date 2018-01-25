@@ -18,24 +18,15 @@ test_that("test modify declare design ", {
 
   my_assignment_2 <- declare_assignment(m = 25, assignment_variable_name = "Z2")
 
-  modify_design(design, replace_step(my_assignment_2, replace = my_assignment))
+  replace_step(design, new_step = my_assignment_2, step = my_assignment)
 
-  modify_design(design, add_step(dplyr::mutate(blah = 6), before = my_potential_outcomes))
+  insert_step(design, dplyr::mutate(blah = 6), before = my_potential_outcomes)
 
-  modify_design(design, add_step(dplyr::mutate(blah = 6), after = my_potential_outcomes))
+  insert_step(design, dplyr::mutate(blah = 6), after = my_potential_outcomes)
 
-  modify_design(design, replace_step(dplyr::mutate(blah = 10), replace = dplyr::mutate(q = 5)))
+  replace_step(design, dplyr::mutate(blah = 10), step = my_population)
 
-  modify_design(design, remove_step(dplyr::mutate(q = 5)))
-
-
-  #multiples
-
-  modify_design(design, add_step(dplyr::mutate(blah = 6),
-                                         my_assignment_2,
-                                         after = my_potential_outcomes))
-
-  modify_design(design, replace_step(dplyr::mutate(blah = 10), my_assignment_2, replace = dplyr::mutate(q = 5)))
+  delete_step(design, 3)
 
 })
 
@@ -57,8 +48,8 @@ test_that("placement doesn't matter", {
 
   design
 
-  modify_design(design, add_step(dplyr::mutate(income = noise^2), after = my_assignment))
-  modify_design(design, add_step(dplyr::mutate(income = noise^2), before = my_assignment))
+  insert_step(design, dplyr::mutate(income = noise^2), after = my_assignment)
+  insert_step(design, dplyr::mutate(income = noise^2), before = my_assignment)
 
 })
 

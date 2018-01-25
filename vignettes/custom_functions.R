@@ -1,13 +1,4 @@
----
-title: "Custom functions and DeclareDesign"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Custom functions and DeclareDesign}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+## ----echo=FALSE, warning=FALSE, message=FALSE----------------------------
 set.seed(42)
 library(DeclareDesign)
 options(digits=2)
@@ -32,15 +23,8 @@ smp <- my_assignment(smp)
 my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
 smp <- reveal_outcomes(smp)
-```
 
-Because all inputs to `declare_design()` are functions, it's easy for you to provide custom functions instead of using our defaults.
-
-# Custom Population
-
-You can use a custom function to generate your population entirely on your own, too:
-
-```{r echo=TRUE, results="hide"}
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_population_function <- function(N) {
   data.frame(u = rnorm(N))
 }
@@ -51,14 +35,11 @@ my_population_custom <- declare_population(
 pop_custom <- my_population_custom()
 
 head(pop_custom)
-```
-```{r echo=FALSE}
+
+## ----echo=FALSE----------------------------------------------------------
 knitr::kable(head(pop_custom))
-```
 
-# Custom Potential Outcomes
-
-```{r echo=TRUE, results="hide"}
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_potential_outcomes_function <-
   function(data) {
     data$Y_Z_0 <- with(data, u)
@@ -72,16 +53,11 @@ my_potential_outcomes_custom <- declare_potential_outcomes(
 pop_pos_custom <- my_potential_outcomes_custom(pop_custom)
 
 head(pop_pos_custom[, c("u", "Y_Z_0", "Y_Z_1")])
-```
-```{r echo=FALSE}
+
+## ----echo=FALSE----------------------------------------------------------
 knitr::kable(head(pop_pos_custom[, c("u", "Y_Z_0", "Y_Z_1")]))
-```
 
-# Custom Sampling
-
-Again, you can still use a custom sampling function easily. In this case, the requirement is simply that the function  takes population data and returns sampled data. You can also include inclusion weights if you wish in the function (as the default function does). 
-
-```{r echo=TRUE, results="hide"}
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_sampling_function <- function(data) {
      data$S <- rbinom(n = nrow(data),
             size = 1,
@@ -95,12 +71,8 @@ my_sampling_custom <- declare_sampling(
 smp_custom <- my_sampling_custom(pop_pos)
 
 nrow(smp_custom)
-```
-`r nrow(smp_custom)`
 
-# Custom Assignment
-
-```{r echo=TRUE, results="hide"}
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_assignment_function <- function(data) {
   data$Z <- rbinom(n = nrow(data),
          size = 1,
@@ -111,16 +83,11 @@ my_assignment_custom <- declare_assignment(
   handler = my_assignment_function)
 
 table(my_assignment_custom(pop_pos)$Z)
-```
-```{r echo=FALSE}
+
+## ----echo=FALSE----------------------------------------------------------
 knitr::kable(t(as.matrix(table(my_assignment_custom(pop_pos)$Z))))
-```
 
-# Custom Estimand
-
-Handlers can also make use of labels, if it's declared as an argument to the custom handler function.
-
-```{r echo=TRUE, results="hide"}
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_estimand_function <- function(data, label) {
     data.frame(
       estimand_label=label,
@@ -131,16 +98,11 @@ my_estimand_custom <- declare_estimand(
   handler = my_estimand_function, label = "medianTE")
 
 my_estimand_custom(pop_pos)
-```
-```{r echo=FALSE}
+
+## ----echo=FALSE----------------------------------------------------------
 knitr::kable(my_estimand_custom(pop_pos))
-```
 
-# Custom Estimator
-
-Custom estimators are slightly different - the default handler itself calls another function, either a model or estimator function, and handles the necessary bookkeeping to align estimators and estimands to later calculate diagnostics.
-
-```{r echo=TRUE, results="hide"}
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_estimator_function <- function(formula, data){
   data.frame(est = with(data, mean(Y)))
 }
@@ -151,7 +113,7 @@ my_estimator_custom <-
                     estimand = my_estimand)
 
 my_estimator_custom(smp)
-```
-```{r echo=FALSE}
+
+## ----echo=FALSE----------------------------------------------------------
 knitr::kable(my_estimator_custom(smp))
-```
+

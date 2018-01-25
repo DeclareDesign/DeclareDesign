@@ -13,9 +13,9 @@ test_that("demo runs", {
 
   ## ------------------------------------------------------------------------
   my_population_nested <- declare_population(
-    districts = level(N = 25, urban = sample(0:1, N, replace = TRUE)),
-    villages = level(N = 10, altitude = rnorm(N)),
-    individuals = level(N = sample(100:200, size = 250, replace = TRUE),
+    districts = add_level(N = 25, urban = sample(0:1, N, replace = TRUE)),
+    villages =add_level(N = 10, altitude = rnorm(N)),
+    individuals = add_level(N = sample(100:200, size = 250, replace = TRUE),
                         income = rnorm(N),
                         age = sample(18:95, N, replace = TRUE)))
 
@@ -23,8 +23,8 @@ test_that("demo runs", {
   ## ------------------------------------------------------------------------
   region_data <- data.frame(capital = c(1, 0, 0, 0, 0))
   pop_level_data <- declare_population(
-    regions = level(N = 2, gdp = runif(N)),
-    cities = level(N = 2, subways = rnorm(N, mean = 5)))
+    regions = add_level(N = 2, gdp = runif(N)),
+    cities = add_level(N = 2, subways = rnorm(N, mean = 5)))
 
   head(pop_level_data())
 
@@ -38,7 +38,7 @@ test_that("demo runs", {
 
   ## ------------------------------------------------------------------------
   pop_data_bootstrap <- declare_population(
-    data = country_data, population_function = fabricatr::resample_data)
+    data = country_data, handler = fabricatr::resample_data)
 
   head(pop_data_bootstrap())
 
@@ -115,7 +115,7 @@ test_that("demo runs", {
   }
 
   my_population_custom <- declare_population(
-    population_function = my_population_function, N = 100)
+    handler = my_population_function, N = 100)
 
   pop_custom <- my_population_custom()
 
@@ -129,7 +129,7 @@ test_that("demo runs", {
       data
     }
   my_potential_outcomes_custom <- declare_potential_outcomes(
-    potential_outcomes_function = my_potential_outcomes_function
+    handler = my_potential_outcomes_function
   )
 
   pop_pos_custom <- my_potential_outcomes_custom(pop_custom)
@@ -145,7 +145,7 @@ test_that("demo runs", {
   }
 
   my_sampling_custom <- declare_sampling(
-    sampling_function = my_sampling_function)
+    handler = my_sampling_function)
 
   smp_custom <- my_sampling_custom(pop_pos)
 
@@ -159,7 +159,7 @@ test_that("demo runs", {
     data
   }
   my_assignment_custom <- declare_assignment(
-    assignment_function = my_assignment_function)
+    handler = my_assignment_function)
 
   table(my_assignment_custom(pop_pos)$Z)
 
@@ -168,7 +168,7 @@ test_that("demo runs", {
     with(data, median(Y_Z_1 - Y_Z_0))
   }
   my_estimand_custom <- declare_estimand(
-    estimand_function = my_estimand_function, label = medianTE)
+    handler = my_estimand_function, label = "medianTE")
 
   my_estimand_custom(pop_pos)
 
@@ -217,7 +217,7 @@ test_that("demo runs", {
     data
   }
 
-  my_assignment_continuous <- declare_assignment(assignment_function = continuous_treatment_function)
+  my_assignment_continuous <- declare_assignment(handler = continuous_treatment_function)
 
   my_design <- declare_design(my_population(),
                               my_potential_outcomes_continuous,
@@ -248,7 +248,7 @@ test_that("demo runs", {
     nrow(stochastic_population()))
 
   ## ------------------------------------------------------------------------
-  library(DeclareDesign)
+
   my_population_function <- function(N) {
     data.frame(u = rnorm(N))
   }
@@ -256,7 +256,7 @@ test_that("demo runs", {
   ## set a variable used in the declaration
   my_N <- 1000
   my_population_custom <- declare_population(
-    population_function = my_population_function, N = my_N)
+    handler = my_population_function, N = my_N)
 
   my_potential_outcomes_function <-
     function(data) {
@@ -265,7 +265,7 @@ test_that("demo runs", {
       data
     }
   my_potential_outcomes_custom <- declare_potential_outcomes(
-    potential_outcomes_function = my_potential_outcomes_function
+    handler = my_potential_outcomes_function
   )
 
   ## remove all objects except your pop and PO functions

@@ -9,7 +9,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
   }
 
   population <-
-    declare_population(population_function = my_population, N = 500)
+    declare_population(handler = my_population, N = 500)
 
   my_sampling <- function(data) {
     data$S <- rbinom(n = nrow(data),
@@ -20,7 +20,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
     data
   }
 
-  sampling <- declare_sampling(sampling_function = my_sampling)
+  sampling <- declare_sampling(handler = my_sampling)
 
   my_assignment <- function(data) {
     data$Z <- rbinom(n = nrow(data),
@@ -30,7 +30,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
   }
 
   assignment <-
-    declare_assignment(assignment_function = my_assignment)
+    declare_assignment(handler = my_assignment)
 
   my_potential_outcomes <-
     function(data) {
@@ -40,14 +40,16 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
     }
 
   potential_outcomes <- declare_potential_outcomes(
-    potential_outcomes_function = my_potential_outcomes
+    handler = my_potential_outcomes
   )
 
   my_estimand <- function(data) {
-    with(data, mean(Y_Z_1 - Y_Z_0))
+    with(data,
+         data.frame(estimand_label="my_estimand", estimand=mean(Y_Z_1 - Y_Z_0), stringsAsFactors = FALSE)
+    )
   }
 
-  estimand <- declare_estimand(estimand_function = my_estimand)
+  estimand <- declare_estimand(handler = my_estimand)
 
   my_estimator <- function(data) {
     reg <- lm(Y ~ Z, data = data)
@@ -73,8 +75,8 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
       estimator
     )
 
-  design$data_function()
-  design$design_function()
+  draw_data(design)
+  execute_design(design)
 
   diagnose_design(
     design = design,

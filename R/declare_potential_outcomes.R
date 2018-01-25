@@ -54,26 +54,27 @@
 #'
 #' head(my_potential_outcomes(pop))
 #'
-declare_potential_outcomes <-
-  function(..., potential_outcomes_function = potential_outcomes_function_default) {
-    args <- eval(substitute(alist(...)))
-    env <- freeze_environment(parent.frame())
-    func <- eval(potential_outcomes_function)
-
-    if (!("data" %in% names(formals(func)))) {
-      stop("Please provide a potential_outcomes_function with a data argument.")
-    }
-
-    potential_outcomes_function_internal <- function(data) {
-      args$data <- data
-      do.call(func, args = args, envir = env)
-    }
-
-    attributes(potential_outcomes_function_internal) <-
-      list(call = match.call(), type = "potential_outcomes")
-
-    return(potential_outcomes_function_internal)
-  }
+declare_potential_outcomes <- make_declarations(potential_outcomes_function_default, "potential_outcomes");
+# declare_potential_outcomes <-
+#   function(..., potential_outcomes_function = potential_outcomes_function_default) {
+#     args <- eval(substitute(alist(...)))
+#     env <- freeze_environment(parent.frame())
+#     func <- eval(potential_outcomes_function)
+#
+#     if (!("data" %in% names(formals(func)))) {
+#       stop("Please provide a potential_outcomes_function with a data argument.")
+#     }
+#
+#     potential_outcomes_function_internal <- function(data) {
+#       args$data <- data
+#       do.call(func, args = args, envir = env)
+#     }
+#
+#     attributes(potential_outcomes_function_internal) <-
+#       list(call = match.call(), type = "potential_outcomes")
+#
+#     return(potential_outcomes_function_internal)
+#   }
 
 #' @importFrom rlang quos quo lang_modify !!! eval_tidy is_formula quo_expr
 potential_outcomes_function_default <-
@@ -85,10 +86,7 @@ potential_outcomes_function_default <-
            ) {
     options <- quos(...)
 
-    level <- substitute(level)
-    if (!is.null(level)) {
-      level <- as.character(level)
-    }
+    level <- reveal_nse_helper(substitute(level))
 
 
     has_formula <- any(sapply(options, function(x) is_formula(quo_expr(x))))
@@ -193,7 +191,7 @@ potential_outcomes_function_formula <-
   }
 
 #' @importFrom rlang quos quo lang_modify !!! eval_tidy !! :=
-#' @importFrom fabricatr fabricate level
+#' @importFrom fabricatr fabricate add_level
 potential_outcomes_function_discrete <-
   function(data, level = NULL, ...) {
     options <- quos(...)
@@ -202,7 +200,7 @@ potential_outcomes_function_discrete <-
       # if user sends a variable name in level, draw POs at the level
       #   defined by that variable. to do this, we send the options that
       #   were sent to fabricate to level first
-      level_options <- quos(level(!!!options))
+      level_options <- quos(modify_level(!!!options))
       names(level_options) <- level
       po_call <- quo(fabricate(!!!level_options))
     } else {

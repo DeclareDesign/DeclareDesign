@@ -11,7 +11,7 @@ test_that("parallel works.", {
 
   pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
 
-  pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = test)
+  pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = "test")
 
   my_design <- declare_design(my_population(),
                               my_potential_outcomes, pate,
@@ -66,7 +66,7 @@ test_that("custom diagnosand function", {
 
   pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
 
-  pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = test)
+  pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = "test")
 
   my_design <- declare_design(my_population(),
                               my_potential_outcomes, pate,

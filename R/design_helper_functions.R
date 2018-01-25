@@ -40,22 +40,53 @@ NULL
 #'
 #' @export
 draw_data <- function(design) {
-  design$data_function()
+  current_df <- NULL
+
+  for(step in design) {
+    if("dgp" %in% attr(step, "causal_type"))
+      current_df <- step(current_df)
+  }
+
+  current_df
 }
+
+#' @export
+execute_design <- function(design) {
+  current_df <- NULL
+
+  results <- list(estimand=vector("list", length(design)),
+                  estimator=vector("list", length(design)))
+
+  for (i in seq_along(design)) {
+    step <- design[[i]]
+    df <- step(current_df)
+
+    # if it's a dgp
+    if ("dgp" %in% attr(step, "causal_type")) {
+      current_df <- df
+    } else {
+      results[[attr(step, "step_type")]][[i]] <- df
+    }
+  }
+  list(estimates_df = do.call(rbind.data.frame, results[["estimator"]]),
+       estimands_df = do.call(rbind.data.frame, results[["estimand"]]))
+}
+
+
 
 
 #' @rdname post_design
 #'
 #' @export
 get_estimates <- function(design) {
-  design$design_function()$estimates_df
+  execute_design(design)$estimates_df
 }
 
 #' @rdname post_design
 #'
 #' @export
 get_estimands <- function(design) {
-  design$design_function()$estimands_df
+  execute_design(design)$estimands_df
 }
 
 #' Obtain the preferred citation for a design
@@ -66,11 +97,12 @@ get_estimands <- function(design) {
 #'
 #' @export
 cite_design <- function(design, ...) {
-  if (class(design$citation) == "bibentry") {
-    print(design$citation, style = "bibtex", ... = ...)
+  citation <- Filter(function(step) attr(step, "causal_type") == 'citation', design)[[1]]()
+  if (class(citation) == "bibentry") {
+    print(citation, style = "bibtex", ... = ...)
     cat("\n")
   }
-  print(design$citation, style = "text", ... = ...)
+  print(citation, style = "text", ... = ...)
   invisible(design)
 }
 
@@ -113,24 +145,7 @@ print.design <- function(x, ...) {
 #' summary(design)
 #' @export
 summary.design <- function(object, ...) {
-  summ <- summary_function(object$causal_order, object$causal_order_types)
-  structure(
-    list(
-      variables_added = summ$variables_added,
-      quantities_added = summ$quantities_added,
-      variables_modified = summ$variables_modified,
-      N = summ$N,
-      formulae = summ$formulae,
-      causal_order_expr = object$causal_order_expr,
-      causal_order_types = object$causal_order_types,
-      function_types = object$function_types,
-      title = object$title,
-      authors = object$authors,
-      description = object$description,
-      citation = object$citation
-    ),
-    class = c("summary.design", "list")
-  )
+  summary_function(object)
 }
 
 #' @export
@@ -156,7 +171,7 @@ print.summary.design <- function(x, ...) {
   }
 
   for (i in 1:max(length(x$variables_added), length(x$quantities_added))) {
-    step_name <- deparse(x$causal_order_expr[[i]])
+    step_name <- deparse(x$call[[i]])
     step_class <-
       ifelse(
         x$function_types[[i]] != "unknown",

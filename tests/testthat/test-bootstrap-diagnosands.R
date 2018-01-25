@@ -1,4 +1,4 @@
-context("Diagnosands")
+context("Bootstrap Diagnosands")
 test_that("test diagnosands", {
 
   my_population <- declare_population(N = 50, noise = rnorm(N))
@@ -11,8 +11,8 @@ test_that("test diagnosands", {
 
   pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
 
-  pate_estimator1 <- declare_estimator(Y ~ Z, estimand = pate, label = test1)
-  pate_estimator2 <- declare_estimator(Y ~ Z - 1, estimand = pate, label = test2)
+  pate_estimator1 <- declare_estimator(Y ~ Z, estimand = pate, label = "test1")
+  pate_estimator2 <- declare_estimator(Y ~ Z - 1, estimand = pate, label = "test2")
 
   my_design <- declare_design(my_population(),
                               my_potential_outcomes, pate,

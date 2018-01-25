@@ -4,12 +4,12 @@
 \alias{declare_sampling}
 \title{Declare Sampling Procedure}
 \usage{
-declare_sampling(..., sampling_function = sampling_function_default)
+declare_sampling(..., handler = sampling_function_default, label = NULL)
 }
 \arguments{
 \item{...}{Arguments to the sampling function}
 
-\item{sampling_function}{A function that takes a data.frame, subsets to sampled observations and optionally adds sampling probabilities or other relevant quantities, and returns a data.frame. By default, the sampling_function uses the \code{randomizr} functions \code{\link{draw_rs}} and \code{\link{obtain_inclusion_probabilities}} to conduct random sampling and obtain the probability of inclusion in the sample.}
+\item{handler}{A function that takes a data.frame, subsets to sampled observations and optionally adds sampling probabilities or other relevant quantities, and returns a data.frame. By default, the sampling_function uses the \code{randomizr} functions \code{\link{draw_rs}} and \code{\link{obtain_inclusion_probabilities}} to conduct random sampling and obtain the probability of inclusion in the sample.}
 }
 \value{
 a function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
@@ -34,7 +34,7 @@ dim(df)
 head(df)
 
 # Stratified random sampling
-my_stratified_sampling <- declare_sampling(strata_var = female)
+my_stratified_sampling <- declare_sampling(strata = female)
 df <- my_population()
 table(df$female)
 df <- my_stratified_sampling(df)
@@ -52,7 +52,7 @@ my_sampling_function <- function(data) {
    }
 
 my_sampling_custom <- declare_sampling(
-   sampling_function = my_sampling_function)
+   handler = my_sampling_function)
 
 df <- my_sampling_custom(df)
 dim(df)

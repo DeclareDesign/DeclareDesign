@@ -16,7 +16,7 @@ test_that("test the estimands", {
   my_population() %>% my_potential_outcomes %>% my_estimand
 
   ## manual label
-  my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = ATE)
+  my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "ATE")
   my_population() %>% my_potential_outcomes %>% my_estimand
 
   ## custom estimand function
@@ -24,7 +24,7 @@ test_that("test the estimands", {
     with(data, median(Y_Z_1 - Y_Z_0))
   }
   my_estimand_custom <- declare_estimand(
-    estimand_function = my_estimand_function, label = medianTE)
+    handler = my_estimand_function, label = "medianTE")
 
   my_population() %>% my_potential_outcomes %>% my_estimand_custom
 
@@ -50,15 +50,11 @@ test_that("declare estimand", {
   attributes(my_estimand)$label
   my_estimand(pop)
 
-  my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = ATE)
-  attributes(my_estimand)$label
-  my_estimand(pop)
-
   my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "ATE")
   attributes(my_estimand)$label
   my_estimand(pop)
 
-  my_estimand <- declare_estimand(SATT = mean(Y_Z_1 - Y_Z_0), label = ATE)
+  my_estimand <- declare_estimand(SATT = mean(Y_Z_1 - Y_Z_0), label = "ATE")
   attributes(my_estimand)$label
   my_estimand(pop)
 
@@ -69,7 +65,7 @@ test_that("declare estimand", {
   }
 
   my_population_custom <- declare_population(
-    population_function = my_population_function, N = 100)
+    handler = my_population_function, N = 100)
 
   rm(my_population_function)
   pop_custom <- my_population_custom()
@@ -83,7 +79,7 @@ test_that("declare estimand", {
   }
 
   my_po_custom <- declare_potential_outcomes(
-    potential_outcomes_function = my_po_function)
+    handler  = my_po_function)
 
   pop_custom <- my_po_custom(pop_custom)
 
@@ -131,7 +127,7 @@ test_that("multiple estimand declarations work", {
     declare_estimator(formula = Y ~ Z,
                       estimator_function = estimatr::lm_robust,
                       estimand = sate,
-                      label = simple)
+                      label = "simple")
 
   design_1 <- declare_design(population,
                            potential_outcomes,

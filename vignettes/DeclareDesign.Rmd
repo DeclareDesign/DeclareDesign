@@ -67,13 +67,13 @@ head(pop)
 knitr::kable(head(pop))
 ```
 
-Multi-level datasets are also easy to produce. For multilevel data you set the `N` of each level in a call to [`level()`](http://fabricatr.declaredesign.org/reference/level.html). The [`level()`](http://fabricatr.declaredesign.org/reference/level.html) function is neat -- if the previous level has data, it merges so that there are N entries for each of the units at the higher level. `declare_population()`can handle non-fixed number of units at each level too.  In the example below, we have  drawn a random number of individuals that are in each village (see the `individuals` line).
+Multi-level datasets are also easy to produce. For multilevel data you set the `N` of each level in a call to [`level()`](http://fabricatr.declaredesign.org/reference/level.html). The [`add_level()`](http://fabricatr.declaredesign.org/reference/level.html) function is intelligent -- if the previous level has data, it merges so that there are N entries for each of the units at the higher level. `declare_population()`can handle non-fixed number of units at each level too.  In the example below, we have  drawn a random number of individuals that are in each village (see the `individuals` line).
 
 ```{r echo=TRUE, results="hide"}
 my_population_nested <- declare_population(
-  districts = level(N = 25, urban = sample(0:1, N, replace = TRUE)),
-  villages = level(N = 10, altitude = rnorm(N)),
-  individuals = level(N = sample(100:200, size = 250, replace = TRUE), 
+  districts = add_level(N = 25, urban = sample(0:1, N, replace = TRUE)),
+  villages = add_level(N = 10, altitude = rnorm(N)),
+  individuals = add_level(N = sample(100:200, size = 250, replace = TRUE), 
                       income = rnorm(N),
                       age = sample(18:95, N, replace = TRUE)))
 ```
@@ -85,8 +85,8 @@ Within those levels, you can add in existing data (and also add new variables to
 ```{r echo=TRUE, results="hide"}
 region_data <- data.frame(capital = c(1, 0, 0, 0, 0))
 pop_level_data <- declare_population(
-  regions = level(N = 2, gdp = runif(N)),
-  cities = level(N = 2, subways = rnorm(N, mean = 5)))
+  regions = add_level(N = 2, gdp = runif(N)),
+  cities = add_level(N = 2, subways = rnorm(N, mean = 5)))
 
 head(pop_level_data())
 ```
@@ -114,7 +114,7 @@ If you don't want your data to be fixed, you can resample from it, i.e.
 
 ```{r echo=TRUE, results="hide"}
 pop_data_bootstrap <- declare_population(
-  data = country_data, population_function = fabricatr::resample_data)
+  data = country_data, handler = fabricatr::resample_data)
 
 head(pop_data_bootstrap())
 ```

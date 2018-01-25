@@ -1,13 +1,4 @@
----
-title: "Advanced features"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Advanced features}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+## ----echo=FALSE, warning=FALSE, message=FALSE----------------------------
 set.seed(42)
 library(DeclareDesign)
 options(digits=2)
@@ -32,13 +23,8 @@ smp <- my_assignment(smp)
 my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
 smp <- reveal_outcomes(smp)
-```
 
-# Quick design
-
-You can also write a design maker function that declares a design based on a set of parameters like `N`, the number of clusters, etc. and use the function `quick_design()` to make designs using just those parameters.
-
-```{r echo=TRUE, results="hide"}
+## ----echo=TRUE, results="hide"-------------------------------------------
 m_arm_trial <- function(numb){
   my_population <- declare_population(
     N = numb, income = rnorm(N), age = sample(18:95, N, replace = T))
@@ -61,14 +47,11 @@ m_arm_trial <- function(numb){
 
 my_1000_design <- quick_design(template = m_arm_trial, numb = 1000)
 head(draw_data(my_1000_design))
-```
-```{r echo=FALSE}
+
+## ----echo=FALSE----------------------------------------------------------
 knitr::kable(head(draw_data(my_1000_design)))
-```
 
-# Continuous potential outcomes
-
-```{r echo=TRUE, results="hide"}
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_potential_outcomes_continuous <- declare_potential_outcomes(
   formula = Y ~ .25 * Z + .01 * age * Z, condition_names = seq(0, 1, by = .1))
 
@@ -85,16 +68,11 @@ my_design <- declare_design(my_population(),
                             reveal_outcomes)
 
 head(draw_data(my_design))
-```
-```{r echo=FALSE}
+
+## ----echo=FALSE----------------------------------------------------------
 knitr::kable(head(draw_data(my_design)))
-```
 
-# Attrition
-
-Attrition can be thought of as just another potential outcome. That is, one describe possible attrition processes, include them in the design, and see how estimation strategies are affected by these processes. Here is an example. 
-
-```{r echo=TRUE, results="hide"}
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_potential_outcomes_attrition <- declare_potential_outcomes(
   formula = R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
 
@@ -106,21 +84,15 @@ my_design <- declare_design(my_population(),
                             reveal_outcomes(attrition_variable_name = "R"))
 
 head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
-```
-```{r echo=FALSE}
+
+## ----echo=FALSE----------------------------------------------------------
 knitr::kable(head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")]))
-```
 
-# Stochastic population sizes
-
-The population (or any level of the population) can have stochastic population sizes. (In fact, N can be a number, a fixed vector of numbers, or an expression that returns a stochastic number or vector of numbers.)
-
-```{r echo=TRUE, results="hide"}
+## ----echo=TRUE, results="hide"-------------------------------------------
 stochastic_population <- declare_population(
   N = sample(500:1000, 1), income = rnorm(N), age = sample(18:95, N, replace = TRUE))
 
 c(nrow(stochastic_population()), 
   nrow(stochastic_population()), 
   nrow(stochastic_population()))
-```
-`r c(nrow(stochastic_population()), nrow(stochastic_population()), nrow(stochastic_population()))`
+

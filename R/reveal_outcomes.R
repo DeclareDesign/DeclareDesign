@@ -47,36 +47,11 @@ reveal_outcomes <-
 
     # Setup to handle NSE
 
-    if (length(substitute(outcome_variable_names)) > 1) {
-      outcome_variable_names <-
-        sapply(lang_args(enexpr(outcome_variable_names)), function(x)
-          if (class(x) != "character") {
-            expr_text(x)
-          } else {
-            x
-          })
-    } else {
-      outcome_variable_names <-
-        as.character(substitute(outcome_variable_names))
-    }
+    outcome_variable_names <- reveal_nse_helper(substitute(outcome_variable_names))
 
-    if (length(substitute(assignment_variable_names)) > 1) {
-      assignment_variable_names <-
-        sapply(lang_args(enexpr(assignment_variable_names)), function(x)
-          if (class(x) != "character") {
-            expr_text(x)
-          } else {
-            x
-          })
-    } else {
-      assignment_variable_names <-
-        as.character(substitute(assignment_variable_names))
-    }
+    assignment_variable_names <- reveal_nse_helper(substitute(assignment_variable_names))
+    attrition_variable_name <- reveal_nse_helper(substitute(attrition_variable_name))
 
-    attrition_variable_name <- substitute(attrition_variable_name)
-    if (!is.null(attrition_variable_name)) {
-      attrition_variable_name <- as.character(attrition_variable_name)
-    }
 
 
     for (outcome_variable_name in outcome_variable_names) {
@@ -111,7 +86,7 @@ reveal_outcomes <-
 
   }
 
-attributes(reveal_outcomes) <- list(type = "reveal_outcomes")
+attributes(reveal_outcomes) <- list(step_type = "reveal_outcomes", causal_type= "dgp")
 
 
 
@@ -161,3 +136,14 @@ switching_equation <- function(data,
   }
   return(data[, outcome_variable_name, drop = TRUE])
 }
+
+
+reveal_nse_helper <- function(X) {
+  if(is.character(X))     X
+  else if(is.name(X))     as.character(X)
+  else if(is_quosure(X))  reveal_nse_helper(quo_expr(X))
+  else if(is.call(X))     unlist(lapply(X[-1], reveal_nse_helper))
+}
+
+#' @export
+declare_reveal <- make_declarations(reveal_outcomes, "reveal_outcomes");

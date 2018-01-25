@@ -3,7 +3,7 @@
 #' Declare Assignment Procedure
 #'
 #' @param ... Arguments to the assignment function.
-#' @param assignment_function A function that takes a data.frame, adds an assignment variable and optionally assignment probabilities or other relevant quantities, and returns a data.frame. By default, the assignment_function uses the \link{randomizr} functions \code{\link{conduct_ra}} and \code{\link{obtain_condition_probabilities}} to conduct random assignment and obtain the probabilities of assignment to each condition.
+#' @param handler A function that takes a data.frame, adds an assignment variable and optionally assignment probabilities or other relevant quantities, and returns a data.frame. By default, the assignment_function uses the \link{randomizr} functions \code{\link{conduct_ra}} and \code{\link{obtain_condition_probabilities}} to conduct random assignment and obtain the probabilities of assignment to each condition.
 #'
 #' @return a function that takes a data.frame as an argument and returns a data.frame with additional columns appended including an assignment variable and (optionally) probabilities of assignment.
 #' @export
@@ -30,7 +30,7 @@
 #'
 #' # Block random assignment
 #'
-#' my_blocked_assignment <- declare_assignment(block_var = female)
+#' my_blocked_assignment <- declare_assignment(blocks = female)
 #'
 #' df <- my_population()
 #'
@@ -51,50 +51,52 @@
 #'    }
 #'
 #' my_assignment_custom <- declare_assignment(
-#'    assignment_function = my_assignment_function)
+#'    handler = my_assignment_function)
 #'
 #' df <- my_assignment_custom(df)
 #' head(df)
 #' table(df$Z)
-declare_assignment <-
-  function(..., assignment_function = assignment_function_default) {
-    args <- eval(substitute(alist(...)))
-    env <- freeze_environment(parent.frame())
-    func <- eval(assignment_function)
+declare_assignment <- make_declarations(assignment_function_default, "assignment" )
 
-    if (!("data" %in% names(formals(func)))) {
-      stop("Please choose an assignment_function with a data argument.")
-    }
-
-    assignment_function_internal <- function(data) {
-      args$data <- data
-      do.call(func, args = args, envir = env)
-    }
-
-    attributes(assignment_function_internal) <-
-      list(call = match.call(), type = "assignment")
-
-    if (from_package(assignment_function, "DeclareDesign") &
-        substitute(assignment_function) == "assignment_function_default") {
-      args_randomizr <- quos(...)
-
-      if (any(names(args_randomizr) == "assignment_variable_name")) {
-        args_randomizr$assignment_variable_name <- NULL
-      }
-      randomizr_call <- quo(declare_ra(!!! args_randomizr))
-
-      randomizr_summary <- function(data) {
-        randomizr_call <- lang_modify(randomizr_call, N = nrow(data))
-        return(print(eval_tidy(randomizr_call, data = data)))
-      }
-
-      attributes(assignment_function_internal)$summary_function <-
-        randomizr_summary
-
-    }
-
-    return(assignment_function_internal)
-  }
+# declare_assignment <-
+#   function(..., assignment_function = assignment_function_default) {
+#     args <- eval(substitute(alist(...)))
+#     env <- freeze_environment(parent.frame())
+#     func <- eval(assignment_function)
+#
+#     if (!("data" %in% names(formals(func)))) {
+#       stop("Please choose an assignment_function with a data argument.")
+#     }
+#
+#     assignment_function_internal <- function(data) {
+#       args$data <- data
+#       do.call(func, args = args, envir = env)
+#     }
+#
+#     attributes(assignment_function_internal) <-
+#       list(call = match.call(), type = "assignment")
+#
+#     if (from_package(assignment_function, "DeclareDesign") &
+#         substitute(assignment_function) == "assignment_function_default") {
+#       args_randomizr <- quos(...)
+#
+#       if (any(names(args_randomizr) == "assignment_variable_name")) {
+#         args_randomizr$assignment_variable_name <- NULL
+#       }
+#       randomizr_call <- quo(declare_ra(!!! args_randomizr))
+#
+#       randomizr_summary <- function(data) {
+#         randomizr_call <- lang_modify(randomizr_call, N = nrow(data))
+#         return(print(eval_tidy(randomizr_call, data = data)))
+#       }
+#
+#       attributes(assignment_function_internal)$summary_function <-
+#         randomizr_summary
+#
+#     }
+#
+#     return(assignment_function_internal)
+#   }
 
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo f_rhs
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities

@@ -1,7 +1,7 @@
 #' Declare the Size and Features of the Population
 #'
 #' @param ... Arguments to the population function
-#' @param population_function A function that generates a data.frame containing features of the population. By default, the \link{fabricatr} function \code{\link{fabricate}} function is used, which allows you to draw single or multi-level hierarchical population data.
+#' @param handler A function that generates a data.frame containing features of the population. By default, the \link{fabricatr} function \code{\link{fabricate}} function is used, which allows you to draw single or multi-level hierarchical population data.
 #'
 #' @return a function that returns a data.frame
 #' @export
@@ -35,24 +35,25 @@
 #' }
 #'
 #' my_population_custom <- declare_population(
-#'   population_function = my_population_function, N = 100)
+#'   handler = my_population_function, N = 100)
 #'
 #' head(my_population_custom())
-declare_population <-
-  function(...,
-           population_function = fabricate) {
-    args <- eval(substitute(alist(...)))
-    env <- freeze_environment(parent.frame())
-    func <- eval(population_function)
-
-    population_function_internal <- function(data = NULL) {
-      if (!is.null(data) & ("data" %in% names(formals(func)))) {
-        args$data <- data
-      }
-      do.call(func, args = args, envir = env)
-    }
-    attributes(population_function_internal) <-
-      list(call = match.call(), type = "population")
-
-    return(population_function_internal)
-  }
+declare_population <- make_declarations(fabricate, "population", strictDataParam=FALSE);
+# declare_population <-
+#   function(...,
+#            population_function = fabricate) {
+#     args <- eval(substitute(alist(...)))
+#     env <- freeze_environment(parent.frame())
+#     func <- eval(population_function)
+#
+#     population_function_internal <- function(data = NULL) {
+#       if (!is.null(data) & ("data" %in% names(formals(func)))) {
+#         args$data <- data
+#       }
+#       do.call(func, args = args, envir = env)
+#     }
+#     attributes(population_function_internal) <-
+#       list(call = match.call(), type = "population")
+#
+#     return(population_function_internal)
+#   }

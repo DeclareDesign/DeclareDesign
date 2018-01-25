@@ -26,10 +26,10 @@ test_that("test the full declare design setup", {
                            reveal_outcomes,
                            my_estimator)
 
-  head(design$data_function())
-  design$design_function()
+  head(draw_data(design))
+  execute_design(design)
 
-  summary(design)
+  #summary(design)
 
   diagnose_design(design, sims = 2, bootstrap = FALSE, parallel = FALSE)
 
@@ -44,10 +44,10 @@ test_that("test the full declare design setup", {
                            declare_assignment(m = 25),
                            reveal_outcomes)
 
-  # head(design$data_function())
-  # design$design_function()
-  #
-  # diagnose_design(design, sims = 3)
+  head(draw_data(design))
+  execute_design(design)
+
+  #diagnose_design(design, sims = 3) - # will fail, no estimands/estimates are declared
 
 })
 
