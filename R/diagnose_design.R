@@ -50,6 +50,8 @@
 #'
 #' }
 #'
+#' @importFrom stats setNames
+#' @importFrom utils head
 #' @export
 diagnose_design <-
   function(...,
