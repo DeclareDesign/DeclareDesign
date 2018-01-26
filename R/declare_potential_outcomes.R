@@ -4,7 +4,8 @@
 #' Potential Outcomes
 #' @param ... Arguments to the potential_outcomes_function
 #'
-#' @param potential_outcomes_function A function that accepts a data.frame as an argument and returns a data.frame with potential outcomes columns appended. See the examples for the behavior of the default function.
+#' @param handler A function that accepts a data.frame as an argument and returns a data.frame with potential outcomes columns appended. See the examples for the behavior of the default function.
+#' @param label A step label
 #'
 #' @return a function that returns a data.frame
 #'
@@ -191,7 +192,7 @@ potential_outcomes_function_formula <-
   }
 
 #' @importFrom rlang quos quo lang_modify !!! eval_tidy !! :=
-#' @importFrom fabricatr fabricate add_level
+#' @importFrom fabricatr fabricate add_level modify_level
 potential_outcomes_function_discrete <-
   function(data, level = NULL, ...) {
     options <- quos(...)

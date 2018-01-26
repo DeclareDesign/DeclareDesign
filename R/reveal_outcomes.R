@@ -145,5 +145,12 @@ reveal_nse_helper <- function(X) {
   else if(is.call(X))     unlist(lapply(X[-1], reveal_nse_helper))
 }
 
+
+#' Declare a Reveal Outcomes step
+#'
+#' @param ... arguments for the handler
+#' @param handler a handler function
+#' @param label a step label
+#'
 #' @export
 declare_reveal <- make_declarations(reveal_outcomes, "reveal_outcomes");

@@ -2,18 +2,26 @@
 % Please edit documentation in R/declare_estimator.R
 \name{declare_estimator}
 \alias{declare_estimator}
+\alias{estimator_handler}
 \title{Declare an Estimator}
 \usage{
 declare_estimator(..., handler = estimator_handler, label = "my_estimator")
+
+estimator_handler(data, ..., model = estimatr::difference_in_means,
+  estimator_function = NULL, coefficient_name = Z, estimand = NULL, label)
 }
 \arguments{
 \item{...}{Arguments to the estimand function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.}
 
+\item{handler}{the handler function}
+
 \item{label}{An optional label to name the estimator, such as DIM.}
 
-\item{estimator_function}{A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.}
+\item{data}{a data.frame}
 
 \item{model}{A model function, e.g. lm or glm. If model is specified, the estimator_function argument is ignored.By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.}
+
+\item{estimator_function}{A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.}
 
 \item{coefficient_name}{A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a \code{model} is chosen or for some \code{estimator_function}'s such as \code{difference_in_means} and \code{lm_robust}.}
 

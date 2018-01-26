@@ -50,6 +50,11 @@ draw_data <- function(design) {
   current_df
 }
 
+
+#' Execute a design
+#'
+#' @param design a DeclareDesign object
+#'
 #' @export
 execute_design <- function(design) {
   current_df <- NULL

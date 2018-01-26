@@ -10,6 +10,8 @@ declare_assignment(..., handler = assignment_function_default, label = NULL)
 \item{...}{Arguments to the assignment function.}
 
 \item{handler}{A function that takes a data.frame, adds an assignment variable and optionally assignment probabilities or other relevant quantities, and returns a data.frame. By default, the assignment_function uses the \link{randomizr} functions \code{\link{conduct_ra}} and \code{\link{obtain_condition_probabilities}} to conduct random assignment and obtain the probabilities of assignment to each condition.}
+
+\item{label}{a step label}
 }
 \value{
 a function that takes a data.frame as an argument and returns a data.frame with additional columns appended including an assignment variable and (optionally) probabilities of assignment.
