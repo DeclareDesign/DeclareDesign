@@ -56,26 +56,7 @@
 #' head(my_potential_outcomes(pop))
 #'
 declare_potential_outcomes <- make_declarations(potential_outcomes_function_default, "potential_outcomes");
-# declare_potential_outcomes <-
-#   function(..., potential_outcomes_function = potential_outcomes_function_default) {
-#     args <- eval(substitute(alist(...)))
-#     env <- freeze_environment(parent.frame())
-#     func <- eval(potential_outcomes_function)
-#
-#     if (!("data" %in% names(formals(func)))) {
-#       stop("Please provide a potential_outcomes_function with a data argument.")
-#     }
-#
-#     potential_outcomes_function_internal <- function(data) {
-#       args$data <- data
-#       do.call(func, args = args, envir = env)
-#     }
-#
-#     attributes(potential_outcomes_function_internal) <-
-#       list(call = match.call(), type = "potential_outcomes")
-#
-#     return(potential_outcomes_function_internal)
-#   }
+
 
 #' @importFrom rlang quos quo lang_modify !!! eval_tidy is_formula quo_expr
 potential_outcomes_function_default <-
