@@ -88,6 +88,13 @@ test_that("custom diagnosand function", {
 
   diagnosis$diagnosands
 
+  # works with two with bootstrapping
+  diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_dig, bootstrap = TRUE, bootstrap_sims = 2, parallel = FALSE)
+
+  # works with only one diagnosand with bootstrapping (!)
+  my_one_dig <-  declare_diagnosands(se_bias = mean(se - sd(estimand)))
+  diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_one_dig, bootstrap = TRUE, parallel = FALSE)
+
 })
 
 
