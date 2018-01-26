@@ -56,49 +56,6 @@ declare_estimand <- make_declarations(estimand_function_default, "estimand", cau
     ret
   })
 
-# declare_estimand <-
-#   function(...,
-#            estimand_function = estimand_function_default,
-#            label = NULL) {
-#     args <- eval(substitute(alist(...)))
-#     env <- freeze_environment(parent.frame())
-#     func <- eval(estimand_function)
-#
-#     ## handles four uses cases of labeling so it's really easy to label without specifying
-#     ## would be great to clean up the next 10 lines
-#     label_internal <- NULL
-#     if (substitute(estimand_function) == "estimand_function_default" &
-#         from_package(estimand_function, "DeclareDesign")) {
-#       label_internal <- names(args)[1]
-#     }
-#
-#     if (!exists("label_internal") | is.null(label_internal)) {
-#       label_internal <- substitute(label)
-#       if (!is.null(label_internal)) {
-#         label_internal <- as.character(label_internal)
-#       } else {
-#         label_internal <- "my_estimand"
-#       }
-#     }
-#
-#     estimand_function_internal <- function(data) {
-#       if ("data" %in% names(formals(func))) {
-#         args$data <- data
-#       }
-#       value <- do.call(func, args = args, envir = env)
-#       data.frame(
-#         estimand_label = label_internal,
-#         estimand = value,
-#         stringsAsFactors = FALSE
-#       )
-#     }
-#     attributes(estimand_function_internal) <-
-#       list(call = match.call(),
-#            type = "estimand",
-#            label = label_internal)
-#
-#     return(estimand_function_internal)
-#   }
 
 #' @importFrom rlang eval_tidy quos  is_quosure
 estimand_function_default <- function(data, ..., subset = NULL, label) {

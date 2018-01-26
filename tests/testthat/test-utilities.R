@@ -1,6 +1,6 @@
 context("Utilities")
 
-test_that("Utilities",{
+test_that("format_num",{
   expect_equal(format_num(2000), "2000.000")
   expect_equal(format_num(1234.5678), "1234.568")
   expect_equal(format_num(1234.5678, digits=1), "1234.6")

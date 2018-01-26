@@ -113,35 +113,26 @@ estimator_handler <- function(data, ...,
   estimand_label <- switch(class(estimand), "character"=estimand, "function"=attributes(estimand)$label)
 
   # estimator_function_internal <- function(data) {
-    args <- quos(...)
-    args$data <- data
-    if ("coefficient_name" %in% names(formals(func))) {
-      args$coefficient_name <- coefficient_name
-    }
-    # results <- do.call(func, args = args)
-    # results <- eval_tidy(quo(func(!!!args)))
-    W <- quo(func(!!!args))
-    results <- eval(quo_expr(W))
-    results <- clean(results, coefficient_name) # fit2tidy if a model function, ow I
-    return_data <-
-      data.frame(estimator_label = label,
-                 results,
-                 stringsAsFactors = FALSE)
-
-    return_data[['estimand_label']] <- estimand_label
-
-    return_data
+  args <- quos(...)
+  args$data <- data
+  if ("coefficient_name" %in% names(formals(func))) {
+    args$coefficient_name <- coefficient_name
   }
+  # results <- do.call(func, args = args)
+  # results <- eval_tidy(quo(func(!!!args)))
+  W <- quo(func(!!!args))
+  results <- eval(quo_expr(W))
+  results <- clean(results, coefficient_name) # fit2tidy if a model function, ow I
+  return_data <-
+    data.frame(estimator_label = label,
+               results,
+               stringsAsFactors = FALSE)
 
-#   attributes(estimator_function_internal) <-
-#     list(call = match.call(),
-#          step_type = "estimator",
-#          causal_type = "estimator",
-#          label = label,
-#          estimand_label = estimand_label)
-#
-#   return(estimator_function_internal)
-# }
+  return_data[['estimand_label']] <- estimand_label
+
+  return_data
+}
+
 
 fit2tidy <- function(fit, coefficient_name = NULL) {
   summ <- summary(fit)$coefficients

@@ -74,32 +74,3 @@
 #'  mean_estimand = mean(estimand))
 #'
 declare_diagnosands <- make_declarations(estimand_function_default, "diagnosand", "diagnosands")
-# declare_diagnosands <- function(..., handler = NULL) {
-#   args <- eval(substitute(alist(...)))
-#   env <- freeze_environment(parent.frame())
-#
-#   # add error if you provide things to ... and diagnosand_function
-#
-#   if (is.null(handler)) {
-#     diagnosand_function <- function(data) {
-#       diagnosands_list <-
-#         lapply(args, function(i)
-#           eval_tidy(i, data = data, env = env))
-#       data.frame(diagnosands_list)
-#     }
-#   }
-#
-#   attributes(handler) <-
-#     list(call = match.call(), type = "diagnosand")
-#
-#   return(handler)
-# }
-#
-# diagnosand_default_handler <- function(data, ...){
-#   structure(
-#     fabricate(data=data, ...),
-#     call
-#
-#
-# }
-#
