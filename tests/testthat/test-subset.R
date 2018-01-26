@@ -1,6 +1,6 @@
 context("Subsetting")
 
-test_that("Test Subsetting", {
+test_that("Test Subsetting on default estimand handler", {
 
   my_population <- declare_population(N = 500, noise = rnorm(N))
 
@@ -8,29 +8,28 @@ test_that("Test Subsetting", {
 
   my_sampling <- declare_sampling(n = 250)
 
-  my_assignment <- declare_assignment(m = 25)
+  my_estimand <- declare_estimand(ATE_pos = mean(Y_Z_1 - Y_Z_0),
+                                  subset = Y_Z_1 > 0)
+
+  my_estimand2 <- declare_estimand(ATE_neg = mean(Y_Z_1 - Y_Z_0),
+                                  subset = Y_Z_1 < 0)
 
 
-
-  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0),
-                                  subset = Y_Z_1 > 1)
-
-  #my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-
-  my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
   design <- declare_design(my_population,
                            my_potential_outcomes,
                            my_sampling,
                            my_estimand,
-                           my_assignment,
-                           reveal_outcomes,
-                           my_estimator)
+                           my_estimand2
+  )
 
-  head(draw_data(design))
 
-  execute_design(design)
+  expect_true(design  %>%  get_estimands() %>% with(estimand[1] > 2 && estimand[2] < 0))
+  # > z <- replicate(10000, design  %>%  get_estimands() %>% with(estimand[[1]] > 2 && estimand[2] < 0)) %>% table
+  # > z
+  # .
+  # FALSE  TRUE
+  # 8  9992
 
 
 })
-

@@ -5,7 +5,7 @@ test_that("declare_population", {
   # just N
 
   my_population <- declare_population(N = 10)
-  my_population()
+  expect_equal( nrow(my_population()), 10)
 
   # test multilevel
 
@@ -13,13 +13,13 @@ test_that("declare_population", {
     regions = add_level(N = 2, gdp = rnorm(N)),
     cities = add_level(N = sample(1:2), subways = rnorm(N, mean = gdp)))
 
-  pop()
+  expect_equal(pop() %>% colnames, c("regions", "gdp", "cities", "subways"))
 
   pop <- declare_population(
     regions = add_level(N = 5),
     cities = add_level(N = sample(1:5), subways = rnorm(N, mean = 5)))
 
-  pop()
+  expect_equal(pop() %>% with(unique(regions)), as.character(1:5))
 
 
   # test multilevel
