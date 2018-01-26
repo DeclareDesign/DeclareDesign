@@ -186,8 +186,8 @@ diagnose_design_single_design <-
       stop("No estimates or estimands were declared, so diagnose_design cannot calculate diagnosands.", call. = FALSE)
     }
 
-    if (!"estimand_label" %in% colnames(estimates_df) && nrow(estimates_df) > 0) {
-      estimates_df$estimand_label <- "no estimand specified"
+    if(!"estimand_label" %in% colnames(estimates_df) &&  length(unique(estimands_df$estimand_label)) > 1 ) {
+      warning("Estimators lack estimand labels for matching, a many-to-many merge will be performed.")
     }
 
     if (nrow(estimands_df) == 0 && nrow(estimates_df) > 0) {
@@ -199,7 +199,7 @@ diagnose_design_single_design <-
         merge(
           estimands_df,
           estimates_df,
-          by = c("sim_ID", "estimand_label"),
+          by = c("sim_ID", intersect("estimand_label", colnames(estimates_df))),
           all = TRUE,
           sort = FALSE
         )
