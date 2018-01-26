@@ -257,7 +257,7 @@ diagnose_design_single_design <-
         lapply(
           diagnosands_se_df,
           FUN = function(df) {
-            apply(df[, !colnames(df) %in% group_by_set], 2, sd)
+            apply(df[, !colnames(df) %in% group_by_set, drop = FALSE], 2, sd)
           }
         )
       diagnosands_se_df <- do.call(rbind, diagnosands_se_df)
