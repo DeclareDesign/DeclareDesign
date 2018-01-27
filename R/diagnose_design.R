@@ -273,16 +273,6 @@ diagnose_design_single_design <-
 
     }
 
-    characteristics <- design$characteristics
-
-    if (!is.null(characteristics)) {
-      for (i in seq_along(characteristics)) {
-        simulations_df[, names(characteristics)[i]] <- characteristics[i]
-        diagnosands_df[, names(characteristics)[i]] <-
-          characteristics[i]
-      }
-    }
-
     return(structure(
       list(simulations = simulations_df, diagnosands = diagnosands_df),
       class = "diagnosis"
