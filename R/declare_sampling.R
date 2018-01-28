@@ -130,7 +130,7 @@ sampling_function_default <-
       eval_tidy(prob_call, data = data)
 
     ## subset to the sampled observations and remove the sampling variable
-    data[data[, sampling_variable_name] == 1,-which(names(data) %in% sampling_variable_name), drop = FALSE]
+    data[data[, sampling_variable_name] %in% 1,-which(names(data) %in% sampling_variable_name), drop = FALSE]
 
   }
 
