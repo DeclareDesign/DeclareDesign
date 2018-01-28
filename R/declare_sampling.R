@@ -111,7 +111,7 @@ sampling_function_default <-
 
     sampling_variable_name <- substitute(sampling_variable_name)
     if (!is.null(sampling_variable_name)) {
-      sampling_variable_name <- as.character(sampling_variable_name)
+      sampling_variable_name <- reveal_nse_helper(sampling_variable_name)
     } else {
       stop("Please provide a name for the sampling variable as sampling_variable_name.")
     }
