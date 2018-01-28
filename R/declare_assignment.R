@@ -81,7 +81,7 @@ assignment_function_default <-
 
     assignment_variable_name <- substitute(assignment_variable_name)
     if (!is.null(assignment_variable_name)) {
-      assignment_variable_name <- as.character(assignment_variable_name)
+      assignment_variable_name <- reveal_nse_helper(assignment_variable_name)
     } else {
       stop("Please provide a name for the assignment variable as assignment_variable_name.")
     }
