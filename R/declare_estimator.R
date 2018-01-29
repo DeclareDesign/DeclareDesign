@@ -110,7 +110,7 @@ estimator_handler <- function(data, ...,
     stop("Please provide ", lbl, " function with a data argument.")
   }
 
-  estimand_label <- switch(class(estimand), "character"=estimand, "function"=attributes(estimand)$label)
+  estimand_label <- switch(class(estimand), "character"=estimand, "function"=attributes(estimand)$label, NULL=NULL, warning("Did not match class of `estimand`"))
 
   # estimator_function_internal <- function(data) {
   args <- quos(...)
