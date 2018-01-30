@@ -123,13 +123,11 @@ potential_outcomes_function_formula <-
         !formula_variables %in% level_variables
       if (any(formula_variables_not_in_level)) {
         stop(
-          paste0(
             "You provided the variables ",
             paste(formula_variables[formula_variables_not_in_level], collapse = ", "),
             " to formula is not constant within level ",
             level,
             "."
-          )
         )
       }
 
