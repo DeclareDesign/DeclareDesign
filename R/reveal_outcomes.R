@@ -47,10 +47,10 @@ reveal_outcomes <-
 
     # Setup to handle NSE
 
-    outcome_variable_names <- reveal_nse_helper(substitute(outcome_variable_names))
+    outcome_variable_names <- reveal_nse_helper(enquo(outcome_variable_names))
 
-    assignment_variable_names <- reveal_nse_helper(substitute(assignment_variable_names))
-    attrition_variable_name <- reveal_nse_helper(substitute(attrition_variable_name))
+    assignment_variable_names <- reveal_nse_helper(enquo(assignment_variable_names))
+    attrition_variable_name <- reveal_nse_helper(enquo(attrition_variable_name))
 
 
 
@@ -153,4 +153,4 @@ reveal_nse_helper <- function(X) {
 #' @param label a step label
 #'
 #' @export
-declare_reveal <- make_declarations(reveal_outcomes, "reveal_outcomes");
+declare_reveal <- make_declarations(reveal_outcomes, "reveal_outcomes")
