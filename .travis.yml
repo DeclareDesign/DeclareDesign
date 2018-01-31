@@ -15,6 +15,12 @@ matrix:
       after_success:
       - echo skipping source packaging on linux/oldrel
 
+    - os: linux
+      r: devel
+      after_success:
+      - echo skipping source packaging on linux/devel
+
+
     - os: osx
       r: release
       if: branch = master
