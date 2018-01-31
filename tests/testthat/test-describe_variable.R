@@ -28,8 +28,8 @@ test_that("Describle Variable",{
   describe_variable(data_logical)
 
   expect_equal(
-    colnames(describe_variable(data_true_mixed)),
-    c("5", "test", "TRUE", "NA")
+    sort(colnames(describe_variable(data_true_mixed))),
+    sort(c("5", "test", "TRUE", "NA"))
   )
 
   expect_equal(
