@@ -31,7 +31,7 @@ test_script:
   - travis-tool.sh run_tests
 
 on_success:
-  - if NOT DEFINED APPVEYOR_PULL_REQUEST_NUMBER (if %APPVEYOR_REPO_BRANCH% == master ( Rscript -e "DDtools::update_drat()" ) )
+  - Rscript -e DDtools::after_build
 
 on_failure:
   - 7z a failure.zip *.Rcheck\*
