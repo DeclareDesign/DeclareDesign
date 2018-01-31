@@ -10,19 +10,25 @@ matrix:
 
     - os: linux
       r: oldrel
-      r_github_packages: 
-      - hadley/pkgdown
+      r_github_packages:
       - jyypma/nloptr
-      - DeclareDesign/DDtools
       after_success:
       - echo skipping source packaging on linux/oldrel
-        
+
+    - os: linux
+      r: devel
+      after_success:
+      - echo skipping source packaging on linux/devel
+
+
     - os: osx
       r: release
-        
+      if: branch = master
+
     - os: osx
       osx_image: xcode6.4
       r: oldrel
+      if: branch = master
 
 
 env:
@@ -32,15 +38,7 @@ env:
   - secure: MirTPzseZG12au6r9/Wda7R3R4NwjPCqjakjyw5DscxXdtbFH9UGO9NWhSq6C2bdeBTTS/QL0IpoGlubobTrPCbFKhVHeNrDPZ+o/fqdDWBKGr3w4U4xlX4AwGw61rweXkw9/1B52sWkLJx77eSP/0ZJcfbaG6+6TQipXRr2D46GvhRD2zM3u4H7TxgdfxCVmvlSQrxfvtTr6jI0s1goBbiBU7l/McMlajbHCYw3p2DrbuSmQbDWU7/hLlrwfGBAUXQK68n5s7igXJZfBFsOiYMCldQwa7bwPilPQwZQ9jn0oRu6CATYGRvyLdXbQwmKD91LUB8bgSmD1m7ndMvpBI8QqAETj5EipUPrB2xDFqGeU2yBYsIgnkXN5twcogK7jEzhococfYmX3QMEBASHijYRSAQsS3icqRqJO5Sm+GHkNhLPUZezXTIF8phU6SP4kszbCzPwrhOuj4Zk5wpcS7LUMDLLc6LtAGoyS+gFstMu0NFAEDBkLrxSEYZdHKFMx3SrH3ljIDUa0FFWEqSbkrp6JxQlONlJhEAUciTsSoPBA6rghZMRuYAljPt5wBDdvK2hHpRs2lDSoHLU9QYKO6DAwXmZy+c/Tt0PqcU43xp6tnrSAcvZruXDGHKSSo4oM+areRso6wakLGUafwu/Tmh0nG1p1Sx4wp/1ZLas41o=
   - secure: nj+3AWAxDUVkMtZ3UQzQuWhjmhw6/A2s6KydDfEdjJdUpWqiMBQV2D0hYlCqGFt1RsocnOgclgzBOJN1UNKdk3jeDdVEQBhOFzc/hGrnPcVciRBhoFmDAEE0ErnWWeX/qN3Mkx4UZH+mGXjY0VEWn4VRa5CTEG1szuvqr/zIqEanHqTUvgQR/ER040OyweIoj3A4iAgXJuRGqKgf+BH4MdRPrSXw4UL3idPl5lsWEYttmGb8WKkb1jX73jbHKtEVlQkcvd7GLqp707+8avlUK9gjAaquBLp5amDPDKWLWH41K1ZnhzsfzyMAW1EeDqUfHdK97oVYrspU1HQFyeysQWW+JrqHeTxLSIYEH+qV5WEoeSvM643bVMQryL1tqy+AKz2l3J1jRd713yVCJ3heFdtpaltQ1xgVzxshNfqzKC9FGFB3Z0911k8REnjrpTjb28NZfPHY3/t14bpQjvs5kznn7P8ZdmSUUw+w3shd2RuM2YymmB6vSggLxekq7JqKYf9VDYfJsP+ggfrI4MtJrRqkGs41DdUm3l1KwsKepjdLhBY955dBis7XtEbt3cHFHQY1d5DHTGITSfS9uCYOMAOLoAZALrJ2CM2w4uTgLzUtnZR+3MbZJBWbn/pb5xyYSOlwQHObxXNkCD49lfCEcojMBLWsAfgHfm5GD/pCdek=
   - secure: UoCUQNU8EAGUDm17Q2egxyjYpqxORIDn7BEsX672KdjEuYLvuH81sjwZ91XeSXZ6j7zXUx/a/1p6VJAeBhLFrWlNhofKUjSVxVNZBjpVgz65tNW1R5v3qN1wtKdY2H17WawFHZCAXqbI+uWkuRmoCoBkoEE7aULhNtxWtQ0mE+YLIc/NIlyw2bDYvjtrwCQuk5i/f69q/T73KOHAZluhuxlJUNdV0cz/lQANvm9D7x1PUd891j5EgbBWIyN60BBGPA/evo32c0ZMSSl/UrfkEfoF2580OCvsE+mGNjZRHX3n/NXuzqqw0zDgCz2rbVm5EF6MM6VdQOmgKfE75KwzHI05WeSTBua39BxCgq8xQF+UA3hcj8Se15B9bjJ6JWqTErv9ESEA7lib4i4GS9oM0cYuQqHd6PFFukKfZMnh6VL3xoFSGEfsxxED0teg7lGNrje8LUpAE390XGqemev8MdpkkbprHBziAxNamywco+u2ggQwLkreT3cuxs6FMvlHk7x57dAX4lAlrR7TWJcGvBuqZly+5AU8IP359xEJaFd7QjWMOULSTnZYgprNRaOGo3oM/VnhxwZgXtOZYlrzPn7ytqnRqSKszRxWqzbAijPVYsXP7uYlVzQp+Upg9mK3j/t5Rs7YmByCUr4pwTO5eMnigeWSTRTVr4CWoY2+Q/8=
-r_packages:
-- git2r
-- covr
-- drat
 r_github_packages:
-- hadley/pkgdown
 - DeclareDesign/DDtools
 after_success:
-- test $TRAVIS_OS_NAME == "linux" && NOT_CRAN=false Rscript -e 'covr::coveralls()'
-- test $TRAVIS_OS_NAME == "osx" && Rscript -e "devtools::build(binary = TRUE, args = c('--preclean'))"
-- test $TRAVIS_OS_NAME == "linux" && Rscript -e "devtools::build()"
-- test $TRAVIS_REPO_SLUG == "DeclareDesign/DeclareDesign" && test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && Rscript -e "DDtools::update_drat()"
+- Rscript -e DDtools::after_build
