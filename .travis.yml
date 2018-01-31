@@ -10,19 +10,19 @@ matrix:
 
     - os: linux
       r: oldrel
-      r_github_packages: 
-      - hadley/pkgdown
+      r_github_packages:
       - jyypma/nloptr
-      - DeclareDesign/DDtools
       after_success:
       - echo skipping source packaging on linux/oldrel
-        
+
     - os: osx
       r: release
-        
+      if: branch = master
+
     - os: osx
       osx_image: xcode6.4
       r: oldrel
+      if: branch = master
 
 
 env:
@@ -37,7 +37,6 @@ r_packages:
 - covr
 - drat
 r_github_packages:
-- hadley/pkgdown
 - DeclareDesign/DDtools
 after_success:
 - test $TRAVIS_OS_NAME == "linux" && NOT_CRAN=false Rscript -e 'covr::coveralls()'
