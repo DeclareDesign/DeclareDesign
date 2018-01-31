@@ -4,10 +4,14 @@
 \alias{declare_diagnosands}
 \title{Declare Diagnosands}
 \usage{
-declare_diagnosands(..., diagnosand_function = NULL)
+declare_diagnosands(..., handler = estimand_function_default, label = NULL)
 }
 \arguments{
 \item{...}{A set of diagnosands, i.e. bias = mean(est - estimand). The diagnostic statistic (i.e., est - estimand) and its associated summary function (i.e., mean) are declared at the same time.}
+
+\item{handler}{a diagnosand handler}
+
+\item{label}{a step label}
 }
 \value{
 a function that returns a data.frame

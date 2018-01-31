@@ -1,5 +1,5 @@
 Package: DeclareDesign
-Title: Declare and diagnose research designs to understand and improve them.
+Title: Declare and Diagnose Research Designs to Understand and Improve Them
 Version: 0.2.0
 Date: 2018-01-24
 Authors@R: c(person("Graeme", "Blair", email = "graeme.blair@ucla.edu", role = c("aut", "cre")),
@@ -17,9 +17,9 @@ Depends:
     R (>= 3.3.0)
 Imports:
     rlang,
-    randomizr,
-    fabricatr,
-    estimatr,
+    randomizr (>= 0.8.0),
+    fabricatr (>= 0.2.0),
+    estimatr (>= 0.2.0),
     doParallel,
     foreach,
     doRNG,

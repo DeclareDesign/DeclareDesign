@@ -9,6 +9,8 @@ quick_design(template = NULL, expand = TRUE, ...)
 \arguments{
 \item{template}{An R function that takes a set of options and returns a design created by declare_design().}
 
+\item{expand}{boolean - if true, form the crossproduct of the ..., otherwise recycle them}
+
 \item{...}{Options sent to the template.}
 }
 \description{

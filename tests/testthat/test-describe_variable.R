@@ -11,7 +11,7 @@ test_that("Describle Variable",{
   data_bigfactor = as.factor(data_bigchar)
   data_bigmissing = c(1:10, rep(NA, 3))
 
-  data_logical = c(rep(TRUE, 10), rep(FALSE, 10))
+  data_logical = c(rep(TRUE, 11), rep(FALSE, 9))
   data_true_mixed = c(TRUE, 5, NA, "test") # Should induce coercion to character
   data_mixed_numeric = c(TRUE, FALSE, TRUE, 5, 7, 8, 9) # Should induce coercion to 1/0
 
@@ -26,6 +26,17 @@ test_that("Describle Variable",{
   describe_variable(data_bigmissing)
 
   describe_variable(data_logical)
-  describe_variable(data_true_mixed)
-  describe_variable(data_mixed_numeric)
+
+  expect_equal(
+    sort(colnames(describe_variable(data_true_mixed))),
+    sort(c("5", "test", "TRUE", "NA"))
+  )
+
+  expect_equal(
+    describe_variable(data_mixed_numeric),
+    structure(list(min = 0, median = 5, mean = 4.43, max = 9, sd = 3.74,
+                   N_missing = 0L, N_unique = 6L), .Names = c("min", "median",
+                                                              "mean", "max", "sd", "N_missing", "N_unique"),
+              row.names = c(NA, -1L), class = "data.frame")
+  )
 })

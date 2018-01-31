@@ -50,6 +50,11 @@ draw_data <- function(design) {
   current_df
 }
 
+
+#' Execute a design
+#'
+#' @param design a DeclareDesign object
+#'
 #' @export
 execute_design <- function(design) {
   current_df <- NULL
@@ -110,42 +115,6 @@ cite_design <- function(design, ...) {
 print.design <- function(x, ...) {
   print(summary(x))
   # invisible(summary(x))
-}
-
-#' Text Summary of a Design
-#'
-#' @param object a design object created by \code{\link{declare_design}}
-#' @param ... optional arguments to be sent to summary function
-#'
-#' @examples
-#'
-#' my_population <- declare_population(N = 500, noise = rnorm(N))
-#'
-#' my_potential_outcomes <- declare_potential_outcomes(
-#'   Y_Z_0 = noise, Y_Z_1 = noise +
-#'   rnorm(N, mean = 2, sd = 2))
-#'
-#' my_sampling <- declare_sampling(n = 250)
-#'
-#' my_assignment <- declare_assignment(m = 25)
-#'
-#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-#'
-#' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-#'
-#' design <- declare_design(my_population,
-#'                          my_potential_outcomes,
-#'                          my_sampling,
-#'                          my_estimand,
-#'                          dplyr::mutate(noise_sq = noise^2),
-#'                          my_assignment,
-#'                          reveal_outcomes,
-#'                          my_estimator)
-#'
-#' summary(design)
-#' @export
-summary.design <- function(object, ...) {
-  summary_function(object)
 }
 
 #' @export

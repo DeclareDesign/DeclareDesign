@@ -3,14 +3,21 @@
 #'
 #' @param ... Arguments to the citation function
 #' @param handler A function that takes a data.frame and yield citation data
+#' @param label a step label
+#' @param data a data.frame
 #'
 #' @return a function that takes a data.frame as an argument and returns citation data
 #' @export
-#' @details
 #'
 
 declare_citation <- make_declarations(citation_function_default, "citation", causal_type="citation", strictDataParam=FALSE)
 
+#' @param title (optional) The title of the study, as a character string.
+#' @param authors (optional) The authors of the study, as a character string.
+#' @param description (optional) A description of the design in words, as a character string, stored alongside the declaration in code.
+#' @param timestamp a timestamp to use in the citation
+#' @param citation (optional) The preferred citation for the design, as a character string. Either include the full citation in text, or paste a BibTeX entry. If title and authors are specified and you leave citation empty, a BibTeX entry will be created automatically.
+#' @rdname declare_citation
 citation_function_default <- function(data=stop("Don't evaluate data argument"), title=NULL, authors=NULL,
                                       description = "Unpublished research design declaration.",
                                       timestamp = Sys.time(), citation=NULL) {

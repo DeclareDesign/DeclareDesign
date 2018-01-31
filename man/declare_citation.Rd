@@ -2,21 +2,38 @@
 % Please edit documentation in R/declare_citation.R
 \name{declare_citation}
 \alias{declare_citation}
+\alias{citation_function_default}
 \title{Declare Research Study Citation}
 \usage{
 declare_citation(..., handler = citation_function_default, label = NULL)
+
+citation_function_default(data = stop("Don't evaluate data argument"),
+  title = NULL, authors = NULL,
+  description = "Unpublished research design declaration.",
+  timestamp = Sys.time(), citation = NULL)
 }
 \arguments{
 \item{...}{Arguments to the citation function}
 
 \item{handler}{A function that takes a data.frame and yield citation data}
+
+\item{label}{a step label}
+
+\item{data}{a data.frame}
+
+\item{title}{(optional) The title of the study, as a character string.}
+
+\item{authors}{(optional) The authors of the study, as a character string.}
+
+\item{description}{(optional) A description of the design in words, as a character string, stored alongside the declaration in code.}
+
+\item{timestamp}{a timestamp to use in the citation}
+
+\item{citation}{(optional) The preferred citation for the design, as a character string. Either include the full citation in text, or paste a BibTeX entry. If title and authors are specified and you leave citation empty, a BibTeX entry will be created automatically.}
 }
 \value{
 a function that takes a data.frame as an argument and returns citation data
 }
 \description{
 Declare Research Study Citation
-}
-\details{
-
 }

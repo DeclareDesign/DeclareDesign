@@ -50,6 +50,8 @@
 #'
 #' }
 #'
+#' @importFrom stats setNames
+#' @importFrom utils head
 #' @export
 diagnose_design <-
   function(...,
@@ -184,8 +186,8 @@ diagnose_design_single_design <-
       stop("No estimates or estimands were declared, so diagnose_design cannot calculate diagnosands.", call. = FALSE)
     }
 
-    if (!"estimand_label" %in% colnames(estimates_df) && nrow(estimates_df) > 0) {
-      estimates_df$estimand_label <- "no estimand specified"
+    if(!"estimand_label" %in% colnames(estimates_df) &&  length(unique(estimands_df$estimand_label)) > 1 ) {
+      warning("Estimators lack estimand labels for matching, a many-to-many merge will be performed.")
     }
 
     if (nrow(estimands_df) == 0 && nrow(estimates_df) > 0) {
@@ -197,7 +199,7 @@ diagnose_design_single_design <-
         merge(
           estimands_df,
           estimates_df,
-          by = c("sim_ID", "estimand_label"),
+          by = c("sim_ID", intersect("estimand_label", colnames(estimates_df))),
           all = TRUE,
           sort = FALSE
         )
@@ -205,32 +207,31 @@ diagnose_design_single_design <-
 
     calculate_diagnosands <-
       function(simulations_df, diagnosands){
-      group_by_set <- c("estimand_label", "estimator_label")
-      group_by_set <- group_by_set[which(group_by_set %in% colnames(simulations_df))]
-      group_by_list <- as.list(simulations_df[, group_by_set])
+      group_by_set <- intersect(colnames(simulations_df), c("estimand_label", "estimator_label"))
+      group_by_list <- simulations_df[, group_by_set, drop=FALSE]
 
-      labels_df <- split(simulations_df[, group_by_set], group_by_list)
-      labels_df <- lapply(labels_df, unique)
-      labels_df <- do.call(rbind, labels_df[lapply(labels_df, nrow) != 0])
+      labels_df <- split(group_by_list, group_by_list, drop = TRUE)
+      labels_df <- lapply(labels_df, head, n=1)
 
-      diagnosands_df <- split(simulations_df, group_by_list)
-      diagnosands_df <- lapply(diagnosands_df[lapply(diagnosands_df, nrow) != 0], FUN = diagnosands)
-      diagnosands_df <- do.call(rbind, diagnosands_df)
+      diagnosands_df <- split(simulations_df, group_by_list, drop=TRUE)
+      diagnosands_df <- lapply(diagnosands_df, FUN = function(x){ dg <- diagnosands(x); setNames(dg[[2]], dg[[1]]) })
 
-      diagnosands_df <- merge(labels_df, diagnosands_df, by = "row.names", all = TRUE, sort = FALSE)
-      diagnosands_df$Row.names <- NULL
+      diagnosands_df <- as.data.frame(t(mapply(c, labels_df, diagnosands_df)), stringsAsFactors=FALSE) # c appropriate and fast here bc labels_df must be a list (drop=FALSE above)
+      diagnosands_df[] <- lapply(diagnosands_df, unlist)
+
+      # diagnosands_df <- merge(labels_df, diagnosands_df, by = "row.names", all = TRUE, sort = FALSE)
+      # diagnosands_df$Row.names <- NULL
       return(diagnosands_df)
     }
 
     diagnosands_df <- calculate_diagnosands(simulations_df, diagnosands)
 
     if (bootstrap) {
+      boot_indicies_by_id <- split(1:nrow(simulations_df), simulations_df$sim_ID)
       boot_function <- function() {
-        boot_ids <- sample(1:sims, sims, replace = TRUE)
-        boot_indicies <- unlist(lapply(boot_ids, function(i) {
-          which(simulations_df$sim_ID == i)
-        }))
-        calculate_diagnosands(simulations_df[boot_indicies, ], diagnosands)
+        boot_ids <- sample.int(sims, sims, TRUE)
+        boot_indicies <- unlist(boot_indicies_by_id[boot_ids])
+        calculate_diagnosands(simulations_df[boot_indicies, , drop=FALSE], diagnosands)
       }
 
       diagnosand_replicates <- foreach(i = seq_len(bootstrap_sims), .combine = rbind) %dorng%
@@ -240,65 +241,36 @@ diagnose_design_single_design <-
       #   replicate(bootstrap_sims, expr = boot_function(), simplify = FALSE)
       # diagnosand_replicates <- do.call(rbind, diagnosand_replicates)
 
-      group_by_set <- c("estimand_label", "estimator_label")
-      group_by_set <-
-        group_by_set[which(group_by_set %in% colnames(diagnosand_replicates))]
-      group_by_list <-
-        as.list(diagnosand_replicates[, group_by_set])
+      group_by_set <- intersect( colnames(diagnosand_replicates), c("estimand_label", "estimator_label"))
+      group_by_list <- diagnosand_replicates[, group_by_set, drop=FALSE]
 
-      labels_df <-
-        split(diagnosand_replicates[, group_by_set], group_by_list)
-      labels_df <- lapply(labels_df, unique)
-      labels_df <- do.call(rbind, labels_df[lapply(labels_df, nrow) != 0])
+      labels_df <- split(group_by_list, group_by_list, drop=TRUE)
+      labels_df <- lapply(labels_df, head, n=1)
 
-      diagnosands_se_df <-
-        split(diagnosand_replicates, group_by_list, drop = TRUE)
-      diagnosands_se_df <-
-        lapply(
-          diagnosands_se_df,
-          FUN = function(df) {
-            apply(df[, !colnames(df) %in% group_by_set], 2, sd)
-          }
-        )
-      diagnosands_se_df <- do.call(rbind, diagnosands_se_df)
-      colnames(diagnosands_se_df) <-
-        paste0("se(", colnames(diagnosands_se_df), ")")
+      diagnosands_df_group <- diagnosands_df[, group_by_set, drop=FALSE]
+      diagnosands_df[group_by_set] <- NULL
+      diagnosands_names <- colnames(diagnosands_df)
+      diagnosands_df <- split(diagnosands_df, diagnosands_df_group, drop=TRUE)
+      diagnosands_df <- diagnosands_df[names(labels_df)]
 
-      diagnosands_se_df <-
-        merge(
-          labels_df,
-          diagnosands_se_df,
-          by = "row.names",
-          all = TRUE,
-          sort = FALSE
-        )
-      diagnosands_se_df$Row.names <- NULL
+      diagnosand_replicates[group_by_set] <- NULL
 
-      diagnosands_names <-
-        names(diagnosands_df)[!names(diagnosands_df) %in% group_by_set]
-      diagnosands_df <-
-        merge(
-          diagnosands_df,
-          diagnosands_se_df,
-          by = group_by_set,
-          all = TRUE,
-          sort = FALSE
-        )
-      diagnosands_df <-
-        diagnosands_df[, c(group_by_set, c(rbind(
-          diagnosands_names, paste0("se(", diagnosands_names, ")")
-        )))]
+      diagnosands_se_df <- split(diagnosand_replicates, group_by_list, drop = TRUE)
+      diagnosands_se_df <- lapply(diagnosands_se_df, lapply, sd)
 
-    }
+      diagnosands_se_df <- lapply(diagnosands_se_df, setNames, sprintf("se(%s)", diagnosands_names))
 
-    characteristics <- design$characteristics
+      diagnosands_df <- as.data.frame(
+        t(mapply(c, labels_df, diagnosands_df, diagnosands_se_df )),
+        stringsAsFactors=FALSE)
+      diagnosands_df[] <- lapply(diagnosands_df, unlist)
 
-    if (!is.null(characteristics)) {
-      for (i in seq_along(characteristics)) {
-        simulations_df[, names(characteristics)[i]] <- characteristics[i]
-        diagnosands_df[, names(characteristics)[i]] <-
-          characteristics[i]
-      }
+      # permute columns so SEs are right of diagnosands
+      n_diag <- length(diagnosands_names)
+      i <- c(seq_along(group_by_set), length(group_by_set) + rep(seq_len(n_diag), each=2) + c(0, n_diag))
+      diagnosands_df <- diagnosands_df[,i, drop=FALSE]
+
+
     }
 
     return(structure(

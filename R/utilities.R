@@ -1,8 +1,3 @@
-# this function is from lazyeval version git version, commit c155c3d
-freeze_environment <- function(x) {
-  list2env(as.list(x, all.names = TRUE), parent = parent.env(x))
-}
-
 
 
 from_package <- function(func, package) {
@@ -42,58 +37,57 @@ wrap_step <- function(...) {
 
 }
 
-format_num <- function(x, digits = 3) {
-  x <- as.numeric(x)
-  return(paste0(sprintf(paste0("%.", digits, "f"), x)))
+# If <= 5 uniques, table it, ow descriptives if numeric-ish, ow number of levels.
+describe_variable <- function(x) {
+
+  num_unique=length(unique(x))
+
+  if(num_unique > 5) {
+    return(describe_variable_impl(x, num_unique))
+  }
+
+  tab <- table(x, exclude = NULL)
+
+  rbind.data.frame(
+    Frequency=data.frame(as.list(tab), check.names = FALSE),
+    Proportion=sprintf("%.2f", prop.table(tab))
+  )
+
+}
+
+describe_variable_impl <- function(x, num_unique) UseMethod("describe_variable_impl")
+
+describe_variable_impl.factor <- function(x, num_unique) {
+  data.frame(
+    as.list(summary.factor(x, 5)),
+    N_unique=num_unique,
+    check.names = FALSE
+  )
+}
+
+describe_variable_impl.character <-  function(x, num_unique) {
+  data.frame(
+    N_missing = sum(is.na(x)),
+    N_unique = num_unique,
+    class = class(x),
+    stringsAsFactors = FALSE
+  )
 }
 
 #' @importFrom stats median sd
-describe_variable <- function(x) {
-  num_unique <- length(unique(x))
-  num_missing <- sum(is.na(x))
-
-  if (num_unique <= 5) {
-    tab <- table(x, exclude = NULL)
-    prop_tab <- prop.table(tab)
-
-    df <-
-      cbind(
-        data.frame(tab, stringsAsFactors = FALSE)[, 2],
-        data.frame(prop_tab, stringsAsFactors = FALSE)[, 2]
-      )
-
-    obj <- data.frame(t(df), stringsAsFactors = FALSE)
-    obj[1, ] <- format_num(obj[1, ], digits = 0)
-    obj[2, ] <- format_num(obj[2, ], digits = 2)
-    obj <- cbind(c("Frequency", "Proportion"), obj)
-    colnames(obj) <- c("", names(tab))
-
-  } else if ((typeof(x) == "character" ||
-              (typeof(x) == "integer" &&
-               class(x) == "factor")) & num_unique > 5) {
-    obj <- data.frame(
-      N_missing = num_missing,
-      N_unique = num_unique,
-      stringsAsFactors = FALSE
-    )
-
-  } else {
-    obj <- data.frame(
-      min = min(x, na.rm = TRUE),
-      median = median(x, na.rm = TRUE),
-      mean = mean(x, na.rm = TRUE),
-      max = max(x, na.rm = TRUE),
-      sd = sd(x, na.rm = TRUE),
-      N_missing = num_missing,
-      N_unique = num_unique,
-      stringsAsFactors = FALSE
-    )
-    obj[, c("min", "median", "mean", "max", "sd")] <-
-      apply(obj[, c("min", "median", "mean", "max", "sd")], 2, format_num, digits = 2)
-  }
-
-  rownames(obj) <- NULL
-  return(obj)
+describe_variable_impl.default <- function(x, num_unique) {
+  #todo just use summary?
+  data.frame(
+    lapply(
+      list(min=min, median=median, mean=mean, max=max, sd=sd),
+      function(f,x) round(f(x, na.rm=TRUE), digits=2),
+      x
+    ),
+    N_missing = sum(is.na(x)),
+    N_unique = num_unique,
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
 }
 
 get_unique_variables_by_level <- function(data, ID_label, superset=NULL) {

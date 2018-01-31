@@ -10,6 +10,8 @@ declare_population(..., handler = fabricate, label = NULL)
 \item{...}{Arguments to the population function}
 
 \item{handler}{A function that generates a data.frame containing features of the population. By default, the \link{fabricatr} function \code{\link{fabricate}} function is used, which allows you to draw single or multi-level hierarchical population data.}
+
+\item{label}{a step label}
 }
 \value{
 a function that returns a data.frame

@@ -10,7 +10,9 @@ declare_potential_outcomes(..., handler = potential_outcomes_function_default,
 \arguments{
 \item{...}{Arguments to the potential_outcomes_function}
 
-\item{potential_outcomes_function}{A function that accepts a data.frame as an argument and returns a data.frame with potential outcomes columns appended. See the examples for the behavior of the default function.}
+\item{handler}{A function that accepts a data.frame as an argument and returns a data.frame with potential outcomes columns appended. See the examples for the behavior of the default function.}
+
+\item{label}{A step label}
 }
 \value{
 a function that returns a data.frame

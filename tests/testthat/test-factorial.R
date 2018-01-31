@@ -29,11 +29,15 @@ test_that("Factorial", {
       my_estimator
     )
 
-  draw_data(my_design) %>% head
-  execute_design(my_design)
+  expect_equal(my_design %>% draw_data %>% dim, c(2000, 12))
 
-  my_design
+  expect_equal(my_design %>% execute_design %>% names, c("estimates_df", "estimands_df"))
+
 
   diagnosis <- diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = FALSE)
-  diagnosis$simulations
+
+  expect_equal(diagnosis %>% get_simulations %>% dim, c(2, 10))
+
+  expect_equal(diagnosis %>%  get_diagnosands %>% dim, c(1,10))
+
 })

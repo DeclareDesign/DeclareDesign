@@ -1,6 +1,8 @@
 #' Declare Diagnosands
 #'
 #' @param ... A set of diagnosands, i.e. bias = mean(est - estimand). The diagnostic statistic (i.e., est - estimand) and its associated summary function (i.e., mean) are declared at the same time.
+#' @param handler a diagnosand handler
+#' @param label a step label
 #'
 #' @details
 #'
@@ -71,24 +73,4 @@
 #'  type_s_rate = mean((sign(est) != sign(estimand)) & p < .05),
 #'  mean_estimand = mean(estimand))
 #'
-declare_diagnosands <- function(..., diagnosand_function = NULL) {
-  args <- eval(substitute(alist(...)))
-  env <- freeze_environment(parent.frame())
-
-  # add error if you provide things to ... and diagnosand_function
-
-  if (is.null(diagnosand_function)) {
-    diagnosand_function <- function(data) {
-      diagnosands_list <-
-        lapply(args, function(i)
-          eval_tidy(i, data = data, env = env))
-      data.frame(diagnosands_list)
-    }
-  }
-
-  attributes(diagnosand_function) <-
-    list(call = match.call(), type = "diagnosand")
-
-  return(diagnosand_function)
-}
-
+declare_diagnosands <- make_declarations(estimand_function_default, "diagnosand", "diagnosands")
