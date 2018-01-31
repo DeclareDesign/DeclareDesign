@@ -74,3 +74,28 @@
 #'  mean_estimand = mean(estimand))
 #'
 declare_diagnosands <- make_declarations(estimand_function_default, "diagnosand", "diagnosands")
+
+
+default_diagnosands <- function(data, alpha=.05){
+
+  est <- data$est
+  estimand <- data$estimand
+  p <- data$p
+  ci_lower <- data$ci_lower
+  ci_upper <- data$ci_upper
+
+  bias = mean(est - estimand)
+  rmse = sqrt(mean((est - estimand) ^ 2))
+  power = mean(p < alpha)
+  coverage = mean(estimand <= ci_upper &
+                    estimand >= ci_lower)
+  mean_estimate = mean(est)
+  sd_estimate = sd(est)
+  type_s_rate = mean((sign(est) != sign(estimand)) & p < alpha)
+  mean_estimand = mean(estimand)
+
+
+  data.frame(estimand_label = c("bias", "rmse", "power", "coverage", "mean_estimate", "sd_estimate", "type_s_rate", "mean_estimand"),
+             estimand       = c( bias ,  rmse ,  power ,  coverage ,  mean_estimate ,  sd_estimate ,  type_s_rate ,  mean_estimand ))
+}
+
