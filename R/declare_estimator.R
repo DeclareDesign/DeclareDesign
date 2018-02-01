@@ -110,7 +110,7 @@ estimator_handler <- function(data, ...,
     stop("Please provide ", lbl, " function with a data argument.")
   }
 
-  estimand_label <- switch(class(estimand), "character"=estimand, "function"=attributes(estimand)$label, NULL=NULL, warning("Did not match class of `estimand`"))
+  estimand_label <- switch(class(estimand)[1], "character"=estimand, "design_step"=attributes(estimand)$label, NULL=NULL, warning("Did not match class of `estimand`"))
 
   # estimator_function_internal <- function(data) {
   args <- quos(...)
@@ -147,7 +147,7 @@ fit2tidy <- function(fit, coefficient_name = NULL) {
   colnames(return_data) <- c("coefficient_name","est", "se", "p", "ci_lower", "ci_upper")
 
 
-  if (!is.null(coefficient_name)) {
+  if (is.character(coefficient_name)) {
     return_data <- return_data[return_data$coefficient_name %in% coefficient_name, ,drop = FALSE]
   }
 
