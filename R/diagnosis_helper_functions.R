@@ -75,8 +75,8 @@ print.summary.diagnosis <- function(x, ...) {
   cat("\nResearch design diagnosis\n\n")
   print_diagnosis <- x
   names(x) <-
-    gsub("(^|[[:space:]])([[:alpha:]])",
-         "\\1\\U\\2",
+    gsub("\\b(se[(]|sd |rmse|[[:alpha:]])",
+         "\\U\\1",
          gsub("_", " ", names(x)),
          perl = TRUE)
   print(x, row.names = FALSE)

@@ -17,7 +17,7 @@
 # f(mtcars)
 
 #' @importFrom rlang quos lang_fn lang_modify eval_tidy
-callquos_to_step <- function(step_call) {
+callquos_to_step <- function(step_call, label="") {
   ## this function allows you to put any R expression
   ## such a dplyr::mutate partial call
   ## into the causal order, i.e.
@@ -43,17 +43,18 @@ callquos_to_step <- function(step_call) {
 
   dots <- quos(!!data_name := data, !!!dots)
 
-  quo <- quo(currydata(fun, !!!dots))
+  #quo <- quo(currydata(fun, !!!dots))
 
   curried <- currydata(fun, dots)
 
   # curried <- eval_tidy(quo)
 
+  build_step(curried, handler=fun, dots=dots,  label, step_type="wrapped", causal_type="dgp", call=step_call)
 
-  structure(curried,
-            call = step_call[[2]],
-            step_type = "wrapped",
-            causal_type="dgp")
+  # structure(curried,
+  #           call = step_call[[2]],
+  #           step_type = "wrapped",
+  #           causal_type="dgp")
 
 }
 
@@ -129,27 +130,22 @@ callquos_to_step <- function(step_call) {
 declare_design <- function(...) {
 
   qs <- quos(...)
+  qs <- maybe_add_labels(qs)
   qnames <- names(qs)
 
-  ret <- structure(list(), class="design")
+  ret <- structure(vector("list", length(qs)), call=match.call(), class="design")
+
+  names(ret)[qnames != ""] <- qnames[qnames != ""]
 
   if(getOption("DD.debug.declare_design", FALSE)) browser()
 
   for(i in  seq_along(qs)) {
 
-
     #wrap step is nasty, converts partial call to curried function
     ret[[i]] <- tryCatch(
       eval_tidy(qs[[i]]),
-      error = function(e) callquos_to_step(qs[[i]])
+      error = function(e) callquos_to_step(qs[[i]], qnames[[i]])
     )
-
-    if(qnames[[i]] != "") {
-      attr(ret[[i]], "label") <- qnames[[i]]
-      names(ret)[i] <- qnames[[i]]
-    }
-
-
 
   }
 

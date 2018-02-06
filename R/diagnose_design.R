@@ -185,7 +185,9 @@ diagnose_design_single_design <-
         merge(
           estimands_df,
           estimates_df,
-          by = c("sim_ID", intersect("estimand_label", colnames(estimates_df))),
+          by = c("sim_ID",
+                 "estimand_label" %i% colnames(estimates_df),
+                 "coefficient_name" %i% colnames(estimands_df) %i% colnames(estimates_df)),
           all = TRUE,
           sort = FALSE
         )
@@ -193,7 +195,7 @@ diagnose_design_single_design <-
 
     calculate_diagnosands <-
       function(simulations_df, diagnosands){
-      group_by_set <- intersect(colnames(simulations_df), c("estimand_label", "estimator_label"))
+      group_by_set <- colnames(simulations_df) %i% c("estimand_label", "estimator_label", "coefficient_name")
       group_by_list <- simulations_df[, group_by_set, drop=FALSE]
 
       labels_df <- split(group_by_list, group_by_list, drop = TRUE)
@@ -227,7 +229,7 @@ diagnose_design_single_design <-
       #   replicate(bootstrap_sims, expr = boot_function(), simplify = FALSE)
       # diagnosand_replicates <- do.call(rbind, diagnosand_replicates)
 
-      group_by_set <- intersect( colnames(diagnosand_replicates), c("estimand_label", "estimator_label"))
+      group_by_set <-  colnames(diagnosand_replicates) %i% c("estimand_label", "estimator_label", "coefficient_name")
       group_by_list <- diagnosand_replicates[, group_by_set, drop=FALSE]
 
       labels_df <- split(group_by_list, group_by_list, drop=TRUE)

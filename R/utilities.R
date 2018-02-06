@@ -37,6 +37,29 @@ wrap_step <- function(...) {
 
 }
 
+
+
+maybe_add_labels <- function(quotations){
+
+  labeller <- function(quotation, lbl) {
+    cx <- quotation[[2]]
+    if(is.call(cx) && is.symbol(cx[[1]]) && ! "label" %in% names(cx) && lbl != ""){
+
+      f <- match.fun(cx[[1]])
+      if("declaration" %in% class(f) && "label" %in% names(formals(f))){
+        quotation[[2]][["label"]] <- lbl
+      }
+    }
+    quotation
+  }
+
+  for(i in seq_along(quotations)){
+    quotations[[i]] <- labeller(quotations[[i]], names(quotations)[i])
+  }
+
+  quotations
+}
+
 # If <= 5 uniques, table it, ow descriptives if numeric-ish, ow number of levels.
 describe_variable <- function(x) {
 
@@ -133,3 +156,5 @@ get_unique_variables_by_level <- function(data, ID_label, superset=NULL) {
 
   return(level_variables)
 }
+
+`%i%` <- intersect
