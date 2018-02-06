@@ -75,7 +75,7 @@ estimand_function_default <- function(data, ..., subset = NULL, coefficient_name
   }
 }
 
-attr(estimand_function_default, "validation_fn") <- function(ret, dots, label){
+validation_fn(estimand_function_default) <-  function(ret, dots, label){
   force(ret)
   # add ... labels at build time
   dotnames <- names(dots)
