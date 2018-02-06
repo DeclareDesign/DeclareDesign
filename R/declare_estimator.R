@@ -66,13 +66,12 @@
 #'
 #' # Use a custom estimator function
 #'
-#' my_estimator_function <- function(formula, data){
+#' my_estimator_function <- function(data){
 #'   data.frame(est = with(data, mean(Y)))
 #' }
 #'
 #' my_estimator_custom <-
-#'   declare_estimator(Y ~ Z,
-#'                     estimator_function = my_estimator_function,
+#'   declare_estimator(handler = custom_estimator(my_estimator_function),
 #'                     estimand = my_estimand)
 #'
 #' my_estimator_custom(df)
@@ -86,49 +85,33 @@ declare_estimator <-make_declarations(estimator_handler, step_type="estimator", 
 #' @rdname declare_estimator
 estimator_handler <- function(data, ...,
                               model = estimatr::difference_in_means,
-                              estimator_function = NULL,
                               coefficient_name = Z,
                               estimand = NULL, label) {
-  model <- if(is.null(estimator_function)) model else NULL
 
   # coefficient_name <- to_char_except_null(substitute(coefficient_name))
   coefficient_name <- reveal_nse_helper(substitute(coefficient_name))
 
-  if (is.null(model) == is.null(estimator_function)) {
-    stop("Please provide either an estimator function or a model.")
-  } else if(!is.null(model)) {
-    lbl <- 'a model'
-    func <- match.fun(model)
-    clean <- fit2tidy #todo could generify this...
-  } else if(!is.null(estimator_function)) {
-    lbl <- 'an estimator'
-    func <- match.fun(estimator_function)
-    clean <- function(x,y)x # no work needed after evaluated
-  }
-
-  if (!("data" %in% names(formals(func)))) {
-    stop("Please provide ", lbl, " function with a data argument.")
+  if (is.null(model) || !is.function(model) || !("data" %in% names(formals(model))) ) {
+    stop("Must provide a function for `model` which takes a `data` argument.") #todo move to declare time validation
   }
 
   estimand_label <- switch(class(estimand)[1], "character"=estimand, "design_step"=attributes(estimand)$label, NULL=NULL, warning("Did not match class of `estimand`"))
 
   # estimator_function_internal <- function(data) {
   args <- quos(...)
-  args$data <- data
-  if ("coefficient_name" %in% names(formals(func))) {
-    args$coefficient_name <- coefficient_name
-  }
-  # results <- do.call(func, args = args)
-  # results <- eval_tidy(quo(func(!!!args)))
-  W <- quo(func(!!!args))
+  W <- quo(model(!!!args, data=data))
   results <- eval(quo_expr(W))
-  results <- clean(results, coefficient_name) # fit2tidy if a model function, ow I
-  return_data <-
-    data.frame(estimator_label = label,
-               results,
-               stringsAsFactors = FALSE)
 
-  return_data[['estimand_label']] <- estimand_label
+
+  results <- fit2tidy(results, coefficient_name) # fit2tidy if a model function, ow I
+
+  return_data <- data.frame(
+    estimator_label = label,
+    results,
+    stringsAsFactors = FALSE
+  )
+
+  return_data[['estimand_label']] <- get_estimand_label(estimand)
 
   return_data
 }
@@ -157,4 +140,37 @@ fit2tidy <- function(fit, coefficient_name = NULL) {
 #todo migrate to utils.R
 to_char_except_null <- function(x){
   if(is.null(x)) NULL else if(is_quosure(x)) as.character(x[[2]]) else as.character(x)
+}
+
+get_estimand_label <- function(estimand){
+  switch(class(estimand),
+         "character"=estimand,
+         "function"=attributes(estimand)$label,
+         NULL=NULL,
+         warning("Did not match class of `estimand`")
+  )
+}
+
+#' @export
+custom_estimator <- function(estimator_function){
+
+  if (!("data" %in% names(formals(estimator_function)))) {
+    stop("Must provide a `estimator_function` function with a data argument.")
+  }
+
+
+  function(data, ..., estimand=NULL, label) {
+
+    ret <- data.frame(
+      estimator_label = label,
+      estimator_function(data, ...),
+      stringsAsFactors = FALSE
+    )
+
+    ret[["estimand_label"]] <- get_estimand_label(estimand)
+
+    ret
+
+  }
+
 }

@@ -125,7 +125,6 @@ test_that("multiple estimand declarations work", {
 
   estimator <-
     declare_estimator(formula = Y ~ Z,
-                      estimator_function = estimatr::lm_robust,
                       estimand = sate,
                       label = "simple")
 
