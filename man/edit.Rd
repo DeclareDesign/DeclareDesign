@@ -16,21 +16,27 @@ clone_design_edit(design, ..., to_replace = list(...))
 Override environment via shim
 }
 \examples{
+\dontrun{
 here_i_am <- "foo"
 dot <- quo(here_i_am)
 dot2 <- clone_dot_edit_env(dot, here_i_am="Rock you like a hurricane", xyxyx="bar")
 eval_tidy(dot)
 eval_tidy(dot2)
+}
+\dontrun{
 N <- 50
 
 pop50 <- declare_population(N=N, noise=rnorm(N))
 nrow(pop50())
 
-pop100 <- clone_step_edit(pop50, N=100)
+pop100 <- DeclareDesign:::clone_step_edit(pop50, N=100)
 nrow(pop100())
 nrow(pop50())
 
+}
 N <- 50
+
+\dontrun{
 
 my_design <- declare_design(
   declare_population(N=N, noise=rnorm(N))
@@ -40,5 +46,6 @@ my_design2 <- DeclareDesign:::clone_design_edit(my_design, N=100)
 nrow(draw_data(my_design))
 nrow(draw_data(my_design2))
 
+}
 }
 \keyword{internal}
