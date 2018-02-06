@@ -111,8 +111,10 @@ estimator_handler <- function(data, ...,
     stringsAsFactors = FALSE
   )
 
-  return_data[['estimand_label']] <- get_estimand_label(estimand)
-
+  estimand_label=get_estimand_label(estimand)
+  if(length(estimand_label) > 0) {
+    return_data <- cbind(return_data, estimand_label=estimand_label, row.names=NULL, stringsAsFactors=FALSE)
+  }
   return_data
 }
 
@@ -143,9 +145,11 @@ to_char_except_null <- function(x){
 }
 
 get_estimand_label <- function(estimand){
+  force(estimand) # no promise nonsense when we look at it
   switch(class(estimand)[1],
          "character"=estimand,
          "design_step"=attributes(estimand)$label,
+         "list"=vapply(estimand, get_estimand_label, NA_character_), #note recursion here
          NULL=NULL,
          warning("Did not match class of `estimand`")
   )
@@ -167,8 +171,10 @@ custom_estimator <- function(estimator_function){
       stringsAsFactors = FALSE
     )
 
-    ret[["estimand_label"]] <- get_estimand_label(estimand)
-
+    estimand_label <- get_estimand_label(estimand)
+    if(length(estimand_label) > 0) {
+      ret <- cbind(ret, estimand_label=estimand_label, row.names=NULL, stringsAsFactors=FALSE)
+    }
     ret
 
   }
