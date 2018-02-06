@@ -55,26 +55,12 @@
 #' @export
 diagnose_design <-
   function(...,
-           diagnosands = NULL,
+           diagnosands = default_diagnosands,
            sims = 500,
            bootstrap = TRUE,
            bootstrap_sims = 100,
            parallel = TRUE,
            parallel_cores = detectCores(logical = TRUE)) {
-
-    if (is.null(diagnosands)) {
-      diagnosands <- declare_diagnosands(
-        bias = mean(est - estimand),
-        rmse = sqrt(mean((est - estimand) ^ 2)),
-        power = mean(p < .05),
-        coverage = mean(estimand <= ci_upper &
-                          estimand >= ci_lower),
-        mean_estimate = mean(est),
-        sd_estimate = sd(est),
-        type_s_rate = mean((sign(est) != sign(estimand)) & p < .05),
-        mean_estimand = mean(estimand)
-      )
-    }
 
     designs <- list(...)
 
