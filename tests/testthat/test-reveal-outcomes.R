@@ -110,6 +110,12 @@ test_that("outcome functions works", {
 
 })
 
+test_that("missing PO stops",{
+
+  expect_error(
+   reveal_outcomes(sleep, outcome_variable_names = foo, assignment_variable_names = extra)
+  )
+})
 
 
 
