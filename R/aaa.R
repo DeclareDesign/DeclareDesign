@@ -103,9 +103,9 @@ validation_fn <- function(f){
   attr(f, "validation_fn")
 }
 
-`validation_fn<-` <- with_validation_fn <- function(f, v) {
-  attr(f, "validation_fn") <- v
-  v
+`validation_fn<-` <- with_validation_fn <- function(x, value) {
+  attr(x, "validation_fn") <- value
+  x
 }
 
 has_validation_fn <- function(f){
