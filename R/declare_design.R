@@ -228,7 +228,9 @@ get_modified_variables <- function(last_df = NULL, current_df) {
 #'
 #' summary(design)
 #' @export
-summary.design <- function(design) {
+summary.design <- function(object, ...) {
+
+  design <- object
 
   title = NULL
   authors = NULL

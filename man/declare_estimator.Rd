@@ -2,36 +2,45 @@
 % Please edit documentation in R/declare_estimator.R
 \name{declare_estimator}
 \alias{declare_estimator}
+\alias{custom_estimator}
 \alias{estimator_handler}
+\alias{estimator_handler_default}
 \title{Declare an Estimator}
 \usage{
-declare_estimator(..., handler = estimator_handler, label = "my_estimator")
+declare_estimator(..., handler = estimator_handler_default,
+  label = "my_estimator")
+
+custom_estimator(estimator_function)
 
 estimator_handler(data, ..., model = estimatr::difference_in_means,
-  coefficient_name = Z, estimand = NULL, label)
+  coefficient_name = Z)
+
+estimator_handler_default(data, ..., estimand = NULL, label)
 }
 \arguments{
-\item{...}{Arguments to the estimand function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.}
+\item{...}{Arguments to the estimation function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.}
 
 \item{handler}{the handler function}
 
 \item{label}{An optional label to name the estimator, such as DIM.}
 
+\item{estimator_function}{A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.}
+
 \item{data}{a data.frame}
 
-\item{model}{A model function, e.g. lm or glm. If model is specified, the estimator_function argument is ignored.By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.}
+\item{model}{A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.}
 
 \item{coefficient_name}{A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a \code{model} is chosen or for some \code{estimator_function}'s such as \code{difference_in_means} and \code{lm_robust}.}
 
-\item{estimand}{An estimand object created using \code{\link{declare_estimand}}. Estimates from this estimator function will be associated with the estimand, for example for calculating the bias and coverage of the estimator.}
-
-\item{estimator_function}{A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.}
+\item{estimand}{a declare_estimand step object, or a character label, or a list of either}
 }
 \value{
 a function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimator and associated statistics.
 }
 \description{
 Declare an Estimator
+
+\code{custom_estimator} takes an estimator function, and returns one which has standard labelling options.
 }
 \section{Custom Estimators}{
 

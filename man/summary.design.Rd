@@ -4,7 +4,7 @@
 \alias{summary.design}
 \title{Text Summary of a Design}
 \usage{
-\method{summary}{design}(design)
+\method{summary}{design}(object, ...)
 }
 \arguments{
 \item{object}{a design object created by \code{\link{declare_design}}}

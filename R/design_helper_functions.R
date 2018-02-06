@@ -90,6 +90,14 @@ execute_design_internal.default <- function(design, current_df=NULL, results=NUL
 
 execute_design_internal.execution_st <- function(design, ...) do.call(execute_design_internal.default, design)
 
+#' Build an execution strategy object
+#'
+#' @param design a design
+#' @param current_df a data.frame
+#' @param results a list of intermediate results
+#' @param start index of starting step
+#' @param end  index of ending step
+#'
 #' @export
 execution_st <- function(design, current_df=NULL, results=NULL, start=1, end=length(design)){
   structure(

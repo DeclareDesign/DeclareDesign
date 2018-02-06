@@ -1,6 +1,6 @@
 #' Declare an Estimator
 #'
-#' @param ... Arguments to the estimand function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.
+#' @param ... Arguments to the estimation function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.
 #' @param handler the handler function
 #' @param label An optional label to name the estimator, such as DIM.
 #' @param data a data.frame
@@ -76,8 +76,12 @@
 #'
 #' my_estimator_custom(df)
 #'
-declare_estimator <-make_declarations(estimator_handler, step_type="estimator", causal_type="estimator", default_label="my_estimator")
+declare_estimator <-make_declarations(estimator_handler_default, step_type="estimator", causal_type="estimator", default_label="my_estimator")
 
+#' \code{custom_estimator} takes an estimator function, and returns one which has standard labelling options.
+#'
+#' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.
+#' @rdname declare_estimator
 #' @export
 custom_estimator <- function(estimator_function){
 
@@ -86,7 +90,7 @@ custom_estimator <- function(estimator_function){
   }
 
 
-  function(data, ..., estimand=NULL, label) {
+  f <- function(data, ..., estimand=NULL, label) {
 
     ret <- data.frame(
       estimator_label = label,
@@ -102,17 +106,18 @@ custom_estimator <- function(estimator_function){
 
   }
 
+  attributes(f) <- attributes(estimator_function)
+
+  f
 }
 
 
 
 
-#' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.
-#' @param model A model function, e.g. lm or glm. If model is specified, the estimator_function argument is ignored.By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
+#' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
 #' @param coefficient_name A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a \code{model} is chosen or for some \code{estimator_function}'s such as \code{difference_in_means} and \code{lm_robust}.
-#' @param estimand An estimand object created using \code{\link{declare_estimand}}. Estimates from this estimator function will be associated with the estimand, for example for calculating the bias and coverage of the estimator.
 #' @rdname declare_estimator
-estimator_handler <- custom_estimator(
+estimator_handler <-
   function(data, ...,
     model = estimatr::difference_in_means,
     coefficient_name = Z)
@@ -128,7 +133,7 @@ estimator_handler <- custom_estimator(
     results <- fit2tidy(results, coefficient_name)
 
     results
-})
+}
 
 validation_fn(estimator_handler) <-  function(ret, dots, label){
   if("model" %in% names(dots)) {
@@ -139,6 +144,10 @@ validation_fn(estimator_handler) <-  function(ret, dots, label){
   }
   ret
 }
+
+#' @param estimand a declare_estimand step object, or a character label, or a list of either
+#' @rdname declare_estimator
+estimator_handler_default <- custom_estimator(estimator_handler)
 
 fit2tidy <- function(fit, coefficient_name = NULL) {
   summ <- summary(fit)$coefficients
