@@ -59,7 +59,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
   }
 
   estimator <-
-    declare_estimator(estimator_function = my_estimator, estimand = estimand)
+    declare_estimator(handler = custom_estimator(my_estimator), estimand = estimand)
 
   diagnosand <-
     declare_diagnosands(bias = mean(est - estimand))
