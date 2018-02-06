@@ -78,83 +78,6 @@
 #'
 declare_estimator <-make_declarations(estimator_handler, step_type="estimator", causal_type="estimator", default_label="my_estimator")
 
-#' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.
-#' @param model A model function, e.g. lm or glm. If model is specified, the estimator_function argument is ignored.By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
-#' @param coefficient_name A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a \code{model} is chosen or for some \code{estimator_function}'s such as \code{difference_in_means} and \code{lm_robust}.
-#' @param estimand An estimand object created using \code{\link{declare_estimand}}. Estimates from this estimator function will be associated with the estimand, for example for calculating the bias and coverage of the estimator.
-#' @rdname declare_estimator
-estimator_handler <- function(data, ...,
-                              model = estimatr::difference_in_means,
-                              coefficient_name = Z,
-                              estimand = NULL, label) {
-
-  # coefficient_name <- to_char_except_null(substitute(coefficient_name))
-  coefficient_name <- reveal_nse_helper(substitute(coefficient_name))
-
-  if (is.null(model) || !is.function(model) || !("data" %in% names(formals(model))) ) {
-    stop("Must provide a function for `model` which takes a `data` argument.") #todo move to declare time validation
-  }
-
-  estimand_label <- get_estimand_label(estimand)
-
-  # estimator_function_internal <- function(data) {
-  args <- quos(...)
-  W <- quo(model(!!!args, data=data))
-  results <- eval(quo_expr(W))
-
-
-  results <- fit2tidy(results, coefficient_name) # fit2tidy if a model function, ow I
-
-  return_data <- data.frame(
-    estimator_label = label,
-    results,
-    stringsAsFactors = FALSE
-  )
-
-  estimand_label=get_estimand_label(estimand)
-  if(length(estimand_label) > 0) {
-    return_data <- cbind(return_data, estimand_label=estimand_label, row.names=NULL, stringsAsFactors=FALSE)
-  }
-  return_data
-}
-
-
-fit2tidy <- function(fit, coefficient_name = NULL) {
-  summ <- summary(fit)$coefficients
-  summ <-
-    summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
-  ci <- suppressMessages(as.data.frame(confint(fit)))
-  return_data <-
-    data.frame(coefficient_name = rownames(summ),
-               summ,
-               ci,
-               stringsAsFactors = FALSE, row.names = NULL)
-  colnames(return_data) <- c("coefficient_name","est", "se", "p", "ci_lower", "ci_upper")
-
-
-  if (is.character(coefficient_name)) {
-    return_data <- return_data[return_data$coefficient_name %in% coefficient_name, ,drop = FALSE]
-  }
-
-  return_data
-}
-
-#todo migrate to utils.R
-to_char_except_null <- function(x){
-  if(is.null(x)) NULL else if(is_quosure(x)) as.character(x[[2]]) else as.character(x)
-}
-
-get_estimand_label <- function(estimand){
-  force(estimand) # no promise nonsense when we look at it
-  switch(class(estimand)[1],
-         "character"=estimand,
-         "design_step"=attributes(estimand)$label,
-         "list"=vapply(estimand, get_estimand_label, NA_character_), #note recursion here
-         NULL=NULL,
-         warning("Did not match class of `estimand`")
-  )
-}
-
 #' @export
 custom_estimator <- function(estimator_function){
 
@@ -180,3 +103,71 @@ custom_estimator <- function(estimator_function){
   }
 
 }
+
+
+
+
+#' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.
+#' @param model A model function, e.g. lm or glm. If model is specified, the estimator_function argument is ignored.By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
+#' @param coefficient_name A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a \code{model} is chosen or for some \code{estimator_function}'s such as \code{difference_in_means} and \code{lm_robust}.
+#' @param estimand An estimand object created using \code{\link{declare_estimand}}. Estimates from this estimator function will be associated with the estimand, for example for calculating the bias and coverage of the estimator.
+#' @rdname declare_estimator
+estimator_handler <- custom_estimator(
+  function(data, ...,
+    model = estimatr::difference_in_means,
+    coefficient_name = Z)
+  {
+
+    coefficient_name <- reveal_nse_helper(substitute(coefficient_name))
+
+    # estimator_function_internal <- function(data) {
+    args <- quos(...)
+    W <- quo(model(!!!args, data=data))
+    results <- eval(quo_expr(W))
+
+    results <- fit2tidy(results, coefficient_name)
+
+    results
+})
+
+validation_fn(estimator_handler) <-  function(ret, dots, label){
+  if("model" %in% names(dots)) {
+    model <- eval_tidy(dots$model)
+    if(!is.function(model) || ! "data" %in% names(formals(model))){
+      stop(simpleError("Must provide a function for `model` which takes a `data` argument.", call = attr(ret, "call")))
+    }
+  }
+  ret
+}
+
+fit2tidy <- function(fit, coefficient_name = NULL) {
+  summ <- summary(fit)$coefficients
+  summ <-
+    summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
+  ci <- suppressMessages(as.data.frame(confint(fit)))
+  return_data <-
+    data.frame(coefficient_name = rownames(summ),
+               summ,
+               ci,
+               stringsAsFactors = FALSE, row.names = NULL)
+  colnames(return_data) <- c("coefficient_name","est", "se", "p", "ci_lower", "ci_upper")
+
+
+  if (is.character(coefficient_name)) {
+    return_data <- return_data[return_data$coefficient_name %in% coefficient_name, ,drop = FALSE]
+  }
+
+  return_data
+}
+
+get_estimand_label <- function(estimand){
+  force(estimand) # no promise nonsense when we look at it
+  switch(class(estimand)[1],
+         "character"=estimand,
+         "design_step"=attributes(estimand)$label,
+         "list"=vapply(estimand, get_estimand_label, NA_character_), #note recursion here
+         NULL=NULL,
+         warning("Did not match class of `estimand`")
+  )
+}
+
