@@ -33,9 +33,9 @@ nrow(pop50())
 N <- 50
 
 my_design <- declare_design(
-  declare_population(N=N, noise=rnorm(N)
+  declare_population(N=N, noise=rnorm(N))
 )
-my_design2 <- clone_design_edit(my_design, N=100)
+my_design2 <- DeclareDesign:::clone_design_edit(my_design, N=100)
 
 nrow(draw_data(my_design))
 nrow(draw_data(my_design2))

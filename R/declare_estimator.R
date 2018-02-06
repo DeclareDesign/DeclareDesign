@@ -95,7 +95,7 @@ estimator_handler <- function(data, ...,
     stop("Must provide a function for `model` which takes a `data` argument.") #todo move to declare time validation
   }
 
-  estimand_label <- switch(class(estimand)[1], "character"=estimand, "design_step"=attributes(estimand)$label, NULL=NULL, warning("Did not match class of `estimand`"))
+  estimand_label <- get_estimand_label(estimand)
 
   # estimator_function_internal <- function(data) {
   args <- quos(...)
@@ -143,9 +143,9 @@ to_char_except_null <- function(x){
 }
 
 get_estimand_label <- function(estimand){
-  switch(class(estimand),
+  switch(class(estimand)[1],
          "character"=estimand,
-         "function"=attributes(estimand)$label,
+         "design_step"=attributes(estimand)$label,
          NULL=NULL,
          warning("Did not match class of `estimand`")
   )

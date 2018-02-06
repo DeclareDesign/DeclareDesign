@@ -4,8 +4,8 @@
 \alias{diagnose_design}
 \title{Diagnose the Design}
 \usage{
-diagnose_design(..., diagnosands = NULL, sims = 500, bootstrap = TRUE,
-  bootstrap_sims = 100, parallel = TRUE,
+diagnose_design(..., diagnosands = default_diagnosands, sims = 500,
+  bootstrap = TRUE, bootstrap_sims = 100, parallel = TRUE,
   parallel_cores = detectCores(logical = TRUE))
 }
 \arguments{

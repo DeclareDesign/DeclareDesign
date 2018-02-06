@@ -91,13 +91,12 @@ estimator_probit <-
 
 # Use a custom estimator function
 
-my_estimator_function <- function(formula, data){
+my_estimator_function <- function(data){
   data.frame(est = with(data, mean(Y)))
 }
 
 my_estimator_custom <-
-  declare_estimator(Y ~ Z,
-                    estimator_function = my_estimator_function,
+  declare_estimator(handler = custom_estimator(my_estimator_function),
                     estimand = my_estimand)
 
 my_estimator_custom(df)
