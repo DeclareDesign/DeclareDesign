@@ -63,14 +63,14 @@ sampling_function_default <-
 
     options <- quos(...)
 
-    if (any(names(options) %in% c("strata_var"))) {
-      if (class(f_rhs(options[["strata_var"]])) == "character") {
-        stop("Please provide the bare (unquoted) strata variable name to strata_var.")
+    if (any(names(options) %in% c("strata"))) {
+      if (class(f_rhs(options[["strata"]])) == "character") {
+        stop("Must provide the bare (unquoted) strata variable name to strata.")
       }
     }
-    if (any(names(options) %in% c("clust_var"))) {
-      if (class(f_rhs(options[["clust_var"]])) == "character") {
-        stop("Please provide the bare (unquoted) cluster variable name to clust_var.")
+    if (any(names(options) %in% c("clusters"))) {
+      if (class(f_rhs(options[["clusters"]])) == "character") {
+        stop("Must provide the bare (unquoted) cluster variable name to clusters.")
       }
     }
 
@@ -78,13 +78,13 @@ sampling_function_default <-
     if (!is.null(sampling_variable_name)) {
       sampling_variable_name <- reveal_nse_helper(sampling_variable_name)
     } else {
-      stop("Please provide a name for the sampling variable as sampling_variable_name.")
+      stop("Must not provide NULL as sampling_variable_name.")
     }
 
     rs_call <- quo(draw_rs(!!! options))
     rs_call <- lang_modify(rs_call, N = nrow(data))
 
-    data[, sampling_variable_name] <- eval_tidy(rs_call, data = data)
+    S <- eval_tidy(rs_call, data = data)
 
     ## obtain inclusion probabilities
 
@@ -95,7 +95,7 @@ sampling_function_default <-
       eval_tidy(prob_call, data = data)
 
     ## subset to the sampled observations and remove the sampling variable
-    data[data[, sampling_variable_name] %in% 1,-which(names(data) %in% sampling_variable_name), drop = FALSE]
+    data[S %in% 1, , drop = FALSE]
 
   }
 
