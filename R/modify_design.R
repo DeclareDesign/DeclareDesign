@@ -5,12 +5,12 @@ find_step <- function(design, step) {
   }
   w <- vapply(design, identical, FALSE, step)
 
-  w <- which(w)[1]
-  if(!is.integer(w)){
+  w <- which(w)
+  if(length(w) == 0){
     stop("Could not find step (", substitute(step), ") in design")
   }
 
-  w
+  w[1]
 }
 
 

@@ -113,7 +113,7 @@ switching_equation <- function(data,
     paste0(outcome_variable_name, "_", condition_combinations)
 
   if (!all(potential_outcome_variable_names %in% colnames(data))) {
-    stop(paste0("You did not provide all the potential outcomes columns required to draw the outcome ", outcome_variable_name, "."))
+    stop("You did not provide all the potential outcomes columns required to draw the outcome ", outcome_variable_name, ".")
   } else {
     data_list <- split(data, potential_outcome_variable_names)
 
