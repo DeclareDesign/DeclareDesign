@@ -76,7 +76,7 @@
 #'
 #' my_estimator_custom(df)
 #'
-declare_estimator <-make_declarations(estimator_handler_default, step_type="estimator", causal_type="estimator", default_label="my_estimator")
+declare_estimator <- make_declarations(estimator_handler_default, step_type="estimator", causal_type="estimator", default_label="my_estimator")
 
 #' \code{custom_estimator} takes an estimator function, and returns one which has standard labelling options.
 #'
