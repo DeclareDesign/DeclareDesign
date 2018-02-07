@@ -93,6 +93,8 @@ potential_outcomes_function_default <-
 
   }
 
+
+#' @importFrom fabricatr get_unique_variables_by_level
 potential_outcomes_function_formula <-
   function(data,
            formula,
@@ -110,11 +112,10 @@ potential_outcomes_function_formula <-
 
       # get the set of variable names that are unique within the level you are adding vars to
       #  so the new vars can be a function of existing ones
-      level_variables <-
-        get_unique_variables_by_level(data = data, ID_label = level)
+      level_variables <- get_unique_variables_by_level(data = data, ID_label = level)
 
       formula_variables <- all.vars(f_rhs(formula))
-      formula_variables <- formula_variables[!formula_variables %in% assignment_variable_name]
+      formula_variables <- setdiff(formula_variables, assignment_variable_name)
       formula_variables_not_in_level <-
         !formula_variables %in% level_variables
       if (any(formula_variables_not_in_level)) {
@@ -170,7 +171,7 @@ potential_outcomes_function_formula <-
 potential_outcomes_function_discrete <- function(data, level = NULL, ...) {
     options <- quos(...)
 
-    if (!is.null(level)) {
+    if (is.character(level)) {
       # if user sends a variable name in level, draw POs at the level
       #   defined by that variable. to do this, we send the options that
       #   were sent to fabricate to level first

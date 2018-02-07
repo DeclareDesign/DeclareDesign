@@ -2,10 +2,8 @@ context("Utilities")
 
 
 
-test_that("get_unique_variables_by_level is identical to fabricatr version", {
+test_that("onLoad adds DD drat repo", {
 
-  skip_on_cran()
-
-  expect_equal(DeclareDesign:::get_unique_variables_by_level, fabricatr:::get_unique_variables_by_level)
+  expect_equal(.onLoad()["declaredesign"], c(declaredesign="https://declaredesign.github.io"))
 
 })
