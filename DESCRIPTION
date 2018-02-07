@@ -14,12 +14,12 @@ Description: Tools for characterizing, diagnosing, and pre-registering research
     design. Finalized designs can be straightforwardly pre-registered with the
     package.
 Depends:
-    R (>= 3.3.0)
+    R (>= 3.3.0),
+    randomizr (>= 0.8.0),
+    fabricatr (>= 0.3.0),
+    estimatr (>= 0.2.0)
 Imports:
     rlang,
-    randomizr (>= 0.8.0),
-    fabricatr (>= 0.2.0),
-    estimatr (>= 0.2.0),
     doParallel,
     foreach,
     doRNG,

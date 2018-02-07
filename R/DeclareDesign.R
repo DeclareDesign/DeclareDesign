@@ -8,7 +8,6 @@
 #' @name DeclareDesign
 NULL
 
-load <- c("fabricatr", "estimatr", "randomizr")
 
 .onLoad <- function(libname, pkgname) {
   repos = getOption("repos")
@@ -17,25 +16,4 @@ load <- c("fabricatr", "estimatr", "randomizr")
   invisible(repos)
 }
 
-.onAttach <- function(...) {
-  needed <- load[!is_attached(load)]
-
-  if (length(needed) == 0)
-    return()
-
-  packageStartupMessage(paste0("Loading DeclareDesign: ", needed, collapse = "\n"))
-  suppressPackageStartupMessages(lapply(
-    needed,
-    library,
-    character.only = TRUE,
-    warn.conflicts = FALSE
-  ))
-
-  ##declaredesign_conflicts()
-}
-
-is_attached <- function(x) {
-  paste0("package:", x) %in% search()
-}
-
-globalVariables(c("Z", "Y", "est", "estimand", "p", "ci_upper", "ci_lower", "my_estimator"))
+utils::globalVariables(c("Y", "Z"))
