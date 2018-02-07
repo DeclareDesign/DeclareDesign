@@ -233,7 +233,7 @@ test_that("coefficient_name = NULL returns all coefficients", {
 })
 
 
-test_that("default estimator handler errors when model is not function or does not have data arg", {
+test_that("default estimator handler validation fn", {
   expect_error(declare_estimator(model="Neal"))
   expect_error(declare_estimator(model=I))
 })
