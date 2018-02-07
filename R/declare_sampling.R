@@ -63,23 +63,7 @@ sampling_function_default <-
 
     options <- quos(...)
 
-    if (any(names(options) %in% c("strata"))) {
-      if (class(f_rhs(options[["strata"]])) == "character") {
-        stop("Must provide the bare (unquoted) strata variable name to strata.")
-      }
-    }
-    if (any(names(options) %in% c("clusters"))) {
-      if (class(f_rhs(options[["clusters"]])) == "character") {
-        stop("Must provide the bare (unquoted) cluster variable name to clusters.")
-      }
-    }
-
-    sampling_variable_name <- substitute(sampling_variable_name)
-    if (!is.null(sampling_variable_name)) {
-      sampling_variable_name <- reveal_nse_helper(sampling_variable_name)
-    } else {
-      stop("Must not provide NULL as sampling_variable_name.")
-    }
+    sampling_variable_name <- reveal_nse_helper(substitute(sampling_variable_name))
 
     rs_call <- quo(draw_rs(!!! options))
     rs_call <- lang_modify(rs_call, N = nrow(data))
@@ -94,8 +78,31 @@ sampling_function_default <-
     data[, paste0(sampling_variable_name, "_inclusion_prob")] <-
       eval_tidy(prob_call, data = data)
 
-    ## subset to the sampled observations and remove the sampling variable
+    ## subset to the sampled observations
     data[S %in% 1, , drop = FALSE]
 
   }
 
+validation_fn(sampling_function_default) <- function(ret, dots, label){
+
+  if ("strata" %in% names(dots)) {
+    if (class(f_rhs(dots[["strata"]])) == "character") {
+      declare_time_error("Must provide the bare (unquoted) strata variable name to strata.", ret)
+    }
+  }
+
+  if ("clusters" %in% names(dots)) {
+    if (class(f_rhs(dots[["clusters"]])) == "character") {
+      declare_time_error("Must provide the bare (unquoted) cluster variable name to clusters.", ret)
+    }
+  }
+
+  if ("sampling_variable_name" %in% names(dots)) {
+    if (class(f_rhs(dots[["sampling_variable_name"]])) == "NULL") {
+    declare_time_error("Must not provide NULL as sampling_variable_name.", ret)
+    }
+  }
+
+  ret
+
+}

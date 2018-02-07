@@ -4,13 +4,13 @@ test_that("randomizr works through declare_sampling", {
   df <- data.frame(ID = 1:10, strata = rep(c("A", "B"), 5, 5))
 
   f_1 <- declare_sampling()
-  f_1(df)
+  expect_equal(dim(f_1(df)), c(5,3))
 
-  f_1 <- declare_sampling(n = 5)
-  f_1(df)
+  f_1 <- declare_sampling(n = 4)
+  expect_equal(dim(f_1(df)), c(4,3))
 
   f_1 <- declare_sampling(strata = strata)
-  f_1(df)
+  expect_length(xtabs(~strata, f_1(df)), 2)
 
 
   # what about inside a function?
@@ -19,7 +19,7 @@ test_that("randomizr works through declare_sampling", {
     f_1 <- declare_sampling(n = n)
     f_1(df)
   }
-  new_fun(3)
+  expect_equal(dim(new_fun(3)), c(3,3))
 
 })
 
@@ -76,5 +76,18 @@ test_that("test sampling and probability functions", {
   smp_draw %>% sampling_7() %>% .$S_inclusion_prob %>% head()
 
 })
+
+
+test_that("declare_assignment expected failures via validation fn", {
+
+  expect_true(is.function(declare_sampling()))
+
+  expect_error(declare_sampling(strata='character'), "strata")
+
+  expect_error(declare_sampling(clusters='character'), "clusters")
+
+  expect_error(declare_sampling(sampling_variable_name = NULL), "sampling_variable_name")
+})
+
 
 
