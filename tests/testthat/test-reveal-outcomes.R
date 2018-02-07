@@ -80,13 +80,13 @@ test_that("reveal multiple outcomes works", {
   design <- declare_design(my_population,
                            my_potential_outcomes1, my_potential_outcomes2,
                            my_assignment,
-                           reveal_outcomes(outcome_variable_name = c(Y1, Y2)))
+                           reveal_outcomes(outcome_variable_names = c(Y1, Y2)))
   draw_data(design)
 
   design <- declare_design(my_population,
                            my_potential_outcomes1, my_potential_outcomes2,
                            my_assignment,
-                           reveal_outcomes(outcome_variable_name = c("Y1", "Y2")))
+                           reveal_outcomes(outcome_variable_names = c("Y1", "Y2")))
   draw_data(design)
 
 })

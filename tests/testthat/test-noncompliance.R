@@ -48,8 +48,8 @@ test_that("Noncompliance", {
                            ITT_d,
                            CACE,
                            my_assignment,
-                           reveal_outcomes(outcome_variable_name = "D", assignment_variable_name = "Z"),
-                           reveal_outcomes(outcome_variable_name = "Y", assignment_variable_name = "D"),
+                           reveal_outcomes(outcome_variable_names = "D", assignment_variable_names = "Z"),
+                           reveal_outcomes(outcome_variable_names = "Y", assignment_variable_names = "D"),
                            cace_hat)
 
 
