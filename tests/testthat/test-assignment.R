@@ -4,19 +4,23 @@ test_that("randomizr works through declare_assignment", {
   df <- data.frame(ID = 1:10, blocks = rep(c("A", "B"), 5, 5))
 
   f_1 <- declare_assignment()
-  f_1(df)
+  expect_equal( sum(f_1(df)$Z), 5)
 
   f_1 <- declare_assignment(m = 5)
-  f_1(df)
+  expect_equal( sum(f_1(df)$Z), 5)
 
   f_1 <- declare_assignment(num_arms = 2)
-  f_1(df)
+  expect_equal( sum(f_1(df)$Z == "T1"), 5)
 
   f_1 <- declare_assignment(num_arms = 3)
-  f_1(df)
+  expect_true( all( table(f_1(df)$Z) >= 3) )
 
   f_1 <- declare_assignment(blocks = blocks)
-  f_1(df)
+  expect_true(all.equal(
+    unclass(xtabs(~blocks+Z, f_1(df))),
+    matrix(c(3,2,3,2),2,2), #slight bug in the blocks above with rep(AB,5,5) => ABABA x 2
+    check.attributes=FALSE
+  ))
 
 
   # what about inside a function?
@@ -125,6 +129,17 @@ test_that("test assignment and probability functions", {
   smp_draw %>% assignment_14() %>% .$Z_cond_prob %>% head()
   smp_draw %>% assignment_15() %>% .$Z_cond_prob %>% head()
 
+})
+
+test_that("declare_assignment expected failures via validation fn", {
+
+  expect_true(is.function(declare_assignment()))
+
+  expect_error(declare_assignment(blocks='character'), "blocks")
+
+  expect_error(declare_assignment(clusters='character'), "clusters")
+
+  expect_error(declare_assignment(assignment_variable_name = NULL), "assignment_variable_name")
 })
 
 

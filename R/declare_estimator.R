@@ -139,11 +139,13 @@ validation_fn(estimator_handler) <-  function(ret, dots, label){
   if("model" %in% names(dots)) {
     model <- eval_tidy(dots$model)
     if(!is.function(model) || ! "data" %in% names(formals(model))){
-      stop(simpleError("Must provide a function for `model` which takes a `data` argument.", call = attr(ret, "call")))
+      declare_time_error("Must provide a function for `model` which takes a `data` argument.", ret)
     }
   }
   ret
 }
+
+
 
 #' @param estimand a declare_estimand step object, or a character label, or a list of either
 #' @rdname declare_estimator

@@ -25,6 +25,11 @@ maybe_add_labels <- function(quotations){
   quotations
 }
 
+declare_time_error <- function(message, declaration){
+  stop( simpleError(message, call = attr(declaration, "call")) )
+}
+
+
 # If <= 5 uniques, table it, ow descriptives if numeric-ish, ow number of levels.
 describe_variable <- function(x) {
 
