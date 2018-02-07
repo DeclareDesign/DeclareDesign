@@ -55,29 +55,29 @@
 declare_potential_outcomes <- make_declarations(potential_outcomes_function_default, "potential_outcomes");
 
 
-#' @importFrom rlang quos quo lang_modify !!! eval_tidy is_formula quo_expr
-potential_outcomes_function_default <-
-  function(...,
-           data,
-           level = NULL
-           ) {
-
-    level <- reveal_nse_helper(substitute(level))
-
-    potential_outcomes(..., data=data, level=level)
-
-  }
+potential_outcomes_function_default <-  function(..., data) {
+    # redispatch on formula
+    potential_outcomes <- function(formula=NULL, ...) UseMethod("potential_outcomes", formula)
+    potential_outcomes(..., data=data)
+}
 
 
-potential_outcomes <- function(formula=NULL, ...) UseMethod("potential_outcomes", formula)
-
-#' @importFrom fabricatr get_unique_variables_by_level
+#' @param formula a formula to calculate Potential outcomes as functions of assignment variables
+#' @param condition_names vector specifying the values the assignment variable can realize
+#' @param assignment_variable_name The name of the assignment variable
+#' @param level a character specifying a level of hierarchy for fabricate to calculate at
+#' @param data a data.frame
+#' @importFrom fabricatr fabricate
+#' @importFrom rlang quos :=
+#' @rdname declare_potential_outcomes
 potential_outcomes.formula <-
   function(formula,
            data,
            condition_names = c(0, 1),
            assignment_variable_name = "Z",
            level = NULL) {
+
+    level <- reveal_nse_helper(enquo(level))
 
     outcome_variable_name <- as.character(formula[[2]])
 
@@ -88,7 +88,7 @@ potential_outcomes.formula <-
     expr = formula[[3]]
     for(cond in condition_names){
       out_name <- paste(outcome_variable_name, assignment_variable_name, cond, sep = "_")
-      condition_quos <- c(condition_quos, quos(!!assignment_variable_name :=!!cond, !!out_name := !!expr) )
+      condition_quos <- c(condition_quos, quos(!!assignment_variable_name := !!cond, !!out_name := !!expr) )
     }
     condition_quos <- c(condition_quos, quos(!!assignment_variable_name := NULL))
 
@@ -100,9 +100,11 @@ potential_outcomes.formula <-
 
 }
 
-#' @importFrom rlang quos quo lang_modify !!! eval_tidy !! :=
 #' @importFrom fabricatr fabricate add_level modify_level
+#' @rdname declare_potential_outcomes
 potential_outcomes.default <- function(formula=stop("Not provided"), ..., data, level = NULL) {
+    level <- reveal_nse_helper(enquo(level))
+
     if (is.character(level)) {
       fabricate(data=data, modify_level(ID_label=!!level, ...))
     } else {
