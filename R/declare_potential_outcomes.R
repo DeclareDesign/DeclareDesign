@@ -1,6 +1,3 @@
-
-
-
 #' Potential Outcomes
 #' @param ... Arguments to the potential_outcomes_function
 #'
@@ -71,30 +68,29 @@ potential_outcomes_function_default <-
     level <- reveal_nse_helper(substitute(level))
 
 
-    has_formula <- any(sapply(options, function(x) is_formula(quo_expr(x))))
+    has_formula <-  is_formula(quo_expr(options[[1]]))
 
     if (has_formula) {
       # TODO: checks re: condition names and assignment variable names
 
-      po_call <- quo(potential_outcomes_function_formula(!!! options))
-      po_call <- lang_modify(po_call, data = data, assignment_variable_name = assignment_variable_name,
-                             condition_names = condition_names)
-      if (!is.null(level)) {
-        po_call <- lang_modify(po_call, level = level)
-      }
-
-      return(eval_tidy(po_call))
-
+      po_call <- quo(potential_outcomes_function_formula(
+        data = !!data,
+        formula=!!(options[[1]]),
+        condition_names = !!condition_names,
+        assignment_variable_name = !!assignment_variable_name,
+        level = !!level
+        ))
     } else {
 
-      po_call <- quo(potential_outcomes_function_discrete(!!! options))
-      po_call <- lang_modify(po_call, data = data)
-      if (!is.null(level)) {
-        po_call <- lang_modify(po_call, level = level)
-      }
-
-      return(eval_tidy(po_call))
+      po_call <- quo(potential_outcomes_function_discrete(data=!!data, level=!!level, !!! options))
     }
+
+    if (!is.null(level)) {
+      po_call <- lang_modify(po_call, level = level)
+    }
+
+    eval_tidy(po_call)
+
   }
 
 potential_outcomes_function_formula <-
@@ -159,8 +155,7 @@ potential_outcomes_function_formula <-
 
     if (has_level) {
       data <-
-        merge(data_full[, colnames(data_full)[!(colnames(data_full) %in%
-                                                  level_variables)], drop = FALSE],
+        merge(data_full[, setdiff(colnames(data_full), level_variables), drop = FALSE],
               data,
               by = level,
               all = TRUE,
@@ -172,22 +167,18 @@ potential_outcomes_function_formula <-
 
 #' @importFrom rlang quos quo lang_modify !!! eval_tidy !! :=
 #' @importFrom fabricatr fabricate add_level modify_level
-potential_outcomes_function_discrete <-
-  function(data, level = NULL, ...) {
+potential_outcomes_function_discrete <- function(data, level = NULL, ...) {
     options <- quos(...)
 
     if (!is.null(level)) {
       # if user sends a variable name in level, draw POs at the level
       #   defined by that variable. to do this, we send the options that
       #   were sent to fabricate to level first
-      level_options <- quos(modify_level(!!!options))
-      names(level_options) <- level
-      po_call <- quo(fabricate(!!!level_options))
-    } else {
-      po_call <- quo(fabricate(!!!options))
+      options <- quos(modify_level(!!!options))
+      names(options) <- level
     }
+    po_call <- quo(fabricate(data=!!data, !!!options))
 
-    po_call <- lang_modify(po_call, data = data)
 
     return(eval_tidy(po_call))
 
