@@ -104,11 +104,7 @@ potential_outcomes.formula <-
 #' @importFrom fabricatr fabricate add_level modify_level
 potential_outcomes.default <- function(formula=stop("Not provided"), ..., data, level = NULL) {
     if (is.character(level)) {
-      e <- list2env(
-        list(data_frame_output_=data, variable_names_=colnames(data)),
-        parent=emptyenv()
-        )
-      modify_level(..., ID_label=level, working_environment_ = !!e)$data_frame_output
+      fabricate(data=data, modify_level(ID_label=!!level, ...))
     } else {
       fabricate(data=data, ...)
     }
