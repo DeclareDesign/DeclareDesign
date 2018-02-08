@@ -12,7 +12,7 @@ matrix:
       r: oldrel
       r_github_packages:
       - jyypma/nloptr
-      - DeclareDesign/fabricatr@dev_0.3.1
+      - DeclareDesign/fabricatr@nfultz/get_symbol
       after_success:
       - echo skipping source packaging on linux/oldrel
 
