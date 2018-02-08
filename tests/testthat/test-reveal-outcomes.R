@@ -80,18 +80,18 @@ test_that("reveal multiple outcomes works", {
   design <- declare_design(my_population,
                            my_potential_outcomes1, my_potential_outcomes2,
                            my_assignment,
-                           reveal_outcomes(outcome_variable_name = c(Y1, Y2)))
+                           reveal_outcomes(outcome_variable_names = c(Y1, Y2)))
   draw_data(design)
 
   design <- declare_design(my_population,
                            my_potential_outcomes1, my_potential_outcomes2,
                            my_assignment,
-                           reveal_outcomes(outcome_variable_name = c("Y1", "Y2")))
+                           reveal_outcomes(outcome_variable_names = c("Y1", "Y2")))
   draw_data(design)
 
 })
 
-test_that("outcome functions works", {
+test_that("declare_reveal handler works", {
 
   N <- 25
 
@@ -105,7 +105,7 @@ test_that("outcome functions works", {
 
   design <- declare_design(my_population,
                            my_assignment,
-                           reveal_outcomes(outcome_function = my_outcome_function))
+                           declare_reveal(handler = my_outcome_function))
   draw_data(design)
 
 })

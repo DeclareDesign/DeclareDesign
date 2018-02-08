@@ -1,13 +1,9 @@
-
-
-
 #' Reveal Observed Outcomes
 #' @param data A data.frame containing columns of potential outcomes and an assignment variable
 #'
 #' @param outcome_variable_names The outcome prefix(es) of the potential outcomes
 #' @param assignment_variable_names The bare (unquote) name(s) of the assignment variable
-#' @param attrition_variable_name The bare (unquote) name of the attrition variable
-#' @param outcome_function If specified, \code{reveal_outcomes} draws outcomes using \code{outcome_function} rather than the switching equation.
+#' @param attrition_variable_names The bare (unquote) name of the attrition variable
 #'
 #' @details
 #'
@@ -35,106 +31,58 @@
 #'
 #' design
 reveal_outcomes <-
-  function(data = NULL,
+  function(data = NULL, ...,
            outcome_variable_names = Y,
            assignment_variable_names = Z,
-           attrition_variable_name = NULL,
-           outcome_function = NULL) {
+           attrition_variable_names = NULL) {
 
-    if (is.null(data)) {
+    if(!is.data.frame(data)) {
       stop("Please provide data to reveal_outcomes.")
     }
 
     # Setup to handle NSE
+    outcome <- reveal_nse_helper(enquo(outcome_variable_names))
+    attrition <- reveal_nse_helper(enquo(attrition_variable_names))
+    assignment <- reveal_nse_helper(enquo(assignment_variable_names))
 
-    outcome_variable_names <- reveal_nse_helper(enquo(outcome_variable_names))
+    assignment <- rep(assignment, length.out=max(length(outcome), length(attrition)))
 
-    assignment_variable_names <- reveal_nse_helper(enquo(assignment_variable_names))
-    attrition_variable_name <- reveal_nse_helper(enquo(attrition_variable_name))
+    for (i in seq_along(outcome)) {
+      data[, outcome[i]] <- switching_equation(data, outcome[i], assignment[i])
+    }
 
-
-
-    for (outcome_variable_name in outcome_variable_names) {
-      # Two Cases: Switching or Outcome Function
-
-      if (is.null(outcome_function)) {
-        data[, outcome_variable_name] <-
-          switching_equation(
-            data = data,
-            outcome_variable_name = outcome_variable_name,
-            assignment_variable_names = assignment_variable_names
-          )
-
-      } else {
-        data <- outcome_function(data)
-      }
-
-      if (!is.null(attrition_variable_name)) {
-        response_vec <-
-          switching_equation(
-            data = data,
-            outcome_variable_name = attrition_variable_name,
-            assignment_variable_names = assignment_variable_names
-          )
-
-        data[response_vec == 0, outcome_variable_name] <- NA
-
-      }
+    for (i in seq_along(attrition)) {
+      response  <- switching_equation(data, attrition[i], assignment[i])
+      data[response == 0, outcome[i]] <- NA
     }
 
     return(data)
-
-  }
+}
 
 attributes(reveal_outcomes) <- list(step_type = "reveal_outcomes", causal_type= "dgp")
 
 
 
 
-switching_equation <- function(data,
-                               outcome_variable_name,
-                               assignment_variable_names) {
+switching_equation <- function(data, outcome, assignment) {
 
-  data[,"_local_id"] <- 1:nrow(data)
+  R <- 1:nrow(data)
 
-  assignment_variable_df <-
-    data[, assignment_variable_names, drop = FALSE]
+  potential_outcome_columns <- paste(outcome, assignment, data[[assignment]], sep = "_")
 
-  condition_combinations <-
-    apply(
-      X = assignment_variable_df,
-      MARGIN = 1,
-      FUN =  function(x) {
-        paste0(paste0(assignment_variable_names, "_"), x, collapse = "_")
-      }
+  data <- data[ , unique(potential_outcome_columns), drop=FALSE]
+
+  C <- match(potential_outcome_columns, colnames(data))
+
+  if(anyNA(C)) {
+    stop(
+      "You did not provide all the potential outcomes columns required to draw the outcome: ", outcome, ".\n",
+      paste("  * ", unique(potential_outcome_columns[is.na(C)], collapse="\n"))
     )
-
-  potential_outcome_variable_names <-
-    paste0(outcome_variable_name, "_", condition_combinations)
-
-  if (!all(potential_outcome_variable_names %in% colnames(data))) {
-    stop("You did not provide all the potential outcomes columns required to draw the outcome ", outcome_variable_name, ".")
-  } else {
-    data_list <- split(data, potential_outcome_variable_names)
-
-    data_list <-
-      mapply(
-        FUN = function(df, cond) {
-          df[, outcome_variable_name] <- df[, cond]
-          return(df)
-        },
-        data_list,
-        names(data_list),
-        SIMPLIFY = FALSE
-      )
-
-    data <- do.call(rbind, data_list)
-    data <- data[order(data$`_local_id`),]
-
-    rownames(data) <- NULL
-
   }
-  return(data[, outcome_variable_name, drop = TRUE])
+
+  data[cbind(R,C)]
+
 }
 
 
