@@ -2,10 +2,18 @@
 % Please edit documentation in R/declare_potential_outcomes.R
 \name{declare_potential_outcomes}
 \alias{declare_potential_outcomes}
+\alias{potential_outcomes.formula}
+\alias{potential_outcomes.default}
 \title{Potential Outcomes}
 \usage{
 declare_potential_outcomes(..., handler = potential_outcomes_function_default,
   label = NULL)
+
+potential_outcomes.formula(formula, data, condition_names = c(0, 1),
+  assignment_variable_name = "Z", level = NULL)
+
+potential_outcomes.default(formula = stop("Not provided"), ..., data,
+  level = NULL)
 }
 \arguments{
 \item{...}{Arguments to the potential_outcomes_function}
@@ -13,6 +21,16 @@ declare_potential_outcomes(..., handler = potential_outcomes_function_default,
 \item{handler}{A function that accepts a data.frame as an argument and returns a data.frame with potential outcomes columns appended. See the examples for the behavior of the default function.}
 
 \item{label}{A step label}
+
+\item{formula}{a formula to calculate Potential outcomes as functions of assignment variables}
+
+\item{data}{a data.frame}
+
+\item{condition_names}{vector specifying the values the assignment variable can realize}
+
+\item{assignment_variable_name}{The name of the assignment variable}
+
+\item{level}{a character specifying a level of hierarchy for fabricate to calculate at}
 }
 \value{
 a function that returns a data.frame
