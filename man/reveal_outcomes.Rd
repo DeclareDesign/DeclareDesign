@@ -4,7 +4,7 @@
 \alias{reveal_outcomes}
 \title{Reveal Observed Outcomes}
 \usage{
-reveal_outcomes(data = NULL, ..., outcome_variable_names = Y,
+reveal_outcomes(data = NULL, outcome_variable_names = Y,
   assignment_variable_names = Z, attrition_variable_names = NULL)
 }
 \arguments{
