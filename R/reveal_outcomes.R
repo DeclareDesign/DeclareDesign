@@ -59,9 +59,15 @@ reveal_outcomes <-
     return(data)
 }
 
-attributes(reveal_outcomes) <- list(step_type = "reveal_outcomes", causal_type= "dgp")
+attributes(reveal_outcomes) <- list(step_type = "reveal_outcomes", causal_type= "dgp", call=quote(reveal_outcomes()))
+
+validation_fn(reveal_outcomes) <- function(ret, dots, label) {
+  if("attrition_variable" %in% names(dots)) {
 
 
+  }
+  ret
+}
 
 
 switching_equation <- function(data, outcome, assignment) {
