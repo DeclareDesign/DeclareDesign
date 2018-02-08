@@ -84,11 +84,10 @@ assignment_function_default <-
       eval_tidy(prob_call, data = data)
 
     outcome <- attr(data, "outcome_variable_name")
-    if(reveal == "auto" && is.character(outcome) && assignment_variable_name == attr(data, "assignment_variable_name")) {
-      data <- reveal_outcomes(data,
-                              assignment_variable_names = !!assignment_variable_name,
-                              outcome_variable_names = !!outcome
-      )
+    if(reveal == "auto"
+       && is.character(outcome) &&
+       assignment_variable_name == attr(data, "assignment_variable_name")) {
+          data <- reveal_outcomes(data, !!outcome, !!assignment_variable_name)
     }
 
     return(data)

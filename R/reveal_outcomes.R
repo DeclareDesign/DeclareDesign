@@ -31,7 +31,7 @@
 #'
 #' design
 reveal_outcomes <-
-  function(data = NULL, ...,
+  function(data = NULL,
            outcome_variable_names = Y,
            assignment_variable_names = Z,
            attrition_variable_names = NULL) {
