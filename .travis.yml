@@ -12,6 +12,7 @@ matrix:
       r: oldrel
       r_github_packages:
       - jyypma/nloptr
+      - DeclareDesign/fabricatr#dev_0.3.1
       after_success:
       - echo skipping source packaging on linux/oldrel
 
@@ -40,5 +41,6 @@ env:
   - secure: UoCUQNU8EAGUDm17Q2egxyjYpqxORIDn7BEsX672KdjEuYLvuH81sjwZ91XeSXZ6j7zXUx/a/1p6VJAeBhLFrWlNhofKUjSVxVNZBjpVgz65tNW1R5v3qN1wtKdY2H17WawFHZCAXqbI+uWkuRmoCoBkoEE7aULhNtxWtQ0mE+YLIc/NIlyw2bDYvjtrwCQuk5i/f69q/T73KOHAZluhuxlJUNdV0cz/lQANvm9D7x1PUd891j5EgbBWIyN60BBGPA/evo32c0ZMSSl/UrfkEfoF2580OCvsE+mGNjZRHX3n/NXuzqqw0zDgCz2rbVm5EF6MM6VdQOmgKfE75KwzHI05WeSTBua39BxCgq8xQF+UA3hcj8Se15B9bjJ6JWqTErv9ESEA7lib4i4GS9oM0cYuQqHd6PFFukKfZMnh6VL3xoFSGEfsxxED0teg7lGNrje8LUpAE390XGqemev8MdpkkbprHBziAxNamywco+u2ggQwLkreT3cuxs6FMvlHk7x57dAX4lAlrR7TWJcGvBuqZly+5AU8IP359xEJaFd7QjWMOULSTnZYgprNRaOGo3oM/VnhxwZgXtOZYlrzPn7ytqnRqSKszRxWqzbAijPVYsXP7uYlVzQp+Upg9mK3j/t5Rs7YmByCUr4pwTO5eMnigeWSTRTVr4CWoY2+Q/8=
 r_github_packages:
 - DeclareDesign/DDtools
+- DeclareDesign/fabricatr#dev_0.3.1
 after_success:
 - Rscript -e DDtools::after_build
