@@ -96,7 +96,11 @@ potential_outcomes.formula <-
       condition_quos <- quos(!!level := modify_level(!!!condition_quos))
     }
 
-    fabricate(data=data, !!!condition_quos)
+
+    structure(
+      fabricate(data=data, !!!condition_quos),
+      outcome_variable_name=outcome_variable_name,
+      assignment_variable_name=assignment_variable_name)
 
 }
 

@@ -63,12 +63,12 @@ declare_assignment <- make_declarations(assignment_function_default, "assignment
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo f_rhs
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
 assignment_function_default <-
-  function(data, ..., assignment_variable_name = Z, reveal="manual") {
+  function(data, ..., assignment_variable_name = Z, reveal="auto") {
     ## draw assignment
 
     options <- quos(...)
 
-    assignment_variable_name <- reveal_nse_helper(substitute(assignment_variable_name))
+    assignment_variable_name <- reveal_nse_helper(enquo(assignment_variable_name))
 
     ra_call <- quo(conduct_ra(!!! options))
     ra_call <- lang_modify(ra_call, N = nrow(data))
@@ -83,8 +83,13 @@ assignment_function_default <-
     data[, paste0(assignment_variable_name, "_cond_prob")] <-
       eval_tidy(prob_call, data = data)
 
-    if(reveal == "auto")
-      data <- reveal_outcomes(data, assignment_variable_names = assignment_variable_name)
+    outcome <- attr(data, "outcome_variable_name")
+    if(reveal == "auto" && is.character(outcome) && assignment_variable_name == attr(data, "assignment_variable_name")) {
+      data <- reveal_outcomes(data,
+                              assignment_variable_names = !!assignment_variable_name,
+                              outcome_variable_names = !!outcome
+      )
+    }
 
     return(data)
 

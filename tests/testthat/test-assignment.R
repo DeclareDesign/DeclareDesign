@@ -60,13 +60,13 @@ test_that("test assignment and probability functions", {
   assignment_0 <- declare_assignment() # blug
   assignment_1 <- declare_assignment(condition_names = c(0, 1))
   assignment_2 <- declare_assignment(m = 60, condition_names = c(0, 1))
-  assignment_3 <- declare_assignment(m_each = c(20, 30, 50))
+  assignment_3 <- declare_assignment(m_each = c(20, 30, 50), reveal = FALSE)
   assignment_4 <- declare_assignment(m_each =c(20, 80), condition_names = c(0, 1))
-  assignment_5 <- declare_assignment(prob_each = c(.2, .3, .5))
+  assignment_5 <- declare_assignment(prob_each = c(.2, .3, .5), reveal=FALSE)
 
   # Blocked assignments
   assignment_6 <- declare_assignment(blocks = ideo_3)
-  assignment_7 <- declare_assignment(blocks = ideo_3, prob_each = c(.3, .6, .1))
+  assignment_7 <- declare_assignment(blocks = ideo_3, prob_each = c(.3, .6, .1), reveal=FALSE)
   assignment_8 <- declare_assignment(blocks = ideo_3, condition_names = c(0, 1))
 
   assignment_9 <- declare_assignment(blocks = ideo_3,
@@ -77,7 +77,7 @@ test_that("test assignment and probability functions", {
   # Clustered assignments
   assignment_10 <- declare_assignment(clusters = villages)
   assignment_11 <- declare_assignment(clusters = villages, condition_names = c(0, 1))
-  assignment_12 <- declare_assignment(clusters = villages, prob_each = c(.1, .3, .6))
+  assignment_12 <- declare_assignment(clusters = villages, prob_each = c(.1, .3, .6), reveal=FALSE)
 
   # Blocked and Clustered assignments
   assignment_13 <- declare_assignment(clusters = villages,
@@ -86,7 +86,7 @@ test_that("test assignment and probability functions", {
   assignment_14 <- declare_assignment(clusters = villages,
                                       blocks = high_elevation, condition_names = c(0,1))
   assignment_15 <- declare_assignment(clusters = villages,
-                                      blocks = high_elevation, prob_each = c(.1, .3, .6))
+                                      blocks = high_elevation, prob_each = c(.1, .3, .6), reveal=FALSE)
 
   # Draw Data
   smp_draw <- population() %>% sampling() %>% potential_outcomes()
@@ -94,10 +94,10 @@ test_that("test assignment and probability functions", {
   smp_draw %>% head
   # Attempt to Assign
 
-  smp_draw %>% assignment_0() %>% with(.,table(Z))
-  smp_draw %>% assignment_1() %>% with(.,table(Z))
-  smp_draw %>% assignment_2() %>% with(.,table(Z))
-  smp_draw %>% assignment_3() %>% with(.,table(Z))
+  smp_draw %>% assignment_0() %>% with(table(Z))
+  smp_draw %>% assignment_1() %>% with(table(Z))
+  smp_draw %>% assignment_2() %>% with(table(Z))
+  smp_draw %>% assignment_3() %>% with(table(Z))
   smp_draw %>% assignment_4() %>% with(.,table(Z))
   smp_draw %>% assignment_5() %>% with(.,table(Z))
   smp_draw %>% assignment_6() %>% with(.,table(ideo_3, Z))
