@@ -20,11 +20,12 @@ test_that("multiple PO / reveal", {
   reveal_multiple <- declare_reveal(outcome_variable_names = !!my_outcomes)
 
 
-  design <- declare_design(my_population,
-                           my_potential_outcomes3,
-                           my_assignment,
-                         reveal_multiple
-                           )
+  design <- declare_design(
+    my_population,
+    my_potential_outcomes3,
+    my_assignment,
+    reveal_multiple
+  )
 
   expect_equal(grep("^Y\\d$", colnames(draw_data(design)), value = TRUE), my_outcomes)
 
