@@ -6,13 +6,13 @@ Authors@R: c(person("Graeme", "Blair", email = "graeme.blair@ucla.edu", role = c
              person("Jasper", "Cooper", email = "jjc2247@columbia.edu", role = c("aut")),
              person("Alexander", "Coppock", email = "alex.coppock@yale.edu", role = c("aut")),
              person("Macartan", "Humphreys", email = "macartan@gmail.com", role = c("aut")),
-             person("Neal", "Fultz", email="nfultz@gmail.com", role = c("ctb")))
-Description: Tools for characterizing, diagnosing, and pre-registering research
-    designs. This software provides a way for scholars to characterize research
-    designs formally, and then to learn about their designs before conducting the
-    study. This includes creating mock data and diagnosing the properties of the
-    design. Finalized designs can be straightforwardly pre-registered with the
-    package.
+             person("Neal", "Fultz", email = "nfultz@gmail.com", role = c("aut")))
+Description: DeclareDesign is statistical software that makes it easier for researchers 
+   to characterize and learn about the properties of research designs before implementation. 
+   Ex ante declaration and diagnosis of designs can help researchers clarify the strengths 
+   and limitations of their designs and to improve their properties. It can make it easier 
+   for readers to evaluate a research strategy prior to implementation and without access 
+   to results. It can also make it easier for designs to be shared, replicated, and critiqued.
 Depends:
     R (>= 3.3.0),
     randomizr (>= 0.8.0),
