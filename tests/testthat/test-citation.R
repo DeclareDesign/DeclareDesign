@@ -19,7 +19,7 @@ test_that("test with generated citation", {
 
   expect_output(cite_design(design), "my design")
 
-  expect_output(print(design), 'Step 4 [(][)]: metadata')
+  expect_output(print(design), 'Step 4 [(]citation[)]: metadata')
 })
 
 test_that("test with user-specified text citation", {

@@ -326,10 +326,13 @@ summary.design <- function(object, ...) {
       }
   }
 
+  function_types <- lapply(design, attr, "step_type")
+
   structure(
     list(variables_added = variables_added,
          quantities_added = quantities_added,
          variables_modified = variables_modified,
+         function_types = function_types,
          N = N,
          call = calls,
          formulae = formulae,
