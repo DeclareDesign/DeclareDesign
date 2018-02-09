@@ -72,20 +72,23 @@ validation_fn(reveal_outcomes) <- function(ret, dots, label) {
 
 switching_equation <- function(data, outcome, assignment) {
 
-  R <- 1:nrow(data)
 
   potential_outcome_columns <- paste(outcome, assignment, data[[assignment]], sep = "_")
 
-  data <- data[ , unique(potential_outcome_columns), drop=FALSE]
+  upoc <- unique(potential_outcome_columns)
 
-  C <- match(potential_outcome_columns, colnames(data))
-
-  if(anyNA(C)) {
+  if(!(all(upoc %in% colnames(data)))){
     stop(
-      "You did not provide all the potential outcomes columns required to draw the outcome: ", outcome, ".\n",
-      paste("  * ", unique(potential_outcome_columns[is.na(C)], collapse="\n"))
+      "Must provide all potential outcomes columns referenced by the assignment variable (", assignment, ").\n",
+      "`data` did not include:\n",
+      paste("  * ", sort(setdiff(upoc, colnames(data))), collapse="\n")
     )
   }
+
+  data <- data[ , upoc, drop=FALSE]
+
+  R <- 1:nrow(data)
+  C <- match(potential_outcome_columns, colnames(data))
 
   data[cbind(R,C)]
 

@@ -117,5 +117,14 @@ test_that("missing PO stops",{
   )
 })
 
+test_that("Not all Potential outcome columns present",{
+
+  df <- data.frame(Z=sample(1:3, 100, replace=TRUE), Y_Z_0=1:100, Y_Z_1=1:100)
+
+  expect_error(
+    reveal_outcomes(df),
+    "Y_Z_3"
+  )
+})
 
 

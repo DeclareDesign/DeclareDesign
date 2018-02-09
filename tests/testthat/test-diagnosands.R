@@ -20,11 +20,11 @@ my_design <- declare_design(my_population(),
 
 
 test_that("parallel works.", {
-  skip("Parallel tests only pass locally - check --as-cran auto fails any test that forks")
 
 
-  diag <- diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = TRUE)
-
+  suppressWarnings(
+    diag <- diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = TRUE, parallel_cores = 1)
+  )
   ## diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = TRUE)
 
   expect_output(print(diag), regexp = "Research design diagnosis")

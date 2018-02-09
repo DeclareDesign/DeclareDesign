@@ -9,6 +9,7 @@
 #' @export
 #'
 #'
+#'
 #' @details
 #'
 #' A `declare_potential_outcomes` declaration returns a function. That function takes data and returns data with potential outcomes columns appended. These columns describe the outcomes that each unit would express if that unit were in the corresponding treatment condition.
