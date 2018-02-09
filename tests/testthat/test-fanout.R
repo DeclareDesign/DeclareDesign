@@ -1,6 +1,6 @@
 context("Fanout execution")
 
-testthat("Fanout does something",{
+test_that("Fanout does something",{
 
   N = 100
 
