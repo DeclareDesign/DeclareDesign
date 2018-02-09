@@ -319,7 +319,7 @@ summary.design <- function(object, ...) {
         citation <- design[[i]]()
         if(!is.character(citation)) {
           title = citation$title
-          authors = citation$authors
+          authors = citation$author
           description = citation$note
         }
         calls[[i]] <- quote(metadata)
