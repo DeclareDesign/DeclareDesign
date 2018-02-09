@@ -205,7 +205,7 @@ test_that("demo runs", {
   }
 
   my_1000_design <- quick_design(template = m_arm_trial, numb = 1000)
-  head(draw_data(my_1000_design[[1]]))
+  head(draw_data(my_1000_design))
 
   ## ------------------------------------------------------------------------
   my_potential_outcomes_continuous <- declare_potential_outcomes(

@@ -22,7 +22,7 @@ test_that("quick_design works", {
   set.seed(1999)
   direct <- draw_data(two_arm_trial(N = 50))
 
-  design <- quick_design(template = two_arm_trial, N = 50)[[1]]
+  design <- quick_design(template = two_arm_trial, N = 50)
   set.seed(1999)
   qd <- draw_data(design)
 
@@ -51,7 +51,7 @@ test_that("quick_design works some more", {
 
   a_quick_design <- quick_design(template = two_arm_trial, N = 50)
 
-  execute_design(a_quick_design[[1]])
+  execute_design(a_quick_design)
 
   diagnose_design(a_quick_design, sims = 2, bootstrap = FALSE, parallel = FALSE)
 })
@@ -130,6 +130,38 @@ test_that("power curve", {
 })
 
 
+test_that("power curve", {
+
+  two_arm_trial <- function(N){
+
+    my_population <- declare_population(N = N, noise = rnorm(N))
+    my_potential_outcomes <- declare_potential_outcomes(
+      Y_Z_0 = noise, Y_Z_1 = noise + .25)
+    my_assignment <- declare_assignment(m = N/2)
+    pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
+    pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = "pate")
+    my_design <- declare_design(my_population,
+                                my_potential_outcomes,
+                                pate,
+                                my_assignment,
+                                reveal_outcomes,
+                                pate_estimator)
+    return(my_design)
+  }
+
+  design <- quick_design(template = two_arm_trial,
+                         N = c(100, 200, 300, 500, 1000))
+
+  diagnosis <- diagnose_design(design, sims = 2, bootstrap = FALSE, parallel = FALSE)
+  #
+  #   library(ggplot2)
+  #   ggplot(get_diagnosands(diagnosis), aes(x = N, y = power)) +
+  #     geom_point() +
+  #     geom_line() +
+  #     theme_bw()
+  #
+
+})
 
 
 
