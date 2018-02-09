@@ -5,7 +5,7 @@
 \alias{redesign}
 \title{Declare a Design via a Template Function}
 \usage{
-quick_design(template = NULL, expand = TRUE, ...)
+quick_design(template, expand = TRUE, ...)
 
 redesign(design, expand = TRUE, ...)
 }
@@ -35,5 +35,12 @@ vary_n <- quick_design(d_template, N=seq(30, 100, 10))
 big_d <- quick_design(d_template, N=200)
 
 bigger_d <- redesign(big_d, N=1000)
+
+little_d <- redesign(big_d, N=seq(5,25,5))
+
+\dontrun{
+ # idea is to diagnose a list
+  diagnose_design(little_d, )
+}
 
 }

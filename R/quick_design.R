@@ -18,9 +18,16 @@
 #'
 #' bigger_d <- redesign(big_d, N=1000)
 #'
+#' little_d <- redesign(big_d, N=seq(5,25,5))
+#'
+#' \dontrun{
+#'  # idea is to diagnose a list
+#'   diagnose_design(little_d, )
+#' }
+#'
 #' @importFrom rlang quo_expr quos
 #' @export
-quick_design <- function(template = NULL, expand = TRUE, ...) {
+quick_design <- function(template, expand = TRUE, ...) {
 
   template_args_matrix <- if (expand)
     expand.grid(..., stringsAsFactors = FALSE)
