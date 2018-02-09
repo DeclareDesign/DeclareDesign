@@ -2,17 +2,38 @@
 % Please edit documentation in R/quick_design.R
 \name{quick_design}
 \alias{quick_design}
+\alias{redesign}
 \title{Declare a Design via a Template Function}
 \usage{
 quick_design(template = NULL, expand = TRUE, ...)
+
+redesign(design, expand = TRUE, ...)
 }
 \arguments{
-\item{template}{An R function that takes a set of options and returns a design created by declare_design().}
+\item{template}{a function which yields a design.}
 
 \item{expand}{boolean - if true, form the crossproduct of the ..., otherwise recycle them}
 
 \item{...}{Options sent to the template.}
+
+\item{a}{design}
+}
+\value{
+if set of designs is size one, the design, otherwise a `by`-list of designs.
 }
 \description{
-Declare a Design via a Template Function
+\code{quick_design} easily generates a set of design from a template function.
+
+\code{redesign} quickly generates a design from an existing one by resetting design variables internally.
+}
+\examples{
+
+d_template <- function(N=100) declare_design(declare_population(N=N))
+
+vary_n <- quick_design(d_template, N=seq(30, 100, 10))
+
+big_d <- quick_design(d_template, N=200)
+
+bigger_d <- redesign(big_d, N=1000)
+
 }
