@@ -248,7 +248,8 @@ print.summary.design <- function(x, ...) {
   invisible(x)
 }
 
-
+#' @export
+str.design_step <- function(object, ...) cat("design_step:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
 
 fan_out <- function(design, fan) {
 

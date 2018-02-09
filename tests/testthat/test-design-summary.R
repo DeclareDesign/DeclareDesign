@@ -60,3 +60,8 @@ test_that("Add Quantitites and Alter Variables", {
   )
 })
 
+test_that("str() works",
+
+  expect_output(str(declare_population(N = 50)), "design_step:\\t declare_population[(]N = 50[)] ")
+
+)
