@@ -91,7 +91,7 @@ default_diagnosands <- function(data, alpha=.05){
                     estimand >= ci_lower)
   mean_estimate = mean(est)
   sd_estimate = sd(est)
-  type_s_rate = mean((sign(est) != sign(estimand)) & p < alpha)
+  type_s_rate = mean((sign(est) != sign(estimand))[ p < alpha ] )
   mean_estimand = mean(estimand)
 
 
