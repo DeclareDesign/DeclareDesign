@@ -138,7 +138,7 @@ knitr::kable(my_estimand_custom(pop_pos))
 
 # Custom Estimator
 
-Custom estimators are slightly different - the default handler itself calls a model function. To implement a new handler, you can use the custom_estimator
+Custom estimators are slightly different - the default handler itself calls a model function. To implement a new handler, you can use the tidy_estimator
 wrapper to handle the bookkeeping associated with estimator and estimand labeling.
 
 ```{r echo=TRUE, results="hide"}
@@ -147,7 +147,7 @@ my_estimator_function <- function(data){
 }
 
 my_estimator_custom <- 
-  declare_estimator(handler = custom_estimator(my_estimator_function), 
+  declare_estimator(handler = tidy_estimator(my_estimator_function), 
                     estimand = my_estimand)
 
 my_estimator_custom(smp)

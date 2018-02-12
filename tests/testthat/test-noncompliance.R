@@ -39,7 +39,7 @@ test_that("Noncompliance", {
     return_frame[return_frame$variable_names == "D",]
   }
 
-  cace_hat <- declare_estimator(handler=custom_estimator(cace_estimator), estimand = CACE, label="CACE_hat")
+  cace_hat <- declare_estimator(handler=tidy_estimator(cace_estimator), estimand = CACE, label="CACE_hat")
 
   design <- declare_design(my_population,
                            POS_Y,

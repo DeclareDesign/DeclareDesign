@@ -71,19 +71,19 @@
 #' }
 #'
 #' my_estimator_custom <-
-#'   declare_estimator(handler = custom_estimator(my_estimator_function),
+#'   declare_estimator(handler = tidy_estimator(my_estimator_function),
 #'                     estimand = my_estimand)
 #'
 #' my_estimator_custom(df)
 #'
 declare_estimator <- make_declarations(estimator_handler_default, step_type="estimator", causal_type="estimator", default_label="my_estimator")
 
-#' \code{custom_estimator} takes an estimator function, and returns one which has standard labelling options.
+#' \code{tidy_estimator} takes an untidy estimation function, and returns a tidy handler which accepts standard labelling options.
 #'
 #' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.
 #' @rdname declare_estimator
 #' @export
-custom_estimator <- function(estimator_function){
+tidy_estimator <- function(estimator_function){
 
   if (!("data" %in% names(formals(estimator_function)))) {
     stop("Must provide a `estimator_function` function with a data argument.")
@@ -149,7 +149,7 @@ validation_fn(estimator_handler) <-  function(ret, dots, label){
 
 #' @param estimand a declare_estimand step object, or a character label, or a list of either
 #' @rdname declare_estimator
-estimator_handler_default <- custom_estimator(estimator_handler)
+estimator_handler_default <- tidy_estimator(estimator_handler)
 
 fit2tidy <- function(fit, coefficient_name = NULL) {
   summ <- summary(fit)$coefficients

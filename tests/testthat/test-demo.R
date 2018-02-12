@@ -178,7 +178,7 @@ test_that("demo runs", {
   }
 
   my_estimator_custom <-
-    declare_estimator(handler=custom_estimator(my_mean),
+    declare_estimator(handler=tidy_estimator(my_mean),
                       estimand = my_estimand)
 
   my_estimator_custom(smp)

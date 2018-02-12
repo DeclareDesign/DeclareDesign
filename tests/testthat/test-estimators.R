@@ -23,7 +23,7 @@ test_that("test the estimators", {
     data.frame(est = with(data, mean(Y)))
   }
 
-  my_estimator_custom <- declare_estimator(handler = custom_estimator(my_mean))
+  my_estimator_custom <- declare_estimator(handler = tidy_estimator(my_mean))
 
   my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes %>% my_estimator_custom
 
@@ -238,8 +238,8 @@ test_that("default estimator handler validation fn", {
   expect_error(declare_estimator(model=I))
 })
 
-test_that("custom_estimator, handler does not take data", {
-  expect_error(custom_estimator(I), "function with a data argument")
+test_that("tidy_estimator, handler does not take data", {
+  expect_error(tidy_estimator(I), "function with a data argument")
 })
 
 test_that("estimator_handler runs directly", {

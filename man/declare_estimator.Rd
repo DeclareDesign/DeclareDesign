@@ -2,7 +2,7 @@
 % Please edit documentation in R/declare_estimator.R
 \name{declare_estimator}
 \alias{declare_estimator}
-\alias{custom_estimator}
+\alias{tidy_estimator}
 \alias{estimator_handler}
 \alias{estimator_handler_default}
 \title{Declare an Estimator}
@@ -10,7 +10,7 @@
 declare_estimator(..., handler = estimator_handler_default,
   label = "my_estimator")
 
-custom_estimator(estimator_function)
+tidy_estimator(estimator_function)
 
 estimator_handler(data, ..., model = estimatr::difference_in_means,
   coefficient_name = Z)
@@ -40,7 +40,7 @@ a function that accepts a data.frame as an argument and returns a data.frame con
 \description{
 Declare an Estimator
 
-\code{custom_estimator} takes an estimator function, and returns one which has standard labelling options.
+\code{tidy_estimator} takes an untidy estimation function, and returns a tidy handler which accepts standard labelling options.
 }
 \section{Custom Estimators}{
 
@@ -105,7 +105,7 @@ my_estimator_function <- function(data){
 }
 
 my_estimator_custom <-
-  declare_estimator(handler = custom_estimator(my_estimator_function),
+  declare_estimator(handler = tidy_estimator(my_estimator_function),
                     estimand = my_estimand)
 
 my_estimator_custom(df)
