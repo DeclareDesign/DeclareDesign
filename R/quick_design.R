@@ -44,7 +44,7 @@ quick_design <- function(template, expand = TRUE, ...) {
 #'
 #' \code{redesign} quickly generates a design from an existing one by resetting design variables internally.
 #'
-#' @param a design
+#' @param design a design
 #' @export
 #' @rdname quick_design
 redesign <- function(design, expand=TRUE, ...) {

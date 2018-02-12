@@ -16,7 +16,7 @@ redesign(design, expand = TRUE, ...)
 
 \item{...}{Options sent to the template.}
 
-\item{a}{design}
+\item{design}{a design}
 }
 \value{
 if set of designs is size one, the design, otherwise a `by`-list of designs.
