@@ -34,7 +34,10 @@ test_that("Reveal Outcomes", {
   dat <- draw_data(my_design)
 
 
-
+  expect_true(
+    all(lapply(design, function(step) "design_step" %in% class(step))),
+    "all steps should have appropriate class set"
+  )
 
 
   my_population <- declare_population(N = 500, noise = rnorm(N))
@@ -49,6 +52,7 @@ test_that("Reveal Outcomes", {
                            reveal_outcomes)
 
   head(draw_data(design))
+
 
   design <- declare_design(my_population,
                            my_potential_outcomes,
@@ -126,5 +130,6 @@ test_that("Not all Potential outcome columns present",{
     "Y_Z_3"
   )
 })
+
 
 

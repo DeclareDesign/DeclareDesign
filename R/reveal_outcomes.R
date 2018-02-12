@@ -59,7 +59,10 @@ reveal_outcomes <-
     return(data)
 }
 
-attributes(reveal_outcomes) <- list(step_type = "reveal_outcomes", causal_type= "dgp", call=quote(reveal_outcomes()))
+attributes(reveal_outcomes) <- list(step_type = "reveal_outcomes",
+                                    causal_type= "dgp",
+                                    call=quote(reveal_outcomes()),
+                                    class=c("design_step", "function"))
 
 validation_fn(reveal_outcomes) <- function(ret, dots, label) {
   if("attrition_variable" %in% names(dots)) {
