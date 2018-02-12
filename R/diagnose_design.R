@@ -172,10 +172,6 @@ diagnose_design_single_design <-
       stop("No estimates or estimands were declared, so diagnose_design cannot calculate diagnosands.", call. = FALSE)
     }
 
-    if(!"estimand_label" %in% colnames(estimates_df) &&  length(unique(estimands_df$estimand_label)) > 1 ) {
-      warning("Estimators lack estimand labels for matching, a many-to-many merge will be performed.")
-    }
-
     if (nrow(estimands_df) == 0 && nrow(estimates_df) > 0) {
       simulations_df <- estimates_df
     } else if (nrow(estimands_df) > 0 && nrow(estimates_df) == 0) {
@@ -191,6 +187,13 @@ diagnose_design_single_design <-
           all = TRUE,
           sort = FALSE
         )
+
+      if(nrow(simulations_df) > max(nrow(estimands_df), nrow(estimates_df))){
+
+        warning("Estimators lack estimand/coefficient labels for matching, a many-to-many merge was performed.")
+
+      }
+
     }
 
     calculate_diagnosands <-

@@ -188,7 +188,7 @@ test_that("labels for estimates and estimands work", {
   my_assignment <- declare_assignment(m = 25)
 
   mand_arg_label <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-  mand_explicit_label <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "the_ATE")
+  mand_explicit_label <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "ATE")
   # mand_explicit_label_noquote <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = the_ATE)
 
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_arg_label)
