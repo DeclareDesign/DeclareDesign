@@ -66,10 +66,11 @@ test_that("str() works",
 
 )
 
-test_that("summary, custom estimand, numeric value",
-      d <- declare_design(sleep, extra=declare_estimator(handler=function(df) mean(df$extra)))
+test_that("summary, custom estimand, numeric value", {
+      d <- declare_design(sleep, extra=declare_estimator(handler=function(data) mean(data$extra)))
 
+      expect_output(print(d), "1.54")
 
-)
+})
 
 

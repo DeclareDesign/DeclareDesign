@@ -35,7 +35,7 @@ test_that("Reveal Outcomes", {
 
 
   expect_true(
-    all(lapply(design, function(step) "design_step" %in% class(step))),
+    all(lapply(my_design, function(step) "design_step" %in% class(step))),
     "all steps should have appropriate class set"
   )
 

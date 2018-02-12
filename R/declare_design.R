@@ -228,6 +228,7 @@ get_modified_variables <- function(last_df = NULL, current_df) {
 #'
 #' summary(design)
 #' @export
+#' @importFrom rlang is_lang
 summary.design <- function(object, ...) {
 
   design <- object

@@ -45,7 +45,7 @@ m_arm_trial <- function(numb){
   return(my_design)
 }
 
-my_1000_design <- quick_design(template = m_arm_trial, numb = 1000)[[1]]
+my_1000_design <- quick_design(template = m_arm_trial, numb = 1000)
 head(draw_data(my_1000_design))
 
 ## ----echo=FALSE----------------------------------------------------------
