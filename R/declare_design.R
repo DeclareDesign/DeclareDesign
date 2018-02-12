@@ -238,9 +238,9 @@ summary.design <- function(object, ...) {
   citation = NULL #cite_design(design)
 
   get_formula_from_step <- function(step){
-    call <- attributes(step)$call
-    type <- attributes(step)$step_type
-    if (!is.null(call) & !is.null(type) & type != "wrapped") {
+    call <- attr(step, "call")
+    type <- attr(step, "step_type")
+    if (is_lang(call) && is.character(type) && type != "wrapped") {
       formulae <- Filter(is_formula, lang_args(call))
       if (length(formulae) == 1) {
         return(formulae[[1]])

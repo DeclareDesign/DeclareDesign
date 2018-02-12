@@ -65,3 +65,11 @@ test_that("str() works",
   expect_output(str(declare_population(N = 50)), "design_step:\\t declare_population[(]N = 50[)] ")
 
 )
+
+test_that("summary, custom estimand, numeric value",
+      d <- declare_design(sleep, extra=declare_estimator(handler=function(df) mean(df$extra)))
+
+
+)
+
+
