@@ -107,7 +107,7 @@ test_that("diagnosis, list of designs",{
 
   diagnosand <- declare_diagnosands(z=mean(est> 0))
 
-  expect_error(diagnose_design(sleep))
+  expect_error(diagnose_design(sleep), "Please only send design objects to diagnose_design")
 
   diag1 <- diagnose_design(list(d,d), diagnosands = diagnosand, parallel = FALSE, sims = 5)
   diag2 <- diagnose_design(design_1=d,design_2=d, diagnosands = diagnosand, parallel = FALSE, sims = 5)

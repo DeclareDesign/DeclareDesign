@@ -79,7 +79,9 @@ diagnose_design <-
       } else {
         inferred_names <- paste0("design_", 1:length(designs))
       }
-    } else if (!all(sapply(designs, class) == "design")) {
+    }
+
+    if (!all(sapply(designs, class) == "design")) {
       stop("Please only send design objects to diagnose_design.")
     }
 
