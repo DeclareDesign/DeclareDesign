@@ -51,7 +51,7 @@ test_that("fill_out works some more", {
 
   a_fill_out <- fill_out(template = two_arm_trial, N = 50)
 
-  execute_design(a_fill_out)
+  conduct_design(a_fill_out)
 
   diagnose_design(a_fill_out, sims = 2, bootstrap = FALSE, parallel = FALSE)
 })

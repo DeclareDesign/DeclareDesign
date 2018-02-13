@@ -55,7 +55,7 @@ test_that("Noncompliance", {
 
   head(draw_data(design))
 
-  execute_design(design)
+  conduct_design(design)
 
   df <- draw_data(design)
   cace_estimator(df)

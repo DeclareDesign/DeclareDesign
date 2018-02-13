@@ -42,12 +42,12 @@ NULL
 #' @param design a DeclareDesign object
 #'
 #' @export
-execute_design <- function(design) execute_design_internal(design)
+conduct_design <- function(design) conduct_design_internal(design)
 
 
-execute_design_internal <- function(design, ...) UseMethod("execute_design_internal", design)
+conduct_design_internal <- function(design, ...) UseMethod("conduct_design_internal", design)
 
-execute_design_internal.default <- function(design, current_df=NULL, results=NULL, start=1, end=length(design), ...) {
+conduct_design_internal.default <- function(design, current_df=NULL, results=NULL, start=1, end=length(design), ...) {
 
   if(!is.list(results)) {
     results <- list(estimand=vector("list", length(design)),
@@ -88,7 +88,7 @@ execute_design_internal.default <- function(design, current_df=NULL, results=NUL
 
 }
 
-execute_design_internal.execution_st <- function(design, ...) do.call(execute_design_internal.default, design)
+conduct_design_internal.execution_st <- function(design, ...) do.call(conduct_design_internal.default, design)
 
 #' Build an execution strategy object
 #'
@@ -111,7 +111,7 @@ execution_st <- function(design, current_df=NULL, results=NULL, start=1, end=len
 #'
 #' @export
 draw_data <- function(design) {
-  execute_design_internal(design, results=list(current_df=0))$current_df
+  conduct_design_internal(design, results=list(current_df=0))$current_df
 }
 
 
@@ -121,7 +121,7 @@ draw_data <- function(design) {
 #' @export
 get_estimates <- function(design) {
   results=list("estimator"=vector("list", length(design)))
-  execute_design_internal.default(design, results=results)$estimates_df
+  conduct_design_internal.default(design, results=results)$estimates_df
 }
 
 #' @rdname post_design
@@ -129,7 +129,7 @@ get_estimates <- function(design) {
 #' @export
 get_estimands <- function(design) {
   results=list("estimand"=vector("list", length(design)))
-  execute_design_internal.default(design, results=results)$estimands_df
+  conduct_design_internal.default(design, results=results)$estimands_df
 }
 
 #' Obtain the preferred citation for a design
@@ -265,7 +265,7 @@ fan_out <- function(design, fan) {
 
     st <- st [ rep(seq_along(st), each = n) ]
 
-    st <- lapply(st, execute_design)
+    st <- lapply(st, conduct_design)
 
   }
 

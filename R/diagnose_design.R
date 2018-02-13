@@ -149,7 +149,7 @@ diagnose_design_single_design <-
       registerDoSEQ()
     }
 
-    results_list <- foreach(i = seq_len(sims)) %dorng% execute_design(design)
+    results_list <- foreach(i = seq_len(sims)) %dorng% conduct_design(design)
 
     results2x <- function(results_list, what) {
       subresult <- lapply(results_list, `[[`, what)

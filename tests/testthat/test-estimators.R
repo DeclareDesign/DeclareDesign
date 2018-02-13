@@ -64,7 +64,7 @@ test_that("regression from estimatr works as an estimator", {
                               reveal_outcomes,
                               pate_estimator)
 
-  execute_design(my_design)
+  conduct_design(my_design)
 
   diagnosis <- diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = FALSE)
   diagnosis
