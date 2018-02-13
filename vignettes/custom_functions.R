@@ -103,13 +103,12 @@ my_estimand_custom(pop_pos)
 knitr::kable(my_estimand_custom(pop_pos))
 
 ## ----echo=TRUE, results="hide"-------------------------------------------
-my_estimator_function <- function(formula, data){
+my_estimator_function <- function(data){
   data.frame(est = with(data, mean(Y)))
 }
 
 my_estimator_custom <- 
-  declare_estimator(Y ~ Z, 
-                    estimator_function = my_estimator_function, 
+  declare_estimator(handler = tidy_estimator(my_estimator_function), 
                     estimand = my_estimand)
 
 my_estimator_custom(smp)

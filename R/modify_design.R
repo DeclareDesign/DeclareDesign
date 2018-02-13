@@ -5,12 +5,12 @@ find_step <- function(design, step) {
   }
   w <- vapply(design, identical, FALSE, step)
 
-  w <- which(w)[1]
-  if(!is.integer(w)){
+  w <- which(w)
+  if(length(w) == 0){
     stop("Could not find step (", substitute(step), ") in design")
   }
 
-  w
+  w[1]
 }
 
 
@@ -18,7 +18,7 @@ find_step <- function(design, step) {
 #'
 #' Insert, delete and replace steps in an (already declared) design object.
 #'
-#' @param design a design object, usually created by \code{\link{declare_design}}, \code{\link{quick_design}}, or \code{\link{download_design}}.
+#' @param design a design object, usually created by \code{\link{declare_design}}, \code{\link{fill_out}}, or the design library.
 #'
 #'
 #' @return A new design object. See \code{\link{declare_design}} for details.

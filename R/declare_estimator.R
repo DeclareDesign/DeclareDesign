@@ -1,6 +1,6 @@
 #' Declare an Estimator
 #'
-#' @param ... Arguments to the estimand function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.
+#' @param ... Arguments to the estimation function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.
 #' @param handler the handler function
 #' @param label An optional label to name the estimator, such as DIM.
 #' @param data a data.frame
@@ -66,73 +66,90 @@
 #'
 #' # Use a custom estimator function
 #'
-#' my_estimator_function <- function(formula, data){
+#' my_estimator_function <- function(data){
 #'   data.frame(est = with(data, mean(Y)))
 #' }
 #'
 #' my_estimator_custom <-
-#'   declare_estimator(Y ~ Z,
-#'                     estimator_function = my_estimator_function,
+#'   declare_estimator(handler = tidy_estimator(my_estimator_function),
 #'                     estimand = my_estimand)
 #'
 #' my_estimator_custom(df)
 #'
-declare_estimator <-make_declarations(estimator_handler, step_type="estimator", causal_type="estimator", default_label="my_estimator")
+declare_estimator <- make_declarations(estimator_handler_default, step_type="estimator", causal_type="estimator", default_label="my_estimator")
 
+#' \code{tidy_estimator} takes an untidy estimation function, and returns a tidy handler which accepts standard labelling options.
+#'
 #' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.
-#' @param model A model function, e.g. lm or glm. If model is specified, the estimator_function argument is ignored.By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
-#' @param coefficient_name A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a \code{model} is chosen or for some \code{estimator_function}'s such as \code{difference_in_means} and \code{lm_robust}.
-#' @param estimand An estimand object created using \code{\link{declare_estimand}}. Estimates from this estimator function will be associated with the estimand, for example for calculating the bias and coverage of the estimator.
 #' @rdname declare_estimator
-estimator_handler <- function(data, ...,
-                              model = estimatr::difference_in_means,
-                              estimator_function = NULL,
-                              coefficient_name = Z,
-                              estimand = NULL, label) {
-  model <- if(is.null(estimator_function)) model else NULL
+#' @export
+tidy_estimator <- function(estimator_function){
 
-  # coefficient_name <- to_char_except_null(substitute(coefficient_name))
-  coefficient_name <- reveal_nse_helper(substitute(coefficient_name))
-
-  if (is.null(model) == is.null(estimator_function)) {
-    stop("Please provide either an estimator function or a model.")
-  } else if(!is.null(model)) {
-    lbl <- 'a model'
-    func <- match.fun(model)
-    clean <- fit2tidy #todo could generify this...
-  } else if(!is.null(estimator_function)) {
-    lbl <- 'an estimator'
-    func <- match.fun(estimator_function)
-    clean <- function(x,y)x # no work needed after evaluated
+  if (!("data" %in% names(formals(estimator_function)))) {
+    stop("Must provide a `estimator_function` function with a data argument.")
   }
 
-  if (!("data" %in% names(formals(func)))) {
-    stop("Please provide ", lbl, " function with a data argument.")
+
+  f <- function(data, ..., estimand=NULL, label) {
+
+    ret <- data.frame(
+      estimator_label = label,
+      estimator_function(data, ...),
+      stringsAsFactors = FALSE
+    )
+
+    estimand_label <- get_estimand_label(estimand)
+    if(length(estimand_label) > 0) {
+      ret <- cbind(ret, estimand_label=estimand_label, row.names=NULL, stringsAsFactors=FALSE)
+    }
+    ret
+
   }
 
-  estimand_label <- switch(class(estimand), "character"=estimand, "function"=attributes(estimand)$label, NULL=NULL, warning("Did not match class of `estimand`"))
+  attributes(f) <- attributes(estimator_function)
 
-  # estimator_function_internal <- function(data) {
-  args <- quos(...)
-  args$data <- data
-  if ("coefficient_name" %in% names(formals(func))) {
-    args$coefficient_name <- coefficient_name
-  }
-  # results <- do.call(func, args = args)
-  # results <- eval_tidy(quo(func(!!!args)))
-  W <- quo(func(!!!args))
-  results <- eval(quo_expr(W))
-  results <- clean(results, coefficient_name) # fit2tidy if a model function, ow I
-  return_data <-
-    data.frame(estimator_label = label,
-               results,
-               stringsAsFactors = FALSE)
-
-  return_data[['estimand_label']] <- estimand_label
-
-  return_data
+  f
 }
 
+
+
+
+#' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
+#' @param coefficient_name A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a \code{model} is chosen or for some \code{estimator_function}'s such as \code{difference_in_means} and \code{lm_robust}.
+#' @rdname declare_estimator
+estimator_handler <-
+  function(data, ...,
+    model = estimatr::difference_in_means,
+    coefficient_name = Z)
+  {
+
+    coefficient_name <- reveal_nse_helper(substitute(coefficient_name))
+
+    # estimator_function_internal <- function(data) {
+    args <- quos(...)
+    W <- quo(model(!!!args, data=data))
+    results <- eval(quo_expr(W))
+
+    results <- fit2tidy(results, coefficient_name)
+
+    results
+}
+
+validation_fn(estimator_handler) <-  function(ret, dots, label){
+  if("model" %in% names(dots)) {
+    model <- eval_tidy(dots$model)
+    if(!is.function(model) || ! "data" %in% names(formals(model))){
+      declare_time_error("Must provide a function for `model` which takes a `data` argument.", ret)
+    }
+  }
+  ret
+}
+
+
+
+#' @param estimand a declare_estimand step object, or a character label, or a list of either
+#' @rdname declare_estimator
+estimator_handler_default <- tidy_estimator(estimator_handler)
 
 fit2tidy <- function(fit, coefficient_name = NULL) {
   summ <- summary(fit)$coefficients
@@ -147,14 +164,21 @@ fit2tidy <- function(fit, coefficient_name = NULL) {
   colnames(return_data) <- c("coefficient_name","est", "se", "p", "ci_lower", "ci_upper")
 
 
-  if (!is.null(coefficient_name)) {
+  if (is.character(coefficient_name)) {
     return_data <- return_data[return_data$coefficient_name %in% coefficient_name, ,drop = FALSE]
   }
 
   return_data
 }
 
-#todo migrate to utils.R
-to_char_except_null <- function(x){
-  if(is.null(x)) NULL else if(is_quosure(x)) as.character(x[[2]]) else as.character(x)
+get_estimand_label <- function(estimand){
+  force(estimand) # no promise nonsense when we look at it
+  switch(class(estimand)[1],
+         "character"=estimand,
+         "design_step"=attributes(estimand)$label,
+         "list"=vapply(estimand, get_estimand_label, NA_character_), #note recursion here
+         NULL=NULL,
+         warning("Did not match class of `estimand`")
+  )
 }
+

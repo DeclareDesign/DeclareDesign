@@ -27,7 +27,7 @@ test_that("test the full declare design setup", {
                            my_estimator)
 
   head(draw_data(design))
-  execute_design(design)
+  conduct_design(design)
 
   #summary(design)
 
@@ -45,7 +45,7 @@ test_that("test the full declare design setup", {
                            reveal_outcomes)
 
   head(draw_data(design))
-  execute_design(design)
+  conduct_design(design)
 
   #diagnose_design(design, sims = 3) - # will fail, no estimands/estimates are declared
 

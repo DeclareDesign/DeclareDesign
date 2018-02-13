@@ -4,19 +4,23 @@ test_that("randomizr works through declare_assignment", {
   df <- data.frame(ID = 1:10, blocks = rep(c("A", "B"), 5, 5))
 
   f_1 <- declare_assignment()
-  f_1(df)
+  expect_equal( sum(f_1(df)$Z), 5)
 
   f_1 <- declare_assignment(m = 5)
-  f_1(df)
+  expect_equal( sum(f_1(df)$Z), 5)
 
   f_1 <- declare_assignment(num_arms = 2)
-  f_1(df)
+  expect_equal( sum(f_1(df)$Z == "T1"), 5)
 
   f_1 <- declare_assignment(num_arms = 3)
-  f_1(df)
+  expect_true( all( table(f_1(df)$Z) >= 3) )
 
   f_1 <- declare_assignment(blocks = blocks)
-  f_1(df)
+  expect_true(all.equal(
+    unclass(xtabs(~blocks+Z, f_1(df))),
+    matrix(c(3,2,3,2),2,2), #slight bug in the blocks above with rep(AB,5,5) => ABABA x 2
+    check.attributes=FALSE
+  ))
 
 
   # what about inside a function?
@@ -56,13 +60,13 @@ test_that("test assignment and probability functions", {
   assignment_0 <- declare_assignment() # blug
   assignment_1 <- declare_assignment(condition_names = c(0, 1))
   assignment_2 <- declare_assignment(m = 60, condition_names = c(0, 1))
-  assignment_3 <- declare_assignment(m_each = c(20, 30, 50))
+  assignment_3 <- declare_assignment(m_each = c(20, 30, 50), reveal = FALSE)
   assignment_4 <- declare_assignment(m_each =c(20, 80), condition_names = c(0, 1))
-  assignment_5 <- declare_assignment(prob_each = c(.2, .3, .5))
+  assignment_5 <- declare_assignment(prob_each = c(.2, .3, .5), reveal=FALSE)
 
   # Blocked assignments
   assignment_6 <- declare_assignment(blocks = ideo_3)
-  assignment_7 <- declare_assignment(blocks = ideo_3, prob_each = c(.3, .6, .1))
+  assignment_7 <- declare_assignment(blocks = ideo_3, prob_each = c(.3, .6, .1), reveal=FALSE)
   assignment_8 <- declare_assignment(blocks = ideo_3, condition_names = c(0, 1))
 
   assignment_9 <- declare_assignment(blocks = ideo_3,
@@ -73,7 +77,7 @@ test_that("test assignment and probability functions", {
   # Clustered assignments
   assignment_10 <- declare_assignment(clusters = villages)
   assignment_11 <- declare_assignment(clusters = villages, condition_names = c(0, 1))
-  assignment_12 <- declare_assignment(clusters = villages, prob_each = c(.1, .3, .6))
+  assignment_12 <- declare_assignment(clusters = villages, prob_each = c(.1, .3, .6), reveal=FALSE)
 
   # Blocked and Clustered assignments
   assignment_13 <- declare_assignment(clusters = villages,
@@ -82,7 +86,7 @@ test_that("test assignment and probability functions", {
   assignment_14 <- declare_assignment(clusters = villages,
                                       blocks = high_elevation, condition_names = c(0,1))
   assignment_15 <- declare_assignment(clusters = villages,
-                                      blocks = high_elevation, prob_each = c(.1, .3, .6))
+                                      blocks = high_elevation, prob_each = c(.1, .3, .6), reveal=FALSE)
 
   # Draw Data
   smp_draw <- population() %>% sampling() %>% potential_outcomes()
@@ -90,10 +94,10 @@ test_that("test assignment and probability functions", {
   smp_draw %>% head
   # Attempt to Assign
 
-  smp_draw %>% assignment_0() %>% with(.,table(Z))
-  smp_draw %>% assignment_1() %>% with(.,table(Z))
-  smp_draw %>% assignment_2() %>% with(.,table(Z))
-  smp_draw %>% assignment_3() %>% with(.,table(Z))
+  smp_draw %>% assignment_0() %>% with(table(Z))
+  smp_draw %>% assignment_1() %>% with(table(Z))
+  smp_draw %>% assignment_2() %>% with(table(Z))
+  smp_draw %>% assignment_3() %>% with(table(Z))
   smp_draw %>% assignment_4() %>% with(.,table(Z))
   smp_draw %>% assignment_5() %>% with(.,table(Z))
   smp_draw %>% assignment_6() %>% with(.,table(ideo_3, Z))
@@ -125,6 +129,17 @@ test_that("test assignment and probability functions", {
   smp_draw %>% assignment_14() %>% .$Z_cond_prob %>% head()
   smp_draw %>% assignment_15() %>% .$Z_cond_prob %>% head()
 
+})
+
+test_that("declare_assignment expected failures via validation fn", {
+
+  expect_true(is.function(declare_assignment()))
+
+  expect_error(declare_assignment(blocks='character'), "blocks")
+
+  expect_error(declare_assignment(clusters='character'), "clusters")
+
+  expect_error(declare_assignment(assignment_variable_name = NULL), "assignment_variable_name")
 })
 
 

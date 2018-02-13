@@ -23,6 +23,54 @@ test_that("Basic design summary", {
                            reveal_outcomes,
                            my_estimator)
 
-  summary(design)
+  s <- summary(design)
+
+  # First step
+  expect_equal(s$N[[1]], "N = 500")
+  expect_equal(s$call[[1]], attr(my_population, "call"))
+
+  # Last step
+  expect_equal(s$formulae[[8]], Y~Z)
+
 
 })
+
+
+test_that("Add Quantitites and Alter Variables", {
+
+  my_population <- declare_population(N = 500, noise = rnorm(N))
+  my_estimand   <- declare_estimand(foo = mean(noise))
+  my_transform  <- declare_population(noise = noise / 2)
+  my_estimand2  <- declare_estimand(foo2 = mean(noise))
+
+
+  design <- declare_design(my_population,
+                           my_estimand,
+                           my_transform,
+                           my_estimand2)
+
+  # Adding Quantitites
+  expect_output(
+    print(design), "A single draw of the"
+  )
+
+  # Altering variables
+  expect_output(
+    print(design), "Altered variable: noise "
+  )
+})
+
+test_that("str() works",
+
+  expect_output(str(declare_population(N = 50)), "design_step:\\t declare_population[(]N = 50[)] ")
+
+)
+
+test_that("summary, custom estimand, numeric value", {
+      d <- declare_design(sleep, extra=declare_estimator(handler=function(data) mean(data$extra)))
+
+      expect_output(print(d), "1.54")
+
+})
+
+

@@ -1,7 +1,7 @@
 context("declare design citation")
 
 my_population <- declare_population(N = 50)
-
+my_po <- declare_potential_outcomes(Y~Z+rnorm(N))
 my_assignment <- declare_assignment(m = 25)
 
 
@@ -9,8 +9,8 @@ test_that("test with generated citation", {
 
 
   design <- declare_design(
-    my_population, my_assignment,
-    declare_citation(
+    my_population, my_po, my_assignment,
+    meta = declare_citation(
       authors = "set of authors",
       title = "my design",
       description = "this is my text description of design"
@@ -19,7 +19,7 @@ test_that("test with generated citation", {
 
   expect_output(cite_design(design), "my design")
 
-
+  expect_output(print(design), 'Step 4 [(]citation[)]: metadata')
 })
 
 test_that("test with user-specified text citation", {

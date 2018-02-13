@@ -173,13 +173,12 @@ test_that("demo runs", {
   my_estimand_custom(pop_pos)
 
   ## ------------------------------------------------------------------------
-  my_estimator_function <- function(formula, data){
+  my_mean <- function(data){
     data.frame(est = with(data, mean(Y)))
   }
 
   my_estimator_custom <-
-    declare_estimator(Y ~ Z,
-                      estimator_function = my_estimator_function,
+    declare_estimator(handler=tidy_estimator(my_mean),
                       estimand = my_estimand)
 
   my_estimator_custom(smp)
@@ -205,7 +204,7 @@ test_that("demo runs", {
     return(my_design)
   }
 
-  my_1000_design <- quick_design(template = m_arm_trial, numb = 1000)
+  my_1000_design <- fill_out(template = m_arm_trial, numb = 1000)
   head(draw_data(my_1000_design))
 
   ## ------------------------------------------------------------------------
@@ -234,8 +233,8 @@ test_that("demo runs", {
                               my_potential_outcomes,
                               my_potential_outcomes_attrition,
                               my_assignment,
-                              reveal_outcomes(outcome_variable_name = "R"),
-                              reveal_outcomes(attrition_variable_name = "R"))
+                              reveal_outcomes(outcome_variable_names = "R"),
+                              reveal_outcomes(attrition_variable_names = "R"))
 
   head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
 

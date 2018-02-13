@@ -63,28 +63,12 @@ declare_assignment <- make_declarations(assignment_function_default, "assignment
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo f_rhs
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
 assignment_function_default <-
-  function(data, ..., assignment_variable_name = Z) {
+  function(data, ..., assignment_variable_name = Z, reveal="auto") {
     ## draw assignment
 
     options <- quos(...)
 
-    if (any(names(options) %in% c("block_var"))) {
-      if (class(f_rhs(options[["block_var"]])) == "character") {
-        stop("Please provide the bare (unquoted) block variable name to block_var.")
-      }
-    }
-    if (any(names(options) %in% c("clust_var"))) {
-      if (class(f_rhs(options[["clust_var"]])) == "character") {
-        stop("Please provide the bare (unquoted) cluster variable name to clust_var.")
-      }
-    }
-
-    assignment_variable_name <- substitute(assignment_variable_name)
-    if (!is.null(assignment_variable_name)) {
-      assignment_variable_name <- reveal_nse_helper(assignment_variable_name)
-    } else {
-      stop("Please provide a name for the assignment variable as assignment_variable_name.")
-    }
+    assignment_variable_name <- reveal_nse_helper(enquo(assignment_variable_name))
 
     ra_call <- quo(conduct_ra(!!! options))
     ra_call <- lang_modify(ra_call, N = nrow(data))
@@ -99,6 +83,38 @@ assignment_function_default <-
     data[, paste0(assignment_variable_name, "_cond_prob")] <-
       eval_tidy(prob_call, data = data)
 
+    outcome <- attr(data, "outcome_variable_name")
+    if(reveal == "auto"
+       && is.character(outcome) &&
+       assignment_variable_name == attr(data, "assignment_variable_name")) {
+          data <- reveal_outcomes(data, !!outcome, !!assignment_variable_name)
+    }
+
     return(data)
 
   }
+
+validation_fn(assignment_function_default) <-   function(ret, dots, label){
+
+  if ("blocks" %in% names(dots)) {
+    if (class(f_rhs(dots[["blocks"]])) == "character") {
+      declare_time_error("Must provide the bare (unquoted) block variable name to blocks.", ret)
+    }
+  }
+
+  if ("clusters" %in% names(dots)) {
+    if (class(f_rhs(dots[["clusters"]])) == "character") {
+      declare_time_error("Must provide the bare (unquoted) cluster variable name to clusters.", ret)
+    }
+  }
+
+  if("assignment_variable_name" %in% names(dots)){
+    if (class(f_rhs(dots[["assignment_variable_name"]])) == "NULL") {
+      declare_time_error("Must provide assignment_variable_name.", ret)
+    }
+  }
+
+  ret
+}
+
+

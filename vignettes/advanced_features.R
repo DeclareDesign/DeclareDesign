@@ -45,7 +45,7 @@ m_arm_trial <- function(numb){
   return(my_design)
 }
 
-my_1000_design <- quick_design(template = m_arm_trial, numb = 1000)
+my_1000_design <- fill_out(template = m_arm_trial, numb = 1000)
 head(draw_data(my_1000_design))
 
 ## ----echo=FALSE----------------------------------------------------------
@@ -80,8 +80,8 @@ my_design <- declare_design(my_population(),
                             my_potential_outcomes,
                             my_potential_outcomes_attrition,
                             my_assignment,
-                            reveal_outcomes(outcome_variable_name = "R"),
-                            reveal_outcomes(attrition_variable_name = "R"))
+                            reveal_outcomes(outcome_variable_names = "R"),
+                            reveal_outcomes(attrition_variable_names = "R"))
 
 head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
 

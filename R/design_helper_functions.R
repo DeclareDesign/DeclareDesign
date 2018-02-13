@@ -36,47 +36,83 @@
 #' @name post_design
 NULL
 
-#' @rdname post_design
-#'
-#' @export
-draw_data <- function(design) {
-  current_df <- NULL
-
-  for(step in design) {
-    if("dgp" %in% attr(step, "causal_type"))
-      current_df <- step(current_df)
-  }
-
-  current_df
-}
-
 
 #' Execute a design
 #'
 #' @param design a DeclareDesign object
 #'
 #' @export
-execute_design <- function(design) {
-  current_df <- NULL
+conduct_design <- function(design) conduct_design_internal(design)
 
-  results <- list(estimand=vector("list", length(design)),
-                  estimator=vector("list", length(design)))
 
-  for (i in seq_along(design)) {
+conduct_design_internal <- function(design, ...) UseMethod("conduct_design_internal", design)
+
+conduct_design_internal.default <- function(design, current_df=NULL, results=NULL, start=1, end=length(design), ...) {
+
+  if(!is.list(results)) {
+    results <- list(estimand=vector("list", length(design)),
+                    estimator=vector("list", length(design)))
+  }
+
+  for (i in seq(start, end)) {
     step <- design[[i]]
-    df <- step(current_df)
+
+    causal_type <- attr(step, "causal_type")
+    step_type <- attr(step, "step_type")
+
 
     # if it's a dgp
-    if ("dgp" %in% attr(step, "causal_type")) {
-      current_df <- df
-    } else {
-      results[[attr(step, "step_type")]][[i]] <- df
+    if ("dgp" %in% causal_type) {
+      current_df <- step(current_df)
+    } else if(step_type %in% names(results) ) {
+      results[[step_type]][[i]] <- step(current_df)
     }
   }
-  list(estimates_df = do.call(rbind.data.frame, results[["estimator"]]),
-       estimands_df = do.call(rbind.data.frame, results[["estimand"]]))
+
+  if(i == length(design)) {
+    if("estimator" %in% names(results)){
+      results[["estimates_df"]] <- do.call(rbind.data.frame, results[["estimator"]])
+      results[["estimator"]] <- NULL
+    }
+    if("estimand" %in% names(results)){
+      results[["estimands_df"]] <- do.call(rbind.data.frame, results[["estimand"]])
+      results[["estimand"]] <- NULL
+
+    }
+    if("current_df" %in% names(results)){
+      results[["current_df"]] <- current_df
+    }
+    results
+
+  } else execution_st(design=design, current_df=current_df, results=results, start=i+1, end=length(design))
+
 }
 
+conduct_design_internal.execution_st <- function(design, ...) do.call(conduct_design_internal.default, design)
+
+#' Build an execution strategy object
+#'
+#' @param design a design
+#' @param current_df a data.frame
+#' @param results a list of intermediate results
+#' @param start index of starting step
+#' @param end  index of ending step
+#'
+#' @export
+execution_st <- function(design, current_df=NULL, results=NULL, start=1, end=length(design)){
+  structure(
+    list(design=design, current_df=current_df, results=results, start=start, end=end),
+    class="execution_st"
+  )
+}
+
+
+#' @rdname post_design
+#'
+#' @export
+draw_data <- function(design) {
+  conduct_design_internal(design, results=list(current_df=0))$current_df
+}
 
 
 
@@ -84,14 +120,16 @@ execute_design <- function(design) {
 #'
 #' @export
 get_estimates <- function(design) {
-  execute_design(design)$estimates_df
+  results=list("estimator"=vector("list", length(design)))
+  conduct_design_internal.default(design, results=results)$estimates_df
 }
 
 #' @rdname post_design
 #'
 #' @export
 get_estimands <- function(design) {
-  execute_design(design)$estimands_df
+  results=list("estimand"=vector("list", length(design)))
+  conduct_design_internal.default(design, results=results)$estimands_df
 }
 
 #' Obtain the preferred citation for a design
@@ -208,4 +246,28 @@ print.summary.design <- function(x, ...) {
   }
 
   invisible(x)
+}
+
+#' @export
+str.design_step <- function(object, ...) cat("design_step:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
+
+fan_out <- function(design, fan) {
+
+  st <- list( execution_st(design) )
+
+  for(i in 1:nrow(fan)){
+
+    end <- fan[i, "end"]
+    n   <- fan[i, "n"]
+
+    for(j in seq_along(st))
+      st[[j]]$end <- end
+
+    st <- st [ rep(seq_along(st), each = n) ]
+
+    st <- lapply(st, conduct_design)
+
+  }
+
+  st
 }

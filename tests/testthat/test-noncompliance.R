@@ -39,7 +39,7 @@ test_that("Noncompliance", {
     return_frame[return_frame$variable_names == "D",]
   }
 
-  cace_hat <- declare_estimator(estimator_function = cace_estimator, estimand = CACE)
+  cace_hat <- declare_estimator(handler=tidy_estimator(cace_estimator), estimand = CACE, label="CACE_hat")
 
   design <- declare_design(my_population,
                            POS_Y,
@@ -48,14 +48,14 @@ test_that("Noncompliance", {
                            ITT_d,
                            CACE,
                            my_assignment,
-                           reveal_outcomes(outcome_variable_name = "D", assignment_variable_name = "Z"),
-                           reveal_outcomes(outcome_variable_name = "Y", assignment_variable_name = "D"),
+                           reveal_outcomes(outcome_variable_names = "D", assignment_variable_names = "Z"),
+                           reveal_outcomes(outcome_variable_names = "Y", assignment_variable_names = "D"),
                            cace_hat)
 
 
   head(draw_data(design))
 
-  execute_design(design)
+  conduct_design(design)
 
   df <- draw_data(design)
   cace_estimator(df)

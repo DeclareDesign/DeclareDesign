@@ -1,7 +1,7 @@
 
 #' Diagnose the Design
 #'
-#' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You dican also provide a single list of designs, for example one created by \code{\link{quick_design}}.
+#' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You dican also provide a single list of designs, for example one created by \code{\link{fill_out}}.
 #'
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
 #'
@@ -55,26 +55,12 @@
 #' @export
 diagnose_design <-
   function(...,
-           diagnosands = NULL,
+           diagnosands = default_diagnosands,
            sims = 500,
            bootstrap = TRUE,
            bootstrap_sims = 100,
            parallel = TRUE,
            parallel_cores = detectCores(logical = TRUE)) {
-
-    if (is.null(diagnosands)) {
-      diagnosands <- declare_diagnosands(
-        bias = mean(est - estimand),
-        rmse = sqrt(mean((est - estimand) ^ 2)),
-        power = mean(p < .05),
-        coverage = mean(estimand <= ci_upper &
-                          estimand >= ci_lower),
-        mean_estimate = mean(est),
-        sd_estimate = sd(est),
-        type_s_rate = mean((sign(est) != sign(estimand)) & p < .05),
-        mean_estimand = mean(estimand)
-      )
-    }
 
     designs <- list(...)
 
@@ -82,18 +68,20 @@ diagnose_design <-
 
     ## three cases:
     ## 1. send one or more design objects created by declare_design
-    ## 2. send a single list of design objects created by quick_design
+    ## 2. send a single list of design objects created by fill_out
     ## 3. do not allow sending more than one object if any of them aren't design objects.
     if (length(designs) == 1 && is.list(designs[[1]]) && !"design" %in% class(designs[[1]]) ) {
       ## this unpacks designs if a list of designs was sent as a single list object, i.e.
-      ##   as created by quick_design
+      ##   as created by fill_out
       designs <- designs[[1]]
       if (!is.null(names(designs))) {
         inferred_names <- names(designs)
       } else {
         inferred_names <- paste0("design_", 1:length(designs))
       }
-    } else if (!all(sapply(designs, class) == "design")) {
+    }
+
+    if (!all(sapply(designs, class) == "design")) {
       stop("Please only send design objects to diagnose_design.")
     }
 
@@ -161,7 +149,7 @@ diagnose_design_single_design <-
       registerDoSEQ()
     }
 
-    results_list <- foreach(i = seq_len(sims)) %dorng% execute_design(design)
+    results_list <- foreach(i = seq_len(sims)) %dorng% conduct_design(design)
 
     results2x <- function(results_list, what) {
       subresult <- lapply(results_list, `[[`, what)
@@ -186,10 +174,6 @@ diagnose_design_single_design <-
       stop("No estimates or estimands were declared, so diagnose_design cannot calculate diagnosands.", call. = FALSE)
     }
 
-    if(!"estimand_label" %in% colnames(estimates_df) &&  length(unique(estimands_df$estimand_label)) > 1 ) {
-      warning("Estimators lack estimand labels for matching, a many-to-many merge will be performed.")
-    }
-
     if (nrow(estimands_df) == 0 && nrow(estimates_df) > 0) {
       simulations_df <- estimates_df
     } else if (nrow(estimands_df) > 0 && nrow(estimates_df) == 0) {
@@ -199,15 +183,24 @@ diagnose_design_single_design <-
         merge(
           estimands_df,
           estimates_df,
-          by = c("sim_ID", intersect("estimand_label", colnames(estimates_df))),
+          by = c("sim_ID",
+                 "estimand_label" %i% colnames(estimates_df),
+                 "coefficient_name" %i% colnames(estimands_df) %i% colnames(estimates_df)),
           all = TRUE,
           sort = FALSE
         )
+
+      if(nrow(simulations_df) > max(nrow(estimands_df), nrow(estimates_df))){
+
+        warning("Estimators lack estimand/coefficient labels for matching, a many-to-many merge was performed.")
+
+      }
+
     }
 
     calculate_diagnosands <-
       function(simulations_df, diagnosands){
-      group_by_set <- intersect(colnames(simulations_df), c("estimand_label", "estimator_label"))
+      group_by_set <- colnames(simulations_df) %i% c("estimand_label", "estimator_label", "coefficient_name")
       group_by_list <- simulations_df[, group_by_set, drop=FALSE]
 
       labels_df <- split(group_by_list, group_by_list, drop = TRUE)
@@ -241,7 +234,7 @@ diagnose_design_single_design <-
       #   replicate(bootstrap_sims, expr = boot_function(), simplify = FALSE)
       # diagnosand_replicates <- do.call(rbind, diagnosand_replicates)
 
-      group_by_set <- intersect( colnames(diagnosand_replicates), c("estimand_label", "estimator_label"))
+      group_by_set <-  colnames(diagnosand_replicates) %i% c("estimand_label", "estimator_label", "coefficient_name")
       group_by_list <- diagnosand_replicates[, group_by_set, drop=FALSE]
 
       labels_df <- split(group_by_list, group_by_list, drop=TRUE)

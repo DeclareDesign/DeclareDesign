@@ -34,7 +34,10 @@ test_that("Reveal Outcomes", {
   dat <- draw_data(my_design)
 
 
-
+  expect_true(
+    all(vapply(my_design, function(step) "design_step" %in% class(step), FALSE)),
+    "all steps should have appropriate class set"
+  )
 
 
   my_population <- declare_population(N = 500, noise = rnorm(N))
@@ -49,6 +52,7 @@ test_that("Reveal Outcomes", {
                            reveal_outcomes)
 
   head(draw_data(design))
+
 
   design <- declare_design(my_population,
                            my_potential_outcomes,
@@ -80,18 +84,18 @@ test_that("reveal multiple outcomes works", {
   design <- declare_design(my_population,
                            my_potential_outcomes1, my_potential_outcomes2,
                            my_assignment,
-                           reveal_outcomes(outcome_variable_name = c(Y1, Y2)))
+                           reveal_outcomes(outcome_variable_names = c(Y1, Y2)))
   draw_data(design)
 
   design <- declare_design(my_population,
                            my_potential_outcomes1, my_potential_outcomes2,
                            my_assignment,
-                           reveal_outcomes(outcome_variable_name = c("Y1", "Y2")))
+                           reveal_outcomes(outcome_variable_names = c("Y1", "Y2")))
   draw_data(design)
 
 })
 
-test_that("outcome functions works", {
+test_that("declare_reveal handler works", {
 
   N <- 25
 
@@ -105,11 +109,61 @@ test_that("outcome functions works", {
 
   design <- declare_design(my_population,
                            my_assignment,
-                           reveal_outcomes(outcome_function = my_outcome_function))
+                           declare_reveal(handler = my_outcome_function))
   draw_data(design)
 
 })
 
+test_that("missing PO stops",{
+
+  expect_error(
+   reveal_outcomes(sleep, outcome_variable_names = foo, assignment_variable_names = extra)
+  )
+})
+
+test_that("Not all Potential outcome columns present",{
+
+  df <- data.frame(Z=sample(1:3, 100, replace=TRUE), Y_Z_0=1:100, Y_Z_1=1:100)
+
+  expect_error(
+    reveal_outcomes(df),
+    "Y_Z_3"
+  )
+})
 
 
+test_that("Single outcome, multiple assn", {
 
+  population <- declare_population(
+    blocks = fabricatr::add_level(
+      N = 40,
+      block_shock = rnorm(N)),
+    subjects  = fabricatr::add_level(
+      N = 8,
+      shock = rnorm(N) + block_shock)
+  )
+
+  # Model ----------------------------------------------------------------------
+  potential_outcomes <- declare_potential_outcomes(
+    Y_A_0_B_0 = 1,  Y_A_1_B_0 = 2,
+    Y_A_0_B_1 = 3,  Y_A_1_B_1 = 4)
+
+
+  # Factorial assignments
+  assign_A <- declare_assignment(
+    block_var = blocks, assignment_variable_name = A)
+  assign_B <- declare_assignment(
+    block_var = A + 10*as.numeric(blocks), assignment_variable_name = B)
+
+  design <- declare_design(
+    population,
+    potential_outcomes,
+    assign_A,   assign_B,
+    reveal_outcomes(outcome_variable_names = Y, assignment_variable_names = c(A,B))
+  )
+
+  dd <- draw_data(design)
+
+  expect_equal(c(table(dd$Y)), c(80,80,80,80), check.attributes=FALSE)
+
+})

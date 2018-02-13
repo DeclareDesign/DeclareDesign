@@ -19,12 +19,11 @@ test_that("test the estimators", {
   my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes %>% my_estimator
 
   ## custom estimator function
-  my_estimator_function <- function(formula, data){
+  my_mean <- function(data){
     data.frame(est = with(data, mean(Y)))
   }
 
-  my_estimator_custom <-
-    declare_estimator(Y ~ Z, estimator_function = my_estimator_function)
+  my_estimator_custom <- declare_estimator(handler = tidy_estimator(my_mean))
 
   my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes %>% my_estimator_custom
 
@@ -65,7 +64,7 @@ test_that("regression from estimatr works as an estimator", {
                               reveal_outcomes,
                               pate_estimator)
 
-  execute_design(my_design)
+  conduct_design(my_design)
 
   diagnosis <- diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = FALSE)
   diagnosis
@@ -100,13 +99,13 @@ test_that("multiple estimator declarations work", {
 
   estimator_1 <-
     declare_estimator(formula = Y ~ Z,
-                      estimator_function = estimatr::lm_robust,
+                      model = estimatr::lm_robust,
                       estimand = sate,
                       label = "estimator_1")
 
   estimator_2 <-
     declare_estimator(formula = Y ~ Z,
-                      estimator_function = estimatr::lm_robust,
+                      model = estimatr::lm_robust,
                       estimand = sate,
                       label = "estimator_2")
 
@@ -122,13 +121,13 @@ test_that("multiple estimator declarations work", {
 
   estimator_3 <-
     declare_estimator(formula = Y ~ Z,
-                      estimator_function = estimatr::lm_robust,
+                      model = estimatr::lm_robust,
                       estimand = sate,
                       label = "estimator_3")
 
   estimator_4 <-
     declare_estimator(formula = Y ~ Z,
-                      estimator_function = estimatr::lm_robust,
+                      model = estimatr::lm_robust,
                       estimand = sate,
                       label = "estimator_4")
 
@@ -145,12 +144,12 @@ test_that("multiple estimator declarations work", {
 
   estimator_5 <-
     declare_estimator(formula = Y ~ Z,
-                      estimator_function = estimatr::lm_robust,
+                      model = estimatr::lm_robust,
                       estimand = sate)
 
   estimator_6 <-
     declare_estimator(formula = Y ~ Z,
-                      estimator_function = estimatr::lm_robust,
+                      model = estimatr::lm_robust,
                       estimand = sate)
 
   # This could eventually be fixed so that the estimator names are inherited
@@ -189,7 +188,7 @@ test_that("labels for estimates and estimands work", {
   my_assignment <- declare_assignment(m = 25)
 
   mand_arg_label <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-  mand_explicit_label <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "the_ATE")
+  mand_explicit_label <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "ATE")
   # mand_explicit_label_noquote <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = the_ATE)
 
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_arg_label)
@@ -233,3 +232,23 @@ test_that("coefficient_name = NULL returns all coefficients", {
   expect_gt(nrow(result), 0)
 })
 
+
+test_that("default estimator handler validation fn", {
+  expect_error(declare_estimator(model="Neal"))
+  expect_error(declare_estimator(model=I))
+})
+
+test_that("tidy_estimator, handler does not take data", {
+  expect_error(tidy_estimator(I), "function with a data argument")
+})
+
+test_that("estimator_handler runs directly", {
+
+  golden <- structure(list(coefficient_name = "group2", est = 1.58, se = 0.849091017238762,
+  p = 0.0791867142159381, ci_lower = -0.203874032287599, ci_upper = 3.3638740322876), .Names = c("coefficient_name",
+                                                                                                                "est", "se", "p", "ci_lower", "ci_upper"), row.names = 2L, class = "data.frame")
+
+  result <- estimator_handler(sleep, extra~group, model=lm, coefficient_name = "group2")
+
+  expect_equal(result, golden)
+})

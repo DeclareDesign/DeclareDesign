@@ -44,12 +44,9 @@ currydata <- function(FUN, dots, addDataArg=TRUE,strictDataParam=TRUE) {
   }
 }
 
-default_declaration_validation_callback <- function(decl, dots) decl
-
 #' @importFrom rlang enquo
 declaration_template <- function(..., handler, label=NULL){
   #message("Declared")
-  d <- enquo(handler);
 
   dots <- quos(...,label=!!label)
   this <- attributes(sys.function())
@@ -61,18 +58,31 @@ declaration_template <- function(..., handler, label=NULL){
 
 
 
-  ret <- structure(currydata(handler, dots, strictDataParam=this$strictDataParam),
+  ret <- build_step(currydata(handler, dots, strictDataParam=this$strictDataParam),
+            handler=handler,
+            dots=dots,
             label=label,
             step_type=this$step_type,
             causal_type=this$causal_type,
-            call=match.call() )
+            call=match.call())
 
-  if(is.function(this$validation)) ret <- this$validation(ret, handler, dots, label)
+  if(has_validation_fn(handler)) ret <- validate(handler, ret,  dots, label)
 
   ret
 }
 
-make_declarations <- function(default_handler, step_type, causal_type='dgp', default_label, validation=NULL, strictDataParam=TRUE) {
+build_step <- function(curried_fn, handler, dots, label, step_type, causal_type, call){
+  structure(curried_fn,
+            handler=handler,
+            dots=dots,
+            label=label,
+            step_type=step_type,
+            causal_type=causal_type,
+            call=call,
+            class=c("design_step", "function"))
+}
+
+make_declarations <- function(default_handler, step_type, causal_type='dgp', default_label, strictDataParam=TRUE) {
 
   declaration <- declaration_template
 
@@ -81,14 +91,27 @@ make_declarations <- function(default_handler, step_type, causal_type='dgp', def
   if(!missing(default_label)) formals(declaration)$label <- default_label
 
   structure(declaration,
-            class=c('Declared', 'function'),
+            class=c('declaration', 'function'),
             step_type=step_type,
             causal_type=causal_type,
-            validation=validation,
             strictDataParam=strictDataParam)
 }
 
+########################################################################
 
+validation_fn <- function(f){
+  attr(f, "validation_fn")
+}
 
+`validation_fn<-` <- with_validation_fn <- function(x, value) {
+  attr(x, "validation_fn") <- value
+  x
+}
 
+has_validation_fn <- function(f){
+  is.function(validation_fn(f))
+}
 
+validate <- function(handler, ret, dots, label) {
+  validation_fn(handler)(ret, dots, label)
+}

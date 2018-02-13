@@ -1,6 +1,3 @@
-
-
-
 #' Potential Outcomes
 #' @param ... Arguments to the potential_outcomes_function
 #'
@@ -10,6 +7,7 @@
 #' @return a function that returns a data.frame
 #'
 #' @export
+#'
 #'
 #'
 #' @details
@@ -58,137 +56,63 @@
 declare_potential_outcomes <- make_declarations(potential_outcomes_function_default, "potential_outcomes");
 
 
-#' @importFrom rlang quos quo lang_modify !!! eval_tidy is_formula quo_expr
-potential_outcomes_function_default <-
-  function(...,
+potential_outcomes_function_default <-  function(..., data) {
+    # redispatch on formula
+    potential_outcomes <- function(formula=NULL, ...) UseMethod("potential_outcomes", formula)
+    potential_outcomes(..., data=data)
+}
+
+
+#' @param formula a formula to calculate Potential outcomes as functions of assignment variables
+#' @param condition_names vector specifying the values the assignment variable can realize
+#' @param assignment_variable_name The name of the assignment variable
+#' @param level a character specifying a level of hierarchy for fabricate to calculate at
+#' @param data a data.frame
+#' @importFrom fabricatr fabricate
+#' @importFrom rlang quos :=
+#' @rdname declare_potential_outcomes
+potential_outcomes.formula <-
+  function(formula,
            data,
-           assignment_variable_name = "Z",
            condition_names = c(0, 1),
-           level = NULL
-           ) {
-    options <- quos(...)
-
-    level <- reveal_nse_helper(substitute(level))
-
-
-    has_formula <- any(sapply(options, function(x) is_formula(quo_expr(x))))
-
-    if (has_formula) {
-      # TODO: checks re: condition names and assignment variable names
-
-      po_call <- quo(potential_outcomes_function_formula(!!! options))
-      po_call <- lang_modify(po_call, data = data, assignment_variable_name = assignment_variable_name,
-                             condition_names = condition_names)
-      if (!is.null(level)) {
-        po_call <- lang_modify(po_call, level = level)
-      }
-
-      return(eval_tidy(po_call))
-
-    } else {
-
-      po_call <- quo(potential_outcomes_function_discrete(!!! options))
-      po_call <- lang_modify(po_call, data = data)
-      if (!is.null(level)) {
-        po_call <- lang_modify(po_call, level = level)
-      }
-
-      return(eval_tidy(po_call))
-    }
-  }
-
-potential_outcomes_function_formula <-
-  function(data,
-           formula,
-           condition_names,
-           assignment_variable_name,
+           assignment_variable_name = "Z",
            level = NULL) {
+
+    level <- reveal_nse_helper(enquo(level))
+
     outcome_variable_name <- as.character(formula[[2]])
 
-    # edit data to be at the level
 
-    has_level <- !is.null(level)
-    if (has_level) {
+    # Build a fabricate call -
+    # fabricate( Z=1, Y_Z_1=f(Z), Z=2, Y_Z_2=f(Z), ..., Z=NULL)
+    condition_quos <- quos()
+    expr = formula[[3]]
+    for(cond in condition_names){
+      out_name <- paste(outcome_variable_name, assignment_variable_name, cond, sep = "_")
+      condition_quos <- c(condition_quos, quos(!!assignment_variable_name := !!cond, !!out_name := !!expr) )
+    }
+    condition_quos <- c(condition_quos, quos(!!assignment_variable_name := NULL))
 
-      # this code lifted from level() in fabricatr
-
-      # get the set of variable names that are unique within the level you are adding vars to
-      #  so the new vars can be a function of existing ones
-      level_variables <-
-        get_unique_variables_by_level(data = data, ID_label = level)
-
-      formula_variables <- all.vars(f_rhs(formula))
-      formula_variables <- formula_variables[!formula_variables %in% assignment_variable_name]
-      formula_variables_not_in_level <-
-        !formula_variables %in% level_variables
-      if (any(formula_variables_not_in_level)) {
-        stop(
-            "You provided the variables ",
-            paste(formula_variables[formula_variables_not_in_level], collapse = ", "),
-            " to formula is not constant within level ",
-            level,
-            "."
-        )
-      }
-
-      data_full <- data
-
-      # construct a dataset with only those variables at this level
-      data <-
-        unique(data[, unique(c(level, level_variables)),
-                    drop = FALSE])
-
+    if(is.character(level)) {
+      condition_quos <- quos(!!level := modify_level(!!!condition_quos))
     }
 
-    for (cond in condition_names) {
-      ## make a dataset that we manipulate to make PO columns
-      ## by adding Z variables that are all 0's or all 1's for example
-      data_environment <- list2env(data)
-      data_environment$N <- nrow(data)
 
-      assign(x = assignment_variable_name,
-             value = rep(cond, nrow(data)),
-             envir = data_environment)
+    structure(
+      fabricate(data=data, !!!condition_quos),
+      outcome_variable_name=outcome_variable_name,
+      assignment_variable_name=assignment_variable_name)
 
-      data[, paste0(c(outcome_variable_name, assignment_variable_name, cond),
-                    collapse = "_")] <-
-        eval(expr = formula[[3]], envir = data_environment)
-    }
+}
 
-    # merge the data back
-
-    if (has_level) {
-      data <-
-        merge(data_full[, colnames(data_full)[!(colnames(data_full) %in%
-                                                  level_variables)], drop = FALSE],
-              data,
-              by = level,
-              all = TRUE,
-              sort = FALSE)
-    }
-
-    return(data)
-  }
-
-#' @importFrom rlang quos quo lang_modify !!! eval_tidy !! :=
 #' @importFrom fabricatr fabricate add_level modify_level
-potential_outcomes_function_discrete <-
-  function(data, level = NULL, ...) {
-    options <- quos(...)
+#' @rdname declare_potential_outcomes
+potential_outcomes.default <- function(formula=stop("Not provided"), ..., data, level = NULL) {
+    level <- reveal_nse_helper(enquo(level))
 
-    if (!is.null(level)) {
-      # if user sends a variable name in level, draw POs at the level
-      #   defined by that variable. to do this, we send the options that
-      #   were sent to fabricate to level first
-      level_options <- quos(modify_level(!!!options))
-      names(level_options) <- level
-      po_call <- quo(fabricate(!!!level_options))
+    if (is.character(level)) {
+      fabricate(data=data, modify_level(ID_label=!!level, ...))
     } else {
-      po_call <- quo(fabricate(!!!options))
+      fabricate(data=data, ...)
     }
-
-    po_call <- lang_modify(po_call, data = data)
-
-    return(eval_tidy(po_call))
-
-  }
+}

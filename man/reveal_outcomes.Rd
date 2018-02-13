@@ -5,8 +5,7 @@
 \title{Reveal Observed Outcomes}
 \usage{
 reveal_outcomes(data = NULL, outcome_variable_names = Y,
-  assignment_variable_names = Z, attrition_variable_name = NULL,
-  outcome_function = NULL)
+  assignment_variable_names = Z, attrition_variable_names = NULL)
 }
 \arguments{
 \item{data}{A data.frame containing columns of potential outcomes and an assignment variable}
@@ -15,9 +14,7 @@ reveal_outcomes(data = NULL, outcome_variable_names = Y,
 
 \item{assignment_variable_names}{The bare (unquote) name(s) of the assignment variable}
 
-\item{attrition_variable_name}{The bare (unquote) name of the attrition variable}
-
-\item{outcome_function}{If specified, \code{reveal_outcomes} draws outcomes using \code{outcome_function} rather than the switching equation.}
+\item{attrition_variable_names}{The bare (unquote) name of the attrition variable}
 }
 \description{
 Reveal Observed Outcomes
