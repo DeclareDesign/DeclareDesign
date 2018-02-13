@@ -1,6 +1,6 @@
 #' Declare a Design via a Template Function
 #'
-#' \code{quick_design} easily generates a set of design from a template function.
+#' \code{fill_out} easily generates a set of design from a template function.
 #'
 #' @param template a function which yields a design.
 #' @param expand boolean - if true, form the crossproduct of the ..., otherwise recycle them
@@ -12,9 +12,9 @@
 #'
 #' d_template <- function(N=100) declare_design(declare_population(N=N))
 #'
-#' vary_n <- quick_design(d_template, N=seq(30, 100, 10))
+#' vary_n <- fill_out(d_template, N=seq(30, 100, 10))
 #'
-#' big_d <- quick_design(d_template, N=200)
+#' big_d <- fill_out(d_template, N=200)
 #'
 #' bigger_d <- redesign(big_d, N=1000)
 #'
@@ -27,7 +27,7 @@
 #'
 #' @importFrom rlang quo_expr quos
 #' @export
-quick_design <- function(template, expand = TRUE, ...) {
+fill_out <- function(template, expand = TRUE, ...) {
 
   template_args_matrix <- if (expand)
     expand.grid(..., stringsAsFactors = FALSE)
@@ -46,9 +46,9 @@ quick_design <- function(template, expand = TRUE, ...) {
 #'
 #' @param design a design
 #' @export
-#' @rdname quick_design
+#' @rdname fill_out
 redesign <- function(design, expand=TRUE, ...) {
   f <- function(...) clone_design_edit(design, ...)
-  quick_design(f, expand, ...)
+  fill_out(f, expand, ...)
 }
 

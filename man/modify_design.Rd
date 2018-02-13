@@ -14,7 +14,7 @@ delete_step(design, step)
 replace_step(design, step, new_step)
 }
 \arguments{
-\item{design}{a design object, usually created by \code{\link{declare_design}}, \code{\link{quick_design}}, or the design library.}
+\item{design}{a design object, usually created by \code{\link{declare_design}}, \code{\link{fill_out}}, or the design library.}
 
 \item{new_step}{the new step - either a function or a partial call}
 

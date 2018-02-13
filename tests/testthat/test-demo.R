@@ -204,7 +204,7 @@ test_that("demo runs", {
     return(my_design)
   }
 
-  my_1000_design <- quick_design(template = m_arm_trial, numb = 1000)
+  my_1000_design <- fill_out(template = m_arm_trial, numb = 1000)
   head(draw_data(my_1000_design))
 
   ## ------------------------------------------------------------------------

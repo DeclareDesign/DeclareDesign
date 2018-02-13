@@ -1,7 +1,7 @@
 
 #' Diagnose the Design
 #'
-#' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You dican also provide a single list of designs, for example one created by \code{\link{quick_design}}.
+#' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You dican also provide a single list of designs, for example one created by \code{\link{fill_out}}.
 #'
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
 #'
@@ -68,11 +68,11 @@ diagnose_design <-
 
     ## three cases:
     ## 1. send one or more design objects created by declare_design
-    ## 2. send a single list of design objects created by quick_design
+    ## 2. send a single list of design objects created by fill_out
     ## 3. do not allow sending more than one object if any of them aren't design objects.
     if (length(designs) == 1 && is.list(designs[[1]]) && !"design" %in% class(designs[[1]]) ) {
       ## this unpacks designs if a list of designs was sent as a single list object, i.e.
-      ##   as created by quick_design
+      ##   as created by fill_out
       designs <- designs[[1]]
       if (!is.null(names(designs))) {
         inferred_names <- names(designs)

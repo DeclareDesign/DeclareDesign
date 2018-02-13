@@ -108,7 +108,7 @@ my_estimator_function <- function(data){
 }
 
 my_estimator_custom <- 
-  declare_estimator(handler = custom_estimator(my_estimator_function), 
+  declare_estimator(handler = tidy_estimator(my_estimator_function), 
                     estimand = my_estimand)
 
 my_estimator_custom(smp)

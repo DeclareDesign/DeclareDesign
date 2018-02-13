@@ -175,7 +175,7 @@ design <- declare_design(
 With the design declared we can run a diagnosis from Monte Carlo simulations of the design:
 
 ```{r,eval = FALSE, echo = FALSE}
-designs <- quick_design(two_way_factorial_template,
+designs <- fill_out(two_way_factorial_template,
                         N = seq(150,3000,150),  
                         beta_A = 0,
                         beta_B = 0,
@@ -225,7 +225,7 @@ We can use the design template `two_way_factorial_template` to quickly declare a
 
 
 ```{r,eval = FALSE, echo = TRUE}
-designs <- quick_design(two_way_factorial_template,
+designs <- fill_out(two_way_factorial_template,
                         N = seq(150,3000,150),  
                         beta_A = 0,
                         beta_B = 0,
