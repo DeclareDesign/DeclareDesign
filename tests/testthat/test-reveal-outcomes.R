@@ -132,4 +132,38 @@ test_that("Not all Potential outcome columns present",{
 })
 
 
+test_that("Single outcome, multiple assn", {
 
+  population <- declare_population(
+    blocks = fabricatr::add_level(
+      N = 40,
+      block_shock = rnorm(N)),
+    subjects  = fabricatr::add_level(
+      N = 8,
+      shock = rnorm(N) + block_shock)
+  )
+
+  # Model ----------------------------------------------------------------------
+  potential_outcomes <- declare_potential_outcomes(
+    Y_A_0_B_0 = 1,  Y_A_1_B_0 = 2,
+    Y_A_0_B_1 = 3,  Y_A_1_B_1 = 4)
+
+
+  # Factorial assignments
+  assign_A <- declare_assignment(
+    block_var = blocks, assignment_variable_name = A)
+  assign_B <- declare_assignment(
+    block_var = A + 10*as.numeric(blocks), assignment_variable_name = B)
+
+  design <- declare_design(
+    population,
+    potential_outcomes,
+    assign_A,   assign_B,
+    reveal_outcomes(outcome_variable_names = Y, assignment_variable_names = c(A,B))
+  )
+
+  dd <- draw_data(design)
+
+  expect_equal(c(table(dd$Y)), c(80,80,80,80), check.attributes=FALSE)
+
+})

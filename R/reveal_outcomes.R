@@ -45,14 +45,12 @@ reveal_outcomes <-
     attrition <- reveal_nse_helper(enquo(attrition_variable_names))
     assignment <- reveal_nse_helper(enquo(assignment_variable_names))
 
-    assignment <- rep(assignment, length.out=max(length(outcome), length(attrition)))
-
     for (i in seq_along(outcome)) {
-      data[, outcome[i]] <- switching_equation(data, outcome[i], assignment[i])
+      data[, outcome[i]] <- switching_equation(data, outcome[i], assignment)
     }
 
     for (i in seq_along(attrition)) {
-      response  <- switching_equation(data, attrition[i], assignment[i])
+      response  <- switching_equation(data, attrition[i], assignment)
       data[response == 0, outcome[i]] <- NA
     }
 
@@ -73,16 +71,16 @@ validation_fn(reveal_outcomes) <- function(ret, dots, label) {
 }
 
 
-switching_equation <- function(data, outcome, assignment) {
+switching_equation <- function(data, outcome, assignments) {
 
-
-  potential_outcome_columns <- paste(outcome, assignment, data[[assignment]], sep = "_")
+  potential_outcome_columns <- mapply(paste, assignments, data[,assignments, drop=FALSE],   sep="_", SIMPLIFY = FALSE)
+  potential_outcome_columns <- do.call(paste, c(outcome, potential_outcome_columns, sep="_"))
 
   upoc <- unique(potential_outcome_columns)
 
   if(!(all(upoc %in% colnames(data)))){
     stop(
-      "Must provide all potential outcomes columns referenced by the assignment variable (", assignment, ").\n",
+      "Must provide all potential outcomes columns referenced by the assignment variable (", assignments, ").\n",
       "`data` did not include:\n",
       paste("  * ", sort(setdiff(upoc, colnames(data))), collapse="\n")
     )

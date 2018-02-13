@@ -29,7 +29,7 @@ test_that("Factorial", {
       my_estimator
     )
 
-  expect_equal(my_design %>% draw_data %>% dim, c(2000, 12))
+  expect_equal(my_design %>% draw_data %>% dim, c(2000, 11))
 
   expect_equal(my_design %>% conduct_design %>% names, c("estimates_df", "estimands_df"))
 
