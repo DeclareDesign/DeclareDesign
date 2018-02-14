@@ -3,7 +3,7 @@
 \name{declare_estimator}
 \alias{declare_estimator}
 \alias{tidy_estimator}
-\alias{estimator_handler_untidy}
+\alias{model_handler}
 \alias{estimator_handler}
 \title{Declare an Estimator}
 \usage{
@@ -11,7 +11,7 @@ declare_estimator(..., handler = estimator_handler, label = "my_estimator")
 
 tidy_estimator(estimator_function)
 
-estimator_handler_untidy(data, ..., model = estimatr::difference_in_means,
+model_handler(data, ..., model = estimatr::difference_in_means,
   coefficient_name = Z)
 
 estimator_handler(data, ..., estimand = NULL, label)

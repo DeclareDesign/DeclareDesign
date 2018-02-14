@@ -117,7 +117,7 @@ tidy_estimator <- function(estimator_function){
 #' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
 #' @param coefficient_name A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a \code{model} is chosen or for some \code{estimator_function}'s such as \code{difference_in_means} and \code{lm_robust}.
 #' @rdname declare_estimator
-estimator_handler_untidy <-
+model_handler <-
   function(data, ...,
     model = estimatr::difference_in_means,
     coefficient_name = Z)
@@ -135,7 +135,7 @@ estimator_handler_untidy <-
     results
 }
 
-validation_fn(estimator_handler_untidy) <-  function(ret, dots, label){
+validation_fn(model_handler) <-  function(ret, dots, label){
   if("model" %in% names(dots)) {
     model <- eval_tidy(dots$model)
     if(!is.function(model) || ! "data" %in% names(formals(model))){
@@ -149,7 +149,7 @@ validation_fn(estimator_handler_untidy) <-  function(ret, dots, label){
 
 #' @param estimand a declare_estimand step object, or a character label, or a list of either
 #' @rdname declare_estimator
-estimator_handler <- tidy_estimator(estimator_handler_untidy)
+estimator_handler <- tidy_estimator(model_handler)
 
 fit2tidy <- function(fit, coefficient_name = NULL) {
   summ <- summary(fit)$coefficients
