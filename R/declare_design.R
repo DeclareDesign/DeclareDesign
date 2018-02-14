@@ -196,8 +196,6 @@ get_modified_variables <- function(last_df = NULL, current_df) {
 }
 
 
-#' Text Summary of a Design
-#'
 #' @param object a design object created by \code{\link{declare_design}}
 #' @param ... optional arguments to be sent to summary function
 #'
@@ -227,6 +225,7 @@ get_modified_variables <- function(last_df = NULL, current_df) {
 #'                          my_estimator)
 #'
 #' summary(design)
+#' @rdname post_design
 #' @export
 #' @importFrom rlang is_lang
 summary.design <- function(object, ...) {
