@@ -9,7 +9,7 @@
 declare_potential_outcomes(..., handler = potential_outcomes_function_default,
   label = NULL)
 
-potential_outcomes.formula(formula, data, condition_names = c(0, 1),
+potential_outcomes.formula(formula, data, conditions = c(0, 1),
   assignment_variable = "Z", level = NULL)
 
 potential_outcomes.default(formula = stop("Not provided"), ..., data,
@@ -26,7 +26,7 @@ potential_outcomes.default(formula = stop("Not provided"), ..., data,
 
 \item{data}{a data.frame}
 
-\item{condition_names}{vector specifying the values the assignment variable can realize}
+\item{conditions}{vector specifying the values the assignment variable can realize}
 
 \item{assignment_variable}{The name of the assignment variable}
 
@@ -68,11 +68,11 @@ head(my_potential_outcomes(pop))
  pop_pos <- my_potential_outcomes(pop)
  head(pop_pos)
 
- # condition_names defines the "range" of the potential outcomes function
+ # conditions defines the "range" of the potential outcomes function
  my_potential_outcomes <-
       declare_potential_outcomes(
       formula = Y ~ .25 * Z + .01 * age * Z,
-      condition_names = 1:4)
+      conditions = 1:4)
 
 head(my_potential_outcomes(pop))
 

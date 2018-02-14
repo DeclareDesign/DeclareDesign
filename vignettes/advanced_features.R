@@ -53,7 +53,7 @@ knitr::kable(head(draw_data(my_1000_design)))
 
 ## ----echo=TRUE, results="hide"-------------------------------------------
 my_potential_outcomes_continuous <- declare_potential_outcomes(
-  formula = Y ~ .25 * Z + .01 * age * Z, condition_names = seq(0, 1, by = .1))
+  formula = Y ~ .25 * Z + .01 * age * Z, conditions = seq(0, 1, by = .1))
 
 continuous_treatment_function <- function(data){
  data$Z <- sample(seq(0, 1, by = .1), size = nrow(data), replace = TRUE)

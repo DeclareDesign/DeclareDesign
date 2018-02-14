@@ -141,12 +141,12 @@ knitr::kable(head(pop_pos))
 ```
 
 
-This has defaults set for condition_names (0, 1) and the assignment variable name (Z). You can set the "domain" of the potential outcomes function with `condition_names`.
+This has defaults set for conditions (0, 1) and the assignment variable name (Z). You can set the "domain" of the potential outcomes function with `conditions`.
 
 ```{r echo=TRUE, results="hide"}
 my_potential_outcomes <- declare_potential_outcomes(
   formula = Y ~ .25 * Z + .01 * age * Z,
-  condition_names = 1:4)
+  conditions = 1:4)
 head(my_potential_outcomes(pop))
 ```
 ```{r echo=FALSE}

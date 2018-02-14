@@ -17,7 +17,7 @@
 #'
 #' my_potential_outcomes <- declare_potential_outcomes(
 #'   formula = Y ~ .25 * Z,
-#'   condition_names = c(0, 1))
+#'   conditions = c(0, 1))
 #'
 #' df <- my_potential_outcomes(my_population())
 #'

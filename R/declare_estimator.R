@@ -22,7 +22,7 @@
 #'
 #' my_potential_outcomes <- declare_potential_outcomes(
 #'   formula = Y ~ .25 * Z,
-#'   condition_names = c(0, 1))
+#'   conditions = c(0, 1))
 #'
 #' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 #'

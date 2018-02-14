@@ -77,8 +77,8 @@ test_that("reveal multiple outcomes works", {
   N <- 25
 
   my_population <- declare_population(N = N, noise = rnorm(N))
-  my_potential_outcomes1 <- declare_potential_outcomes(formula = Y1 ~ Z * .25, condition_names = c(0, 1))
-  my_potential_outcomes2 <- declare_potential_outcomes(formula = Y2 ~ Z * .5 + 3, condition_names = c(0, 1))
+  my_potential_outcomes1 <- declare_potential_outcomes(formula = Y1 ~ Z * .25, conditions = c(0, 1))
+  my_potential_outcomes2 <- declare_potential_outcomes(formula = Y2 ~ Z * .5 + 3, conditions = c(0, 1))
   my_assignment <- declare_assignment(m = 10)
 
   design <- declare_design(my_population,
