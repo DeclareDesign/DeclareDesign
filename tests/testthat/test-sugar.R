@@ -17,7 +17,7 @@ test_that("multiple PO / reveal", {
 
   my_outcomes <- paste0('Y', 1:3)
 
-  reveal_multiple <- declare_reveal(outcome_variable_names = !!my_outcomes)
+  reveal_multiple <- declare_reveal(outcome_variables = !!my_outcomes)
 
 
   design <- declare_design(

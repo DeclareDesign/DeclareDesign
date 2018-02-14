@@ -233,8 +233,8 @@ test_that("demo runs", {
                               my_potential_outcomes,
                               my_potential_outcomes_attrition,
                               my_assignment,
-                              reveal_outcomes(outcome_variable_names = "R"),
-                              reveal_outcomes(attrition_variable_names = "R"))
+                              reveal_outcomes(outcome_variables = "R"),
+                              reveal_outcomes(attrition_variables = "R"))
 
   head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
 
