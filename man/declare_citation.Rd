@@ -2,14 +2,13 @@
 % Please edit documentation in R/declare_citation.R
 \name{declare_citation}
 \alias{declare_citation}
-\alias{citation_function_default}
+\alias{citation_handler}
 \title{Declare Research Study Citation}
 \usage{
-declare_citation(..., handler = citation_function_default, label = NULL)
+declare_citation(..., handler = citation_handler, label = NULL)
 
-citation_function_default(data = stop("Don't evaluate data argument"),
-  title = NULL, authors = NULL,
-  description = "Unpublished research design declaration.",
+citation_handler(data = stop("Don't evaluate data argument"), title = NULL,
+  authors = NULL, description = "Unpublished research design declaration.",
   timestamp = Sys.time(), citation = NULL)
 }
 \arguments{

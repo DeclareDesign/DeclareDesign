@@ -40,11 +40,11 @@
 #' my_estimand_custom(df)
 #'
 
-declare_estimand <- make_declarations(estimand_function_default, "estimand", causal_type="estimand", default_label="my_estimand")
+declare_estimand <- make_declarations(estimand_handler, "estimand", causal_type="estimand", default_label="my_estimand")
 
 
 #' @importFrom rlang eval_tidy quos  is_quosure
-estimand_function_default <- function(data, ..., subset = NULL, coefficient_names=FALSE, label) {
+estimand_handler <- function(data, ..., subset = NULL, coefficient_names=FALSE, label) {
   options <- quos(...)
   if(names(options)[1] == "") names(options)[1] <- label
 
@@ -75,12 +75,12 @@ estimand_function_default <- function(data, ..., subset = NULL, coefficient_name
   }
 }
 
-validation_fn(estimand_function_default) <-  function(ret, dots, label){
+validation_fn(estimand_handler) <-  function(ret, dots, label){
   force(ret)
   # add ... labels at build time
   dotnames <- names(dots)
 
-  maybeDotLabel <- dotnames[! dotnames %in% c("", names(formals(estimand_function_default)) )]
+  maybeDotLabel <- dotnames[! dotnames %in% c("", names(formals(estimand_handler)) )]
   if(length(maybeDotLabel) == 1){
     attr(ret, "steplabel") <- attr(ret, "label")
     attr(ret, "label") <- maybeDotLabel[1]

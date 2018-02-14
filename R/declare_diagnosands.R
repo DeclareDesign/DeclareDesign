@@ -73,7 +73,7 @@
 #'  type_s_rate = mean((sign(est) != sign(estimand)) & p < .05),
 #'  mean_estimand = mean(estimand))
 #'
-declare_diagnosands <- make_declarations(estimand_function_default, "diagnosand", "diagnosands")
+declare_diagnosands <- make_declarations(estimand_handler, "diagnosand", "diagnosands")
 
 
 default_diagnosands <- function(data, alpha=.05){

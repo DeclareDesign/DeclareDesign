@@ -3,19 +3,18 @@
 \name{declare_estimator}
 \alias{declare_estimator}
 \alias{tidy_estimator}
+\alias{estimator_handler_untidy}
 \alias{estimator_handler}
-\alias{estimator_handler_default}
 \title{Declare an Estimator}
 \usage{
-declare_estimator(..., handler = estimator_handler_default,
-  label = "my_estimator")
+declare_estimator(..., handler = estimator_handler, label = "my_estimator")
 
 tidy_estimator(estimator_function)
 
-estimator_handler(data, ..., model = estimatr::difference_in_means,
+estimator_handler_untidy(data, ..., model = estimatr::difference_in_means,
   coefficient_name = Z)
 
-estimator_handler_default(data, ..., estimand = NULL, label)
+estimator_handler(data, ..., estimand = NULL, label)
 }
 \arguments{
 \item{...}{Arguments to the estimation function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.}

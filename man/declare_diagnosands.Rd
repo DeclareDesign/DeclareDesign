@@ -4,7 +4,7 @@
 \alias{declare_diagnosands}
 \title{Declare Diagnosands}
 \usage{
-declare_diagnosands(..., handler = estimand_function_default, label = NULL)
+declare_diagnosands(..., handler = estimand_handler, label = NULL)
 }
 \arguments{
 \item{...}{A set of diagnosands, i.e. bias = mean(est - estimand). The diagnostic statistic (i.e., est - estimand) and its associated summary function (i.e., mean) are declared at the same time.}

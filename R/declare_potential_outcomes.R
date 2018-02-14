@@ -53,10 +53,10 @@
 #'
 #' head(my_potential_outcomes(pop))
 #'
-declare_potential_outcomes <- make_declarations(potential_outcomes_function_default, "potential_outcomes");
+declare_potential_outcomes <- make_declarations(potential_outcomes_handler, "potential_outcomes");
 
 
-potential_outcomes_function_default <-  function(..., data) {
+potential_outcomes_handler <-  function(..., data) {
     # redispatch on formula
     potential_outcomes <- function(formula=NULL, ...) UseMethod("potential_outcomes", formula)
     potential_outcomes(..., data=data)

@@ -52,12 +52,12 @@
 #' df <- my_sampling_custom(df)
 #' dim(df)
 #' head(df)
-declare_sampling <- make_declarations(sampling_function_default, "sampling")
+declare_sampling <- make_declarations(sampling_handler, "sampling")
 
 
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
-sampling_function_default <-
+sampling_handler <-
   function(data, ..., sampling_variable = "S") {
     ## draw sample
 
@@ -83,7 +83,7 @@ sampling_function_default <-
 
   }
 
-validation_fn(sampling_function_default) <- function(ret, dots, label){
+validation_fn(sampling_handler) <- function(ret, dots, label){
 
   if ("strata" %in% names(dots)) {
     if (class(f_rhs(dots[["strata"]])) == "character") {

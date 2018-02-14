@@ -57,12 +57,12 @@
 #' df <- my_assignment_custom(df)
 #' head(df)
 #' table(df$Z)
-declare_assignment <- make_declarations(assignment_function_default, "assignment" )
+declare_assignment <- make_declarations(assignment_handler, "assignment" )
 
 
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo f_rhs
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
-assignment_function_default <-
+assignment_handler <-
   function(data, ..., assignment_variable = Z, reveal="auto") {
     ## draw assignment
 
@@ -94,7 +94,7 @@ assignment_function_default <-
 
   }
 
-validation_fn(assignment_function_default) <-   function(ret, dots, label){
+validation_fn(assignment_handler) <-   function(ret, dots, label){
 
   if ("blocks" %in% names(dots)) {
     if (class(f_rhs(dots[["blocks"]])) == "character") {

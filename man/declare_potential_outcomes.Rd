@@ -6,7 +6,7 @@
 \alias{potential_outcomes.default}
 \title{Potential Outcomes}
 \usage{
-declare_potential_outcomes(..., handler = potential_outcomes_function_default,
+declare_potential_outcomes(..., handler = potential_outcomes_handler,
   label = NULL)
 
 potential_outcomes.formula(formula, data, conditions = c(0, 1),
