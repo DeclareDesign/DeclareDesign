@@ -2,9 +2,13 @@
 % Please edit documentation in R/reveal_outcomes.R
 \name{declare_reveal}
 \alias{declare_reveal}
+\alias{reveal_outcomes}
 \title{Declare a Reveal Outcomes step}
 \usage{
 declare_reveal(..., handler = reveal_outcomes, label = NULL)
+
+reveal_outcomes(data = NULL, outcome_variables = Y,
+  assignment_variables = Z, attrition_variables = NULL)
 }
 \arguments{
 \item{...}{arguments for the handler}
@@ -12,7 +16,35 @@ declare_reveal(..., handler = reveal_outcomes, label = NULL)
 \item{handler}{a handler function}
 
 \item{label}{a step label}
+
+\item{data}{A data.frame containing columns of potential outcomes and an assignment variable}
+
+\item{outcome_variables}{The outcome prefix(es) of the potential outcomes}
+
+\item{assignment_variables}{The bare (unquote) name(s) of the assignment variable}
+
+\item{attrition_variables}{The bare (unquote) name of the attrition variable}
 }
 \description{
 Declare a Reveal Outcomes step
+}
+\details{
+Typically, a design includes a potential outcomes declaration and an assignment declaration. Reveal outcomes uses the random assignment to pluck out the correct potential outcomes. This is analogous to the "switching equation" (Gerber and Green 2012, Chapter 2).
+}
+\examples{
+
+my_population <- declare_population(N = 100, noise = rnorm(N))
+
+my_potential_outcomes <- declare_potential_outcomes(
+  Y_Z_0 = noise, Y_Z_1 = noise +
+  rnorm(N, mean = 2, sd = 2))
+
+my_assignment <- declare_assignment(m = 50)
+
+design <- declare_design(my_population,
+                         my_potential_outcomes,
+                         my_assignment,
+                         reveal_outcomes)
+
+design
 }

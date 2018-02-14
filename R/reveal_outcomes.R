@@ -1,9 +1,19 @@
-#' Reveal Observed Outcomes
+
+#' Declare a Reveal Outcomes step
+#'
+#' @param ... arguments for the handler
+#' @param handler a handler function
+#' @param label a step label
+#'
+#' @export
+declare_reveal <- make_declarations(reveal_outcomes, "reveal_outcomes")
+
+
 #' @param data A data.frame containing columns of potential outcomes and an assignment variable
 #'
-#' @param outcome_variable_names The outcome prefix(es) of the potential outcomes
-#' @param assignment_variable_names The bare (unquote) name(s) of the assignment variable
-#' @param attrition_variable_names The bare (unquote) name of the attrition variable
+#' @param outcome_variables The outcome prefix(es) of the potential outcomes
+#' @param assignment_variables The bare (unquote) name(s) of the assignment variable
+#' @param attrition_variables The bare (unquote) name of the attrition variable
 #'
 #' @details
 #'
@@ -13,6 +23,7 @@
 #' @importFrom rlang enexpr lang_args expr_text
 #'
 #' @export
+#' @rdname declare_reveal
 #'
 #' @examples
 #'
@@ -32,18 +43,18 @@
 #' design
 reveal_outcomes <-
   function(data = NULL,
-           outcome_variable_names = Y,
-           assignment_variable_names = Z,
-           attrition_variable_names = NULL) {
+           outcome_variables = Y,
+           assignment_variables = Z,
+           attrition_variables = NULL) {
 
     if(!is.data.frame(data)) {
       stop("Please provide data to reveal_outcomes.")
     }
 
     # Setup to handle NSE
-    outcome <- reveal_nse_helper(enquo(outcome_variable_names))
-    attrition <- reveal_nse_helper(enquo(attrition_variable_names))
-    assignment <- reveal_nse_helper(enquo(assignment_variable_names))
+    outcome <- reveal_nse_helper(enquo(outcome_variables))
+    attrition <- reveal_nse_helper(enquo(attrition_variables))
+    assignment <- reveal_nse_helper(enquo(assignment_variables))
 
     for (i in seq_along(outcome)) {
       data[, outcome[i]] <- switching_equation(data, outcome[i], assignment)
@@ -102,13 +113,3 @@ reveal_nse_helper <- function(X) {
   else if(is_quosure(X))  reveal_nse_helper(quo_expr(X))
   else if(is.call(X))     unlist(lapply(X[-1], reveal_nse_helper))
 }
-
-
-#' Declare a Reveal Outcomes step
-#'
-#' @param ... arguments for the handler
-#' @param handler a handler function
-#' @param label a step label
-#'
-#' @export
-declare_reveal <- make_declarations(reveal_outcomes, "reveal_outcomes")
