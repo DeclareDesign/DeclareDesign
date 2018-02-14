@@ -58,11 +58,9 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
     phi
   }
 
-  estimator <-
-    declare_estimator(handler = tidy_estimator(my_estimator), estimand = estimand)
+  estimator <- declare_estimator(handler = tidy_estimator(my_estimator), estimand = estimand)
 
-  diagnosand <-
-    declare_diagnosands(bias = mean(est - estimand))
+  diagnosand <- declare_diagnosands(bias = mean(est - estimand))
 
   design <-
     declare_design(
@@ -81,7 +79,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
   diagnose_design(
     design = design,
     diagnosands = diagnosand,
-    sims = 2, bootstrap = FALSE, parallel = FALSE
+    sims = 2, bootstrap = FALSE
   )
 
 

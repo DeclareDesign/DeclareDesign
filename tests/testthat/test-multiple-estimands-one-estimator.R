@@ -38,7 +38,7 @@ test_that("", {
     sd_estimand = sd(estimand)
   )
 
-  diag <- diagnose_design(des, sims = 2, diagnosands = my_dig, bootstrap = FALSE, parallel = FALSE)
+  diag <- diagnose_design(des, sims = 2, diagnosands = my_dig, bootstrap = FALSE)
 
   expect_equal(nrow(get_diagnosands(diag)), 2)
   expect_true(!any(is.na(get_diagnosands(diag)$bias_se)))
