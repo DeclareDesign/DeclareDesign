@@ -129,8 +129,7 @@
     <p>Declare Design</p>
     
 
-    <pre class="usage"><span class='fu'>declare_design</span>(<span class='no'>...</span>, <span class='kw'>title</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>authors</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>description</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>citation</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>declare_design</span>(<span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -138,22 +137,6 @@
     <tr>
       <th>...</th>
       <td><p>A set of steps in a research design, beginning with a <code>data.frame</code> representing the population or a function that draws the population. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a <code>data.frame</code> as an argument and return a <code>data.frame</code>. Typically, many steps are declared using the <code>declare_</code> functions, i.e., <code><a href='declare_population.html'>declare_population</a></code>, <code><a href='declare_population.html'>declare_population</a></code>, <code><a href='declare_sampling.html'>declare_sampling</a></code>, <code><a href='declare_potential_outcomes.html'>declare_potential_outcomes</a></code>, <code><a href='declare_estimand.html'>declare_estimand</a></code>, <code><a href='declare_assignment.html'>declare_assignment</a></code>, and <code><a href='declare_estimator.html'>declare_estimator</a></code>. Functions from the <code>dplyr</code> package such as mutate can also be usefully included.</p></td>
-    </tr>
-    <tr>
-      <th>title</th>
-      <td><p>(optional) The title of the study, as a character string.</p></td>
-    </tr>
-    <tr>
-      <th>authors</th>
-      <td><p>(optional) The authors of the study, as a character string.</p></td>
-    </tr>
-    <tr>
-      <th>description</th>
-      <td><p>(optional) A description of the design in words, as a character string, stored alongside the declaration in code.</p></td>
-    </tr>
-    <tr>
-      <th>citation</th>
-      <td><p>(optional) The preferred citation for the design, as a character string. Either include the full citation in text, or paste a BibTeX entry. If title and authors are specified and you leave citation empty, a BibTeX entry will be created automatically.</p></td>
     </tr>
     </table>
     
@@ -200,112 +183,112 @@
 <span class='no'>design</span></div><div class='output co'>#&gt; 
 #&gt; Design Summary
 #&gt; 
-#&gt; Step 1 (population): my_population ---------------------------------------------
+#&gt; Step 1 (population): declare_population(N = 500, noise = rnorm(N)) -------------
 #&gt; 
 #&gt; N = 500 
 #&gt; 
 #&gt; Added variable: ID 
-#&gt;  N_missing N_unique
-#&gt;          0      500
+#&gt;  N_missing N_unique     class
+#&gt;          0      500 character
 #&gt; 
 #&gt; Added variable: noise 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -2.42  -0.02 0.03 2.84 0.95         0      500
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.94  -0.07 -0.03 2.65 0.99         0      500
 #&gt; 
-#&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
+#&gt; Step 2 (potential outcomes): declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N,     mean = 2, sd = 2)) 
 #&gt; 
 #&gt; Added variable: Y_Z_0 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -2.42  -0.02 0.03 2.84 0.95         0      500
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.94  -0.07 -0.03 2.65 0.99         0      500
 #&gt; 
 #&gt; Added variable: Y_Z_1 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -5.51   2.08 2.05 9.77 2.19         0      500
+#&gt;    min median mean max   sd N_missing N_unique
+#&gt;  -4.44   1.78 1.81 8.1 2.29         0      500
 #&gt; 
-#&gt; Step 3 (sampling): my_sampling -------------------------------------------------
+#&gt; Step 3 (sampling): declare_sampling(n = 250) -----------------------------------
 #&gt; 
 #&gt; N = 250 (250 subtracted) 
 #&gt; 
 #&gt; Added variable: S_inclusion_prob 
-#&gt;              0.5
-#&gt;   Frequency  250
-#&gt;  Proportion 1.00
+#&gt;   0.5
+#&gt;   250
+#&gt;  1.00
 #&gt; 
 #&gt; Altered variable: ID 
 #&gt;   Before: 
-#&gt;  N_missing N_unique
-#&gt;          0      500
+#&gt;  N_missing N_unique     class
+#&gt;          0      500 character
 #&gt; 
 #&gt;   After:
-#&gt;  N_missing N_unique
-#&gt;          0      250
+#&gt;  N_missing N_unique     class
+#&gt;          0      250 character
 #&gt; 
 #&gt; Altered variable: noise 
 #&gt;   Before: 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -2.42  -0.02 0.03 2.84 0.95         0      500
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.94  -0.07 -0.03 2.65 0.99         0      500
 #&gt; 
 #&gt;   After:
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -2.27   0.09 0.14 2.84 0.94         0      250
+#&gt;    min median  mean  max sd N_missing N_unique
+#&gt;  -2.81  -0.05 -0.04 2.65  1         0      250
 #&gt; 
 #&gt; Altered variable: Y_Z_0 
 #&gt;   Before: 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -2.42  -0.02 0.03 2.84 0.95         0      500
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.94  -0.07 -0.03 2.65 0.99         0      500
 #&gt; 
 #&gt;   After:
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -2.27   0.09 0.14 2.84 0.94         0      250
+#&gt;    min median  mean  max sd N_missing N_unique
+#&gt;  -2.81  -0.05 -0.04 2.65  1         0      250
 #&gt; 
 #&gt; Altered variable: Y_Z_1 
 #&gt;   Before: 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -5.51   2.08 2.05 9.77 2.19         0      500
+#&gt;    min median mean max   sd N_missing N_unique
+#&gt;  -4.44   1.78 1.81 8.1 2.29         0      500
 #&gt; 
 #&gt;   After:
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -4.10   2.03 2.13 8.85 2.21         0      250
+#&gt;  -4.11   1.71 1.63 7.11 2.29         0      250
 #&gt; 
-#&gt; Step 4 (estimand): my_estimand -------------------------------------------------
+#&gt; Step 4 (estimand): declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) -----------------
 #&gt; 
 #&gt; A single draw of the estimand:
 #&gt;  estimand_label estimand
-#&gt;             ATE        2
+#&gt;             ATE 1.669875
 #&gt; 
-#&gt; Step 5 (declare step): dplyr::mutate(noise_sq = noise^2) -----------------------
+#&gt; Step 5 (wrapped): ~dplyr::mutate(noise_sq = noise^2) ---------------------------
 #&gt; 
 #&gt; Added variable: noise_sq 
-#&gt;   min median mean  max   sd N_missing N_unique
-#&gt;  0.00   0.42 0.90 8.06 1.26         0      250
+#&gt;  min median mean  max   sd N_missing N_unique
+#&gt;    0   0.47 0.99 7.88 1.38         0      250
 #&gt; 
-#&gt; Step 6 (assignment): my_assignment ---------------------------------------------
+#&gt; Step 6 (assignment): declare_assignment(m = 25) --------------------------------
 #&gt; 
 #&gt; Added variable: Z 
-#&gt;                0    1
-#&gt;   Frequency  225   25
-#&gt;  Proportion 0.90 0.10
+#&gt;     0    1
+#&gt;   225   25
+#&gt;  0.90 0.10
 #&gt; 
 #&gt; Added variable: Z_cond_prob 
-#&gt;              0.1  0.9
-#&gt;   Frequency   25  225
-#&gt;  Proportion 0.10 0.90
+#&gt;   0.1  0.9
+#&gt;    25  225
+#&gt;  0.10 0.90
 #&gt; 
-#&gt; Step 7 (reveal outcomes): reveal_outcomes --------------------------------------
+#&gt; Step 7 (reveal outcomes): reveal_outcomes() ------------------------------------
 #&gt; 
 #&gt; Added variable: Y 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -4.10   0.10 0.32 6.68 1.36         0      250
+#&gt;  -3.77   0.01 0.06 5.64 1.23         0      250
 #&gt; 
-#&gt; Step 8 (estimator): my_estimator -----------------------------------------------
+#&gt; Step 8 (estimator): declare_estimator(Y ~ Z, estimand = my_estimand) -----------
 #&gt; 
 #&gt; Formula: Y ~ Z 
 #&gt; 
 #&gt; A single draw of the estimator:
-#&gt;  estimator_label coefficient_name est   se       p ci_lower ci_upper
-#&gt;     my_estimator                Z 2.1 0.53 0.00074     0.95      3.1
-#&gt;  estimand_label
-#&gt;             ATE
+#&gt;  estimator_label coefficient_name       est        se          p    ci_lower
+#&gt;     my_estimator                Z 0.9070776 0.4666258 0.06322904 -0.05389551
+#&gt;  ci_upper estimand_label
+#&gt;  1.868051            ATE
 #&gt; </div><div class='input'>
 <span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='post_design.html'>draw_data</a></span>(<span class='no'>design</span>)
 
@@ -334,7 +317,7 @@
 
       <footer>
       <div class="copyright" style="flex:3;">
-  <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys.</p>
+  <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys, Neal Fultz.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 

@@ -129,8 +129,8 @@
     <p>Declare Estimand</p>
     
 
-    <pre class="usage"><span class='fu'>declare_estimand</span>(<span class='no'>...</span>, <span class='kw'>estimand_function</span> <span class='kw'>=</span> <span class='no'>estimand_function_default</span>,
-  <span class='kw'>label</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>declare_estimand</span>(<span class='no'>...</span>, <span class='kw'>handler</span> <span class='kw'>=</span> <span class='no'>estimand_function_default</span>,
+  <span class='kw'>label</span> <span class='kw'>=</span> <span class='st'>"my_estimand"</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -140,7 +140,7 @@
       <td><p>Arguments to the estimand function. For example, you might specify ATE = mean(Y_Z_1 - Y_Z_0), which would declare the estimand to be named ATE and to be the mean of the difference in the control and treatment potential outcome.</p></td>
     </tr>
     <tr>
-      <th>estimand_function</th>
+      <th>handler</th>
       <td><p>A function that takes a data.frame as an argument and returns a data.frame with the estimand and a label. By default, the estimand function accepts an expression such as ATE = mean(Y_Z_1-Y_Z_0).</p></td>
     </tr>
     <tr>
@@ -173,14 +173,15 @@
 #&gt; 1            ATE     0.25</div><div class='input'>
 <span class='co'># Custom random assignment functions</span>
 
-<span class='no'>my_estimand_function</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>data</span>) {
-  <span class='fu'>with</span>(<span class='no'>data</span>, <span class='fu'>median</span>(<span class='no'>Y_Z_1</span> - <span class='no'>Y_Z_0</span>))
+<span class='no'>my_estimand_function</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>data</span>, <span class='no'>label</span>) {
+  <span class='no'>ret</span> <span class='kw'>&lt;-</span> <span class='fu'>with</span>(<span class='no'>data</span>, <span class='fu'>median</span>(<span class='no'>Y_Z_1</span> - <span class='no'>Y_Z_0</span>))
+  <span class='fu'>data.frame</span>(<span class='fu'>setNames</span>(<span class='no'>ret</span>, <span class='no'>label</span>))
 }
 <span class='no'>my_estimand_custom</span> <span class='kw'>&lt;-</span> <span class='fu'>declare_estimand</span>(
-  <span class='kw'>estimand_function</span> <span class='kw'>=</span> <span class='no'>my_estimand_function</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='no'>medianTE</span>)
+  <span class='kw'>handler</span> <span class='kw'>=</span> <span class='no'>my_estimand_function</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='st'>"medianTE"</span>)
 
-<span class='fu'>my_estimand_custom</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt;   estimand_label estimand
-#&gt; 1       medianTE     0.25</div><div class='input'>
+<span class='fu'>my_estimand_custom</span>(<span class='no'>df</span>)</div><div class='output co'>#&gt;          setNames.ret..label.
+#&gt; medianTE                 0.25</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -198,7 +199,7 @@
 
       <footer>
       <div class="copyright" style="flex:3;">
-  <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys.</p>
+  <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys, Neal Fultz.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 

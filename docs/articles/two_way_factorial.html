@@ -149,20 +149,20 @@ population &lt;-<span class="st"> </span><span class="kw"><a href="../reference/
 
 potential_outcomes &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
   <span class="dt">Y_Z_T1 =</span> noise,
-  <span class="dt">Y_Z_T2 =</span> noise <span class="op">+</span><span class="st"> </span>beta_A,
-  <span class="dt">Y_Z_T3 =</span> noise <span class="op">+</span><span class="st"> </span>beta_B,
-  <span class="dt">Y_Z_T4 =</span> noise <span class="op">+</span><span class="st"> </span>beta_A <span class="op">+</span><span class="st"> </span>beta_B <span class="op">+</span><span class="st"> </span>beta_AB)
+  <span class="dt">Y_Z_T2 =</span> noise +<span class="st"> </span>beta_A,
+  <span class="dt">Y_Z_T3 =</span> noise +<span class="st"> </span>beta_B,
+  <span class="dt">Y_Z_T4 =</span> noise +<span class="st"> </span>beta_A +<span class="st"> </span>beta_B +<span class="st"> </span>beta_AB)
 
 <span class="co"># Inquiry ----------------------------------------------------------------------</span>
 estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(
-  <span class="dt">interaction =</span> <span class="kw">mean</span>((Y_Z_T4 <span class="op">-</span><span class="st"> </span>Y_Z_T3) <span class="op">-</span><span class="st"> </span>(Y_Z_T2 <span class="op">-</span><span class="st"> </span>Y_Z_T1)), 
+  <span class="dt">interaction =</span> <span class="kw">mean</span>((Y_Z_T4 -<span class="st"> </span>Y_Z_T3) -<span class="st"> </span>(Y_Z_T2 -<span class="st"> </span>Y_Z_T1)), 
   <span class="dt">label =</span> <span class="st">"interaction"</span>)
 
 <span class="co"># Data Strategy ----------------------------------------------------------------</span>
 assignment &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_assignment.html">declare_assignment</a></span>(<span class="dt">num_arms =</span> <span class="dv">4</span>)
 
 <span class="co"># Answer Strategy --------------------------------------------------------------</span>
-estimator &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y <span class="op">~</span><span class="st"> </span>A <span class="op">+</span><span class="st"> </span>B <span class="op">+</span><span class="st"> </span>A<span class="op">:</span>B,
+estimator &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y ~<span class="st"> </span>A +<span class="st"> </span>B +<span class="st"> </span>A:B,
                                <span class="dt">model =</span> lm_robust,
                                <span class="dt">coefficient_name =</span> <span class="st">"A:B"</span>, 
                                <span class="dt">estimand =</span> estimand)
@@ -173,8 +173,8 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
   potential_outcomes,
   estimand,
   assignment,
-  dplyr<span class="op">::</span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>(<span class="dt">A =</span> <span class="kw">as.numeric</span>(Z <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">"T2"</span>, <span class="st">"T4"</span>)),
-                <span class="dt">B =</span> <span class="kw">as.numeric</span>(Z <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">"T3"</span>, <span class="st">"T4"</span>))),
+  dplyr::<span class="kw">mutate</span>(<span class="dt">A =</span> <span class="kw">as.numeric</span>(Z %in%<span class="st"> </span><span class="kw">c</span>(<span class="st">"T2"</span>, <span class="st">"T4"</span>)),
+                <span class="dt">B =</span> <span class="kw">as.numeric</span>(Z %in%<span class="st"> </span><span class="kw">c</span>(<span class="st">"T3"</span>, <span class="st">"T4"</span>))),
   reveal_outcomes,
   estimator)</code></pre></div>
 </div>
@@ -208,7 +208,7 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <p>The first thing to note about the design is that it produces an unbiased estimate of the quantity we care about: the average estimate is equal to the average estimand, at 0.25. The design exhibits good coverage too, with the estimand falling within the estimated confidence intervals roughly 95% of the time.</p>
 <p>Note, however, that the power of this design is very low. Even with 1000 subjects, at 50% power, whether or not we detect the reasonably large one-quarter standard deviation effect is essentially a coin toss. Half of the time we run the risk of erroneously maintaining a null of no effect, whereas in combination the treatments do in fact produce a fairly large effect.</p>
 <p>We can use the design template <code>two_way_factorial_template</code> to quickly declare an array of designs that increment the <span class="math inline">\(N\)</span> from 150 to 3,000 by increments of 150. Diagnosing and plotting the results of this exercise reveals that we would require over 2,000 respondents to reach statistical power at the conventional 80% level.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">designs &lt;-<span class="st"> </span><span class="kw"><a href="../reference/quick_design.html">quick_design</a></span>(two_way_factorial_template,
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">designs &lt;-<span class="st"> </span><span class="kw"><a href="../reference/fill_out.html">fill_out</a></span>(two_way_factorial_template,
                         <span class="dt">N =</span> <span class="kw">seq</span>(<span class="dv">150</span>,<span class="dv">3000</span>,<span class="dv">150</span>),  
                         <span class="dt">beta_A =</span> <span class="dv">0</span>,
                         <span class="dt">beta_B =</span> <span class="dv">0</span>,
@@ -270,7 +270,7 @@ diagnoses_N &lt;-<span class="st"> </span><span class="kw"><a href="../reference
 
 
       <footer><div class="copyright" style="flex:3;">
-  <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys.</p>
+  <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys, Neal Fultz.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 

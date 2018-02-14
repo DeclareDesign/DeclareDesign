@@ -174,112 +174,112 @@
 <span class='fu'>summary</span>(<span class='no'>design</span>)</div><div class='output co'>#&gt; 
 #&gt; Design Summary
 #&gt; 
-#&gt; Step 1 (population): my_population ---------------------------------------------
+#&gt; Step 1 (population): declare_population(N = 500, noise = rnorm(N)) -------------
 #&gt; 
 #&gt; N = 500 
 #&gt; 
 #&gt; Added variable: ID 
-#&gt;  N_missing N_unique
-#&gt;          0      500
+#&gt;  N_missing N_unique     class
+#&gt;          0      500 character
 #&gt; 
 #&gt; Added variable: noise 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.42   0.05 0.03 2.85 0.99         0      500
+#&gt;  -2.72   -0.1 -0.1 2.89 0.99         0      500
 #&gt; 
-#&gt; Step 2 (potential outcomes): my_potential_outcomes -----------------------------
+#&gt; Step 2 (potential outcomes): declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N,     mean = 2, sd = 2)) 
 #&gt; 
 #&gt; Added variable: Y_Z_0 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.42   0.05 0.03 2.85 0.99         0      500
+#&gt;  -2.72   -0.1 -0.1 2.89 0.99         0      500
 #&gt; 
 #&gt; Added variable: Y_Z_1 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -5.53   1.91 1.98 7.74 2.26         0      500
+#&gt;    min median mean max   sd N_missing N_unique
+#&gt;  -5.23   1.85 1.85 8.4 2.27         0      500
 #&gt; 
-#&gt; Step 3 (sampling): my_sampling -------------------------------------------------
+#&gt; Step 3 (sampling): declare_sampling(n = 250) -----------------------------------
 #&gt; 
 #&gt; N = 250 (250 subtracted) 
 #&gt; 
 #&gt; Added variable: S_inclusion_prob 
-#&gt;              0.5
-#&gt;   Frequency  250
-#&gt;  Proportion 1.00
+#&gt;   0.5
+#&gt;   250
+#&gt;  1.00
 #&gt; 
 #&gt; Altered variable: ID 
 #&gt;   Before: 
-#&gt;  N_missing N_unique
-#&gt;          0      500
+#&gt;  N_missing N_unique     class
+#&gt;          0      500 character
 #&gt; 
 #&gt;   After:
-#&gt;  N_missing N_unique
-#&gt;          0      250
+#&gt;  N_missing N_unique     class
+#&gt;          0      250 character
 #&gt; 
 #&gt; Altered variable: noise 
 #&gt;   Before: 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.42   0.05 0.03 2.85 0.99         0      500
+#&gt;  -2.72   -0.1 -0.1 2.89 0.99         0      500
 #&gt; 
 #&gt;   After:
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.04   0.06 0.01 2.55 1.00         0      250
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.72  -0.11 -0.16 2.38 0.98         0      250
 #&gt; 
 #&gt; Altered variable: Y_Z_0 
 #&gt;   Before: 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.42   0.05 0.03 2.85 0.99         0      500
+#&gt;  -2.72   -0.1 -0.1 2.89 0.99         0      500
 #&gt; 
 #&gt;   After:
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.04   0.06 0.01 2.55 1.00         0      250
+#&gt;    min median  mean  max   sd N_missing N_unique
+#&gt;  -2.72  -0.11 -0.16 2.38 0.98         0      250
 #&gt; 
 #&gt; Altered variable: Y_Z_1 
 #&gt;   Before: 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -5.53   1.91 1.98 7.74 2.26         0      500
+#&gt;    min median mean max   sd N_missing N_unique
+#&gt;  -5.23   1.85 1.85 8.4 2.27         0      500
 #&gt; 
 #&gt;   After:
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -4.88   1.97 1.99 6.97 2.23         0      250
+#&gt;    min median mean max   sd N_missing N_unique
+#&gt;  -4.39   1.94 1.96 8.4 2.21         0      250
 #&gt; 
-#&gt; Step 4 (estimand): my_estimand -------------------------------------------------
+#&gt; Step 4 (estimand): declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) -----------------
 #&gt; 
 #&gt; A single draw of the estimand:
 #&gt;  estimand_label estimand
-#&gt;             ATE        2
+#&gt;             ATE 2.118752
 #&gt; 
-#&gt; Step 5 (declare step): dplyr::mutate(noise_sq = noise^2) -----------------------
+#&gt; Step 5 (wrapped): ~dplyr::mutate(noise_sq = noise^2) ---------------------------
 #&gt; 
 #&gt; Added variable: noise_sq 
-#&gt;   min median mean  max   sd N_missing N_unique
-#&gt;  0.00   0.38 0.99 9.26 1.36         0      250
+#&gt;  min median mean  max   sd N_missing N_unique
+#&gt;    0   0.51 0.98 7.42 1.26         0      250
 #&gt; 
-#&gt; Step 6 (assignment): my_assignment ---------------------------------------------
+#&gt; Step 6 (assignment): declare_assignment(m = 25) --------------------------------
 #&gt; 
 #&gt; Added variable: Z 
-#&gt;                0    1
-#&gt;   Frequency  225   25
-#&gt;  Proportion 0.90 0.10
+#&gt;     0    1
+#&gt;   225   25
+#&gt;  0.90 0.10
 #&gt; 
 #&gt; Added variable: Z_cond_prob 
-#&gt;              0.1  0.9
-#&gt;   Frequency   25  225
-#&gt;  Proportion 0.10 0.90
+#&gt;   0.1  0.9
+#&gt;    25  225
+#&gt;  0.10 0.90
 #&gt; 
-#&gt; Step 7 (reveal outcomes): reveal_outcomes --------------------------------------
+#&gt; Step 7 (reveal outcomes): reveal_outcomes() ------------------------------------
 #&gt; 
 #&gt; Added variable: Y 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -4.88   0.16 0.19 6.18 1.22         0      250
+#&gt;  -4.39  -0.06    0 7.03 1.32         0      250
 #&gt; 
-#&gt; Step 8 (estimator): my_estimator -----------------------------------------------
+#&gt; Step 8 (estimator): declare_estimator(Y ~ Z, estimand = my_estimand) -----------
 #&gt; 
 #&gt; Formula: Y ~ Z 
 #&gt; 
 #&gt; A single draw of the estimator:
-#&gt;  estimator_label coefficient_name est   se     p ci_lower ci_upper
-#&gt;     my_estimator                Z 1.1 0.48 0.023     0.17      2.1
-#&gt;  estimand_label
-#&gt;             ATE
+#&gt;  estimator_label coefficient_name     est       se          p   ci_lower
+#&gt;     my_estimator                Z 1.25822 0.566097 0.03565853 0.09145012
+#&gt;  ci_upper estimand_label
+#&gt;  2.424989            ATE
 #&gt; </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -295,7 +295,7 @@
 
       <footer>
       <div class="copyright" style="flex:3;">
-  <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys.</p>
+  <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys, Neal Fultz.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 

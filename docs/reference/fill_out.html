@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>DeclareDesign - Reveal Observed Outcomes — reveal_outcomes</title>
+<title>DeclareDesign - Declare a Design via a Template Function — fill_out</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -122,107 +122,67 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Reveal Observed Outcomes</h1>
+    <h1>Declare a Design via a Template Function</h1>
     </div>
 
     
-    <p>Reveal Observed Outcomes</p>
+    <p><code>fill_out</code> easily generates a set of design from a template function.
+
+    <code>redesign</code> quickly generates a design from an existing one by resetting design variables internally.</p>
     
 
-    <pre class="usage"><span class='fu'>reveal_outcomes</span>(<span class='kw'>data</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>outcome_variable_names</span> <span class='kw'>=</span> <span class='no'>Y</span>,
-  <span class='kw'>assignment_variable_names</span> <span class='kw'>=</span> <span class='no'>Z</span>, <span class='kw'>attrition_variable_names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>fill_out</span>(<span class='no'>template</span>, <span class='kw'>expand</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>...</span>)
+
+<span class='fu'>redesign</span>(<span class='no'>design</span>, <span class='kw'>expand</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>data</th>
-      <td><p>A data.frame containing columns of potential outcomes and an assignment variable</p></td>
+      <th>template</th>
+      <td><p>a function which yields a design.</p></td>
     </tr>
     <tr>
-      <th>outcome_variable_names</th>
-      <td><p>The outcome prefix(es) of the potential outcomes</p></td>
+      <th>expand</th>
+      <td><p>boolean - if true, form the crossproduct of the ..., otherwise recycle them</p></td>
     </tr>
     <tr>
-      <th>assignment_variable_names</th>
-      <td><p>The bare (unquote) name(s) of the assignment variable</p></td>
+      <th>...</th>
+      <td><p>Options sent to the template.</p></td>
     </tr>
     <tr>
-      <th>attrition_variable_names</th>
-      <td><p>The bare (unquote) name of the attrition variable</p></td>
+      <th>design</th>
+      <td><p>a design</p></td>
     </tr>
     </table>
     
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Typically, a design includes a potential outcomes declaration and an assignment declaration. Reveal outcomes uses the random assignment to pluck out the correct potential outcomes. This is analogous to the "switching equation" (Gerber and Green 2012, Chapter 2).</p>
+    <p>if set of designs is size one, the design, otherwise a `by`-list of designs.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='no'>my_population</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_population.html'>declare_population</a></span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>noise</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='no'>N</span>))
+<span class='no'>d_template</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>N</span><span class='kw'>=</span><span class='fl'>100</span>) <span class='fu'><a href='declare_design.html'>declare_design</a></span>(<span class='fu'><a href='declare_population.html'>declare_population</a></span>(<span class='kw'>N</span><span class='kw'>=</span><span class='no'>N</span>))
 
-<span class='no'>my_potential_outcomes</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_potential_outcomes.html'>declare_potential_outcomes</a></span>(
-  <span class='kw'>Y_Z_0</span> <span class='kw'>=</span> <span class='no'>noise</span>, <span class='kw'>Y_Z_1</span> <span class='kw'>=</span> <span class='no'>noise</span> +
-  <span class='fu'>rnorm</span>(<span class='no'>N</span>, <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>2</span>))
+<span class='no'>vary_n</span> <span class='kw'>&lt;-</span> <span class='fu'>fill_out</span>(<span class='no'>d_template</span>, <span class='kw'>N</span><span class='kw'>=</span><span class='fu'>seq</span>(<span class='fl'>30</span>, <span class='fl'>100</span>, <span class='fl'>10</span>))
 
-<span class='no'>my_assignment</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_assignment.html'>declare_assignment</a></span>(<span class='kw'>m</span> <span class='kw'>=</span> <span class='fl'>50</span>)
+<span class='no'>big_d</span> <span class='kw'>&lt;-</span> <span class='fu'>fill_out</span>(<span class='no'>d_template</span>, <span class='kw'>N</span><span class='kw'>=</span><span class='fl'>200</span>)
 
-<span class='no'>design</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_design.html'>declare_design</a></span>(<span class='no'>my_population</span>,
-                         <span class='no'>my_potential_outcomes</span>,
-                         <span class='no'>my_assignment</span>,
-                         <span class='no'>reveal_outcomes</span>)
+<span class='no'>bigger_d</span> <span class='kw'>&lt;-</span> <span class='fu'>redesign</span>(<span class='no'>big_d</span>, <span class='kw'>N</span><span class='kw'>=</span><span class='fl'>1000</span>)
 
-<span class='no'>design</span></div><div class='output co'>#&gt; 
-#&gt; Design Summary
-#&gt; 
-#&gt; Step 1 (population): declare_population(N = 100, noise = rnorm(N)) -------------
-#&gt; 
-#&gt; N = 100 
-#&gt; 
-#&gt; Added variable: ID 
-#&gt;  N_missing N_unique     class
-#&gt;          0      100 character
-#&gt; 
-#&gt; Added variable: noise 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -2.23  -0.03    0 2.37 0.95         0      100
-#&gt; 
-#&gt; Step 2 (potential outcomes): declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N,     mean = 2, sd = 2)) 
-#&gt; 
-#&gt; Added variable: Y_Z_0 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -2.23  -0.03    0 2.37 0.95         0      100
-#&gt; 
-#&gt; Added variable: Y_Z_1 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.93   2.08 2.13 8.09 2.47         0      100
-#&gt; 
-#&gt; Step 3 (assignment): declare_assignment(m = 50) --------------------------------
-#&gt; 
-#&gt; Added variable: Z 
-#&gt;     0    1
-#&gt;    50   50
-#&gt;  0.50 0.50
-#&gt; 
-#&gt; Added variable: Z_cond_prob 
-#&gt;   0.5
-#&gt;   100
-#&gt;  1.00
-#&gt; 
-#&gt; Step 4 (reveal outcomes): reveal_outcomes() ------------------------------------
-#&gt; 
-#&gt; Added variable: Y 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.93   0.93 1.08 8.09 2.13         0      100
-#&gt; </div></pre>
+<span class='no'>little_d</span> <span class='kw'>&lt;-</span> <span class='fu'>redesign</span>(<span class='no'>big_d</span>, <span class='kw'>N</span><span class='kw'>=</span><span class='fu'>seq</span>(<span class='fl'>5</span>,<span class='fl'>25</span>,<span class='fl'>5</span>))</div><span class='co'># NOT RUN {</span>
+ <span class='co'># idea is to diagnose a list</span>
+  <span class='fu'><a href='diagnose_design.html'>diagnose_design</a></span>(<span class='no'>little_d</span>, )
+<span class='co'># }</span><div class='input'>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       
-      <li><a href="#details">Details</a></li>
+      <li><a href="#value">Value</a></li>
       
       <li><a href="#examples">Examples</a></li>
     </ul>

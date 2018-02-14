@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>DeclareDesign - Declare the Size and Features of the Population — declare_population</title>
+<title>DeclareDesign - Override environment via shim — clone_dot_edit_env</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -122,97 +122,52 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Declare the Size and Features of the Population</h1>
+    <h1>Override environment via shim</h1>
     </div>
 
     
-    <p>Declare the Size and Features of the Population</p>
+    <p>Override environment via shim</p>
     
 
-    <pre class="usage"><span class='fu'>declare_population</span>(<span class='no'>...</span>, <span class='kw'>handler</span> <span class='kw'>=</span> <span class='no'>fabricate</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
-    
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>...</th>
-      <td><p>Arguments to the population function</p></td>
-    </tr>
-    <tr>
-      <th>handler</th>
-      <td><p>A function that generates a data.frame containing features of the population. By default, the fabricatr function <code>fabricate</code> function is used, which allows you to draw single or multi-level hierarchical population data.</p></td>
-    </tr>
-    <tr>
-      <th>label</th>
-      <td><p>a step label</p></td>
-    </tr>
-    </table>
-    
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+    <pre class="usage"><span class='fu'>clone_dot_edit_env</span>(<span class='no'>dot</span>, <span class='no'>...</span>, <span class='kw'>to_replace</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='no'>...</span>))
 
-    <p>a function that returns a data.frame</p>
-    
+<span class='fu'>clone_step_edit</span>(<span class='no'>step</span>, <span class='no'>...</span>, <span class='kw'>to_replace</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='no'>...</span>))
+
+<span class='fu'>clone_design_edit</span>(<span class='no'>design</span>, <span class='no'>...</span>, <span class='kw'>to_replace</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='no'>...</span>))</pre>
+        
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># Declare a single-level population with no covariates</span>
-<span class='no'>my_population</span> <span class='kw'>&lt;-</span> <span class='fu'>declare_population</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>)
-<span class='fu'>head</span>(<span class='fu'>my_population</span>())</div><div class='output co'>#&gt;    ID
-#&gt; 1 001
-#&gt; 2 002
-#&gt; 3 003
-#&gt; 4 004
-#&gt; 5 005
-#&gt; 6 006</div><div class='input'>
-<span class='co'># Declare a single-level population with a covariate</span>
-<span class='no'>my_population</span> <span class='kw'>&lt;-</span> <span class='fu'>declare_population</span>(
-  <span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>,
-  <span class='kw'>height_ft</span> <span class='kw'>=</span> <span class='fu'>runif</span>(<span class='no'>N</span>, <span class='fl'>3.5</span>, <span class='fl'>8</span>)
+    <pre class="examples"><span class='co'># NOT RUN {</span>
+<span class='no'>here_i_am</span> <span class='kw'>&lt;-</span> <span class='st'>"foo"</span>
+<span class='no'>dot</span> <span class='kw'>&lt;-</span> <span class='fu'>quo</span>(<span class='no'>here_i_am</span>)
+<span class='no'>dot2</span> <span class='kw'>&lt;-</span> <span class='fu'>clone_dot_edit_env</span>(<span class='no'>dot</span>, <span class='kw'>here_i_am</span><span class='kw'>=</span><span class='st'>"Rock you like a hurricane"</span>, <span class='kw'>xyxyx</span><span class='kw'>=</span><span class='st'>"bar"</span>)
+<span class='fu'>eval_tidy</span>(<span class='no'>dot</span>)
+<span class='fu'>eval_tidy</span>(<span class='no'>dot2</span>)
+<span class='co'># }</span><span class='co'># NOT RUN {</span>
+<span class='no'>N</span> <span class='kw'>&lt;-</span> <span class='fl'>50</span>
+
+<span class='no'>pop50</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_population.html'>declare_population</a></span>(<span class='kw'>N</span><span class='kw'>=</span><span class='no'>N</span>, <span class='kw'>noise</span><span class='kw'>=</span><span class='fu'>rnorm</span>(<span class='no'>N</span>))
+<span class='fu'>nrow</span>(<span class='fu'>pop50</span>())
+
+<span class='no'>pop100</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>DeclareDesign</span><span class='kw ns'>:::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/DeclareDesign/topics/edit'>clone_step_edit</a></span>(<span class='no'>pop50</span>, <span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>)
+<span class='fu'>nrow</span>(<span class='fu'>pop100</span>())
+<span class='fu'>nrow</span>(<span class='fu'>pop50</span>())
+
+<span class='co'># }</span><div class='input'><span class='no'>N</span> <span class='kw'>&lt;-</span> <span class='fl'>50</span></div><span class='co'># NOT RUN {</span>
+<span class='no'>my_design</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_design.html'>declare_design</a></span>(
+  <span class='fu'><a href='declare_population.html'>declare_population</a></span>(<span class='kw'>N</span><span class='kw'>=</span><span class='no'>N</span>, <span class='kw'>noise</span><span class='kw'>=</span><span class='fu'>rnorm</span>(<span class='no'>N</span>))
 )
-<span class='fu'>head</span>(<span class='fu'>my_population</span>())</div><div class='output co'>#&gt;    ID height_ft
-#&gt; 1 001  4.541163
-#&gt; 2 002  5.541377
-#&gt; 3 003  5.251368
-#&gt; 4 004  6.432244
-#&gt; 5 005  5.487036
-#&gt; 6 006  5.307416</div><div class='input'>
-<span class='co'># Declare a two-level hierarchical population</span>
-<span class='co'># containing cities within regions</span>
+<span class='no'>my_design2</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>DeclareDesign</span><span class='kw ns'>:::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/DeclareDesign/topics/edit'>clone_design_edit</a></span>(<span class='no'>my_design</span>, <span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>)
 
-<span class='no'>pop</span> <span class='kw'>&lt;-</span> <span class='fu'>declare_population</span>(
- <span class='kw'>regions</span> <span class='kw'>=</span> <span class='fu'>level</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>5</span>),
- <span class='kw'>cities</span> <span class='kw'>=</span> <span class='fu'>level</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>pollution</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='no'>N</span>, <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>5</span>)))
-<span class='fu'>head</span>(<span class='fu'>my_population</span>())</div><div class='output co'>#&gt;    ID height_ft
-#&gt; 1 001  4.784681
-#&gt; 2 002  6.894644
-#&gt; 3 003  5.042305
-#&gt; 4 004  3.531256
-#&gt; 5 005  4.855222
-#&gt; 6 006  3.734016</div><div class='input'>
-<span class='co'># Custom population functions</span>
+<span class='fu'>nrow</span>(<span class='fu'><a href='post_design.html'>draw_data</a></span>(<span class='no'>my_design</span>))
+<span class='fu'>nrow</span>(<span class='fu'><a href='post_design.html'>draw_data</a></span>(<span class='no'>my_design2</span>))
 
-<span class='no'>my_population_function</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>N</span>) {
-  <span class='fu'>data.frame</span>(<span class='kw'>u</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='no'>N</span>))
-}
-
-<span class='no'>my_population_custom</span> <span class='kw'>&lt;-</span> <span class='fu'>declare_population</span>(
-  <span class='kw'>handler</span> <span class='kw'>=</span> <span class='no'>my_population_function</span>, <span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>)
-
-<span class='fu'>head</span>(<span class='fu'>my_population_custom</span>())</div><div class='output co'>#&gt;            u
-#&gt; 1 -2.0197586
-#&gt; 2  0.2559044
-#&gt; 3  0.3904464
-#&gt; 4 -0.8311341
-#&gt; 5  0.5195553
-#&gt; 6 -0.8455217</div></pre>
+<span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#value">Value</a></li>
-      
+            
       <li><a href="#examples">Examples</a></li>
     </ul>
 

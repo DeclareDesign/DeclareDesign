@@ -125,16 +125,16 @@
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># M -- Model: Speculation on variables and relations between them</span>
 population &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_population.html">declare_population</a></span>(<span class="dt">N =</span> <span class="dv">100</span>, <span class="dt">u =</span> <span class="kw">rnorm</span>(N))
 potential_outcomes &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(<span class="dt">Y_Z_0 =</span> <span class="dv">0</span>, 
-                                                 <span class="dt">Y_Z_1 =</span> <span class="dv">1</span> <span class="op">+</span><span class="st"> </span>u)
+                                                 <span class="dt">Y_Z_1 =</span> <span class="dv">1</span> +<span class="st"> </span>u)
 
 <span class="co"># I -- Inquiry: A query defined in terms of potential outcomes</span>
-estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(<span class="dt">ATE =</span> <span class="kw">mean</span>(Y_Z_<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>Y_Z_<span class="dv">0</span>))
+estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(<span class="dt">ATE =</span> <span class="kw">mean</span>(Y_Z_1 -<span class="st"> </span>Y_Z_0))
 
 <span class="co"># D -- Data Strategy: Researcher interventions on the world</span>
 assignment &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_assignment.html">declare_assignment</a></span>(<span class="dt">m =</span> <span class="dv">50</span>) 
 
 <span class="co"># A -- Answer Strategy: Conclusions to be drawn from data</span>
-estimator &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y <span class="op">~</span><span class="st"> </span>Z, <span class="dt">estimand =</span> estimand)
+estimator &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y ~<span class="st"> </span>Z, <span class="dt">estimand =</span> estimand)
 
 <span class="co"># Design: Putting it all together</span>
 design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_design.html">declare_design</a></span>(population, 
@@ -143,7 +143,7 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
                          assignment, 
                          reveal_outcomes, 
                          estimator,
-                         <span class="dt">description =</span> <span class="st">"A very simple design"</span>)</code></pre></div>
+                         <span class="kw"><a href="../reference/declare_citation.html">declare_citation</a></span>(<span class="dt">description =</span> <span class="st">"A very simple design"</span>))</code></pre></div>
 </div>
 <div id="making-use-of-a-design" class="section level2">
 <h2 class="hasAnchor">
@@ -249,7 +249,7 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">diagnosis &lt;-<span class="st"> </span><span class="kw"><a href="../reference/diagnose_design.html">diagnose_design</a></span>(design, <span class="dt">sims =</span> <span class="dv">10000</span>, <span class="dt">bootstrap_sims =</span> <span class="dv">500</span>)</code></pre></div>
 <table class="table">
 <thead><tr class="header">
-<th></th>
+<th align="left"></th>
 <th align="center">Bias</th>
 <th align="center">RMSE</th>
 <th align="center">Power</th>
@@ -261,7 +261,7 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>Diagnosand</td>
+<td align="left">Diagnosand</td>
 <td align="center">0</td>
 <td align="center">0.1</td>
 <td align="center">1</td>
@@ -272,7 +272,7 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 <td align="center">0</td>
 </tr>
 <tr class="even">
-<td>Boostrapped SE</td>
+<td align="left">Boostrapped SE</td>
 <td align="center">0</td>
 <td align="center">0.0</td>
 <td align="center">0</td>
@@ -306,7 +306,7 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
 
 
       <footer><div class="copyright" style="flex:3;">
-  <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys.</p>
+  <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys, Neal Fultz.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 

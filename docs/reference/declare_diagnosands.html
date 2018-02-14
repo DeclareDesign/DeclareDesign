@@ -129,7 +129,7 @@
     <p>Declare Diagnosands</p>
     
 
-    <pre class="usage"><span class='fu'>declare_diagnosands</span>(<span class='no'>...</span>, <span class='kw'>diagnosand_function</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>declare_diagnosands</span>(<span class='no'>...</span>, <span class='kw'>handler</span> <span class='kw'>=</span> <span class='no'>estimand_function_default</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -137,6 +137,14 @@
     <tr>
       <th>...</th>
       <td><p>A set of diagnosands, i.e. bias = mean(est - estimand). The diagnostic statistic (i.e., est - estimand) and its associated summary function (i.e., mean) are declared at the same time.</p></td>
+    </tr>
+    <tr>
+      <th>handler</th>
+      <td><p>a diagnosand handler</p></td>
+    </tr>
+    <tr>
+      <th>label</th>
+      <td><p>a step label</p></td>
     </tr>
     </table>
     
@@ -217,7 +225,7 @@ mean_estimand = mean(estimand)</p>
 
       <footer>
       <div class="copyright" style="flex:3;">
-  <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys.</p>
+  <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys, Neal Fultz.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 

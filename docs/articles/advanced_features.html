@@ -109,17 +109,17 @@
 <div id="quick-design" class="section level1">
 <h1 class="hasAnchor">
 <a href="#quick-design" class="anchor"></a>Quick design</h1>
-<p>You can also write a design maker function that declares a design based on a set of parameters like <code>N</code>, the number of clusters, etc. and use the function <code><a href="../reference/quick_design.html">quick_design()</a></code> to make designs using just those parameters.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m_arm_trial &lt;-<span class="st"> </span><span class="cf">function</span>(numb){
+<p>You can also write a design maker function that declares a design based on a set of parameters like <code>N</code>, the number of clusters, etc. and use the function <code><a href="../reference/fill_out.html">fill_out()</a></code> to make designs using just those parameters.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m_arm_trial &lt;-<span class="st"> </span>function(numb){
   my_population &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_population.html">declare_population</a></span>(
-    <span class="dt">N =</span> numb, <span class="dt">income =</span> <span class="kw">rnorm</span>(N), <span class="dt">age =</span> <span class="kw">sample</span>(<span class="dv">18</span><span class="op">:</span><span class="dv">95</span>, N, <span class="dt">replace =</span> T))
+    <span class="dt">N =</span> numb, <span class="dt">income =</span> <span class="kw">rnorm</span>(N), <span class="dt">age =</span> <span class="kw">sample</span>(<span class="dv">18</span>:<span class="dv">95</span>, N, <span class="dt">replace =</span> T))
 
   my_potential_outcomes &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
-    <span class="dt">formula =</span> Y <span class="op">~</span><span class="st"> </span>.<span class="dv">25</span> <span class="op">*</span><span class="st"> </span>Z <span class="op">+</span><span class="st"> </span>.<span class="dv">01</span> <span class="op">*</span><span class="st"> </span>age <span class="op">*</span><span class="st"> </span>Z)
+    <span class="dt">formula =</span> Y ~<span class="st"> </span>.<span class="dv">25</span> *<span class="st"> </span>Z +<span class="st"> </span>.<span class="dv">01</span> *<span class="st"> </span>age *<span class="st"> </span>Z)
   my_sampling &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_sampling.html">declare_sampling</a></span>(<span class="dt">n =</span> <span class="dv">250</span>)
   my_assignment &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_assignment.html">declare_assignment</a></span>(<span class="dt">m =</span> <span class="dv">25</span>)
-  my_estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(<span class="dt">ATE =</span> <span class="kw">mean</span>(Y_Z_<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>Y_Z_<span class="dv">0</span>))
-  my_estimator_dim &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y <span class="op">~</span><span class="st"> </span>Z, <span class="dt">estimand =</span> my_estimand)
+  my_estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(<span class="dt">ATE =</span> <span class="kw">mean</span>(Y_Z_1 -<span class="st"> </span>Y_Z_0))
+  my_estimator_dim &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y ~<span class="st"> </span>Z, <span class="dt">estimand =</span> my_estimand)
   my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_design.html">declare_design</a></span>(my_population,
                               my_potential_outcomes,
                               my_estimand,
@@ -130,11 +130,11 @@
   <span class="kw">return</span>(my_design)
 }
 
-my_1000_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/quick_design.html">quick_design</a></span>(<span class="dt">template =</span> m_arm_trial, <span class="dt">numb =</span> <span class="dv">1000</span>)
+my_1000_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/fill_out.html">fill_out</a></span>(<span class="dt">template =</span> m_arm_trial, <span class="dt">numb =</span> <span class="dv">1000</span>)
 <span class="kw">head</span>(<span class="kw"><a href="../reference/post_design.html">draw_data</a></span>(my_1000_design))</code></pre></div>
 <table class="table">
 <thead><tr class="header">
-<th></th>
+<th align="left"></th>
 <th align="left">ID</th>
 <th align="right">income</th>
 <th align="right">age</th>
@@ -147,7 +147,7 @@ my_1000_design &lt;-<span class="st"> </span><span class="kw"><a href="../refere
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>7</td>
+<td align="left">7</td>
 <td align="left">0007</td>
 <td align="right">-0.96</td>
 <td align="right">51</td>
@@ -159,7 +159,7 @@ my_1000_design &lt;-<span class="st"> </span><span class="kw"><a href="../refere
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td>10</td>
+<td align="left">10</td>
 <td align="left">0010</td>
 <td align="right">1.51</td>
 <td align="right">40</td>
@@ -171,7 +171,7 @@ my_1000_design &lt;-<span class="st"> </span><span class="kw"><a href="../refere
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td>11</td>
+<td align="left">11</td>
 <td align="left">0011</td>
 <td align="right">2.35</td>
 <td align="right">75</td>
@@ -183,7 +183,7 @@ my_1000_design &lt;-<span class="st"> </span><span class="kw"><a href="../refere
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td>20</td>
+<td align="left">20</td>
 <td align="left">0020</td>
 <td align="right">-0.28</td>
 <td align="right">21</td>
@@ -195,7 +195,7 @@ my_1000_design &lt;-<span class="st"> </span><span class="kw"><a href="../refere
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td>23</td>
+<td align="left">23</td>
 <td align="left">0023</td>
 <td align="right">-0.02</td>
 <td align="right">55</td>
@@ -207,7 +207,7 @@ my_1000_design &lt;-<span class="st"> </span><span class="kw"><a href="../refere
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td>27</td>
+<td align="left">27</td>
 <td align="left">0027</td>
 <td align="right">0.27</td>
 <td align="right">51</td>
@@ -225,14 +225,14 @@ my_1000_design &lt;-<span class="st"> </span><span class="kw"><a href="../refere
 <h1 class="hasAnchor">
 <a href="#continuous-potential-outcomes" class="anchor"></a>Continuous potential outcomes</h1>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_potential_outcomes_continuous &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
-  <span class="dt">formula =</span> Y <span class="op">~</span><span class="st"> </span>.<span class="dv">25</span> <span class="op">*</span><span class="st"> </span>Z <span class="op">+</span><span class="st"> </span>.<span class="dv">01</span> <span class="op">*</span><span class="st"> </span>age <span class="op">*</span><span class="st"> </span>Z, <span class="dt">condition_names =</span> <span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>))
+  <span class="dt">formula =</span> Y ~<span class="st"> </span>.<span class="dv">25</span> *<span class="st"> </span>Z +<span class="st"> </span>.<span class="dv">01</span> *<span class="st"> </span>age *<span class="st"> </span>Z, <span class="dt">condition_names =</span> <span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>))
 
-continuous_treatment_function &lt;-<span class="st"> </span><span class="cf">function</span>(data){
- data<span class="op">$</span>Z &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>), <span class="dt">size =</span> <span class="kw">nrow</span>(data), <span class="dt">replace =</span> <span class="ot">TRUE</span>)
+continuous_treatment_function &lt;-<span class="st"> </span>function(data){
+ data$Z &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>), <span class="dt">size =</span> <span class="kw">nrow</span>(data), <span class="dt">replace =</span> <span class="ot">TRUE</span>)
  data
 }
 
-my_assignment_continuous &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_assignment.html">declare_assignment</a></span>(<span class="dt">assignment_function =</span> continuous_treatment_function)
+my_assignment_continuous &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_assignment.html">declare_assignment</a></span>(<span class="dt">handler =</span> continuous_treatment_function)
 
 my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_design.html">declare_design</a></span>(<span class="kw">my_population</span>(),
                             my_potential_outcomes_continuous,
@@ -376,14 +376,14 @@ my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
 <a href="#attrition" class="anchor"></a>Attrition</h1>
 <p>Attrition can be thought of as just another potential outcome. That is, one describe possible attrition processes, include them in the design, and see how estimation strategies are affected by these processes. Here is an example.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_potential_outcomes_attrition &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
-  <span class="dt">formula =</span> R <span class="op">~</span><span class="st"> </span><span class="kw">rbinom</span>(<span class="dt">n =</span> N, <span class="dt">size =</span> <span class="dv">1</span>, <span class="dt">prob =</span> <span class="kw">pnorm</span>(Y_Z_<span class="dv">0</span>)))
+  <span class="dt">formula =</span> R ~<span class="st"> </span><span class="kw">rbinom</span>(<span class="dt">n =</span> N, <span class="dt">size =</span> <span class="dv">1</span>, <span class="dt">prob =</span> <span class="kw">pnorm</span>(Y_Z_0)))
 
 my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_design.html">declare_design</a></span>(<span class="kw">my_population</span>(),
                             my_potential_outcomes,
                             my_potential_outcomes_attrition,
                             my_assignment,
-                            <span class="kw"><a href="../reference/reveal_outcomes.html">reveal_outcomes</a></span>(<span class="dt">outcome_variable_name =</span> <span class="st">"R"</span>),
-                            <span class="kw"><a href="../reference/reveal_outcomes.html">reveal_outcomes</a></span>(<span class="dt">attrition_variable_name =</span> <span class="st">"R"</span>))
+                            <span class="kw"><a href="../reference/reveal_outcomes.html">reveal_outcomes</a></span>(<span class="dt">outcome_variable_names =</span> <span class="st">"R"</span>),
+                            <span class="kw"><a href="../reference/reveal_outcomes.html">reveal_outcomes</a></span>(<span class="dt">attrition_variable_names =</span> <span class="st">"R"</span>))
 
 <span class="kw">head</span>(<span class="kw"><a href="../reference/post_design.html">draw_data</a></span>(my_design)[, <span class="kw">c</span>(<span class="st">"ID"</span>, <span class="st">"Y_Z_0"</span>, <span class="st">"Y_Z_1"</span>, <span class="st">"R_Z_0"</span>, <span class="st">"R_Z_1"</span>, <span class="st">"Z"</span>, <span class="st">"R"</span>, <span class="st">"Y"</span>)])</code></pre></div>
 <table class="table">
@@ -466,7 +466,7 @@ my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
 <a href="#stochastic-population-sizes" class="anchor"></a>Stochastic population sizes</h1>
 <p>The population (or any level of the population) can have stochastic population sizes. (In fact, N can be a number, a fixed vector of numbers, or an expression that returns a stochastic number or vector of numbers.)</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stochastic_population &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_population.html">declare_population</a></span>(
-  <span class="dt">N =</span> <span class="kw">sample</span>(<span class="dv">500</span><span class="op">:</span><span class="dv">1000</span>, <span class="dv">1</span>), <span class="dt">income =</span> <span class="kw">rnorm</span>(N), <span class="dt">age =</span> <span class="kw">sample</span>(<span class="dv">18</span><span class="op">:</span><span class="dv">95</span>, N, <span class="dt">replace =</span> <span class="ot">TRUE</span>))
+  <span class="dt">N =</span> <span class="kw">sample</span>(<span class="dv">500</span>:<span class="dv">1000</span>, <span class="dv">1</span>), <span class="dt">income =</span> <span class="kw">rnorm</span>(N), <span class="dt">age =</span> <span class="kw">sample</span>(<span class="dv">18</span>:<span class="dv">95</span>, N, <span class="dt">replace =</span> <span class="ot">TRUE</span>))
 
 <span class="kw">c</span>(<span class="kw">nrow</span>(<span class="kw">stochastic_population</span>()), 
   <span class="kw">nrow</span>(<span class="kw">stochastic_population</span>()), 
@@ -493,7 +493,7 @@ my_design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/d
 
 
       <footer><div class="copyright" style="flex:3;">
-  <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys.</p>
+  <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys, Neal Fultz.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 

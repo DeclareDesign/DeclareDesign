@@ -1,34 +1,40 @@
 ## ---- echo = FALSE, message = FALSE, error = FALSE, warning = FALSE, output = FALSE----
 library(DeclareDesign)
 set.seed(42)
+options(digits=2)
 
-## ------------------------------------------------------------------------
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_population <-
   declare_population(N = 1000,
   income = rnorm(N),
-  age = sample(18:95, N, replace = T))
+  age = sample(18:95, N, replace = TRUE))
 
 pop <- my_population()
 head(pop)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(pop))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_population_nested <- declare_population(
-  districts = level(N = 25, urban = sample(0:1, N, replace = TRUE)),
-  villages = level(N = 10, altitude = rnorm(N)),
-  individuals = level(N = sample(100:200, size = 250, replace = TRUE), 
+  districts = add_level(N = 25, urban = sample(0:1, N, replace = TRUE)),
+  villages = add_level(N = 10, altitude = rnorm(N)),
+  individuals = add_level(N = sample(100:200, size = 250, replace = TRUE), 
                       income = rnorm(N),
                       age = sample(18:95, N, replace = TRUE)))
 
-
-## ------------------------------------------------------------------------
+## ----echo=TRUE, results="hide"-------------------------------------------
 region_data <- data.frame(capital = c(1, 0, 0, 0, 0))
 pop_level_data <- declare_population(
-  regions = level(N = 2, gdp = runif(N)),
-  cities = level(N = 2, subways = rnorm(N, mean = 5)))
+  regions = add_level(N = 2, gdp = runif(N)),
+  cities = add_level(N = 2, subways = rnorm(N, mean = 5)))
 
 head(pop_level_data())
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(pop_level_data()))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 country_data <- data.frame(
   cow_code = c(504, 15, 100, 90),
   polity_iv = c(-9, 7, -1, 3))
@@ -36,25 +42,37 @@ pop_data <- declare_population(data = country_data)
 
 head(pop_data())
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(pop_data()))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 pop_data_bootstrap <- declare_population(
-  data = country_data, population_function = fabricatr::resample_data)
+  data = country_data, handler = fabricatr::resample_data)
 
 head(pop_data_bootstrap())
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(pop_data_bootstrap()))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_potential_outcomes <- declare_potential_outcomes(
   formula = Y ~ .25 * Z + .01 * age * Z)
 pop_pos <- my_potential_outcomes(pop)
 head(pop_pos)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(pop_pos))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_potential_outcomes <- declare_potential_outcomes(
   formula = Y ~ .25 * Z + .01 * age * Z,
   condition_names = 1:4)
 head(my_potential_outcomes(pop))
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(my_potential_outcomes(pop)))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_potential_outcomes <-
   declare_potential_outcomes(
     Y_Z_0 = .05,
@@ -62,27 +80,44 @@ my_potential_outcomes <-
 
 head(my_potential_outcomes(pop))
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(my_potential_outcomes(pop)))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_sampling <- declare_sampling(n = 250)
 smp <- my_sampling(pop_pos)
 nrow(smp)
 
-## ------------------------------------------------------------------------
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_assignment <- declare_assignment(m = 25)
 smp <- my_assignment(smp)
 table(smp$Z)
+
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(t(as.matrix(table(smp$Z))))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 head(smp)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(smp))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 my_estimand(pop_pos)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(my_estimand(pop_pos))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 smp <- reveal_outcomes(smp)
 my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
 my_estimator_dim(smp)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(my_estimator_dim(smp))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 my_estimator_lm <- 
   declare_estimator(Y ~ Z, 
                     model = lm_robust, 
@@ -91,160 +126,34 @@ my_estimator_lm <-
 
 my_estimator_lm(smp)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(my_estimator_lm(smp))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 design <- declare_design(my_population,
                          my_potential_outcomes,
                          my_estimand,
-                         dplyr::mutate(big_income = 5*income), 
                          my_sampling,
                          my_assignment,
                          reveal_outcomes,
                          my_estimator_dim)
 
-## ------------------------------------------------------------------------
+## ----echo=TRUE, results="hide"-------------------------------------------
 dat <- draw_data(design)
 head(dat)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(dat))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 get_estimates(design)
 
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(get_estimates(design))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 get_estimands(design)
 
-## ------------------------------------------------------------------------
-my_population_function <- function(N) {
-  data.frame(u = rnorm(N))
-}
-
-my_population_custom <- declare_population(
-  population_function = my_population_function, N = 100)
-
-pop_custom <- my_population_custom()
-
-head(pop_custom)
-
-## ------------------------------------------------------------------------
-my_potential_outcomes_function <-
-  function(data) {
-    data$Y_Z_0 <- with(data, u)
-    data$Y_Z_1 <- with(data, 0.25 + u)
-    data
-  }
-my_potential_outcomes_custom <- declare_potential_outcomes(
-  potential_outcomes_function = my_potential_outcomes_function
-)
-
-pop_pos_custom <- my_potential_outcomes_custom(pop_custom)
-
-head(pop_pos_custom[, c("u", "Y_Z_0", "Y_Z_1")])
-
-## ------------------------------------------------------------------------
-my_sampling_function <- function(data) {
-     data$S <- rbinom(n = nrow(data),
-            size = 1,
-            prob = 0.1)
-     data[data$S == 1, ]
-}
-
-my_sampling_custom <- declare_sampling(
-  sampling_function = my_sampling_function)
-
-smp_custom <- my_sampling_custom(pop_pos)
-
-nrow(smp_custom)
-
-## ------------------------------------------------------------------------
-my_assignment_function <- function(data) {
-  data$Z <- rbinom(n = nrow(data),
-         size = 1,
-         prob = 0.5)
-  data
-}
-my_assignment_custom <- declare_assignment(
-  assignment_function = my_assignment_function)
-
-table(my_assignment_custom(pop_pos)$Z)
-
-## ------------------------------------------------------------------------
-my_estimand_function <- function(data) {
-  with(data, median(Y_Z_1 - Y_Z_0))
-}
-my_estimand_custom <- declare_estimand(
-  estimand_function = my_estimand_function, label = medianTE)
-
-my_estimand_custom(pop_pos)
-
-## ------------------------------------------------------------------------
-my_estimator_function <- function(formula, data){
-  data.frame(est = with(data, mean(Y)))
-}
-
-my_estimator_custom <- 
-  declare_estimator(Y ~ Z, 
-                    estimator_function = my_estimator_function, 
-                    estimand = my_estimand)
-
-my_estimator_custom(smp)
-
-## ------------------------------------------------------------------------
-m_arm_trial <- function(numb){
-  my_population <- declare_population(
-    N = numb, income = rnorm(N), age = sample(18:95, N, replace = T))
-
-  my_potential_outcomes <- declare_potential_outcomes(
-    formula = Y ~ .25 * Z + .01 * age * Z)
-  my_sampling <- declare_sampling(n = 250)
-  my_assignment <- declare_assignment(m = 25)
-  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-  my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
-  my_design <- declare_design(my_population,
-                              my_potential_outcomes,
-                              my_estimand,
-                              my_sampling,
-                              my_assignment,
-                              reveal_outcomes,
-                              my_estimator_dim)
-  return(my_design)
-}
-
-my_1000_design <- quick_design(template = m_arm_trial, numb = 1000)
-head(draw_data(my_1000_design))
-
-## ------------------------------------------------------------------------
-my_potential_outcomes_continuous <- declare_potential_outcomes(
-  formula = Y ~ .25 * Z + .01 * age * Z, condition_names = seq(0, 1, by = .1))
-
-continuous_treatment_function <- function(data){
- data$Z <- sample(seq(0, 1, by = .1), size = nrow(data), replace = TRUE)
- data
-}
-
-my_assignment_continuous <- declare_assignment(assignment_function = continuous_treatment_function)
-
-my_design <- declare_design(my_population(),
-                            my_potential_outcomes_continuous,
-                            my_assignment_continuous,
-                            reveal_outcomes)
-
-head(draw_data(my_design))
-
-## ------------------------------------------------------------------------
-my_potential_outcomes_attrition <- declare_potential_outcomes(
-  formula = R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
-
-my_design <- declare_design(my_population(),
-                            my_potential_outcomes,
-                            my_potential_outcomes_attrition,
-                            my_assignment,
-                            reveal_outcomes(outcome_variable_name = "R"),
-                            reveal_outcomes(attrition_variable_name = "R"))
-
-head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
-
-## ------------------------------------------------------------------------
-stochastic_population <- declare_population(
-  N = sample(500:1000, 1), income = rnorm(N), age = sample(18:95, N, replace = TRUE))
-
-c(nrow(stochastic_population()), 
-  nrow(stochastic_population()), 
-  nrow(stochastic_population()))
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(get_estimands(design))
 

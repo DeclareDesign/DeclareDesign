@@ -124,7 +124,7 @@
     <div class="page-header">
       <h1>
         Reference
-        <small>version&nbsp;1.1.0</small>
+        <small>version&nbsp;0.3.0</small>
       </h1>
     </div>
 
@@ -146,21 +146,27 @@
         <tr>
           <!--  -->
           <td>
-            <p><code><a href="add_step.html">add_step</a></code> </p>
-          </td>
-          <td><p>Add a step to an existing design</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
             <p><code><a href="cite_design.html">cite_design</a></code> </p>
           </td>
           <td><p>Obtain the preferred citation for a design</p></td>
         </tr><tr>
           <!--  -->
           <td>
+            <p><code><a href="conduct_design.html">conduct_design</a></code> </p>
+          </td>
+          <td><p>Execute a design</p></td>
+        </tr><tr>
+          <!--  -->
+          <td>
             <p><code><a href="declare_assignment.html">declare_assignment</a></code> </p>
           </td>
           <td><p>Declare Assignment Procedure</p></td>
+        </tr><tr>
+          <!--  -->
+          <td>
+            <p><code><a href="declare_citation.html">declare_citation</a></code> <code><a href="declare_citation.html">citation_function_default</a></code> </p>
+          </td>
+          <td><p>Declare Research Study Citation</p></td>
         </tr><tr>
           <!--  -->
           <td>
@@ -182,7 +188,7 @@
         </tr><tr>
           <!--  -->
           <td>
-            <p><code><a href="declare_estimator.html">declare_estimator</a></code> </p>
+            <p><code><a href="declare_estimator.html">declare_estimator</a></code> <code><a href="declare_estimator.html">tidy_estimator</a></code> <code><a href="declare_estimator.html">estimator_handler</a></code> <code><a href="declare_estimator.html">estimator_handler_default</a></code> </p>
           </td>
           <td><p>Declare an Estimator</p></td>
         </tr><tr>
@@ -194,9 +200,15 @@
         </tr><tr>
           <!--  -->
           <td>
-            <p><code><a href="declare_potential_outcomes.html">declare_potential_outcomes</a></code> </p>
+            <p><code><a href="declare_potential_outcomes.html">declare_potential_outcomes</a></code> <code><a href="declare_potential_outcomes.html">potential_outcomes.formula</a></code> <code><a href="declare_potential_outcomes.html">potential_outcomes.default</a></code> </p>
           </td>
           <td><p>Potential Outcomes</p></td>
+        </tr><tr>
+          <!--  -->
+          <td>
+            <p><code><a href="declare_reveal.html">declare_reveal</a></code> </p>
+          </td>
+          <td><p>Declare a Reveal Outcomes step</p></td>
         </tr><tr>
           <!--  -->
           <td>
@@ -224,45 +236,27 @@
         </tr><tr>
           <!--  -->
           <td>
-            <p><code><a href="download_design.html">download_design</a></code> </p>
+            <p><code><a href="execution_st.html">execution_st</a></code> </p>
           </td>
-          <td><p>Get Design from the DeclareDesign Library of Research Designs</p></td>
+          <td><p>Build an execution strategy object</p></td>
         </tr><tr>
           <!--  -->
           <td>
-            <p><code><a href="download_template.html">download_template</a></code> </p>
+            <p><code><a href="fill_out.html">fill_out</a></code> <code><a href="fill_out.html">redesign</a></code> </p>
           </td>
-          <td><p>Get Design Template from the DeclareDesign Library of Research Designs</p></td>
+          <td><p>Declare a Design via a Template Function</p></td>
         </tr><tr>
           <!--  -->
           <td>
-            <p><code><a href="modify_design.html">modify_design</a></code> </p>
+            <p><code><a href="modify_design.html">insert_step</a></code> <code><a href="modify_design.html">delete_step</a></code> <code><a href="modify_design.html">replace_step</a></code> </p>
           </td>
-          <td><p>Modify a Design</p></td>
+          <td><p>Modify a design after the fact</p></td>
         </tr><tr>
           <!--  -->
           <td>
             <p><code><a href="post_design.html">draw_data</a></code> <code><a href="post_design.html">get_estimates</a></code> <code><a href="post_design.html">get_estimands</a></code> </p>
           </td>
           <td><p>Explore your design</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="quick_design.html">quick_design</a></code> </p>
-          </td>
-          <td><p>Declare a Design via a Template Function</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="remove_step.html">remove_step</a></code> </p>
-          </td>
-          <td><p>Remove a step from an existing design</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="replace_step.html">replace_step</a></code> </p>
-          </td>
-          <td><p>Replace a step in an existing design</p></td>
         </tr><tr>
           <!--  -->
           <td>
@@ -291,7 +285,7 @@
 
       <footer>
       <div class="copyright" style="flex:3;">
-  <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys.</p>
+  <p>Developed by Graeme Blair, Jasper Cooper, Alexander Coppock, Macartan Humphreys, Neal Fultz.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 
