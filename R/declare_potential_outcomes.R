@@ -69,7 +69,7 @@ potential_outcomes_function_default <-  function(..., data) {
 #' @param level a character specifying a level of hierarchy for fabricate to calculate at
 #' @param data a data.frame
 #' @importFrom fabricatr fabricate
-#' @importFrom rlang quos :=
+#' @importFrom rlang quos := !! !!!
 #' @rdname declare_potential_outcomes
 potential_outcomes.formula <-
   function(formula,

@@ -129,11 +129,7 @@ diagnose_design <-
 
   }
 
-#' @importFrom rlang !! !!!
-#' @importFrom foreach registerDoSEQ getDoParWorkers foreach %dopar%
-#' @importFrom doRNG %dorng%
-#' @importFrom doParallel registerDoParallel
-#' @importFrom parallel detectCores
+#' @importFrom future.apply future_lapply
 diagnose_design_single_design <-
   function(design,
            diagnosands = NULL,
@@ -143,13 +139,11 @@ diagnose_design_single_design <-
            parallel = TRUE,
            parallel_cores = detectCores(logical = TRUE)) {
 
-    if (parallel) {
-      registerDoParallel(cores = parallel_cores)
-    } else {
-      registerDoSEQ()
-    }
 
-    results_list <- foreach(i = seq_len(sims)) %dorng% conduct_design(design)
+
+    results_list <- future_lapply(seq_along(sims),
+                                  function(i) conduct_design(design),
+                                  future.seed = NA, future.globals = "design")
 
     results2x <- function(results_list, what) {
       subresult <- lapply(results_list, `[[`, what)
@@ -227,8 +221,10 @@ diagnose_design_single_design <-
         calculate_diagnosands(simulations_df[boot_indicies, , drop=FALSE], diagnosands)
       }
 
-      diagnosand_replicates <- foreach(i = seq_len(bootstrap_sims), .combine = rbind) %dorng%
-        boot_function()
+      diagnosand_replicates <- future_lapply(seq_len(bootstrap_sims),
+                                             boot_function,
+                                             future.seed = NA)
+      diagnosand_replicates <- do.call(rbind.data.frame, diagnosand_replicates)
 
       # diagnosand_replicates <-
       #   replicate(bootstrap_sims, expr = boot_function(), simplify = FALSE)
