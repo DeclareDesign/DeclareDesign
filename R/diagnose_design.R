@@ -141,7 +141,7 @@ diagnose_design_single_design <-
 
 
 
-    results_list <- future_lapply(seq_along(sims),
+    results_list <- future_lapply(seq_len(sims),
                                   function(i) conduct_design(design),
                                   future.seed = NA, future.globals = "design")
 
@@ -222,8 +222,9 @@ diagnose_design_single_design <-
       }
 
       diagnosand_replicates <- future_lapply(seq_len(bootstrap_sims),
-                                             boot_function,
-                                             future.seed = NA)
+                                             function(i) boot_function(), # this pattern seems to make the NSE happy for now
+                                             future.seed = NA,
+                                             future.globals="boot_function")
       diagnosand_replicates <- do.call(rbind.data.frame, diagnosand_replicates)
 
       # diagnosand_replicates <-
