@@ -63,31 +63,31 @@ declare_assignment <- make_declarations(assignment_function_default, "assignment
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo f_rhs
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
 assignment_function_default <-
-  function(data, ..., assignment_variable_name = Z, reveal="auto") {
+  function(data, ..., assignment_variable = Z, reveal="auto") {
     ## draw assignment
 
     options <- quos(...)
 
-    assignment_variable_name <- reveal_nse_helper(enquo(assignment_variable_name))
+    assignment_variable <- reveal_nse_helper(enquo(assignment_variable))
 
     ra_call <- quo(conduct_ra(!!! options))
     ra_call <- lang_modify(ra_call, N = nrow(data))
 
-    data[, assignment_variable_name] <- eval_tidy(ra_call, data = data)
+    data[, assignment_variable] <- eval_tidy(ra_call, data = data)
 
     ## obtain condition probabilities
 
     prob_call <- quo(obtain_condition_probabilities(!!! options))
-    prob_call <- lang_modify(prob_call, assignment = data[, assignment_variable_name])
+    prob_call <- lang_modify(prob_call, assignment = data[, assignment_variable])
 
-    data[, paste0(assignment_variable_name, "_cond_prob")] <-
+    data[, paste0(assignment_variable, "_cond_prob")] <-
       eval_tidy(prob_call, data = data)
 
     outcome <- attr(data, "outcome_variable_name")
     if(reveal == "auto"
        && is.character(outcome) &&
-       assignment_variable_name == attr(data, "assignment_variable_name")) {
-          data <- reveal_outcomes(data, !!outcome, !!assignment_variable_name)
+       assignment_variable == attr(data, "assignment_variable")) {
+          data <- reveal_outcomes(data, !!outcome, !!assignment_variable)
     }
 
     return(data)
@@ -108,9 +108,9 @@ validation_fn(assignment_function_default) <-   function(ret, dots, label){
     }
   }
 
-  if("assignment_variable_name" %in% names(dots)){
-    if (class(f_rhs(dots[["assignment_variable_name"]])) == "NULL") {
-      declare_time_error("Must provide assignment_variable_name.", ret)
+  if("assignment_variable" %in% names(dots)){
+    if (class(f_rhs(dots[["assignment_variable"]])) == "NULL") {
+      declare_time_error("Must provide assignment_variable.", ret)
     }
   }
 

@@ -50,7 +50,7 @@ test_that("test assignment and probability functions", {
 
   potential_outcomes <- declare_potential_outcomes(formula = Y ~ 5 + .5*(Z==1) + .9*(Z==2) + .2*Z*elevation + noise,
                                                    condition_names = c(0, 1, 2),
-                                                   assignment_variable_name = "Z")
+                                                   assignment_variable = "Z")
 
 
 #  population() %>% sampling() %>% potential_outcomes()
@@ -139,7 +139,7 @@ test_that("declare_assignment expected failures via validation fn", {
 
   expect_error(declare_assignment(clusters='character'), "clusters")
 
-  expect_error(declare_assignment(assignment_variable_name = NULL), "assignment_variable_name")
+  expect_error(declare_assignment(assignment_variable = NULL), "assignment_variable")
 })
 
 

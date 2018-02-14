@@ -58,12 +58,12 @@ declare_sampling <- make_declarations(sampling_function_default, "sampling")
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
 sampling_function_default <-
-  function(data, ..., sampling_variable_name = "S") {
+  function(data, ..., sampling_variable = "S") {
     ## draw sample
 
     options <- quos(...)
 
-    sampling_variable_name <- reveal_nse_helper(substitute(sampling_variable_name))
+    sampling_variable <- reveal_nse_helper(substitute(sampling_variable))
 
     rs_call <- quo(draw_rs(!!! options))
     rs_call <- lang_modify(rs_call, N = nrow(data))
@@ -75,7 +75,7 @@ sampling_function_default <-
     prob_call <- quo(obtain_inclusion_probabilities(!!! options))
     prob_call <- lang_modify(prob_call, N = nrow(data))
 
-    data[, paste0(sampling_variable_name, "_inclusion_prob")] <-
+    data[, paste0(sampling_variable, "_inclusion_prob")] <-
       eval_tidy(prob_call, data = data)
 
     ## subset to the sampled observations
@@ -97,9 +97,9 @@ validation_fn(sampling_function_default) <- function(ret, dots, label){
     }
   }
 
-  if ("sampling_variable_name" %in% names(dots)) {
-    if (class(f_rhs(dots[["sampling_variable_name"]])) == "NULL") {
-    declare_time_error("Must not provide NULL as sampling_variable_name.", ret)
+  if ("sampling_variable" %in% names(dots)) {
+    if (class(f_rhs(dots[["sampling_variable"]])) == "NULL") {
+    declare_time_error("Must not provide NULL as sampling_variable.", ret)
     }
   }
 

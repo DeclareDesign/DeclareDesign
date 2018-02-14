@@ -65,7 +65,7 @@ potential_outcomes_function_default <-  function(..., data) {
 
 #' @param formula a formula to calculate Potential outcomes as functions of assignment variables
 #' @param condition_names vector specifying the values the assignment variable can realize
-#' @param assignment_variable_name The name of the assignment variable
+#' @param assignment_variable The name of the assignment variable
 #' @param level a character specifying a level of hierarchy for fabricate to calculate at
 #' @param data a data.frame
 #' @importFrom fabricatr fabricate
@@ -75,7 +75,7 @@ potential_outcomes.formula <-
   function(formula,
            data,
            condition_names = c(0, 1),
-           assignment_variable_name = "Z",
+           assignment_variable = "Z",
            level = NULL) {
 
     level <- reveal_nse_helper(enquo(level))
@@ -88,10 +88,10 @@ potential_outcomes.formula <-
     condition_quos <- quos()
     expr = formula[[3]]
     for(cond in condition_names){
-      out_name <- paste(outcome_variable_name, assignment_variable_name, cond, sep = "_")
-      condition_quos <- c(condition_quos, quos(!!assignment_variable_name := !!cond, !!out_name := !!expr) )
+      out_name <- paste(outcome_variable_name, assignment_variable, cond, sep = "_")
+      condition_quos <- c(condition_quos, quos(!!assignment_variable := !!cond, !!out_name := !!expr) )
     }
-    condition_quos <- c(condition_quos, quos(!!assignment_variable_name := NULL))
+    condition_quos <- c(condition_quos, quos(!!assignment_variable := NULL))
 
     if(is.character(level)) {
       condition_quos <- quos(!!level := modify_level(!!!condition_quos))
@@ -101,7 +101,7 @@ potential_outcomes.formula <-
     structure(
       fabricate(data=data, !!!condition_quos),
       outcome_variable_name=outcome_variable_name,
-      assignment_variable_name=assignment_variable_name)
+      assignment_variable=assignment_variable)
 
 }
 

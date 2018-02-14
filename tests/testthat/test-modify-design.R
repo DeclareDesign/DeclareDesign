@@ -16,7 +16,7 @@ test_that("test modify declare design ", {
                            dplyr::mutate(q = 5),
                            my_assignment)
 
-  my_assignment_2 <- declare_assignment(m = 25, assignment_variable_name = "Z2")
+  my_assignment_2 <- declare_assignment(m = 25, assignment_variable = "Z2")
 
   expect_length(replace_step(design, new_step = my_assignment_2, step = my_assignment), 4)
 

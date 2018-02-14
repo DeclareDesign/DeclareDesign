@@ -65,7 +65,7 @@ test_that("Reveal Outcomes", {
   design <- declare_design(my_population,
                            my_potential_outcomes,
                            my_assignment,
-                           reveal_outcomes(assignment_variable_name = "Z",
+                           reveal_outcomes(assignment_variable = "Z",
                                            outcome_variable_name = "Y"))
 
   head(draw_data(design))
@@ -151,9 +151,9 @@ test_that("Single outcome, multiple assn", {
 
   # Factorial assignments
   assign_A <- declare_assignment(
-    block_var = blocks, assignment_variable_name = A)
+    block_var = blocks, assignment_variable = A)
   assign_B <- declare_assignment(
-    block_var = A + 10*as.numeric(blocks), assignment_variable_name = B)
+    block_var = A + 10*as.numeric(blocks), assignment_variable = B)
 
   design <- declare_design(
     population,
