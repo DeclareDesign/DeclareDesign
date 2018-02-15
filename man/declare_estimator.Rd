@@ -3,19 +3,18 @@
 \name{declare_estimator}
 \alias{declare_estimator}
 \alias{tidy_estimator}
+\alias{model_handler}
 \alias{estimator_handler}
-\alias{estimator_handler_default}
 \title{Declare an Estimator}
 \usage{
-declare_estimator(..., handler = estimator_handler_default,
-  label = "my_estimator")
+declare_estimator(..., handler = estimator_handler, label = "my_estimator")
 
 tidy_estimator(estimator_function)
 
-estimator_handler(data, ..., model = estimatr::difference_in_means,
+model_handler(data, ..., model = estimatr::difference_in_means,
   coefficient_name = Z)
 
-estimator_handler_default(data, ..., estimand = NULL, label)
+estimator_handler(data, ..., estimand = NULL, label)
 }
 \arguments{
 \item{...}{Arguments to the estimation function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.}
@@ -56,7 +55,7 @@ my_population <- declare_population(N = 100)
 
 my_potential_outcomes <- declare_potential_outcomes(
   formula = Y ~ .25 * Z,
-  condition_names = c(0, 1))
+  conditions = c(0, 1))
 
 my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 

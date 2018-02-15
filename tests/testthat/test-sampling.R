@@ -86,7 +86,7 @@ test_that("declare_assignment expected failures via validation fn", {
 
   expect_error(declare_sampling(clusters='character'), "clusters")
 
-  expect_error(declare_sampling(sampling_variable_name = NULL), "sampling_variable_name")
+  expect_error(declare_sampling(sampling_variable = NULL), "sampling_variable")
 })
 
 

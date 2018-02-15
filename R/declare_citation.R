@@ -10,7 +10,7 @@
 #' @export
 #'
 
-declare_citation <- make_declarations(citation_function_default, "citation", causal_type="citation", strictDataParam=FALSE)
+declare_citation <- make_declarations(citation_handler, "citation", causal_type="citation", strictDataParam=FALSE)
 
 #' @param title (optional) The title of the study, as a character string.
 #' @param authors (optional) The authors of the study, as a character string.
@@ -18,7 +18,7 @@ declare_citation <- make_declarations(citation_function_default, "citation", cau
 #' @param timestamp a timestamp to use in the citation
 #' @param citation (optional) The preferred citation for the design, as a character string. Either include the full citation in text, or paste a BibTeX entry. If title and authors are specified and you leave citation empty, a BibTeX entry will be created automatically.
 #' @rdname declare_citation
-citation_function_default <- function(data=stop("Don't evaluate data argument"), title=NULL, authors=NULL,
+citation_handler <- function(data=stop("Don't evaluate data argument"), title=NULL, authors=NULL,
                                       description = "Unpublished research design declaration.",
                                       timestamp = Sys.time(), citation=NULL) {
   if("bibentry" %in% class(citation)) return(citation)

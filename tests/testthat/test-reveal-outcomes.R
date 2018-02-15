@@ -57,16 +57,16 @@ test_that("Reveal Outcomes", {
   design <- declare_design(my_population,
                            my_potential_outcomes,
                            my_assignment,
-                           reveal_outcomes(assignment_variable_names = Z,
-                                           outcome_variable_names = Y))
+                           reveal_outcomes(assignment_variables = Z,
+                                           outcome_variables = Y))
 
   head(draw_data(design))
 
   design <- declare_design(my_population,
                            my_potential_outcomes,
                            my_assignment,
-                           reveal_outcomes(assignment_variable_name = "Z",
-                                           outcome_variable_name = "Y"))
+                           reveal_outcomes(assignment_variable = "Z",
+                                           outcome_variable = "Y"))
 
   head(draw_data(design))
 
@@ -77,20 +77,20 @@ test_that("reveal multiple outcomes works", {
   N <- 25
 
   my_population <- declare_population(N = N, noise = rnorm(N))
-  my_potential_outcomes1 <- declare_potential_outcomes(formula = Y1 ~ Z * .25, condition_names = c(0, 1))
-  my_potential_outcomes2 <- declare_potential_outcomes(formula = Y2 ~ Z * .5 + 3, condition_names = c(0, 1))
+  my_potential_outcomes1 <- declare_potential_outcomes(formula = Y1 ~ Z * .25, conditions = c(0, 1))
+  my_potential_outcomes2 <- declare_potential_outcomes(formula = Y2 ~ Z * .5 + 3, conditions = c(0, 1))
   my_assignment <- declare_assignment(m = 10)
 
   design <- declare_design(my_population,
                            my_potential_outcomes1, my_potential_outcomes2,
                            my_assignment,
-                           reveal_outcomes(outcome_variable_names = c(Y1, Y2)))
+                           reveal_outcomes(outcome_variables = c(Y1, Y2)))
   draw_data(design)
 
   design <- declare_design(my_population,
                            my_potential_outcomes1, my_potential_outcomes2,
                            my_assignment,
-                           reveal_outcomes(outcome_variable_names = c("Y1", "Y2")))
+                           reveal_outcomes(outcome_variables = c("Y1", "Y2")))
   draw_data(design)
 
 })
@@ -117,7 +117,7 @@ test_that("declare_reveal handler works", {
 test_that("missing PO stops",{
 
   expect_error(
-   reveal_outcomes(sleep, outcome_variable_names = foo, assignment_variable_names = extra)
+   reveal_outcomes(sleep, outcome_variables = foo, assignment_variables = extra)
   )
 })
 
@@ -151,15 +151,15 @@ test_that("Single outcome, multiple assn", {
 
   # Factorial assignments
   assign_A <- declare_assignment(
-    block_var = blocks, assignment_variable_name = A)
+    block_var = blocks, assignment_variable = A)
   assign_B <- declare_assignment(
-    block_var = A + 10*as.numeric(blocks), assignment_variable_name = B)
+    block_var = A + 10*as.numeric(blocks), assignment_variable = B)
 
   design <- declare_design(
     population,
     potential_outcomes,
     assign_A,   assign_B,
-    reveal_outcomes(outcome_variable_names = Y, assignment_variable_names = c(A,B))
+    reveal_outcomes(outcome_variables = Y, assignment_variables = c(A,B))
   )
 
   dd <- draw_data(design)

@@ -49,8 +49,8 @@ test_that("test assignment and probability functions", {
   sampling <- declare_sampling(n = 10, clusters = villages)
 
   potential_outcomes <- declare_potential_outcomes(formula = Y ~ 5 + .5*(Z==1) + .9*(Z==2) + .2*Z*elevation + noise,
-                                                   condition_names = c(0, 1, 2),
-                                                   assignment_variable_name = "Z")
+                                                   conditions = c(0, 1, 2),
+                                                   assignment_variable = "Z")
 
 
 #  population() %>% sampling() %>% potential_outcomes()
@@ -58,25 +58,25 @@ test_that("test assignment and probability functions", {
 
   # Complete Random Assignment assignments
   assignment_0 <- declare_assignment() # blug
-  assignment_1 <- declare_assignment(condition_names = c(0, 1))
-  assignment_2 <- declare_assignment(m = 60, condition_names = c(0, 1))
+  assignment_1 <- declare_assignment(conditions = c(0, 1))
+  assignment_2 <- declare_assignment(m = 60, conditions = c(0, 1))
   assignment_3 <- declare_assignment(m_each = c(20, 30, 50), reveal = FALSE)
-  assignment_4 <- declare_assignment(m_each =c(20, 80), condition_names = c(0, 1))
+  assignment_4 <- declare_assignment(m_each =c(20, 80), conditions = c(0, 1))
   assignment_5 <- declare_assignment(prob_each = c(.2, .3, .5), reveal=FALSE)
 
   # Blocked assignments
   assignment_6 <- declare_assignment(blocks = ideo_3)
   assignment_7 <- declare_assignment(blocks = ideo_3, prob_each = c(.3, .6, .1), reveal=FALSE)
-  assignment_8 <- declare_assignment(blocks = ideo_3, condition_names = c(0, 1))
+  assignment_8 <- declare_assignment(blocks = ideo_3, conditions = c(0, 1))
 
   assignment_9 <- declare_assignment(blocks = ideo_3,
-                                       condition_names = c(0, 1),
+                                       conditions = c(0, 1),
                                        block_m = c(10, 10, 10))
 
 
   # Clustered assignments
   assignment_10 <- declare_assignment(clusters = villages)
-  assignment_11 <- declare_assignment(clusters = villages, condition_names = c(0, 1))
+  assignment_11 <- declare_assignment(clusters = villages, conditions = c(0, 1))
   assignment_12 <- declare_assignment(clusters = villages, prob_each = c(.1, .3, .6), reveal=FALSE)
 
   # Blocked and Clustered assignments
@@ -84,7 +84,7 @@ test_that("test assignment and probability functions", {
                                       blocks = high_elevation)
 
   assignment_14 <- declare_assignment(clusters = villages,
-                                      blocks = high_elevation, condition_names = c(0,1))
+                                      blocks = high_elevation, conditions = c(0,1))
   assignment_15 <- declare_assignment(clusters = villages,
                                       blocks = high_elevation, prob_each = c(.1, .3, .6), reveal=FALSE)
 
@@ -139,7 +139,7 @@ test_that("declare_assignment expected failures via validation fn", {
 
   expect_error(declare_assignment(clusters='character'), "clusters")
 
-  expect_error(declare_assignment(assignment_variable_name = NULL), "assignment_variable_name")
+  expect_error(declare_assignment(assignment_variable = NULL), "assignment_variable")
 })
 
 

@@ -4,8 +4,7 @@
 \alias{declare_estimand}
 \title{Declare Estimand}
 \usage{
-declare_estimand(..., handler = estimand_function_default,
-  label = "my_estimand")
+declare_estimand(..., handler = estimand_handler, label = "my_estimand")
 }
 \arguments{
 \item{...}{Arguments to the estimand function. For example, you might specify ATE = mean(Y_Z_1 - Y_Z_0), which would declare the estimand to be named ATE and to be the mean of the difference in the control and treatment potential outcome.}
@@ -26,7 +25,7 @@ my_population <- declare_population(N = 100)
 
 my_potential_outcomes <- declare_potential_outcomes(
   formula = Y ~ .25 * Z,
-  condition_names = c(0, 1))
+  conditions = c(0, 1))
 
 df <- my_potential_outcomes(my_population())
 

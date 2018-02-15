@@ -242,13 +242,13 @@ test_that("tidy_estimator, handler does not take data", {
   expect_error(tidy_estimator(I), "function with a data argument")
 })
 
-test_that("estimator_handler runs directly", {
+test_that("model_handler runs directly", {
 
   golden <- structure(list(coefficient_name = "group2", est = 1.58, se = 0.849091017238762,
   p = 0.0791867142159381, ci_lower = -0.203874032287599, ci_upper = 3.3638740322876), .Names = c("coefficient_name",
                                                                                                                 "est", "se", "p", "ci_lower", "ci_upper"), row.names = 2L, class = "data.frame")
 
-  result <- estimator_handler(sleep, extra~group, model=lm, coefficient_name = "group2")
+  result <- model_handler(sleep, extra~group, model=lm, coefficient_name = "group2")
 
   expect_equal(result, golden)
 })

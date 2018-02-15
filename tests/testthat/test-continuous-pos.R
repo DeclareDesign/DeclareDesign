@@ -5,7 +5,7 @@ test_that("you can do continuous POs", {
     N = 100, income = rnorm(N), age = sample(18:95, N, replace = T))
 
   my_potential_outcomes <- declare_potential_outcomes(
-    formula = Y ~ .25 * Z + .01 * age * Z, condition_names = seq(0, 1, by = .1))
+    formula = Y ~ .25 * Z + .01 * age * Z, conditions = seq(0, 1, by = .1))
 
   continuous_treatment_function <- function(data){
     data$Z <- sample(seq(0, 1, by = .1), size = nrow(data), replace = TRUE)

@@ -51,7 +51,7 @@ test_that("demo runs", {
   ## ------------------------------------------------------------------------
   my_potential_outcomes <- declare_potential_outcomes(
     formula = Y ~ .25 * Z + .01 * age * Z,
-    condition_names = 1:4)
+    conditions = 1:4)
   head(my_potential_outcomes(pop))
 
   ## ------------------------------------------------------------------------
@@ -209,7 +209,7 @@ test_that("demo runs", {
 
   ## ------------------------------------------------------------------------
   my_potential_outcomes_continuous <- declare_potential_outcomes(
-    formula = Y ~ .25 * Z + .01 * age * Z, condition_names = seq(0, 1, by = .1))
+    formula = Y ~ .25 * Z + .01 * age * Z, conditions = seq(0, 1, by = .1))
 
   continuous_treatment_function <- function(data){
     data$Z <- sample(seq(0, 1, by = .1), size = nrow(data), replace = TRUE)
@@ -233,8 +233,8 @@ test_that("demo runs", {
                               my_potential_outcomes,
                               my_potential_outcomes_attrition,
                               my_assignment,
-                              reveal_outcomes(outcome_variable_names = "R"),
-                              reveal_outcomes(attrition_variable_names = "R"))
+                              reveal_outcomes(outcome_variables = "R"),
+                              reveal_outcomes(attrition_variables = "R"))
 
   head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
 

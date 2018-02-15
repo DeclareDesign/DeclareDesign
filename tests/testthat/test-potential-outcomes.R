@@ -106,7 +106,7 @@ test_that("PO as a formula works", {
       ))
 
   ##debugonce(DeclareDesign:::potential_outcomes_function_formula)
-  #debugonce(DeclareDesign:::potential_outcomes_function_default)
+  #debugonce(DeclareDesign:::potential_outcomes_handler)
 
 
     head(my_potential_outcomes_explicit(pop))

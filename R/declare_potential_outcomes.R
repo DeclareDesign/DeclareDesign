@@ -45,18 +45,18 @@
 #'  pop_pos <- my_potential_outcomes(pop)
 #'  head(pop_pos)
 #'
-#'  # condition_names defines the "range" of the potential outcomes function
+#'  # conditions defines the "range" of the potential outcomes function
 #'  my_potential_outcomes <-
 #'       declare_potential_outcomes(
 #'       formula = Y ~ .25 * Z + .01 * age * Z,
-#'       condition_names = 1:4)
+#'       conditions = 1:4)
 #'
 #' head(my_potential_outcomes(pop))
 #'
-declare_potential_outcomes <- make_declarations(potential_outcomes_function_default, "potential_outcomes");
+declare_potential_outcomes <- make_declarations(potential_outcomes_handler, "potential_outcomes");
 
 
-potential_outcomes_function_default <-  function(..., data) {
+potential_outcomes_handler <-  function(..., data) {
     # redispatch on formula
     potential_outcomes <- function(formula=NULL, ...) UseMethod("potential_outcomes", formula)
     potential_outcomes(..., data=data)
@@ -64,8 +64,8 @@ potential_outcomes_function_default <-  function(..., data) {
 
 
 #' @param formula a formula to calculate Potential outcomes as functions of assignment variables
-#' @param condition_names vector specifying the values the assignment variable can realize
-#' @param assignment_variable_name The name of the assignment variable
+#' @param conditions vector specifying the values the assignment variable can realize
+#' @param assignment_variable The name of the assignment variable
 #' @param level a character specifying a level of hierarchy for fabricate to calculate at
 #' @param data a data.frame
 #' @importFrom fabricatr fabricate
@@ -74,24 +74,24 @@ potential_outcomes_function_default <-  function(..., data) {
 potential_outcomes.formula <-
   function(formula,
            data,
-           condition_names = c(0, 1),
-           assignment_variable_name = "Z",
+           conditions = c(0, 1),
+           assignment_variable = "Z",
            level = NULL) {
 
     level <- reveal_nse_helper(enquo(level))
 
-    outcome_variable_name <- as.character(formula[[2]])
+    outcome_variable <- as.character(formula[[2]])
 
 
     # Build a fabricate call -
     # fabricate( Z=1, Y_Z_1=f(Z), Z=2, Y_Z_2=f(Z), ..., Z=NULL)
     condition_quos <- quos()
     expr = formula[[3]]
-    for(cond in condition_names){
-      out_name <- paste(outcome_variable_name, assignment_variable_name, cond, sep = "_")
-      condition_quos <- c(condition_quos, quos(!!assignment_variable_name := !!cond, !!out_name := !!expr) )
+    for(cond in conditions){
+      out_name <- paste(outcome_variable, assignment_variable, cond, sep = "_")
+      condition_quos <- c(condition_quos, quos(!!assignment_variable := !!cond, !!out_name := !!expr) )
     }
-    condition_quos <- c(condition_quos, quos(!!assignment_variable_name := NULL))
+    condition_quos <- c(condition_quos, quos(!!assignment_variable := NULL))
 
     if(is.character(level)) {
       condition_quos <- quos(!!level := modify_level(!!!condition_quos))
@@ -100,8 +100,8 @@ potential_outcomes.formula <-
 
     structure(
       fabricate(data=data, !!!condition_quos),
-      outcome_variable_name=outcome_variable_name,
-      assignment_variable_name=assignment_variable_name)
+      outcome_variable=outcome_variable,
+      assignment_variable=assignment_variable)
 
 }
 
