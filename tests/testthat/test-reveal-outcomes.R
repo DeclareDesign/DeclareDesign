@@ -66,7 +66,7 @@ test_that("Reveal Outcomes", {
                            my_potential_outcomes,
                            my_assignment,
                            reveal_outcomes(assignment_variable = "Z",
-                                           outcome_variable_name = "Y"))
+                                           outcome_variable = "Y"))
 
   head(draw_data(design))
 

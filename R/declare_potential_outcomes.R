@@ -80,7 +80,7 @@ potential_outcomes.formula <-
 
     level <- reveal_nse_helper(enquo(level))
 
-    outcome_variable_name <- as.character(formula[[2]])
+    outcome_variable <- as.character(formula[[2]])
 
 
     # Build a fabricate call -
@@ -88,7 +88,7 @@ potential_outcomes.formula <-
     condition_quos <- quos()
     expr = formula[[3]]
     for(cond in conditions){
-      out_name <- paste(outcome_variable_name, assignment_variable, cond, sep = "_")
+      out_name <- paste(outcome_variable, assignment_variable, cond, sep = "_")
       condition_quos <- c(condition_quos, quos(!!assignment_variable := !!cond, !!out_name := !!expr) )
     }
     condition_quos <- c(condition_quos, quos(!!assignment_variable := NULL))
@@ -100,7 +100,7 @@ potential_outcomes.formula <-
 
     structure(
       fabricate(data=data, !!!condition_quos),
-      outcome_variable_name=outcome_variable_name,
+      outcome_variable=outcome_variable,
       assignment_variable=assignment_variable)
 
 }

@@ -83,7 +83,7 @@ assignment_handler <-
     data[, paste0(assignment_variable, "_cond_prob")] <-
       eval_tidy(prob_call, data = data)
 
-    outcome <- attr(data, "outcome_variable_name")
+    outcome <- attr(data, "outcome_variable")
     if(reveal == "auto"
        && is.character(outcome) &&
        assignment_variable == attr(data, "assignment_variable")) {
