@@ -111,7 +111,7 @@
 <h1 class="hasAnchor">
 <a href="#custom-population" class="anchor"></a>Custom Population</h1>
 <p>You can use a custom function to generate your population entirely on your own, too:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_population_function &lt;-<span class="st"> </span>function(N) {
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_population_function &lt;-<span class="st"> </span><span class="cf">function</span>(N) {
   <span class="kw">data.frame</span>(<span class="dt">u =</span> <span class="kw">rnorm</span>(N))
 }
 
@@ -151,9 +151,9 @@ pop_custom &lt;-<span class="st"> </span><span class="kw">my_population_custom</
 <h1 class="hasAnchor">
 <a href="#custom-potential-outcomes" class="anchor"></a>Custom Potential Outcomes</h1>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_potential_outcomes_function &lt;-
-<span class="st">  </span>function(data) {
-    data$Y_Z_0 &lt;-<span class="st"> </span><span class="kw">with</span>(data, u)
-    data$Y_Z_1 &lt;-<span class="st"> </span><span class="kw">with</span>(data, <span class="fl">0.25</span> +<span class="st"> </span>u)
+<span class="st">  </span><span class="cf">function</span>(data) {
+    data<span class="op">$</span>Y_Z_<span class="dv">0</span> &lt;-<span class="st"> </span><span class="kw">with</span>(data, u)
+    data<span class="op">$</span>Y_Z_<span class="dv">1</span> &lt;-<span class="st"> </span><span class="kw">with</span>(data, <span class="fl">0.25</span> <span class="op">+</span><span class="st"> </span>u)
     data
   }
 my_potential_outcomes_custom &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
@@ -207,11 +207,11 @@ pop_pos_custom &lt;-<span class="st"> </span><span class="kw">my_potential_outco
 <h1 class="hasAnchor">
 <a href="#custom-sampling" class="anchor"></a>Custom Sampling</h1>
 <p>Again, you can still use a custom sampling function easily. In this case, the requirement is simply that the function takes population data and returns sampled data. You can also include inclusion weights if you wish in the function (as the default function does).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_sampling_function &lt;-<span class="st"> </span>function(data) {
-     data$S &lt;-<span class="st"> </span><span class="kw">rbinom</span>(<span class="dt">n =</span> <span class="kw">nrow</span>(data),
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_sampling_function &lt;-<span class="st"> </span><span class="cf">function</span>(data) {
+     data<span class="op">$</span>S &lt;-<span class="st"> </span><span class="kw">rbinom</span>(<span class="dt">n =</span> <span class="kw">nrow</span>(data),
             <span class="dt">size =</span> <span class="dv">1</span>,
             <span class="dt">prob =</span> <span class="fl">0.1</span>)
-     data[data$S ==<span class="st"> </span><span class="dv">1</span>, ]
+     data[data<span class="op">$</span>S <span class="op">==</span><span class="st"> </span><span class="dv">1</span>, ]
 }
 
 my_sampling_custom &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_sampling.html">declare_sampling</a></span>(
@@ -225,8 +225,8 @@ smp_custom &lt;-<span class="st"> </span><span class="kw">my_sampling_custom</sp
 <div id="custom-assignment" class="section level1">
 <h1 class="hasAnchor">
 <a href="#custom-assignment" class="anchor"></a>Custom Assignment</h1>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_assignment_function &lt;-<span class="st"> </span>function(data) {
-  data$Z &lt;-<span class="st"> </span><span class="kw">rbinom</span>(<span class="dt">n =</span> <span class="kw">nrow</span>(data),
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_assignment_function &lt;-<span class="st"> </span><span class="cf">function</span>(data) {
+  data<span class="op">$</span>Z &lt;-<span class="st"> </span><span class="kw">rbinom</span>(<span class="dt">n =</span> <span class="kw">nrow</span>(data),
          <span class="dt">size =</span> <span class="dv">1</span>,
          <span class="dt">prob =</span> <span class="fl">0.5</span>)
   data
@@ -234,7 +234,7 @@ smp_custom &lt;-<span class="st"> </span><span class="kw">my_sampling_custom</sp
 my_assignment_custom &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_assignment.html">declare_assignment</a></span>(
   <span class="dt">handler =</span> my_assignment_function)
 
-<span class="kw">table</span>(<span class="kw">my_assignment_custom</span>(pop_pos)$Z)</code></pre></div>
+<span class="kw">table</span>(<span class="kw">my_assignment_custom</span>(pop_pos)<span class="op">$</span>Z)</code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="right">0</th>
@@ -250,10 +250,10 @@ my_assignment_custom &lt;-<span class="st"> </span><span class="kw"><a href="../
 <h1 class="hasAnchor">
 <a href="#custom-estimand" class="anchor"></a>Custom Estimand</h1>
 <p>Handlers can also make use of labels, if it’s declared as an argument to the custom handler function.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_estimand_function &lt;-<span class="st"> </span>function(data, label) {
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_estimand_function &lt;-<span class="st"> </span><span class="cf">function</span>(data, label) {
     <span class="kw">data.frame</span>(
       <span class="dt">estimand_label=</span>label,
-      <span class="dt">estimand=</span><span class="kw">with</span>(data, <span class="kw">median</span>(Y_Z_1 -<span class="st"> </span>Y_Z_0))
+      <span class="dt">estimand=</span><span class="kw">with</span>(data, <span class="kw">median</span>(Y_Z_<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>Y_Z_<span class="dv">0</span>))
     )
 }
 my_estimand_custom &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(
@@ -275,7 +275,7 @@ my_estimand_custom &lt;-<span class="st"> </span><span class="kw"><a href="../re
 <h1 class="hasAnchor">
 <a href="#custom-estimator" class="anchor"></a>Custom Estimator</h1>
 <p>Custom estimators are slightly different - the default handler itself calls a model function. To implement a new handler, you can use the tidy_estimator wrapper to handle the bookkeeping associated with estimator and estimand labeling.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_estimator_function &lt;-<span class="st"> </span>function(data){
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_estimator_function &lt;-<span class="st"> </span><span class="cf">function</span>(data){
   <span class="kw">data.frame</span>(<span class="dt">est =</span> <span class="kw">with</span>(data, <span class="kw">mean</span>(Y)))
 }
 

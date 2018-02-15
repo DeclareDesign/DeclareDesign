@@ -129,7 +129,7 @@
     <p>Declare Assignment Procedure</p>
     
 
-    <pre class="usage"><span class='fu'>declare_assignment</span>(<span class='no'>...</span>, <span class='kw'>handler</span> <span class='kw'>=</span> <span class='no'>assignment_function_default</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>declare_assignment</span>(<span class='no'>...</span>, <span class='kw'>handler</span> <span class='kw'>=</span> <span class='no'>assignment_handler</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -154,7 +154,7 @@
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>While declare_assignment can work with any assignment_function that takes data and returns data, most random assignment procedures can be easily implemented with randomizr. The arguments to <code>conduct_ra</code> can include N, block_var, clust_var, m, m_each, prob, prob_each, block_m, block_m_each = NULL, block_prob, block_prob_each, num_arms, and condition_names. The arguments you need to specify are different for different designs. Check the help files for <code>complete_ra</code>, <code>block_ra</code>, <code>cluster_ra</code>, or <code>block_and_cluster_ra</code> for details on how to execute many common designs.</p>
+    <p>While declare_assignment can work with any assignment_function that takes data and returns data, most random assignment procedures can be easily implemented with randomizr. The arguments to <code>conduct_ra</code> can include N, block_var, clust_var, m, m_each, prob, prob_each, block_m, block_m_each = NULL, block_prob, block_prob_each, num_arms, and conditions. The arguments you need to specify are different for different designs. Check the help files for <code>complete_ra</code>, <code>block_ra</code>, <code>cluster_ra</code>, or <code>block_and_cluster_ra</code> for details on how to execute many common designs.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>

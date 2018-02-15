@@ -129,8 +129,7 @@
     <p>Declare Estimand</p>
     
 
-    <pre class="usage"><span class='fu'>declare_estimand</span>(<span class='no'>...</span>, <span class='kw'>handler</span> <span class='kw'>=</span> <span class='no'>estimand_function_default</span>,
-  <span class='kw'>label</span> <span class='kw'>=</span> <span class='st'>"my_estimand"</span>)</pre>
+    <pre class="usage"><span class='fu'>declare_estimand</span>(<span class='no'>...</span>, <span class='kw'>handler</span> <span class='kw'>=</span> <span class='no'>estimand_handler</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='st'>"my_estimand"</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -160,7 +159,7 @@
 
 <span class='no'>my_potential_outcomes</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_potential_outcomes.html'>declare_potential_outcomes</a></span>(
   <span class='kw'>formula</span> <span class='kw'>=</span> <span class='no'>Y</span> ~ <span class='fl'>.25</span> * <span class='no'>Z</span>,
-  <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0</span>, <span class='fl'>1</span>))
+  <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0</span>, <span class='fl'>1</span>))
 
 <span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'>my_potential_outcomes</span>(<span class='fu'>my_population</span>())
 

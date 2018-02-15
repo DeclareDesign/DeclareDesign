@@ -147,17 +147,17 @@ population &lt;-<span class="st"> </span><span class="kw"><a href="../reference/
  <span class="dt">N =</span> N, <span class="dt">noise =</span> <span class="kw">rnorm</span>(N), <span class="dt">treatment_effect =</span> <span class="kw">rnorm</span>(N, <span class="dt">mean =</span> tau, <span class="dt">sd =</span> sigma))
 potential_outcomes &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
     <span class="dt">Y_Z_0 =</span> noise, 
-    <span class="dt">Y_Z_1 =</span> noise +<span class="st"> </span>treatment_effect)
+    <span class="dt">Y_Z_1 =</span> noise <span class="op">+</span><span class="st"> </span>treatment_effect)
 
 <span class="co"># Inquiry ----------------------------------------------------------------------</span>
-estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(<span class="dt">ATE =</span> <span class="kw">mean</span>(Y_Z_1 -<span class="st"> </span>Y_Z_0))
+estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(<span class="dt">ATE =</span> <span class="kw">mean</span>(Y_Z_<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>Y_Z_<span class="dv">0</span>))
 
 <span class="co"># Data Strategy ----------------------------------------------------------------</span>
 sampling &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_sampling.html">declare_sampling</a></span>(<span class="dt">n =</span> n)
 assignment &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_assignment.html">declare_assignment</a></span>(<span class="dt">m =</span> m)
 
 <span class="co"># Answer Strategy --------------------------------------------------------------</span>
-estimator &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y ~<span class="st"> </span>Z, <span class="dt">estimand =</span> estimand)
+estimator &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y <span class="op">~</span><span class="st"> </span>Z, <span class="dt">estimand =</span> estimand)
 
 <span class="co"># Design -----------------------------------------------------------------------</span>
 two_arm &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_design.html">declare_design</a></span>(population, potential_outcomes, sampling, 

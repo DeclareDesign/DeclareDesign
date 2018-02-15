@@ -149,20 +149,20 @@ population &lt;-<span class="st"> </span><span class="kw"><a href="../reference/
 
 potential_outcomes &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
   <span class="dt">Y_Z_T1 =</span> noise,
-  <span class="dt">Y_Z_T2 =</span> noise +<span class="st"> </span>beta_A,
-  <span class="dt">Y_Z_T3 =</span> noise +<span class="st"> </span>beta_B,
-  <span class="dt">Y_Z_T4 =</span> noise +<span class="st"> </span>beta_A +<span class="st"> </span>beta_B +<span class="st"> </span>beta_AB)
+  <span class="dt">Y_Z_T2 =</span> noise <span class="op">+</span><span class="st"> </span>beta_A,
+  <span class="dt">Y_Z_T3 =</span> noise <span class="op">+</span><span class="st"> </span>beta_B,
+  <span class="dt">Y_Z_T4 =</span> noise <span class="op">+</span><span class="st"> </span>beta_A <span class="op">+</span><span class="st"> </span>beta_B <span class="op">+</span><span class="st"> </span>beta_AB)
 
 <span class="co"># Inquiry ----------------------------------------------------------------------</span>
 estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(
-  <span class="dt">interaction =</span> <span class="kw">mean</span>((Y_Z_T4 -<span class="st"> </span>Y_Z_T3) -<span class="st"> </span>(Y_Z_T2 -<span class="st"> </span>Y_Z_T1)), 
+  <span class="dt">interaction =</span> <span class="kw">mean</span>((Y_Z_T4 <span class="op">-</span><span class="st"> </span>Y_Z_T3) <span class="op">-</span><span class="st"> </span>(Y_Z_T2 <span class="op">-</span><span class="st"> </span>Y_Z_T1)), 
   <span class="dt">label =</span> <span class="st">"interaction"</span>)
 
 <span class="co"># Data Strategy ----------------------------------------------------------------</span>
 assignment &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_assignment.html">declare_assignment</a></span>(<span class="dt">num_arms =</span> <span class="dv">4</span>)
 
 <span class="co"># Answer Strategy --------------------------------------------------------------</span>
-estimator &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y ~<span class="st"> </span>A +<span class="st"> </span>B +<span class="st"> </span>A:B,
+estimator &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(Y <span class="op">~</span><span class="st"> </span>A <span class="op">+</span><span class="st"> </span>B <span class="op">+</span><span class="st"> </span>A<span class="op">:</span>B,
                                <span class="dt">model =</span> lm_robust,
                                <span class="dt">coefficient_name =</span> <span class="st">"A:B"</span>, 
                                <span class="dt">estimand =</span> estimand)
@@ -173,8 +173,8 @@ design &lt;-<span class="st"> </span><span class="kw"><a href="../reference/decl
   potential_outcomes,
   estimand,
   assignment,
-  dplyr::<span class="kw">mutate</span>(<span class="dt">A =</span> <span class="kw">as.numeric</span>(Z %in%<span class="st"> </span><span class="kw">c</span>(<span class="st">"T2"</span>, <span class="st">"T4"</span>)),
-                <span class="dt">B =</span> <span class="kw">as.numeric</span>(Z %in%<span class="st"> </span><span class="kw">c</span>(<span class="st">"T3"</span>, <span class="st">"T4"</span>))),
+  dplyr<span class="op">::</span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>(<span class="dt">A =</span> <span class="kw">as.numeric</span>(Z <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">"T2"</span>, <span class="st">"T4"</span>)),
+                <span class="dt">B =</span> <span class="kw">as.numeric</span>(Z <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">"T3"</span>, <span class="st">"T4"</span>))),
   reveal_outcomes,
   estimator)</code></pre></div>
 </div>

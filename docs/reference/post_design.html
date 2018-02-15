@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>DeclareDesign - Explore your design — post_design</title>
+<title>DeclareDesign - Explore your design — summary.design</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -129,7 +129,10 @@
     <p>Explore your design</p>
     
 
-    <pre class="usage"><span class='fu'>draw_data</span>(<span class='no'>design</span>)
+    <pre class="usage"><span class='co'># S3 method for design</span>
+<span class='fu'>summary</span>(<span class='no'>object</span>, <span class='no'>...</span>)
+
+<span class='fu'>draw_data</span>(<span class='no'>design</span>)
 
 <span class='fu'>get_estimates</span>(<span class='no'>design</span>)
 
@@ -139,6 +142,14 @@
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
+      <th>object</th>
+      <td><p>a design object created by <code><a href='declare_design.html'>declare_design</a></code></p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>optional arguments to be sent to summary function</p></td>
+    </tr>
+    <tr>
       <th>design</th>
       <td><p>A design created by <code><a href='declare_design.html'>declare_design</a></code>.</p></td>
     </tr>
@@ -146,7 +157,140 @@
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>my_population</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_population.html'>declare_population</a></span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>500</span>, <span class='kw'>noise</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='no'>N</span>))
+    <pre class="examples"><div class='input'>
+<span class='no'>my_population</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_population.html'>declare_population</a></span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>500</span>, <span class='kw'>noise</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='no'>N</span>))
+
+<span class='no'>my_potential_outcomes</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_potential_outcomes.html'>declare_potential_outcomes</a></span>(
+  <span class='kw'>Y_Z_0</span> <span class='kw'>=</span> <span class='no'>noise</span>, <span class='kw'>Y_Z_1</span> <span class='kw'>=</span> <span class='no'>noise</span> +
+  <span class='fu'>rnorm</span>(<span class='no'>N</span>, <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>2</span>))
+
+<span class='no'>my_sampling</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_sampling.html'>declare_sampling</a></span>(<span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>250</span>)
+
+<span class='no'>my_assignment</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_assignment.html'>declare_assignment</a></span>(<span class='kw'>m</span> <span class='kw'>=</span> <span class='fl'>25</span>)
+
+<span class='no'>my_estimand</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_estimand.html'>declare_estimand</a></span>(<span class='kw'>ATE</span> <span class='kw'>=</span> <span class='fu'>mean</span>(<span class='no'>Y_Z_1</span> - <span class='no'>Y_Z_0</span>))
+
+<span class='no'>my_estimator</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_estimator.html'>declare_estimator</a></span>(<span class='no'>Y</span> ~ <span class='no'>Z</span>, <span class='kw'>estimand</span> <span class='kw'>=</span> <span class='no'>my_estimand</span>)
+
+<span class='no'>design</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_design.html'>declare_design</a></span>(<span class='no'>my_population</span>,
+                         <span class='no'>my_potential_outcomes</span>,
+                         <span class='no'>my_sampling</span>,
+                         <span class='no'>my_estimand</span>,
+                         <span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span>(<span class='kw'>noise_sq</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>),
+                         <span class='no'>my_assignment</span>,
+                         <span class='no'>reveal_outcomes</span>,
+                         <span class='no'>my_estimator</span>)
+
+<span class='fu'>summary</span>(<span class='no'>design</span>)</div><div class='output co'>#&gt; 
+#&gt; Design Summary
+#&gt; 
+#&gt; Step 1 (population): declare_population(N = 500, noise = rnorm(N)) -------------
+#&gt; 
+#&gt; N = 500 
+#&gt; 
+#&gt; Added variable: ID 
+#&gt;  N_missing N_unique     class
+#&gt;          0      500 character
+#&gt; 
+#&gt; Added variable: noise 
+#&gt;    min median  mean  max sd N_missing N_unique
+#&gt;  -3.17  -0.04 -0.01 3.59  1         0      500
+#&gt; 
+#&gt; Step 2 (potential outcomes): declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N,     mean = 2, sd = 2)) 
+#&gt; 
+#&gt; Added variable: Y_Z_0 
+#&gt;    min median  mean  max sd N_missing N_unique
+#&gt;  -3.17  -0.04 -0.01 3.59  1         0      500
+#&gt; 
+#&gt; Added variable: Y_Z_1 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -4.87   1.79 1.79 8.95 2.22         0      500
+#&gt; 
+#&gt; Step 3 (sampling): declare_sampling(n = 250) -----------------------------------
+#&gt; 
+#&gt; N = 250 (250 subtracted) 
+#&gt; 
+#&gt; Added variable: S_inclusion_prob 
+#&gt;   0.5
+#&gt;   250
+#&gt;  1.00
+#&gt; 
+#&gt; Altered variable: ID 
+#&gt;   Before: 
+#&gt;  N_missing N_unique     class
+#&gt;          0      500 character
+#&gt; 
+#&gt;   After:
+#&gt;  N_missing N_unique     class
+#&gt;          0      250 character
+#&gt; 
+#&gt; Altered variable: noise 
+#&gt;   Before: 
+#&gt;    min median  mean  max sd N_missing N_unique
+#&gt;  -3.17  -0.04 -0.01 3.59  1         0      500
+#&gt; 
+#&gt;   After:
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.62  -0.06 0.03 2.76 0.98         0      250
+#&gt; 
+#&gt; Altered variable: Y_Z_0 
+#&gt;   Before: 
+#&gt;    min median  mean  max sd N_missing N_unique
+#&gt;  -3.17  -0.04 -0.01 3.59  1         0      500
+#&gt; 
+#&gt;   After:
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.62  -0.06 0.03 2.76 0.98         0      250
+#&gt; 
+#&gt; Altered variable: Y_Z_1 
+#&gt;   Before: 
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -4.87   1.79 1.79 8.95 2.22         0      500
+#&gt; 
+#&gt;   After:
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -4.87   1.92 1.79 8.46 2.22         0      250
+#&gt; 
+#&gt; Step 4 (estimand): declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) -----------------
+#&gt; 
+#&gt; A single draw of the estimand:
+#&gt;  estimand_label estimand
+#&gt;             ATE 1.764987
+#&gt; 
+#&gt; Step 5 (wrapped): ~dplyr::mutate(noise_sq = noise^2) ---------------------------
+#&gt; 
+#&gt; Added variable: noise_sq 
+#&gt;  min median mean  max   sd N_missing N_unique
+#&gt;    0   0.44 0.96 7.64 1.39         0      250
+#&gt; 
+#&gt; Step 6 (assignment): declare_assignment(m = 25) --------------------------------
+#&gt; 
+#&gt; Added variable: Z 
+#&gt;     0    1
+#&gt;   225   25
+#&gt;  0.90 0.10
+#&gt; 
+#&gt; Added variable: Z_cond_prob 
+#&gt;   0.1  0.9
+#&gt;    25  225
+#&gt;  0.10 0.90
+#&gt; 
+#&gt; Step 7 (reveal outcomes): reveal_outcomes() ------------------------------------
+#&gt; 
+#&gt; Added variable: Y 
+#&gt;    min median mean max   sd N_missing N_unique
+#&gt;  -3.85  -0.02 0.16 6.6 1.33         0      250
+#&gt; 
+#&gt; Step 8 (estimator): declare_estimator(Y ~ Z, estimand = my_estimand) -----------
+#&gt; 
+#&gt; Formula: Y ~ Z 
+#&gt; 
+#&gt; A single draw of the estimator:
+#&gt;  estimator_label coefficient_name      est        se          p  ci_lower
+#&gt;     my_estimator                Z 1.481748 0.5438306 0.01164498 0.3610407
+#&gt;  ci_upper estimand_label
+#&gt;  2.602455            ATE
+#&gt; </div><div class='input'><span class='no'>my_population</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_population.html'>declare_population</a></span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>500</span>, <span class='kw'>noise</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='no'>N</span>))
 
 <span class='no'>my_potential_outcomes</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_potential_outcomes.html'>declare_potential_outcomes</a></span>(
   <span class='kw'>Y_Z_0</span> <span class='kw'>=</span> <span class='no'>noise</span>, <span class='kw'>Y_Z_1</span> <span class='kw'>=</span> <span class='no'>noise</span> +
@@ -181,18 +325,18 @@
 #&gt;          0      500 character
 #&gt; 
 #&gt; Added variable: noise 
-#&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -3.17  -0.07 -0.04 3.59 1.02         0      500
+#&gt;   min median mean  max   sd N_missing N_unique
+#&gt;  -3.4  -0.02    0 3.13 0.99         0      500
 #&gt; 
 #&gt; Step 2 (potential outcomes): declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N,     mean = 2, sd = 2)) 
 #&gt; 
 #&gt; Added variable: Y_Z_0 
-#&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -3.17  -0.07 -0.04 3.59 1.02         0      500
+#&gt;   min median mean  max   sd N_missing N_unique
+#&gt;  -3.4  -0.02    0 3.13 0.99         0      500
 #&gt; 
 #&gt; Added variable: Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -4.18   1.86 1.88 8.87 2.18         0      500
+#&gt;  -4.38   2.06 2.03 7.88 2.14         0      500
 #&gt; 
 #&gt; Step 3 (sampling): declare_sampling(n = 250) -----------------------------------
 #&gt; 
@@ -214,42 +358,42 @@
 #&gt; 
 #&gt; Altered variable: noise 
 #&gt;   Before: 
-#&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -3.17  -0.07 -0.04 3.59 1.02         0      500
+#&gt;   min median mean  max   sd N_missing N_unique
+#&gt;  -3.4  -0.02    0 3.13 0.99         0      500
 #&gt; 
 #&gt;   After:
-#&gt;    min median  mean max   sd N_missing N_unique
-#&gt;  -3.17  -0.08 -0.06 2.5 1.07         0      250
+#&gt;   min median mean  max   sd N_missing N_unique
+#&gt;  -3.4      0 0.01 3.13 1.04         0      250
 #&gt; 
 #&gt; Altered variable: Y_Z_0 
 #&gt;   Before: 
-#&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -3.17  -0.07 -0.04 3.59 1.02         0      500
+#&gt;   min median mean  max   sd N_missing N_unique
+#&gt;  -3.4  -0.02    0 3.13 0.99         0      500
 #&gt; 
 #&gt;   After:
-#&gt;    min median  mean max   sd N_missing N_unique
-#&gt;  -3.17  -0.08 -0.06 2.5 1.07         0      250
+#&gt;   min median mean  max   sd N_missing N_unique
+#&gt;  -3.4      0 0.01 3.13 1.04         0      250
 #&gt; 
 #&gt; Altered variable: Y_Z_1 
 #&gt;   Before: 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -4.18   1.86 1.88 8.87 2.18         0      500
+#&gt;  -4.38   2.06 2.03 7.88 2.14         0      500
 #&gt; 
 #&gt;   After:
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.08   1.79 1.84 7.15 2.15         0      250
+#&gt;   min median mean  max   sd N_missing N_unique
+#&gt;  -3.3   2.15 2.15 7.88 2.11         0      250
 #&gt; 
 #&gt; Step 4 (estimand): declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) -----------------
 #&gt; 
 #&gt; A single draw of the estimand:
 #&gt;  estimand_label estimand
-#&gt;             ATE 1.895835
+#&gt;             ATE 2.137114
 #&gt; 
 #&gt; Step 5 (wrapped): ~dplyr::mutate(noise_sq = noise^2) ---------------------------
 #&gt; 
 #&gt; Added variable: noise_sq 
 #&gt;  min median mean   max   sd N_missing N_unique
-#&gt;    0    0.6 1.14 10.02 1.56         0      250
+#&gt;    0   0.45 1.09 11.59 1.64         0      250
 #&gt; 
 #&gt; Step 6 (assignment): declare_assignment(m = 25) --------------------------------
 #&gt; 
@@ -266,18 +410,18 @@
 #&gt; Step 7 (reveal outcomes): reveal_outcomes() ------------------------------------
 #&gt; 
 #&gt; Added variable: Y 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.17  -0.01 0.15 5.47 1.31         0      250
+#&gt;   min median mean  max   sd N_missing N_unique
+#&gt;  -3.4   0.13 0.24 5.73 1.37         0      250
 #&gt; 
 #&gt; Step 8 (estimator): declare_estimator(Y ~ Z, estimand = my_estimand) -----------
 #&gt; 
 #&gt; Formula: Y ~ Z 
 #&gt; 
 #&gt; A single draw of the estimator:
-#&gt;  estimator_label coefficient_name      est        se            p ci_lower
-#&gt;     my_estimator                Z 1.873539 0.3974622 7.399343e-05 1.055951
+#&gt;  estimator_label coefficient_name     est        se            p ci_lower
+#&gt;     my_estimator                Z 2.17774 0.4367293 3.746964e-05  1.27879
 #&gt;  ci_upper estimand_label
-#&gt;  2.691127            ATE
+#&gt;   3.07669            ATE
 #&gt; </div><div class='input'>
 <span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'>draw_data</span>(<span class='no'>design</span>)
 

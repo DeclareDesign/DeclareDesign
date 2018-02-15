@@ -131,15 +131,14 @@
     <code>tidy_estimator</code> takes an untidy estimation function, and returns a tidy handler which accepts standard labelling options.</p>
     
 
-    <pre class="usage"><span class='fu'>declare_estimator</span>(<span class='no'>...</span>, <span class='kw'>handler</span> <span class='kw'>=</span> <span class='no'>estimator_handler_default</span>,
-  <span class='kw'>label</span> <span class='kw'>=</span> <span class='st'>"my_estimator"</span>)
+    <pre class="usage"><span class='fu'>declare_estimator</span>(<span class='no'>...</span>, <span class='kw'>handler</span> <span class='kw'>=</span> <span class='no'>estimator_handler</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='st'>"my_estimator"</span>)
 
 <span class='fu'>tidy_estimator</span>(<span class='no'>estimator_function</span>)
 
-<span class='fu'>estimator_handler</span>(<span class='no'>data</span>, <span class='no'>...</span>, <span class='kw'>model</span> <span class='kw'>=</span> <span class='kw pkg'>estimatr</span><span class='kw ns'>::</span><span class='no'><a href='http://www.rdocumentation.org/packages/estimatr/topics/difference_in_means'>difference_in_means</a></span>,
+<span class='fu'>model_handler</span>(<span class='no'>data</span>, <span class='no'>...</span>, <span class='kw'>model</span> <span class='kw'>=</span> <span class='kw pkg'>estimatr</span><span class='kw ns'>::</span><span class='no'><a href='http://www.rdocumentation.org/packages/estimatr/topics/difference_in_means'>difference_in_means</a></span>,
   <span class='kw'>coefficient_name</span> <span class='kw'>=</span> <span class='no'>Z</span>)
 
-<span class='fu'>estimator_handler_default</span>(<span class='no'>data</span>, <span class='no'>...</span>, <span class='kw'>estimand</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>label</span>)</pre>
+<span class='fu'>estimator_handler</span>(<span class='no'>data</span>, <span class='no'>...</span>, <span class='kw'>estimand</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>label</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -195,7 +194,7 @@
 
 <span class='no'>my_potential_outcomes</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_potential_outcomes.html'>declare_potential_outcomes</a></span>(
   <span class='kw'>formula</span> <span class='kw'>=</span> <span class='no'>Y</span> ~ <span class='fl'>.25</span> * <span class='no'>Z</span>,
-  <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0</span>, <span class='fl'>1</span>))
+  <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0</span>, <span class='fl'>1</span>))
 
 <span class='no'>my_estimand</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_estimand.html'>declare_estimand</a></span>(<span class='kw'>ATE</span> <span class='kw'>=</span> <span class='fu'>mean</span>(<span class='no'>Y_Z_1</span> - <span class='no'>Y_Z_0</span>))
 

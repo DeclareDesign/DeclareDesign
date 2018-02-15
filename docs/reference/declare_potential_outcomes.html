@@ -129,10 +129,10 @@
     <p>Potential Outcomes</p>
     
 
-    <pre class="usage"><span class='fu'>declare_potential_outcomes</span>(<span class='no'>...</span>, <span class='kw'>handler</span> <span class='kw'>=</span> <span class='no'>potential_outcomes_function_default</span>,
+    <pre class="usage"><span class='fu'>declare_potential_outcomes</span>(<span class='no'>...</span>, <span class='kw'>handler</span> <span class='kw'>=</span> <span class='no'>potential_outcomes_handler</span>,
   <span class='kw'>label</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
-<span class='fu'>potential_outcomes.formula</span>(<span class='no'>formula</span>, <span class='no'>data</span>, <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0</span>, <span class='fl'>1</span>),
+<span class='fu'>potential_outcomes.formula</span>(<span class='no'>formula</span>, <span class='no'>data</span>, <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0</span>, <span class='fl'>1</span>),
   <span class='kw'>assignment_variable</span> <span class='kw'>=</span> <span class='st'>"Z"</span>, <span class='kw'>level</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
 <span class='fu'>potential_outcomes.default</span>(<span class='kw'>formula</span> <span class='kw'>=</span> <span class='fu'>stop</span>(<span class='st'>"Not provided"</span>), <span class='no'>...</span>, <span class='no'>data</span>,
@@ -162,7 +162,7 @@
       <td><p>a data.frame</p></td>
     </tr>
     <tr>
-      <th>condition_names</th>
+      <th>conditions</th>
       <td><p>vector specifying the values the assignment variable can realize</p></td>
     </tr>
     <tr>
@@ -220,11 +220,11 @@
 #&gt; 4 0004 -0.1707637  71     0  0.96
 #&gt; 5 0005  0.5745204  40     0  0.65
 #&gt; 6 0006 -0.5342050  44     0  0.69</div><div class='input'>
- <span class='co'># condition_names defines the "range" of the potential outcomes function</span>
+ <span class='co'># conditions defines the "range" of the potential outcomes function</span>
  <span class='no'>my_potential_outcomes</span> <span class='kw'>&lt;-</span>
       <span class='fu'>declare_potential_outcomes</span>(
       <span class='kw'>formula</span> <span class='kw'>=</span> <span class='no'>Y</span> ~ <span class='fl'>.25</span> * <span class='no'>Z</span> + <span class='fl'>.01</span> * <span class='no'>age</span> * <span class='no'>Z</span>,
-      <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>4</span>)
+      <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>4</span>)
 
 <span class='fu'>head</span>(<span class='fu'>my_potential_outcomes</span>(<span class='no'>pop</span>))</div><div class='output co'>#&gt;     ID     income age Y_Z_1 Y_Z_2 Y_Z_3 Y_Z_4
 #&gt; 1 0001 -0.4349032  30  0.55  1.10  1.65  2.20

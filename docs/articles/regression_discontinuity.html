@@ -149,29 +149,29 @@ bandwidth &lt;-<span class="st"> </span>cutoff
 tau &lt;-<span class="st"> </span>.<span class="dv">15</span>
 poly_order &lt;-<span class="st"> </span><span class="dv">4</span>
 <span class="co"># Model -------------------------------------------------------------------</span>
-control &lt;-<span class="st"> </span>function(X) {
-  <span class="kw">as.vector</span>(<span class="kw">poly</span>(X, <span class="dv">4</span>, <span class="dt">raw =</span> T) %*%<span class="st"> </span><span class="kw">c</span>(.<span class="dv">7</span>, -.<span class="dv">8</span>, .<span class="dv">5</span>, <span class="dv">1</span>))}
-treatment &lt;-<span class="st"> </span>function(X) {
-  <span class="kw">as.vector</span>(<span class="kw">poly</span>(X, <span class="dv">4</span>, <span class="dt">raw =</span> T) %*%<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>, -<span class="fl">1.5</span>, .<span class="dv">5</span>, .<span class="dv">8</span>)) +<span class="st"> </span>tau}
+control &lt;-<span class="st"> </span><span class="cf">function</span>(X) {
+  <span class="kw">as.vector</span>(<span class="kw">poly</span>(X, <span class="dv">4</span>, <span class="dt">raw =</span> T) <span class="op">%*%</span><span class="st"> </span><span class="kw">c</span>(.<span class="dv">7</span>, <span class="op">-</span>.<span class="dv">8</span>, .<span class="dv">5</span>, <span class="dv">1</span>))}
+treatment &lt;-<span class="st"> </span><span class="cf">function</span>(X) {
+  <span class="kw">as.vector</span>(<span class="kw">poly</span>(X, <span class="dv">4</span>, <span class="dt">raw =</span> T) <span class="op">%*%</span><span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>, <span class="op">-</span><span class="fl">1.5</span>, .<span class="dv">5</span>, .<span class="dv">8</span>)) <span class="op">+</span><span class="st"> </span>tau}
 population &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_population.html">declare_population</a></span>(
   <span class="dt">N =</span> N,
-  <span class="dt">X =</span> <span class="kw">runif</span>(N,<span class="dv">0</span>,<span class="dv">1</span>) -<span class="st"> </span>cutoff,
+  <span class="dt">X =</span> <span class="kw">runif</span>(N,<span class="dv">0</span>,<span class="dv">1</span>) <span class="op">-</span><span class="st"> </span>cutoff,
   <span class="dt">noise =</span> <span class="kw">rnorm</span>(N,<span class="dv">0</span>,.<span class="dv">1</span>),
-  <span class="dt">Z =</span> <span class="dv">1</span> *<span class="st"> </span>(X &gt;<span class="st"> </span><span class="dv">0</span>))
+  <span class="dt">Z =</span> <span class="dv">1</span> <span class="op">*</span><span class="st"> </span>(X <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>))
 potential_outcomes &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_potential_outcomes.html">declare_potential_outcomes</a></span>(
-  <span class="dt">Y_Z_0 =</span> <span class="kw">control</span>(X) +<span class="st"> </span>noise,
-  <span class="dt">Y_Z_1 =</span> <span class="kw">treatment</span>(X) +<span class="st"> </span>noise)
+  <span class="dt">Y_Z_0 =</span> <span class="kw">control</span>(X) <span class="op">+</span><span class="st"> </span>noise,
+  <span class="dt">Y_Z_1 =</span> <span class="kw">treatment</span>(X) <span class="op">+</span><span class="st"> </span>noise)
 
 <span class="co"># Inquiry -----------------------------------------------------------------</span>
-estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(<span class="dt">LATE =</span> <span class="kw">treatment</span>(<span class="dv">0</span>) -<span class="st"> </span><span class="kw">control</span>(<span class="dv">0</span>))
+estimand &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimand.html">declare_estimand</a></span>(<span class="dt">LATE =</span> <span class="kw">treatment</span>(<span class="dv">0</span>) <span class="op">-</span><span class="st"> </span><span class="kw">control</span>(<span class="dv">0</span>))
 
 <span class="co"># Data Strategy -----------------------------------------------------------</span>
-sampling &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_sampling.html">declare_sampling</a></span>(<span class="dt">handler =</span> function(data){
-  <span class="kw">subset</span>(data,(X &gt;<span class="st"> </span><span class="dv">0</span> -<span class="st"> </span>bandwidth) &amp;<span class="st">     </span>X &lt;<span class="st"> </span><span class="dv">0</span> +<span class="st"> </span>bandwidth)})
+sampling &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_sampling.html">declare_sampling</a></span>(<span class="dt">handler =</span> <span class="cf">function</span>(data){
+  <span class="kw">subset</span>(data,(X <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span> <span class="op">-</span><span class="st"> </span>bandwidth) <span class="op">&amp;</span><span class="st">     </span>X <span class="op">&lt;</span><span class="st"> </span><span class="dv">0</span> <span class="op">+</span><span class="st"> </span>bandwidth)})
 
 <span class="co"># Answer Strategy ---------------------------------------------------------</span>
 estimator &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_estimator.html">declare_estimator</a></span>(
-  <span class="dt">formula =</span> Y ~<span class="st"> </span><span class="kw">poly</span>(X, poly_order) *<span class="st"> </span>Z,
+  <span class="dt">formula =</span> Y <span class="op">~</span><span class="st"> </span><span class="kw">poly</span>(X, poly_order) <span class="op">*</span><span class="st"> </span>Z,
   <span class="dt">model =</span> lm,
   <span class="dt">estimand =</span> estimand)
 

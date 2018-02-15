@@ -129,11 +129,10 @@
     <p>Declare Research Study Citation</p>
     
 
-    <pre class="usage"><span class='fu'>declare_citation</span>(<span class='no'>...</span>, <span class='kw'>handler</span> <span class='kw'>=</span> <span class='no'>citation_function_default</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+    <pre class="usage"><span class='fu'>declare_citation</span>(<span class='no'>...</span>, <span class='kw'>handler</span> <span class='kw'>=</span> <span class='no'>citation_handler</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
-<span class='fu'>citation_function_default</span>(<span class='kw'>data</span> <span class='kw'>=</span> <span class='fu'>stop</span>(<span class='st'>"Don't evaluate data argument"</span>),
-  <span class='kw'>title</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>authors</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>description</span> <span class='kw'>=</span> <span class='st'>"Unpublished research design declaration."</span>,
+<span class='fu'>citation_handler</span>(<span class='kw'>data</span> <span class='kw'>=</span> <span class='fu'>stop</span>(<span class='st'>"Don't evaluate data argument"</span>), <span class='kw'>title</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>authors</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>description</span> <span class='kw'>=</span> <span class='st'>"Unpublished research design declaration."</span>,
   <span class='kw'>timestamp</span> <span class='kw'>=</span> <span class='fu'>Sys.time</span>(), <span class='kw'>citation</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>

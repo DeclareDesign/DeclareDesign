@@ -66,7 +66,7 @@ knitr::kable(head(pop_pos))
 ## ----echo=TRUE, results="hide"-------------------------------------------
 my_potential_outcomes <- declare_potential_outcomes(
   formula = Y ~ .25 * Z + .01 * age * Z,
-  condition_names = 1:4)
+  conditions = 1:4)
 head(my_potential_outcomes(pop))
 
 ## ----echo=FALSE----------------------------------------------------------

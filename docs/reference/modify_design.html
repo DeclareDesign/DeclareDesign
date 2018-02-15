@@ -196,18 +196,18 @@
 #&gt;          0      100 character
 #&gt; 
 #&gt; Added variable: noise 
-#&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -1.91  -0.12 -0.06 1.89 0.84         0      100
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.77    0.1 0.02 2.69 1.03         0      100
 #&gt; 
 #&gt; Step 2 (potential outcomes): declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N,     mean = 2, sd = 2)) 
 #&gt; 
 #&gt; Added variable: Y_Z_0 
-#&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -1.91  -0.12 -0.06 1.89 0.84         0      100
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -2.77    0.1 0.02 2.69 1.03         0      100
 #&gt; 
 #&gt; Added variable: Y_Z_1 
-#&gt;    min median mean max   sd N_missing N_unique
-#&gt;  -3.68   2.13 2.21   7 2.18         0      100
+#&gt;  min median mean  max   sd N_missing N_unique
+#&gt;   -4    1.7 1.83 7.47 2.33         0      100
 #&gt; 
 #&gt; Step 3 (assignment): declare_assignment(m = 50) --------------------------------
 #&gt; 
@@ -235,17 +235,17 @@
 #&gt; 
 #&gt; Added variable: noise 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -2.77    0.1 0.02 2.69 1.03         0      100
+#&gt;  -2.76   0.09 0.07 3.45 1.13         0      100
 #&gt; 
 #&gt; Step 2 (potential outcomes): declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N,     mean = 2, sd = 2)) 
 #&gt; 
 #&gt; Added variable: Y_Z_0 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -2.77    0.1 0.02 2.69 1.03         0      100
+#&gt;  -2.76   0.09 0.07 3.45 1.13         0      100
 #&gt; 
 #&gt; Added variable: Y_Z_1 
-#&gt;  min median mean  max   sd N_missing N_unique
-#&gt;   -4    1.7 1.83 7.47 2.33         0      100
+#&gt;    min median mean  max   sd N_missing N_unique
+#&gt;  -1.61   2.11 2.01 6.69 1.93         0      100
 #&gt; 
 #&gt; Step 3 (assignment): declare_assignment(m = 50) --------------------------------
 #&gt; 
@@ -262,8 +262,8 @@
 #&gt; Step 4 (wrapped): ~dplyr::mutate(income = noise^2) -----------------------------
 #&gt; 
 #&gt; Added variable: income 
-#&gt;  min median mean  max  sd N_missing N_unique
-#&gt;    0   0.32 1.04 7.69 1.5         0      100
+#&gt;  min median mean   max   sd N_missing N_unique
+#&gt;    0   0.77 1.26 11.92 1.82         0      100
 #&gt; </div><div class='input'> <span class='fu'>insert_step</span>(<span class='no'>design</span>, <span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span>(<span class='kw'>income</span> <span class='kw'>=</span> <span class='no'>noise</span>^<span class='fl'>2</span>), <span class='kw'>before</span> <span class='kw'>=</span> <span class='no'>my_assignment</span>)</div><div class='output co'>#&gt; 
 #&gt; Design Summary
 #&gt; 
@@ -276,24 +276,24 @@
 #&gt;          0      100 character
 #&gt; 
 #&gt; Added variable: noise 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -2.76   0.09 0.07 3.45 1.13         0      100
+#&gt;   min median  mean  max   sd N_missing N_unique
+#&gt;  -2.8   0.07 -0.03 1.84 0.91         0      100
 #&gt; 
 #&gt; Step 2 (potential outcomes): declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N,     mean = 2, sd = 2)) 
 #&gt; 
 #&gt; Added variable: Y_Z_0 
-#&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -2.76   0.09 0.07 3.45 1.13         0      100
+#&gt;   min median  mean  max   sd N_missing N_unique
+#&gt;  -2.8   0.07 -0.03 1.84 0.91         0      100
 #&gt; 
 #&gt; Added variable: Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -1.61   2.11 2.01 6.69 1.93         0      100
+#&gt;  -3.84   2.13 2.08 8.32 2.35         0      100
 #&gt; 
 #&gt; Step 3 (wrapped): ~dplyr::mutate(income = noise^2) -----------------------------
 #&gt; 
 #&gt; Added variable: income 
-#&gt;  min median mean   max   sd N_missing N_unique
-#&gt;    0   0.77 1.26 11.92 1.82         0      100
+#&gt;  min median mean  max  sd N_missing N_unique
+#&gt;    0   0.46 0.83 7.86 1.2         0      100
 #&gt; 
 #&gt; Step 4 (assignment): declare_assignment(m = 50) --------------------------------
 #&gt; 
@@ -320,18 +320,18 @@
 #&gt;          0      100 character
 #&gt; 
 #&gt; Added variable: noise 
-#&gt;   min median  mean  max   sd N_missing N_unique
-#&gt;  -2.8   0.07 -0.03 1.84 0.91         0      100
+#&gt;    min median  mean max   sd N_missing N_unique
+#&gt;  -2.49  -0.01 -0.09 2.2 0.92         0      100
 #&gt; 
 #&gt; Step 2 (potential outcomes): declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N,     mean = 2, sd = 2)) 
 #&gt; 
 #&gt; Added variable: Y_Z_0 
-#&gt;   min median  mean  max   sd N_missing N_unique
-#&gt;  -2.8   0.07 -0.03 1.84 0.91         0      100
+#&gt;    min median  mean max   sd N_missing N_unique
+#&gt;  -2.49  -0.01 -0.09 2.2 0.92         0      100
 #&gt; 
 #&gt; Added variable: Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -3.84   2.13 2.08 8.32 2.35         0      100
+#&gt;  -3.73   1.96 2.07 7.18 2.24         0      100
 #&gt; </div><div class='input'> <span class='fu'>replace_step</span>(<span class='no'>design</span>, <span class='no'>my_assignment</span>, <span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span>(<span class='kw'>words</span><span class='kw'>=</span><span class='st'>"HIARYLAH"</span>))</div><div class='output co'>#&gt; 
 #&gt; Design Summary
 #&gt; 
@@ -344,18 +344,18 @@
 #&gt;          0      100 character
 #&gt; 
 #&gt; Added variable: noise 
-#&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -2.49  -0.07 -0.16 2.07 0.99         0      100
+#&gt;    min median  mean max   sd N_missing N_unique
+#&gt;  -3.11  -0.25 -0.13 2.3 1.07         0      100
 #&gt; 
 #&gt; Step 2 (potential outcomes): declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N,     mean = 2, sd = 2)) 
 #&gt; 
 #&gt; Added variable: Y_Z_0 
-#&gt;    min median  mean  max   sd N_missing N_unique
-#&gt;  -2.49  -0.07 -0.16 2.07 0.99         0      100
+#&gt;    min median  mean max   sd N_missing N_unique
+#&gt;  -3.11  -0.25 -0.13 2.3 1.07         0      100
 #&gt; 
 #&gt; Added variable: Y_Z_1 
 #&gt;    min median mean  max   sd N_missing N_unique
-#&gt;  -2.44    1.9 2.13 5.95 1.86         0      100
+#&gt;  -5.34   1.81 1.82 7.13 2.06         0      100
 #&gt; 
 #&gt; Step 3 (wrapped): ~dplyr::mutate(words = "HIARYLAH") ---------------------------
 #&gt; 
