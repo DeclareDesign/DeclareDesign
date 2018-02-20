@@ -60,7 +60,7 @@ test_that("Noncompliance", {
   df <- draw_data(design)
   cace_estimator(df)
 
-  diagnose_design(design, sims = 2, bootstrap = FALSE, parallel = FALSE)
+  diagnose_design(design, sims = 2, bootstrap = FALSE)
 
 
 })

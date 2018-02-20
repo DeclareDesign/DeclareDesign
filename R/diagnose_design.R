@@ -53,14 +53,8 @@
 #' @importFrom stats setNames
 #' @importFrom utils head
 #' @export
-diagnose_design <-
-  function(...,
-           diagnosands = default_diagnosands,
-           sims = 500,
-           bootstrap = TRUE,
-           bootstrap_sims = 100,
-           parallel = TRUE,
-           parallel_cores = detectCores(logical = TRUE)) {
+diagnose_design <- function(..., diagnosands = default_diagnosands,
+                                 sims = 500, bootstrap = 100) {
 
     designs <- list(...)
 
@@ -87,69 +81,53 @@ diagnose_design <-
 
     if (is.null(names(designs))) {
       names(designs) <- inferred_names
-    } else{
-      names(designs)[names(designs) == ""] <-
-        inferred_names[names(designs) == ""]
+    } else {
+      names(designs)[names(designs) == ""] <- inferred_names[names(designs) == ""]
+    }
+
+    if(length(designs) == 1) {
+      out <- diagnose_design_single_design(designs[[1]], diagnosands, sims, bootstrap)
+      return(out)
     }
 
     comparison_sims <- lapply(designs,
                               diagnose_design_single_design,
                               diagnosands = diagnosands,
                               sims = sims,
-                              bootstrap = bootstrap,
-                              bootstrap_sims = bootstrap_sims,
-                              parallel = parallel,
-                              parallel_cores = parallel_cores)
+                              bootstrap = bootstrap)
 
-    if (length(comparison_sims) > 1) {
 
-      simulations_list <- lapply(comparison_sims, function(x) x$simulations)
-      diagnosands_list <- lapply(comparison_sims, function(x) x$diagnosands)
 
-      for (i in 1:length(simulations_list)) {
-        simulations_list[[i]] <- cbind(design_ID = names(simulations_list)[i], simulations_list[[i]])
-        diagnosands_list[[i]] <- cbind(design_ID = names(diagnosands_list)[i], diagnosands_list[[i]])
-      }
+    simulations_list <- lapply(comparison_sims, function(x) x$simulations)
+    diagnosands_list <- lapply(comparison_sims, function(x) x$diagnosands)
 
-      simulations_df <- do.call(rbind, simulations_list)
-      diagnosands_df <- do.call(rbind, diagnosands_list)
-
-      rownames(simulations_df) <- NULL
-      rownames(diagnosands_df) <- NULL
-
-    } else {
-      simulations_df <- comparison_sims[[1]]$simulations
-      diagnosands_df <- comparison_sims[[1]]$diagnosands
+    for (i in 1:length(simulations_list)) {
+      simulations_list[[i]] <- cbind(design_ID = names(simulations_list)[i], simulations_list[[i]])
+      diagnosands_list[[i]] <- cbind(design_ID = names(diagnosands_list)[i], diagnosands_list[[i]])
     }
 
-    return(structure(
+    simulations_df <- do.call(rbind, simulations_list)
+    diagnosands_df <- do.call(rbind, diagnosands_list)
+
+    rownames(simulations_df) <- NULL
+    rownames(diagnosands_df) <- NULL
+
+
+    structure(
       list(simulations = simulations_df, diagnosands = diagnosands_df),
       class = "diagnosis"
-    ))
+    )
 
   }
 
-#' @importFrom rlang !! !!!
-#' @importFrom foreach registerDoSEQ getDoParWorkers foreach %dopar%
-#' @importFrom doRNG %dorng%
-#' @importFrom doParallel registerDoParallel
-#' @importFrom parallel detectCores
-diagnose_design_single_design <-
-  function(design,
-           diagnosands = NULL,
-           sims = 500,
-           bootstrap = TRUE,
-           bootstrap_sims = 100,
-           parallel = TRUE,
-           parallel_cores = detectCores(logical = TRUE)) {
+#' @importFrom future.apply future_lapply
+diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) {
 
-    if (parallel) {
-      registerDoParallel(cores = parallel_cores)
-    } else {
-      registerDoSEQ()
-    }
 
-    results_list <- foreach(i = seq_len(sims)) %dorng% conduct_design(design)
+
+    results_list <- future_lapply(seq_len(sims),
+                                  function(i) conduct_design(design),
+                                  future.seed = NA, future.globals = "design")
 
     results2x <- function(results_list, what) {
       subresult <- lapply(results_list, `[[`, what)
@@ -159,14 +137,6 @@ diagnose_design_single_design <-
       df <- cbind(sim_ID = rep(1:sims, sapply(subresult, nrow)), df)
     }
 
-
-    # estimates_list <- lapply(results_list, function(x) x$estimates_df)
-    # estimates_df <- do.call(rbind, estimates_list)
-    # estimates_df <- cbind(sim_ID = rep(1:sims, sapply(estimates_list, nrow)), estimates_df)
-    #
-    # estimands_list <- lapply(results_list, function(x) x$estimands_df)
-    # estimands_df <- do.call(rbind, estimands_list)
-    # estimands_df <- cbind(sim_ID = rep(1:sims, sapply(estimands_list, nrow)), estimands_df)
 
     estimates_df <- results2x(results_list, "estimates_df")
     estimands_df <- results2x(results_list, "estimands_df")
@@ -183,23 +153,18 @@ diagnose_design_single_design <-
         merge(
           estimands_df,
           estimates_df,
-          by = c("sim_ID",
-                 "estimand_label" %i% colnames(estimates_df),
-                 "coefficient_name" %i% colnames(estimands_df) %i% colnames(estimates_df)),
+          by = colnames(estimands_df) %i% colnames(estimates_df),
           all = TRUE,
           sort = FALSE
         )
 
-      if(nrow(simulations_df) > max(nrow(estimands_df), nrow(estimates_df))){
-
+      if (nrow(simulations_df) > max(nrow(estimands_df), nrow(estimates_df))) {
         warning("Estimators lack estimand/coefficient labels for matching, a many-to-many merge was performed.")
-
       }
 
     }
 
-    calculate_diagnosands <-
-      function(simulations_df, diagnosands){
+    calculate_diagnosands <- function(simulations_df, diagnosands) {
       group_by_set <- colnames(simulations_df) %i% c("estimand_label", "estimator_label", "coefficient_name")
       group_by_list <- simulations_df[, group_by_set, drop=FALSE]
 
@@ -219,7 +184,7 @@ diagnose_design_single_design <-
 
     diagnosands_df <- calculate_diagnosands(simulations_df, diagnosands)
 
-    if (bootstrap) {
+    if (bootstrap > 0) {
       boot_indicies_by_id <- split(1:nrow(simulations_df), simulations_df$sim_ID)
       boot_function <- function() {
         boot_ids <- sample.int(sims, sims, TRUE)
@@ -227,12 +192,12 @@ diagnose_design_single_design <-
         calculate_diagnosands(simulations_df[boot_indicies, , drop=FALSE], diagnosands)
       }
 
-      diagnosand_replicates <- foreach(i = seq_len(bootstrap_sims), .combine = rbind) %dorng%
-        boot_function()
+      diagnosand_replicates <- future_lapply(seq_len(bootstrap),
+                                             function(i) boot_function(), # this pattern seems to make the NSE happy for now
+                                             future.seed = NA,
+                                             future.globals="boot_function")
+      diagnosand_replicates <- do.call(rbind.data.frame, diagnosand_replicates)
 
-      # diagnosand_replicates <-
-      #   replicate(bootstrap_sims, expr = boot_function(), simplify = FALSE)
-      # diagnosand_replicates <- do.call(rbind, diagnosand_replicates)
 
       group_by_set <-  colnames(diagnosand_replicates) %i% c("estimand_label", "estimator_label", "coefficient_name")
       group_by_list <- diagnosand_replicates[, group_by_set, drop=FALSE]
@@ -266,10 +231,10 @@ diagnose_design_single_design <-
 
     }
 
-    return(structure(
+    structure(
       list(simulations = simulations_df, diagnosands = diagnosands_df),
       class = "diagnosis"
-    ))
+    )
 
   }
 

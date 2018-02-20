@@ -19,7 +19,7 @@ test_that("Factorial", {
 
 
 
-  diagnosis <- diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = FALSE)
+  diagnosis <- diagnose_design(my_design, sims = 2, bootstrap = FALSE)
 
   expect_equal(diagnosis %>% get_simulations %>% dim, c(4, 10))
 

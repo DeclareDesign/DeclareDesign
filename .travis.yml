@@ -28,6 +28,9 @@ matrix:
     - os: osx
       osx_image: xcode6.4
       r: oldrel
+      r_github_packages:
+      - HenrikBengtsson/future.apply
+      - DeclareDesign/DDtools
       if: branch = master
 
 
