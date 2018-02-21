@@ -5,8 +5,7 @@
 \title{Diagnose the Design}
 \usage{
 diagnose_design(..., diagnosands = default_diagnosands, sims = 500,
-  bootstrap = TRUE, bootstrap_sims = 100, parallel = TRUE,
-  parallel_cores = detectCores(logical = TRUE))
+  bootstrap = 100)
 }
 \arguments{
 \item{...}{A design created by \code{\link{declare_design}}, or a set of designs. You dican also provide a single list of designs, for example one created by \code{\link{fill_out}}.}
