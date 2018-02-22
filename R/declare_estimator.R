@@ -1,9 +1,6 @@
 #' Declare an Estimator
 #'
-#' @param ... Arguments to the estimation function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.
-#' @param handler the handler function
-#' @param label An optional label to name the estimator, such as DIM.
-#' @param data a data.frame
+#' @inheritParams declare_internal_inherit_params
 #'
 #' @export
 #' @importFrom estimatr difference_in_means
@@ -113,22 +110,17 @@ tidy_estimator <- function(estimator_function){
 
 
 
-
+#' @param data a data.frame
 #' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
 #' @param coefficient_name A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a \code{model} is chosen or for some \code{estimator_function}'s such as \code{difference_in_means} and \code{lm_robust}.
 #' @rdname declare_estimator
-model_handler <-
-  function(data, ...,
-    model = estimatr::difference_in_means,
-    coefficient_name = Z)
-  {
+model_handler <- function(data, ..., model = estimatr::difference_in_means, coefficient_name = Z) {
 
     coefficient_name <- reveal_nse_helper(substitute(coefficient_name))
 
     # estimator_function_internal <- function(data) {
     args <- quos(...)
-    W <- quo(model(!!!args, data=data))
-    results <- eval(quo_expr(W))
+    results <- eval_tidy(quo(model(!!!args, data=data)))
 
     results <- fit2tidy(results, coefficient_name)
 

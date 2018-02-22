@@ -7,11 +7,11 @@
 declare_diagnosands(..., handler = estimand_handler, label = NULL)
 }
 \arguments{
-\item{...}{A set of diagnosands, i.e. bias = mean(est - estimand). The diagnostic statistic (i.e., est - estimand) and its associated summary function (i.e., mean) are declared at the same time.}
+\item{...}{arguments to be captured, and later passed to the handler}
 
-\item{handler}{a diagnosand handler}
+\item{handler}{a tidy-in, tidy-out function}
 
-\item{label}{a step label}
+\item{label}{a string describing the step}
 }
 \value{
 a function that returns a data.frame

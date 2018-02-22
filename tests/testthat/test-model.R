@@ -3,8 +3,8 @@ context("model estimator")
 test_that("test the estimators", {
   my_population <- declare_population(N = 500, noise = rnorm(N))
   my_potential_outcomes <-
-    declare_potential_outcomes(Y_Z_0 = draw_binary(noise, link = "probit"),
-                               Y_Z_1 = draw_binary(noise + 2, link = "probit"))
+    declare_potential_outcomes(Y_Z_0 = draw_binary(latent=noise, link = "probit"),
+                               Y_Z_1 = draw_binary(latent=noise + 2, link = "probit"))
   my_assignment <- declare_assignment()
   my_design <- declare_design(my_population,
                               my_potential_outcomes,

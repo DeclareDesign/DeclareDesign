@@ -7,11 +7,11 @@
 declare_sampling(..., handler = sampling_handler, label = NULL)
 }
 \arguments{
-\item{...}{Arguments to the sampling function}
+\item{...}{arguments to be captured, and later passed to the handler}
 
-\item{handler}{A function that takes a data.frame, subsets to sampled observations and optionally adds sampling probabilities or other relevant quantities, and returns a data.frame. By default, the sampling_function uses the \code{randomizr} functions \code{\link{draw_rs}} and \code{\link{obtain_inclusion_probabilities}} to conduct random sampling and obtain the probability of inclusion in the sample.}
+\item{handler}{a tidy-in, tidy-out function}
 
-\item{label}{A step label.}
+\item{label}{a string describing the step}
 }
 \value{
 a function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.

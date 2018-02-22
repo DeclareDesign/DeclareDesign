@@ -16,11 +16,11 @@ potential_outcomes.default(formula = stop("Not provided"), ..., data,
   level = NULL)
 }
 \arguments{
-\item{...}{Arguments to the potential_outcomes_function}
+\item{...}{arguments to be captured, and later passed to the handler}
 
-\item{handler}{A function that accepts a data.frame as an argument and returns a data.frame with potential outcomes columns appended. See the examples for the behavior of the default function.}
+\item{handler}{a tidy-in, tidy-out function}
 
-\item{label}{A step label}
+\item{label}{a string describing the step}
 
 \item{formula}{a formula to calculate Potential outcomes as functions of assignment variables}
 

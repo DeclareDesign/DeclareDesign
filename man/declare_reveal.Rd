@@ -11,11 +11,11 @@ reveal_outcomes(data = NULL, outcome_variables = Y,
   assignment_variables = Z, attrition_variables = NULL)
 }
 \arguments{
-\item{...}{arguments for the handler}
+\item{...}{arguments to be captured, and later passed to the handler}
 
-\item{handler}{a handler function}
+\item{handler}{a tidy-in, tidy-out function}
 
-\item{label}{a step label}
+\item{label}{a string describing the step}
 
 \item{data}{A data.frame containing columns of potential outcomes and an assignment variable}
 

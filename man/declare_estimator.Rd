@@ -17,11 +17,11 @@ model_handler(data, ..., model = estimatr::difference_in_means,
 estimator_handler(data, ..., estimand = NULL, label)
 }
 \arguments{
-\item{...}{Arguments to the estimation function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.}
+\item{...}{arguments to be captured, and later passed to the handler}
 
-\item{handler}{the handler function}
+\item{handler}{a tidy-in, tidy-out function}
 
-\item{label}{An optional label to name the estimator, such as DIM.}
+\item{label}{a string describing the step}
 
 \item{estimator_function}{A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.}
 

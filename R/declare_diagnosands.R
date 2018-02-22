@@ -1,8 +1,6 @@
 #' Declare Diagnosands
 #'
-#' @param ... A set of diagnosands, i.e. bias = mean(est - estimand). The diagnostic statistic (i.e., est - estimand) and its associated summary function (i.e., mean) are declared at the same time.
-#' @param handler a diagnosand handler
-#' @param label a step label
+#' @inheritParams declare_internal_inherit_params
 #'
 #' @details
 #'

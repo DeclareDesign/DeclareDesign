@@ -7,11 +7,11 @@
 declare_estimand(..., handler = estimand_handler, label = "my_estimand")
 }
 \arguments{
-\item{...}{Arguments to the estimand function. For example, you might specify ATE = mean(Y_Z_1 - Y_Z_0), which would declare the estimand to be named ATE and to be the mean of the difference in the control and treatment potential outcome.}
+\item{...}{arguments to be captured, and later passed to the handler}
 
-\item{handler}{A function that takes a data.frame as an argument and returns a data.frame with the estimand and a label. By default, the estimand function accepts an expression such as ATE = mean(Y_Z_1-Y_Z_0).}
+\item{handler}{a tidy-in, tidy-out function}
 
-\item{label}{An optional label to name the estimand, such as ATE. Typically, the label is inferred from how you specify the estimand in \code{...}, i.e. if you specify ATE = mean(Y_Z_1 - Y_Z_0) the estimand label will be ATE.}
+\item{label}{a string describing the step}
 }
 \value{
 a function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimand.

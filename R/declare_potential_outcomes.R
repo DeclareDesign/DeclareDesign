@@ -1,8 +1,6 @@
 #' Potential Outcomes
-#' @param ... Arguments to the potential_outcomes_function
 #'
-#' @param handler A function that accepts a data.frame as an argument and returns a data.frame with potential outcomes columns appended. See the examples for the behavior of the default function.
-#' @param label A step label
+#' @inheritParams declare_internal_inherit_params
 #'
 #' @return a function that returns a data.frame
 #'
