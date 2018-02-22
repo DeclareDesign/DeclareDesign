@@ -1,9 +1,7 @@
 
 #' Declare a Reveal Outcomes step
 #'
-#' @param ... arguments for the handler
-#' @param handler a handler function
-#' @param label a step label
+#' @inheritParams declare_internal_inherit_params
 #'
 #' @export
 declare_reveal <- make_declarations(reveal_outcomes, "reveal_outcomes")

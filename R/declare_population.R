@@ -1,8 +1,6 @@
 #' Declare the Size and Features of the Population
 #'
-#' @param ... Arguments to the population function
-#' @param handler A function that generates a data.frame containing features of the population. By default, the \link{fabricatr} function \code{\link{fabricate}} function is used, which allows you to draw single or multi-level hierarchical population data.
-#' @param label a step label
+#' @inheritParams declare_internal_inherit_params
 #' @return a function that returns a data.frame
 #' @export
 #' @importFrom fabricatr fabricate

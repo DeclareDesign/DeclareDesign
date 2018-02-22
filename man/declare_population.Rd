@@ -7,11 +7,11 @@
 declare_population(..., handler = fabricate, label = NULL)
 }
 \arguments{
-\item{...}{Arguments to the population function}
+\item{...}{arguments to be captured, and later passed to the handler}
 
-\item{handler}{A function that generates a data.frame containing features of the population. By default, the \link{fabricatr} function \code{\link{fabricate}} function is used, which allows you to draw single or multi-level hierarchical population data.}
+\item{handler}{a tidy-in, tidy-out function}
 
-\item{label}{a step label}
+\item{label}{a string describing the step}
 }
 \value{
 a function that returns a data.frame

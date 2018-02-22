@@ -16,8 +16,8 @@ Description: DeclareDesign is statistical software that makes it easier for rese
 Depends:
     R (>= 3.3.0),
     randomizr (>= 0.9.0),
-    fabricatr (>= 0.3.0),
-    estimatr (>= 0.2.0),
+    fabricatr (>= 0.4.0),
+    estimatr (>= 0.4.0),
 Imports:
     rlang,
     future.apply,

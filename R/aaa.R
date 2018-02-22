@@ -97,7 +97,7 @@ make_declarations <- function(default_handler, step_type, causal_type='dgp', def
             strictDataParam=strictDataParam)
 }
 
-########################################################################
+###############################################################################
 
 validation_fn <- function(f){
   attr(f, "validation_fn")
@@ -115,3 +115,12 @@ has_validation_fn <- function(f){
 validate <- function(handler, ret, dots, label) {
   validation_fn(handler)(ret, dots, label)
 }
+
+
+###############################################################################
+
+#' @param ...      arguments to be captured, and later passed to the handler
+#' @param handler  a tidy-in, tidy-out function
+#' @param label    a string describing the step
+#' @keywords internal
+declare_internal_inherit_params <- make_declarations(function(data, ...) data.frame(HIA="RYLAH"), step_type = "HIARYLAH")
