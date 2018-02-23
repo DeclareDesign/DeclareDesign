@@ -110,16 +110,6 @@ potential_outcomes.formula <-
            level = NULL) {
 
     outcome_variable <- as.character(formula[[2]])
-
-
-    if(!is.data.frame(conditions)){
-      if(!is.list(conditions)){
-        conditions <- setNames(list(conditions), assignment_variable)
-      }
-
-      conditions <- expand.grid(conditions, stringsAsFactors = FALSE)
-    }
-
     condition_names <- names(conditions)
 
     # Build a fabricate call -
@@ -154,9 +144,11 @@ potential_outcomes.formula <-
 
 
 validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
-  formula <- eval_tidy(dots$formula)
+  dots$formula <- eval_tidy(dots$formula)
+  outcome_variable <- as.character(dots$formula[[2]])
 
-  if (length(formula) == 2) {
+
+  if (length(dots$formula) < 3) {
     declare_time_error("Must provide an outcome  in potential outcomes formula", ret)
   }
 
@@ -164,7 +156,23 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
     declare_time_error("Must not pass ID_label.", ret)
   }
 
-  structure(ret, potential_outcomes_formula = formula)
+  if("assignment_variable" %in% dots){
+    dots$assignment_variable <- reveal_nse_helper(dots$assignment_variable)
+  }
+
+  dots$conditions <- eval_tidy(quo(expand_conditions(!!!dots)))
+
+  ret <- build_step(currydata(potential_outcomes.formula, dots, strictDataParam=attr(ret, "strictDataParam")),
+                    handler=potential_outcomes.formula,
+                    dots=dots,
+                    label=label,
+                    step_type=attr(ret, "step_type"),
+                    causal_type=attr(ret,"causal_type"),
+                    call=attr(ret, "call"))
+
+
+
+  structure(ret, potential_outcomes_formula = formula, outcome_meta=list(outcome=outcome_variable, conditions=names(dots$conditions)))
 }
 
 #' @importFrom fabricatr fabricate add_level modify_level
@@ -185,3 +193,19 @@ validation_fn(potential_outcomes.NULL) <- function(ret, dots, label){
 
   ret
 }
+
+
+
+###############################################################################
+
+expand_conditions <- function() {
+  if(!is.data.frame(conditions)){
+    if(!is.list(conditions)){
+      conditions <- setNames(list(conditions), assignment_variable)
+    }
+
+    conditions <- expand.grid(conditions, stringsAsFactors = FALSE)
+  }
+  conditions
+}
+formals(expand_conditions) <- formals(potential_outcomes.formula)
