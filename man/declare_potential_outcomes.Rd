@@ -3,16 +3,16 @@
 \name{declare_potential_outcomes}
 \alias{declare_potential_outcomes}
 \alias{potential_outcomes.formula}
-\alias{potential_outcomes.default}
+\alias{potential_outcomes.NULL}
 \title{Potential Outcomes}
 \usage{
 declare_potential_outcomes(..., handler = potential_outcomes_handler,
   label = NULL)
 
-potential_outcomes.formula(formula, data, conditions = c(0, 1),
-  assignment_variable = "Z", level = NULL)
+potential_outcomes.formula(formula, conditions = c(0, 1),
+  assignment_variable = "Z", data, level = NULL)
 
-potential_outcomes.default(formula = stop("Not provided"), ..., data,
+potential_outcomes.NULL(formula = stop("Not provided"), ..., data,
   level = NULL)
 }
 \arguments{
@@ -24,11 +24,11 @@ potential_outcomes.default(formula = stop("Not provided"), ..., data,
 
 \item{formula}{a formula to calculate Potential outcomes as functions of assignment variables}
 
-\item{data}{a data.frame}
-
 \item{conditions}{vector specifying the values the assignment variable can realize}
 
 \item{assignment_variable}{The name of the assignment variable}
+
+\item{data}{a data.frame}
 
 \item{level}{a character specifying a level of hierarchy for fabricate to calculate at}
 }
