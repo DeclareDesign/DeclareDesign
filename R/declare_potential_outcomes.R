@@ -140,14 +140,13 @@ potential_outcomes.formula <-
 
     if(is.character(level)) {
       condition_quos <- quos(!!level := modify_level(!!!condition_quos))
+    } else {
+      condition_quos <- c(condition_quos, quos(ID_label=NA))
     }
 
 
     structure(
       fabricate(data=data, !!!condition_quos),
-
-
-
       outcome_variable=outcome_variable,
       assignment_variable=assignment_variable)
 
@@ -161,7 +160,9 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
     declare_time_error("Must provide an outcome  in potential outcomes formula", ret)
   }
 
-
+  if("ID_label" %in% names(dots)){
+    declare_time_error("Must not pass ID_label.", ret)
+  }
 
   structure(ret, potential_outcomes_formula = formula)
 }
@@ -171,8 +172,16 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
 potential_outcomes.NULL <- function(formula=stop("Not provided"), ..., data, level = NULL) {
 
     if (is.character(level)) {
-      fabricate(data=data, modify_level(ID_label=!!level, ...))
+      fabricate(data=data, !!level := modify_level(...))
     } else {
-      fabricate(data=data, ...)
+      fabricate(data=data, ..., ID_label=NA)
     }
+}
+
+validation_fn(potential_outcomes.NULL) <- function(ret, dots, label){
+  if("ID_label" %in% names(dots)){
+    declare_time_error("Must not pass ID_label.", ret)
+  }
+
+  ret
 }
