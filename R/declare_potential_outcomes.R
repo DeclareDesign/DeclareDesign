@@ -53,20 +53,21 @@
 #'
 declare_potential_outcomes <- make_declarations(potential_outcomes_handler, "potential_outcomes");
 
-# level *must* be last argument, otherwise eager reveal_nse_helper in validation_fn will not work positionally
 potential_outcomes_handler <-  function(..., data, level) {}
 
 validation_fn(potential_outcomes_handler) <-  function(ret, dots, label) {
   if(getOption("debug.DeclareDesign.potential_outcome_validation", FALSE)) browser()
 
 
-  # Below is a similar redispatch pattern for the validation_delegate at declare time
+  # Below is a similar redispatch strategy, only at declare time
   validation_delegate <- function(formula=NULL, ...) {
-    potential_outcomes <- function(formula, ...) UseMethod("potential_outcomes", formula)
-    s3method <- getS3method("potential_outcomes", class(formula))
     if(getOption("debug.DeclareDesign.potential_outcome_validation_s3_lookup", FALSE)) browser()
-
-    s3method
+    potential_outcomes <- function(formula, ...) UseMethod("potential_outcomes", formula)
+    for(c in class(formula)){
+      s3method <- getS3method("potential_outcomes", class(formula))
+      if(is.function(s3method)) return(s3method)
+    }
+    declare_time_error("Could not find appropriate implementation", ret)
   }
 
   s3method <- eval_tidy(quo(validation_delegate(!!!dots)))
@@ -110,12 +111,15 @@ potential_outcomes.formula <-
 
     outcome_variable <- as.character(formula[[2]])
 
-    if(!is.list(conditions)){
-      conditions <- setNames(list(conditions), assignment_variable)
+
+    if(!is.data.frame(conditions)){
+      if(!is.list(conditions)){
+        conditions <- setNames(list(conditions), assignment_variable)
+      }
+
+      conditions <- expand.grid(conditions, stringsAsFactors = FALSE)
     }
 
-
-    conditions <- expand.grid(conditions, stringsAsFactors = FALSE)
     condition_names <- names(conditions)
 
     # Build a fabricate call -
@@ -141,24 +145,25 @@ potential_outcomes.formula <-
 
     structure(
       fabricate(data=data, !!!condition_quos),
+
+
+
       outcome_variable=outcome_variable,
       assignment_variable=assignment_variable)
 
   }
 
 
-validation_fn(potential_outcomes.formula) <- function(ret, dots, label){
-  getFormulaOut <- function(...) formula
-  formals(getFormulaOut) <- formals(potential_outcomes.formula)
+validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
+  formula <- eval_tidy(dots$formula)
 
-  formula <- eval_tidy(quo(getFormulaOut(!!!dots)))
-
-  if(length(formula) == 2){
+  if (length(formula) == 2) {
     declare_time_error("Must provide an outcome  in potential outcomes formula", ret)
   }
 
 
-  ret
+
+  structure(ret, potential_outcomes_formula = formula)
 }
 
 #' @importFrom fabricatr fabricate add_level modify_level
