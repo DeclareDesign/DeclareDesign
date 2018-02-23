@@ -53,13 +53,45 @@
 #'
 declare_potential_outcomes <- make_declarations(potential_outcomes_handler, "potential_outcomes");
 
+# level *must* be last argument, otherwise eager reveal_nse_helper in validation_fn will not work positionally
+potential_outcomes_handler <-  function(..., data, level) {}
 
-potential_outcomes_handler <-  function(..., data) {
-    # redispatch on formula
-    potential_outcomes <- function(formula=NULL, ...) UseMethod("potential_outcomes", formula)
-    potential_outcomes(..., data=data)
+validation_fn(potential_outcomes_handler) <-  function(ret, dots, label) {
+  if(getOption("debug.DeclareDesign.potential_outcome_validation", FALSE)) browser()
+
+
+  # Below is a similar redispatch pattern for the validation_delegate at declare time
+  validation_delegate <- function(formula=NULL, ...) {
+    potential_outcomes <- function(formula, ...) UseMethod("potential_outcomes", formula)
+    s3method <- getS3method("potential_outcomes", class(formula))
+    if(getOption("debug.DeclareDesign.potential_outcome_validation_s3_lookup", FALSE)) browser()
+
+    s3method
+  }
+
+  s3method <- eval_tidy(quo(validation_delegate(!!!dots)))
+
+  # explicitly name all dots, for easier s3 handler validation
+  dots <- rename_dots(s3method, dots)
+
+  if("level" %in% names(dots)){
+    dots$level <- reveal_nse_helper(dots$level)
+  }
+
+
+  ret <- build_step(currydata(s3method, dots, strictDataParam=attr(ret, "strictDataParam")),
+                    handler=s3method,
+                    dots=dots,
+                    label=label,
+                    step_type=attr(ret, "step_type"),
+                    causal_type=attr(ret,"causal_type"),
+                    call=attr(ret, "call"))
+
+  if(has_validation_fn(s3method)) ret <- validate(s3method, ret, dots, label)
+
+
+  ret
 }
-
 
 #' @param formula a formula to calculate Potential outcomes as functions of assignment variables
 #' @param conditions vector specifying the values the assignment variable can realize
@@ -71,25 +103,36 @@ potential_outcomes_handler <-  function(..., data) {
 #' @rdname declare_potential_outcomes
 potential_outcomes.formula <-
   function(formula,
-           data,
            conditions = c(0, 1),
            assignment_variable = "Z",
+           data,
            level = NULL) {
-
-    level <- reveal_nse_helper(enquo(level))
 
     outcome_variable <- as.character(formula[[2]])
 
+    if(!is.list(conditions)){
+      conditions <- setNames(list(conditions), assignment_variable)
+    }
+
+
+    conditions <- expand.grid(conditions, stringsAsFactors = FALSE)
+    condition_names <- names(conditions)
 
     # Build a fabricate call -
     # fabricate( Z=1, Y_Z_1=f(Z), Z=2, Y_Z_2=f(Z), ..., Z=NULL)
     condition_quos <- quos()
     expr = formula[[3]]
-    for(cond in conditions){
-      out_name <- paste(outcome_variable, assignment_variable, cond, sep = "_")
-      condition_quos <- c(condition_quos, quos(!!assignment_variable := !!cond, !!out_name := !!expr) )
+    for(i in 1:nrow(conditions)){
+
+      condition_values <- conditions[i,,drop=FALSE]
+      out_name <- paste0(outcome_variable, "_", paste0(condition_names, "_", condition_values, collapse = "_"))
+
+      condition_quos <- c(condition_quos, quos(!!!condition_values, !!out_name := !!expr) )
     }
-    condition_quos <- c(condition_quos, quos(!!assignment_variable := NULL))
+
+    # clean up
+    condition_values <-  lapply(condition_values, function(x) NULL)
+    condition_quos <- c(condition_quos, quos(!!condition_values))
 
     if(is.character(level)) {
       condition_quos <- quos(!!level := modify_level(!!!condition_quos))
@@ -101,12 +144,26 @@ potential_outcomes.formula <-
       outcome_variable=outcome_variable,
       assignment_variable=assignment_variable)
 
+  }
+
+
+validation_fn(potential_outcomes.formula) <- function(ret, dots, label){
+  getFormulaOut <- function(...) formula
+  formals(getFormulaOut) <- formals(potential_outcomes.formula)
+
+  formula <- eval_tidy(quo(getFormulaOut(!!!dots)))
+
+  if(length(formula) == 2){
+    declare_time_error("Must provide an outcome  in potential outcomes formula", ret)
+  }
+
+
+  ret
 }
 
 #' @importFrom fabricatr fabricate add_level modify_level
 #' @rdname declare_potential_outcomes
-potential_outcomes.default <- function(formula=stop("Not provided"), ..., data, level = NULL) {
-    level <- reveal_nse_helper(enquo(level))
+potential_outcomes.NULL <- function(formula=stop("Not provided"), ..., data, level = NULL) {
 
     if (is.character(level)) {
       fabricate(data=data, modify_level(ID_label=!!level, ...))
