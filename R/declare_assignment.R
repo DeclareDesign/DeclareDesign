@@ -61,25 +61,18 @@ declare_assignment <- make_declarations(assignment_handler, "assignment" )
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo f_rhs
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
 assignment_handler <-
-  function(data, ..., assignment_variable = Z, reveal="auto") {
+  function(data, ..., assignment_variable = "Z", reveal="auto") {
     ## draw assignment
 
     options <- quos(...)
+    assn <- as.symbol(reveal_nse_helper(enquo(assignment_variable)))
+    cond_prob <- as.symbol(paste0(assn, "_cond_prob"))
 
-    assignment_variable <- reveal_nse_helper(enquo(assignment_variable))
-
-    ra_call <- quo(conduct_ra(!!! options))
-    ra_call <- lang_modify(ra_call, N = nrow(data))
-
-    data[, assignment_variable] <- eval_tidy(ra_call, data = data)
-
-    ## obtain condition probabilities
-
-    prob_call <- quo(obtain_condition_probabilities(!!! options))
-    prob_call <- lang_modify(prob_call, assignment = data[, assignment_variable])
-
-    data[, paste0(assignment_variable, "_cond_prob")] <-
-      eval_tidy(prob_call, data = data)
+    data <- fabricate(data,
+     !!assn      := conduct_ra(N=N, !!!options),
+     !!cond_prob := obtain_condition_probabilities(!!!options, assignment = !!assn),
+     ID_label = NA
+    )
 
     outcome <- attr(data, "outcome_variable")
     if(reveal == "auto"
