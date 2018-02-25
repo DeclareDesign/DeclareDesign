@@ -163,19 +163,28 @@
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='no'>d_template</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>N</span><span class='kw'>=</span><span class='fl'>100</span>) <span class='fu'><a href='declare_design.html'>declare_design</a></span>(<span class='fu'><a href='declare_population.html'>declare_population</a></span>(<span class='kw'>N</span><span class='kw'>=</span><span class='no'>N</span>))
+<span class='no'>design_template</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>) {
+  <span class='no'>population</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_population.html'>declare_population</a></span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='no'>N</span>)
+  <span class='fu'>return</span>(<span class='fu'><a href='declare_design.html'>declare_design</a></span>(<span class='no'>population</span>))
+  }
 
-<span class='no'>vary_n</span> <span class='kw'>&lt;-</span> <span class='fu'>fill_out</span>(<span class='no'>d_template</span>, <span class='kw'>N</span><span class='kw'>=</span><span class='fu'>seq</span>(<span class='fl'>30</span>, <span class='fl'>100</span>, <span class='fl'>10</span>))
-
-<span class='no'>big_d</span> <span class='kw'>&lt;-</span> <span class='fu'>fill_out</span>(<span class='no'>d_template</span>, <span class='kw'>N</span><span class='kw'>=</span><span class='fl'>200</span>)
-
-<span class='no'>bigger_d</span> <span class='kw'>&lt;-</span> <span class='fu'>redesign</span>(<span class='no'>big_d</span>, <span class='kw'>N</span><span class='kw'>=</span><span class='fl'>1000</span>)
-
-<span class='no'>little_d</span> <span class='kw'>&lt;-</span> <span class='fu'>redesign</span>(<span class='no'>big_d</span>, <span class='kw'>N</span><span class='kw'>=</span><span class='fu'>seq</span>(<span class='fl'>5</span>,<span class='fl'>25</span>,<span class='fl'>5</span>))</div><span class='co'># NOT RUN {</span>
- <span class='co'># idea is to diagnose a list</span>
-  <span class='fu'><a href='diagnose_design.html'>diagnose_design</a></span>(<span class='no'>little_d</span>, )
+<span class='co'># returns list of three designs</span>
+<span class='no'>vary_n</span> <span class='kw'>&lt;-</span> <span class='fu'>fill_out</span>(<span class='no'>design_template</span>, <span class='kw'>N</span> <span class='kw'>=</span> <span class='fu'>seq</span>(<span class='fl'>30</span>, <span class='fl'>100</span>, <span class='fl'>10</span>))</div><span class='co'># NOT RUN {</span>
+ <span class='co'># diagnose a list of designs created by fill_out or redesign</span>
+ <span class='no'>diagnose_vary_n</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='diagnose_design.html'>diagnose_design</a></span>(<span class='no'>vary_n</span>)
 <span class='co'># }</span><div class='input'>
-</div></pre>
+<span class='co'># returns a single design</span>
+<span class='no'>large_design</span> <span class='kw'>&lt;-</span> <span class='fu'>fill_out</span>(<span class='no'>design_template</span>, <span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>200</span>)</div><span class='co'># NOT RUN {</span>
+ <span class='no'>diagnose_large_design</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='diagnose_design.html'>diagnose_design</a></span>(<span class='no'>large_design</span>)
+<span class='co'># }</span><div class='input'>
+<span class='no'>my_population</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_population.html'>declare_population</a></span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>)
+<span class='no'>my_design</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_design.html'>declare_design</a></span>(<span class='no'>my_population</span>)
+
+<span class='co'># returns a single, modified design</span>
+<span class='no'>design_large_N</span> <span class='kw'>&lt;-</span> <span class='fu'>redesign</span>(<span class='no'>my_design</span>, <span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>1000</span>)
+
+<span class='co'># returns a list of five modified designs</span>
+<span class='no'>design_vary_N</span> <span class='kw'>&lt;-</span> <span class='fu'>redesign</span>(<span class='no'>my_design</span>, <span class='kw'>N</span> <span class='kw'>=</span> <span class='fu'>seq</span>(<span class='fl'>500</span>, <span class='fl'>1000</span>, <span class='fl'>100</span>))</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
