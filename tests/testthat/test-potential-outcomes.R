@@ -200,3 +200,23 @@ test_that("error if you try to draw POs at a level using a variable that doesn't
   expect_error(my_potential_outcomes_formula(pop))
 
 })
+
+
+test_that("error if you try to draw POs at a level using a variable that doesn't exist at that level",{
+
+  beta <- c(1, 3)
+
+  my_potential_outcomes_formula <-
+    declare_potential_outcomes(
+      formula = test ~ extra + cbind(z1, z2) %*% beta,
+      conditions = list(z1=0:1, z2=1:2)
+    )
+  out <- my_potential_outcomes_formula(sleep)
+  with(out, {
+       expect_equal(extra + 3, test_z1_0_z2_1)
+       expect_equal(extra + 4, test_z1_1_z2_1)
+       expect_equal(extra + 6, test_z1_0_z2_2)
+       expect_equal(extra + 7, test_z1_1_z2_2)
+  })
+
+})
