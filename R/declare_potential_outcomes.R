@@ -100,7 +100,7 @@ validation_fn(potential_outcomes_handler) <-  function(ret, dots, label) {
 #' @param level a character specifying a level of hierarchy for fabricate to calculate at
 #' @param data a data.frame
 #' @importFrom fabricatr fabricate
-#' @importFrom rlang quos := !! !!!
+#' @importFrom rlang quos := !! !!! as_quosure
 #' @rdname declare_potential_outcomes
 potential_outcomes.formula <-
   function(formula,
@@ -115,7 +115,7 @@ potential_outcomes.formula <-
     # Build a fabricate call -
     # fabricate( Z=1, Y_Z_1=f(Z), Z=2, Y_Z_2=f(Z), ..., Z=NULL)
     condition_quos <- quos()
-    expr = formula[[3]]
+    expr = as_quosure(formula)
     for(i in 1:nrow(conditions)){
 
       condition_values <- conditions[i,,drop=FALSE]
@@ -126,17 +126,18 @@ potential_outcomes.formula <-
 
     # clean up
     condition_values <-  lapply(condition_values, function(x) NULL)
-    condition_quos <- c(condition_quos, quos(!!condition_values))
+    condition_quos <- c(condition_quos, quos(!!!condition_values))
 
     if(is.character(level)) {
       condition_quos <- quos(!!level := modify_level(!!!condition_quos))
-    } else {
-      condition_quos <- c(condition_quos, quos(ID_label=NA))
     }
+    # else {
+    #   condition_quos <- c(condition_quos, quos(ID_label=NA))
+    # }
 
 
     structure(
-      fabricate(data=data, !!!condition_quos),
+      fabricate(data=data, !!!condition_quos, ID_label=NA),
       outcome_variable=outcome_variable,
       assignment_variable=assignment_variable)
 
@@ -172,7 +173,8 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
 
 
 
-  structure(ret, potential_outcomes_formula = formula, outcome_meta=list(outcome=outcome_variable, conditions=names(dots$conditions)))
+  structure(ret, potential_outcomes_formula = formula,
+            outcome_meta=list(outcome=outcome_variable, conditions=names(dots$conditions)))
 }
 
 #' @importFrom fabricatr fabricate add_level modify_level
