@@ -211,12 +211,7 @@ test_that("demo runs", {
   my_potential_outcomes_continuous <- declare_potential_outcomes(
     formula = Y ~ .25 * Z + .01 * age * Z, conditions = seq(0, 1, by = .1))
 
-  continuous_treatment_function <- function(data){
-    data$Z <- sample(seq(0, 1, by = .1), size = nrow(data), replace = TRUE)
-    data
-  }
-
-  my_assignment_continuous <- declare_assignment(handler = continuous_treatment_function)
+  my_assignment_continuous <- declare_assignment(conditions = seq(0, 1, by = .1))
 
   my_design <- declare_design(my_population(),
                               my_potential_outcomes_continuous,

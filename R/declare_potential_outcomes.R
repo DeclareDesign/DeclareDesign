@@ -95,7 +95,7 @@ validation_fn(potential_outcomes_handler) <-  function(ret, dots, label) {
 }
 
 #' @param formula a formula to calculate Potential outcomes as functions of assignment variables
-#' @param conditions vector specifying the values the assignment variable can realize
+#' @param conditions see \code{\link{expand_conditions}}
 #' @param assignment_variable The name of the assignment variable
 #' @param level a character specifying a level of hierarchy for fabricate to calculate at
 #' @param data a data.frame
@@ -105,12 +105,23 @@ validation_fn(potential_outcomes_handler) <-  function(ret, dots, label) {
 potential_outcomes.formula <-
   function(formula,
            conditions = c(0, 1),
-           assignment_variable = "Z",
+           assignment_variables = "Z", # only used to provide a default - read from names of conditions immediately after.
            data,
-           level = NULL) {
+           level = NULL,
+           label = outcome_variable) {
 
     outcome_variable <- as.character(formula[[2]])
-    condition_names <- names(conditions)
+
+    # used at very end to un-modify the pre-existing assignment variables
+    restore <- function(df){
+      i <- assignment_variables %i% colnames(data)
+      if(length(i) == 0) return(df)
+      warning("Assignment variables (", paste(i, sep=", "), ") already present in PO step.",
+              "They will be restored.", call.=FALSE)
+      df[i] <- data[i]
+      df
+    }
+
 
     # Build a fabricate call -
     # fabricate( Z=1, Y_Z_1=f(Z), Z=2, Y_Z_2=f(Z), ..., Z=NULL)
@@ -119,7 +130,7 @@ potential_outcomes.formula <-
     for(i in 1:nrow(conditions)){
 
       condition_values <- conditions[i,,drop=FALSE]
-      out_name <- paste0(outcome_variable, "_", paste0(condition_names, "_", condition_values, collapse = "_"))
+      out_name <- paste0(outcome_variable, "_", paste0(assignment_variables, "_", condition_values, collapse = "_"))
 
       condition_quos <- c(condition_quos, quos(!!!condition_values, !!out_name := !!expr) )
     }
@@ -137,9 +148,9 @@ potential_outcomes.formula <-
 
 
     structure(
-      fabricate(data=data, !!!condition_quos, ID_label=NA),
+      restore(fabricate(data=data, !!!condition_quos, ID_label=NA)),
       outcome_variable=outcome_variable,
-      assignment_variable=assignment_variable)
+      assignment_variables=assignment_variables)
 
   }
 
@@ -158,10 +169,12 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
   }
 
   if("assignment_variable" %in% dots){
-    dots$assignment_variable <- reveal_nse_helper(dots$assignment_variable)
+    dots$assignment_variables <- reveal_nse_helper(dots$assignment_variables)
   }
 
   dots$conditions <- eval_tidy(quo(expand_conditions(!!!dots)))
+  dots$assignment_variables <- names(dots$conditions)
+
 
   ret <- build_step(currydata(potential_outcomes.formula, dots, strictDataParam=attr(ret, "strictDataParam")),
                     handler=potential_outcomes.formula,
@@ -173,9 +186,56 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
 
 
 
-  structure(ret, potential_outcomes_formula = formula,
-            outcome_meta=list(outcome=outcome_variable, conditions=names(dots$conditions)))
+  structure(ret,
+            potential_outcomes_formula = formula,
+            step_meta=list(outcome=outcome_variable, assignment_variables=names(dots$conditions)),
+            design_validation=pofdv)
 }
+
+
+pofdv <- function(design, i, step){
+
+  if(i == length(design)) {
+    warning("Potential outcome is the final step in the design.", call.=FALSE)
+    return(0)
+  }
+
+
+  check <- function(var_type, step_type, step_attr, callback) {
+    vars <- attr(step, "step_meta")[[var_type]]
+
+    assn_steps <- Filter(function(step_j) attr(step_j, "step_type") == step_type,
+                     design[(i+1):length(design)])
+
+    for(step_j in assn_steps) {
+        step_assn <- attr(step_j, "step_meta")[[step_attr]]
+        vars <- setdiff(vars, step_assn)
+        if(length(vars) == 0) return(0)
+    }
+
+    callback(vars)
+  }
+
+
+
+  check("assignment_variables", "assignment", "assignment",
+    function(assignment_variables) warning(
+      "Assignment variables (", paste(assignment_variables, sep=", "),
+      ") were declared in a Potential Outcome step (", attr(step, "label"),
+      "), but never later assigned by an assigment step.", call.=FALSE)
+  )
+
+  check("outcome", "reveal_outcomes", "outcome",
+        function(assignment_variables) warning(
+          "Outcome variables (", paste(assignment_variables, sep=", "),
+          ") were declared in a Potential Outcome step (", attr(step, "label"),
+          "), but never later revealed.", call.=FALSE)
+  )
+
+}
+
+
+###############################################################################
 
 #' @importFrom fabricatr fabricate add_level modify_level
 #' @rdname declare_potential_outcomes
@@ -200,10 +260,25 @@ validation_fn(potential_outcomes.NULL) <- function(ret, dots, label){
 
 ###############################################################################
 
+#' Expand assignment conditions
+#'
+#' Internal helper to eagerly build assignment conditions for potential outcomes.
+#'
+#' If conditions is a data.frame, it is returned unchanged
+#'
+#' Otherwise, if conditions is a list, it is passed to expand.grid for expansion to a data.frame
+#'
+#' Otherwise, if condition is something else, box it in a list with assignment_variables for names,
+#' and pass that to expand.grid.
+#'
+#' @param conditions the conditions
+#' @param assignment_variables the name of assignment variables, if conditions is not already named.
+#' @return a data.frame of potential outcome conditions
+#' @keywords internal
 expand_conditions <- function() {
   if(!is.data.frame(conditions)){
     if(!is.list(conditions)){
-      conditions <- setNames(list(conditions), assignment_variable)
+      conditions <- setNames(list(conditions), assignment_variables)
     }
 
     conditions <- expand.grid(conditions, stringsAsFactors = FALSE)
