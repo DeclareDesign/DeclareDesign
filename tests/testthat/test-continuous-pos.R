@@ -14,7 +14,7 @@ test_that("you can do continuous POs", {
   my_design <- declare_design(my_population,
                               my_potential_outcomes,
                               my_assignment,
-                              reveal_outcomes)
+                              reveal_outcomes())
 
 
 

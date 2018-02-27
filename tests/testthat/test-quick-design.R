@@ -82,17 +82,17 @@ test_that("vary works", {
   diagnose_design(design, sims = 2, bootstrap = FALSE)
 
   design <- fill_out(template = two_arm_trial,
-                         N = c(100, 200, 300), noise_sd = c(.1, .2, .3))
+                     N = c(100, 200, 300), noise_sd = c(.1, .2, .3))
 
   diagnose_design(design, sims = 2, bootstrap = FALSE)
 
   design <- fill_out(template = two_arm_trial, expand = FALSE,
-                         N = c(100, 200, 300), noise_sd = c(.1, .2, .3))
+                     N = c(100, 200, 300), noise_sd = c(.1, .2, .3))
 
   diagnose_design(design, sims = 2, bootstrap = FALSE)
 
   expect_error(fill_out(template = two_arm_trial, expand = FALSE,
-                         N = c(100, 200, 300), noise_sd = c(.1, .2)))
+                        N = c(100, 200, 300), noise_sd = c(.1, .2)))
 
 })
 
@@ -116,15 +116,15 @@ test_that("power curve", {
   }
 
   design <- fill_out(template = two_arm_trial,
-                         N = c(100, 200, 300, 500, 1000))
+                     N = c(100, 200, 300, 500, 1000))
 
   diagnosis <- diagnose_design(design, sims = 2, bootstrap = FALSE)
-#
-#   library(ggplot2)
-#   ggplot(get_diagnosands(diagnosis), aes(x = N, y = power)) +
-#     geom_point() +
-#     geom_line() +
-#     theme_bw()
+  #
+  #   library(ggplot2)
+  #   ggplot(get_diagnosands(diagnosis), aes(x = N, y = power)) +
+  #     geom_point() +
+  #     geom_line() +
+  #     theme_bw()
 #
 
 })

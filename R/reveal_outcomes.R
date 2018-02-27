@@ -4,8 +4,7 @@
 #' @inheritParams declare_internal_inherit_params
 #'
 #' @export
-declare_reveal <- make_declarations(reveal_outcomes, "reveal_outcomes")
-
+declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal_outcomes")
 
 #' @param data A data.frame containing columns of potential outcomes and an assignment variable
 #'
@@ -39,46 +38,72 @@ declare_reveal <- make_declarations(reveal_outcomes, "reveal_outcomes")
 #'                          reveal_outcomes)
 #'
 #' design
-reveal_outcomes <-
+reveal_outcomes_handler <-
   function(data = NULL,
            outcome_variables = Y,
            assignment_variables = Z,
-           attrition_variables = NULL) {
+           attrition_variables = NULL,
+           ...) {
 
     if(!is.data.frame(data)) {
       stop("Please provide data to reveal_outcomes.")
     }
 
-    # Setup to handle NSE
-    outcome <- reveal_nse_helper(enquo(outcome_variables))
-    attrition <- reveal_nse_helper(enquo(attrition_variables))
-    assignment <- reveal_nse_helper(enquo(assignment_variables))
-
-    for (i in seq_along(outcome)) {
-      data[, outcome[i]] <- switching_equation(data, outcome[i], assignment)
+    if(!is.character(outcome_variables)) {
+      stop("outcome_variables should already be converted to characters")
+    }
+    if(!is.character(assignment_variables)) {
+      stop("assignment_variables should already be converted to characters")
+    }
+    if(!is.null(attrition_variables) && !is.character(assignment_variables)) {
+      stop("attrition_variables should already be converted to characters")
     }
 
-    for (i in seq_along(attrition)) {
-      response  <- switching_equation(data, attrition[i], assignment)
-      data[response == 0, outcome[i]] <- NA
+    for (i in seq_along(outcome_variables)) {
+      data[, outcome_variables[i]] <- switching_equation(data, outcome_variables[i], assignment_variables)
+    }
+
+    for (i in seq_along(attrition_variables)) {
+      response  <- switching_equation(data, attrition_variables[i], assignment_variables)
+      data[response == 0, outcome_variables[i]] <- NA
     }
 
     return(data)
 }
 
-attributes(reveal_outcomes) <- list(step_type = "reveal_outcomes",
-                                    causal_type= "dgp",
-                                    call=quote(reveal_outcomes()),
-                                    class=c("design_step", "function"))
+# attributes(reveal_outcomes) <- list(step_type = "reveal_outcomes",
+#                                     causal_type= "dgp",
+#                                     call=quote(reveal_outcomes()),
+#                                     class=c("design_step", "function"))
 
-validation_fn(reveal_outcomes) <- function(ret, dots, label) {
+validation_fn(reveal_outcomes_handler) <- function(ret, dots, label) {
+  dots$outcome_variables <- if("outcome_variables" %in% names(dots)) {
+     reveal_nse_helper(dots$outcome_variables)
+  } else as.character(formals(reveal_outcomes_handler)$outcome_variables)
+
+  dots$assignment_variables <- if("assignment_variables" %in% names(dots)) {
+    reveal_nse_helper(dots$assignment_variables)
+  } else as.character(formals(reveal_outcomes_handler)$assignment_variables)
+
   if("attrition_variable" %in% names(dots)) {
-
-
+    dots$attrition_variable <- reveal_nse_helper(dots$attrition_variable)
   }
-  ret
+
+  if("deprecated" %in% names(dots)){
+    .Deprecated("declare_reveal", old="reveal_outcomes")
+    dots$deprecated <- NULL
+  }
+
+  build_step(currydata(reveal_outcomes_handler, dots, strictDataParam=attr(ret, "strictDataParam")),
+             handler=reveal_outcomes_handler,
+             dots=dots,
+             label=label,
+             step_type=attr(ret, "step_type"),
+             causal_type=attr(ret,"causal_type"),
+             call=attr(ret, "call"))
 }
 
+reveal_outcomes <- declare_reveal(deprecate=TRUE)
 
 switching_equation <- function(data, outcome, assignments) {
 
