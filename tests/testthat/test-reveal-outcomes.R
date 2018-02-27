@@ -57,7 +57,7 @@ test_that("Reveal Outcomes", {
   design <- declare_design(my_population,
                            my_potential_outcomes,
                            my_assignment,
-                           reveal_outcomes(assignment_variables = Z,
+                           declare_reveal(assignment_variables = Z,
                                            outcome_variables = Y))
 
   head(draw_data(design))
@@ -65,7 +65,7 @@ test_that("Reveal Outcomes", {
   design <- declare_design(my_population,
                            my_potential_outcomes,
                            my_assignment,
-                           reveal_outcomes(assignment_variable = "Z",
+                           declare_reveal(assignment_variable = "Z",
                                            outcome_variable = "Y"))
 
   head(draw_data(design))
@@ -84,13 +84,13 @@ test_that("reveal multiple outcomes works", {
   design <- declare_design(my_population,
                            my_potential_outcomes1, my_potential_outcomes2,
                            my_assignment,
-                           reveal_outcomes(outcome_variables = c(Y1, Y2)))
+                           declare_reveal(outcome_variables = c(Y1, Y2)))
   draw_data(design)
 
   design <- declare_design(my_population,
                            my_potential_outcomes1, my_potential_outcomes2,
                            my_assignment,
-                           reveal_outcomes(outcome_variables = c("Y1", "Y2")))
+                           declare_reveal(outcome_variables = c("Y1", "Y2")))
   draw_data(design)
 
 })
@@ -117,7 +117,7 @@ test_that("declare_reveal handler works", {
 test_that("missing PO stops",{
 
   expect_error(
-   reveal_outcomes(sleep, outcome_variables = foo, assignment_variables = extra)
+    declare_reveal(outcome_variables = foo, assignment_variables = extra)(sleep)
   )
 })
 
@@ -126,7 +126,7 @@ test_that("Not all Potential outcome columns present",{
   df <- data.frame(Z=sample(1:3, 100, replace=TRUE), Y_Z_0=1:100, Y_Z_1=1:100)
 
   expect_error(
-    reveal_outcomes(df),
+    declare_reveal()(df),
     "Y_Z_3"
   )
 })
@@ -159,7 +159,7 @@ test_that("Single outcome, multiple assn", {
     population,
     potential_outcomes,
     assign_A,   assign_B,
-    reveal_outcomes(outcome_variables = Y, assignment_variables = c(A,B))
+    declare_reveal(outcome_variables = Y, assignment_variables = c(A,B))
   )
 
   dd <- draw_data(design)

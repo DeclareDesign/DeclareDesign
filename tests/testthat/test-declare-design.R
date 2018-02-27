@@ -23,7 +23,7 @@ test_that("test the full declare design setup", {
                            dplyr::mutate(q = 5),
                            dplyr::mutate(q = 6),
                            my_assignment,
-                           reveal_outcomes,
+                           reveal_outcomes(),
                            my_estimator)
 
   head(draw_data(design))
@@ -42,7 +42,8 @@ test_that("test the full declare design setup", {
                            declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)),
                            declare_sampling(n = 250),
                            declare_assignment(m = 25),
-                           reveal_outcomes)
+                           reveal_outcomes()
+  )
 
   head(draw_data(design))
   conduct_design(design)
