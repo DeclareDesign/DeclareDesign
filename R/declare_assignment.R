@@ -103,9 +103,15 @@ validation_fn(assignment_handler) <-   function(ret, dots, label){
     if (class(f_rhs(dots[["assignment_variable"]])) == "NULL") {
       declare_time_error("Must provide assignment_variable.", ret)
     }
+    assn <- reveal_nse_helper(dots$assignment_variable)
+  } else {
+    assn <- formals(assignment_handler)$assignment_variable
   }
 
-  ret
+
+  structure(ret, step_meta=list(assignment=assn))
 }
+
+###############################################################################
 
 

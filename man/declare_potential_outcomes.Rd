@@ -10,7 +10,8 @@ declare_potential_outcomes(..., handler = potential_outcomes_handler,
   label = NULL)
 
 potential_outcomes.formula(formula, conditions = c(0, 1),
-  assignment_variable = "Z", data, level = NULL)
+  assignment_variables = "Z", data, level = NULL,
+  label = outcome_variable)
 
 potential_outcomes.NULL(formula = stop("Not provided"), ..., data,
   level = NULL)
@@ -24,13 +25,13 @@ potential_outcomes.NULL(formula = stop("Not provided"), ..., data,
 
 \item{formula}{a formula to calculate Potential outcomes as functions of assignment variables}
 
-\item{conditions}{vector specifying the values the assignment variable can realize}
-
-\item{assignment_variable}{The name of the assignment variable}
+\item{conditions}{see \code{\link{expand_conditions}}}
 
 \item{data}{a data.frame}
 
 \item{level}{a character specifying a level of hierarchy for fabricate to calculate at}
+
+\item{assignment_variable}{The name of the assignment variable}
 }
 \value{
 a function that returns a data.frame

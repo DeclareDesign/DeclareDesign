@@ -157,26 +157,37 @@ declare_design <- function(...) {
     })
   }
 
-    local({
+  local({
 
-      labels <- sapply(ret, attr, "label")
-      function_types <- sapply(ret, attr, "step_type")
+    labels <- sapply(ret, attr, "label")
+    function_types <- sapply(ret, attr, "step_type")
 
-      check_unique_labels <- function(labels, types, what){
-        ss <- labels[types == what]
-        if(anyDuplicated(ss)) stop(
-          "You have ", what, "s with identical labels: ",
-          unique(ss[duplicated(ss)]),
-          "\nPlease provide ", what, "s with unique labels"
+    check_unique_labels <- function(labels, types, what) {
+      ss <- labels[types == what]
+      if(anyDuplicated(ss)) stop(
+        "You have ", what, "s with identical labels: ",
+        unique(ss[duplicated(ss)]),
+        "\nPlease provide ", what, "s with unique labels"
 
-          )
+      )
 
+    }
+
+    check_unique_labels(labels, function_types, "estimand")
+    check_unique_labels(labels, function_types, "estimator")
+
+  })
+
+  local({
+    for(i in seq_along(ret)){
+      step <- ret[[i]]
+      callback <- attr(step, "design_validation")
+      if(!is.null(callback)){
+        callback(ret, i, step)
       }
+    }
+  })
 
-      check_unique_labels(labels, function_types, "estimand")
-      check_unique_labels(labels, function_types, "estimator")
-
-    })
 
   ret
 }

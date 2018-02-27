@@ -170,12 +170,15 @@ test_that("POs at a higher level",{
       formula = Y_vil ~ elevation + 5 + 2*Z
     )
 
-  my_design <-
-    declare_design(
-      pop,
-      group_by(villages),
-      my_potential_outcomes
-    )
+  expect_warning(
+    my_design <-
+      declare_design(
+        pop,
+        group_by(villages),
+        my_potential_outcomes
+      ),
+    "Potential outcome is the final step in the design."
+  )
 
   draw_data(my_design)
 
@@ -202,7 +205,7 @@ test_that("error if you try to draw POs at a level using a variable that doesn't
 })
 
 
-test_that("error if you try to draw POs at a level using a variable that doesn't exist at that level",{
+test_that("Potential outcomes with multiple assignment variables",{
 
   beta <- c(1, 3)
 
@@ -220,3 +223,22 @@ test_that("error if you try to draw POs at a level using a variable that doesn't
   })
 
 })
+
+
+test_that("Restore existing variables to be unchanged",{
+
+
+  my_potential_outcomes_formula <-
+    declare_potential_outcomes(
+      formula = test ~ extra + group,
+      conditions = list(group=1:2)
+    )
+  expect_warning(
+    expect_identical(
+       my_potential_outcomes_formula(sleep)$group,
+       sleep$group),
+    "Assignment variables (group) already present in PO step.", fixed = TRUE
+  )
+
+})
+
