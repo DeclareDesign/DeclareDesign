@@ -29,6 +29,10 @@ declare_time_error <- function(message, declaration){
   stop( simpleError(message, call = attr(declaration, "call")) )
 }
 
+declare_time_warn <- function(message, declaration){
+  stop( simpleWarning(message, call = attr(declaration, "call")) )
+}
+
 
 # If <= 5 uniques, table it, ow descriptives if numeric-ish, ow number of levels.
 describe_variable <- function(x) {

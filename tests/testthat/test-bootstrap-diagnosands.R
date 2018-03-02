@@ -17,7 +17,7 @@ test_that("test diagnosands", {
   my_design <- declare_design(my_population(),
                               my_potential_outcomes, pate,
                               my_assignment,
-                              reveal_outcomes(),
+                              reveal_outcomes,
                               pate_estimator1,
                               pate_estimator2)
 

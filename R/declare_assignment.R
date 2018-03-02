@@ -61,28 +61,24 @@ declare_assignment <- make_declarations(assignment_handler, "assignment" )
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo f_rhs
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
 assignment_handler <-
-  function(data, ..., assignment_variable = "Z", reveal="auto") {
+  function(data, ..., assignment_variable = "Z") {
     ## draw assignment
 
     options <- quos(...)
-    assn <- as.symbol(reveal_nse_helper(enquo(assignment_variable)))
-    cond_prob <- as.symbol(paste0(assn, "_cond_prob"))
 
-    data <- fabricate(data,
-     !!assn      := conduct_ra(N=N, !!!options),
-     !!cond_prob := obtain_condition_probabilities(!!!options, assignment = !!assn),
-     ID_label = NA
-    )
 
-    outcome <- attr(data, "outcome_variable")
-    if(reveal == "auto"
-       && is.character(outcome) &&
-       assignment_variable == attr(data, "assignment_variable")) {
-          data <- reveal_outcomes(data, !!outcome, !!assignment_variable)
+    for(assn in assignment_variable){
+      cond_prob <- as.symbol(paste0(assn, "_cond_prob"))
+      assn <- as.symbol(assn)
+      data <- fabricate(data,
+                        !!assn      := conduct_ra(N=N, !!!options),
+                        !!cond_prob := obtain_condition_probabilities(!!!options, assignment = !!assn),
+       ID_label = NA
+      )
     }
 
-    return(data)
 
+    data
   }
 
 validation_fn(assignment_handler) <-   function(ret, dots, label){
@@ -104,12 +100,24 @@ validation_fn(assignment_handler) <-   function(ret, dots, label){
       declare_time_error("Must provide assignment_variable.", ret)
     }
     assn <- reveal_nse_helper(dots$assignment_variable)
+
+    dots$assignment_variable <- assn
+
+    ret <- build_step(currydata(assignment_handler, dots, strictDataParam=attr(ret, "strictDataParam")),
+                      handler=assignment_handler,
+                      dots=dots,
+                      label=label,
+                      step_type=attr(ret, "step_type"),
+                      causal_type=attr(ret,"causal_type"),
+                      call=attr(ret, "call"))
+
+
   } else {
     assn <- formals(assignment_handler)$assignment_variable
   }
 
 
-  structure(ret, step_meta=list(assignment=assn))
+  structure(ret, step_meta=list(assignment_variables=assn))
 }
 
 ###############################################################################
