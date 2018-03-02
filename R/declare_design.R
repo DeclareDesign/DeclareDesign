@@ -178,15 +178,13 @@ declare_design <- function(...) {
 
   })
 
-  local({
-    for(i in seq_along(ret)){
-      step <- ret[[i]]
-      callback <- attr(step, "design_validation")
-      if(!is.null(callback)){
-        callback(ret, i, step)
-      }
+  for(i in seq_along(ret)){
+    step <- ret[[i]]
+    callback <- attr(step, "design_validation")
+    if(is.function(callback)){
+      ret <- callback(ret, i, step)
     }
-  })
+  }
 
 
   ret
@@ -333,7 +331,7 @@ summary.design <- function(object, ...) {
           authors = citation$author
           description = citation$note
         }
-        calls[[i]] <- quote(metadata)
+        calls[i] <- list(NULL)
       }
   }
 

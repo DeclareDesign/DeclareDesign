@@ -49,6 +49,11 @@ reveal_outcomes_handler <-
       stop("Please provide data to reveal_outcomes.")
     }
 
+    if("deprecate" %in% names(list(...))){
+      .Deprecated("declare_reveal", old="reveal_outcomes")
+    }
+
+
     if(!is.character(outcome_variables)) {
       stop("outcome_variables should already be converted to characters")
     }
@@ -69,7 +74,7 @@ reveal_outcomes_handler <-
     }
 
     return(data)
-}
+  }
 
 # attributes(reveal_outcomes) <- list(step_type = "reveal_outcomes",
 #                                     causal_type= "dgp",
@@ -77,8 +82,9 @@ reveal_outcomes_handler <-
 #                                     class=c("design_step", "function"))
 
 validation_fn(reveal_outcomes_handler) <- function(ret, dots, label) {
+
   dots$outcome_variables <- if("outcome_variables" %in% names(dots)) {
-     reveal_nse_helper(dots$outcome_variables)
+    reveal_nse_helper(dots$outcome_variables)
   } else as.character(formals(reveal_outcomes_handler)$outcome_variables)
 
   dots$assignment_variables <- if("assignment_variables" %in% names(dots)) {
@@ -89,18 +95,18 @@ validation_fn(reveal_outcomes_handler) <- function(ret, dots, label) {
     dots$attrition_variable <- reveal_nse_helper(dots$attrition_variable)
   }
 
-  if("deprecated" %in% names(dots)){
-    .Deprecated("declare_reveal", old="reveal_outcomes")
-    dots$deprecated <- NULL
-  }
+  ret <- build_step(currydata(reveal_outcomes_handler, dots, strictDataParam=attr(ret, "strictDataParam")),
+                    handler=reveal_outcomes_handler,
+                    dots=dots,
+                    label=label,
+                    step_type=attr(ret, "step_type"),
+                    causal_type=attr(ret,"causal_type"),
+                    call=attr(ret, "call")
+  )
 
-  build_step(currydata(reveal_outcomes_handler, dots, strictDataParam=attr(ret, "strictDataParam")),
-             handler=reveal_outcomes_handler,
-             dots=dots,
-             label=label,
-             step_type=attr(ret, "step_type"),
-             causal_type=attr(ret,"causal_type"),
-             call=attr(ret, "call"))
+  structure(ret,
+            step_meta = dots[c("attrition_variable", "outcome_variables", "assignment_variables")]
+  )
 }
 
 reveal_outcomes <- declare_reveal(deprecate=TRUE)

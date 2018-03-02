@@ -178,7 +178,7 @@ print.summary.design <- function(x, ...) {
   }
 
   for (i in 1:max(length(x$variables_added), length(x$quantities_added))) {
-    step_name <- deparse(x$call[[i]])
+    step_name <- if(is.null(x$call[[i]])) "" else deparse(x$call[[i]])
     step_class <-
       ifelse(
         x$function_types[[i]] != "unknown",
