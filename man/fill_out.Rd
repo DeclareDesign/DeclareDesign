@@ -28,19 +28,34 @@ if set of designs is size one, the design, otherwise a `by`-list of designs.
 }
 \examples{
 
-d_template <- function(N=100) declare_design(declare_population(N=N))
+design_template <- function(N = 100) {
+  population <- declare_population(N = N)
+  return(declare_design(population))
+  }
 
-vary_n <- fill_out(d_template, N=seq(30, 100, 10))
-
-big_d <- fill_out(d_template, N=200)
-
-bigger_d <- redesign(big_d, N=1000)
-
-little_d <- redesign(big_d, N=seq(5,25,5))
+# returns list of three designs
+vary_n <- fill_out(design_template, N = seq(30, 100, 10))
 
 \dontrun{
- # idea is to diagnose a list
-  diagnose_design(little_d, )
+ # diagnose a list of designs created by fill_out or redesign
+ diagnose_vary_n <- diagnose_design(vary_n)
 }
+
+# returns a single design
+large_design <- fill_out(design_template, N = 200)
+
+\dontrun{
+ diagnose_large_design <- diagnose_design(large_design)
+}
+
+my_population <- declare_population(N = 100)
+my_design <- declare_design(my_population)
+
+# returns a single, modified design
+design_large_N <- redesign(my_design, N = 1000)
+
+# returns a list of five modified designs
+design_vary_N <- redesign(my_design, N = seq(500, 1000, 100))
+
 
 }
