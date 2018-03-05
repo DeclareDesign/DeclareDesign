@@ -34,9 +34,10 @@ test_that("compare_designs works", {
   diagnosis_2 <- diagnose_design(my_design_2, sims = 2, bootstrap = FALSE)
 
   comparison <- diagnose_design(my_design_1, my_design_2, sims = 2, bootstrap = FALSE)
-  comparison
+
+  expect_equal(comparison$diagnosands$design_ID, factor(c("my_design_1","my_design_2")))
 
   comparison <- diagnose_design(first_design = my_design_1, my_design_2, sims = 2, bootstrap = FALSE)
-  comparison
 
+  expect_equal(comparison$diagnosands$design_ID, factor(c("first_design","my_design_2")))
 })

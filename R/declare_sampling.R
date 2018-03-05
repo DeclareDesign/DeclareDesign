@@ -55,26 +55,28 @@ declare_sampling <- make_declarations(sampling_handler, "sampling")
 
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
-sampling_handler <-
-  function(data, ..., sampling_variable = "S") {
-    ## draw sample
+sampling_handler <- function(data, ..., sampling_variable = "S") {
+  ## draw sample
 
-    options <- quos(...)
+  options <- quos(...)
 
-    samp <- reveal_nse_helper(substitute(sampling_variable))
-    samp <- as.symbol(paste0(samp, "_inclusion_prob"))
+  samp <- reveal_nse_helper(sampling_variable)
+  samp <- as.symbol(paste0(samp, "_inclusion_prob"))
 
+  S <- as.symbol(".__Sample") # Matching old code but also eliminating the R CMD check warning that .__Sample is a undef/global variable
 
-    data <- fabricate(data,
-      .__Sample        :=  draw_rs(N=N, !!!options),
-      !!samp           :=  obtain_inclusion_probabilities(N=N, !!!options),
-      ID_label = NA
-    )
+  data <- fabricate(data,
+    !!S              :=  draw_rs(N=N, !!!options),
+    !!samp           :=  obtain_inclusion_probabilities(N=N, !!!options),
+    ID_label = NA
+  )
 
-    ## subset to the sampled observations
-    subset(data, .__Sample %in% 1, -.__Sample)
+  S <- as.character(S)
 
-  }
+  ## subset to the sampled observations
+  data[ data[[S]] %in% 1, names(data) != S, drop=FALSE]
+
+}
 
 validation_fn(sampling_handler) <- function(ret, dots, label){
 

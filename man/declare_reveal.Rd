@@ -2,13 +2,13 @@
 % Please edit documentation in R/reveal_outcomes.R
 \name{declare_reveal}
 \alias{declare_reveal}
-\alias{reveal_outcomes}
+\alias{reveal_outcomes_handler}
 \title{Declare a Reveal Outcomes step}
 \usage{
-declare_reveal(..., handler = reveal_outcomes, label = NULL)
+declare_reveal(..., handler = reveal_outcomes_handler, label = NULL)
 
-reveal_outcomes(data = NULL, outcome_variables = Y,
-  assignment_variables = Z, attrition_variables = NULL)
+reveal_outcomes_handler(data = NULL, outcome_variables = Y,
+  assignment_variables = Z, attrition_variables = NULL, ...)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}

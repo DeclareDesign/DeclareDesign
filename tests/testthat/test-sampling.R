@@ -23,7 +23,24 @@ test_that("randomizr works through declare_sampling", {
 
 })
 
+expect_sampling_step <- function(step, df, n, clusters=NULL, strata=NULL ){
+  df <- step(df)
 
+  if(!is.na(n)){
+    expect_equal(nrow(df), n)
+  }
+
+  expect_true(is.numeric(df$S_inclusion_prob))
+
+  if(is.character(clusters)){
+
+  }
+  if(is.character(strata)){
+
+  }
+
+
+}
 
 test_that("test sampling and probability functions", {
 
@@ -33,47 +50,25 @@ test_that("test sampling and probability functions", {
     individuals = add_level(N = 10, noise = rnorm(N),
                         ideo_3 = sample(c('Liberal', 'Moderate', 'Conservative'),
                                         size = N, prob = c(.2, .3, .5), replace = TRUE))
-)
+  )
+  # Draw Data
+  population <- population()
+
+
   # "complete" sampling
-  sampling_1 <- declare_sampling()
-  sampling_2 <- declare_sampling(n = 60)
+  expect_sampling_step(declare_sampling(), population, n=500)
+  expect_sampling_step(declare_sampling(n = 60), population, n=60)
 
   # stratified sampling
-  sampling_3 <- declare_sampling(strata = ideo_3)
-  sampling_4 <- declare_sampling(strata = ideo_3, strata_prob = c(.3, .6, .1))
-
-  sampling_5 <- declare_sampling(strata = ideo_3,
-                                 strata_n = c(10, 10, 10))
+  expect_sampling_step(declare_sampling(strata=ideo_3), population, n=NA)
+  expect_sampling_step(declare_sampling(strata=ideo_3, strata_prob = c(.3, .6, .1)), population, n=NA)
+  expect_sampling_step(declare_sampling(strata=ideo_3,  strata_n = c(10, 10, 10)), population, n=30)
 
   # Clustered sampling
-  sampling_6 <- declare_sampling(clusters = villages)
+  expect_sampling_step(declare_sampling(clusters = villages), population, n=500)
 
   # Stratified and Clustered assignments
-  sampling_7 <- declare_sampling(clusters = villages,
-                                      strata = high_elevation)
-
-  # Draw Data
-  smp_draw <- population()
-
-  # Attempt to Assign
-
-  smp_draw %>% nrow
-  smp_draw %>% sampling_1() %>% nrow
-  smp_draw %>% sampling_2() %>% nrow
-  smp_draw %>% sampling_3() %>% with(.,table(ideo_3))
-  smp_draw %>% sampling_4() %>% with(.,table(ideo_3))
-  smp_draw %>% sampling_5() %>% with(.,table(ideo_3))
-  smp_draw %>% sampling_6() %>% with(.,table(villages))
-  smp_draw %>% sampling_7() %>% with(.,table(villages, high_elevation))
-
-  # Obtain Treatment Probabilities
-  smp_draw %>% sampling_1() %>% .$S_inclusion_prob %>% head()
-  smp_draw %>% sampling_2() %>% .$S_inclusion_prob %>% head()
-  smp_draw %>% sampling_3() %>% .$S_inclusion_prob %>% head()
-  smp_draw %>% sampling_4() %>% .$S_inclusion_prob %>% head()
-  smp_draw %>% sampling_5() %>% .$S_inclusion_prob %>% head()
-  smp_draw %>% sampling_6() %>% .$S_inclusion_prob %>% head()
-  smp_draw %>% sampling_7() %>% .$S_inclusion_prob %>% head()
+  expect_sampling_step(declare_sampling(clusters = villages,strata = high_elevation), population, n=NA)
 
 })
 

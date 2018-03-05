@@ -9,7 +9,8 @@ test_that("demo runs", {
                        age = sample(18:95, N, replace = T))
 
   pop <- my_population()
-  head(pop)
+  expect_equal(nrow(pop), 1000)
+  expect_equal(colnames(pop), c("ID", "income", "age"))
 
   ## ------------------------------------------------------------------------
   my_population_nested <- declare_population(
@@ -78,6 +79,7 @@ test_that("demo runs", {
   my_estimand(pop_pos)
 
   ## ------------------------------------------------------------------------
+  reveal_outcomes <- declare_reveal()
   smp <- reveal_outcomes(smp)
   my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
   my_estimator_dim(smp)

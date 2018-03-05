@@ -16,6 +16,8 @@ test_that("test the full declare design setup", {
 
   my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
+  my_reveal <- declare_reveal()
+
   design <- declare_design(my_population,
                            my_potential_outcomes,
                            my_sampling,
@@ -23,32 +25,38 @@ test_that("test the full declare design setup", {
                            dplyr::mutate(q = 5),
                            dplyr::mutate(q = 6),
                            my_assignment,
-                           reveal_outcomes(),
+                           my_reveal,
                            my_estimator)
 
-  head(draw_data(design))
-  conduct_design(design)
+  df <- (draw_data(design))
+  expect_equal(dim(df), c(250,9))
 
-  #summary(design)
 
-  diagnose_design(design, sims = 2, bootstrap = FALSE)
+  output <- conduct_design(design)
+  expect_equal(dim(output$estimates_df), c(1,8))
+  expect_equal(dim(output$estimands), c(1,2))
 
 })
 
 
-test_that("test the full declare design setup", {
+test_that("No estimators / estimands", {
 
-  design <- declare_design(declare_population(N = 500, noise = rnorm(N)),
-                           declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)),
-                           declare_sampling(n = 250),
-                           declare_assignment(m = 25),
-                           reveal_outcomes()
+  design <- declare_design(
+    declare_population(N = 500, noise = 1:N),
+    declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + 1),
+    declare_sampling(n = 250),
+    declare_assignment(m = 25),
+    declare_reveal()
   )
 
   head(draw_data(design))
-  conduct_design(design)
+  expect_identical(
+    conduct_design(design),
+    structure(list(estimates_df = structure(list(), class = "data.frame", row.names = integer(0)),
+    estimands_df = structure(list(), class = "data.frame", row.names = integer(0))), .Names = c("estimates_df",
+    "estimands_df"))
+  )
 
-  #diagnose_design(design, sims = 3) - # will fail, no estimands/estimates are declared
 
 })
 

@@ -2,6 +2,7 @@
 library(DeclareDesign)
 set.seed(42)
 options(digits=2)
+reveal_outcomes <- declare_reveal()
 
 ## ----echo=TRUE, results="hide"-------------------------------------------
 my_population <-
