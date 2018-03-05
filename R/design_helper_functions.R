@@ -251,6 +251,10 @@ print.summary.design <- function(x, ...) {
 #' @export
 str.design_step <- function(object, ...) cat("design_step:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
 
+#' @export
+str.seed_data <- function(object, ...) cat("design_step:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
+
+
 fan_out <- function(design, fan) {
 
   st <- list( execution_st(design) )

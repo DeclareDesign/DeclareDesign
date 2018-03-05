@@ -12,6 +12,7 @@ vignette: >
 library(DeclareDesign)
 set.seed(42)
 options(digits=2)
+reveal_outcomes <- declare_reveal()
 ```
 
 # Overview

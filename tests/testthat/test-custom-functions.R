@@ -1,6 +1,6 @@
 context("Custom Functions")
 
-test_that("you can use custom functions for each of the six declare steps", {
+test_that("custom population", {
 
   ## population
   my_population_function <- function(N) {
@@ -12,13 +12,17 @@ test_that("you can use custom functions for each of the six declare steps", {
 
   rm(my_population_function)
   pop_custom <- my_population_custom()
-  head(pop_custom)
+
+  expect_equal(dim(pop_custom), c(100,1))
+})
+
+test_that("custom PO", {
 
   ## potential outcomes
   my_potential_outcomes_function <-
     function(data) {
-      data$Y_Z_0 <- with(data, u)
-      data$Y_Z_1 <- with(data, 0.25 + u)
+      data$Y_Z_0 <- with(data, extra)
+      data$Y_Z_1 <- with(data, 0.25 + extra)
       data
     }
 
@@ -27,22 +31,25 @@ test_that("you can use custom functions for each of the six declare steps", {
   )
 
   rm(my_potential_outcomes_function)
-  pop_custom <- my_potential_outcomes_custom(data = pop_custom)
+  pop_custom <- my_potential_outcomes_custom(data = sleep)
 
-  head(pop_custom)
+  expect_equal(dim(pop_custom), c(20,5))
+})
 
+
+test_that("custom sampling", {
   ## sampling
   my_sampling_function <- function(data) {
-    S <- rbinom(n = nrow(data),
+    data$S <- rbinom(n = nrow(data),
            size = 1,
            prob = 0.1)
-    data[S == 1,]
+    data[data$S == 1,]
   }
 
   my_sampling_custom <- declare_sampling(
     handler  = my_sampling_function)
 
-  smp_custom <- my_sampling_custom(pop_custom)
-  smp_custom
+  smp_custom <- my_sampling_custom(sleep)
+  expect_true("S" %in% names(smp_custom))
 })
 

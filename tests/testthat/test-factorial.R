@@ -17,6 +17,8 @@ test_that("Factorial", {
                                     model = lm_robust,
                                     coefficient_name = "Z1:Z2")
 
+  reveal_outcomes <- declare_reveal()
+
   my_design <-
     declare_design(
       my_population,

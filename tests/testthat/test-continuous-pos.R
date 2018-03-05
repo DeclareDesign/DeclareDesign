@@ -11,10 +11,12 @@ test_that("you can do continuous POs", {
 
   my_assignment <- declare_assignment(conditions=conditions)
 
+  my_reveal <- declare_reveal()
+
   my_design <- declare_design(my_population,
                               my_potential_outcomes,
                               my_assignment,
-                              reveal_outcomes)
+                              my_reveal)
 
 
 

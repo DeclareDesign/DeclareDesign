@@ -151,10 +151,10 @@ declare_design <- function(...) {
 
   # Special case for initializing with a data.frame
   if("data.frame" %in% class(ret[[1]])){
-    ret[[1]] <- local({
-      df <- ret[[1]]
-      structure(function(data) df, step_type='seed.data', causal_type='dgp', call=qs[[1]][[2]])
-    })
+    ret[[1]] <- build_step(
+      (function(df) { force(df); function(data) df})(ret[[1]]),
+      handler=NULL, dots=list(), label=qnames[1], step_type="seed_data", causal_type="dgp", call=qs[[1]][[2]]
+    )
   }
 
   local({

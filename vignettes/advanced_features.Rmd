@@ -98,12 +98,15 @@ Attrition can be thought of as just another potential outcome. That is, one desc
 my_potential_outcomes_attrition <- declare_potential_outcomes(
   formula = R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
 
+reveal_R <- declare_reveal(outcome_variables = "R")
+reveal_Y <- declare_reveal(outcome_variables = "Y", attrition_variables = "R")
+
 my_design <- declare_design(my_population(),
                             my_potential_outcomes,
                             my_potential_outcomes_attrition,
                             my_assignment,
-                            reveal_outcomes(outcome_variables = "R"),
-                            reveal_outcomes(attrition_variables = "R"))
+                            reveal_R,
+                            reveal_Y)
 
 head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
 ```

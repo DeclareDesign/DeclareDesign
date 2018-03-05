@@ -120,7 +120,6 @@ diagnose_design <- function(..., diagnosands = default_diagnosands,
 
   }
 
-#' @importFrom future.apply future_lapply
 diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) {
 
 

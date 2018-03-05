@@ -34,6 +34,15 @@ declare_time_warn <- function(message, declaration){
 }
 
 
+future_lapply <- function(...){
+  if(requireNamespace("future.apply", quietly = TRUE)){
+    future.apply::future_lapply(...)
+  } else {
+    lapply(...)
+  }
+}
+
+
 # If <= 5 uniques, table it, ow descriptives if numeric-ish, ow number of levels.
 describe_variable <- function(x) {
 
