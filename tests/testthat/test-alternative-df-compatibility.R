@@ -8,11 +8,16 @@ test_that("data.frame", {
 
   design <- declare_design(dat, pos)
 
-  draw_data(design)
+  df <- draw_data(design)
+
+  expect_identical(colnames(df), c("y", "x", "Y_Z_0", "Y_Z_1"))
+
+  expect_identical(dims(df), 5:4)
 
 })
 
 test_that("tibble", {
+  skip_if_not_installed("dplyr")
 
   dat <- dplyr::tibble(y = rnorm(5), x = rnorm(5))
 
@@ -22,10 +27,17 @@ test_that("tibble", {
 
   draw_data(design)
 
+  expect_identical(colnames(df), c("y", "x", "Y_Z_0", "Y_Z_1"))
+
+  expect_identical(dims(df), 5:4)
+
+
 })
 
 
 test_that("data.table", {
+
+  skip_if_not_installed("data.table")
 
   dat <- data.table::data.table(y = rnorm(5), x = rnorm(5))
 
@@ -34,6 +46,11 @@ test_that("data.table", {
   design <- declare_design(dat, pos)
 
   draw_data(design)
+
+  expect_identical(colnames(df), c("y", "x", "Y_Z_0", "Y_Z_1"))
+
+  expect_identical(dims(df), 5:4)
+
 
 })
 
