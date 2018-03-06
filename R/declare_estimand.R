@@ -78,8 +78,11 @@ validation_fn(estimand_handler) <-  function(ret, dots, label){
   # add ... labels at build time
   dotnames <- names(dots)
 
+  # Don't overwrite label-label with splat label if coefficient names are true
+  if("coefficient_names" %in% dotnames && isTRUE(eval_tidy(dots$coefficient_names))) return(ret)
+
   maybeDotLabel <- dotnames[! dotnames %in% c("", names(formals(estimand_handler)) )]
-  if(length(maybeDotLabel) == 1){
+  if(length(maybeDotLabel) == 1 ){
     attr(ret, "steplabel") <- attr(ret, "label")
     attr(ret, "label") <- maybeDotLabel[1]
   }
