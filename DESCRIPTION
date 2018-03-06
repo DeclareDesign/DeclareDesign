@@ -23,6 +23,7 @@ Imports:
 Additional_repositories: http://r.declaredesign.org
 Remotes:
     DeclareDesign/fabricatr,
+    DeclareDesign/randomizr,
     DeclareDesign/estimatr@lukesonnet/iv
 License: MIT + file LICENSE
 URL: http://declaredesign.org, https://github.com/DeclareDesign/DeclareDesign
