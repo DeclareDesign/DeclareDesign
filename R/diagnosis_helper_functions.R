@@ -16,11 +16,13 @@
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 #'
+#' my_reveal <- declare_reveal()
+#'
 #' design <- declare_design(my_population,
 #'                          my_potential_outcomes,
 #'                          my_estimand,
 #'                          my_assignment,
-#'                          reveal_outcomes,
+#'                          my_reveal,
 #'                          my_estimator)
 #'
 #' \dontrun{

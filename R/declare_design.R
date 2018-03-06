@@ -105,13 +105,15 @@ callquos_to_step <- function(step_call, label="") {
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 #'
+#' my_reveal <- declare_reveal()
+#'
 #' design <- declare_design(my_population,
 #'                          my_potential_outcomes,
 #'                          my_sampling,
 #'                          my_estimand,
 #'                          dplyr::mutate(noise_sq = noise^2),
 #'                          my_assignment,
-#'                          reveal_outcomes,
+#'                          my_reveal,
 #'                          my_estimator)
 #'
 #' design
@@ -224,13 +226,15 @@ get_modified_variables <- function(last_df = NULL, current_df) {
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 #'
+#' my_reveal <- declare_reveal()
+#'
 #' design <- declare_design(my_population,
 #'                          my_potential_outcomes,
 #'                          my_sampling,
 #'                          my_estimand,
 #'                          dplyr::mutate(noise_sq = noise^2),
 #'                          my_assignment,
-#'                          reveal_outcomes,
+#'                          my_reveal,
 #'                          my_estimator)
 #'
 #' summary(design)

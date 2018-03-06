@@ -16,4 +16,4 @@ NULL
   invisible(repos)
 }
 
-utils::globalVariables(c("Y", "Z"))
+utils::globalVariables(c("Y", "Z", "N"))

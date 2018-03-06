@@ -6,10 +6,7 @@
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
 #'
 #' @param sims The number of simulations, defaulting to 500.
-#' @param bootstrap Option to bootstrap the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{TRUE}.
-#' @param bootstrap_sims The number of bootstrap replicates of the diagnosands, defaulting to 100.
-#' @param parallel Logical indicating whether to run the diagnoses in parallel. Defaults to TRUE.
-#' @param parallel_cores Number of CPU cores to use. Defaults to all available cores.
+#' @param bootstrap Number  of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}.
 #'
 #' @examples
 #' my_population <- declare_population(N = 500, noise = rnorm(N))
@@ -24,11 +21,13 @@
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 #'
+#' my_reveal <- declare_reveal()
+#'
 #' design <- declare_design(my_population,
 #'                          my_potential_outcomes,
 #'                          my_estimand,
 #'                          my_assignment,
-#'                          reveal_outcomes,
+#'                          my_reveal,
 #'                          my_estimator)
 #'
 #' \dontrun{
