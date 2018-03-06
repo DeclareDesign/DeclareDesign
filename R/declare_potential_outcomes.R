@@ -112,20 +112,26 @@ potential_outcomes.formula <-
 
     outcome_variable <- as.character(formula[[2]])
 
-    # used at very end to un-modify the pre-existing assignment variables
-    restore <- function(df){
-      i <- assignment_variables %i% colnames(data)
-      if(length(i) == 0) return(df)
-      warning("Assignment variables (", paste(i, sep=", "), ") already present in PO step (", label ,").",
-              "They will be restored.", call.=FALSE)
-      df[i] <- data[i]
-      df
-    }
-
+    to_restore <- assignment_variables %i% colnames(data)
+    to_null <- setdiff(assignment_variables, to_restore)
 
     # Build a fabricate call -
     # fabricate( Z=1, Y_Z_1=f(Z), Z=2, Y_Z_2=f(Z), ..., Z=NULL)
     condition_quos <- quos()
+
+    if(length(to_restore) > 0){
+      restore_mangled <- paste(rep("_", max(nchar(colnames(data)))), collapse="")
+
+      restore_mangled <- setNames(
+        lapply(to_restore, as.symbol),
+        paste0(".", restore_mangled, to_restore)
+      )
+
+      condition_quos <- c(condition_quos, quos(!!!restore_mangled))
+
+    }
+
+
     expr = as_quosure(formula)
     for(i in 1:nrow(conditions)){
 
@@ -136,19 +142,27 @@ potential_outcomes.formula <-
     }
 
     # clean up
-    condition_values <-  lapply(condition_values, function(x) NULL)
-    condition_quos <- c(condition_quos, quos(!!!condition_values))
+    if(length(to_restore) > 0) {
+      to_restore <-  setNames(
+        lapply(names(restore_mangled), as.symbol),
+        to_restore
+      )
+      restore_mangled <- lapply(restore_mangled, function(x) NULL)
+      condition_quos <- c(condition_quos, quos(!!!to_restore), quos(!!!restore_mangled))
+    }
+
+    if(length(to_null) > 0) {
+      to_null <-  lapply(to_null, function(x) NULL)
+      condition_quos <- c(condition_quos, quos(!!!to_null))
+    }
+
 
     if(is.character(level)) {
       condition_quos <- quos(!!level := modify_level(!!!condition_quos))
     }
-    # else {
-    #   condition_quos <- c(condition_quos, quos(ID_label=NA))
-    # }
-
 
     structure(
-      restore(fabricate(data=data, !!!condition_quos, ID_label=NA)),
+      fabricate(data=data, !!!condition_quos, ID_label=NA),
       outcome_variable=outcome_variable,
       assignment_variables=assignment_variables)
 
