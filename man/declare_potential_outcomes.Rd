@@ -27,11 +27,11 @@ potential_outcomes.NULL(formula = stop("Not provided"), ..., data,
 
 \item{conditions}{see \code{\link{expand_conditions}}}
 
+\item{assignment_variables}{The name of the assignment variable}
+
 \item{data}{a data.frame}
 
 \item{level}{a character specifying a level of hierarchy for fabricate to calculate at}
-
-\item{assignment_variable}{The name of the assignment variable}
 }
 \value{
 a function that returns a data.frame

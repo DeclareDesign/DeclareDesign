@@ -96,7 +96,7 @@ validation_fn(potential_outcomes_handler) <-  function(ret, dots, label) {
 
 #' @param formula a formula to calculate Potential outcomes as functions of assignment variables
 #' @param conditions see \code{\link{expand_conditions}}
-#' @param assignment_variable The name of the assignment variable
+#' @param assignment_variables The name of the assignment variable
 #' @param level a character specifying a level of hierarchy for fabricate to calculate at
 #' @param data a data.frame
 #' @importFrom fabricatr fabricate
@@ -321,3 +321,4 @@ expand_conditions <- function() {
   conditions
 }
 formals(expand_conditions) <- formals(potential_outcomes.formula)
+formals(expand_conditions)["label"] <- list(NULL) # Fixes R CMD Check warning outcome is undefined

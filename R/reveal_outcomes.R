@@ -32,10 +32,12 @@ declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal_outcomes")
 #'
 #' my_assignment <- declare_assignment(m = 50)
 #'
+#' my_reveal <- declare_reveal()
+#'
 #' design <- declare_design(my_population,
 #'                          my_potential_outcomes,
 #'                          my_assignment,
-#'                          reveal_outcomes)
+#'                          my_reveal)
 #'
 #' design
 reveal_outcomes_handler <-

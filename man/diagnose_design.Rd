@@ -14,13 +14,7 @@ diagnose_design(..., diagnosands = default_diagnosands, sims = 500,
 
 \item{sims}{The number of simulations, defaulting to 500.}
 
-\item{bootstrap}{Option to bootstrap the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{TRUE}.}
-
-\item{bootstrap_sims}{The number of bootstrap replicates of the diagnosands, defaulting to 100.}
-
-\item{parallel}{Logical indicating whether to run the diagnoses in parallel. Defaults to TRUE.}
-
-\item{parallel_cores}{Number of CPU cores to use. Defaults to all available cores.}
+\item{bootstrap}{Number  of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}.}
 }
 \description{
 Diagnose the Design
@@ -38,11 +32,13 @@ my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
 my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
+my_reveal <- declare_reveal()
+
 design <- declare_design(my_population,
                          my_potential_outcomes,
                          my_estimand,
                          my_assignment,
-                         reveal_outcomes,
+                         my_reveal,
                          my_estimator)
 
 \dontrun{
