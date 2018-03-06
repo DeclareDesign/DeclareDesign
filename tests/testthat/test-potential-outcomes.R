@@ -192,12 +192,9 @@ test_that("Restore existing variables to be unchanged",{
       formula = test ~ extra + group,
       conditions = list(group=1:2)
     )
-  expect_warning(
-    expect_identical(
-       my_potential_outcomes_formula(sleep)$group,
-       sleep$group),
-    "Assignment variables (group) already present in PO step.", fixed = TRUE
-  )
+  expect_identical(
+     my_potential_outcomes_formula(sleep)$group,
+     sleep$group)
 
 })
 
