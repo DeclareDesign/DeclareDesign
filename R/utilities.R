@@ -8,7 +8,12 @@ maybe_add_labels <- function(quotations){
 
   labeller <- function(quotation, lbl) {
     cx <- quotation[[2]]
-    if(is.call(cx) && is.symbol(cx[[1]]) && ! "label" %in% names(cx) && lbl != ""){
+
+    if (lbl == "") {
+      lbl <- deparse(f_rhs(quotation))
+    }
+
+    if(is.call(cx) && is.symbol(cx[[1]]) && ! "label" %in% names(cx)){
 
       f <- match.fun(cx[[1]])
       if("declaration" %in% class(f) && "label" %in% names(formals(f))){
