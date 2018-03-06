@@ -219,13 +219,6 @@ pofdv <- function(design, i, step){
     callback(vars)
   }
 
-  prev_unassigned <- check("assignment_variables",  "assignment", "assignment_variables",
-                         to=i-1, callback=I)
-
-  prev_unrevealed <- check("assignment_variables", "reveal_outcomes", "outcome_variables",
-                           to=i-1, callback=I)
-
-
   unrevealed_outcomes <- check("outcome_variables", "reveal_outcomes", "outcome_variables",
                                from=i+1,
                                function(vars){
@@ -236,6 +229,17 @@ pofdv <- function(design, i, step){
                                  vars
                                }
   )
+
+  if(length(unrevealed_outcomes) == 0) return(design)
+
+
+  prev_unassigned <- check("assignment_variables",  "assignment", "assignment_variables",
+                         to=i-1, callback=I)
+
+  prev_unrevealed <- check("assignment_variables", "reveal_outcomes", "outcome_variables",
+                           to=i-1, callback=I)
+
+
 
   if(length(prev_unassigned %i% prev_unrevealed) == 0 && length(unrevealed_outcomes) > 0){
     new_step <- declare_reveal(outcome_variables = !!this_step_meta$outcome_variables,
