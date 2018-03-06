@@ -2,7 +2,7 @@
 
 
 
-
+#' @importFrom rlang f_text f_env
 
 maybe_add_labels <- function(quotations){
 
@@ -10,12 +10,12 @@ maybe_add_labels <- function(quotations){
     cx <- quotation[[2]]
 
     if (lbl == "") {
-      lbl <- deparse(f_rhs(quotation))
+      lbl <- f_text(quotation)
     }
 
     if(is.call(cx) && is.symbol(cx[[1]]) && ! "label" %in% names(cx)){
 
-      f <- match.fun(cx[[1]])
+      f <- get0(as.character(cx[[1]]), f_env(quotation), "function") #match.fun does not repect quosures environment, doing get manually
       if("declaration" %in% class(f) && "label" %in% names(formals(f))){
         quotation[[2]][["label"]] <- lbl
       }
