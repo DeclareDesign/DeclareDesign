@@ -19,7 +19,7 @@ options(digits=2)
 The **DeclareDesign** package has a small set of core functions. Six core functions are used to describe key steps in a research design:
 
 1. `declare_population()` (describes dimensions and distributions over the variables in the population)
-2. `declare_potential_outcomes()` (takes population or sample and adds potential outcomes produced by interventions) 
+2. `declare_potential_outcomes()` (takes population or sample and adds potential outcomes produced by interventions)
 3. `declare_sampling()` (takes a population and selects a sample)
 4. `declare_assignment()` (takes a population or sample and adds treatment assignments)
 5. `declare_estimand()` (takes potential outcomes and calculates a quantity of interest)
@@ -67,18 +67,18 @@ head(pop)
 knitr::kable(head(pop))
 ```
 
-Multi-level datasets are also easy to produce. For multilevel data you set the `N` of each level in a call to [`level()`](http://fabricatr.declaredesign.org/reference/level.html). The [`add_level()`](http://fabricatr.declaredesign.org/reference/level.html) function is intelligent -- if the previous level has data, it merges so that there are N entries for each of the units at the higher level. `declare_population()`can handle non-fixed number of units at each level too.  In the example below, we have  drawn a random number of individuals that are in each village (see the `individuals` line).
+Multi-level datasets are also easy to produce. For multilevel data you set the `N` of each level in a call to [`level()`](http://declaredesign.org/R/fabricatr/reference/level.html). The [`add_level()`](http://declaredesign.org/R/fabricatr/reference/level.html) function is intelligent -- if the previous level has data, it merges so that there are N entries for each of the units at the higher level. `declare_population()`can handle non-fixed number of units at each level too.  In the example below, we have  drawn a random number of individuals that are in each village (see the `individuals` line).
 
 ```{r echo=TRUE, results="hide"}
 my_population_nested <- declare_population(
   districts = add_level(N = 25, urban = sample(0:1, N, replace = TRUE)),
   villages = add_level(N = 10, altitude = rnorm(N)),
-  individuals = add_level(N = sample(100:200, size = 250, replace = TRUE), 
+  individuals = add_level(N = sample(100:200, size = 250, replace = TRUE),
                       income = rnorm(N),
                       age = sample(18:95, N, replace = TRUE)))
 ```
 
-In this example there are 25 districts, 10 villages per districts, and then between 100 and 200 individuals per village. The function creates districts first, then merges in villages, then merges in individuals using ID variables created at the level above it. 
+In this example there are 25 districts, 10 villages per districts, and then between 100 and 200 individuals per village. The function creates districts first, then merges in villages, then merges in individuals using ID variables created at the level above it.
 
 Within those levels, you can add in existing data (and also add new variables to them if you wish):
 
@@ -122,7 +122,7 @@ head(pop_data_bootstrap())
 knitr::kable(head(pop_data_bootstrap()))
 ```
 
-Note that **fabricatr** is one of the helper packages that come along with **DeclareDesign**. **fabricatr** helps you simulate population data or resample from existing data. 
+Note that **fabricatr** is one of the helper packages that come along with **DeclareDesign**. **fabricatr** helps you simulate population data or resample from existing data.
 
 ## Potential outcomes
 
@@ -188,7 +188,7 @@ In more general applications `declare_sampling()` can allow for more complex str
 
 Assignment declarations return functions of data that return data. If you use the **randomizr** defaults, then it appends to the dataset an assignment draw and a vector of observed probability weights.
 
-Here we declare simple random assignment of 25 units to a binary treatment. 
+Here we declare simple random assignment of 25 units to a binary treatment.
 
 ```{r echo=TRUE, results="hide"}
 my_assignment <- declare_assignment(m = 25)
@@ -210,7 +210,7 @@ knitr::kable(head(smp))
 
 ## Estimands
 
-Estimands run on data that includes potential outcomes. 
+Estimands run on data that includes potential outcomes.
 
 In this example, as in many applications, the estimand is defined as a function of potential outcomes: the average difference between outcomes for each unit when they are in the treatment condition and when they are in the control condition. The information needed to define the estimand is available thanks to the  `declare_potential_outcomes()` call even though it will in general not be available in datasets used by researchers conducting estimation.
 
@@ -226,7 +226,7 @@ The only part baked in to **DeclareDesign** is the naming structure, *outcome_as
 
 ## Estimators
 
-To declare an estimator, you declare an estimator function, a [`difference_in_means()`](http://estimatr.declaredesign.org/reference/difference_in_means.html) by default. Optionally you also declare an estimand that is attached to the estimator.
+To declare an estimator, you declare an estimator function, a [`difference_in_means()`](http://declaredesign.org/R/estimatr/reference/difference_in_means.html) by default. Optionally you also declare an estimand that is attached to the estimator.
 
 ```{r echo=TRUE, results="hide"}
 smp <- reveal_outcomes(smp)
@@ -241,10 +241,10 @@ knitr::kable(my_estimator_dim(smp))
 The below example uses our function `lm_robust()`, which is a simple, faster drop-in replacement for `R`'s built-in `lm()` that features robust standard errors (HC2 by default, or your choice of other heteroskedasticity-consistent standard errors):
 
 ```{r echo=TRUE, results="hide"}
-my_estimator_lm <- 
-  declare_estimator(Y ~ Z, 
-                    model = lm_robust, 
-                    coefficient_name = "Z", 
+my_estimator_lm <-
+  declare_estimator(Y ~ Z,
+                    model = lm_robust,
+                    coefficient_name = "Z",
                     estimand = my_estimand)
 
 my_estimator_lm(smp)
@@ -273,7 +273,7 @@ design <- declare_design(my_population,
 Remarks re: `declare_design()`:
 
 1. The first argument must always be a dataset or create one.
-2. Your estimand is placed where you want to define it, i.e. here we are defining a PATE by placing the estimand just after population and before sampling or assignment. 
+2. Your estimand is placed where you want to define it, i.e. here we are defining a PATE by placing the estimand just after population and before sampling or assignment.
 3. `declare_design()` produces two things: a "dgp function" and a "design function."  The dgp function draws a dataset and the design function returns an estimands dataframe and an estimates data frame. It simulates the design from population through estimates, in whatever order you tell it -- meaning it carefully separates the data generating parts of the design and the calculation of estimates and estimands.
 
 You can run them directly via:
@@ -304,6 +304,6 @@ knitr::kable(get_estimands(design))
 
 # Next steps
 
-Next, we recommend you read the [Custom functions](/articles/custom_functions.html) tutorial to learn how to provide custom functions to replace any step of `declare_design()`. You can also read about [`fill_out()` and other advanced features](/articles/advanced_featurs.html) in our Advanced features tutorial.
+Next, we recommend you read the [Custom functions](http://declaredesign.org/R/DeclareDesign/articles/custom_functions.html) tutorial to learn how to provide custom functions to replace any step of `declare_design()`. You can also read about [`fill_out()` and other advanced features](http://declaredesign.org/R/DeclareDesign/articles/advanced_features.html) in our Advanced features tutorial.
 
-Finally, you can [learn about DeclareDesign’s companion packages](/articles/companion_packages.html).
+Finally, you can [learn about DeclareDesign’s companion packages](http://declaredesign.org/R/DeclareDesign/articles/companion_packages.html).
