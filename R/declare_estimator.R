@@ -118,7 +118,7 @@ tidy_estimator <- function(estimator_function){
 #' @rdname declare_estimator
 model_handler <- function(data, ..., model = estimatr::difference_in_means, coefficient_name = Z) {
 
-    coefficient_name <- reveal_nse_helper(substitute(coefficient_name))
+    coefficient_name <- reveal_nse_helper(enquo(coefficient_name))
 
     # estimator_function_internal <- function(data) {
     args <- quos(...)
