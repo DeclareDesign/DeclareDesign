@@ -14,7 +14,7 @@ test_that("Factorial", {
       coefficient_names = TRUE
     )
     ,
-    OLS = declare_estimator(Y~X, model=lm, estimand="theta", coefficient_name=NULL)
+    OLS = declare_estimator(Y~X, model=lm, estimand="theta", coefficient_names=TRUE)
   )
 
 

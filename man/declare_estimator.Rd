@@ -12,9 +12,10 @@ declare_estimator(..., handler = estimator_handler, label = "my_estimator")
 tidy_estimator(estimator_function)
 
 model_handler(data, ..., model = estimatr::difference_in_means,
-  coefficient_name = Z)
+  coefficient_names = FALSE)
 
-estimator_handler(data, ..., estimand = NULL, label)
+estimator_handler(data, ..., model = estimatr::difference_in_means,
+  coefficient_names = FALSE, estimand = NULL, label)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -29,7 +30,7 @@ estimator_handler(data, ..., estimand = NULL, label)
 
 \item{model}{A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.}
 
-\item{coefficient_name}{A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a \code{model} is chosen or for some \code{estimator_function}'s such as \code{difference_in_means} and \code{lm_robust}.}
+\item{coefficient_names}{A character vector of coefficients that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept coefficient; if TRUE return all coefficients.}
 
 \item{estimand}{a declare_estimand step object, or a character label, or a list of either}
 }

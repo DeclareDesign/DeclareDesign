@@ -139,7 +139,7 @@ switching_equation <- function(data, outcome, assignments) {
 
 
 reveal_nse_helper <- function(X) {
-  if(is.character(X))     X
+  if(is.character(X) || is.logical(X))     X
   else if(is.name(X))     as.character(X)
   else if(is_quosure(X))  reveal_nse_helper(quo_expr(X))
   else if(is.call(X))     unlist(lapply(X[-1], reveal_nse_helper))

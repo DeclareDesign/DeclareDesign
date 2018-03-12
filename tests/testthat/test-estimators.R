@@ -78,7 +78,7 @@ test_that("regression from estimatr works as an estimator", {
   pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
   pate_estimator <- declare_estimator(Y ~ Z + noise,
                                       model = lm_robust,
-                                      coefficient_name = "noise",
+                                      coefficient_names = "noise",
                                       estimand = pate, label = "pate")
   reveal_outcomes <- declare_reveal()
 
@@ -275,7 +275,7 @@ test_that("labels for estimates and estimands work estimand label, estimator def
 
 
 
-test_that("coefficient_name = NULL returns all coefficients", {
+test_that("coefficient_names = TRUE returns all coefficients", {
   tst <- data.frame(x = runif(100), y = runif(100), wt = runif(100), clust = sample(1:10, 100, replace = TRUE))
 
   est4 <- declare_estimator(
@@ -283,7 +283,7 @@ test_that("coefficient_name = NULL returns all coefficients", {
       clusters = clust,
       weights = wt,
       model = lm_robust,
-      coefficient_name = NULL)
+      coefficient_names = TRUE)
 
   result <- est4(tst)
 
@@ -306,7 +306,7 @@ test_that("model_handler runs directly", {
   p = 0.0791867142159381, ci_lower = -0.203874032287599, ci_upper = 3.3638740322876), .Names = c("coefficient_name",
                                                                                                                 "est", "se", "p", "ci_lower", "ci_upper"), row.names = 2L, class = "data.frame")
 
-  result <- model_handler(sleep, extra~group, model=lm, coefficient_name = "group2")
+  result <- model_handler(sleep, extra~group, model=lm, coefficient_names = "group2")
 
   expect_equal(result, golden)
 })
