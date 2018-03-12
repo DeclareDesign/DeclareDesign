@@ -15,7 +15,7 @@ test_that("Factorial", {
 
   my_estimator <- declare_estimator(Y ~ Z1 + Z2 + Z1*Z2,
                                     model = lm_robust,
-                                    coefficient_name = "Z1:Z2")
+                                    coefficient_names = "Z1:Z2")
 
   reveal_outcomes <- declare_reveal()
 

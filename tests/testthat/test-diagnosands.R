@@ -111,7 +111,7 @@ test_that("no estimates, no estimators should error", {
 
 test_that("diagnosis, list of designs",{
 
-  d <- declare_design(sleep, declare_estimator(extra~group, coefficient_name=group2))
+  d <- declare_design(sleep, declare_estimator(extra~group, coefficient_names=group2))
 
   diagnosand <- declare_diagnosands(z=mean(est> 0))
 
@@ -125,7 +125,7 @@ test_that("diagnosis, list of designs",{
 })
 
 test_that("diagnosis, unlinked estimator", {
-  d <- declare_design(sleep, declare_estimand(foo=2, bar=3), declare_estimator(extra~group, model=lm, coefficient_name=NULL))
+  d <- declare_design(sleep, declare_estimand(foo=2, bar=3), declare_estimator(extra~group, model=lm, coefficient_names=TRUE))
 
   expect_warning( diagnose_design(d, sims = 5), "Estimators lack estimand/coefficient labels for matching, a many-to-many merge was performed.")
 })
