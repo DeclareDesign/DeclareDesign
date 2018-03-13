@@ -271,7 +271,7 @@ fan_out <- function(design, fan) {
 
     st <- st [ rep(seq_along(st), each = n) ]
 
-    st <- lapply(st, conduct_design)
+    st <- future_lapply(seq_along(st), function(j) conduct_design(st[[j]]), future.seed = NA, future.globals = "st")
 
   }
 
