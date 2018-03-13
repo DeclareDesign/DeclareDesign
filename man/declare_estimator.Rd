@@ -12,10 +12,10 @@ declare_estimator(..., handler = estimator_handler, label = "my_estimator")
 tidy_estimator(estimator_function)
 
 model_handler(data, ..., model = estimatr::difference_in_means,
-  coefficient_names = FALSE)
+  coefficients = FALSE)
 
 estimator_handler(data, ..., model = estimatr::difference_in_means,
-  coefficient_names = FALSE, estimand = NULL, label)
+  coefficients = FALSE, estimand = NULL, label)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -30,7 +30,7 @@ estimator_handler(data, ..., model = estimatr::difference_in_means,
 
 \item{model}{A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.}
 
-\item{coefficient_names}{A character vector of coefficients that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept coefficient; if TRUE return all coefficients.}
+\item{coefficients}{A character vector of coefficients that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept coefficient; if TRUE return all coefficients.}
 
 \item{estimand}{a declare_estimand step object, or a character label, or a list of either}
 }
@@ -81,7 +81,7 @@ my_estimator_dim(df)
 my_estimator_lm <-
  declare_estimator(Y ~ Z,
                    model = estimatr::lm_robust,
-                   coefficient_name = "Z",
+                   coefficients = "Z",
                    estimand = my_estimand)
 
 my_estimator_lm(df)
@@ -97,7 +97,7 @@ estimator_probit <-
     Y ~ Z,
     model = glm,
     family = binomial(link = "probit"),
-    coefficient_name = "Z"
+    coefficients = "Z"
  )
 
 # Use a custom estimator function

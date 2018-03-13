@@ -122,7 +122,7 @@ knitr::kable(my_estimator_dim(smp))
 my_estimator_lm <- 
   declare_estimator(Y ~ Z, 
                     model = lm_robust, 
-                    coefficient_name = "Z", 
+                    coefficients = "Z", 
                     estimand = my_estimand)
 
 my_estimator_lm(smp)
