@@ -135,9 +135,9 @@ tidy_estimator <- function(estimator_function){
 #' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
 #' @param coefficient_names A character vector of coefficients that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept coefficient; if TRUE return all coefficients.
 #' @rdname declare_estimator
-model_handler <- function(data, ..., model = estimatr::difference_in_means, coefficient_names = FALSE) {
+model_handler <- function(data, ..., model = estimatr::difference_in_means, coefficients = FALSE) {
 
-    coefficient_names <- enquo(coefficient_names) # forces evaluation of quosure
+    coefficient_names <- enquo(coefficients) # forces evaluation of quosure
     coefficient_names <- reveal_nse_helper(coefficient_names)
 
     # estimator_function_internal <- function(data) {
@@ -165,7 +165,7 @@ validation_fn(model_handler) <-  function(ret, dots, label){
 #' @rdname declare_estimator
 estimator_handler <- tidy_estimator(model_handler)
 
-fit2tidy <- function(fit, coefficient_names = FALSE) {
+fit2tidy <- function(fit, coefficients = FALSE) {
   summ <- summary(fit)$coefficients
   summ <-
     summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
@@ -175,13 +175,13 @@ fit2tidy <- function(fit, coefficient_names = FALSE) {
                summ,
                ci,
                stringsAsFactors = FALSE, row.names = NULL)
-  colnames(return_data) <- c("coefficient_name","est", "se", "p", "ci_lower", "ci_upper")
+  colnames(return_data) <- c("coefficient","est", "se", "p", "ci_lower", "ci_upper")
 
 
-  if (is.character(coefficient_names)) {
-    return_data <- return_data[return_data$coefficient_name %in% coefficient_names, ,drop = FALSE]
-  } else if(is.logical(coefficient_names) && !coefficient_names) {
-    return_data <- return_data[which.max(return_data$coefficient_name != "(Intercept)"), ,drop = FALSE]
+  if (is.character(coefficients)) {
+    return_data <- return_data[return_data$coefficient %in% coefficients, ,drop = FALSE]
+  } else if(is.logical(coefficients) && !coefficients) {
+    return_data <- return_data[which.max(return_data$coefficient != "(Intercept)"), ,drop = FALSE]
   }
 
 

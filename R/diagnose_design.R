@@ -163,7 +163,7 @@ diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) 
     }
 
     calculate_diagnosands <- function(simulations_df, diagnosands) {
-      group_by_set <- colnames(simulations_df) %i% c("estimand_label", "estimator_label", "coefficient_name")
+      group_by_set <- colnames(simulations_df) %i% c("estimand_label", "estimator_label", "coefficient")
       group_by_list <- simulations_df[, group_by_set, drop=FALSE]
 
       labels_df <- split(group_by_list, group_by_list, drop = TRUE)
@@ -197,7 +197,7 @@ diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) 
       diagnosand_replicates <- do.call(rbind.data.frame, diagnosand_replicates)
 
 
-      group_by_set <-  colnames(diagnosand_replicates) %i% c("estimand_label", "estimator_label", "coefficient_name")
+      group_by_set <-  colnames(diagnosand_replicates) %i% c("estimand_label", "estimator_label", "coefficient")
       group_by_list <- diagnosand_replicates[, group_by_set, drop=FALSE]
 
       labels_df <- split(group_by_list, group_by_list, drop=TRUE)

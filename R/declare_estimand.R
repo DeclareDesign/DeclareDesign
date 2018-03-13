@@ -42,7 +42,7 @@ declare_estimand <- make_declarations(estimand_handler, "estimand", causal_type=
 
 
 #' @importFrom rlang eval_tidy quos  is_quosure
-estimand_handler <- function(data, ..., subset = NULL, coefficient_names=FALSE, label) {
+estimand_handler <- function(data, ..., subset = NULL, coefficients=FALSE, label) {
   options <- quos(...)
   if(names(options)[1] == "") names(options)[1] <- label
 
@@ -59,9 +59,9 @@ estimand_handler <- function(data, ..., subset = NULL, coefficient_names=FALSE, 
   }
   ret <- simplify2array(ret)
 
-  if(coefficient_names){
+  if(coefficients){
     data.frame(estimand_label=label,
-               coefficient_name=names(options),
+               coefficient=names(options),
                estimand=ret,
                stringsAsFactors = FALSE)
 
@@ -79,7 +79,7 @@ validation_fn(estimand_handler) <-  function(ret, dots, label){
   dotnames <- names(dots)
 
   # Don't overwrite label-label with splat label if coefficient names are true
-  if("coefficient_names" %in% dotnames && isTRUE(eval_tidy(dots$coefficient_names))) return(ret)
+  if("coefficients" %in% dotnames && isTRUE(eval_tidy(dots$coefficients))) return(ret)
 
   maybeDotLabel <- dotnames[! dotnames %in% c("", names(formals(estimand_handler)) )]
   if(length(maybeDotLabel) == 1 ){
