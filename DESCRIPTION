@@ -15,16 +15,12 @@ Description: DeclareDesign is statistical software that makes it easier for rese
    to results. It can also make it easier for designs to be shared, replicated, and critiqued.
 Depends:
     R (>= 3.3.0),
-    randomizr (>= 0.9.0),
+    randomizr (>= 0.12.0),
     fabricatr (>= 0.4.0),
     estimatr (>= 0.5.0),
 Imports:
     rlang
 Additional_repositories: http://r.declaredesign.org
-Remotes:
-    DeclareDesign/fabricatr,
-    DeclareDesign/randomizr,
-    DeclareDesign/estimatr@lukesonnet/iv
 License: MIT + file LICENSE
 URL: http://declaredesign.org, https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues

@@ -19,7 +19,7 @@ test_that("", {
     model = estimatr::lm_robust,
     se_type = "classical",
     estimand = c(dgp_se, obs_se),
-    coefficient_names = "X"
+    coefficients = "X"
   )
 
   des <- declare_design(

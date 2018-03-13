@@ -8,7 +8,7 @@ reveal_outcomes <- declare_reveal()
 expect_estimates <- function(estimates, label = NULL) {
   expect_equal(
     names(estimates),
-    c("estimator_label", "coefficient_name", "est", "se", "p", "ci_lower", "ci_upper")
+    c("estimator_label", "coefficient", "est", "se", "p", "ci_lower", "ci_upper")
   )
   if(is.character(label)){
     expect_equal( estimates$estimator_label, label)
@@ -78,7 +78,7 @@ test_that("regression from estimatr works as an estimator", {
   pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
   pate_estimator <- declare_estimator(Y ~ Z + noise,
                                       model = lm_robust,
-                                      coefficient_names = "noise",
+                                      coefficients = "noise",
                                       estimand = pate, label = "pate")
   reveal_outcomes <- declare_reveal()
 
@@ -91,7 +91,7 @@ test_that("regression from estimatr works as an estimator", {
 
   est <- get_estimates(my_design)
   expect_equal(est$estimator_label, "pate")
-  expect_equal(est$coefficient_name, "noise")
+  expect_equal(est$coefficient, "noise")
   expect_equal(est$estimand_label, "pate")
 
 
@@ -283,7 +283,7 @@ test_that("coefficient_names = TRUE returns all coefficients", {
       clusters = clust,
       weights = wt,
       model = lm_robust,
-      coefficient_names = TRUE)
+      coefficients = TRUE)
 
   result <- est4(tst)
 
@@ -302,11 +302,11 @@ test_that("tidy_estimator, handler does not take data", {
 
 test_that("model_handler runs directly", {
 
-  golden <- structure(list(coefficient_name = "group2", est = 1.58, se = 0.849091017238762,
-  p = 0.0791867142159381, ci_lower = -0.203874032287599, ci_upper = 3.3638740322876), .Names = c("coefficient_name",
-                                                                                                                "est", "se", "p", "ci_lower", "ci_upper"), row.names = 2L, class = "data.frame")
+  golden <- structure(list(coefficient = "group2", est = 1.58, se = 0.849091017238762,
+    p = 0.0791867142159381, ci_lower = -0.203874032287599, ci_upper = 3.3638740322876), .Names = c("coefficient",
+    "est", "se", "p", "ci_lower", "ci_upper"), row.names = 2L, class = "data.frame")
 
-  result <- model_handler(sleep, extra~group, model=lm, coefficient_names = "group2")
+  result <- model_handler(sleep, extra~group, model=lm, coefficients = "group2")
 
   expect_equal(result, golden)
 })
