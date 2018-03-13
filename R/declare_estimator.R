@@ -44,7 +44,7 @@
 #' my_estimator_lm <-
 #'  declare_estimator(Y ~ Z,
 #'                    model = estimatr::lm_robust,
-#'                    coefficient_name = "Z",
+#'                    coefficients = "Z",
 #'                    estimand = my_estimand)
 #'
 #' my_estimator_lm(df)
@@ -60,7 +60,7 @@
 #'     Y ~ Z,
 #'     model = glm,
 #'     family = binomial(link = "probit"),
-#'     coefficient_name = "Z"
+#'     coefficients = "Z"
 #'  )
 #'
 #' # Use a custom estimator function
@@ -133,7 +133,7 @@ tidy_estimator <- function(estimator_function){
 
 #' @param data a data.frame
 #' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
-#' @param coefficient_names A character vector of coefficients that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept coefficient; if TRUE return all coefficients.
+#' @param coefficients A character vector of coefficients that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept coefficient; if TRUE return all coefficients.
 #' @rdname declare_estimator
 model_handler <- function(data, ..., model = estimatr::difference_in_means, coefficients = FALSE) {
 
@@ -171,7 +171,7 @@ fit2tidy <- function(fit, coefficients = FALSE) {
     summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
   ci <- suppressMessages(as.data.frame(confint(fit)))
   return_data <-
-    data.frame(coefficient_name = rownames(summ),
+    data.frame(coefficient = rownames(summ),
                summ,
                ci,
                stringsAsFactors = FALSE, row.names = NULL)
