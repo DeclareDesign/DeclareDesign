@@ -123,16 +123,23 @@ diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) 
 
 
 
-    results_list <- future_lapply(seq_len(sims),
-                                  function(i) conduct_design(design),
-                                  future.seed = NA, future.globals = "design")
+
+    if(length(sims) == 1) {
+      results_list <- future_lapply(seq_len(sims),
+                                    function(i) conduct_design(design),
+                                    future.seed = NA, future.globals = "design")
+    } else {
+      results_list <- fan_out(design, data.frame(end=seq_along(sims), n=sims))
+    }
+
+
 
     results2x <- function(results_list, what) {
       subresult <- lapply(results_list, `[[`, what)
       df <- do.call(rbind.data.frame, subresult)
       if(nrow(df) == 0) return(df)
 
-      df <- cbind(sim_ID = rep(1:sims, sapply(subresult, nrow)), df)
+      df <- cbind(sim_ID = rep(seq_along(subresult), vapply(subresult, nrow, 0L)), df)
     }
 
 

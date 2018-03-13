@@ -39,9 +39,9 @@ declare_time_warn <- function(message, declaration){
 }
 
 
-future_lapply <- function(...){
-  if(requireNamespace("future.apply", quietly = TRUE)){
-    future.apply::future_lapply(...)
+future_lapply <- function(..., future.seed = NA, future.globals=TRUE){
+  if (requireNamespace("future.apply", quietly = TRUE)) {
+    future.apply::future_lapply(..., future.seed=future.seed, future.globals = future.globals)
   } else {
     lapply(...)
   }
