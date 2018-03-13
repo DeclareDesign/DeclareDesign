@@ -18,17 +18,17 @@ options(digits=2)
 
 **DeclareDesign** is statistical software that makes it easier for researchers to characterize and learn about the properties of research designs before implementation. Ex ante declaration and diagnosis of designs can help researchers clarify the strengths and limitations of their designs and to improve their properties. It can make it easier for readers to evaluate a research strategy prior to implementation and without access to results. It can also make it easier for designs to be shared, replicated, and critiqued.
 
-Get started <!-- with our Web-based [design builder](http://shiny.declaredesign.org/builder/) or --> by reading about [the idea behind DeclareDesign](http://declaredesign.org/idea/).
+Get started <!-- with our Web-based [design builder](http://shiny.declaredesign.org/builder/) or --> by reading about [the idea behind DeclareDesign](https://declaredesign.org/idea/).
 
-The motivation for the software is described in a [working paper](http://declaredesign.org/paper.pdf) by the authors.
+The motivation for the software is described in a [working paper](https://declaredesign.org/paper.pdf) by the authors.
 
 **DeclareDesign** consists of a core package, which is documented on this web site, as well as three companion packages that stand on their own but are also called on by the core package. They are:
 
-1. [randomizr](http://declaredesign.org/R/randomizr/): Easy to use tools for common forms of random assignment and sampling.
-2. [fabricatr](http://declaredesign.org/R/fabricatr/): Imagine your data before you collect it.
-3. [estimatr](http://declaredesign.org/R/estimatr/): Fast estimators for social scientists.
+1. [randomizr](https://declaredesign.org/R/randomizr/): Easy to use tools for common forms of random assignment and sampling.
+2. [fabricatr](https://declaredesign.org/R/fabricatr/): Imagine your data before you collect it.
+3. [estimatr](https://declaredesign.org/R/estimatr/): Fast estimators for social scientists.
 
-A [library](http://declaredesign.org/library/) of declared designs is under construction. The library includes canonical designs that users can download, modify, and deploy. To get underway with your own designs, follow the install instructions below and check out our guide on [getting started with DeclareDesign](http://declaredesign.org/R/DeclareDesign/articles/DeclareDesign.html), which covers the main functionality of the software.
+A [library](https://declaredesign.org/library/) of declared designs is under construction. The library includes canonical designs that users can download, modify, and deploy. To get underway with your own designs, follow the install instructions below and check out our guide on [getting started with DeclareDesign](https://declaredesign.org/R/DeclareDesign/articles/DeclareDesign.html), which covers the main functionality of the software.
 
 ## Installing DeclareDesign
 
