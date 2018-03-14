@@ -2,9 +2,7 @@
 
 #' Declare Sampling Procedure
 #'
-#' @param ... Arguments to the sampling function
-#' @param handler A function that takes a data.frame, subsets to sampled observations and optionally adds sampling probabilities or other relevant quantities, and returns a data.frame. By default, the sampling_function uses the \code{randomizr} functions \code{\link{draw_rs}} and \code{\link{obtain_inclusion_probabilities}} to conduct random sampling and obtain the probability of inclusion in the sample.
-#' @param label A step label.
+#' @inheritParams declare_internal_inherit_params
 #'
 #' @return a function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
 #' @export
@@ -57,31 +55,28 @@ declare_sampling <- make_declarations(sampling_handler, "sampling")
 
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
-sampling_handler <-
-  function(data, ..., sampling_variable = "S") {
-    ## draw sample
+sampling_handler <- function(data, ..., sampling_variable = "S") {
+  ## draw sample
 
-    options <- quos(...)
+  options <- quos(...)
 
-    sampling_variable <- reveal_nse_helper(substitute(sampling_variable))
+  samp <- reveal_nse_helper(sampling_variable)
+  samp <- as.symbol(paste0(samp, "_inclusion_prob"))
 
-    rs_call <- quo(draw_rs(!!! options))
-    rs_call <- lang_modify(rs_call, N = nrow(data))
+  S <- as.symbol(".__Sample") # Matching old code but also eliminating the R CMD check warning that .__Sample is a undef/global variable
 
-    S <- eval_tidy(rs_call, data = data)
+  data <- fabricate(data,
+    !!S              :=  draw_rs(N=N, !!!options),
+    !!samp           :=  obtain_inclusion_probabilities(N=N, !!!options),
+    ID_label = NA
+  )
 
-    ## obtain inclusion probabilities
+  S <- as.character(S)
 
-    prob_call <- quo(obtain_inclusion_probabilities(!!! options))
-    prob_call <- lang_modify(prob_call, N = nrow(data))
+  ## subset to the sampled observations
+  data[ data[[S]] %in% 1, names(data) != S, drop=FALSE]
 
-    data[, paste0(sampling_variable, "_inclusion_prob")] <-
-      eval_tidy(prob_call, data = data)
-
-    ## subset to the sampled observations
-    data[S %in% 1, , drop = FALSE]
-
-  }
+}
 
 validation_fn(sampling_handler) <- function(ret, dots, label){
 
@@ -99,7 +94,7 @@ validation_fn(sampling_handler) <- function(ret, dots, label){
 
   if ("sampling_variable" %in% names(dots)) {
     if (class(f_rhs(dots[["sampling_variable"]])) == "NULL") {
-    declare_time_error("Must not provide NULL as sampling_variable.", ret)
+      declare_time_error("Must not provide NULL as sampling_variable.", ret)
     }
   }
 

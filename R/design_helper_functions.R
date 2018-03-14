@@ -17,13 +17,15 @@
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 #'
+#' my_reveal <- declare_reveal()
+#'
 #' design <- declare_design(my_population,
 #'                          my_potential_outcomes,
 #'                          my_sampling,
 #'                          my_estimand,
 #'                          dplyr::mutate(noise_sq = noise^2),
 #'                          my_assignment,
-#'                          reveal_outcomes,
+#'                          my_reveal,
 #'                          my_estimator)
 #'
 #' design
@@ -178,7 +180,7 @@ print.summary.design <- function(x, ...) {
   }
 
   for (i in 1:max(length(x$variables_added), length(x$quantities_added))) {
-    step_name <- deparse(x$call[[i]])
+    step_name <- if(is.null(x$call[[i]])) "" else deparse(x$call[[i]])
     step_class <-
       ifelse(
         x$function_types[[i]] != "unknown",
@@ -251,6 +253,10 @@ print.summary.design <- function(x, ...) {
 #' @export
 str.design_step <- function(object, ...) cat("design_step:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
 
+#' @export
+str.seed_data <- function(object, ...) cat("design_step:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
+
+
 fan_out <- function(design, fan) {
 
   st <- list( execution_st(design) )
@@ -265,7 +271,7 @@ fan_out <- function(design, fan) {
 
     st <- st [ rep(seq_along(st), each = n) ]
 
-    st <- lapply(st, conduct_design)
+    st <- future_lapply(seq_along(st), function(j) conduct_design(st[[j]]), future.seed = NA, future.globals = "st")
 
   }
 

@@ -3,32 +3,33 @@
 \name{declare_potential_outcomes}
 \alias{declare_potential_outcomes}
 \alias{potential_outcomes.formula}
-\alias{potential_outcomes.default}
+\alias{potential_outcomes.NULL}
 \title{Potential Outcomes}
 \usage{
 declare_potential_outcomes(..., handler = potential_outcomes_handler,
   label = NULL)
 
-potential_outcomes.formula(formula, data, conditions = c(0, 1),
-  assignment_variable = "Z", level = NULL)
+potential_outcomes.formula(formula, conditions = c(0, 1),
+  assignment_variables = "Z", data, level = NULL,
+  label = outcome_variable)
 
-potential_outcomes.default(formula = stop("Not provided"), ..., data,
+potential_outcomes.NULL(formula = stop("Not provided"), ..., data,
   level = NULL)
 }
 \arguments{
-\item{...}{Arguments to the potential_outcomes_function}
+\item{...}{arguments to be captured, and later passed to the handler}
 
-\item{handler}{A function that accepts a data.frame as an argument and returns a data.frame with potential outcomes columns appended. See the examples for the behavior of the default function.}
+\item{handler}{a tidy-in, tidy-out function}
 
-\item{label}{A step label}
+\item{label}{a string describing the step}
 
 \item{formula}{a formula to calculate Potential outcomes as functions of assignment variables}
 
+\item{conditions}{see \code{\link{expand_conditions}}}
+
+\item{assignment_variables}{The name of the assignment variable}
+
 \item{data}{a data.frame}
-
-\item{conditions}{vector specifying the values the assignment variable can realize}
-
-\item{assignment_variable}{The name of the assignment variable}
 
 \item{level}{a character specifying a level of hierarchy for fabricate to calculate at}
 }

@@ -7,11 +7,11 @@
 declare_diagnosands(..., handler = estimand_handler, label = NULL)
 }
 \arguments{
-\item{...}{A set of diagnosands, i.e. bias = mean(est - estimand). The diagnostic statistic (i.e., est - estimand) and its associated summary function (i.e., mean) are declared at the same time.}
+\item{...}{arguments to be captured, and later passed to the handler}
 
-\item{handler}{a diagnosand handler}
+\item{handler}{a tidy-in, tidy-out function}
 
-\item{label}{a step label}
+\item{label}{a string describing the step}
 }
 \value{
 a function that returns a data.frame
@@ -47,11 +47,13 @@ my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
 my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
+my_reveal <- declare_reveal()
+
 design <- declare_design(my_population,
                          my_potential_outcomes,
                          my_estimand,
                          my_assignment,
-                         reveal_outcomes,
+                         my_reveal,
                          my_estimator)
 
 \dontrun{

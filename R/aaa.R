@@ -6,6 +6,29 @@ env_deep_copy <- function(e) {
       env_clone(e, Recall(parent.env(e)))
 }
 
+# Given a function and dots, rename dots based on how things will positionally match
+#' @importFrom rlang is_empty
+rename_dots <- function(handler, dots, addData=TRUE){
+  if(is_empty(dots)) return(dots)
+  f <- function(...) as.list(match.call(handler)[-1])
+
+  d_idx <- setNames(seq_along(dots), names(dots))
+
+  if(addData) d_idx["data"] <- list(NULL)
+
+  d_idx <- eval_tidy(quo(f(!!!d_idx)))
+
+  if(addData) d_idx$data <- NULL
+
+  d_idx <- unlist(d_idx)
+  # browser()
+  d_idx <- d_idx[names(d_idx) != "" ]
+
+  names(dots)[d_idx] <- names(d_idx)
+
+  dots
+}
+
 
 currydata <- function(FUN, dots, addDataArg=TRUE,strictDataParam=TRUE) {
   # dots <- quos(...)
@@ -55,7 +78,7 @@ declaration_template <- function(..., handler, label=NULL){
     dots$label <- NULL
   }
 
-
+  dots <- rename_dots(handler, dots, this$strictDataParam)
 
 
   ret <- build_step(currydata(handler, dots, strictDataParam=this$strictDataParam),
@@ -97,7 +120,7 @@ make_declarations <- function(default_handler, step_type, causal_type='dgp', def
             strictDataParam=strictDataParam)
 }
 
-########################################################################
+###############################################################################
 
 validation_fn <- function(f){
   attr(f, "validation_fn")
@@ -115,3 +138,12 @@ has_validation_fn <- function(f){
 validate <- function(handler, ret, dots, label) {
   validation_fn(handler)(ret, dots, label)
 }
+
+
+###############################################################################
+
+#' @param ...      arguments to be captured, and later passed to the handler
+#' @param handler  a tidy-in, tidy-out function
+#' @param label    a string describing the step
+#' @keywords internal
+declare_internal_inherit_params <- make_declarations(function(data, ...) data.frame(HIA="RYLAH"), step_type = "HIARYLAH")

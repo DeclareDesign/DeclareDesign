@@ -3,9 +3,7 @@
 
 #' Declare Estimand
 #'
-#' @param ... Arguments to the estimand function. For example, you might specify ATE = mean(Y_Z_1 - Y_Z_0), which would declare the estimand to be named ATE and to be the mean of the difference in the control and treatment potential outcome.
-#' @param handler A function that takes a data.frame as an argument and returns a data.frame with the estimand and a label. By default, the estimand function accepts an expression such as ATE = mean(Y_Z_1-Y_Z_0).
-#' @param label An optional label to name the estimand, such as ATE. Typically, the label is inferred from how you specify the estimand in \code{...}, i.e. if you specify ATE = mean(Y_Z_1 - Y_Z_0) the estimand label will be ATE.
+#' @inheritParams declare_internal_inherit_params
 #'
 #' @return a function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimand.
 #'
@@ -44,7 +42,7 @@ declare_estimand <- make_declarations(estimand_handler, "estimand", causal_type=
 
 
 #' @importFrom rlang eval_tidy quos  is_quosure
-estimand_handler <- function(data, ..., subset = NULL, coefficient_names=FALSE, label) {
+estimand_handler <- function(data, ..., subset = NULL, coefficients=FALSE, label) {
   options <- quos(...)
   if(names(options)[1] == "") names(options)[1] <- label
 
@@ -61,9 +59,9 @@ estimand_handler <- function(data, ..., subset = NULL, coefficient_names=FALSE, 
   }
   ret <- simplify2array(ret)
 
-  if(coefficient_names){
+  if(coefficients){
     data.frame(estimand_label=label,
-               coefficient_name=names(options),
+               coefficient=names(options),
                estimand=ret,
                stringsAsFactors = FALSE)
 
@@ -80,8 +78,11 @@ validation_fn(estimand_handler) <-  function(ret, dots, label){
   # add ... labels at build time
   dotnames <- names(dots)
 
+  # Don't overwrite label-label with splat label if coefficient names are true
+  if("coefficients" %in% dotnames && isTRUE(eval_tidy(dots$coefficients))) return(ret)
+
   maybeDotLabel <- dotnames[! dotnames %in% c("", names(formals(estimand_handler)) )]
-  if(length(maybeDotLabel) == 1){
+  if(length(maybeDotLabel) == 1 ){
     attr(ret, "steplabel") <- attr(ret, "label")
     attr(ret, "label") <- maybeDotLabel[1]
   }

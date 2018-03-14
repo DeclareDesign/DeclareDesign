@@ -1,9 +1,6 @@
 #' Declare an Estimator
 #'
-#' @param ... Arguments to the estimation function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.
-#' @param handler the handler function
-#' @param label An optional label to name the estimator, such as DIM.
-#' @param data a data.frame
+#' @inheritParams declare_internal_inherit_params
 #'
 #' @export
 #' @importFrom estimatr difference_in_means
@@ -28,9 +25,11 @@
 #'
 #' my_assignment <- declare_assignment(m = 50)
 #'
+#' my_reveal <- declare_reveal()
+#'
 #' design <- declare_design(
 #'  my_population, my_potential_outcomes,
-#'  my_estimand, my_assignment, reveal_outcomes
+#'  my_estimand, my_assignment, my_reveal
 #' )
 #'
 #' df <- draw_data(design)
@@ -45,7 +44,7 @@
 #' my_estimator_lm <-
 #'  declare_estimator(Y ~ Z,
 #'                    model = estimatr::lm_robust,
-#'                    coefficient_name = "Z",
+#'                    coefficients = "Z",
 #'                    estimand = my_estimand)
 #'
 #' my_estimator_lm(df)
@@ -61,7 +60,7 @@
 #'     Y ~ Z,
 #'     model = glm,
 #'     family = binomial(link = "probit"),
-#'     coefficient_name = "Z"
+#'     coefficients = "Z"
 #'  )
 #'
 #' # Use a custom estimator function
@@ -83,6 +82,7 @@ declare_estimator <- make_declarations(estimator_handler, step_type="estimator",
 #' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.
 #' @rdname declare_estimator
 #' @export
+#' @importFrom rlang UQ
 tidy_estimator <- function(estimator_function){
 
   if (!("data" %in% names(formals(estimator_function)))) {
@@ -92,9 +92,21 @@ tidy_estimator <- function(estimator_function){
 
   f <- function(data, ..., estimand=NULL, label) {
 
+    calling_args <- names(match.call(expand.dots = FALSE)) %i% names(formals(estimator_function))
+
+    dots <- if("..." %in% calling_args) quos(...) else list()
+
+    calling_args <- setdiff(calling_args, c("", "data", "..."))
+
+    for(e in calling_args) {
+      dots[[e]] <- do.call(enquo, list(as.symbol(e))) # this *should* retrieve coefficient names as quosure. IDK
+    }
+
+    ret <- eval_tidy(quo(estimator_function(data, !!!dots)))
+
     ret <- data.frame(
       estimator_label = label,
-      estimator_function(data, ...),
+      ret,
       stringsAsFactors = FALSE
     )
 
@@ -106,31 +118,33 @@ tidy_estimator <- function(estimator_function){
 
   }
 
+
+  formals(f) <- formals(estimator_function)
+  if(!"estimand" %in% names(formals(f))){formals(f)["estimand"] <- list(NULL)}
+  if(!"label"%in% names(formals(f))){formals(f)$label <- alist(a=)$a}
+
   attributes(f) <- attributes(estimator_function)
+
 
   f
 }
 
 
 
-
+#' @param data a data.frame
 #' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
-#' @param coefficient_name A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a \code{model} is chosen or for some \code{estimator_function}'s such as \code{difference_in_means} and \code{lm_robust}.
+#' @param coefficients A character vector of coefficients that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept coefficient; if TRUE return all coefficients.
 #' @rdname declare_estimator
-model_handler <-
-  function(data, ...,
-    model = estimatr::difference_in_means,
-    coefficient_name = Z)
-  {
+model_handler <- function(data, ..., model = estimatr::difference_in_means, coefficients = FALSE) {
 
-    coefficient_name <- reveal_nse_helper(substitute(coefficient_name))
+    coefficient_names <- enquo(coefficients) # forces evaluation of quosure
+    coefficient_names <- reveal_nse_helper(coefficient_names)
 
     # estimator_function_internal <- function(data) {
     args <- quos(...)
-    W <- quo(model(!!!args, data=data))
-    results <- eval(quo_expr(W))
+    results <- eval_tidy(quo(model(!!!args, data=data)))
 
-    results <- fit2tidy(results, coefficient_name)
+    results <- fit2tidy(results, coefficient_names)
 
     results
 }
@@ -151,22 +165,25 @@ validation_fn(model_handler) <-  function(ret, dots, label){
 #' @rdname declare_estimator
 estimator_handler <- tidy_estimator(model_handler)
 
-fit2tidy <- function(fit, coefficient_name = NULL) {
+fit2tidy <- function(fit, coefficients = FALSE) {
   summ <- summary(fit)$coefficients
   summ <-
     summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
   ci <- suppressMessages(as.data.frame(confint(fit)))
   return_data <-
-    data.frame(coefficient_name = rownames(summ),
+    data.frame(coefficient = rownames(summ),
                summ,
                ci,
                stringsAsFactors = FALSE, row.names = NULL)
-  colnames(return_data) <- c("coefficient_name","est", "se", "p", "ci_lower", "ci_upper")
+  colnames(return_data) <- c("coefficient","est", "se", "p", "ci_lower", "ci_upper")
 
 
-  if (is.character(coefficient_name)) {
-    return_data <- return_data[return_data$coefficient_name %in% coefficient_name, ,drop = FALSE]
+  if (is.character(coefficients)) {
+    return_data <- return_data[return_data$coefficient %in% coefficients, ,drop = FALSE]
+  } else if(is.logical(coefficients) && !coefficients) {
+    return_data <- return_data[which.max(return_data$coefficient != "(Intercept)"), ,drop = FALSE]
   }
+
 
   return_data
 }

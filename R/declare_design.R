@@ -105,13 +105,15 @@ callquos_to_step <- function(step_call, label="") {
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 #'
+#' my_reveal <- declare_reveal()
+#'
 #' design <- declare_design(my_population,
 #'                          my_potential_outcomes,
 #'                          my_sampling,
 #'                          my_estimand,
 #'                          dplyr::mutate(noise_sq = noise^2),
 #'                          my_assignment,
-#'                          reveal_outcomes,
+#'                          my_reveal,
 #'                          my_estimator)
 #'
 #' design
@@ -151,32 +153,41 @@ declare_design <- function(...) {
 
   # Special case for initializing with a data.frame
   if("data.frame" %in% class(ret[[1]])){
-    ret[[1]] <- local({
-      df <- ret[[1]]
-      structure(function(data) df, step_type='seed.data', causal_type='dgp', call=qs[[1]][[2]])
-    })
+    ret[[1]] <- build_step(
+      (function(df) { force(df); function(data) df})(ret[[1]]),
+      handler=NULL, dots=list(), label=qnames[1], step_type="seed_data", causal_type="dgp", call=qs[[1]][[2]]
+    )
   }
 
-    local({
+  local({
 
-      labels <- sapply(ret, attr, "label")
-      function_types <- sapply(ret, attr, "step_type")
+    labels <- sapply(ret, attr, "label")
+    function_types <- sapply(ret, attr, "step_type")
 
-      check_unique_labels <- function(labels, types, what){
-        ss <- labels[types == what]
-        if(anyDuplicated(ss)) stop(
-          "You have ", what, "s with identical labels: ",
-          unique(ss[duplicated(ss)]),
-          "\nPlease provide ", what, "s with unique labels"
+    check_unique_labels <- function(labels, types, what) {
+      ss <- labels[types == what]
+      if(anyDuplicated(ss)) stop(
+        "You have ", what, "s with identical labels: ",
+        unique(ss[duplicated(ss)]),
+        "\nPlease provide ", what, "s with unique labels"
 
-          )
+      )
 
-      }
+    }
 
-      check_unique_labels(labels, function_types, "estimand")
-      check_unique_labels(labels, function_types, "estimator")
+    check_unique_labels(labels, function_types, "estimand")
+    check_unique_labels(labels, function_types, "estimator")
 
-    })
+  })
+
+  for(i in seq_along(ret)){
+    step <- ret[[i]]
+    callback <- attr(step, "design_validation")
+    if(is.function(callback)){
+      ret <- callback(ret, i, step)
+    }
+  }
+
 
   ret
 }
@@ -215,13 +226,15 @@ get_modified_variables <- function(last_df = NULL, current_df) {
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 #'
+#' my_reveal <- declare_reveal()
+#'
 #' design <- declare_design(my_population,
 #'                          my_potential_outcomes,
 #'                          my_sampling,
 #'                          my_estimand,
 #'                          dplyr::mutate(noise_sq = noise^2),
 #'                          my_assignment,
-#'                          reveal_outcomes,
+#'                          my_reveal,
 #'                          my_estimator)
 #'
 #' summary(design)
@@ -322,7 +335,7 @@ summary.design <- function(object, ...) {
           authors = citation$author
           description = citation$note
         }
-        calls[[i]] <- quote(metadata)
+        calls[i] <- list(NULL)
       }
   }
 

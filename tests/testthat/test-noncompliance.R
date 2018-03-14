@@ -48,19 +48,16 @@ test_that("Noncompliance", {
                            ITT_d,
                            CACE,
                            my_assignment,
-                           reveal_outcomes(outcome_variables = "D", assignment_variables = "Z"),
-                           reveal_outcomes(outcome_variables = "Y", assignment_variables = "D"),
+                           declare_reveal(outcome_variables = "D", assignment_variables = "Z"),
+                           declare_reveal(outcome_variables = "Y", assignment_variables = "D"),
                            cace_hat)
 
-
-  head(draw_data(design))
-
-  conduct_design(design)
-
   df <- draw_data(design)
-  cace_estimator(df)
+  expect_true("complier" %in% colnames(df))
 
-  diagnose_design(design, sims = 2, bootstrap = FALSE)
+  diag <- diagnose_design(design, sims = 2, bootstrap = FALSE)
 
+  expect_equal(diag$diagnosands$mean_estimand, 2)
+  expect_equal(diag$diagnosands$estimator_label, "CACE_hat") # ITT_d is not in output - not estimated
 
 })

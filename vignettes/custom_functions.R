@@ -22,7 +22,9 @@ smp <- my_assignment(smp)
 
 my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
-smp <- reveal_outcomes(smp)
+my_reveal <- declare_reveal()
+
+smp <- my_reveal(smp)
 
 ## ----echo=TRUE, results="hide"-------------------------------------------
 my_population_function <- function(N) {

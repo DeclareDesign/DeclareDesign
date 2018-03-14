@@ -1,8 +1,6 @@
 #' Declare Diagnosands
 #'
-#' @param ... A set of diagnosands, i.e. bias = mean(est - estimand). The diagnostic statistic (i.e., est - estimand) and its associated summary function (i.e., mean) are declared at the same time.
-#' @param handler a diagnosand handler
-#' @param label a step label
+#' @inheritParams declare_internal_inherit_params
 #'
 #' @details
 #'
@@ -39,11 +37,13 @@
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 #'
+#' my_reveal <- declare_reveal()
+#'
 #' design <- declare_design(my_population,
 #'                          my_potential_outcomes,
 #'                          my_estimand,
 #'                          my_assignment,
-#'                          reveal_outcomes,
+#'                          my_reveal,
 #'                          my_estimator)
 #'
 #' \dontrun{

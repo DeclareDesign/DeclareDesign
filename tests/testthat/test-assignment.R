@@ -40,10 +40,10 @@ test_that("test assignment and probability functions", {
 
   population <- declare_population(
     villages = add_level(N = 100, elevation = rnorm(N),
-                     high_elevation = as.numeric(elevation > 0)),
+                         high_elevation = as.numeric(elevation > 0)),
     individuals = add_level(N = 10, noise = rnorm(N),
-                        ideo_3 = sample(c('Liberal', 'Moderate', 'Conservative'),
-                                        size = N, prob = c(.2, .3, .5), replace = TRUE))
+                            ideo_3 = sample(c('Liberal', 'Moderate', 'Conservative'),
+                                            size = N, prob = c(.2, .3, .5), replace = TRUE))
   )
 
   sampling <- declare_sampling(n = 10, clusters = villages)
@@ -53,81 +53,52 @@ test_that("test assignment and probability functions", {
                                                    assignment_variable = "Z")
 
 
-#  population() %>% sampling() %>% potential_outcomes()
+
+  smp_draw <- population() %>% sampling() %>% potential_outcomes()
+
+  #  population() %>% sampling() %>% potential_outcomes()
+
+  expect_assignment <- function(assn){
+    df <- assn(smp_draw)
+    expect_true("Z_cond_prob" %in% names(df))
+  }
 
 
   # Complete Random Assignment assignments
-  assignment_0 <- declare_assignment() # blug
-  assignment_1 <- declare_assignment(conditions = c(0, 1))
-  assignment_2 <- declare_assignment(m = 60, conditions = c(0, 1))
-  assignment_3 <- declare_assignment(m_each = c(20, 30, 50), reveal = FALSE)
-  assignment_4 <- declare_assignment(m_each =c(20, 80), conditions = c(0, 1))
-  assignment_5 <- declare_assignment(prob_each = c(.2, .3, .5), reveal=FALSE)
+  assignment_0 <- declare_assignment() %>% expect_assignment # blug
+  assignment_1 <- declare_assignment(conditions = c(0, 1))%>% expect_assignment
+  assignment_2 <- declare_assignment(m = 60, conditions = c(0, 1))%>% expect_assignment
+  assignment_3 <- declare_assignment(m_each = c(20, 30, 50))%>% expect_assignment
+  assignment_4 <- declare_assignment(m_each =c(20, 80), conditions = c(0, 1))%>% expect_assignment
+  assignment_5 <- declare_assignment(prob_each = c(.2, .3, .5))%>% expect_assignment
 
   # Blocked assignments
-  assignment_6 <- declare_assignment(blocks = ideo_3)
-  assignment_7 <- declare_assignment(blocks = ideo_3, prob_each = c(.3, .6, .1), reveal=FALSE)
-  assignment_8 <- declare_assignment(blocks = ideo_3, conditions = c(0, 1))
+  assignment_6 <- declare_assignment(blocks = ideo_3)%>% expect_assignment
+  assignment_7 <- declare_assignment(blocks = ideo_3, prob_each = c(.3, .6, .1))%>% expect_assignment
+  assignment_8 <- declare_assignment(blocks = ideo_3, conditions = c(0, 1))%>% expect_assignment
 
   assignment_9 <- declare_assignment(blocks = ideo_3,
-                                       conditions = c(0, 1),
-                                       block_m = c(10, 10, 10))
+                                     conditions = c(0, 1),
+                                     block_m = c(10, 10, 10))%>% expect_assignment
 
 
   # Clustered assignments
-  assignment_10 <- declare_assignment(clusters = villages)
-  assignment_11 <- declare_assignment(clusters = villages, conditions = c(0, 1))
-  assignment_12 <- declare_assignment(clusters = villages, prob_each = c(.1, .3, .6), reveal=FALSE)
+  assignment_10 <- declare_assignment(clusters = villages)%>% expect_assignment
+  assignment_11 <- declare_assignment(clusters = villages, conditions = c(0, 1))%>% expect_assignment
+  assignment_12 <- declare_assignment(clusters = villages, prob_each = c(.1, .3, .6))%>% expect_assignment
 
   # Blocked and Clustered assignments
   assignment_13 <- declare_assignment(clusters = villages,
-                                      blocks = high_elevation)
+                                      blocks = high_elevation)%>% expect_assignment
 
   assignment_14 <- declare_assignment(clusters = villages,
-                                      blocks = high_elevation, conditions = c(0,1))
+                                      blocks = high_elevation, conditions = c(0,1))%>% expect_assignment
   assignment_15 <- declare_assignment(clusters = villages,
-                                      blocks = high_elevation, prob_each = c(.1, .3, .6), reveal=FALSE)
+                                      blocks = high_elevation, prob_each = c(.1, .3, .6))%>% expect_assignment
 
   # Draw Data
-  smp_draw <- population() %>% sampling() %>% potential_outcomes()
 
   smp_draw %>% head
-  # Attempt to Assign
-
-  smp_draw %>% assignment_0() %>% with(table(Z))
-  smp_draw %>% assignment_1() %>% with(table(Z))
-  smp_draw %>% assignment_2() %>% with(table(Z))
-  smp_draw %>% assignment_3() %>% with(table(Z))
-  smp_draw %>% assignment_4() %>% with(.,table(Z))
-  smp_draw %>% assignment_5() %>% with(.,table(Z))
-  smp_draw %>% assignment_6() %>% with(.,table(ideo_3, Z))
-  smp_draw %>% assignment_7() %>% with(.,table(ideo_3, Z))
-  smp_draw %>% assignment_8() %>% with(.,table(ideo_3, Z))
-  smp_draw %>% assignment_9() %>% with(.,table(ideo_3, Z))
-  smp_draw %>% assignment_10() %>% with(.,table(villages, Z))
-  smp_draw %>% assignment_11() %>% with(.,table(villages, Z))
-  smp_draw %>% assignment_12() %>% with(.,table(villages, Z))
-  smp_draw %>% assignment_13() %>% with(.,table(villages, Z))
-  smp_draw %>% assignment_14() %>% with(.,table(villages, Z))
-  smp_draw %>% assignment_15() %>% with(.,table(villages, Z))
-
-  # Obtain Treatment Probabilities
-  smp_draw %>% assignment_0() %>% .$Z_cond_prob %>% head()
-  smp_draw %>% assignment_1() %>% .$Z_cond_prob %>% head()
-  smp_draw %>% assignment_2() %>% .$Z_cond_prob %>% head()
-  smp_draw %>% assignment_3() %>% .$Z_cond_prob %>% head()
-  smp_draw %>% assignment_4() %>% .$Z_cond_prob %>% head()
-  smp_draw %>% assignment_5() %>% .$Z_cond_prob %>% head()
-  smp_draw %>% assignment_6() %>% .$Z_cond_prob %>% head()
-  smp_draw %>% assignment_7() %>% .$Z_cond_prob %>% head()
-  smp_draw %>% assignment_8() %>% .$Z_cond_prob %>% head()
-  smp_draw %>% assignment_9() %>% .$Z_cond_prob %>% head()
-  smp_draw %>% assignment_10() %>% .$Z_cond_prob %>% head()
-  smp_draw %>% assignment_11() %>% .$Z_cond_prob %>% head()
-  smp_draw %>% assignment_12() %>% .$Z_cond_prob %>% head()
-  smp_draw %>% assignment_13() %>% .$Z_cond_prob %>% head()
-  smp_draw %>% assignment_14() %>% .$Z_cond_prob %>% head()
-  smp_draw %>% assignment_15() %>% .$Z_cond_prob %>% head()
 
 })
 

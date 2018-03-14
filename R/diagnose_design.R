@@ -6,10 +6,7 @@
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
 #'
 #' @param sims The number of simulations, defaulting to 500.
-#' @param bootstrap Option to bootstrap the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{TRUE}.
-#' @param bootstrap_sims The number of bootstrap replicates of the diagnosands, defaulting to 100.
-#' @param parallel Logical indicating whether to run the diagnoses in parallel. Defaults to TRUE.
-#' @param parallel_cores Number of CPU cores to use. Defaults to all available cores.
+#' @param bootstrap Number  of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}.
 #'
 #' @examples
 #' my_population <- declare_population(N = 500, noise = rnorm(N))
@@ -24,11 +21,13 @@
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 #'
+#' my_reveal <- declare_reveal()
+#'
 #' design <- declare_design(my_population,
 #'                          my_potential_outcomes,
 #'                          my_estimand,
 #'                          my_assignment,
-#'                          reveal_outcomes,
+#'                          my_reveal,
 #'                          my_estimator)
 #'
 #' \dontrun{
@@ -120,21 +119,27 @@ diagnose_design <- function(..., diagnosands = default_diagnosands,
 
   }
 
-#' @importFrom future.apply future_lapply
 diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) {
 
 
 
-    results_list <- future_lapply(seq_len(sims),
-                                  function(i) conduct_design(design),
-                                  future.seed = NA, future.globals = "design")
+
+    if(length(sims) == 1) {
+      results_list <- future_lapply(seq_len(sims),
+                                    function(i) conduct_design(design),
+                                    future.seed = NA, future.globals = "design")
+    } else {
+      results_list <- fan_out(design, data.frame(end=seq_along(sims), n=sims))
+    }
+
+
 
     results2x <- function(results_list, what) {
       subresult <- lapply(results_list, `[[`, what)
       df <- do.call(rbind.data.frame, subresult)
       if(nrow(df) == 0) return(df)
 
-      df <- cbind(sim_ID = rep(1:sims, sapply(subresult, nrow)), df)
+      df <- cbind(sim_ID = rep(seq_along(subresult), vapply(subresult, nrow, 0L)), df)
     }
 
 
@@ -165,7 +170,7 @@ diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) 
     }
 
     calculate_diagnosands <- function(simulations_df, diagnosands) {
-      group_by_set <- colnames(simulations_df) %i% c("estimand_label", "estimator_label", "coefficient_name")
+      group_by_set <- colnames(simulations_df) %i% c("estimand_label", "estimator_label", "coefficient")
       group_by_list <- simulations_df[, group_by_set, drop=FALSE]
 
       labels_df <- split(group_by_list, group_by_list, drop = TRUE)
@@ -199,7 +204,7 @@ diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) 
       diagnosand_replicates <- do.call(rbind.data.frame, diagnosand_replicates)
 
 
-      group_by_set <-  colnames(diagnosand_replicates) %i% c("estimand_label", "estimator_label", "coefficient_name")
+      group_by_set <-  colnames(diagnosand_replicates) %i% c("estimand_label", "estimator_label", "coefficient")
       group_by_list <- diagnosand_replicates[, group_by_set, drop=FALSE]
 
       labels_df <- split(group_by_list, group_by_list, drop=TRUE)

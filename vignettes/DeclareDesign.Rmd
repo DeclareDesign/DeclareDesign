@@ -12,6 +12,7 @@ vignette: >
 library(DeclareDesign)
 set.seed(42)
 options(digits=2)
+reveal_outcomes <- declare_reveal()
 ```
 
 # Overview
@@ -241,10 +242,10 @@ knitr::kable(my_estimator_dim(smp))
 The below example uses our function `lm_robust()`, which is a simple, faster drop-in replacement for `R`'s built-in `lm()` that features robust standard errors (HC2 by default, or your choice of other heteroskedasticity-consistent standard errors):
 
 ```{r echo=TRUE, results="hide"}
-my_estimator_lm <-
-  declare_estimator(Y ~ Z,
-                    model = lm_robust,
-                    coefficient_name = "Z",
+my_estimator_lm <- 
+  declare_estimator(Y ~ Z, 
+                    model = lm_robust, 
+                    coefficients = "Z", 
                     estimand = my_estimand)
 
 my_estimator_lm(smp)

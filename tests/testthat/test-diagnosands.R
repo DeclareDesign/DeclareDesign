@@ -12,15 +12,21 @@ pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
 
 pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = "test")
 
+reveal_outcomes <- declare_reveal()
+
+
 my_design <- declare_design(my_population(),
                             my_potential_outcomes, pate,
                             my_assignment,
-                            reveal_outcomes(),
+                            reveal_outcomes,
                             pate_estimator)
 
 
 test_that("parallel works.", {
   #TODO use future
+
+  skip_if_not_installed("future.apply")
+  skip_on_cran()
 
   suppressWarnings(
     diag <- diagnose_design(my_design, sims = 2, bootstrap = FALSE)
@@ -62,11 +68,6 @@ test_that("test diagnosands without estimands", {
 
 test_that("custom diagnosand function", {
 
-
-
-  # default set
-  diagnosis <- diagnose_design(my_design, sims = 2, bootstrap = FALSE)
-
   mean_custom <- function(x) return(mean(x * 5))
 
   my_dig <-  declare_diagnosands(mean_x5 = mean_custom(est), mean_true = mean(est))
@@ -74,17 +75,24 @@ test_that("custom diagnosand function", {
   rm(mean_custom)
   diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_dig, bootstrap = FALSE)
 
-  head(diagnosis$simulations)
+  expect_true("mean_x5" %in% names(diagnosis$diagnosands))
 
-  diagnosis$diagnosands
 
   # works with two with bootstrapping
   diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_dig, bootstrap = 2)
+
+  expect_true("se(mean_x5)" %in% names(diagnosis$diagnosands))
+})
+
+
+test_that("single diagnosand function", {
+
 
   # works with only one diagnosand with bootstrapping (!)
   my_one_dig <-  declare_diagnosands(se_bias = mean(se - sd(estimand)))
   diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_one_dig)
 
+  expect_true("se_bias" %in% names(diagnosis$diagnosands))
 })
 
 
@@ -103,7 +111,7 @@ test_that("no estimates, no estimators should error", {
 
 test_that("diagnosis, list of designs",{
 
-  d <- declare_design(sleep, declare_estimator(extra~group, coefficient_name=group2))
+  d <- declare_design(sleep, declare_estimator(extra~group, coefficients=group2))
 
   diagnosand <- declare_diagnosands(z=mean(est> 0))
 
@@ -117,7 +125,7 @@ test_that("diagnosis, list of designs",{
 })
 
 test_that("diagnosis, unlinked estimator", {
-  d <- declare_design(sleep, declare_estimand(foo=2, bar=3), declare_estimator(extra~group, model=lm, coefficient_name=NULL))
+  d <- declare_design(sleep, declare_estimand(foo=2, bar=3), declare_estimator(extra~group, model=lm, coefficients=TRUE))
 
   expect_warning( diagnose_design(d, sims = 5), "Estimators lack estimand/coefficient labels for matching, a many-to-many merge was performed.")
 })

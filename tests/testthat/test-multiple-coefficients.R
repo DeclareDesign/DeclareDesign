@@ -11,10 +11,10 @@ test_that("Factorial", {
     theta = declare_estimand(
       `(Intercept)`=alpha,
       X = beta,
-      coefficient_names = TRUE
+      coefficients = TRUE
     )
     ,
-    OLS = declare_estimator(Y~X, model=lm, estimand="theta", coefficient_name=NULL)
+    OLS = declare_estimator(Y~X, model=lm, estimand="theta", coefficients=TRUE)
   )
 
 

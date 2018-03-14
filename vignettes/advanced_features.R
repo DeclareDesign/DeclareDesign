@@ -22,7 +22,9 @@ smp <- my_assignment(smp)
 
 my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
-smp <- reveal_outcomes(smp)
+my_reveal <- declare_reveal()
+
+smp <- my_reveal(smp)
 
 ## ----echo=TRUE, results="hide"-------------------------------------------
 m_arm_trial <- function(numb){
@@ -35,12 +37,13 @@ m_arm_trial <- function(numb){
   my_assignment <- declare_assignment(m = 25)
   my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
   my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
+  my_reveal <- declare_reveal()
   my_design <- declare_design(my_population,
                               my_potential_outcomes,
                               my_estimand,
                               my_sampling,
                               my_assignment,
-                              reveal_outcomes,
+                              my_reveal,
                               my_estimator_dim)
   return(my_design)
 }
@@ -62,10 +65,13 @@ continuous_treatment_function <- function(data){
 
 my_assignment_continuous <- declare_assignment(handler = continuous_treatment_function)
 
+my_reveal <- declare_reveal()
+
+
 my_design <- declare_design(my_population(),
                             my_potential_outcomes_continuous,
                             my_assignment_continuous,
-                            reveal_outcomes)
+                            my_reveal)
 
 head(draw_data(my_design))
 
@@ -76,12 +82,15 @@ knitr::kable(head(draw_data(my_design)))
 my_potential_outcomes_attrition <- declare_potential_outcomes(
   formula = R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
 
+reveal_R <- declare_reveal(outcome_variables = "R")
+reveal_Y <- declare_reveal(outcome_variables = "Y", attrition_variables = "R")
+
 my_design <- declare_design(my_population(),
                             my_potential_outcomes,
                             my_potential_outcomes_attrition,
                             my_assignment,
-                            reveal_outcomes(outcome_variables = "R"),
-                            reveal_outcomes(attrition_variables = "R"))
+                            reveal_R,
+                            reveal_Y)
 
 head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
 

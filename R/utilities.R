@@ -2,15 +2,20 @@
 
 
 
-
+#' @importFrom rlang f_text f_env
 
 maybe_add_labels <- function(quotations){
 
   labeller <- function(quotation, lbl) {
     cx <- quotation[[2]]
-    if(is.call(cx) && is.symbol(cx[[1]]) && ! "label" %in% names(cx) && lbl != ""){
 
-      f <- match.fun(cx[[1]])
+    if (lbl == "") {
+      lbl <- f_text(quotation)
+    }
+
+    if(is.call(cx) && is.symbol(cx[[1]]) && ! "label" %in% names(cx)){
+
+      f <- get0(as.character(cx[[1]]), f_env(quotation), "function") #match.fun does not repect quosures environment, doing get manually
       if("declaration" %in% class(f) && "label" %in% names(formals(f))){
         quotation[[2]][["label"]] <- lbl
       }
@@ -27,6 +32,19 @@ maybe_add_labels <- function(quotations){
 
 declare_time_error <- function(message, declaration){
   stop( simpleError(message, call = attr(declaration, "call")) )
+}
+
+declare_time_warn <- function(message, declaration){
+  stop( simpleWarning(message, call = attr(declaration, "call")) )
+}
+
+
+future_lapply <- function(..., future.seed = NA, future.globals=TRUE){
+  if (requireNamespace("future.apply", quietly = TRUE)) {
+    future.apply::future_lapply(..., future.seed=future.seed, future.globals = future.globals)
+  } else {
+    lapply(...)
+  }
 }
 
 
