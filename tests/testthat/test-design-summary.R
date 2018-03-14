@@ -62,17 +62,24 @@ test_that("Add Quantitites and Alter Variables", {
   )
 })
 
-test_that("str() works",
+test_that("str() works", {
 
   expect_output(str(declare_population(N = 50)), "design_step:\\t declare_population[(]N = 50[)] ")
+  expect_output(str(declare_design(sleep)), "design_step:\\t sleep")
 
-)
+})
 
-test_that("summary, custom estimand, numeric value", {
+test_that("summary, custom estimator handler, numeric value", {
       d <- declare_design(sleep, extra=declare_estimator(handler=function(data) mean(data$extra)))
 
       expect_output(print(d), "1.54")
 
 })
 
+test_that("summary, estimator formula print formula", {
+  d <- declare_design(sleep, extra=declare_estimator(extra~group))
+
+  expect_output(print(d), "extra ~ group")
+
+})
 
