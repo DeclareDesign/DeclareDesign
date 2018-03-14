@@ -24,6 +24,10 @@ matrix:
     - os: osx
       r: release
       if: branch = master
+      r_github_packages:
+      - HenrikBengtsson/future.apply
+      - DeclareDesign/DDtools
+      - ropensci/git2r
 
     - os: osx
       osx_image: xcode6.4
@@ -31,6 +35,7 @@ matrix:
       r_github_packages:
       - HenrikBengtsson/future.apply
       - DeclareDesign/DDtools
+      - ropensci/git2r
       if: branch = master
 
 
