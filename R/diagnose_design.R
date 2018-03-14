@@ -74,7 +74,7 @@ diagnose_design <- function(..., diagnosands = default_diagnosands,
       }
     }
 
-    if (!all(sapply(designs, class) == "design")) {
+    if (!all(vapply(designs, inherits, FALSE, "design"))) {
       stop("Please only send design objects to diagnose_design.")
     }
 
