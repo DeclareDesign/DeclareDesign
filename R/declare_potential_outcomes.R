@@ -152,7 +152,7 @@ potential_outcomes.formula <-
     }
 
     if(length(to_null) > 0) {
-      to_null <-  lapply(to_null, function(x) NULL)
+      to_null <-  lapply(setNames(nm=to_null), function(x) NULL)
       condition_quos <- c(condition_quos, quos(!!!to_null))
     }
 
@@ -300,7 +300,7 @@ pofdv <- function(design, i, step){
       }
       else if(attr(step_j, "step_type") == "reveal_outcomes"){
 
-        if(any(step_meta$assignment_variables %in% attr(step, "step_meta")$outcome_variables)){
+        if(any(step_meta$outcome_variables %in% attr(step, "step_meta")$assignment_variables)){
           warning("Attempting to inject a `declare_reveal(", this_step_meta$outcome_variables, ", ",
                   this_step_meta$assignment_variables,
                   ")` step after Reveal step (", attr(step_j, "label"),
