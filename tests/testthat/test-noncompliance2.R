@@ -47,3 +47,15 @@ expect_equal(attr(e, "step_meta")$outcome_variables, "D")
 
 
 })
+
+
+test_that("POS don't erase Z",{
+
+  pop <- declare_population(N=10, Z=rbinom(N, size=1, prob=.5))
+
+  po <- declare_potential_outcomes(Y~Z)
+
+  df <- pop()
+
+  expect_equal(df$Z, po(df)$Z)
+})
