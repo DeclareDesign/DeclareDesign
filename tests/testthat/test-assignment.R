@@ -102,6 +102,18 @@ test_that("test assignment and probability functions", {
 
 })
 
+test_that("more than 1 assignment", {
+
+
+  assn <- declare_assignment(assignment_variable=P:Q)
+
+  out <- assn(sleep)
+
+  expect_equal(colnames(out), c("extra", "group", "ID", "P", "P_cond_prob", "Q", "Q_cond_prob"))
+
+})
+
+
 test_that("declare_assignment expected failures via validation fn", {
 
   expect_true(is.function(declare_assignment()))
