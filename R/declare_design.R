@@ -135,7 +135,7 @@ declare_design <- function(...) {
   qs <- maybe_add_labels(qs)
   qnames <- names(qs)
 
-  ret <- structure(vector("list", length(qs)), call=match.call(), class="design")
+  ret <- structure(vector("list", length(qs)), call=match.call(), class=c("design", "d_par"))
 
   names(ret)[qnames != ""] <- qnames[qnames != ""]
 

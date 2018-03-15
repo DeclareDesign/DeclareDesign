@@ -31,3 +31,9 @@ test_that("multiple PO / reveal", {
 
 
 })
+
+
+test_that("slash constructors", {
+  d <- declare_population(sleep) / declare_sampling() / declare_assignment()
+  expect_equal(dim(draw_data(d)), c(10,6))
+})

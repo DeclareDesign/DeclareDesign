@@ -102,7 +102,7 @@ build_step <- function(curried_fn, handler, dots, label, step_type, causal_type,
             step_type=step_type,
             causal_type=causal_type,
             call=call,
-            class=c("design_step", "function"))
+            class=c("design_step", "d_par","function"))
 }
 
 make_declarations <- function(default_handler, step_type, causal_type='dgp', default_label, strictDataParam=TRUE) {
