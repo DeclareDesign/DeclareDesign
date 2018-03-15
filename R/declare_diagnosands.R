@@ -78,17 +78,17 @@ declare_diagnosands <- make_declarations(estimand_handler, "diagnosand", "diagno
 
 default_diagnosands <- function(data, alpha=.05){
 
-  est <- data$est
-  estimand <- data$estimand
-  p <- data$p
-  ci_lower <- data$ci_lower
-  ci_upper <- data$ci_upper
+  est      <- data$est         %||% NA
+  estimand <- data$estimand    %||% NA
+  p        <- data$p           %||% NA
+  ci_lower <- data$ci_lower    %||% NA
+  ci_upper <- data$ci_upper    %||% NA
 
   bias = mean(est - estimand)
   rmse = sqrt(mean((est - estimand) ^ 2))
   power = mean(p < alpha)
   coverage = mean(estimand <= ci_upper &
-                    estimand >= ci_lower)
+                  estimand >= ci_lower)
   mean_estimate = mean(est)
   sd_estimate = sd(est)
   type_s_rate = mean((sign(est) != sign(estimand))[ p < alpha ] )
