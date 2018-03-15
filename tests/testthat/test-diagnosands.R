@@ -143,3 +143,42 @@ test_that("diagnosis, no estimator", {
                     )
 })
 
+
+test_that("diagnosis, NAs if no estimand", {
+  d <- declare_design(sleep, ols = declare_estimator(extra~group))
+
+golden <-
+  structure(list(estimator_label = "ols", coefficient = "group2",
+                 bias = NA_real_, `se(bias)` = NA_real_, rmse = NA_real_,
+                 `se(rmse)` = NA_real_, power = 0, `se(power)` = 0, coverage = NA_real_,
+                 `se(coverage)` = NA_real_, mean_estimate = 1.58, `se(mean_estimate)` = 0,
+                 sd_estimate = 0, `se(sd_estimate)` = 0, type_s_rate = NaN,
+                 `se(type_s_rate)` = NA_real_, mean_estimand = NA_real_, `se(mean_estimand)` = NA_real_), .Names = c("estimator_label",
+                 "coefficient", "bias", "se(bias)", "rmse", "se(rmse)", "power",
+                 "se(power)", "coverage", "se(coverage)", "mean_estimate", "se(mean_estimate)",
+                 "sd_estimate", "se(sd_estimate)", "type_s_rate", "se(type_s_rate)",
+                 "mean_estimand", "se(mean_estimand)"), class = "data.frame", row.names = "ols.group2")
+
+
+  expect_identical( diagnose_design(d, sims=4)$diagnosands, golden)
+
+})
+
+test_that("diagnosis, NAs if no estimand", {
+  d <- declare_design(sleep, mu = declare_estimand(mean(extra)))
+
+  golden <-
+    structure(list(estimand_label = "mu", bias = NA_real_, `se(bias)` = NA_real_,
+                   rmse = NA_real_, `se(rmse)` = NA_real_, power = NA_real_,
+                   `se(power)` = NA_real_, coverage = NA_real_, `se(coverage)` = NA_real_,
+                   mean_estimate = NA_real_, `se(mean_estimate)` = NA_real_,
+                   sd_estimate = NA_real_, `se(sd_estimate)` = NA_real_, type_s_rate = NA_real_,
+                   `se(type_s_rate)` = NA_real_, mean_estimand = 1.54, `se(mean_estimand)` = 0), .Names = c("estimand_label",
+                      "bias", "se(bias)", "rmse", "se(rmse)", "power", "se(power)",
+                      "coverage", "se(coverage)", "mean_estimate", "se(mean_estimate)",
+                      "sd_estimate", "se(sd_estimate)", "type_s_rate", "se(type_s_rate)",
+                      "mean_estimand", "se(mean_estimand)"), class = "data.frame", row.names = "mu")
+  expect_identical( diagnose_design(d, sims=4)$diagnosands, golden)
+
+})
+
