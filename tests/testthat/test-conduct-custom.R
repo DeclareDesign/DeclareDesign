@@ -1,0 +1,24 @@
+context("declare design")
+
+test_that("test the custom execution strategy", {
+
+  # closes ticket #62
+
+
+  design <- declare_population(sleep) /
+    declare_estimator(extra~group)
+
+  my_sleep <- sleep
+  my_sleep$extra <- my_sleep$extra + 1* (my_sleep$group == 1)
+
+  exst <- execution_st(design, current_df=my_sleep, results=list(estimator=vector(mode = "list", length = 2)), 2, 2)
+
+
+  regular <- conduct_design(design)
+  output <- conduct_design(exst)
+
+  expect_equal(regular$estimates_df$est, output$estimates_df$est + 1)
+  expect_equal(names(output), "estimates_df") # no estimands
+
+}
+)
