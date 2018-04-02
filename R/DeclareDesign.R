@@ -1,6 +1,10 @@
 #' DeclareDesign package
 #'
-#' Some stuff about what this package is
+#' \begin{enumerate}
+#' \item \code{\link{declare_assignment}}
+#' \end{enumerate}
+#'
+#'
 #'
 #' @docType package
 #' @importFrom stats glm lm var vcov sd aggregate anova aov as.formula confint coef df.residual pt qt rbinom rnorm rmultinom update.formula

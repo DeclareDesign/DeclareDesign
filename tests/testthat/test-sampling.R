@@ -91,6 +91,8 @@ test_that("declare_assignment expected failures via validation fn", {
 
 test_that("Factor out declarations", {
 
+  skip_if_not_installed("randomizr", "0.15.0")
+
   N <- 500
   n <- 250
   m <- 25

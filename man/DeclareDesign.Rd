@@ -6,5 +6,7 @@
 \alias{DeclareDesign-package}
 \title{DeclareDesign package}
 \description{
-Some stuff about what this package is
+\begin{enumerate}
+\item \code{\link{declare_assignment}}
+\end{enumerate}
 }
