@@ -150,6 +150,9 @@ model_handler <- function(data, ..., model = estimatr::difference_in_means, coef
 }
 
 validation_fn(model_handler) <-  function(ret, dots, label){
+  declare_time_error_if_data(ret)
+
+
   if("model" %in% names(dots)) {
     model <- eval_tidy(dots$model)
     if(!is.function(model) || ! "data" %in% names(formals(model))){

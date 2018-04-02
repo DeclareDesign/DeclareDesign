@@ -152,6 +152,13 @@ cite_design <- function(design, ...) {
 }
 
 #' @export
+print.design_step <- function(x, ...) {
+  print(attr(x, "call"))
+  # invisible(summary(x))
+}
+
+
+#' @export
 print.design <- function(x, ...) {
   print(summary(x))
   # invisible(summary(x))
@@ -254,7 +261,7 @@ print.summary.design <- function(x, ...) {
 str.design_step <- function(object, ...) cat("design_step:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
 
 #' @export
-str.seed_data <- function(object, ...) cat("design_step:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
+str.seed_data <- function(object, ...) cat("seed_data:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
 
 
 fan_out <- function(design, fan) {

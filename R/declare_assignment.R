@@ -83,16 +83,40 @@ assignment_handler <-
 
 validation_fn(assignment_handler) <-   function(ret, dots, label){
 
-  if ("blocks" %in% names(dots)) {
-    if (class(f_rhs(dots[["blocks"]])) == "character") {
-      declare_time_error("Must provide the bare (unquoted) block variable name to blocks.", ret)
-    }
-  }
+  declare_time_error_if_data(ret)
 
-  if ("clusters" %in% names(dots)) {
-    if (class(f_rhs(dots[["clusters"]])) == "character") {
-      declare_time_error("Must provide the bare (unquoted) cluster variable name to clusters.", ret)
+  dirty <- FALSE
+  # browser()
+
+  if(! "declaration" %in% names(dots)) {
+    if ("blocks" %in% names(dots)) {
+      if (class(f_rhs(dots[["blocks"]])) == "character") {
+        declare_time_error("Must provide the bare (unquoted) block variable name to blocks.", ret)
+      }
     }
+
+    if ("clusters" %in% names(dots)) {
+      if (class(f_rhs(dots[["clusters"]])) == "character") {
+        declare_time_error("Must provide the bare (unquoted) cluster variable name to clusters.", ret)
+      }
+    }
+
+    ra_args <- setdiff(names(dots), names(formals(assignment_handler))) #removes data and assignment_variable
+
+    ra_dots <- dots[ra_args]
+
+    if(length(ra_dots) > 0) {
+      declaration <- tryCatch(eval_tidy(quo(declare_ra(!!!ra_dots))), error=function(e)e)
+
+      if(inherits(declaration, "ra_declaration")) {
+        message("Assignment declaration factored out from execution path.")
+        dots[ra_args] <- NULL
+        dots$declaration <- declaration
+        dirty <- TRUE
+      }
+    }
+
+
   }
 
   if("assignment_variable" %in% names(dots)){
@@ -103,6 +127,14 @@ validation_fn(assignment_handler) <-   function(ret, dots, label){
 
     dots$assignment_variable <- assn
 
+    dirty <- TRUE
+
+  }
+  else {
+    assn <- formals(assignment_handler)$assignment_variable
+  }
+
+  if(dirty) {
     ret <- build_step(currydata(assignment_handler, dots, strictDataParam=attr(ret, "strictDataParam")),
                       handler=assignment_handler,
                       dots=dots,
@@ -110,11 +142,8 @@ validation_fn(assignment_handler) <-   function(ret, dots, label){
                       step_type=attr(ret, "step_type"),
                       causal_type=attr(ret,"causal_type"),
                       call=attr(ret, "call"))
-
-
-  } else {
-    assn <- formals(assignment_handler)$assignment_variable
   }
+
 
 
   structure(ret, step_meta=list(assignment_variables=assn))

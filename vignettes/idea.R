@@ -24,7 +24,7 @@ design <- declare_design(population,
                          potential_outcomes, 
                          estimand, 
                          assignment, 
-                         reveal_outcomes, 
+                         declare_reveal(), 
                          estimator,
                          declare_citation(description = "A very simple design"))
 

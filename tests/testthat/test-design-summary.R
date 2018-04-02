@@ -65,7 +65,7 @@ test_that("Add Quantitites and Alter Variables", {
 test_that("str() works", {
 
   expect_output(str(declare_population(N = 50)), "design_step:\\t declare_population[(]N = 50[)] ")
-  expect_output(str(declare_design(sleep)), "design_step:\\t sleep")
+  expect_output(str(declare_design(sleep)), "seed_data:\\t sleep")
 
 })
 

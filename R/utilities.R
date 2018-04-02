@@ -35,7 +35,12 @@ declare_time_error <- function(message, declaration){
 }
 
 declare_time_warn <- function(message, declaration){
-  stop( simpleWarning(message, call = attr(declaration, "call")) )
+  warning( simpleWarning(message, call = attr(declaration, "call")) )
+}
+
+declare_time_error_if_data <- function(declaration){
+  if("data" %in% names(attr(declaration, "dots")))
+    stop( simpleError("`data` should not be a declared argument.", call = attr(declaration, "call")) )
 }
 
 

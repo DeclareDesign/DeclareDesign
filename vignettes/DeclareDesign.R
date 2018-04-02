@@ -20,7 +20,7 @@ knitr::kable(head(pop))
 my_population_nested <- declare_population(
   districts = add_level(N = 25, urban = sample(0:1, N, replace = TRUE)),
   villages = add_level(N = 10, altitude = rnorm(N)),
-  individuals = add_level(N = sample(100:200, size = 250, replace = TRUE), 
+  individuals = add_level(N = sample(100:200, size = 250, replace = TRUE),
                       income = rnorm(N),
                       age = sample(18:95, N, replace = TRUE)))
 

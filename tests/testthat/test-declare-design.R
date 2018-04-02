@@ -62,3 +62,15 @@ test_that("No estimators / estimands", {
 
 
 
+
+test_that("Declare a bare function", {
+
+  design <- expect_warning(declare_design(
+    sleep,
+    function(foo) foo
+  ), "data")
+
+  expect_identical(draw_data(design), sleep)
+
+
+})

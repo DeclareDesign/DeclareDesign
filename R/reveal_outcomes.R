@@ -47,22 +47,13 @@ reveal_outcomes_handler <-
            attrition_variables = NULL,
            ...) {
 
-    if(!is.data.frame(data)) {
-      stop("Please provide data to reveal_outcomes.")
-    }
-
-    if("deprecate" %in% names(list(...))){
-      .Deprecated("declare_reveal", old="reveal_outcomes")
-    }
-
-
     if(!is.character(outcome_variables)) {
       stop("outcome_variables should already be converted to characters")
     }
     if(!is.character(assignment_variables)) {
       stop("assignment_variables should already be converted to characters")
     }
-    if(!is.null(attrition_variables) && !is.character(assignment_variables)) {
+    if(!is.null(attrition_variables) && !is.character(attrition_variables)) {
       stop("attrition_variables should already be converted to characters")
     }
 
@@ -84,6 +75,9 @@ reveal_outcomes_handler <-
 #                                     class=c("design_step", "function"))
 
 validation_fn(reveal_outcomes_handler) <- function(ret, dots, label) {
+
+  declare_time_error_if_data(ret)
+
 
   dots$outcome_variables <- if("outcome_variables" %in% names(dots)) {
     reveal_nse_helper(dots$outcome_variables)
@@ -110,8 +104,6 @@ validation_fn(reveal_outcomes_handler) <- function(ret, dots, label) {
             step_meta = dots[c("attrition_variable", "outcome_variables", "assignment_variables")]
   )
 }
-
-reveal_outcomes <- declare_reveal(deprecate=TRUE)
 
 switching_equation <- function(data, outcome, assignments) {
 
