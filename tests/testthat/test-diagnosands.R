@@ -146,6 +146,10 @@ test_that("diagnosis, no estimator", {
 
 test_that("Overriding join conditions",{
   skip_if_not_installed("reshape2")
+  skip_if_not_installed("dplyr")
+
+  require(dplyr)
+  require(reshape2)
 
   alpha <- .05
 
@@ -166,7 +170,9 @@ test_that("Overriding join conditions",{
             declare_estimand(group1=1, group2=2, coefficients=TRUE, label="e") /
             declare_estimator(extra~group+0, coefficients=TRUE, estimand="e", model=lm, label="my_estimator")
 
-  diagnose_design(design, diagnosands = custom)
+  diagnosands <- get_diagnosands(diagnose_design(design, diagnosands = custom))
+
+  expect_true(is.data.frame(diagnosands) && nrow(diagnosands) == 1)
 
 })
 
