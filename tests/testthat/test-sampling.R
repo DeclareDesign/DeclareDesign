@@ -73,7 +73,7 @@ test_that("test sampling and probability functions", {
 })
 
 
-test_that("declare_assignment expected failures via validation fn", {
+test_that("declare_sampling expected failures via validation fn", {
 
   expect_true(is.function(declare_sampling()))
 

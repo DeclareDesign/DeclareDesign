@@ -1,9 +1,43 @@
 #' DeclareDesign package
 #'
-#' \begin{enumerate}
-#' \item \code{\link{declare_assignment}}
-#' \end{enumerate}
+#' The four main types of functions are to declare a step, combine steps into designs,
+#' and manipulate designs and design templates.
 #'
+#' @section Design Steps:
+#' \describe{
+#'   \item{\code{\link{declare_population}}}{Population step}
+#'   \item{\code{\link{declare_potential_outcomes}}}{Potential Outcomes step}
+#'   \item{\code{\link{declare_sampling}}}{Sampling step}
+#'   \item{\code{\link{declare_assignment}}}{Assignment step}
+#'   \item{\code{\link{declare_reveal}}}{Reveal Outcomes step}
+#'   \item{\code{\link{declare_estimand}}}{Estimand step}
+#'   \item{\code{\link{declare_estimator}}}{Estimator step}
+#'   \item{\code{\link{declare_citation}}}{Citation step}
+#' }
+#'
+#' @section Design Objects:
+#' \describe{
+#'   \item{\code{\link{declare_design}}}{Declare a design from steps}
+#'   \item{\code{\link{draw_data}}}{Simulate the DGP}
+#'   \item{\code{\link{conduct_design}}}{Simulate the DGP with estimands/estimators}
+#'   \item{\code{\link{diagnose_design}}}{Diagnose a design}
+#'   \item{\code{\link{cite_design}}}{Cite a design}
+#'   \item{\code{\link{declare_estimator}}}{Estimator step}
+#' }
+#'
+#'
+#' @section Design Editing:
+#' \describe{
+#'   \item{\code{\link{modify_design}}}{Add, delete or replace a step}
+#'   \item{\code{\link{redesign}}}{Redeclare local variables within a design (advanced)}
+#' }
+#'
+#'
+#' @section Design Templates:
+#' \describe{
+#'   \item{\code{\link{fill_out}}}{Generate Designs from a Template}
+#'   \item{designs}{See also the \code{designs} package for templates to use}
+#' }
 #'
 #'
 #' @docType package
