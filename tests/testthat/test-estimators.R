@@ -60,7 +60,7 @@ test_that("check blocked d-i-m estimator", {
 
   ## lm with HC3 robust ses
   my_estimator_blocked <- declare_estimator(Y ~ Z, model = difference_in_means, blocks = `blocks`)
-  df <- my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes
+  df <- my_population() %>% my_potential_outcomes %>% my_assignment %>% declare_reveal()()
   my_estimator_notblocked <- declare_estimator(Y ~ Z)
 
   df %>% my_estimator_notblocked%>% expect_estimates

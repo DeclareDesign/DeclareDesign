@@ -244,7 +244,7 @@ test_that("Reveal step injected (default names)",{
   pop <- declare_population(N=N, foo=rnorm(N))
   po <- declare_potential_outcomes(Q~T+foo, assignment_variables=list(T=1:3))
   assn <- declare_assignment(N=N, m=N/2, assignment_variable=T)
-  d <- declare_design(pop, po, assn)
+  expect_warning( d <- declare_design(pop, po, assn) )
   # Not autoreveal injected, so length 3
   expect_length(d, 3)
 
