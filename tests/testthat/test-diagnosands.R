@@ -143,3 +143,29 @@ test_that("diagnosis, no estimator", {
                     )
 })
 
+
+test_that("Overriding join conditions",{
+  skip_if_not_installed("reshape2")
+
+  alpha <- .05
+
+  custom <- declare_diagnosands(handler = function(data) {
+                                  data %>% group_by(sim_ID) %>%
+                                  summarize(any_significant = any(p < alpha),
+                                            num_significant = sum(p < alpha),
+                                            all_significant = all(p < alpha)) %>%
+                                  summarize(any_significant = mean(any_significant),
+                                            num_significant = mean(num_significant),
+                                            all_significant = mean(all_significant)) %>%
+                                    melt(id.vars=NULL, variable.name="estimand_label", value.name="estimand")
+  })
+
+  attr(custom, "join_on") <- c("estimand_label", "estimator_label")
+
+  design <- declare_population(sleep, handler=fabricatr::resample_data) /
+            declare_estimand(group1=1, group2=2, coefficients=TRUE, label="e") /
+            declare_estimator(extra~group+0, coefficients=TRUE, estimand="e", model=lm, label="my_estimator")
+
+  diagnose_design(design, diagnosands = custom)
+
+})
