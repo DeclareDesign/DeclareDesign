@@ -108,3 +108,5 @@ describe_variable_impl.default <- function(x, num_unique) {
 
 
 `%i%` <- intersect
+
+`%||%` <- function(e1, e2) if(is.null(e1)) e2 else e1

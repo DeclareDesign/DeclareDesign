@@ -2,6 +2,8 @@ context("Noncompliance")
 
 test_that("Noncompliance", {
 
+  skip_if_not_installed("AER")
+
   my_population <- declare_population(N = 100, noise = rnorm(N))
 
   POS_Y <- declare_potential_outcomes(Y_D_0 = noise, Y_D_1 = Y_D_0 + 2)
