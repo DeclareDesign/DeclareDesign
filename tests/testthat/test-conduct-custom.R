@@ -22,3 +22,17 @@ test_that("test the custom execution strategy", {
 
 }
 )
+
+
+test_that("test error messages in conduct_design", {
+
+  # closes ticket #12
+
+
+  design <- declare_population(sleep) /
+    declare_population(foo=bar)
+
+  expect_error(conduct_design(design), "Error in step 2")
+
+}
+)

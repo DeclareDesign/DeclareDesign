@@ -94,12 +94,18 @@ conduct_design_internal.default <- function(design, current_df=NULL, results=NUL
     causal_type <- attr(step, "causal_type")
     step_type <- attr(step, "step_type")
 
+    tryCatch(
+      nxt <- step(current_df),
+      error = function(err) {
+        stop(simpleError(sprintf("Error in step %d (%s):\n\t%s", i, attr(step, "label") %||% "", err)))
+      }
+    )
 
     # if it's a dgp
     if ("dgp" %in% causal_type) {
-      current_df <- step(current_df)
+      current_df <- nxt
     } else if(step_type %in% names(results) ) {
-      results[[step_type]][[i]] <- step(current_df)
+      results[[step_type]][[i]] <- nxt
     }
   }
 
