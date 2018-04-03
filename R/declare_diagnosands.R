@@ -1,3 +1,13 @@
+diagnosand_handler <- estimand_handler
+validation_fn(diagnosand_handler) <- function(ret, dots, label){
+
+  if(is.null(names(dots)) || "" %in% names(dots)) {
+    declare_time_error("All diagnosands must be named")
+  }
+
+  ret
+}
+
 #' Declare Diagnosands
 #'
 #' @inheritParams declare_internal_inherit_params
@@ -73,7 +83,7 @@
 #'  type_s_rate = mean((sign(est) != sign(estimand)) & p < .05),
 #'  mean_estimand = mean(estimand))
 #'
-declare_diagnosands <- make_declarations(estimand_handler, "diagnosand", "diagnosands")
+declare_diagnosands <- make_declarations(diagnosand_handler, "diagnosand", "diagnosands")
 
 
 default_diagnosands <- function(data, alpha=.05){
