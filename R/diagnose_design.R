@@ -141,6 +141,8 @@ diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) 
     } else {
       sims <- check_sims(design, sims)
       results_list <- fan_out(design, sims)
+      fan_id <- setNames(rev(do.call(expand.grid, lapply(rev(sims$n), seq))), paste0("fan_", seq_len(nrow(sims))))
+      fan_id$sim_ID <- seq_len(nrow(fan_id))
     }
 
 
@@ -179,6 +181,12 @@ diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) 
       }
 
     }
+
+    if(exists("fan_id")){
+      simulations_df <- merge(simulations_df, fan_id, by="sim_ID")
+    }
+
+
 
     group_by_set <- attr(diagnosands, "group_by") %||%
       colnames(simulations_df) %i% c("estimand_label", "estimator_label", "coefficient")

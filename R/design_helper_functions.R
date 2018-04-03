@@ -41,28 +41,31 @@ NULL
 
 check_sims <- function(design, sims) {
   n <- length(design)
-  if( length(sims) == n){
-    sims_full <- sims
-  }
-  else if(is.character(names(sims))) {
-    sims_full <- rep(1, n)
-    design_labels <- as.character(lapply(design, attr, "label"))
-    i <- match(names(sims), design_labels)
-    sims_full[i] <- sims
-  } else if (length(sims) != n) {
-    sims_full <- c(sims, rep(1, n))[1:n]
-  }
+  if(!is.data.frame(sims)){
+    if( length(sims) == n){
+      sims_full <- sims
+    }
+    else if(is.character(names(sims))) {
+      sims_full <- rep(1, n)
+      design_labels <- as.character(lapply(design, attr, "label"))
+      i <- match(names(sims), design_labels)
+      sims_full[i] <- sims
+    } else if (length(sims) != n) {
+      sims_full <- c(sims, rep(1, n))[1:n]
+    }
 
-  ret <- data.frame(end=1:n, n=sims_full)
+    ret <- data.frame(end=1:n, n=sims_full)
+  }
+  else ret <- sims
 
   # Compress sequences of ones into one partial execution
   include <- rep(TRUE,n)
   last_1 <- FALSE
   for(i in n:1){
     if(!last_1) include[i] <- TRUE
-    else if(sims_full[i] == 1 && last_1) include[i] <- FALSE
+    else if(ret[i, "n"] == 1 && last_1) include[i] <- FALSE
 
-    last_1 <- sims_full[[i]] == 1
+    last_1 <- ret[i, "n"] == 1
   }
 
   ret[include, ,drop=FALSE]
@@ -308,16 +311,6 @@ fan_out <- function(design, fan) {
     st <- st [ rep(seq_along(st), each = n) ]
 
     st <- future_lapply(seq_along(st), function(j) conduct_design(st[[j]]), future.seed = NA, future.globals = "st")
-
-    if(end < length(design)) {
-      for (j in seq_along(st))
-        st[[j]]$results$fan_out <- append(st[[j]]$results$fan_out, j)
-    }
-    else {
-      # special case for at end and only results are returned from conduct_design
-      for (j in seq_along(st))
-        st[[j]]$fan_out <- append(st[[j]]$fan_out, j)
-    }
 
   }
 

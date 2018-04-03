@@ -52,6 +52,7 @@ test_that("Diagnosing a fanout",{
     tapply(dx$simulations$est, rep_id[dx$simulations$sim_ID, 3], var), c(0,0,0,0,0)
   )
 
+  expect_length(paste0("fan_", 1:3) %i% colnames(dx$simulations), 3)
 
 })
 
@@ -87,9 +88,9 @@ test_that("fan_out ids are correct",{
 
   fan <- data.frame(end=1:3, n=c(2,3,5))
 
-  fo <- fan_out(design, fan=fan)
+  fo <- diagnose_design(design, sims=fan)
 
-  fo_id <- lapply(fo, `[[`, "fan_out")
+  fo_id <- fo$simulations[paste0("fan_", 1:3)]
 
-  expect_length(unique(fo_id), prod(fan$n))
+  expect_equal(nrow(unique(fo_id)), prod(fan$n))
 })
