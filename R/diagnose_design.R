@@ -1,12 +1,22 @@
 
 #' Diagnose the Design
 #'
+#' Runs many simulations of a design, and applies a diagnosand function to the results.
+#'
 #' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You dican also provide a single list of designs, for example one created by \code{\link{fill_out}}.
 #'
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
 #'
 #' @param sims The number of simulations, defaulting to 500.
 #' @param bootstrap Number  of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}.
+#'
+#' @details
+#'
+#' If the diagnosand function contains a \code{group_by} attribute, it will be used to split-apply-combine diagnosands rather than the intersecting column names.
+#'
+#' If \code{sims} is named, or longer than one element, a fan-out strategy is created and used instead.
+#'
+#' If the \code{future} package is installed, you can set a \code{\link{future}{plan}} to run multiple simulations at once.
 #'
 #' @examples
 #' my_population <- declare_population(N = 500, noise = rnorm(N))
@@ -170,7 +180,7 @@ diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) 
 
     }
 
-    group_by_set <- attr(diagnosands, "join_on") %||%
+    group_by_set <- attr(diagnosands, "group_by") %||%
       colnames(simulations_df) %i% c("estimand_label", "estimator_label", "coefficient")
 
 

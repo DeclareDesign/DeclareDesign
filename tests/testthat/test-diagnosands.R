@@ -164,7 +164,7 @@ test_that("Overriding join conditions",{
                                     melt(id.vars=NULL, variable.name="estimand_label", value.name="estimand")
   })
 
-  attr(custom, "join_on") <- c("estimand_label", "estimator_label")
+  attr(custom, "group_by") <- c("estimand_label", "estimator_label")
 
   design <- declare_population(sleep, handler=fabricatr::resample_data) /
             declare_estimand(group1=1, group2=2, coefficients=TRUE, label="e") /
