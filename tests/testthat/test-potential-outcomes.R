@@ -279,3 +279,11 @@ test_that("Reveal step injected after another injected reveal step",{
   expect_equal(attr(d[[5]], "step_type"), "reveal_outcomes")
   expect_equal(attr(d[[6]], "step_type"), "reveal_outcomes")
 })
+
+
+test_that("Multiple assignment variables in PO",{
+
+  po <- declare_potential_outcomes(Y~Z1 + Z2, conditions=list(Z1=0:1, Z2=0:1))
+
+  expect_length(colnames(po(sleep)) %i% c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0", "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1"), 4)
+})
