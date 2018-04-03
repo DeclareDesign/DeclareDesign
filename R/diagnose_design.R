@@ -129,7 +129,8 @@ diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) 
                                     function(i) conduct_design(design),
                                     future.seed = NA, future.globals = "design")
     } else {
-      results_list <- fan_out(design, data.frame(end=seq_along(sims), n=sims))
+      sims <- check_sims(design, sims)
+      results_list <- fan_out(design, sims)
     }
 
 
@@ -195,8 +196,9 @@ diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) 
 
     if (bootstrap > 0) {
       boot_indicies_by_id <- split(1:nrow(simulations_df), simulations_df$sim_ID)
+      nsims <- max(simulations_df$sim_ID)
       boot_function <- function() {
-        boot_ids <- sample.int(sims, sims, TRUE)
+        boot_ids <- sample.int(nsims, nsims, TRUE)
         boot_indicies <- unlist(boot_indicies_by_id[boot_ids])
         calculate_diagnosands(simulations_df[boot_indicies, , drop=FALSE], diagnosands)
       }

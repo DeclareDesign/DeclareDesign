@@ -55,3 +55,41 @@ test_that("Diagnosing a fanout",{
 
 })
 
+test_that("sims expansion is correct",{
+  design <- declare_population(sleep) /
+    declare_estimand(2, label="a") /
+    declare_estimand(b=rnorm(1))
+
+
+  sims <- c(1,1,1)
+  expanded <- check_sims(design, sims)
+  expect_equal(expanded$n, 1)
+
+
+  sims <- 2
+  expanded <- check_sims(design, sims)
+
+  # compressed final two steps
+  expect_equal(expanded$n, c(2,1))
+
+  sims <- c(a=2)
+  expanded <- check_sims(design, sims)
+  expect_equal(expanded$n, c(1,2,1))
+
+
+})
+
+
+test_that("fan_out ids are correct",{
+  design <- declare_population(sleep) /
+    declare_estimand(2, label="a") /
+    declare_estimand(b=rnorm(1))
+
+  fan <- data.frame(end=1:3, n=c(2,3,5))
+
+  fo <- fan_out(design, fan=fan)
+
+  fo_id <- lapply(fo, `[[`, "fan_out")
+
+  expect_length(unique(fo_id), prod(fan$n))
+})
