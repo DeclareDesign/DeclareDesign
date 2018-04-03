@@ -310,3 +310,65 @@ test_that("model_handler runs directly", {
 
   expect_equal(result, golden)
 })
+
+
+test_that("estimators have different columns", {
+
+  skip_if_not_installed("Matching")
+
+
+  population <- declare_population(
+    N = 1000,
+    X1 = rnorm(N),
+    X2 = rnorm(N),
+    X3 = rnorm(N)
+  )
+
+  potential_outcomes <-
+    declare_potential_outcomes(formula = Y ~ X1 + X2 + X3 + Z)
+
+  assignment <- declare_assignment(
+    handler =  function(data) {
+      prob <- with(data, pnorm(X1 + X2 + X3))
+      data$Z <- rbinom(nrow(data), 1, prob)
+      return(data)
+    }
+  )
+
+  att <- declare_estimand(att = mean(Y_Z_1[Z == 1] - Y_Z_0[Z == 1]))
+
+  estimator_d_i_m <- declare_estimator(Y ~ Z, estimand = "estimand", label = "dim")
+
+  matching_helper <- function(data) {
+    match_out <- with(data, Matching::Match(
+      Y = Y,
+      Tr = Z,
+      X = cbind(X1, X2, X3)
+    ))
+    return(data.frame(est = match_out$est))
+  }
+
+  estimator_m <- declare_estimator(
+    handler = tidy_estimator(matching_helper),
+    estimand = att,
+    label = "matching"
+  )
+
+  matching <- declare_design(
+    population,
+    potential_outcomes,
+    assignment,
+    declare_reveal(Y, Z),
+    estimator_d_i_m,
+    estimator_m
+  )
+
+
+  result <- get_estimates(matching)
+
+
+  expect_length(result, 8)
+  expect_equal(nrow(result), 2)
+
+})
+

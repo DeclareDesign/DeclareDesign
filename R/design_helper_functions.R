@@ -102,11 +102,11 @@ conduct_design_internal.default <- function(design, current_df=NULL, results=NUL
 
   if(i == length(design)) {
     if("estimator" %in% names(results)){
-      results[["estimates_df"]] <- do.call(rbind.data.frame, results[["estimator"]])
+      results[["estimates_df"]] <-  rbind_disjoint(results[["estimator"]])
       results[["estimator"]] <- NULL
     }
     if("estimand" %in% names(results)){
-      results[["estimands_df"]] <- do.call(rbind.data.frame, results[["estimand"]])
+      results[["estimands_df"]] <- rbind_disjoint(results[["estimand"]])
       results[["estimand"]] <- NULL
 
     }

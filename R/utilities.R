@@ -106,6 +106,19 @@ describe_variable_impl.default <- function(x, num_unique) {
   )
 }
 
+rbind_disjoint <- function(list_of_df) {
+  list_of_df <- Filter(is.data.frame, list_of_df)
+  all_columns <- Reduce(union, lapply(list_of_df, colnames))
+
+  for(i in seq_along(list_of_df)) {
+    list_of_df[[i]][setdiff(all_columns, colnames(list_of_df[[i]]))] <- NA
+  }
+
+  list_of_df <- lapply(list_of_df, `[`, all_columns)
+
+  do.call(rbind.data.frame, append(list_of_df, list(make.row.names=FALSE, stringsAsFactors=FALSE)))
+}
+
 
 `%i%` <- intersect
 
