@@ -146,7 +146,9 @@ declare_design <- function(...) {
     #wrap step is nasty, converts partial call to curried function
     ret[[i]] <- tryCatch(
       eval_tidy(qs[[i]]),
-      error = function(e) callquos_to_step(qs[[i]], qnames[[i]])
+      error = function(e) tryCatch(callquos_to_step(qs[[i]], qnames[[i]]),
+                                   error = function(e) stop("Could not evaluate step ", i,
+                                                            "as either a step or call."))
     )
 
     # Is it a non-declared function
