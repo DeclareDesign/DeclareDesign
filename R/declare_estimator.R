@@ -133,7 +133,7 @@ tidy_estimator <- function(estimator_function){
 
 #' @param data a data.frame
 #' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
-#' @param coefficients A character vector of coefficients that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept coefficient; if TRUE return all coefficients.
+#' @param coefficients Symbols or literal character vector of coefficients that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept coefficient; if TRUE return all coefficients. To escape non-standard-evaluation use \code{!!}.
 #' @rdname declare_estimator
 model_handler <- function(data, ..., model = estimatr::difference_in_means, coefficients = FALSE) {
 
