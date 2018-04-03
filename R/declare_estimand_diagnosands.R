@@ -1,8 +1,10 @@
+# File is named so that it collates after declare_estimand
+
 diagnosand_handler <- estimand_handler
 validation_fn(diagnosand_handler) <- function(ret, dots, label){
 
   if(is.null(names(dots)) || "" %in% names(dots)) {
-    declare_time_error("All diagnosands must be named")
+    declare_time_error("All diagnosands must be named", ret)
   }
 
   ret

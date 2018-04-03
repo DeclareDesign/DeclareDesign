@@ -229,3 +229,8 @@ test_that("diagnosis, sorted by estimator order in design", {
 })
 
 
+
+test_that("error if diagnosand not named", {
+  expect_error(declare_diagnosands(mean(foo)), "All diagnosands must be named")
+})
+
