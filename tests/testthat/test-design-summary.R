@@ -83,3 +83,9 @@ test_that("summary, estimator formula print formula", {
 
 })
 
+test_that("summary, estimator print model", {
+  d <- declare_design(sleep, declare_estimator(extra~group, model=lm))
+
+  expect_output(print(d), "Model:\\s*lm")
+
+})

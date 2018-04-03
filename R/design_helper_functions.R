@@ -256,6 +256,9 @@ print.summary.design <- function(x, ...) {
     if (!is.null(x$formulae[[i]])) {
       cat("Formula:", deparse(x$formula[[i]]), "\n\n")
     }
+    if (is.character(x$extra_summary[[i]])) {
+      cat(x$extra_summary[[i]], "\n\n")
+    }
 
     if (!is.null(x$quantities_added[[i]])) {
       if (class(x$quantities_added[[i]]) == "data.frame") {

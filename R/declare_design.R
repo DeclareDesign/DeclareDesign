@@ -281,7 +281,7 @@ summary.design <- function(object, ...) {
 
   variables_added <- variables_modified <-
     quantities_added <- quantities_modified <-
-    N <-
+    N <- extra_summary <-
     vector("list", length(design))
 
   formulae <- lapply(design, get_formula_from_step)
@@ -302,6 +302,7 @@ summary.design <- function(object, ...) {
       causal_type <- attr(design[[i]], "causal_type")
       if(is.null(causal_type)) next;
 
+      extra_summary[i] <- list(attr(design[[i]], "extra_summary"))
 
       # if it's a dgp
       if (causal_type == "dgp") {
@@ -367,7 +368,8 @@ summary.design <- function(object, ...) {
          title = title,
          authors = authors,
          description = description,
-         citation = citation
+         citation = citation,
+         extra_summary = extra_summary
     ),
     class = c("summary.design", "list")
 

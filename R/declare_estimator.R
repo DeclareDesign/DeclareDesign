@@ -158,6 +158,7 @@ validation_fn(model_handler) <-  function(ret, dots, label){
     if(!is.function(model) || ! "data" %in% names(formals(model))){
       declare_time_error("Must provide a function for `model` which takes a `data` argument.", ret)
     }
+    attr(ret, "extra_summary") <- sprintf("Model:\t%s", as.character(f_rhs(dots$model)))
   }
   ret
 }
