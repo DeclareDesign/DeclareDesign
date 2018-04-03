@@ -258,6 +258,13 @@ diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) 
 
     }
 
+    if (nrow(estimates_df) > 0) {
+
+      estimator_f <- factor(diagnosands_df$estimator_label, unique(estimates_df$estimator_label))
+      diagnosands_df <- diagnosands_df[order(estimator_f), , drop=FALSE]
+    }
+
+
     structure(
       list(simulations = simulations_df, diagnosands = diagnosands_df),
       class = "diagnosis"

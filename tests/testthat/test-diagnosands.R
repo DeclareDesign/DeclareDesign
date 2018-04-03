@@ -214,3 +214,18 @@ test_that("diagnosis, NAs if no estimand", {
 
 })
 
+
+test_that("diagnosis, sorted by estimator order in design", {
+  d <- declare_design(sleep,
+                      declare_estimand(m=mean(extra)),
+                      declare_estimator(extra~group, label="X4", estimand="m"),
+                      declare_estimator(extra~group, label="X3", estimand="m"),
+                      declare_estimator(extra~group, label="X2", estimand="m"),
+                      declare_estimator(extra~group, label="X1", estimand="m"))
+
+  dx <- diagnose_design(d)
+
+  expect_true(!is.unsorted(rev(dx$diagnosands$estimator_label)))
+})
+
+
