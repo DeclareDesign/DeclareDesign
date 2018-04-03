@@ -170,9 +170,8 @@ diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) 
 
     }
 
-    group_by_set <- if(is.null(attr(diagnosands, "join_on")))
+    group_by_set <- attr(diagnosands, "join_on") %||%
       colnames(simulations_df) %i% c("estimand_label", "estimator_label", "coefficient")
-      else attr(diagnosands, "join_on")
 
 
     calculate_diagnosands <- function(simulations_df, diagnosands) {
