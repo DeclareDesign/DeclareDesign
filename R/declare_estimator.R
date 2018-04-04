@@ -1,4 +1,6 @@
-#' Declare an Estimator
+#' Declare Estimator
+#'
+#' @description Declares an estimator which generates estimates and associated statistics
 #'
 #' @inheritParams declare_internal_inherit_params
 #'
@@ -18,26 +20,42 @@
 #' #########################################
 #' # Default handler
 #'
-#' my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
+#' my_estimand <- declare_estimand(ATE=mean(Y_Z_1-Y_Z_0))
 #'
+#' # Automatically uses first non-intercept coefficient as estimate
+#' # Default method is the `difference_in_means` estimator from `estimatr`
 #'
-#' # Use the linear regression (lm) function
-#' # with robust standard errors from the estimatr package
+#' my_estimator_dim <- declare_estimator(Y ~ Z, estimand = "ATE", label = "DIM")
 #'
-#' my_estimator_lm <- declare_estimator(
+#' # lm from base R
+#' my_estimator_lm <- declare_estimator(Y ~ Z, estimand = "ATE", model = lm, label = "LM")
+#
+#' # Use linear regression with robust standard errors from `estimatr` package
+#' my_estimator_lm_rob <- declare_estimator(
 #'   Y ~ Z,
+#'   estimand = "ATE",
 #'   model = estimatr::lm_robust,
-#'   coefficients = "Z",
-#'   estimand = my_estimand
+#'   label = "LM_Robust"
 #' )
 #'
+#' # Set `coefficient`` if estimate of interest is not the first non-intercept variable
+#' my_estimator_lm_rob_x <- declare_estimator(
+#'   Y ~ X + Z,
+#'   estimand = my_estimand,
+#'   coefficients = "Z",
+#'   model = estimatr::lm_robust
+#' )
 #'
-#' # Use R's built-in lm function via model
+#' # Use glm from base R
+#' my_estimator_glm <- declare_estimator(
+#'   Y ~ X + Z,
+#'   family = "gaussian",
+#'   estimand = my_estimand,
+#'   coefficients = "Z",
+#'   model = glm
+#' )
 #'
-#' estimator_lm <- declare_estimator(Y ~ Z, model = lm)
-#'
-#' # Run a probit regression using glm via model
-#'
+#' # A probit
 #' estimator_probit <- declare_estimator(
 #'   Y ~ Z,
 #'   model = glm,
@@ -45,8 +63,11 @@
 #'   coefficients = "Z"
 #' )
 #'
-#' # Use a custom estimator function with tidy_estimator handling labelling
+#' ##################
+#' # Custom handlers
 #'
+#' # Define your own estimator and use the `tidy_estimator` function for labeling
+#' # Must have `data` argument that is a data.frame
 #' my_estimator_function <- function(data){
 #'   data.frame(est = with(data, mean(Y)))
 #' }
@@ -70,6 +91,78 @@
 #'
 #' my_estimator_custom2 <- declare_estimator(handler = my_estimator_function)
 #'
+#' #########################
+#' # Examples
+#'
+#' # First, set up the rest of a design
+#' set.seed(42)
+#'
+#' design_def <- declare_design(
+#'   declare_population(N = 100, X = rnorm(N), W=rexp(N,1), noise=rnorm(N)),
+#'   declare_potential_outcomes(Y ~ .25 * Z + noise),
+#'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)),
+#'   declare_assignment(m = 50),
+#'   declare_reveal(),
+#'   my_estimator_dim
+#' )
+#'
+#' conduct_design(design_def)
+#'
+#' # Can also use declared estimator on a data.frame
+#' dat <- draw_data(design_def)
+#' my_estimator_dim(dat)
+#'
+#' # ----------
+#' # 2. Using existing estimators
+#' # ----------
+#'
+#' design <- replace_step(design_def, my_estimator_dim, my_estimator_lm_rob)
+#'
+#' conduct_design(design)
+#'
+#'
+#' design <- replace_step(design_def, my_estimator_dim, my_estimator_lm)
+#'
+#' conduct_design(design)
+#'
+#'
+#' design <- replace_step(design_def, my_estimator_dim, my_estimator_glm)
+#'
+#' conduct_design(design)
+#'
+#' # ----------
+#' # 3. Using custom estimators
+#' # ----------
+#'
+#'
+#' design <- replace_step(design_def, my_estimator_dim, my_estimator_custom)
+#'
+#' conduct_design(design)
+#'
+#' # The names in your custom estimator return should match with
+#' # your diagnosands when diagnosing a design
+#' my_median <- function(data) data.frame(med = median(data$Y))
+#'
+#' my_estimator_median <- declare_estimator(
+#'   handler = tidy_estimator(my_median),
+#'   estimand = my_estimand
+#' )
+#'
+#' design <- replace_step(design_def, my_estimator_dim, my_estimator_median)
+#'
+#' conduct_design(design)
+#'
+#' my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand))
+#' diagnose_design(design, diagnosands = my_diagnosand, sims = 5, bootstrap = FALSE)
+#'
+#' # ----------
+#' # 4. Multiple estimators per estimand
+#' # ----------
+#'
+#' design_two <- insert_step(design_def,  my_estimator_lm,  after=my_estimator_dim)
+#'
+#' conduct_design(design_two)
+#' diagnose_design(design_two, sims = 5, bootstrap = FALSE)
 #'
 declare_estimator <- make_declarations(estimator_handler, step_type="estimator", causal_type="estimator", default_label="my_estimator")
 

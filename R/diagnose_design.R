@@ -16,7 +16,7 @@
 #'
 #' If \code{sims} is named, or longer than one element, a fan-out strategy is created and used instead.
 #'
-#' If the \code{future} package is installed, you can set  \code{\link{future::plan}} to run multiple simulations at once.
+#' If the \code{future} package is installed, you can set  \code{\link[future]{plan}} to run multiple simulations at once.
 #'
 #' @examples
 #' my_population <- declare_population(N = 500, noise = rnorm(N))
