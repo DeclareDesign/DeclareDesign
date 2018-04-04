@@ -11,7 +11,7 @@
 #' eval_tidy(dot2)
 #' }
 clone_dot_edit_env <- function(dot, ..., to_replace=list(...)){
-
+  if(is.null(environment(dot))) return(dot)
   environment(dot) <- list2env(to_replace, parent = environment(dot))
 
   dot
