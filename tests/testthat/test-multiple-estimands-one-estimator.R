@@ -1,7 +1,7 @@
 context("Multiple estimands can be mapped to one estimator")
 
 
-test_that("", {
+test_that("Multiple estimands can be mapped to one estimator", {
   pop_var <- function(x) mean((x - mean(x))^2)
   x <- rnorm(100)
   dat <- data.frame(X = x)

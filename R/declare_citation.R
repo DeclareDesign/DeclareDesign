@@ -6,6 +6,11 @@
 #' @return a function that takes a data.frame as an argument and returns citation data
 #' @export
 #'
+#' @examples
+#'
+#'  cite <- declare_citation(title="example", author="Neal")
+#'  design <- declare_design(cite)
+#'  cite_design(design)
 
 declare_citation <- make_declarations(citation_handler, "citation", causal_type="citation", strictDataParam=FALSE)
 

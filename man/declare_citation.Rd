@@ -36,3 +36,9 @@ a function that takes a data.frame as an argument and returns citation data
 \description{
 Declare Research Study Citation
 }
+\examples{
+
+ cite <- declare_citation(title="example", author="Neal")
+ design <- declare_design(cite)
+ cite_design(design)
+}
