@@ -78,6 +78,9 @@ validation_fn(estimand_handler) <-  function(ret, dots, label){
   # add ... labels at build time
   dotnames <- names(dots)
 
+  declare_time_error_if_data(ret)
+
+
   # Don't overwrite label-label with splat label if coefficient names are true
   if("coefficients" %in% dotnames && isTRUE(eval_tidy(dots$coefficients))) return(ret)
 

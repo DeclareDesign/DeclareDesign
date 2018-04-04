@@ -35,7 +35,12 @@ declare_time_error <- function(message, declaration){
 }
 
 declare_time_warn <- function(message, declaration){
-  stop( simpleWarning(message, call = attr(declaration, "call")) )
+  warning( simpleWarning(message, call = attr(declaration, "call")) )
+}
+
+declare_time_error_if_data <- function(declaration){
+  if("data" %in% names(attr(declaration, "dots")))
+    stop( simpleError("`data` should not be a declared argument.", call = attr(declaration, "call")) )
 }
 
 
@@ -99,6 +104,19 @@ describe_variable_impl.default <- function(x, num_unique) {
     stringsAsFactors = FALSE,
     check.names = FALSE
   )
+}
+
+rbind_disjoint <- function(list_of_df) {
+  list_of_df <- Filter(is.data.frame, list_of_df)
+  all_columns <- Reduce(union, lapply(list_of_df, colnames))
+
+  for(i in seq_along(list_of_df)) {
+    list_of_df[[i]][setdiff(all_columns, colnames(list_of_df[[i]]))] <- NA
+  }
+
+  list_of_df <- lapply(list_of_df, `[`, all_columns)
+
+  do.call(rbind.data.frame, append(list_of_df, list(make.row.names=FALSE, stringsAsFactors=FALSE)))
 }
 
 

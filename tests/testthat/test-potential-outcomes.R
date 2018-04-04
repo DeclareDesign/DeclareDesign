@@ -198,3 +198,92 @@ test_that("Restore existing variables to be unchanged",{
 
 })
 
+
+test_that("PO warns if unnamed dot",{
+
+
+  expect_warning(
+    my_potential_outcomes_formula <- declare_potential_outcomes(NULL, sleep)
+  )
+
+})
+
+
+test_that("Binary Potential outcomes",{
+
+
+  my_potential_outcomes_formula <-
+    declare_potential_outcomes(
+      Y ~ draw_binary(prob=plogis(1000*Z + extra))
+    )
+
+  out <- my_potential_outcomes_formula(sleep)
+  expect_true(all(out$Y_Z_1 == 1))
+
+})
+
+
+test_that("Reveal step injected (default names)",{
+
+  N <- 100
+
+  pop <- declare_population(N=N, foo=rnorm(N))
+  po <- declare_potential_outcomes(Y~Z+foo)
+  assn <- declare_assignment(N=N, m=N/2)
+  expect_warning(d <- declare_design(pop, po, assn), "inject a `declare_reveal")
+  expect_true("Y" %in% colnames(draw_data(d)))
+
+})
+
+
+test_that("Reveal step injected (default names)",{
+
+  N <- 100
+
+  # Assn is buggy, but masked by po autoreveal error
+  pop <- declare_population(N=N, foo=rnorm(N))
+  po <- declare_potential_outcomes(Q~T+foo, assignment_variables=list(T=1:3))
+  assn <- declare_assignment(N=N, m=N/2, assignment_variable=T)
+  expect_warning( d <- declare_design(pop, po, assn) )
+  # Not autoreveal injected, so length 3
+  expect_length(d, 3)
+
+  # Now we see it
+  po <- declare_potential_outcomes(Q~T+foo, conditions=list(T=1:3))
+  expect_warning(d <- declare_design(pop, po, assn), "never later revealed")
+  expect_error(draw_data(d), "Q_T_0")
+
+  # Fix it
+  assn <- declare_assignment(N=N, prob_each=c(1,1,1)/3, conditions=1:3, assignment_variable="T")
+  expect_warning(d <- declare_design(pop, po, assn), "never later revealed")
+  expect_true("Q" %in% colnames(draw_data(d)))
+
+  expect_warning(d <- declare_design(pop, assn, po, identity), "inject a `declare_reveal")
+  expect_equal(attr(d[[4]], "step_type"), "reveal_outcomes")
+
+})
+
+
+test_that("Reveal step injected after another injected reveal step",{
+
+  N <- 100
+
+  pop <- declare_population(N=N, foo=rnorm(N))
+  po <- declare_potential_outcomes(Y~draw_binary(plogis(Z+foo)))
+  po2 <- declare_potential_outcomes(Q~Y+foo, conditions=list(Y=0:1))
+  assn <- declare_assignment(N=N, m=N/2)
+
+  expect_warning(d <- declare_design(pop, po, po2,assn), "inject a `declare_reveal[(]Q, Y")
+  expect_true("Y" %in% colnames(draw_data(d)))
+
+  expect_equal(attr(d[[5]], "step_type"), "reveal_outcomes")
+  expect_equal(attr(d[[6]], "step_type"), "reveal_outcomes")
+})
+
+
+test_that("Multiple assignment variables in PO",{
+
+  po <- declare_potential_outcomes(Y~Z1 + Z2, conditions=list(Z1=0:1, Z2=0:1))
+
+  expect_length(colnames(po(sleep)) %i% c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0", "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1"), 4)
+})

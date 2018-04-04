@@ -39,6 +39,38 @@
 NULL
 
 
+check_sims <- function(design, sims) {
+  n <- length(design)
+  if(!is.data.frame(sims)){
+    if( length(sims) == n){
+      sims_full <- sims
+    }
+    else if(is.character(names(sims))) {
+      sims_full <- rep(1, n)
+      design_labels <- as.character(lapply(design, attr, "label"))
+      i <- match(names(sims), design_labels)
+      sims_full[i] <- sims
+    } else if (length(sims) != n) {
+      sims_full <- c(sims, rep(1, n))[1:n]
+    }
+
+    ret <- data.frame(end=1:n, n=sims_full)
+  }
+  else ret <- sims
+
+  # Compress sequences of ones into one partial execution
+  include <- rep(TRUE,n)
+  last_1 <- FALSE
+  for(i in n:1){
+    if(!last_1) include[i] <- TRUE
+    else if(ret[i, "n"] == 1 && last_1) include[i] <- FALSE
+
+    last_1 <- ret[i, "n"] == 1
+  }
+
+  ret[include, ,drop=FALSE]
+}
+
 #' Execute a design
 #'
 #' @param design a DeclareDesign object
@@ -62,22 +94,28 @@ conduct_design_internal.default <- function(design, current_df=NULL, results=NUL
     causal_type <- attr(step, "causal_type")
     step_type <- attr(step, "step_type")
 
+    tryCatch(
+      nxt <- step(current_df),
+      error = function(err) {
+        stop(simpleError(sprintf("Error in step %d (%s):\n\t%s", i, attr(step, "label") %||% "", err)))
+      }
+    )
 
     # if it's a dgp
     if ("dgp" %in% causal_type) {
-      current_df <- step(current_df)
+      current_df <- nxt
     } else if(step_type %in% names(results) ) {
-      results[[step_type]][[i]] <- step(current_df)
+      results[[step_type]][[i]] <- nxt
     }
   }
 
   if(i == length(design)) {
     if("estimator" %in% names(results)){
-      results[["estimates_df"]] <- do.call(rbind.data.frame, results[["estimator"]])
+      results[["estimates_df"]] <-  rbind_disjoint(results[["estimator"]])
       results[["estimator"]] <- NULL
     }
     if("estimand" %in% names(results)){
-      results[["estimands_df"]] <- do.call(rbind.data.frame, results[["estimand"]])
+      results[["estimands_df"]] <- rbind_disjoint(results[["estimand"]])
       results[["estimand"]] <- NULL
 
     }
@@ -152,6 +190,13 @@ cite_design <- function(design, ...) {
 }
 
 #' @export
+print.design_step <- function(x, ...) {
+  print(attr(x, "call"))
+  # invisible(summary(x))
+}
+
+
+#' @export
 print.design <- function(x, ...) {
   print(summary(x))
   # invisible(summary(x))
@@ -211,6 +256,9 @@ print.summary.design <- function(x, ...) {
     if (!is.null(x$formulae[[i]])) {
       cat("Formula:", deparse(x$formula[[i]]), "\n\n")
     }
+    if (is.character(x$extra_summary[[i]])) {
+      cat(x$extra_summary[[i]], "\n\n")
+    }
 
     if (!is.null(x$quantities_added[[i]])) {
       if (class(x$quantities_added[[i]]) == "data.frame") {
@@ -254,7 +302,7 @@ print.summary.design <- function(x, ...) {
 str.design_step <- function(object, ...) cat("design_step:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
 
 #' @export
-str.seed_data <- function(object, ...) cat("design_step:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
+str.seed_data <- function(object, ...) cat("seed_data:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
 
 
 fan_out <- function(design, fan) {

@@ -58,6 +58,8 @@ potential_outcomes_handler <-  function(..., data, level) {}
 validation_fn(potential_outcomes_handler) <-  function(ret, dots, label) {
   if(getOption("debug.DeclareDesign.potential_outcome_validation", FALSE)) browser()
 
+  declare_time_error_if_data(ret)
+
 
   # Below is a similar redispatch strategy, only at declare time
   validation_delegate <- function(formula=NULL, ...) {
@@ -334,6 +336,10 @@ potential_outcomes.NULL <- function(formula=stop("Not provided"), ..., data, lev
 validation_fn(potential_outcomes.NULL) <- function(ret, dots, label){
   if("ID_label" %in% names(dots)){
     declare_time_error("Must not pass ID_label.", ret)
+  }
+
+  if ("" %in% names(dots)) {
+    declare_time_warn("Unnamed declared argument in potential outcome", ret)
   }
 
   ret

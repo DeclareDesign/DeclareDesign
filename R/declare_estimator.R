@@ -133,7 +133,7 @@ tidy_estimator <- function(estimator_function){
 
 #' @param data a data.frame
 #' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
-#' @param coefficients A character vector of coefficients that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept coefficient; if TRUE return all coefficients.
+#' @param coefficients Symbols or literal character vector of coefficients that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept coefficient; if TRUE return all coefficients. To escape non-standard-evaluation use \code{!!}.
 #' @rdname declare_estimator
 model_handler <- function(data, ..., model = estimatr::difference_in_means, coefficients = FALSE) {
 
@@ -150,11 +150,15 @@ model_handler <- function(data, ..., model = estimatr::difference_in_means, coef
 }
 
 validation_fn(model_handler) <-  function(ret, dots, label){
+  declare_time_error_if_data(ret)
+
+
   if("model" %in% names(dots)) {
     model <- eval_tidy(dots$model)
     if(!is.function(model) || ! "data" %in% names(formals(model))){
       declare_time_error("Must provide a function for `model` which takes a `data` argument.", ret)
     }
+    attr(ret, "extra_summary") <- sprintf("Model:\t%s", as.character(f_rhs(dots$model)))
   }
   ret
 }

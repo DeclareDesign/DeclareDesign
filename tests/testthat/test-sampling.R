@@ -73,7 +73,7 @@ test_that("test sampling and probability functions", {
 })
 
 
-test_that("declare_assignment expected failures via validation fn", {
+test_that("declare_sampling expected failures via validation fn", {
 
   expect_true(is.function(declare_sampling()))
 
@@ -83,6 +83,36 @@ test_that("declare_assignment expected failures via validation fn", {
 
   expect_error(declare_sampling(sampling_variable = NULL), "sampling_variable")
 })
+
+
+
+
+
+
+test_that("Factor out declarations", {
+
+  skip_if_not_installed("randomizr", "0.15.0")
+
+  N <- 500
+  n <- 250
+  m <- 25
+
+  expect_message(
+    design <- declare_design(
+      declare_population(N = N, noise = 1:N),
+      declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + 1),
+      declare_sampling(N=N, n = n),
+      declare_assignment(N=n, m = m),
+      declare_reveal()
+    ),
+    "declaration"
+  )
+
+  expect_true(inherits(attr(design[[3]], "dots")$declaration, "rs_complete"))
+  expect_true(inherits(attr(design[[4]], "dots")$declaration, "ra_complete"))
+
+})
+
 
 
 

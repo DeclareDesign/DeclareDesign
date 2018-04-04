@@ -144,6 +144,38 @@ test_that("diagnosis, no estimator", {
 })
 
 
+test_that("Overriding join conditions",{
+  skip_if_not_installed("reshape2")
+  skip_if_not_installed("dplyr")
+
+  require(dplyr)
+  require(reshape2)
+
+  alpha <- .05
+
+  custom <- declare_diagnosands(handler = function(data) {
+                                  data %>% group_by(sim_ID) %>%
+                                  summarize(any_significant = any(p < alpha),
+                                            num_significant = sum(p < alpha),
+                                            all_significant = all(p < alpha)) %>%
+                                  summarize(any_significant = mean(any_significant),
+                                            num_significant = mean(num_significant),
+                                            all_significant = mean(all_significant)) %>%
+                                    melt(id.vars=NULL, variable.name="estimand_label", value.name="estimand")
+  })
+
+  attr(custom, "group_by") <- c("estimand_label", "estimator_label")
+
+  design <- declare_population(sleep, handler=fabricatr::resample_data) /
+            declare_estimand(group1=1, group2=2, coefficients=TRUE, label="e") /
+            declare_estimator(extra~group+0, coefficients=TRUE, estimand="e", model=lm, label="my_estimator")
+
+  diagnosands <- get_diagnosands(diagnose_design(design, diagnosands = custom))
+
+  expect_true(is.data.frame(diagnosands) && nrow(diagnosands) == 1)
+
+})
+
 test_that("diagnosis, NAs if no estimand", {
   d <- declare_design(sleep, ols = declare_estimator(extra~group))
 
@@ -180,5 +212,25 @@ test_that("diagnosis, NAs if no estimand", {
                       "mean_estimand", "se(mean_estimand)"), class = "data.frame", row.names = "mu")
   expect_identical( diagnose_design(d, sims=4)$diagnosands, golden)
 
+})
+
+
+test_that("diagnosis, sorted by estimator order in design", {
+  d <- declare_design(sleep,
+                      declare_estimand(m=mean(extra)),
+                      declare_estimator(extra~group, label="X4", estimand="m"),
+                      declare_estimator(extra~group, label="X3", estimand="m"),
+                      declare_estimator(extra~group, label="X2", estimand="m"),
+                      declare_estimator(extra~group, label="X1", estimand="m"))
+
+  dx <- diagnose_design(d)
+
+  expect_true(!is.unsorted(rev(dx$diagnosands$estimator_label)))
+})
+
+
+
+test_that("error if diagnosand not named", {
+  expect_error(declare_diagnosands(mean(foo)), "All diagnosands must be named")
 })
 
