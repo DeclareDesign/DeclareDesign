@@ -81,7 +81,7 @@ design_def <- declare_design(
   my_estimator_dim
 )
 
-conduct_design(design)
+conduct_design(design_def)
 
 # Can also use declared estimator on a data.frame
 dat <- draw_data(design_def)
@@ -105,7 +105,7 @@ conduct_design(design)
 my_estimator_lm_rob_x <- declare_estimator(
   Y ~ X + Z,
   estimand = my_estimand,
-  coefficient = "Z",
+  coefficients = "Z",
   model = estimatr::lm_robust
 )
 
@@ -122,7 +122,7 @@ my_estimator_glm <- declare_estimator(
   Y ~ X + Z,
   family = "gaussian",
   estimand = my_estimand,
-  coefficient = "Z",
+  coefficients = "Z",
   model = glm
 )
 
