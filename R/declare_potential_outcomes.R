@@ -19,7 +19,7 @@
 #'
 #'
 #' @examples
-#' #################################################################
+#' ##########################################
 #' # Default handler
 #'
 #' # By default, there are two ways of declaring potential outcomes:
@@ -51,7 +51,7 @@
 #'    conditions = list(Z1=0:1, Z2=0:1)
 #'  )
 #'
-#' ####################################################
+#' ##########################################
 #' # Custom handler
 #'
 #' my_potential_outcome_f <- function(data) {

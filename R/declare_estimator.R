@@ -17,7 +17,7 @@
 #'
 #' @examples
 #'
-#' #########################################
+#' ##########################################
 #' # Default handler
 #'
 #' my_estimand <- declare_estimand(ATE=mean(Y_Z_1-Y_Z_0))
@@ -63,7 +63,7 @@
 #'   coefficients = "Z"
 #' )
 #'
-#' ##################
+#' ##########################################
 #' # Custom handlers
 #'
 #' # Define your own estimator and use the `tidy_estimator` function for labeling
@@ -91,7 +91,7 @@
 #'
 #' my_estimator_custom2 <- declare_estimator(handler = my_estimator_function)
 #'
-#' #########################
+#' ##########################################
 #' # Examples
 #'
 #' # First, set up the rest of a design

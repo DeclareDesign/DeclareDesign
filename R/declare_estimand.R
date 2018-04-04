@@ -10,7 +10,7 @@
 #'
 #' @examples
 #'
-#' ################################
+#' ##########################################
 #' # Default handler
 #'
 #' my_estimand_ATE <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
@@ -30,7 +30,7 @@
 #'   label="TrueRegressionParams"
 #' )
 #'
-#' ################################
+#' ##########################################
 #' # Custom random assignment functions
 #'
 #' my_estimand_function <- function(data, label) {
@@ -42,7 +42,7 @@
 #' }
 #' my_estimand_custom <- declare_estimand(handler = my_estimand_function, label = "medianTE")
 #'
-#' ##################################################
+#' ##########################################
 #' # Using with estimators
 #'
 #'

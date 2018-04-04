@@ -21,7 +21,7 @@
 #'
 #' @examples
 #'
-#' #######################################
+#' ##########################################
 #' # Default Handler
 #' # Delegates to conduct_ra
 #'
@@ -35,7 +35,7 @@
 #'   assignment_variable = "X1"
 #' )
 #'
-#' #######################################
+#' ##########################################
 #' #' # Custom random assignment functions
 #'
 #' my_assignment_function <- function(data) {
