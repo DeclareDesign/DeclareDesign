@@ -1,6 +1,7 @@
 
 #' @importFrom rlang env_clone
 env_deep_copy <- function(e) {
+  if(environmentName(e) == "CheckExEnv") e else # Cloning the CheckExEnv causes examples to autofail, it has delayedAssign("F", stop())
   if(identical(e, emptyenv())) emptyenv() else
     if(identical(e, globalenv())) env_clone(e) else # don't clone attached packages
       env_clone(e, Recall(parent.env(e)))
