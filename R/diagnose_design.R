@@ -16,7 +16,7 @@
 #'
 #' If \code{sims} is named, or longer than one element, a fan-out strategy is created and used instead.
 #'
-#' If the \code{future} package is installed, you can set a \code{\link{future}{plan}} to run multiple simulations at once.
+#' If the \code{future} package is installed, you can set  \code{\link{future::plan}} to run multiple simulations at once.
 #'
 #' @examples
 #' my_population <- declare_population(N = 500, noise = rnorm(N))
@@ -256,6 +256,11 @@ diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) 
       diagnosands_df <- diagnosands_df[,i, drop=FALSE]
 
 
+      # Reordering columns
+      dim_cols <- c("estimator_label", "coefficient", "estimand_label") %i% group_by_set
+      ix <- sort(match(dim_cols, colnames(diagnosands_df)))
+      diagnosands_df[ix] <- diagnosands_df[dim_cols]
+      names(diagnosands_df)[ix] <- dim_cols
     }
 
     if (nrow(estimates_df) > 0) {

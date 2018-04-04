@@ -2,9 +2,12 @@
 % Please edit documentation in R/declare_estimand.R
 \name{declare_estimand}
 \alias{declare_estimand}
+\alias{estimand_handler}
 \title{Declare Estimand}
 \usage{
 declare_estimand(..., handler = estimand_handler, label = "my_estimand")
+
+estimand_handler(data, ..., subset = NULL, coefficients = FALSE, label)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -12,6 +15,12 @@ declare_estimand(..., handler = estimand_handler, label = "my_estimand")
 \item{handler}{a tidy-in, tidy-out function}
 
 \item{label}{a string describing the step}
+
+\item{data}{a data.frame}
+
+\item{subset}{a subset expression}
+
+\item{coefficients}{TRUE/FALSE}
 }
 \value{
 a function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimand.
@@ -19,32 +28,36 @@ a function that accepts a data.frame as an argument and returns a data.frame con
 \description{
 Declare Estimand
 }
+\details{
+If coefficients is TRUE, the names of ... will be returned in a `coefficients` column, and `estimand_label`
+will contain the step label. This can be used as an additional dimension for use in diagnosis.
+}
 \examples{
 
-my_population <- declare_population(N = 100)
-
-my_potential_outcomes <- declare_potential_outcomes(
-  formula = Y ~ .25 * Z,
-  conditions = c(0, 1))
-
-df <- my_potential_outcomes(my_population())
-
-# Use the default estimand setup to
-# declare an average treatment effect estimand
+################################
+# Default handler
 
 my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
-my_estimand(df)
+my_estimand <- declare_estimand(ATT = mean(Y_Z_1 - Y_Z_0), subset=Z==1)
 
+my_estimand <- declare_estimand(
+  `(Intercept)`=1,
+  Z=2,
+  coefficients=TRUE,
+  label="TrueRegressionParams"
+)
+
+################################
 # Custom random assignment functions
 
 my_estimand_function <- function(data, label) {
   ret <- with(data, median(Y_Z_1 - Y_Z_0))
-  data.frame(setNames(ret, label))
+  data.frame(estimand_label=label,
+             estimand=ret,
+             time=Sys.time(),
+             stringsAsFactors=FALSE)
 }
-my_estimand_custom <- declare_estimand(
-  handler = my_estimand_function, label = "medianTE")
-
-my_estimand_custom(df)
+my_estimand_custom <- declare_estimand(handler = my_estimand_function, label = "medianTE")
 
 }

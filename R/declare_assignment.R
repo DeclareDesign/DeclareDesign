@@ -9,57 +9,52 @@
 #'
 #' @details
 #'
-#' While declare_assignment can work with any assignment_function that takes data and returns data, most random assignment procedures can be easily implemented with randomizr. The arguments to \code{\link{conduct_ra}} can include N, block_var, clust_var, m, m_each, prob, prob_each, block_m, block_m_each = NULL, block_prob, block_prob_each, num_arms, and conditions. The arguments you need to specify are different for different designs. Check the help files for \code{\link{complete_ra}}, \code{\link{block_ra}}, \code{\link{cluster_ra}}, or \code{\link{block_and_cluster_ra}} for details on how to execute many common designs.
+#' While declare_assignment can work with any assignment_function that takes data and returns data, most random assignment procedures can be easily implemented with randomizr.
+#' The arguments to \code{\link{conduct_ra}} can include N, block_var, clust_var, m, m_each, prob, prob_each, block_m, block_m_each = NULL, block_prob, block_prob_each, num_arms, and conditions.
+#' The arguments you need to specify are different for different designs. Check the help files for \code{\link{complete_ra}},
+#' \code{\link{block_ra}}, \code{\link{cluster_ra}}, or \code{\link{block_and_cluster_ra}} for details on how to execute many common designs.
+#'
+#' Custom assignment handlers should augment the data frame with an appropriate column for the assignments.
 #'
 #' @importFrom rlang quos quo lang_modify eval_tidy !!!
 #' @importFrom randomizr declare_ra
 #'
 #' @examples
 #'
-#' my_population <- declare_population(N = 100, female = rbinom(N, 1, .5))
-#' df <- my_population()
-#'
-#' # Complete random assignment using randomizr
-#' # use any arguments you would use in conduct_ra.
+#' #######################################
+#' # Default Handler
+#' # Delegates to conduct_ra
 #'
 #' my_assignment <- declare_assignment(m = 50)
-#' df <- my_assignment(df)
-#' head(df)
-#' table(df$Z)
+#' my_assignment <- declare_assignment(block_prob = 1/3, blocks = female)
+#' my_assignment <- declare_assignment(block_prob = 1/4, clusters = classrooms)
 #'
-#' # Block random assignment
+#' my_assignment <- declare_assignment(
+#'   block_prob = 1/4,
+#'   clusters = classrooms,
+#'   assignment_variable = "X1"
+#' )
 #'
-#' my_blocked_assignment <- declare_assignment(blocks = female)
-#'
-#' df <- my_population()
-#'
-#' df <- my_blocked_assignment(df)
-#' head(df)
-#' with(df, table(Z, female))
-#'
-#'
-#' # Custom random assignment functions
-#'
-#' df <- my_population()
+#' #######################################
+#' #' # Custom random assignment functions
 #'
 #' my_assignment_function <- function(data) {
-#'    data$Z <- rbinom(n = nrow(data),
-#'    size = 1,
-#'    prob = 0.5)
+#'    data$Z <- ifelse(data$extra <= median(data$extra), 1, 0)
 #'    data
-#'    }
+#' }
 #'
-#' my_assignment_custom <- declare_assignment(
-#'    handler = my_assignment_function)
+#' my_assignment_custom <- declare_assignment(handler = my_assignment_function)
 #'
-#' df <- my_assignment_custom(df)
-#' head(df)
-#' table(df$Z)
+#' df <- my_assignment_custom(sleep)
+#' table(df$Z, df$group)
 declare_assignment <- make_declarations(assignment_handler, "assignment" )
 
 
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo f_rhs
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
+#' @param assignment_variable name for assignment variable
+#' @param data a data.frame
+#' @rdname declare_assignment
 assignment_handler <-
   function(data, ..., assignment_variable = "Z") {
     ## draw assignment

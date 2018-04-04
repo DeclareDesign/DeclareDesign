@@ -52,39 +52,22 @@ Declare an Estimator
 
 \examples{
 
-my_population <- declare_population(N = 100)
-
-my_potential_outcomes <- declare_potential_outcomes(
-  formula = Y ~ .25 * Z,
-  conditions = c(0, 1))
-
-my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-
-my_assignment <- declare_assignment(m = 50)
-
-my_reveal <- declare_reveal()
-
-design <- declare_design(
- my_population, my_potential_outcomes,
- my_estimand, my_assignment, my_reveal
-)
-
-df <- draw_data(design)
+#########################################
+# Default handler
 
 my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
-my_estimator_dim(df)
 
 # Use the linear regression (lm) function
 # with robust standard errors from the estimatr package
 
-my_estimator_lm <-
- declare_estimator(Y ~ Z,
-                   model = estimatr::lm_robust,
-                   coefficients = "Z",
-                   estimand = my_estimand)
+my_estimator_lm <- declare_estimator(
+  Y ~ Z,
+  model = estimatr::lm_robust,
+  coefficients = "Z",
+  estimand = my_estimand
+)
 
-my_estimator_lm(df)
 
 # Use R's built-in lm function via model
 
@@ -92,24 +75,37 @@ estimator_lm <- declare_estimator(Y ~ Z, model = lm)
 
 # Run a probit regression using glm via model
 
-estimator_probit <-
-  declare_estimator(
-    Y ~ Z,
-    model = glm,
-    family = binomial(link = "probit"),
-    coefficients = "Z"
- )
+estimator_probit <- declare_estimator(
+  Y ~ Z,
+  model = glm,
+  family = binomial(link = "probit"),
+  coefficients = "Z"
+)
 
-# Use a custom estimator function
+# Use a custom estimator function with tidy_estimator handling labelling
 
 my_estimator_function <- function(data){
   data.frame(est = with(data, mean(Y)))
 }
 
-my_estimator_custom <-
-  declare_estimator(handler = tidy_estimator(my_estimator_function),
-                    estimand = my_estimand)
+my_estimator_custom <- declare_estimator(
+  handler = tidy_estimator(my_estimator_function),
+  estimand = my_estimand
+)
 
-my_estimator_custom(df)
+# Use a custom estimator function with custom labelling
+
+my_estimator_function <- function(data){
+  data.frame(
+    estimator_label="foo",
+    estimand_label="bar",
+    est = with(data, mean(Y)),
+    n = nrow(data),
+    stringsAsFactors=FALSE
+  )
+}
+
+my_estimator_custom2 <- declare_estimator(handler = my_estimator_function)
+
 
 }

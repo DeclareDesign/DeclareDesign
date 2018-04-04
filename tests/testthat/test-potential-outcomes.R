@@ -287,3 +287,16 @@ test_that("Multiple assignment variables in PO",{
 
   expect_length(colnames(po(sleep)) %i% c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0", "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1"), 4)
 })
+
+
+test_that("handler dispatches correctly",{
+
+  po <- potential_outcomes_handler(Y~Z1 + Z2, conditions=expand.grid(Z1=0:1, Z2=0:1), assignment_variables=c("Z1", "Z2"), data=sleep, level=NULL)
+
+  po2 <- potential_outcomes_handler(NULL, Y_Z1_0_Z2_0=0, Y_Z1_0_Z2_1=1,Y_Z1_1_Z2_0=1,Y_Z1_1_Z2_1=2, data=sleep, level=NULL)
+
+  expect_length(names(po) %i% c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0", "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1"), 4)
+  expect_length(names(po2) %i% c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0", "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1"), 4)
+
+})
+

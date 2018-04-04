@@ -2,9 +2,12 @@
 % Please edit documentation in R/declare_sampling.R
 \name{declare_sampling}
 \alias{declare_sampling}
+\alias{sampling_handler}
 \title{Declare Sampling Procedure}
 \usage{
 declare_sampling(..., handler = sampling_handler, label = NULL)
+
+sampling_handler(data, ..., sampling_variable = "S")
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -12,6 +15,10 @@ declare_sampling(..., handler = sampling_handler, label = NULL)
 \item{handler}{a tidy-in, tidy-out function}
 
 \item{label}{a string describing the step}
+
+\item{data}{a data.frame}
+
+\item{sampling_variable}{The prefix for the sampling inclusion probability variable}
 }
 \value{
 a function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
@@ -20,43 +27,35 @@ a function that takes a data.frame as an argument and returns a data.frame subse
 Declare Sampling Procedure
 }
 \details{
-While declare_sampling can work with any sampling_function that takes data and returns data, most random sampling procedures can be easily implemented with randomizr. The arguments to \code{\link{draw_rs}} can include N, strata_var, clust_var, n, prob, strata_n, and strata_prob. The arguments you need to specify are different for different designs. Check the help files for \code{\link{complete_rs}}, \code{\link{strata_rs}}, \code{\link{cluster_rs}}, or \code{\link{strata_and_cluster_rs}} for details on how to execute many common designs.
+While declare_sampling can work with any sampling_function that takes data and returns data, most random sampling procedures can be easily implemented with randomizr.
+The arguments to \code{\link{draw_rs}} can include N, strata_var, clust_var, n, prob, strata_n, and strata_prob.
+The arguments you need to specify are different for different designs.
+
+Check the help files for \code{\link{complete_rs}}, \code{\link{strata_rs}}, \code{\link{cluster_rs}}, or \code{\link{strata_and_cluster_rs}}
+for details on how to execute many common designs.
 }
 \examples{
 
-my_population <- declare_population(N = 100, female = rbinom(N, 1, .5))
-df <- my_population()
+#######################################################
+# Default handler
 
 # Simple random sampling using randomizr
 # use any arguments you would use in draw_rs.
 
 my_sampling <- declare_sampling(n = 50)
-df <- my_sampling(df)
-dim(df)
-head(df)
 
 # Stratified random sampling
 my_stratified_sampling <- declare_sampling(strata = female)
-df <- my_population()
-table(df$female)
-df <- my_stratified_sampling(df)
-table(df$female)
 
+
+#######################################################
 # Custom random sampling functions
 
-df <- my_population()
+my_sampling_function <- function(data, n=nrow(data)) {
+   data[sample(n,n,replace=TRUE), , drop=FALSE]
+}
 
-my_sampling_function <- function(data) {
-   data$S <- rbinom(n = nrow(data),
-     size = 1,
-     prob = 0.5)
-   data[data$S == 1, ]
-   }
+my_sampling_custom <- declare_sampling(handler = my_sampling_function)
 
-my_sampling_custom <- declare_sampling(
-   handler = my_sampling_function)
-
-df <- my_sampling_custom(df)
-dim(df)
-head(df)
+my_sampling_custom(sleep)
 }

@@ -11,37 +11,46 @@
 #'
 #' @examples
 #'
-#' my_population <- declare_population(N = 100)
-#'
-#' my_potential_outcomes <- declare_potential_outcomes(
-#'   formula = Y ~ .25 * Z,
-#'   conditions = c(0, 1))
-#'
-#' df <- my_potential_outcomes(my_population())
-#'
-#' # Use the default estimand setup to
-#' # declare an average treatment effect estimand
+#' ################################
+#' # Default handler
 #'
 #' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 #'
-#' my_estimand(df)
+#' my_estimand <- declare_estimand(ATT = mean(Y_Z_1 - Y_Z_0), subset=Z==1)
 #'
+#' my_estimand <- declare_estimand(
+#'   `(Intercept)`=1,
+#'   Z=2,
+#'   coefficients=TRUE,
+#'   label="TrueRegressionParams"
+#' )
+#'
+#' ################################
 #' # Custom random assignment functions
 #'
 #' my_estimand_function <- function(data, label) {
 #'   ret <- with(data, median(Y_Z_1 - Y_Z_0))
-#'   data.frame(setNames(ret, label))
+#'   data.frame(estimand_label=label,
+#'              estimand=ret,
+#'              time=Sys.time(),
+#'              stringsAsFactors=FALSE)
 #' }
-#' my_estimand_custom <- declare_estimand(
-#'   handler = my_estimand_function, label = "medianTE")
-#'
-#' my_estimand_custom(df)
+#' my_estimand_custom <- declare_estimand(handler = my_estimand_function, label = "medianTE")
 #'
 
 declare_estimand <- make_declarations(estimand_handler, "estimand", causal_type="estimand", default_label="my_estimand")
 
-
+#' @param subset a subset expression
+#' @param coefficients TRUE/FALSE
+#' @param data a data.frame
+#' @details
+#'
+#' If coefficients is TRUE, the names of ... will be returned in a `coefficients` column, and `estimand_label`
+#' will contain the step label. This can be used as an additional dimension for use in diagnosis.
+#'
+#'
 #' @importFrom rlang eval_tidy quos  is_quosure
+#' @rdname declare_estimand
 estimand_handler <- function(data, ..., subset = NULL, coefficients=FALSE, label) {
   options <- quos(...)
   if(names(options)[1] == "") names(options)[1] <- label
