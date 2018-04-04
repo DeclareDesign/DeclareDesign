@@ -146,17 +146,32 @@ declare_design <- function(...) {
     #wrap step is nasty, converts partial call to curried function
     ret[[i]] <- tryCatch(
       eval_tidy(qs[[i]]),
-      error = function(e) callquos_to_step(qs[[i]], qnames[[i]])
+      error = function(e) tryCatch(callquos_to_step(qs[[i]], qnames[[i]]),
+                                   error = function(e) stop("Could not evaluate step ", i,
+                                                            "as either a step or call."))
     )
+
+    # Is it a non-declared function
+    if(is.function(ret[[i]]) && !inherits(ret[[i]], "design_step")){
+      if(!identical(names(formals(ret[[i]])), "data")){
+        warning("Undeclared Step ", i, " function arguments are not exactly 'data'")
+      }
+
+      ret[[i]] <- build_step(
+        ret[[i]],
+        handler=NULL, dots=list(), label=qnames[i], step_type="undeclared", causal_type="dgp", call=qs[[i]][[2]]
+      )
+    }
 
   }
 
   # Special case for initializing with a data.frame
-  if("data.frame" %in% class(ret[[1]])){
+  if(inherits(ret[[1]], "data.frame")){
     ret[[1]] <- build_step(
       (function(df) { force(df); function(data) df})(ret[[1]]),
       handler=NULL, dots=list(), label=qnames[1], step_type="seed_data", causal_type="dgp", call=qs[[1]][[2]]
     )
+    class(ret[[1]]) <- c("seed_data", class(ret[[1]]))
   }
 
   local({
@@ -266,7 +281,7 @@ summary.design <- function(object, ...) {
 
   variables_added <- variables_modified <-
     quantities_added <- quantities_modified <-
-    N <-
+    N <- extra_summary <-
     vector("list", length(design))
 
   formulae <- lapply(design, get_formula_from_step)
@@ -287,6 +302,7 @@ summary.design <- function(object, ...) {
       causal_type <- attr(design[[i]], "causal_type")
       if(is.null(causal_type)) next;
 
+      extra_summary[i] <- list(attr(design[[i]], "extra_summary"))
 
       # if it's a dgp
       if (causal_type == "dgp") {
@@ -352,7 +368,8 @@ summary.design <- function(object, ...) {
          title = title,
          authors = authors,
          description = description,
-         citation = citation
+         citation = citation,
+         extra_summary = extra_summary
     ),
     class = c("summary.design", "list")
 

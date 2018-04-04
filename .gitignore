@@ -8,7 +8,7 @@
 # produced vignettes
 vignettes/*.html
 vignettes/*.pdf
-###vignettes/*.R #TODO NJF probably shouldn't be here
+vignettes/*.R
 vignettes/.*
 .Rproj.user
 tests/testthat/*.pdf

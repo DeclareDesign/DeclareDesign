@@ -160,9 +160,9 @@ test_that("Single outcome, multiple assn", {
 
   # Factorial assignments
   assign_A <- declare_assignment(
-    block_var = blocks, assignment_variable = A)
+    blocks = blocks, assignment_variable = A)
   assign_B <- declare_assignment(
-    block_var = A + 10*as.numeric(blocks), assignment_variable = B)
+    blocks = A + 10*as.numeric(blocks), assignment_variable = B)
 
   design <- declare_design(
     population,
@@ -174,5 +174,18 @@ test_that("Single outcome, multiple assn", {
   dd <- draw_data(design)
 
   expect_equal(c(table(dd$Y)), c(80,80,80,80), check.attributes=FALSE)
+
+})
+
+
+test_that("handler rrror on symbols", {
+  expect_error(reveal_outcomes_handler(sleep, outcome_variables = as.symbol("Y")))
+  expect_error(reveal_outcomes_handler(sleep,
+                                       outcome_variables = "Y",
+                                       assignment_variables = as.symbol("Z")))
+  expect_error(reveal_outcomes_handler(sleep,
+                                       outcome_variables = "Y",
+                                       assignment_variables = "Z",
+                                       attrition_variables  = as.symbol("R")))
 
 })

@@ -17,7 +17,14 @@ diagnose_design(..., diagnosands = default_diagnosands, sims = 500,
 \item{bootstrap}{Number  of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}.}
 }
 \description{
-Diagnose the Design
+Runs many simulations of a design, and applies a diagnosand function to the results.
+}
+\details{
+If the diagnosand function contains a \code{group_by} attribute, it will be used to split-apply-combine diagnosands rather than the intersecting column names.
+
+If \code{sims} is named, or longer than one element, a fan-out strategy is created and used instead.
+
+If the \code{future} package is installed, you can set a \code{\link{future}{plan}} to run multiple simulations at once.
 }
 \examples{
 my_population <- declare_population(N = 500, noise = rnorm(N))

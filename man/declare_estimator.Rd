@@ -30,7 +30,7 @@ estimator_handler(data, ..., model = estimatr::difference_in_means,
 
 \item{model}{A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.}
 
-\item{coefficients}{A character vector of coefficients that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept coefficient; if TRUE return all coefficients.}
+\item{coefficients}{Symbols or literal character vector of coefficients that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept coefficient; if TRUE return all coefficients. To escape non-standard-evaluation use \code{!!}.}
 
 \item{estimand}{a declare_estimand step object, or a character label, or a list of either}
 }
