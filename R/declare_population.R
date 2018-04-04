@@ -7,23 +7,31 @@
 #'
 #' @examples
 #'
+#' ##########################################
+#' # Default handler is fabricate
+#'
 #' # Declare a single-level population with no covariates
 #' my_population <- declare_population(N = 100)
-#' head(my_population())
+#'
+#' # Declare a population from existing data
+#' my_population <- declare_population(sleep)
 #'
 #' # Declare a single-level population with a covariate
 #' my_population <- declare_population(
-#'   N = 100,
-#'   height_ft = runif(N, 3.5, 8)
+#'   N = 6,
+#'   gender=draw_binary(N, prob=.5),
+#'   height_ft = rnorm(N, mean=5 + 4/12 + 4/12 * gender, sd=3/12)
 #' )
-#' head(my_population())
+#' my_population()
 #'
 #' # Declare a two-level hierarchical population
 #' # containing cities within regions
 #'
 #' pop <- declare_population(
-#'  regions = level(N = 5),
-#'  cities = level(N = 10, pollution = rnorm(N, mean = 5)))
+#'   regions = level(N = 5),
+#'   cities = level(N = 10, pollution = rnorm(N, mean = 5))
+#' )
+#'
 #' head(my_population())
 #'
 #' # Custom population functions
@@ -32,8 +40,7 @@
 #'   data.frame(u = rnorm(N))
 #' }
 #'
-#' my_population_custom <- declare_population(
-#'   handler = my_population_function, N = 100)
+#' my_population_custom <- declare_population(N = 10, handler = my_population_function)
 #'
-#' head(my_population_custom())
+#' my_population_custom()
 declare_population <- make_declarations(fabricate, "population", strictDataParam=FALSE)
