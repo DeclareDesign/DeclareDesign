@@ -207,7 +207,7 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
   dots$assignment_variables <- names(dots$conditions)
 
 
-  ret <- build_step(currydata(potential_outcomes.formula, dots, strictDataParam=attr(ret, "strictDataParam")),
+  ret <- build_step(currydata(potential_outcomes.formula, dots, strictDataParam=attr(ret, "strictDataParam"), cloneDots=FALSE),
                     handler=potential_outcomes.formula,
                     dots=dots,
                     label=label,

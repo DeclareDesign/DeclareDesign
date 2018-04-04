@@ -1,10 +1,27 @@
 
 #' @importFrom rlang env_clone
 env_deep_copy <- function(e) {
+  if(environmentName(e) == "CheckExEnv") e else # Cloning the CheckExEnv causes examples to autofail, it has delayedAssign("F", stop())
   if(identical(e, emptyenv())) emptyenv() else
     if(identical(e, globalenv())) env_clone(e) else # don't clone attached packages
       env_clone(e, Recall(parent.env(e)))
 }
+
+dots_env_copy <- function(dots) {
+  eprev <- NULL
+  for(i in seq_along(dots)) {
+    ecurrent <- environment(dots[[i]])
+    if(!is.null(ecurrent)) {
+      if(!identical(ecurrent, eprev) ) {
+        eprev <- ecurrent
+        eclone <- env_deep_copy(ecurrent)
+      }
+      environment(dots[[i]]) <- eclone
+    }
+  }
+  dots
+}
+
 
 # Given a function and dots, rename dots based on how things will positionally match
 #' @importFrom rlang is_empty
@@ -30,24 +47,14 @@ rename_dots <- function(handler, dots, addData=TRUE){
 }
 
 
-currydata <- function(FUN, dots, addDataArg=TRUE,strictDataParam=TRUE) {
+currydata <- function(FUN, dots, addDataArg=TRUE,strictDataParam=TRUE, cloneDots=TRUE) {
   # dots <- quos(...)
 
   #  for(i in seq_along(dots)) {
   #    environment(dots[[i]]) <- env_clone(dots[[i]])
 
   # heuristic to reuse deep clones
-  eprev <- NULL
-  for(i in seq_along(dots)) {
-    ecurrent <- environment(dots[[i]])
-    if(!is.null(ecurrent)) {
-      if(!identical(ecurrent, eprev) ) {
-        eprev <- ecurrent
-        eclone <- env_deep_copy(ecurrent)
-      }
-      environment(dots[[i]]) <- eclone
-    }
-  }
+  if(cloneDots) dots <- dots_env_copy(dots)
 
   quoNoData <- quo((FUN)(!!!dots))
 
@@ -79,9 +86,10 @@ declaration_template <- function(..., handler, label=NULL){
   }
 
   dots <- rename_dots(handler, dots, this$strictDataParam)
+  dots <- dots_env_copy(dots)
 
 
-  ret <- build_step(currydata(handler, dots, strictDataParam=this$strictDataParam),
+  ret <- build_step(currydata(handler, dots, strictDataParam=this$strictDataParam, cloneDots = FALSE),
             handler=handler,
             dots=dots,
             label=label,
