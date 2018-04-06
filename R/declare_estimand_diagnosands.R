@@ -26,7 +26,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label){
 #' coverage = mean(estimand <= ci_upper & estimand >= ci_lower)\cr
 #' mean_estimate = mean(est)\cr
 #' sd_estimate = sd(est)\cr
-#' type_s_rate = mean((sign(est) != sign(estimand)) & p < .05)\cr
+#' type_s_rate = mean((sign(est) != sign(estimand))[p < alpha])\cr
 #' mean_estimand = mean(estimand)\cr
 #'
 #' @return a function that returns a data.frame
