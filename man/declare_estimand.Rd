@@ -29,12 +29,14 @@ a function that accepts a data.frame as an argument and returns a data.frame con
 Declares estimands which are the subjects of inquiry and can be estimated by an estimator
 }
 \details{
+For the default diagnosands, the return value of the handler should have `estimand_label` and `estimand` columns.
+
 If coefficients is TRUE, the names of ... will be returned in a `coefficients` column, and `estimand_label`
 will contain the step label. This can be used as an additional dimension for use in diagnosis.
 }
 \examples{
 
-################################
+########################################################
 # Default handler
 
 my_estimand_ATE <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
@@ -54,7 +56,7 @@ my_estimand_regression <- declare_estimand(
   label="TrueRegressionParams"
 )
 
-################################
+########################################################
 # Custom random assignment functions
 
 my_estimand_function <- function(data, label) {
@@ -66,7 +68,7 @@ my_estimand_function <- function(data, label) {
 }
 my_estimand_custom <- declare_estimand(handler = my_estimand_function, label = "medianTE")
 
-##################################################
+########################################################
 # Using with estimators
 
 

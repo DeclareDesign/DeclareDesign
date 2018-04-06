@@ -1,5 +1,5 @@
 # File is named so that it collates after declare_estimand
-
+# Diagnosands use the same handler as estimands
 diagnosand_handler <- estimand_handler
 validation_fn(diagnosand_handler) <- function(ret, dots, label){
 
@@ -87,7 +87,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label){
 #'
 declare_diagnosands <- make_declarations(diagnosand_handler, "diagnosand", "diagnosands")
 
-
+# Defaults are implemented directly.
 default_diagnosands <- function(data, alpha=.05){
 
   est      <- data$est         %||% NA

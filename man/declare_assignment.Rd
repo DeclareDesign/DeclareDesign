@@ -36,7 +36,7 @@ Custom assignment handlers should augment the data frame with an appropriate col
 }
 \examples{
 
-#######################################
+########################################################
 # Default Handler
 # Delegates to conduct_ra
 
@@ -50,7 +50,7 @@ my_assignment <- declare_assignment(
   assignment_variable = "X1"
 )
 
-#######################################
+########################################################
 #' # Custom random assignment functions
 
 my_assignment_function <- function(data) {

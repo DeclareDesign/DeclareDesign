@@ -6,11 +6,15 @@
 #'
 #' @return a function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimand.
 #'
+#' @details
+#'
+#' For the default diagnosands, the return value of the handler should have `estimand_label` and `estimand` columns.
+#'
 #' @export
 #'
 #' @examples
 #'
-#' ##########################################
+#' ########################################################
 #' # Default handler
 #'
 #' my_estimand_ATE <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
@@ -30,7 +34,7 @@
 #'   label="TrueRegressionParams"
 #' )
 #'
-#' ##########################################
+#' ########################################################
 #' # Custom random assignment functions
 #'
 #' my_estimand_function <- function(data, label) {
@@ -42,7 +46,7 @@
 #' }
 #' my_estimand_custom <- declare_estimand(handler = my_estimand_function, label = "medianTE")
 #'
-#' ##########################################
+#' ########################################################
 #' # Using with estimators
 #'
 #'

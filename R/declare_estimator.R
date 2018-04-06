@@ -17,7 +17,7 @@
 #'
 #' @examples
 #'
-#' ##########################################
+#' ########################################################
 #' # Default handler
 #'
 #' my_estimand <- declare_estimand(ATE=mean(Y_Z_1-Y_Z_0))
@@ -63,7 +63,7 @@
 #'   coefficients = "Z"
 #' )
 #'
-#' ##########################################
+#' ########################################################
 #' # Custom handlers
 #'
 #' # Define your own estimator and use the `tidy_estimator` function for labeling
@@ -91,7 +91,7 @@
 #'
 #' my_estimator_custom2 <- declare_estimator(handler = my_estimator_function)
 #'
-#' ##########################################
+#' ########################################################
 #' # Examples
 #'
 #' # First, set up the rest of a design
@@ -168,6 +168,8 @@ declare_estimator <- make_declarations(estimator_handler, step_type="estimator",
 
 #' \code{tidy_estimator} takes an untidy estimation function, and returns a tidy handler which accepts standard labelling options.
 #'
+#' The intent here is to factor out the estimator/estimand labeling so that it can be reused by other model handlers.
+#'
 #' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.
 #' @rdname declare_estimator
 #' @export
@@ -231,6 +233,9 @@ model_handler <- function(data, ..., model = estimatr::difference_in_means, coef
 
     # estimator_function_internal <- function(data) {
     args <- quos(...)
+
+    # todo special case weights offsets for glm etc?
+
     results <- eval_tidy(quo(model(!!!args, data=data)))
 
     results <- fit2tidy(results, coefficient_names)
@@ -258,8 +263,11 @@ validation_fn(model_handler) <-  function(ret, dots, label){
 #' @rdname declare_estimator
 estimator_handler <- tidy_estimator(model_handler)
 
+
+
+# called by model_handler, resets columns names !!!
 fit2tidy <- function(fit, coefficients = FALSE) {
-  summ <- summary(fit)$coefficients
+  summ <- coef(summary(fit))
   summ <-
     summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
   ci <- suppressMessages(as.data.frame(confint(fit)))
@@ -281,6 +289,8 @@ fit2tidy <- function(fit, coefficients = FALSE) {
   return_data
 }
 
+# helper methods for estimand=my_estimand arguments to estimator_handler
+#
 get_estimand_label <- function(estimand){
   force(estimand) # no promise nonsense when we look at it
   switch(class(estimand)[1],

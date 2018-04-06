@@ -132,7 +132,7 @@ diagnose_design <- function(..., diagnosands = default_diagnosands,
 diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) {
 
 
-
+    ### If sims is set correctly, fan out
 
     if(length(sims) == 1 && is.null(names(sims))) {
       results_list <- future_lapply(seq_len(sims),
@@ -211,6 +211,7 @@ diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) 
 
     diagnosands_df <- calculate_diagnosands(simulations_df, diagnosands)
 
+    ################### Bootstrapping standard errors
     if (bootstrap > 0) {
       boot_indicies_by_id <- split(1:nrow(simulations_df), simulations_df$sim_ID)
       nsims <- max(simulations_df$sim_ID)

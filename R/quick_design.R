@@ -57,7 +57,7 @@ fill_out <- function(template, expand = TRUE, ...) {
 }
 
 #'
-#' \code{redesign} quickly generates a design from an existing one by resetting design variables internally.
+#' \code{redesign} quickly generates a design from an existing one by resetting design variables internally. (Advanced).
 #'
 #' @param design a design
 #' @export

@@ -22,7 +22,6 @@
 #'   \item{\code{\link{conduct_design}}}{Simulate the DGP with estimands/estimators}
 #'   \item{\code{\link{diagnose_design}}}{Diagnose a design}
 #'   \item{\code{\link{cite_design}}}{Cite a design}
-#'   \item{\code{\link{declare_estimator}}}{Estimator step}
 #' }
 #'
 #'

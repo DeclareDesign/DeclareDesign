@@ -40,7 +40,7 @@ a function that accepts a data.frame as an argument and returns a data.frame con
 \description{
 Declares an estimator which generates estimates and associated statistics
 
-\code{tidy_estimator} takes an untidy estimation function, and returns a tidy handler which accepts standard labelling options.
+The intent here is to factor out the estimator/estimand labeling so that it can be reused by other model handlers.
 }
 \section{Custom Estimators}{
 
@@ -52,7 +52,7 @@ Declares an estimator which generates estimates and associated statistics
 
 \examples{
 
-#########################################
+########################################################
 # Default handler
 
 my_estimand <- declare_estimand(ATE=mean(Y_Z_1-Y_Z_0))
@@ -97,7 +97,7 @@ estimator_probit <- declare_estimator(
   coefficients = "Z"
 )
 
-##################
+########################################################
 # Custom handlers
 
 # Define your own estimator and use the `tidy_estimator` function for labeling
@@ -125,7 +125,7 @@ my_estimator_function <- function(data){
 
 my_estimator_custom2 <- declare_estimator(handler = my_estimator_function)
 
-#########################
+########################################################
 # Examples
 
 # First, set up the rest of a design

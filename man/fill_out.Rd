@@ -24,7 +24,7 @@ if set of designs is size one, the design, otherwise a `by`-list of designs.
 \description{
 \code{fill_out} easily generates a set of design from a template function.
 
-\code{redesign} quickly generates a design from an existing one by resetting design variables internally.
+\code{redesign} quickly generates a design from an existing one by resetting design variables internally. (Advanced).
 }
 \examples{
 
