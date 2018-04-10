@@ -3,30 +3,17 @@
 #' @param design A design created by \code{\link{declare_design}}.
 #'
 #' @examples
-#' my_population <- declare_population(N = 500, noise = rnorm(N))
 #'
-#' my_potential_outcomes <- declare_potential_outcomes(
-#'   Y_Z_0 = noise, Y_Z_1 = noise +
-#'   rnorm(N, mean = 2, sd = 2))
-#'
-#' my_sampling <- declare_sampling(n = 250)
-#'
-#' my_assignment <- declare_assignment(m = 25)
-#'
-#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-#'
-#' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-#'
-#' my_reveal <- declare_reveal()
-#'
-#' design <- declare_design(my_population,
-#'                          my_potential_outcomes,
-#'                          my_sampling,
-#'                          my_estimand,
-#'                          dplyr::mutate(noise_sq = noise^2),
-#'                          my_assignment,
-#'                          my_reveal,
-#'                          my_estimator)
+#' design <- declare_design(
+#'   my_population = declare_population(N = 500, noise = rnorm(N)),
+#'   my_potential_outcomes = declare_potential_outcomes(Y ~ noise + Z * rnorm(N, 2, 2)),
+#'   my_sampling = declare_sampling(n = 250),
+#'   my_estimand = declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)),
+#'   dplyr::mutate(noise_sq = noise^2),
+#'   my_assignment =  declare_assignment(m = 25),
+#'   my_reveal = declare_reveal(),
+#'   my_estimator = declare_estimator(Y ~ Z, estimand = "my_estimand")
+#' )
 #'
 #' design
 #'
@@ -38,6 +25,9 @@
 #' @name post_design
 NULL
 
+
+###############################################################################
+# For fan-out execution, convert the vector representation to (end, n) pairs
 
 check_sims <- function(design, sims) {
   n <- length(design)
@@ -76,12 +66,12 @@ check_sims <- function(design, sims) {
 #' @param design a DeclareDesign object
 #'
 #' @export
-conduct_design <- function(design) conduct_design_internal(design)
+run_design <- function(design) run_design_internal(design)
 
 
-conduct_design_internal <- function(design, ...) UseMethod("conduct_design_internal", design)
+run_design_internal <- function(design, ...) UseMethod("run_design_internal", design)
 
-conduct_design_internal.default <- function(design, current_df=NULL, results=NULL, start=1, end=length(design), ...) {
+run_design_internal.default <- function(design, current_df=NULL, results=NULL, start=1, end=length(design), ...) {
 
   if(!is.list(results)) {
     results <- list(estimand=vector("list", length(design)),
@@ -128,7 +118,7 @@ conduct_design_internal.default <- function(design, current_df=NULL, results=NUL
 
 }
 
-conduct_design_internal.execution_st <- function(design, ...) do.call(conduct_design_internal.default, design)
+run_design_internal.execution_st <- function(design, ...) do.call(run_design_internal.default, design)
 
 #' Build an execution strategy object
 #'
@@ -140,6 +130,7 @@ conduct_design_internal.execution_st <- function(design, ...) do.call(conduct_de
 #'
 #' @export
 execution_st <- function(design, current_df=NULL, results=NULL, start=1, end=length(design)){
+  # An execution state are the arguments needed to run run_design
   structure(
     list(design=design, current_df=current_df, results=results, start=start, end=end),
     class="execution_st"
@@ -151,17 +142,15 @@ execution_st <- function(design, current_df=NULL, results=NULL, start=1, end=len
 #'
 #' @export
 draw_data <- function(design) {
-  conduct_design_internal(design, results=list(current_df=0))$current_df
+  run_design_internal(design, results=list(current_df=0))$current_df
 }
-
-
 
 #' @rdname post_design
 #'
 #' @export
 get_estimates <- function(design) {
   results=list("estimator"=vector("list", length(design)))
-  conduct_design_internal.default(design, results=results)$estimates_df
+  run_design_internal.default(design, results=results)$estimates_df
 }
 
 #' @rdname post_design
@@ -169,7 +158,7 @@ get_estimates <- function(design) {
 #' @export
 get_estimands <- function(design) {
   results=list("estimand"=vector("list", length(design)))
-  conduct_design_internal.default(design, results=results)$estimands_df
+  run_design_internal.default(design, results=results)$estimands_df
 }
 
 #' Obtain the preferred citation for a design
@@ -305,6 +294,10 @@ str.design_step <- function(object, ...) cat("design_step:\t", paste0(deparse(at
 str.seed_data <- function(object, ...) cat("seed_data:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
 
 
+
+### A wrapper around conduct design for fan-out execution strategies
+###
+###
 fan_out <- function(design, fan) {
 
   st <- list( execution_st(design) )
@@ -319,7 +312,7 @@ fan_out <- function(design, fan) {
 
     st <- st [ rep(seq_along(st), each = n) ]
 
-    st <- future_lapply(seq_along(st), function(j) conduct_design(st[[j]]), future.seed = NA, future.globals = "st")
+    st <- future_lapply(seq_along(st), function(j) run_design(st[[j]]), future.seed = NA, future.globals = "st")
 
   }
 

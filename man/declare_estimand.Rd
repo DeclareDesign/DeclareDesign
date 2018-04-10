@@ -29,12 +29,14 @@ a function that accepts a data.frame as an argument and returns a data.frame con
 Declares estimands which are the subjects of inquiry and can be estimated by an estimator
 }
 \details{
+For the default diagnosands, the return value of the handler should have `estimand_label` and `estimand` columns.
+
 If coefficients is TRUE, the names of ... will be returned in a `coefficients` column, and `estimand_label`
 will contain the step label. This can be used as an additional dimension for use in diagnosis.
 }
 \examples{
 
-################################
+########################################################
 # Default handler
 
 my_estimand_ATE <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
@@ -54,7 +56,7 @@ my_estimand_regression <- declare_estimand(
   label="TrueRegressionParams"
 )
 
-################################
+########################################################
 # Custom random assignment functions
 
 my_estimand_function <- function(data, label) {
@@ -66,7 +68,7 @@ my_estimand_function <- function(data, label) {
 }
 my_estimand_custom <- declare_estimand(handler = my_estimand_function, label = "medianTE")
 
-##################################################
+########################################################
 # Using with estimators
 
 
@@ -97,7 +99,7 @@ my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand_ATE, label="esti
 design_def <- insert_step(design_stub, my_estimand_ATE, before="assn")
 design_def <- insert_step(design_def, my_estimator, after="reveal")
 
-conduct_design(design_def)
+run_design(design_def)
 
 # ----------
 # 2. Multiple estimands
@@ -112,7 +114,7 @@ design_two <- insert_step(design_stub, my_estimand_ATE, before="assn")
 design_two <- insert_step(design_two, my_estimand_ATT, after="assn")
 design_two <- insert_step(design_two, my_estimator_two, after="reveal")
 
-conduct_design(design_two)
+run_design(design_two)
 
 
 # For the model based estimator, specify the estimand as usual,
@@ -127,7 +129,7 @@ my_estimator_double <- declare_estimator(
 design_double <- insert_step(design_stub, my_estimand_regression, after="po")
 design_double <- insert_step(design_double, my_estimator_double, after="reveal")
 
-conduct_design(design_double)
+run_design(design_double)
 
 # ----------
 # 3. Custom estimands
@@ -147,5 +149,5 @@ my_estimator_custom <-
 design_cust <- insert_step(design_stub, my_estimand_custom, before="assn")
 design_cust <- insert_step(design_cust, my_estimator_custom, after="reveal")
 
-conduct_design(design_cust)
+run_design(design_cust)
 }

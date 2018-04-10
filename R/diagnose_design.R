@@ -3,7 +3,7 @@
 #'
 #' Runs many simulations of a design, and applies a diagnosand function to the results.
 #'
-#' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You dican also provide a single list of designs, for example one created by \code{\link{fill_out}}.
+#' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You dican also provide a single list of designs, for example one created by \code{\link{expand_design}}.
 #'
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
 #'
@@ -71,11 +71,11 @@ diagnose_design <- function(..., diagnosands = default_diagnosands,
 
     ## three cases:
     ## 1. send one or more design objects created by declare_design
-    ## 2. send a single list of design objects created by fill_out
+    ## 2. send a single list of design objects created by expand_design
     ## 3. do not allow sending more than one object if any of them aren't design objects.
     if (length(designs) == 1 && is.list(designs[[1]]) && !"design" %in% class(designs[[1]]) ) {
       ## this unpacks designs if a list of designs was sent as a single list object, i.e.
-      ##   as created by fill_out
+      ##   as created by expand_design
       designs <- designs[[1]]
       if (!is.null(names(designs))) {
         inferred_names <- names(designs)
@@ -132,11 +132,11 @@ diagnose_design <- function(..., diagnosands = default_diagnosands,
 diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) {
 
 
-
+    ### If sims is set correctly, fan out
 
     if(length(sims) == 1 && is.null(names(sims))) {
       results_list <- future_lapply(seq_len(sims),
-                                    function(i) conduct_design(design),
+                                    function(i) run_design(design),
                                     future.seed = NA, future.globals = "design")
     } else {
       sims <- check_sims(design, sims)
@@ -211,6 +211,7 @@ diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) 
 
     diagnosands_df <- calculate_diagnosands(simulations_df, diagnosands)
 
+    ################### Bootstrapping standard errors
     if (bootstrap > 0) {
       boot_indicies_by_id <- split(1:nrow(simulations_df), simulations_df$sim_ID)
       nsims <- max(simulations_df$sim_ID)

@@ -1,3 +1,4 @@
+# index of a step (specified by object, label or position)
 find_step <- function(design, step) {
   if(is.numeric(step) && step <= length(design) && step > 0) return(step)
   if(is.character(step)) {
@@ -18,7 +19,7 @@ find_step <- function(design, step) {
 #'
 #' Insert, delete and replace steps in an (already declared) design object.
 #'
-#' @param design a design object, usually created by \code{\link{declare_design}}, \code{\link{fill_out}}, or the design library.
+#' @param design a design object, usually created by \code{\link{declare_design}}, \code{\link{expand_design}}, or the design library.
 #'
 #'
 #' @return A new design object. See \code{\link{declare_design}} for details.
@@ -74,7 +75,7 @@ insert_step_ <- function(design, new_step_quosure, before = NULL, after = NULL) 
 
   new_step <- tryCatch(
     eval_tidy(new_step_quosure),
-    error = function(e) callquos_to_step(new_step_quosure)
+    error = function(e) callquos_to_step(new_step_quosure) # DO we really need this
   )
 
 

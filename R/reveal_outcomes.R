@@ -69,27 +69,15 @@ reveal_outcomes_handler <-
     return(data)
   }
 
-# attributes(reveal_outcomes) <- list(step_type = "reveal_outcomes",
-#                                     causal_type= "dgp",
-#                                     call=quote(reveal_outcomes()),
-#                                     class=c("design_step", "function"))
 
 validation_fn(reveal_outcomes_handler) <- function(ret, dots, label) {
 
   declare_time_error_if_data(ret)
 
+  dots <- reveal_nse_helper_dots(dots, "outcome_variables", reveal_outcomes_handler)
+  dots <- reveal_nse_helper_dots(dots, "assignment_variables", reveal_outcomes_handler)
+  dots <- reveal_nse_helper_dots(dots, "attrition_variables", reveal_outcomes_handler)
 
-  dots$outcome_variables <- if("outcome_variables" %in% names(dots)) {
-    reveal_nse_helper(dots$outcome_variables)
-  } else as.character(formals(reveal_outcomes_handler)$outcome_variables)
-
-  dots$assignment_variables <- if("assignment_variables" %in% names(dots)) {
-    reveal_nse_helper(dots$assignment_variables)
-  } else as.character(formals(reveal_outcomes_handler)$assignment_variables)
-
-  if("attrition_variable" %in% names(dots)) {
-    dots$attrition_variable <- reveal_nse_helper(dots$attrition_variable)
-  }
 
   ret <- build_step(currydata(reveal_outcomes_handler, dots, strictDataParam=attr(ret, "strictDataParam")),
                     handler=reveal_outcomes_handler,
@@ -129,10 +117,25 @@ switching_equation <- function(data, outcome, assignments) {
 
 }
 
+###############################################################################
+## Helper functions for declaratiosn that should work either with symbols,
+## string literals, or functions of either
+## eg Y:Z => c("Y","Z")
 
 reveal_nse_helper <- function(X) {
   if(is.character(X) || is.logical(X))     X
   else if(is.name(X))     as.character(X)
   else if(is_quosure(X))  reveal_nse_helper(quo_expr(X))
   else if(is.call(X))     unlist(lapply(X[-1], reveal_nse_helper))
+}
+
+reveal_nse_helper_dots <- function(dots, what, handler) {
+
+  if(what %in% names(dots)) {
+    dots[[what]] <- reveal_nse_helper(dots[[what]])
+  } else if(!is.null(formals(handler)[[what]])) {
+    dots[[what]] <- as.character(formals(handler)[[what]])
+  }
+
+  dots
 }
