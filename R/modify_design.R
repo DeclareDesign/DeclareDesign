@@ -19,7 +19,7 @@ find_step <- function(design, step) {
 #'
 #' Insert, delete and replace steps in an (already declared) design object.
 #'
-#' @param design a design object, usually created by \code{\link{declare_design}}, \code{\link{fill_out}}, or the design library.
+#' @param design a design object, usually created by \code{\link{declare_design}}, \code{\link{expand_design}}, or the design library.
 #'
 #'
 #' @return A new design object. See \code{\link{declare_design}} for details.

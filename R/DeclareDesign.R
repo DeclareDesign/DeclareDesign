@@ -34,7 +34,7 @@
 #'
 #' @section Design Templates:
 #' \describe{
-#'   \item{\code{\link{fill_out}}}{Generate Designs from a Template}
+#'   \item{\code{\link{expand_design}}}{Generate Designs from a Template}
 #'   \item{designs}{See also the \code{designs} package for templates to use}
 #' }
 #'

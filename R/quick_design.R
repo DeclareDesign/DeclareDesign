@@ -1,6 +1,6 @@
 #' Declare a Design via a Template Function
 #'
-#' \code{fill_out} easily generates a set of design from a template function.
+#' \code{expand_design} easily generates a set of design from a template function.
 #'
 #' @param template a function which yields a design.
 #' @param expand boolean - if true, form the crossproduct of the ..., otherwise recycle them
@@ -16,15 +16,15 @@
 #'   }
 #'
 #' # returns list of three designs
-#' vary_n <- fill_out(design_template, N = seq(30, 100, 10))
+#' vary_n <- expand_design(design_template, N = seq(30, 100, 10))
 #'
 #' \dontrun{
-#'  # diagnose a list of designs created by fill_out or redesign
+#'  # diagnose a list of designs created by expand_design or redesign
 #'  diagnose_vary_n <- diagnose_design(vary_n)
 #' }
 #'
 #' # returns a single design
-#' large_design <- fill_out(design_template, N = 200)
+#' large_design <- expand_design(design_template, N = 200)
 #'
 #' \dontrun{
 #'  diagnose_large_design <- diagnose_design(large_design)
@@ -42,7 +42,7 @@
 #'
 #' @importFrom rlang quo_expr quos
 #' @export
-fill_out <- function(template, expand = TRUE, ...) {
+expand_design <- function(template, expand = TRUE, ...) {
 
   template_args_matrix <- if (expand)
     expand.grid(..., stringsAsFactors = FALSE)
@@ -61,9 +61,9 @@ fill_out <- function(template, expand = TRUE, ...) {
 #'
 #' @param design a design
 #' @export
-#' @rdname fill_out
+#' @rdname expand_design
 redesign <- function(design, expand=TRUE, ...) {
   f <- function(...) clone_design_edit(design, ...)
-  fill_out(f, expand, ...)
+  expand_design(f, expand, ...)
 }
 
