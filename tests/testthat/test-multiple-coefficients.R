@@ -23,6 +23,6 @@ test_that("Factorial", {
 
   expect_equal(diagnosis %>% get_simulations %>% dim, c(4, 10))
 
-  expect_equal(diagnosis %>%  get_diagnosands %>% dim, c(2,11))
+  expect_equal(diagnosis %>%  get_diagnosands %>% dim, c(2,12))
 
 })
