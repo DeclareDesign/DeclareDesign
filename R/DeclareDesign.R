@@ -19,7 +19,7 @@
 #' \describe{
 #'   \item{\code{\link{declare_design}}}{Declare a design from steps}
 #'   \item{\code{\link{draw_data}}}{Simulate the DGP}
-#'   \item{\code{\link{conduct_design}}}{Simulate the DGP with estimands/estimators}
+#'   \item{\code{\link{run_design}}}{Simulate the DGP with estimands/estimators}
 #'   \item{\code{\link{diagnose_design}}}{Diagnose a design}
 #'   \item{\code{\link{cite_design}}}{Cite a design}
 #' }
@@ -34,7 +34,7 @@
 #'
 #' @section Design Templates:
 #' \describe{
-#'   \item{\code{\link{fill_out}}}{Generate Designs from a Template}
+#'   \item{\code{\link{expand_design}}}{Generate Designs from a Template}
 #'   \item{designs}{See also the \code{designs} package for templates to use}
 #' }
 #'

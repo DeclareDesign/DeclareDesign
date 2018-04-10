@@ -69,7 +69,7 @@ declare_potential_outcomes <- make_declarations(potential_outcomes_handler, "pot
 ### Default handler calls either the formula handler or non-formula handler
 ### this can be determind at declare time in the validation_fn, and the correct function returned instead
 ### If possible, we do so, even though much of the logic is essentially duplicated
-### this makes tracing the execution in conduct_design much simpler
+### this makes tracing the execution in run_design much simpler
 
 potential_outcomes_handler <-  function(..., data, level) {
   (function(formula, ...) UseMethod("potential_outcomes"))(..., data=data, level=level)

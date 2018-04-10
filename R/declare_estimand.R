@@ -77,7 +77,7 @@
 #' design_def <- insert_step(design_stub, my_estimand_ATE, before="assn")
 #' design_def <- insert_step(design_def, my_estimator, after="reveal")
 #'
-#' conduct_design(design_def)
+#' run_design(design_def)
 #'
 #' # ----------
 #' # 2. Multiple estimands
@@ -92,7 +92,7 @@
 #' design_two <- insert_step(design_two, my_estimand_ATT, after="assn")
 #' design_two <- insert_step(design_two, my_estimator_two, after="reveal")
 #'
-#' conduct_design(design_two)
+#' run_design(design_two)
 #'
 #'
 #' # For the model based estimator, specify the estimand as usual,
@@ -107,7 +107,7 @@
 #' design_double <- insert_step(design_stub, my_estimand_regression, after="po")
 #' design_double <- insert_step(design_double, my_estimator_double, after="reveal")
 #'
-#' conduct_design(design_double)
+#' run_design(design_double)
 #'
 #' # ----------
 #' # 3. Custom estimands
@@ -127,7 +127,7 @@
 #' design_cust <- insert_step(design_stub, my_estimand_custom, before="assn")
 #' design_cust <- insert_step(design_cust, my_estimator_custom, after="reveal")
 #'
-#' conduct_design(design_cust)
+#' run_design(design_cust)
 declare_estimand <- make_declarations(estimand_handler, "estimand", causal_type="estimand", default_label="my_estimand")
 
 #' @param subset a subset expression

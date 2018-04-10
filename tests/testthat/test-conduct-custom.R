@@ -14,8 +14,8 @@ test_that("test the custom execution strategy", {
   exst <- execution_st(design, current_df=my_sleep, results=list(estimator=vector(mode = "list", length = 2)), 2, 2)
 
 
-  regular <- conduct_design(design)
-  output <- conduct_design(exst)
+  regular <- run_design(design)
+  output <- run_design(exst)
 
   expect_equal(regular$estimates_df$est, output$estimates_df$est + 1)
   expect_equal(names(output), "estimates_df") # no estimands
@@ -24,7 +24,7 @@ test_that("test the custom execution strategy", {
 )
 
 
-test_that("test error messages in conduct_design", {
+test_that("test error messages in run_design", {
 
   # closes ticket #12
 
@@ -32,7 +32,7 @@ test_that("test error messages in conduct_design", {
   design <- declare_population(sleep) /
     declare_population(foo=bar)
 
-  expect_error(conduct_design(design), "Error in step 2")
+  expect_error(run_design(design), "Error in step 2")
 
 }
 )
