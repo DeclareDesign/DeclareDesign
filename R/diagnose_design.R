@@ -136,7 +136,7 @@ diagnose_design_single_design <- function(design, diagnosands, sims, bootstrap) 
 
     if(length(sims) == 1 && is.null(names(sims))) {
       results_list <- future_lapply(seq_len(sims),
-                                    function(i) conduct_design(design),
+                                    function(i) run_design(design),
                                     future.seed = NA, future.globals = "design")
     } else {
       sims <- check_sims(design, sims)

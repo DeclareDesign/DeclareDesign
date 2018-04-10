@@ -32,7 +32,7 @@ test_that("test the full declare design setup", {
   expect_equal(dim(df), c(250,9))
 
 
-  output <- conduct_design(design)
+  output <- run_design(design)
   expect_equal(dim(output$estimates_df), c(1,8))
   expect_equal(dim(output$estimands), c(1,2))
 
@@ -51,7 +51,7 @@ test_that("No estimators / estimands", {
 
   head(draw_data(design))
   expect_identical(
-    conduct_design(design),
+    run_design(design),
     structure(list(estimates_df = structure(list(), class = "data.frame", row.names = integer(0)),
     estimands_df = structure(list(), class = "data.frame", row.names = integer(0))), .Names = c("estimates_df",
     "estimands_df"))
