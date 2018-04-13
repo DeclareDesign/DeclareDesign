@@ -1,14 +1,15 @@
-# index of a step (specified by object, label or position)
+# index of a step (specified by label or position)
 find_step <- function(design, step) {
-  if(is.numeric(step) && step <= length(design) && step > 0) return(step)
-  if(is.character(step)) {
+  if(is.numeric(step) && step <= length(design) && step > 0 && step == floor(step)) return(step)
+  else if(is.character(step)) {
     design <- lapply(design, attr, "label")
   }
+  else stop("Step must be an index number or character label, but got ", paste(class(step), collapse=", "))
   w <- vapply(design, identical, FALSE, step)
 
   w <- which(w)
   if(length(w) == 0){
-    stop("Could not find step (", substitute(step), ") in design")
+    stop("Could not find step (", step, ") in design")
   }
 
   w[1]
@@ -36,7 +37,7 @@ find_step <- function(design, step) {
 #'    declare_potential_outcomes(Y_Z_0 = noise,
 #'                               Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 #'
-#'  my_assignment <- declare_assignment(m = 50)
+#'  my_assignment <- declare_assignment(m = 50, label="assn")
 #'  my_assignment_2 <- declare_assignment(m = 25)
 #'
 #'  design <- declare_design(my_population,
@@ -47,7 +48,7 @@ find_step <- function(design, step) {
 #'
 NULL
 
-#' @param before the step before which to add steps
+#' @param before the index or label of the step before which to add steps
 #' @param after same
 #' @param new_step the new step - either a function or a partial call
 #'
@@ -55,8 +56,8 @@ NULL
 #' @rdname modify_design
 #' @examples
 #'
-#'  insert_step(design, dplyr::mutate(income = noise^2), after = my_assignment)
-#'  insert_step(design, dplyr::mutate(income = noise^2), before = my_assignment)
+#'  insert_step(design, dplyr::mutate(income = noise^2), after = "assn")
+#'  insert_step(design, dplyr::mutate(income = noise^2), before = "assn")
 #'
 #' @export
 insert_step <- function(design, new_step, before = NULL, after = NULL) {
@@ -86,13 +87,13 @@ insert_step_ <- function(design, new_step_quosure, before = NULL, after = NULL) 
   )
 }
 
-#' @param step the step to be deleted or replaced
+#' @param step the index or label of the step to be deleted or replaced
 #'
 #' @export
 #' @rdname modify_design
 #' @examples
 #'
-#'  delete_step(design, my_assignment)
+#'  delete_step(design, "assn")
 delete_step <- function(design, step) {
   i <- find_step(design, step)
   structure(design[-i], class = "design")
@@ -101,7 +102,7 @@ delete_step <- function(design, step) {
 #' @export
 #' @rdname modify_design
 #' @examples
-#'  replace_step(design, my_assignment, dplyr::mutate(words="HIARYLAH"))
+#'  replace_step(design, "assn", dplyr::mutate(words="HIARYLAH"))
 replace_step <- function(design, step, new_step) {
   delete_step(
     insert_step_(design, after = step, new_step_quosure = enquo(new_step)),

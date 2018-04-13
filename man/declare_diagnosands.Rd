@@ -30,7 +30,7 @@ power = mean(p < .05)\cr
 coverage = mean(estimand <= ci_upper & estimand >= ci_lower)\cr
 mean_estimate = mean(est)\cr
 sd_estimate = sd(est)\cr
-type_s_rate = mean((sign(est) != sign(estimand)) & p < .05)\cr
+type_s_rate = mean((sign(est) != sign(estimand))[p < alpha])\cr
 mean_estimand = mean(estimand)\cr
 }
 \examples{
