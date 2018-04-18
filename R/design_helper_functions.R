@@ -71,6 +71,16 @@ run_design <- function(design) run_design_internal(design)
 
 run_design_internal <- function(design, ...) UseMethod("run_design_internal", design)
 
+next_step <- function(step, current_df, i) {
+  tryCatch(
+    nxt <- step(current_df),
+    error = function(err) {
+      stop(simpleError(sprintf("Error in step %d (%s):\n\t%s", i, attr(step, "label") %||% "", err)))
+    }
+ )
+ nxt
+}
+
 run_design_internal.default <- function(design, current_df=NULL, results=NULL, start=1, end=length(design), ...) {
 
   if(!is.list(results)) {
@@ -84,18 +94,15 @@ run_design_internal.default <- function(design, current_df=NULL, results=NULL, s
     causal_type <- attr(step, "causal_type")
     step_type <- attr(step, "step_type")
 
-    tryCatch(
-      nxt <- step(current_df),
-      error = function(err) {
-        stop(simpleError(sprintf("Error in step %d (%s):\n\t%s", i, attr(step, "label") %||% "", err)))
-      }
-    )
+
 
     # if it's a dgp
     if ("dgp" %in% causal_type) {
-      current_df <- nxt
+      current_df <- next_step(step, current_df, i)
     } else if(step_type %in% names(results) ) {
-      results[[step_type]][[i]] <- nxt
+      results[[step_type]][[i]] <- next_step(step, current_df, i)
+    } else {
+      NULL # skipping steps not in the requested results types
     }
   }
 
