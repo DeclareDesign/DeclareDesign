@@ -61,8 +61,13 @@ assignment <- declare_assignment(m = m)
 estimator <- declare_estimator(Y ~ Z, estimand = estimand)
 
 # Design -----------------------------------------------------------------------
-two_arm <- declare_design(population, potential_outcomes, sampling, 
-													estimand, assignment, reveal_outcomes, estimator)
+two_arm <- declare_design(population,
+			  potential_outcomes,
+			  sampling,
+			  estimand,
+			  assignment,
+			  declare_reveal(),
+			  estimator)
 
 ## ----eval = FALSE, echo = FALSE------------------------------------------
 #  diagnosis <- diagnose_design(two_arm, sims = 10000, bootstrap_sims = 1000)
