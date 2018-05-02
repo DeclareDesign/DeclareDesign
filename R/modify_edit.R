@@ -37,7 +37,7 @@ clone_step_edit <- function(step, ..., to_replace=list(...)) {
 
   step_attributes$dots[] <- lapply(step_attributes$dots, clone_dot_edit_env, to_replace=to_replace)
 
-  f <- with(step_attributes, currydata(handler, dots, strictDataParam=!is.null(formals(step)$data)))
+  f <- with(step_attributes, currydata(handler, dots, strictDataParam=!is.null(formals(step)$data), cloneDots=FALSE))
   attributes(f) <- step_attributes
   f
 }

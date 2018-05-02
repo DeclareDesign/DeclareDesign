@@ -79,7 +79,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
 
   expect_equal(colnames(df), c("u", "Z", "Y_Z_0", "Y_Z_1", "Y"))
 
-  conduct_design(design)
+  run_design(design)
 
   diagnose_design(
     design = design,

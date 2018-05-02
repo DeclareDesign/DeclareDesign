@@ -1,4 +1,5 @@
-
+###############################################################################
+# Copies an environment chain
 #' @importFrom rlang env_clone
 env_deep_copy <- function(e) {
   if(environmentName(e) == "CheckExEnv") e else # Cloning the CheckExEnv causes examples to autofail, it has delayedAssign("F", stop())
@@ -6,6 +7,11 @@ env_deep_copy <- function(e) {
     if(identical(e, globalenv())) env_clone(e) else # don't clone attached packages
       env_clone(e, Recall(parent.env(e)))
 }
+
+###############################################################################
+# For set of dots, copy environment chain, reusing the new env if possible
+# to save memory
+#' @importFrom rlang env_clone
 
 dots_env_copy <- function(dots) {
   eprev <- NULL
@@ -46,13 +52,8 @@ rename_dots <- function(handler, dots, addData=TRUE){
   dots
 }
 
-
+# Returns a new function(data) which calls FUN(data, dots)
 currydata <- function(FUN, dots, addDataArg=TRUE,strictDataParam=TRUE, cloneDots=TRUE) {
-  # dots <- quos(...)
-
-  #  for(i in seq_along(dots)) {
-  #    environment(dots[[i]]) <- env_clone(dots[[i]])
-
   # heuristic to reuse deep clones
   if(cloneDots) dots <- dots_env_copy(dots)
 
@@ -74,6 +75,9 @@ currydata <- function(FUN, dots, addDataArg=TRUE,strictDataParam=TRUE, cloneDots
   }
 }
 
+# Implementation for declarations
+# captures the dots and handler, and returns a function that calls the handler with dots
+# also deals with labeling and can trigger step validation
 #' @importFrom rlang enquo
 declaration_template <- function(..., handler, label=NULL){
   #message("Declared")
@@ -102,6 +106,7 @@ declaration_template <- function(..., handler, label=NULL){
   ret
 }
 
+# data structure for steps
 build_step <- function(curried_fn, handler, dots, label, step_type, causal_type, call){
   structure(curried_fn,
             handler=handler,
@@ -113,6 +118,7 @@ build_step <- function(curried_fn, handler, dots, label, step_type, causal_type,
             class=c("design_step", "d_par","function"))
 }
 
+# generate declaration steps (eg declare_population) by setting the default handler and metadata
 make_declarations <- function(default_handler, step_type, causal_type='dgp', default_label, strictDataParam=TRUE) {
 
   declaration <- declaration_template
@@ -129,6 +135,11 @@ make_declarations <- function(default_handler, step_type, causal_type='dgp', def
 }
 
 ###############################################################################
+# internal helpers for step-specific validation code
+# set on a handler (see eg reveal_outcomes_handler)
+# called at declare time
+#
+# to debug, use debug(DeclareDesign:::validation_fn(DeclareDesign:::reveal_outcomes_handler))
 
 validation_fn <- function(f){
   attr(f, "validation_fn")
@@ -149,6 +160,7 @@ validate <- function(handler, ret, dots, label) {
 
 
 ###############################################################################
+# used to inherit roxygen docs
 
 #' @param ...      arguments to be captured, and later passed to the handler
 #' @param handler  a tidy-in, tidy-out function

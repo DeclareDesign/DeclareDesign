@@ -1,7 +1,9 @@
 
-
-
-
+# Helper function for "floating labels to the right" in declare_design
+#
+# eg declare_design(pop=declare_population(N=100))
+# step 1 will have label set to pop
+#
 #' @importFrom rlang f_text f_env
 
 maybe_add_labels <- function(quotations){
@@ -32,6 +34,9 @@ maybe_add_labels <- function(quotations){
   quotations
 }
 
+###############################################################################
+# Helpers for declare_time checking
+
 declare_time_error <- function(message, declaration){
   stop( simpleError(message, call = attr(declaration, "call")) )
 }
@@ -42,8 +47,11 @@ declare_time_warn <- function(message, declaration){
 
 declare_time_error_if_data <- function(declaration){
   if("data" %in% names(attr(declaration, "dots")))
-    stop( simpleError("`data` should not be a declared argument.", call = attr(declaration, "call")) )
+    declare_time_error("`data` should not be a declared argument.", declaration)
 }
+
+###############################################################################
+# Wrapper function, use future_lapply if we have it, fallback to lapply if not
 
 
 future_lapply <- function(..., future.seed = NA, future.globals=TRUE){
@@ -53,6 +61,9 @@ future_lapply <- function(..., future.seed = NA, future.globals=TRUE){
     lapply(...)
   }
 }
+
+###############################################################################
+# Descriptive statistics to be used in summary
 
 
 # If <= 5 uniques, table it, ow descriptives if numeric-ish, ow number of levels.
@@ -72,6 +83,7 @@ describe_variable <- function(x) {
   )
 
 }
+
 
 describe_variable_impl <- function(x, num_unique) UseMethod("describe_variable_impl")
 
@@ -108,12 +120,16 @@ describe_variable_impl.default <- function(x, num_unique) {
   )
 }
 
-rbind_disjoint <- function(list_of_df) {
+
+###############################################################################
+
+# Like rbind, but fill missing columns with NA
+rbind_disjoint <- function(list_of_df, infill=NA) {
   list_of_df <- Filter(is.data.frame, list_of_df)
   all_columns <- Reduce(union, lapply(list_of_df, colnames))
 
   for(i in seq_along(list_of_df)) {
-    list_of_df[[i]][setdiff(all_columns, colnames(list_of_df[[i]]))] <- NA
+    list_of_df[[i]][setdiff(all_columns, colnames(list_of_df[[i]]))] <- infill
   }
 
   list_of_df <- lapply(list_of_df, `[`, all_columns)
