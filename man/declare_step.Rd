@@ -6,9 +6,28 @@
 \usage{
 declare_step(..., handler = fabricate, label = NULL)
 }
+\arguments{
+\item{...}{arguments to be captured, and later passed to the handler}
+
+\item{handler}{a tidy-in, tidy-out function}
+
+\item{label}{a string describing the step}
+}
 \value{
 a function that returns a data.frame
 }
 \description{
 Declare a custom step
+}
+\examples{
+
+N <- 50
+my_population <- declare_population(N = N, noise = rnorm(N))
+my_assignment <- declare_assignment(m = 25)
+my_step <- declare_step(Z2 = Z, q = 5)
+
+design <- declare_design(my_population,
+                         my_assignment,
+                         my_step)
+
 }
