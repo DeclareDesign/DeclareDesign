@@ -8,7 +8,6 @@ test_that("test declare step ", {
   my_step <- declare_step(Z2 = Z, q = 5)
 
   design <- declare_design(my_population,
-                           my_potential_outcomes,
                            my_assignment,
                            my_step)
   design
