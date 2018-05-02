@@ -19,7 +19,7 @@
 #'
 #'
 #' @examples
-#' ##########################################
+#' ########################################################
 #' # Default handler
 #'
 #' # By default, there are two ways of declaring potential outcomes:
@@ -51,7 +51,7 @@
 #'    conditions = list(Z1=0:1, Z2=0:1)
 #'  )
 #'
-#' ##########################################
+#' ########################################################
 #' # Custom handler
 #'
 #' my_potential_outcome_f <- function(data) {
@@ -64,6 +64,12 @@
 #' custom_potential <- declare_potential_outcomes(handler=my_potential_outcome_f)
 #'
 declare_potential_outcomes <- make_declarations(potential_outcomes_handler, "potential_outcomes");
+
+
+### Default handler calls either the formula handler or non-formula handler
+### this can be determind at declare time in the validation_fn, and the correct function returned instead
+### If possible, we do so, even though much of the logic is essentially duplicated
+### this makes tracing the execution in run_design much simpler
 
 potential_outcomes_handler <-  function(..., data, level) {
   (function(formula, ...) UseMethod("potential_outcomes"))(..., data=data, level=level)
@@ -132,10 +138,11 @@ potential_outcomes.formula <-
     to_restore <- assignment_variables %i% colnames(data)
     to_null <- setdiff(assignment_variables, to_restore)
 
-    # Build a fabricate call -
+    # Build a single large fabricate call -
     # fabricate( Z=1, Y_Z_1=f(Z), Z=2, Y_Z_2=f(Z), ..., Z=NULL)
     condition_quos <- quos()
 
+    ### If assn vars already present, swap them out
     if(length(to_restore) > 0){
       restore_mangled <- paste(rep("_", max(nchar(colnames(data)))), collapse="")
 
@@ -148,7 +155,7 @@ potential_outcomes.formula <-
 
     }
 
-
+    # build call
     expr = as_quosure(formula)
     for(i in 1:nrow(conditions)){
 
@@ -178,6 +185,8 @@ potential_outcomes.formula <-
       condition_quos <- quos(!!level := modify_level(!!!condition_quos))
     }
 
+    ### Actually do it and return
+    ### Note ID_label=NA
     structure(
       fabricate(data=data, !!!condition_quos, ID_label=NA),
       outcome_variable=outcome_variable,
@@ -216,7 +225,8 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
                     call=attr(ret, "call"))
 
 
-
+  ### Note that this sets a design_validation callback for later use!!! see below
+  ### step_meta is the data that design_validation will use for design time checks
   structure(ret,
             potential_outcomes_formula = formula,
             step_meta=list(outcome_variables=outcome_variable, assignment_variables=names(dots$conditions)),
@@ -224,6 +234,13 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
 }
 
 
+### A design time validation
+###
+###  Checks for unrevealed outcome variables.
+###
+###  If there are any, inject a declare_reveal step after the latest assign/reveal of an assn variable
+###
+###
 pofdv <- function(design, i, step){
 
   if(i == length(design)) {

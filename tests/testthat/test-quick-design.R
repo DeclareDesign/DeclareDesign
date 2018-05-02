@@ -1,6 +1,6 @@
 context("Quick Design")
 
-test_that("fill_out works", {
+test_that("expand_design works", {
 
   two_arm_trial <- function(N){
 
@@ -23,7 +23,7 @@ test_that("fill_out works", {
   set.seed(1999)
   direct <- draw_data(two_arm_trial(N = 50))
 
-  design <- fill_out(template = two_arm_trial, N = 50)
+  design <- expand_design(template = two_arm_trial, N = 50)
   set.seed(1999)
   qd <- draw_data(design)
 
@@ -34,7 +34,7 @@ test_that("fill_out works", {
 
 rm(list = ls())
 
-test_that("fill_out works some more", {
+test_that("expand_design works some more", {
 
   two_arm_trial <- function(N) {
     pop <- declare_population(N = N,
@@ -50,9 +50,9 @@ test_that("fill_out works some more", {
   expect_equal(nrow(draw_data(two_arm_trial(N = 5))), 5)
   expect_equal(nrow(draw_data(two_arm_trial(N = 15))), 15)
 
-  a_fill_out <- fill_out(template = two_arm_trial, N = 50)
+  a_expand_design <- expand_design(template = two_arm_trial, N = 50)
 
-  df <- draw_data(a_fill_out)
+  df <- draw_data(a_expand_design)
 
   expect_equal(nrow(df), 50)
 })
@@ -78,14 +78,14 @@ test_that("vary works", {
     return(my_design)
   }
 
-  design <- fill_out(template = two_arm_trial,
+  design <- expand_design(template = two_arm_trial,
                          N = c(100, 200, 300), noise_sd = 1)
   expect_length(design, 3)
   diagnose_design(design, sims = 2, bootstrap = FALSE)
 
 
 
-  design <- fill_out(template = two_arm_trial,
+  design <- expand_design(template = two_arm_trial,
                      N = c(100, 200, 300), noise_sd = c(.1, .2, .3))
   expect_length(design, 9)
   diagnose_design(design, sims = 2, bootstrap = FALSE)
@@ -93,14 +93,14 @@ test_that("vary works", {
 
 
 
-  design <- fill_out(template = two_arm_trial, expand = FALSE,
+  design <- expand_design(template = two_arm_trial, expand = FALSE,
                      N = c(100, 200, 300), noise_sd = c(.1, .2, .3))
   expect_length(design, 3)
   diagnose_design(design, sims = 2, bootstrap = FALSE)
 
 
 
-  expect_error(fill_out(template = two_arm_trial, expand = FALSE,
+  expect_error(expand_design(template = two_arm_trial, expand = FALSE,
                         N = c(100, 200, 300), noise_sd = c(.1, .2)))
 
 })
@@ -125,7 +125,7 @@ test_that("power curve", {
     return(my_design)
   }
 
-  design <- fill_out(template = two_arm_trial,
+  design <- expand_design(template = two_arm_trial,
                      N = c(100, 200, 300, 500, 1000))
 
   expect_length(design, 5)

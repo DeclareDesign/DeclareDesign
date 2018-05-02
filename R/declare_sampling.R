@@ -1,5 +1,3 @@
-
-
 #' Declare Sampling Procedure
 #'
 #' @inheritParams declare_internal_inherit_params
@@ -20,7 +18,7 @@
 #'
 #' @examples
 #'
-#' ##########################################
+#' ########################################################
 #' # Default handler
 #'
 #' # Simple random sampling using randomizr
@@ -32,7 +30,7 @@
 #' my_stratified_sampling <- declare_sampling(strata = female)
 #'
 #'
-#' ##########################################
+#' ########################################################
 #' # Custom random sampling functions
 #'
 #' my_sampling_function <- function(data, n=nrow(data)) {
@@ -77,6 +75,11 @@ validation_fn(sampling_handler) <- function(ret, dots, label){
   declare_time_error_if_data(ret)
 
 
+  if ("sampling_variable" %in% names(dots) &&
+      inherits(f_rhs(dots[["sampling_variable"]]), "NULL")) {
+    declare_time_error("Must not provide NULL as sampling_variable.", ret)
+  }
+
   if(! "declaration" %in% names(dots)) {
 
     if ("strata" %in% names(dots)) {
@@ -90,7 +93,7 @@ validation_fn(sampling_handler) <- function(ret, dots, label){
         declare_time_error("Must provide the bare (unquoted) cluster variable name to clusters.", ret)
       }
     }
-    rs_args <- setdiff(names(dots), names(formals(sampling_handler))) #removes data and assignment_variable
+    rs_args <- setdiff(names(dots), names(formals(sampling_handler))) #removes data and sampling_variable
 
     rs_dots <- dots[rs_args]
 
@@ -112,17 +115,6 @@ validation_fn(sampling_handler) <- function(ret, dots, label){
 
 
       }
-    }
-
-
-  }
-
-
-
-
-  if ("sampling_variable" %in% names(dots)) {
-    if (class(f_rhs(dots[["sampling_variable"]])) == "NULL") {
-      declare_time_error("Must not provide NULL as sampling_variable.", ret)
     }
   }
 

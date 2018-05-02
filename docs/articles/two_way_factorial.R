@@ -98,7 +98,7 @@ assignment <- declare_assignment(num_arms = 4)
 # Answer Strategy --------------------------------------------------------------
 estimator <- declare_estimator(Y ~ A + B + A:B,
                                model = lm_robust,
-                               coefficient_name = "A:B", 
+                               coefficients = "A:B", 
                                estimand = estimand)
 
 # Design -----------------------------------------------------------------------
@@ -109,7 +109,7 @@ design <- declare_design(
   assignment,
   dplyr::mutate(A = as.numeric(Z %in% c("T2", "T4")),
                 B = as.numeric(Z %in% c("T3", "T4"))),
-  reveal_outcomes,
+  declare_reveal(),
   estimator)
 
 ## ----eval = FALSE, echo = FALSE------------------------------------------

@@ -1,5 +1,5 @@
 
-
+# Some testing code
 # d1 <- make_declarations(summary, step_type='summary')
 # dd <- d1()
 # dd(sleep)
@@ -15,6 +15,11 @@
 #
 # me <- !me
 # f(mtcars)
+
+
+###############################################################################
+# In declare_design, if a step is a dplyr style call mutate(foo=bar),
+# it will fail to evaluate - we can catch that and try to curry it
 
 #' @importFrom rlang quos lang_fn lang_modify eval_tidy
 callquos_to_step <- function(step_call, label="") {
@@ -139,6 +144,7 @@ declare_design <- function(...) {
 
   if(getOption("DD.debug.declare_design", FALSE)) browser()
 
+  # for each step in qs, eval, and handle edge cases (dplyr calls, non-declared functions)
   for(i in  seq_along(qs)) {
 
     #wrap step is nasty, converts partial call to curried function
@@ -146,7 +152,7 @@ declare_design <- function(...) {
       eval_tidy(qs[[i]]),
       error = function(e) tryCatch(callquos_to_step(qs[[i]], qnames[[i]]),
                                    error = function(e) stop("Could not evaluate step ", i,
-                                                            "as either a step or call."))
+                                                            " as either a step or call."))
     )
 
     # Is it a non-declared function
@@ -172,6 +178,7 @@ declare_design <- function(...) {
     class(ret[[1]]) <- c("seed_data", class(ret[[1]]))
   }
 
+  # Assert that all labels are unique
   local({
 
     labels <- sapply(ret, attr, "label")
@@ -193,6 +200,7 @@ declare_design <- function(...) {
 
   })
 
+  # If there is a design-time validation, trigger it
   for(i in seq_along(ret)){
     step <- ret[[i]]
     callback <- attr(step, "design_validation")

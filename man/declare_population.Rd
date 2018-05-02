@@ -21,7 +21,7 @@ Declare the Size and Features of the Population
 }
 \examples{
 
-#####################################################
+########################################################
 # Default handler is fabricate
 
 # Declare a single-level population with no covariates

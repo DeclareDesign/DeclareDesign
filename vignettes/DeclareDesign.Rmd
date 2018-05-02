@@ -39,7 +39,7 @@ Once you have declared your design, there are six core post-design-declaration c
 
 There are a few other features:
 
-1. A template is a function that takes parameters (e.g., `N`) and returns a design. `fill_out()` is a function of a template and parameters that returns a design.
+1. A template is a function that takes parameters (e.g., `N`) and returns a design. `expand_design()` is a function of a template and parameters that returns a design.
 2. We can easily `declare_diagnosands()`, which are things like power and bias, but the package defaults to the usual suspects.
 3. `reveal_outcomes()` implements a general switching equation, which allows you to reveal outcomes from potential outcomes and a treatment assignment.
 
@@ -305,6 +305,6 @@ knitr::kable(get_estimands(design))
 
 # Next steps
 
-Next, we recommend you read the [Custom functions](/R/DeclareDesign/articles/custom_functions.html) tutorial to learn how to provide custom functions to replace any step of `declare_design()`. You can also read about [`fill_out()` and other advanced features](/R/DeclareDesign/articles/advanced_features.html) in our Advanced features tutorial.
+Next, we recommend you read the [Custom functions](/R/DeclareDesign/articles/custom_functions.html) tutorial to learn how to provide custom functions to replace any step of `declare_design()`. You can also read about [`expand_design()` and other advanced features](/R/DeclareDesign/articles/advanced_features.html) in our Advanced features tutorial.
 
 Finally, you can [learn about DeclareDesign’s companion packages](/R/DeclareDesign/articles/companion_packages.html).

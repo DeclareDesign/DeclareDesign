@@ -36,7 +36,7 @@ for details on how to execute many common designs.
 }
 \examples{
 
-#######################################################
+########################################################
 # Default handler
 
 # Simple random sampling using randomizr
@@ -48,7 +48,7 @@ my_sampling <- declare_sampling(n = 50)
 my_stratified_sampling <- declare_sampling(strata = female)
 
 
-#######################################################
+########################################################
 # Custom random sampling functions
 
 my_sampling_function <- function(data, n=nrow(data)) {
