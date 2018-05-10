@@ -8,7 +8,7 @@
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
 #'
 #' @param sims The number of simulations, defaulting to 500.
-#' @param bootstrap Number  of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}.
+#' @param bootstrap Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}.
 #'
 #' @details
 #'

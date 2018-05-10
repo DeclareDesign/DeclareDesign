@@ -14,12 +14,29 @@ pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = "test")
 
 reveal_outcomes <- declare_reveal()
 
-
-my_design <- declare_design(my_population(),
+my_design <- declare_design(my_population,
                             my_potential_outcomes, pate,
                             my_assignment,
                             reveal_outcomes,
                             pate_estimator)
+
+diagnosis <- diagnose_design(my_design, sims = 10)
+
+test_that("reshape diagnosis works",{
+reshape_diagnosis(diagnosis)
+
+  pate_estimator_2 <- declare_estimator(Y ~ Z, estimand = pate, label = "test_2")
+
+  my_design <- declare_design(my_population,
+                              my_potential_outcomes, pate,
+                              my_assignment,
+                              reveal_outcomes,
+                              pate_estimator,pate_estimator_2)
+
+  diagnosis <- diagnose_design(my_design, sims = 10)
+  reshape_diagnosis(diagnosis)
+})
+
 
 
 test_that("parallel works.", {
