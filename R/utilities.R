@@ -143,7 +143,7 @@ rbind_disjoint <- function(list_of_df, infill=NA) {
 
 add_parens <- function(x, digits = 3) {
   x <- as.numeric(x)
-  return_vec <- paste0("(", sprintf(paste0("%.", digits, "f"), x), ")")
+  return_vec <- sprintf("(%s)", format_num(x, digits))
   return(return_vec)
 }
 
