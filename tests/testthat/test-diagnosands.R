@@ -23,7 +23,10 @@ my_design <- declare_design(my_population,
 diagnosis <- diagnose_design(my_design, sims = 10)
 
 test_that("reshape diagnosis works",{
-reshape_diagnosis(diagnosis)
+  reshaped <- reshape_diagnosis(diagnosis)
+
+  expect_equal(ncol(reshaped), 13)
+
 
   pate_estimator_2 <- declare_estimator(Y ~ Z, estimand = pate, label = "test_2")
 
@@ -34,7 +37,11 @@ reshape_diagnosis(diagnosis)
                               pate_estimator,pate_estimator_2)
 
   diagnosis <- diagnose_design(my_design, sims = 10)
-  reshape_diagnosis(diagnosis)
+
+  reshaped <- reshape_diagnosis(diagnosis)
+  expect_equal(nrow(reshaped), 4)
+  expect_equivalent(as.character(reshaped$statistic),
+                    c("Diagnosand Estimate", "Bootstrapped SE", "Diagnosand Estimate", "Bootstrapped SE"))
 })
 
 
