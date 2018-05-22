@@ -1,6 +1,7 @@
 ---
 output:
   github_document
+title: "DeclareDesign: Declare and diagnose research designs to understand and improve them"
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -9,8 +10,6 @@ output:
 set.seed(42)
 options(digits=2)
 ```
-
-# DeclareDesign: Declare and diagnose research designs to understand and improve them
 
 [![Travis-CI Build Status](https://travis-ci.org/DeclareDesign/DeclareDesign.svg?branch=master)](https://travis-ci.org/DeclareDesign/DeclareDesign)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/DeclareDesign/DeclareDesign?branch=master&svg=true)](https://ci.appveyor.com/project/DeclareDesign/DeclareDesign)
