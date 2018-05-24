@@ -11,7 +11,7 @@ reshape_diagnosis(diagnosis, digits = 2, is.extracted = FALSE)
 
 \item{digits}{Number of digits.}
 
-\item{is.extracted}{If TRUE diagnosis is the diagnosands dataframe; if FALSE diagnosis is a list containing the diagnosands data frame as its second object}
+\item{is.extracted}{Should be TRUE if diagnosis is a diagnosands dataframe; set to FALSE if diagnosis is a list containing the diagnosands data frame as its second element}
 }
 \value{
 A formatted text table with bootstrapped standard errors in parentheses.
@@ -20,7 +20,7 @@ A formatted text table with bootstrapped standard errors in parentheses.
 If diagnosands are bootstrapped, se's are put in parenthese on a second line and rounded to \code{digits}.
 }
 \examples{
-library(DesignLibrary)
+# library(DesignLibrary)
 # diagnosis <- diagnose_design(simple_two_arm_designer(), sims = 3)
 # reshape_diagnosis(diagnosis)
 }

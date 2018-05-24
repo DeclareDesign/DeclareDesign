@@ -42,6 +42,8 @@
 #'
 #' get_simulations(diagnosis)
 #'
+#' reshape_diagnosis(diagnosis)
+#'
 #' }
 #'
 #' @name diagnosis_helpers
@@ -72,20 +74,6 @@ summary.diagnosis <- function(object, ...) {
 }
 
 #' @export
-# print.summary.diagnosis <- function(x, ...) {
-#   class(x) <- "data.frame"
-#   cat(paste0("\nResearch design diagnosis, based on ", attr(x, "sims"), " simulations and ", attr(x, "bootstrap"), " bootstrap draws.\n\n"))
-#   print_diagnosis <- x
-#   names(x) <-
-#     gsub("\\b(se[(]|sd |rmse|[[:alpha:]])",
-#          "\\U\\1",
-#          gsub("_", " ", names(x)),
-#          perl = TRUE)
-#   print(x, row.names = FALSE)
-#   cat("\n")
-#   invisible(x)
-# }
-
 print.summary.diagnosis <- function(x, ...) {
   sims <- attr(x, "sims")
   if(length(sims) > 1) sims <- paste0("(", paste0(sims, collapse = ", "), ")")
@@ -106,12 +94,12 @@ print.summary.diagnosis <- function(x, ...) {
 #'
 #' @param diagnosis An object from \code{diagnose_design}, either a diagnosand dataframe or a list containing a diagnosand dataframe
 #' @param digits Number of digits.
-#' @param is.extracted If TRUE diagnosis is the diagnosands dataframe; if FALSE diagnosis is a list containing the diagnosands data frame as its second object
+#' @param is.extracted Should be TRUE if diagnosis is a diagnosands dataframe; set to FALSE if diagnosis is a list containing the diagnosands data frame as its second element
 #' @return A formatted text table with bootstrapped standard errors in parentheses.
 #' @export
 #'
 #' @examples
-#' library(DesignLibrary)
+#' # library(DesignLibrary)
 #' # diagnosis <- diagnose_design(simple_two_arm_designer(), sims = 3)
 #' # reshape_diagnosis(diagnosis)
 

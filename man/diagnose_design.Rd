@@ -14,7 +14,7 @@ diagnose_design(..., simulations_df = NULL,
 
 \item{diagnosands}{A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).}
 
-\item{sims}{The number of simulations, defaulting to 500.}
+\item{sims}{The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}}
 
 \item{bootstrap}{Number  of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}.}
 
@@ -74,7 +74,7 @@ get_simulations(diagnosis)
 }
 # Using an existing data frame of simulations
 \dontrun{
-simulations <- simulate_design(designs, sims = 2)$simulations
+simulations <- simulate_design(designs, sims = 2)
 diagnosis   <- diagnose_design(simulations_df = simulations)
 
 }

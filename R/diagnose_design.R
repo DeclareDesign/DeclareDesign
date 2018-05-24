@@ -1,10 +1,11 @@
-#' Run a design
+#' Run a design many times
 #'
-#' Runs many simulations of a design
+#' Runs many simulations of a design and saves to a dataframe.
+#'
 #'
 #' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.
 #'
-#' @param sims The number of simulations, defaulting to 500.
+#' @param sims The number of simulations, defaulting to 500. If sims is a vector of the form c(10, 1, 2, 1) then different steps of a design will be simulated different numbers of times.  See details.
 #'
 #' @importFrom stats setNames
 #' @importFrom utils head
@@ -32,10 +33,18 @@
 #'                          my_estimator)
 #'
 #' \dontrun{
-#' simulations <- simulate_design(designs, sims = 2)$simulations
+#' simulations <- simulate_design(designs, sims = 2)
 #' diagnosis   <- diagnose_design(simulations_df = simulations)
-#'
 #' }
+#'
+#' \dontrun{
+#' # A fixed population with simulations over assignment only
+#' head(simulate_design(design, sims = c(1,1,1,100,1)))
+#'
+#'
+#'@details
+#'
+#' Different steps of a design may each be simulated different a number of times, as specified by sims. In this case simulations are grouped into "fans", eg "fan_1" indicates all the simulations that have the same draw from the first level of the design. For efficiency there are generally fewer fans than design steps where all contiguous steps with 1 sim specified are combined into a single fan.
 
 simulate_design <- function(...,  sims = 500) {
 
@@ -170,7 +179,7 @@ structure(simulations_df)
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
 #' @param grouping_variables A set of variables used to generate groups of simulations for diagnosis. Defaults to c("design_ID", "estimand_label", "estimator_label", "coefficient")
 #'
-#' @param sims The number of simulations, defaulting to 500.
+#' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}
 #' @param bootstrap Number  of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}.
 #'
 #' @details
@@ -223,7 +232,7 @@ structure(simulations_df)
 #' }
 #' # Using an existing data frame of simulations
 #' \dontrun{
-#' simulations <- simulate_design(designs, sims = 2)$simulations
+#' simulations <- simulate_design(designs, sims = 2)
 #' diagnosis   <- diagnose_design(simulations_df = simulations)
 #'
 #' }

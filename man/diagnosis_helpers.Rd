@@ -55,6 +55,8 @@ get_diagnosands(diagnosis)
 
 get_simulations(diagnosis)
 
+reshape_diagnosis(diagnosis)
+
 }
 
 }
