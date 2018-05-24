@@ -7,24 +7,20 @@
 reshape_diagnosis(diagnosis, digits = 2, is.extracted = FALSE)
 }
 \arguments{
-\item{diagnosis}{An object from \code{declare_design}}
+\item{diagnosis}{An object from \code{diagnose_design}, either a diagnosand dataframe or a list containing a diagnosand dataframe}
 
 \item{digits}{Number of digits.}
 
-\item{is.extracted}{If TRUE diagnosis is a dataframe; if FALSE diagnosis is a list containing the diagnosands data frame as its second object}
+\item{is.extracted}{If TRUE diagnosis is the diagnosands dataframe; if FALSE diagnosis is a list containing the diagnosands data frame as its second object}
 }
 \value{
 A formatted text table with bootstrapped standard errors in parentheses.
 }
 \description{
 If diagnosands are bootstrapped, se's are put in parenthese on a second line and rounded to \code{digits}.
-Function uses presence of "se(" to identify bootrapped diagnoses; avoid errors by not using "se(" in naming of diagnosands.
 }
 \examples{
+library(DesignLibrary)
 # diagnosis <- diagnose_design(simple_two_arm_designer(), sims = 3)
 # reshape_diagnosis(diagnosis)
-# reshape_diagnosis(diagnosis, col.names = 1:11)
-# reshape_diagnosis(diagnosis, col.names = "default")
-# diagnosis <- diagnose_design(simple_two_arm_designer(), sims = 3, bootstrap = 0)
-# reshape_diagnosis(diagnosis, col.names = "default")
 }

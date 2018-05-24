@@ -289,6 +289,7 @@ diagnose_design <- function(..., simulations_df = NULL,
   }
 
   diagnosands_df <- calculate_diagnosands(simulations_df, diagnosands)
+  rnames <- rownames(diagnosands_df)
 
   ################### Bootstrapping standard errors
   if (bootstrap > 0) {
@@ -330,29 +331,32 @@ diagnose_design <- function(..., simulations_df = NULL,
       stringsAsFactors=FALSE)
     diagnosands_df[] <- lapply(diagnosands_df, unlist)
 
-    # permute columns so SEs are right of diagnosands
+  # permute columns so SEs are right of diagnosands
     n_diag <- length(diagnosands_names)
     i <- c(seq_along(group_by_set), length(group_by_set) + rep(seq_len(n_diag), each=2) + c(0, n_diag))
     diagnosands_df <- diagnosands_df[,i, drop=FALSE]
 
 
-    # Reordering columns
+  # Reordering columns
     dim_cols <- c("estimator_label", "coefficient", "estimand_label") %i% group_by_set
     ix <- sort(match(dim_cols, colnames(diagnosands_df)))
     diagnosands_df[ix] <- diagnosands_df[dim_cols]
     names(diagnosands_df)[ix] <- dim_cols
   }
 
-  # Reorder by estimator labels
-  estimator_labels <- unique(diagnosands_df$estimator_label)
+  # Reorder by estimator labels in design
+  estimator_labels <- unique(simulations_df$estimator_label)
   if (length(estimator_labels) > 1) {
     estimator_f <- factor(diagnosands_df$estimator_label, estimator_labels)
     diagnosands_df <- diagnosands_df[order(estimator_f), , drop=FALSE]
   }
 
-  rownames(diagnosands_df) <- NULL
-  attr(diagnosands_df, "sims") <- sims
+#  rownames(diagnosands_df) <- NULL
+  rownames(diagnosands_df)  <- rnames
+  attr(diagnosands_df, "sims")      <- sims
   attr(diagnosands_df, "bootstrap") <- bootstrap
+  attr(diagnosands_df, "n_diagosands")   <-  nrow(diagnosands(simulations_df))
+
 
   structure(
       list(simulations = simulations_df, diagnosands = diagnosands_df),

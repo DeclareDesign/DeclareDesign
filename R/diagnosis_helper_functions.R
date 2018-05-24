@@ -72,66 +72,98 @@ summary.diagnosis <- function(object, ...) {
 }
 
 #' @export
+# print.summary.diagnosis <- function(x, ...) {
+#   class(x) <- "data.frame"
+#   cat(paste0("\nResearch design diagnosis, based on ", attr(x, "sims"), " simulations and ", attr(x, "bootstrap"), " bootstrap draws.\n\n"))
+#   print_diagnosis <- x
+#   names(x) <-
+#     gsub("\\b(se[(]|sd |rmse|[[:alpha:]])",
+#          "\\U\\1",
+#          gsub("_", " ", names(x)),
+#          perl = TRUE)
+#   print(x, row.names = FALSE)
+#   cat("\n")
+#   invisible(x)
+# }
+
 print.summary.diagnosis <- function(x, ...) {
+  sims <- attr(x, "sims")
+  if(length(sims) > 1) sims <- paste0("(", paste0(sims, collapse = ", "), ")")
+  cat(paste0("\nResearch design diagnosis, based on ", sims, " simulations and ",
+             1*attr(x, "bootstrap"), " bootstrap draws.\n\n"))
+  x <- reshape_diagnosis(x, is.extracted = TRUE)
   class(x) <- "data.frame"
-  cat(paste0("\nResearch design diagnosis, based on ", attr(x, "sims"), " simulations and ", attr(x, "bootstrap"), " bootstrap draws.\n\n"))
   print_diagnosis <- x
-  names(x) <-
-    gsub("\\b(se[(]|sd |rmse|[[:alpha:]])",
-         "\\U\\1",
-         gsub("_", " ", names(x)),
-         perl = TRUE)
   print(x, row.names = FALSE)
   cat("\n")
   invisible(x)
 }
 
 
-
 #' Clean up DeclareDesign diagnosis object for printing
 #'
 #' If diagnosands are bootstrapped, se's are put in parenthese on a second line and rounded to \code{digits}.
-#' Function uses presence of "se(" to identify bootrapped diagnoses; avoid errors by not using "se(" in naming of diagnosands.
 #'
-#' @param diagnosis An object from \code{declare_design}
+#' @param diagnosis An object from \code{diagnose_design}, either a diagnosand dataframe or a list containing a diagnosand dataframe
 #' @param digits Number of digits.
-#' @param is.extracted If TRUE diagnosis is a dataframe; if FALSE diagnosis is a list containing the diagnosands data frame as its second object
+#' @param is.extracted If TRUE diagnosis is the diagnosands dataframe; if FALSE diagnosis is a list containing the diagnosands data frame as its second object
 #' @return A formatted text table with bootstrapped standard errors in parentheses.
 #' @export
 #'
 #' @examples
+#' library(DesignLibrary)
 #' # diagnosis <- diagnose_design(simple_two_arm_designer(), sims = 3)
 #' # reshape_diagnosis(diagnosis)
-#' # reshape_diagnosis(diagnosis, col.names = 1:11)
-#' # reshape_diagnosis(diagnosis, col.names = "default")
-#' # diagnosis <- diagnose_design(simple_two_arm_designer(), sims = 3, bootstrap = 0)
-#' # reshape_diagnosis(diagnosis, col.names = "default")
 
-reshape_diagnosis <- function(diagnosis, digits = 2, is.extracted = FALSE
-) {
+reshape_diagnosis <- function(diagnosis, digits = 2, is.extracted = FALSE) {
 
   # Housekeeping
-  bootstrapped <- attr(diagnosis, "bootstrap") > 0
-  if(!is.extracted) diagnosis     <- diagnosis[[2]]
+  diagnosands_df  <- diagnosis
+  if(!is.extracted) diagnosands_df <- diagnosis$diagnosands
 
-  if(!bootstrapped) return(diagnosis)
+  # Make names nicer
+  names(diagnosands_df) <-
+    gsub("\\b(se[(]|sd |rmse|[[:alpha:]])",
+         "\\U\\1",
+         gsub("_", " ", names(diagnosands_df)),
+         perl = TRUE)
 
-  n_text_fields <- min(which(grepl("se\\(", names(diagnosis)))) - 2
-  D             <- as.matrix(diagnosis[,(n_text_fields+1):ncol(diagnosis)])
-  rows          <- nrow(D)
+  # Finish up if no bootstrapping
+  bootstrapped <- attr(diagnosands_df, "bootstrap") > 0
+  if(!bootstrapped) return(diagnosands_df)
 
-    cols       <- ncol(D)/2
-    out.width  <- cols+n_text_fields
+  # Reshape if there is bootstrapping
+  k <- ncol(diagnosands_df) - 2*attr(diagnosands_df, "n_diagosands")
 
-    # Reformatting
-    out <- matrix(NA, 2*rows, out.width)
-    out[2*(1:rows)-1, (n_text_fields + 1):ncol(out)] <- round(D[,2*(1:cols)-1], digits)
-    out[2*(1:rows),   (n_text_fields + 1):ncol(out)] <- paste0("(", round(D[,2*(1:cols)], digits), ")")
+  diagnosands_df_names <- names(diagnosands_df)
+  group_names <- diagnosands_df_names[1:k]
+  value_names <- diagnosands_df_names[-(1:k)]
+  diagnosands_names <- value_names[seq(1, length(value_names)-1, 2)]
+  se_names    <- value_names[seq(2, length(value_names), 2)]
 
-    out[2*(1:rows)-1, 1:n_text_fields] <- as.matrix(diagnosis)[, 1:n_text_fields]
-    out[2*(1:rows), 1:n_text_fields] <- " "
-    colnames(out) <- colnames(diagnosis[,c(1:n_text_fields, n_text_fields+2*(1:cols)-1)])
+  # Make diagnosand only df
+  diagnosands_only_df <- diagnosands_df[,c(group_names, diagnosands_names), drop = FALSE]
 
-    return(out)
+  clean_values_df <- data.frame(lapply(diagnosands_only_df[, diagnosands_names, drop = FALSE],
+                    format_num, digits = digits))
+
+  diagnosands_only_df <- cbind( diagnosands_only_df[, group_names, drop = FALSE], clean_values_df)
+
+  names(diagnosands_only_df) <- c(group_names, diagnosands_names)
+
+  # Make se only df
+  se_only_df <- diagnosands_df[, se_names, drop = FALSE]
+  se_only_df <- data.frame(lapply(se_only_df,add_parens, digits = digits))
+  colnames(se_only_df) <- diagnosands_names
+
+  # Merge
+  return_df <- rbind_disjoint(list(diagnosands_only_df, se_only_df), infill = "")
+
+  # Reorder rows
+  nrows <- nrow(diagnosands_only_df)
+  return_df <- return_df[rep(1:nrows, each = 2) + rep(c(0,nrows), nrows), ]
+
+  return(return_df)
+
 }
 

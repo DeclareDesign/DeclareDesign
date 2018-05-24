@@ -195,7 +195,7 @@ golden <-
 
   expect_identical( diagnose_design(d, sims=4)$diagnosands, golden)
 
-})
+  })
 
 test_that("diagnosis, NAs if no estimand", {
   d <- declare_design(sleep, mu = declare_estimand(mean(extra)))
@@ -225,7 +225,7 @@ test_that("diagnosis, sorted by estimator order in design", {
                       declare_estimator(extra~group, label="X2", estimand="m"),
                       declare_estimator(extra~group, label="X1", estimand="m"))
 
-  dx <- diagnose_design(d)
+  dx <- diagnose_design(d, sims = 5)
 
   expect_true(!is.unsorted(rev(dx$diagnosands$estimator_label)))
 })
