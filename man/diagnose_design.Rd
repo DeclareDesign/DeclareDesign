@@ -4,8 +4,10 @@
 \alias{diagnose_design}
 \title{Diagnose the Design}
 \usage{
-diagnose_design(..., diagnosands = default_diagnosands, sims = 500,
-  bootstrap = 100)
+diagnose_design(..., simulations_df = NULL,
+  diagnosands = default_diagnosands, sims = 500, bootstrap = 100,
+  grouping_variables = c("design_ID", "estimand_label", "estimator_label",
+  "coefficient"))
 }
 \arguments{
 \item{...}{A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.}
@@ -15,9 +17,13 @@ diagnose_design(..., diagnosands = default_diagnosands, sims = 500,
 \item{sims}{The number of simulations, defaulting to 500.}
 
 \item{bootstrap}{Number  of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}.}
+
+\item{grouping_variables}{A set of variables used to generate groups of simulations for diagnosis. Defaults to c("design_ID", "estimand_label", "estimator_label", "coefficient")}
+
+\item{simulations}{A dataframe with simulations of a design. user must provide either a simulations data frame or a design or list of designs. Should have a sims attribute indicating the number of simulations used.}
 }
 \description{
-Runs many simulations of a design, and applies a diagnosand function to the results.
+Applies a diagnosand function to the simulations of a design results.
 }
 \details{
 If the diagnosand function contains a \code{group_by} attribute, it will be used to split-apply-combine diagnosands rather than the intersecting column names.
@@ -66,5 +72,10 @@ get_diagnosands(diagnosis)
 get_simulations(diagnosis)
 
 }
+# Using an existing data frame of simulations
+\dontrun{
+simulations <- simulate_design(designs, sims = 2)$simulations
+diagnosis   <- diagnose_design(simulations_df = simulations)
 
+}
 }

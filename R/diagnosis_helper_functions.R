@@ -74,7 +74,7 @@ summary.diagnosis <- function(object, ...) {
 #' @export
 print.summary.diagnosis <- function(x, ...) {
   class(x) <- "data.frame"
-  cat("\nResearch design diagnosis\n\n")
+  cat(paste0("\nResearch design diagnosis, based on ", attr(x, "sims"), " simulations and ", attr(x, "bootstrap"), " bootstrap draws.\n\n"))
   print_diagnosis <- x
   names(x) <-
     gsub("\\b(se[(]|sd |rmse|[[:alpha:]])",
@@ -85,3 +85,53 @@ print.summary.diagnosis <- function(x, ...) {
   cat("\n")
   invisible(x)
 }
+
+
+
+#' Clean up DeclareDesign diagnosis object for printing
+#'
+#' If diagnosands are bootstrapped, se's are put in parenthese on a second line and rounded to \code{digits}.
+#' Function uses presence of "se(" to identify bootrapped diagnoses; avoid errors by not using "se(" in naming of diagnosands.
+#'
+#' @param diagnosis An object from \code{declare_design}
+#' @param digits Number of digits.
+#' @param is.extracted If TRUE diagnosis is a dataframe; if FALSE diagnosis is a list containing the diagnosands data frame as its second object
+#' @return A formatted text table with bootstrapped standard errors in parentheses.
+#' @export
+#'
+#' @examples
+#' # diagnosis <- diagnose_design(simple_two_arm_designer(), sims = 3)
+#' # reshape_diagnosis(diagnosis)
+#' # reshape_diagnosis(diagnosis, col.names = 1:11)
+#' # reshape_diagnosis(diagnosis, col.names = "default")
+#' # diagnosis <- diagnose_design(simple_two_arm_designer(), sims = 3, bootstrap = 0)
+#' # reshape_diagnosis(diagnosis, col.names = "default")
+
+reshape_diagnosis <- function(diagnosis, digits = 2, is.extracted = FALSE
+) {
+
+  # Housekeeping
+  bootstrapped <- attr(diagnosis, "bootstrap") > 0
+  if(!is.extracted) diagnosis     <- diagnosis[[2]]
+
+  if(!bootstrapped) return(diagnosis)
+
+  n_text_fields <- min(which(grepl("se\\(", names(diagnosis)))) - 2
+  D             <- as.matrix(diagnosis[,(n_text_fields+1):ncol(diagnosis)])
+  rows          <- nrow(D)
+
+    cols       <- ncol(D)/2
+    out.width  <- cols+n_text_fields
+
+    # Reformatting
+    out <- matrix(NA, 2*rows, out.width)
+    out[2*(1:rows)-1, (n_text_fields + 1):ncol(out)] <- round(D[,2*(1:cols)-1], digits)
+    out[2*(1:rows),   (n_text_fields + 1):ncol(out)] <- paste0("(", round(D[,2*(1:cols)], digits), ")")
+
+    out[2*(1:rows)-1, 1:n_text_fields] <- as.matrix(diagnosis)[, 1:n_text_fields]
+    out[2*(1:rows), 1:n_text_fields] <- " "
+    colnames(out) <- colnames(diagnosis[,c(1:n_text_fields, n_text_fields+2*(1:cols)-1)])
+
+    return(out)
+}
+
