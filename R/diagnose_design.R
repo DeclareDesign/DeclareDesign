@@ -88,11 +88,13 @@ simulate_design <- function(...,  sims = 500) {
                             sims = sims
   )
 
+
+  #for (i in 1:length(simulations_list)) {
+   # simulations_list[[i]] <- cbind(design_ID = names(simulations_list)[i], simulations_list[[i]])
+  #}
   # simulations_list <- lapply(comparison_sims, function(x) x$simulations)
 
-  for (i in 1:length(simulations_list)) {
-    simulations_list[[i]] <- cbind(design_ID = names(simulations_list)[i], simulations_list[[i]])
-  }
+  simulations_list <- Map(cbind,  design_ID = names(simulations_list), simulations_list)
 
   simulations_df <- do.call(rbind, simulations_list)
 
