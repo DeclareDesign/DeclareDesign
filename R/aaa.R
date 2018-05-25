@@ -160,7 +160,7 @@ validate <- function(handler, ret, dots, label) {
 
 
 ###############################################################################
-# used to inherit roxygen docs
+#' used to inherit roxygen docs
 
 #' @param ...      arguments to be captured, and later passed to the handler
 #' @param handler  a tidy-in, tidy-out function

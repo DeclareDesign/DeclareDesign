@@ -19,7 +19,7 @@ redesign(design, expand = TRUE, ...)
 \item{design}{a design}
 }
 \value{
-if set of designs is size one, the design, otherwise a `by`-list of designs.
+if set of designs is size one, the design, otherwise a `by`-list of designs. Designs are given a parameters attribute with the values of parameters assigned by expand_design.
 }
 \description{
 \code{expand_design} easily generates a set of design from a template function.
@@ -56,6 +56,6 @@ design_large_N <- redesign(my_design, N = 1000)
 
 # returns a list of five modified designs
 design_vary_N <- redesign(my_design, N = seq(500, 1000, 100))
-
+attr(design_vary_N[[1]], "parameters")
 
 }

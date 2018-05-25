@@ -6,7 +6,7 @@
 #' @param expand boolean - if true, form the crossproduct of the ..., otherwise recycle them
 #' @param ... Options sent to the template.
 #'
-#' @return if set of designs is size one, the design, otherwise a `by`-list of designs.
+#' @return if set of designs is size one, the design, otherwise a `by`-list of designs. Designs are given a parameters attribute with the values of parameters assigned by expand_design.
 #'
 #' @examples
 #'
@@ -15,7 +15,7 @@
 #'   return(declare_design(population))
 #'   }
 #'
-#' # returns list of three designs
+#' # returns list of eight designs
 #' vary_n <- expand_design(design_template, N = seq(30, 100, 10))
 #'
 #' \dontrun{
@@ -36,12 +36,13 @@
 #' # returns a single, modified design
 #' design_large_N <- redesign(my_design, N = 1000)
 #'
-#' # returns a list of five modified designs
+#' # returns a list of six modified designs
 #' design_vary_N <- redesign(my_design, N = seq(500, 1000, 100))
-#'
+#' attr(design_vary_N[[1]], "parameters")
 #'
 #' @importFrom rlang quo_expr quos
 #' @export
+
 expand_design <- function(template, expand = TRUE, ...) {
 
   template_args_matrix <- if (expand)
@@ -52,9 +53,15 @@ expand_design <- function(template, expand = TRUE, ...) {
   k <- nrow(template_args_matrix)
   if(k == 1) return( template(...) )
 
-  by(template_args_matrix, 1:k, do.call, what=template, simplify = FALSE)
+  out <- by(template_args_matrix, 1:k, do.call, what=template, simplify = FALSE)
+
+  # Add attribute
+  for(j in 1:k) {attr(out[[j]], "parameters") <-
+    setNames(template_args_matrix[j,], names(template_args_matrix) )}
+  return(out)
 
 }
+
 
 #'
 #' \code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters internally. (Advanced).

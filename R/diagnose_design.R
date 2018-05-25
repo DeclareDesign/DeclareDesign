@@ -40,7 +40,7 @@
 #' \dontrun{
 #' # A fixed population with simulations over assignment only
 #' head(simulate_design(design, sims = c(1,1,1,100,1)))
-#'
+#'}
 #'
 #'@details
 #'
