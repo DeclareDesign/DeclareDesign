@@ -5,7 +5,7 @@
 \alias{redesign}
 \title{Declare a Design via a Template Function}
 \usage{
-expand_design(template, expand = TRUE, ...)
+expand_design(template, expand = TRUE, name_stub = "", ...)
 
 redesign(design, expand = TRUE, ...)
 }
@@ -33,7 +33,7 @@ design_template <- function(N = 100) {
   return(declare_design(population))
   }
 
-# returns list of three designs
+# returns list of eight designs
 vary_n <- expand_design(design_template, N = seq(30, 100, 10))
 
 \dontrun{
@@ -54,7 +54,7 @@ my_design <- declare_design(my_population)
 # returns a single, modified design
 design_large_N <- redesign(my_design, N = 1000)
 
-# returns a list of five modified designs
+# returns a list of six modified designs
 design_vary_N <- redesign(my_design, N = seq(500, 1000, 100))
 attr(design_vary_N[[1]], "parameters")
 

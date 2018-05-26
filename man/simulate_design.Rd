@@ -4,7 +4,7 @@
 \alias{simulate_design}
 \title{Run a design many times}
 \usage{
-simulate_design(..., sims = 500)
+simulate_design(..., sims = 500, add_parameters = FALSE)
 }
 \arguments{
 \item{...}{A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.}

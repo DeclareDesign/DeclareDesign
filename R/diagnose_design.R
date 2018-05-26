@@ -120,16 +120,14 @@ simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
   # Block to reorder  columns if add_parameters is TRUE
   if(add_parameters){
     allcolnames <- colnames(simulations_df)
-    Front <- c("design_ID", "sim_ID")
-    Front <- Front[Front %in%  allcolnames]
-    Parnames <- sort({
-      unique(unlist(lapply(designs, function(j) {if(!is_empty(attr(j , "parameters")))
-        names(attr(j , "parameters"))})))})
-    End <- allcolnames[!(allcolnames %in% c(Front, Parnames))]
-    simulations_df <- simulations_df[, c(Front, Parnames, End)]
+    part_1 <- c("design_ID", "sim_ID")
+    part_1 <- part_1[part_1 %in%  allcolnames]
+    part_2 <- get_parnames(designs)
+    part_3 <- allcolnames[!(allcolnames %in% c(part_1, part_2))]
+    simulations_df <- simulations_df[, c(part_1, part_2, part_3)]
     }
 
-  attr(simulations_df, "sims") <- sims
+    attr(simulations_df, "sims") <- sims
 
   structure(simulations_df)
 
@@ -323,15 +321,7 @@ diagnose_design <- function(..., simulations_df = NULL, add_parameters = FALSE,
     colnames(simulations_df) %i% grouping_variables
 
   ## Get the list of all parameter attributes in design list since these are to be preserved in dataframe
-  if(add_parameters){
-    Parnames <- sort({unique(unlist(
-        lapply(designs, function(j) {
-          if(!is_empty(attr(j , "parameters")))
-          names(attr(j , "parameters"))
-          }
-        )))})
-    group_by_set <- c(group_by_set, Parnames)}
-
+  if(add_parameters){group_by_set <- c(group_by_set, get_parnames(designs))}
 
   calculate_diagnosands <- function(simulations_df, diagnosands) {
     group_by_list <- simulations_df[, group_by_set, drop=FALSE]

@@ -43,21 +43,26 @@
 #' @importFrom rlang quo_expr quos
 #' @export
 
-expand_design <- function(template, expand = TRUE, ...) {
+
+expand_design <- function(template, expand = TRUE, name_stub = "", ...) {
 
   template_args_matrix <- if (expand)
     expand.grid(..., stringsAsFactors = FALSE)
   else
     cbind.data.frame(..., stringsAsFactors=FALSE)
-
   k <- nrow(template_args_matrix)
-  if(k == 1) return( template(...) )
 
-  out <- by(template_args_matrix, 1:k, do.call, what=template, simplify = FALSE)
+  if(k == 1) {
+    return(template(...))
+  } else {
+    out <- by(template_args_matrix, 1:k, do.call, what=template, simplify = FALSE)
+  }
 
   # Add attribute
   for(j in 1:k) {attr(out[[j]], "parameters") <-
     setNames(template_args_matrix[j,], names(template_args_matrix) )}
+
+  names(out) <- paste0(name_stub, 1:length(out))
   return(out)
 
 }

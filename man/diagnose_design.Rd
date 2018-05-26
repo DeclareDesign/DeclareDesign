@@ -4,7 +4,7 @@
 \alias{diagnose_design}
 \title{Diagnose the Design}
 \usage{
-diagnose_design(..., simulations_df = NULL,
+diagnose_design(..., simulations_df = NULL, add_parameters = FALSE,
   diagnosands = default_diagnosands, sims = 500, bootstrap = 100,
   grouping_variables = c("design_ID", "estimand_label", "estimator_label",
   "coefficient"))

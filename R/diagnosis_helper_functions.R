@@ -155,3 +155,16 @@ reshape_diagnosis <- function(diagnosis, digits = 2, is.extracted = FALSE) {
 
 }
 
+# Get Names of Parameters from a list of designs
+get_parnames <- function(designs, sort_names = TRUE){
+
+  out <- lapply(designs, function(j) {
+    if(!is_empty(attr(j , "parameters"))) names(attr(j , "parameters"))
+    }
+  )
+
+  out <- unique(unlist(out))
+  if(sort_names) sort(out)
+  out
+}
+

@@ -4,7 +4,7 @@
 \alias{simulate_single_design}
 \title{Run Single Design -- Basic simulation script that is called on by simulate_design}
 \usage{
-simulate_single_design(design, sims)
+simulate_single_design(design, sims, add_parameters = FALSE)
 }
 \description{
 Run Single Design -- Basic simulation script that is called on by simulate_design
