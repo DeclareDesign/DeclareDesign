@@ -46,7 +46,7 @@
 #'
 #' Different steps of a design may each be simulated different a number of times, as specified by sims. In this case simulations are grouped into "fans", eg "fan_1" indicates all the simulations that have the same draw from the first level of the design. For efficiency there are generally fewer fans than design steps where all contiguous steps with 1 sim specified are combined into a single fan.
 
-simulate_design <- function(...,  sims = 500) {
+simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
 
   designs <- list(...)
 
@@ -78,41 +78,56 @@ simulate_design <- function(...,  sims = 500) {
   }
 
   if(length(designs) == 1) {
-    out <- simulate_single_design(designs[[1]], sims)
+    out <- simulate_single_design(designs[[1]], sims = sims, add_parameters = add_parameters)
     return(out)
   }
 
   # comparison_sims
   simulations_list <- lapply(designs,
                             simulate_single_design,
-                            sims = sims
+                            sims = sims,
+                            add_parameters = add_parameters
   )
 
-  #for (i in 1:length(simulations_list)) {
-   # simulations_list[[i]] <- cbind(design_ID = names(simulations_list)[i], simulations_list[[i]])
-  #}
-  # simulations_list <- lapply(comparison_sims, function(x) x$simulations)
+#  for (i in 1:length(simulations_list)) {
+#    simulations_list[[i]] <- cbind(design_ID = names(simulations_list)[i], simulations_list[[i]])
+#  }
+
+#   simulations_list <- lapply(comparison_sims, function(x) x$simulations)
 
   simulations_list <- Map(cbind,  design_ID = names(simulations_list), simulations_list )
 
   # Create an empty column for each non-existing attribute
-  col_list <- unique(unlist(sapply(simulations_list, names)))
+  col_list <- unique(unlist(as.vector(sapply(simulations_list, names))))
   simulations_list <- lapply(simulations_list, function(x) {
     if(!identical(col_list , colnames(x))){
       missing_cols <- col_list[!col_list %in% colnames(x)]
       append  <- replicate(length(missing_cols), rep(NA, sims))
       colnames(append) <- missing_cols
-      x <- cbind(x, append )}
+      x <- cbind(x, append)}
     x <- x[,col_list]
   })
 
 
 
 
-   simulations_df <- do.call(rbind, simulations_list)
+  simulations_df <- do.call(rbind, simulations_list)
+
+  simulations_df <- data.frame(simulations_df)
 
   rownames(simulations_df) <- NULL
-  simulations_df <- data.frame(simulations_df)
+
+  # Block to reorder  columns if add_parameters is TRUE
+  if(add_parameters){
+    allcolnames <- colnames(simulations_df)
+    Front <- c("design_ID", "sim_ID")
+    Front <- Front[Front %in%  allcolnames]
+    Parnames <- sort({
+      unique(unlist(lapply(designs, function(j) {if(!is_empty(attr(j , "parameters")))
+        names(attr(j , "parameters"))})))})
+    End <- allcolnames[!(allcolnames %in% c(Front, Parnames))]
+    simulations_df <- simulations_df[, c(Front, Parnames, End)]
+    }
 
   attr(simulations_df, "sims") <- sims
 
@@ -127,7 +142,7 @@ simulate_design <- function(...,  sims = 500) {
 
 #' Run Single Design -- Basic simulation script that is called on by simulate_design
 
-simulate_single_design <- function(design, sims) {
+simulate_single_design <- function(design, sims, add_parameters = FALSE) {
 
 ### If sims is set correctly, fan out
 
@@ -177,17 +192,21 @@ if(exists("fan_id")){
   simulations_df <- merge(simulations_df, fan_id, by="sim_ID")
 }
 
-# Add column for each extra attribute
+# Optionally add columns containing parameter attributes of a design
 
-
-if(!is_empty(attr(design , "parameters"))) simulations_df <- cbind(simulations_df,  sapply(attr(design , "parameters") , rep, sims))
-
+if(add_parameters){ if(!is_empty(attr(design , "parameters"))){
+  parameters <- sapply(attr(design , "parameters"), rep, sims)
+  if(sims == 1) parameters <- t(parameters)
+  simulations_df <-
+  cbind(parameters, simulations_df)
+}}
 
 attr(simulations_df, "sims") <- sims
 
 structure(simulations_df)
 
 }
+
 
 
 
@@ -261,13 +280,15 @@ structure(simulations_df)
 #' @importFrom stats setNames
 #' @importFrom utils head
 #' @export
-diagnose_design <- function(..., simulations_df = NULL,
+diagnose_design <- function(..., simulations_df = NULL, add_parameters = FALSE,
                             diagnosands = default_diagnosands,
                             sims = 500, bootstrap = 100,
                             grouping_variables = c("design_ID", "estimand_label", "estimator_label", "coefficient")
                             ) {
   designs <- list(...)
 
+
+  diagnosands
 
   ## three cases:
   ## 1. send one or more design objects created by declare_design
@@ -296,10 +317,21 @@ diagnose_design <- function(..., simulations_df = NULL,
   # Update sims to reflect actual simulation dataframe
   if(!is.null(simulations_df)) sims <- attr(simulations_df, "sims")
 
-  if(is.null(simulations_df))  simulations_df <- simulate_design(designs, sims = sims)
+  if(is.null(simulations_df))  simulations_df <- simulate_design(designs, sims = sims, add_parameters = add_parameters)
 
   group_by_set <- attr(diagnosands, "group_by") %||%
     colnames(simulations_df) %i% grouping_variables
+
+  ## Get the list of all parameter attributes in design list since these are to be preserved in dataframe
+  if(add_parameters){
+    Parnames <- sort({unique(unlist(
+        lapply(designs, function(j) {
+          if(!is_empty(attr(j , "parameters")))
+          names(attr(j , "parameters"))
+          }
+        )))})
+    group_by_set <- c(group_by_set, Parnames)}
+
 
   calculate_diagnosands <- function(simulations_df, diagnosands) {
     group_by_list <- simulations_df[, group_by_set, drop=FALSE]
