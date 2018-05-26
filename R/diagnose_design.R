@@ -77,6 +77,14 @@ simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
     names(designs)[names(designs) == ""] <- inferred_names[names(designs) == ""]
   }
 
+  # Make sure no duplicated or empty names
+  dupes <- duplicated(names(designs)) | names(designs) == ""
+  if(any(dupes)) {
+    n_dupes <- sum(dupes)
+    names(designs)[dupes] <- paste0("_", names(designs)[dupes], "_", 1:n_dupes)
+  }
+
+  # Simulate single design
   if(length(designs) == 1) {
     out <- simulate_single_design(designs[[1]], sims = sims, add_parameters = add_parameters)
     return(out)
