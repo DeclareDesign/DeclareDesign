@@ -88,28 +88,15 @@ simulate_design <- function(...,  sims = 500) {
                             sims = sims
   )
 
+
   #for (i in 1:length(simulations_list)) {
    # simulations_list[[i]] <- cbind(design_ID = names(simulations_list)[i], simulations_list[[i]])
   #}
   # simulations_list <- lapply(comparison_sims, function(x) x$simulations)
 
-  simulations_list <- Map(cbind,  design_ID = names(simulations_list), simulations_list )
+  simulations_list <- Map(cbind,  design_ID = names(simulations_list), simulations_list)
 
-  # Create an empty column for each non-existing attribute
-  col_list <- unique(unlist(sapply(simulations_list, names)))
-  simulations_list <- lapply(simulations_list, function(x) {
-    if(!identical(col_list , colnames(x))){
-      missing_cols <- col_list[!col_list %in% colnames(x)]
-      append  <- replicate(length(missing_cols), rep(NA, sims))
-      colnames(append) <- missing_cols
-      x <- cbind(x, append )}
-    x <- x[,col_list]
-  })
-
-
-
-
-   simulations_df <- do.call(rbind, simulations_list)
+  simulations_df <- do.call(rbind, simulations_list)
 
   rownames(simulations_df) <- NULL
   simulations_df <- data.frame(simulations_df)
@@ -176,12 +163,6 @@ if (nrow(estimands_df) == 0 && nrow(estimates_df) > 0) {
 if(exists("fan_id")){
   simulations_df <- merge(simulations_df, fan_id, by="sim_ID")
 }
-
-# Add column for each extra attribute
-
-
-if(!is_empty(attr(design , "parameters"))) simulations_df <- cbind(simulations_df,  sapply(attr(design , "parameters") , rep, sims))
-
 
 attr(simulations_df, "sims") <- sims
 
