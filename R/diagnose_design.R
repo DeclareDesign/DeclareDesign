@@ -285,9 +285,6 @@ diagnose_design <- function(..., simulations_df = NULL, add_parameters = FALSE,
                             ) {
   designs <- list(...)
 
-
-  diagnosands
-
   ## three cases:
   ## 1. send one or more design objects created by declare_design
   ## 2. send a single list of design objects created by expand_design
@@ -400,7 +397,7 @@ diagnose_design <- function(..., simulations_df = NULL, add_parameters = FALSE,
   estimator_labels <- unique(simulations_df$estimator_label)
   if (length(estimator_labels) > 1) {
     estimator_f <- factor(diagnosands_df$estimator_label, estimator_labels)
-    diagnosands_df <- diagnosands_df[order(estimator_f), , drop=FALSE]
+    diagnosands_df <- diagnosands_df[order(diagnosands_df$design_ID, estimator_f), , drop=FALSE]
   }
 
 #  rownames(diagnosands_df) <- NULL
