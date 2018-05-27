@@ -53,7 +53,8 @@ expand_design <- function(template, expand = TRUE, name_stub = "", ...) {
   k <- nrow(template_args_matrix)
 
   if(k == 1) {
-    return(template(...))
+    design_args <- list(...)
+    return(do.call(template, design_args))
   } else {
     out <- by(template_args_matrix, 1:k, do.call, what=template, simplify = FALSE)
   }
