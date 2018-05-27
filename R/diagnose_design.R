@@ -80,8 +80,10 @@ simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
   # Make sure no duplicated or empty names
   dupes <- duplicated(names(designs)) | names(designs) == ""
   if(any(dupes)) {
+    warning("Duplicated or missing names for some designs. Attempt to generate names.")
     n_dupes <- sum(dupes)
     names(designs)[dupes] <- paste0("_", names(designs)[dupes], "_", 1:n_dupes)
+    if(any(duplicated(names(designs)) | names(designs) == "")) stop("Please provide unique names for designs")
   }
 
   # Simulate single design
@@ -97,12 +99,6 @@ simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
                             add_parameters = add_parameters
   )
 
-#  for (i in 1:length(simulations_list)) {
-#    simulations_list[[i]] <- cbind(design_ID = names(simulations_list)[i], simulations_list[[i]])
-#  }
-
-#   simulations_list <- lapply(comparison_sims, function(x) x$simulations)
-
   simulations_list <- Map(cbind,  design_ID = names(simulations_list), simulations_list )
 
   # Create an empty column for each non-existing attribute
@@ -115,9 +111,6 @@ simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
       x <- cbind(x, append)}
     x <- x[,col_list]
   })
-
-
-
 
   simulations_df <- do.call(rbind, simulations_list)
 
@@ -138,7 +131,6 @@ simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
     attr(simulations_df, "sims") <- sims
 
   structure(simulations_df)
-
 
 }
 
