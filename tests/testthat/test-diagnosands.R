@@ -136,7 +136,7 @@ test_that("diagnosis, no estimator", {
 
   diagnosand <- declare_diagnosands(z=mean(estimand > 0))
 
-  expect_identical( diagnose_design(d, diagnosands = diagnosand, sims = 5)$diagnosand,
+  expect_equivalent( diagnose_design(d, diagnosands = diagnosand, sims = 5)$diagnosand,
                     structure(list(estimand_label = c("bar", "foo"), z = c(1, 1),
                                    `se(z)` = c(0, 0)), .Names = c("estimand_label", "z", "se(z)"
                                    ), class = "data.frame", row.names = c("bar", "foo"))
@@ -193,7 +193,7 @@ golden <-
                    "se(type_s_rate)", "mean_estimand", "se(mean_estimand)"), row.names = "ols.group2", class = "data.frame")
 
 
-  expect_identical( diagnose_design(d, sims=4)$diagnosands, golden)
+  expect_equivalent( diagnose_design(d, sims=4)$diagnosands, golden)
 
   })
 
@@ -212,7 +212,7 @@ test_that("diagnosis, NAs if no estimand", {
                       "coverage", "se(coverage)", "mean_estimate", "se(mean_estimate)",
                       "sd_estimate", "se(sd_estimate)", "mean_se", "se(mean_se)", "type_s_rate",
                       "se(type_s_rate)", "mean_estimand", "se(mean_estimand)"), row.names = "mu", class = "data.frame")
-  expect_identical( diagnose_design(d, sims=4)$diagnosands, golden)
+  expect_equivalent( diagnose_design(d, sims=4)$diagnosands, golden)
 
 })
 
@@ -225,7 +225,7 @@ test_that("diagnosis, sorted by estimator order in design", {
                       declare_estimator(extra~group, label="X2", estimand="m"),
                       declare_estimator(extra~group, label="X1", estimand="m"))
 
-  dx <- diagnose_design(d, sims = 5)
+  dx <- diagnose_design(design = d, sims = 5)
 
   expect_true(!is.unsorted(rev(dx$diagnosands$estimator_label)))
 })
