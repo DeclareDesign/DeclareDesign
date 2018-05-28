@@ -139,3 +139,17 @@ rbind_disjoint <- function(list_of_df, infill=NA) {
 `%i%` <- intersect
 
 `%||%` <- function(e1, e2) if(is.null(e1)) e2 else e1
+
+
+add_parens <- function(x, digits = 3) {
+  x <- as.numeric(x)
+  return_vec <- sprintf("(%s)", format_num(x, digits))
+  return(return_vec)
+}
+
+format_num <- function(x, digits = 3) {
+  x <- as.numeric(x)
+  return(paste0(sprintf(paste0("%.", digits, "f"), x)))
+}
+
+

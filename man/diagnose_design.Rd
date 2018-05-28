@@ -14,7 +14,7 @@ diagnose_design(..., diagnosands = default_diagnosands, sims = 500,
 
 \item{sims}{The number of simulations, defaulting to 500.}
 
-\item{bootstrap}{Number  of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}.}
+\item{bootstrap}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}.}
 }
 \description{
 Runs many simulations of a design, and applies a diagnosand function to the results.

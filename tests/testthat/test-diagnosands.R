@@ -14,12 +14,36 @@ pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = "test")
 
 reveal_outcomes <- declare_reveal()
 
-
-my_design <- declare_design(my_population(),
+my_design <- declare_design(my_population,
                             my_potential_outcomes, pate,
                             my_assignment,
                             reveal_outcomes,
                             pate_estimator)
+
+diagnosis <- diagnose_design(my_design, sims = 10)
+
+test_that("reshape diagnosis works",{
+  reshaped <- reshape_diagnosis(diagnosis)
+
+  expect_equal(ncol(reshaped), 13)
+
+
+  pate_estimator_2 <- declare_estimator(Y ~ Z, estimand = pate, label = "test_2")
+
+  my_design <- declare_design(my_population,
+                              my_potential_outcomes, pate,
+                              my_assignment,
+                              reveal_outcomes,
+                              pate_estimator,pate_estimator_2)
+
+  diagnosis <- diagnose_design(my_design, sims = 10)
+
+  reshaped <- reshape_diagnosis(diagnosis)
+  expect_equal(nrow(reshaped), 4)
+  expect_equivalent(as.character(reshaped$statistic),
+                    c("Diagnosand Estimate", "Bootstrapped SE", "Diagnosand Estimate", "Bootstrapped SE"))
+})
+
 
 
 test_that("parallel works.", {
