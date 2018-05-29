@@ -52,13 +52,11 @@ simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
 
   inferred_names <- paste(substitute(list(...)))[-1]
 
-  ## three cases:
+  ## Two cases:
   ## 1. send one or more design objects created by declare_design
-  ## 2. send a single list of design objects created by expand_design
-  ## 3. do not allow sending more than one object if any of them aren't design objects.
+  ## 2. send a single list of design objects e.g. created by expand_design
+  ## Approach: unpack designs if a list of designs was sent as a single list object
   if (length(designs) == 1 && is.list(designs[[1]]) && !"design" %in% class(designs[[1]]) ) {
-    ## this unpacks designs if a list of designs was sent as a single list object, i.e.
-    ##   as created by expand_design
     designs <- designs[[1]]
     if (!is.null(names(designs))) {
       inferred_names <- names(designs)
@@ -67,12 +65,12 @@ simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
     }
   }
 
+  ## Do not allow users to send more than one object if any is not a design object
   if (!all(vapply(designs, inherits, FALSE, "design"))) {
     stop("Please only send design objects to simulate_design.")
   }
 
   # Ensure designs have names
-
   if (is.null(names(designs))) names(designs) <- inferred_names
   names(designs)[names(designs) == ""] <- inferred_names[names(designs) == ""]
 
@@ -100,21 +98,20 @@ simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
 
   simulations_list <- Map(cbind,  design_ID = names(simulations_list), simulations_list )
 
-  # Create an empty column for each non-existing attribute
+  # Create columns for non-existing attributes to allow merging
   col_list <- unique(unlist(as.vector(sapply(simulations_list, names))))
   simulations_list <- lapply(simulations_list, function(x) {
     if(!identical(col_list , colnames(x))){
       missing_cols <- col_list[!col_list %in% colnames(x)]
-      append  <- replicate(length(missing_cols), rep(NA, sims))
+      append       <- replicate(length(missing_cols), rep(NA, sims))
       colnames(append) <- missing_cols
       x <- cbind(x, append)}
     x <- x[,col_list]
   })
 
+  # Cleanup
   simulations_df <- do.call(rbind, simulations_list)
-
   simulations_df <- data.frame(simulations_df)
-
   rownames(simulations_df) <- NULL
 
   # Block to reorder  columns if add_parameters is TRUE
@@ -205,8 +202,6 @@ structure(simulations_df)
 }
 
 
-
-
 #' Diagnose the Design
 #'
 #' Applies a diagnosand function to the simulations of a design results.
@@ -214,10 +209,10 @@ structure(simulations_df)
 #' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.
 #' @param simulations A dataframe with simulations of a design. user must provide either a simulations data frame or a design or list of designs. Should have a sims attribute indicating the number of simulations used.
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
-#' @param grouping_variables A set of variables used to generate groups of simulations for diagnosis. Defaults to c("design_ID", "estimand_label", "estimator_label", "coefficient")
+#' @param add_grouping_variables Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_ID", "estimand_label", "estimator_label", "coefficient")
 #'
 #' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}
-#' @param bootstrap Number  of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}.
+#' @param bootstrap Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}.
 #'
 #' @details
 #'
@@ -280,14 +275,16 @@ structure(simulations_df)
 diagnose_design <- function(..., simulations_df = NULL, add_parameters = FALSE,
                             diagnosands = default_diagnosands,
                             sims = 500, bootstrap = 100,
-                            grouping_variables = c("design_ID", "estimand_label", "estimator_label", "coefficient")
+                            add_grouping_variables = NULL
                             ) {
   designs <- list(...)
 
-  ## three cases:
+  grouping_variables <- c("design_ID", "estimand_label", "estimator_label", "coefficient", add_grouping_variables)
+
+  ## Two cases:
   ## 1. send one or more design objects created by declare_design
-  ## 2. send a single list of design objects created by expand_design
-  ## 3. do not allow sending more than one object if any of them aren't design objects.
+  ## 2. send a single list of design objects e.g. created by expand_design
+  ## Approach: unpack designs if a list of designs was sent as a single list object
   if (length(designs) == 1 && is.list(designs[[1]]) && !"design" %in% class(designs[[1]]) ) {
     ## this unpacks designs if a list of designs was sent as a single list object, i.e.
     ##   as created by expand_design
@@ -299,14 +296,14 @@ diagnose_design <- function(..., simulations_df = NULL, add_parameters = FALSE,
     }
   }
 
+  if(length(designs)>0){
+    if (!all(vapply(designs, inherits, FALSE, "design"))) {
+      stop("Please only send design objects to diagnose_design. If providing simulations_df use simulations_df = simulations_df.")
+    }}
 
   if(is.null(simulations_df) + (length(designs)==0) !=1) {
     stop("Must provide either a design or a simulations data frame (not both, not neither!)")}
 
-  if(length(designs)>0){
-    if (!all(vapply(designs, inherits, FALSE, "design"))) {
-      stop("Please only send design objects to diagnose_design.")
-    }}
 
   # Update sims to reflect actual simulation dataframe
   if(!is.null(simulations_df)) sims <- attr(simulations_df, "sims")
