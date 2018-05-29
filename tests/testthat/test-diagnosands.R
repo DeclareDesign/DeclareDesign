@@ -236,3 +236,10 @@ test_that("error if diagnosand not named", {
   expect_error(declare_diagnosands(mean(foo)), "All diagnosands must be named")
 })
 
+
+test_that("error if duplicated estimator in a design", {
+  two_arm <- simple_two_arm_design / declare_estimator(Y~Z, model = lm_robust, estimand = "ATE")
+  expect_error(diagnose_design(list(a= simple_two_arm_design, b = two_arm)), "Duplicated labels in designs: b")
+})
+
+

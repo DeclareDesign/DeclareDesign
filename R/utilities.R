@@ -151,3 +151,6 @@ format_num <- function(x, digits = 3) {
   return(paste0(sprintf(paste0("%.", digits, "f"), x)))
 }
 
+
+check_design_estimator_labels <- function(design) any(duplicated(run_design(design)[[1]]$estimator_label))
+
