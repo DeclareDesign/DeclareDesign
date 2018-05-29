@@ -1,4 +1,4 @@
-#' Run a design many times
+#' Simulate a design
 #'
 #' Runs many simulations of a design and saves to a dataframe.
 #'
@@ -7,6 +7,7 @@
 #'
 #' @param sims The number of simulations, defaulting to 500. If sims is a vector of the form c(10, 1, 2, 1) then different steps of a design will be simulated different numbers of times.  See details.
 #'
+#' @param add_parameters If TRUE, add any design parameters to the simulations_df and add the names of parameters as attributes to the simulations_df to be picked up by \code{\link{diagnose_design}}
 #' @importFrom stats setNames
 #' @importFrom utils head
 #' @export
@@ -122,9 +123,11 @@ simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
     part_2 <- get_parnames(designs)
     part_3 <- allcolnames[!(allcolnames %in% c(part_1, part_2))]
     simulations_df <- simulations_df[, c(part_1, part_2, part_3)]
+    attr(simulations_df, "parameters") <- part_2
     }
 
-    attr(simulations_df, "sims") <- sims
+  # Add attributes
+  attr(simulations_df, "sims") <- sims
 
   structure(simulations_df)
 
@@ -209,6 +212,7 @@ structure(simulations_df)
 #' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.
 #' @param simulations A dataframe with simulations of a design. user must provide either a simulations data frame or a design or list of designs. Should have a sims attribute indicating the number of simulations used.
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
+#' @param add_parameters If TRUE, add any design parameters to the diagnosands_df inherited from simulation_df (and ultimately, from designs)
 #' @param add_grouping_variables Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_ID", "estimand_label", "estimator_label", "coefficient")
 #'
 #' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}
@@ -308,13 +312,15 @@ diagnose_design <- function(..., simulations_df = NULL, add_parameters = FALSE,
   # Update sims to reflect actual simulation dataframe
   if(!is.null(simulations_df)) sims <- attr(simulations_df, "sims")
 
-  if(is.null(simulations_df))  simulations_df <- simulate_design(designs, sims = sims, add_parameters = add_parameters)
+  if(is.null(simulations_df))  simulations_df <- simulate_design(designs,
+                                                                 sims = sims,
+                                                                 add_parameters = add_parameters)
 
   group_by_set <- attr(diagnosands, "group_by") %||%
     colnames(simulations_df) %i% grouping_variables
 
-  ## Get the list of all parameter attributes in design list since these are to be preserved in dataframe
-  if(add_parameters){group_by_set <- c(group_by_set, get_parnames(designs))}
+  ## Get the list of parameter attributes in design list since these are to be preserved in dataframe
+  if(add_parameters){group_by_set <- c(group_by_set, attr(simulations_df, "parameters"))}
 
   calculate_diagnosands <- function(simulations_df, diagnosands) {
     group_by_list <- simulations_df[, group_by_set, drop=FALSE]
@@ -328,8 +334,6 @@ diagnose_design <- function(..., simulations_df = NULL, add_parameters = FALSE,
     diagnosands_df <- as.data.frame(t(mapply(c, labels_df, diagnosands_df)), stringsAsFactors=FALSE) # c appropriate and fast here bc labels_df must be a list (drop=FALSE above)
     diagnosands_df[] <- lapply(diagnosands_df, unlist)
 
-    # diagnosands_df <- merge(labels_df, diagnosands_df, by = "row.names", all = TRUE, sort = FALSE)
-    # diagnosands_df$Row.names <- NULL
     return(diagnosands_df)
   }
 
@@ -376,7 +380,7 @@ diagnose_design <- function(..., simulations_df = NULL, add_parameters = FALSE,
       stringsAsFactors=FALSE)
     diagnosands_df[] <- lapply(diagnosands_df, unlist)
 
-  # permute columns so SEs are right of diagnosands
+  # Permute columns so SEs are right of diagnosands
     n_diag <- length(diagnosands_names)
     i <- c(seq_along(group_by_set), length(group_by_set) + rep(seq_len(n_diag), each=2) + c(0, n_diag))
     diagnosands_df <- diagnosands_df[,i, drop=FALSE]
@@ -389,6 +393,8 @@ diagnose_design <- function(..., simulations_df = NULL, add_parameters = FALSE,
     names(diagnosands_df)[ix] <- dim_cols
   }
 
+  rownames(diagnosands_df)  <- rnames
+
   # Reorder by estimator labels in design
   estimator_labels <- unique(simulations_df$estimator_label)
   if (length(estimator_labels) > 1) {
@@ -399,9 +405,6 @@ diagnose_design <- function(..., simulations_df = NULL, add_parameters = FALSE,
     }
     }
 
-
-#  rownames(diagnosands_df) <- NULL
-  rownames(diagnosands_df)  <- rnames
   attr(diagnosands_df, "sims")      <- sims
   attr(diagnosands_df, "bootstrap") <- bootstrap
   attr(diagnosands_df, "n_diagosands")   <-  nrow(diagnosands(simulations_df))

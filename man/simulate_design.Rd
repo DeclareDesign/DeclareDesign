@@ -2,7 +2,7 @@
 % Please edit documentation in R/diagnose_design.R
 \name{simulate_design}
 \alias{simulate_design}
-\title{Run a design many times}
+\title{Simulate a design}
 \usage{
 simulate_design(..., sims = 500, add_parameters = FALSE)
 }
@@ -10,6 +10,8 @@ simulate_design(..., sims = 500, add_parameters = FALSE)
 \item{...}{A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.}
 
 \item{sims}{The number of simulations, defaulting to 500. If sims is a vector of the form c(10, 1, 2, 1) then different steps of a design will be simulated different numbers of times.  See details.}
+
+\item{add_parameters}{If TRUE, add any design parameters to the simulations_df and add the names of parameters as attributes to the simulations_df to be picked up by \code{\link{diagnose_design}}}
 }
 \description{
 Runs many simulations of a design and saves to a dataframe.
