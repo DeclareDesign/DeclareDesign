@@ -71,18 +71,17 @@ simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
     stop("Please only send design objects to simulate_design.")
   }
 
-  if (is.null(names(designs))) {
-    names(designs) <- inferred_names
-  } else {
-    names(designs)[names(designs) == ""] <- inferred_names[names(designs) == ""]
-  }
+  # Ensure designs have names
+
+  if (is.null(names(designs))) names(designs) <- inferred_names
+  names(designs)[names(designs) == ""] <- inferred_names[names(designs) == ""]
 
   # Make sure no duplicated or empty names
   dupes <- duplicated(names(designs)) | names(designs) == ""
   if(any(dupes)) {
-    warning("Duplicated or missing names for some designs. Attempt to generate names.")
+    warning("Duplicated or missing names for some designs.")
     n_dupes <- sum(dupes)
-    names(designs)[dupes] <- paste0("_", names(designs)[dupes], "_", 1:n_dupes)
+    names(designs)[dupes] <- paste0("_tempname_", (1:length(designs))[dupes])
     if(any(duplicated(names(designs)) | names(designs) == "")) stop("Please provide unique names for designs")
   }
 
@@ -92,7 +91,7 @@ simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
     return(out)
   }
 
-  # comparison_sims
+  # Simulate Multiple Designs
   simulations_list <- lapply(designs,
                             simulate_single_design,
                             sims = sims,
@@ -397,8 +396,12 @@ diagnose_design <- function(..., simulations_df = NULL, add_parameters = FALSE,
   estimator_labels <- unique(simulations_df$estimator_label)
   if (length(estimator_labels) > 1) {
     estimator_f <- factor(diagnosands_df$estimator_label, estimator_labels)
+    if(length(designs)==1) {diagnosands_df <- diagnosands_df[order(estimator_f), , drop=FALSE]
+    } else {
     diagnosands_df <- diagnosands_df[order(diagnosands_df$design_ID, estimator_f), , drop=FALSE]
-  }
+    }
+    }
+
 
 #  rownames(diagnosands_df) <- NULL
   rownames(diagnosands_df)  <- rnames
