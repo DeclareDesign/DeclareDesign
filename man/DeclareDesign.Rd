@@ -42,11 +42,11 @@ and manipulate designs and design templates.
 }
 }
 
-\section{Design Templates}{
+\section{Designers}{
 
 \describe{
-  \item{\code{\link{expand_design}}}{Generate Designs from a Template}
-  \item{designs}{See also the \code{designs} package for templates to use}
+  \item{\code{\link{expand_design}}}{Generate Designs from a Designer}
+  \item{designs}{See also the \code{DesignLibrary} package for designers to use}
 }
 }
 

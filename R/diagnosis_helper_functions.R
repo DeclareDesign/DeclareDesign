@@ -94,7 +94,8 @@ print.summary.diagnosis <- function(x, ...) {
 #'
 #' @param diagnosis An object from \code{diagnose_design}, either a diagnosand dataframe or a list containing a diagnosand dataframe
 #' @param digits Number of digits.
-#' @param is.extracted Should be TRUE if diagnosis is a diagnosands dataframe; set to FALSE if diagnosis is a list containing the diagnosands data frame as its second element
+#' @param selection List of columns to include in output. Defaults to all.
+#' @param is.extracted Should be TRUE if diagnosis is a diagnosands dataframe; set to FALSE if diagnosis is a list containing the diagnosands dataframe as its second element
 #' @return A formatted text table with bootstrapped standard errors in parentheses.
 #' @export
 #'
@@ -102,69 +103,90 @@ print.summary.diagnosis <- function(x, ...) {
 #' # library(DesignLibrary)
 #' # diagnosis <- diagnose_design(simple_two_arm_designer(), sims = 3)
 #' # reshape_diagnosis(diagnosis)
+#' # reshape_diagnosis(diagnosis, selection = c("Bias", "Power"))
 
-reshape_diagnosis <- function(diagnosis, digits = 2, is.extracted = FALSE) {
 
-  # Housekeeping
-  diagnosands_df  <- diagnosis
-  if(!is.extracted) diagnosands_df <- diagnosis$diagnosands
+reshape_diagnosis <-
+  function(diagnosis,
+           digits = 2,
+           selection = TRUE,
+           is.extracted = FALSE) {
+    # Housekeeping
+    diagnosands_df  <- diagnosis
+    if (!is.extracted)
+      diagnosands_df <- diagnosis$diagnosands
 
-  # Make names nicer
-  names(diagnosands_df) <-
-    gsub("\\b(se[(]|sd |rmse|[[:alpha:]])",
-         "\\U\\1",
-         gsub("_", " ", names(diagnosands_df)),
-         perl = TRUE)
+    # Make names nicer
+    names(diagnosands_df) <-
+      gsub("\\b(se[(]|sd |rmse|[[:alpha:]])",
+           "\\U\\1",
+           gsub("_", " ", names(diagnosands_df)),
+           perl = TRUE)
 
-  # Finish up if no bootstrapping
-  bootstrapped <- attr(diagnosands_df, "bootstrap") > 0
-  if(!bootstrapped) return(diagnosands_df)
+    # Finish up if no bootstrapping
+    bootstrapped <- attr(diagnosands_df, "bootstrap") > 0
+    if (!bootstrapped)
+      return(diagnosands_df)
 
-  # Reshape if there is bootstrapping
-  k <- ncol(diagnosands_df) - 2*attr(diagnosands_df, "n_diagosands")
+    # Reshape if there is bootstrapping
+    k <- ncol(diagnosands_df) - 2 * attr(diagnosands_df, "n_diagosands")
 
-  diagnosands_df_names <- names(diagnosands_df)
-  group_names <- diagnosands_df_names[1:k]
-  value_names <- diagnosands_df_names[-(1:k)]
-  diagnosands_names <- value_names[seq(1, length(value_names)-1, 2)]
-  se_names    <- value_names[seq(2, length(value_names), 2)]
+    diagnosands_df_names <- names(diagnosands_df)
+    group_names <- diagnosands_df_names[1:k]
+    value_names <- diagnosands_df_names[-(1:k)]
+    diagnosands_names <- value_names[seq(1, length(value_names) - 1, 2)]
+    se_names    <- value_names[seq(2, length(value_names), 2)]
 
-  # Make diagnosand only df
-  diagnosands_only_df <- diagnosands_df[,c(group_names, diagnosands_names), drop = FALSE]
+    # Make diagnosand only df
+    diagnosands_only_df <-
+      diagnosands_df[, c(group_names, diagnosands_names), drop = FALSE]
 
-  clean_values_df <- data.frame(lapply(diagnosands_only_df[, diagnosands_names, drop = FALSE],
-                    format_num, digits = digits))
+    clean_values_df <-
+      data.frame(lapply(diagnosands_only_df[, diagnosands_names, drop = FALSE],
+                        format_num, digits = digits))
 
-  diagnosands_only_df <- cbind( diagnosands_only_df[, group_names, drop = FALSE], clean_values_df)
+    diagnosands_only_df <-
+      cbind(diagnosands_only_df[, group_names, drop = FALSE], clean_values_df)
 
-  names(diagnosands_only_df) <- c(group_names, diagnosands_names)
+    names(diagnosands_only_df) <- c(group_names, diagnosands_names)
 
-  # Make se only df
-  se_only_df <- diagnosands_df[, se_names, drop = FALSE]
-  se_only_df <- data.frame(lapply(se_only_df,add_parens, digits = digits))
-  colnames(se_only_df) <- diagnosands_names
+    # Make se only df
+    se_only_df <- diagnosands_df[, se_names, drop = FALSE]
+    se_only_df <-
+      data.frame(lapply(se_only_df, add_parens, digits = digits))
+    colnames(se_only_df) <- diagnosands_names
 
-  # Merge
-  return_df <- rbind_disjoint(list(diagnosands_only_df, se_only_df), infill = "")
+    # Merge
+    return_df <-
+      rbind_disjoint(list(diagnosands_only_df, se_only_df), infill = "")
 
-  # Reorder rows
-  nrows <- nrow(diagnosands_only_df)
-  return_df <- return_df[rep(1:nrows, each = 2) + rep(c(0,nrows), nrows), ]
+    # Reorder rows
+    nrows <- nrow(diagnosands_only_df)
+    return_df <-
+      return_df[rep(1:nrows, each = 2) + rep(c(0, nrows), nrows),]
 
-  return(return_df)
+    # Select columns
+    if (!is.logical(selection))
+      if (any(!(selection %in% diagnosands_df_names)))
+        stop(paste(
+          "selection argument must only include elements from: ",
+          paste(c(group_names, diagnosands_names), collapse = ",")
+        ))
 
-}
+    return_df <- return_df[, selection]
+    return(return_df)
+
+  }
 
 # Get Names of Parameters from a list of designs
-get_parnames <- function(designs, sort_names = TRUE){
-
+get_parnames <- function(designs, sort_names = TRUE) {
   out <- lapply(designs, function(j) {
-    if(!is_empty(attr(j , "parameters"))) names(attr(j , "parameters"))
-    }
-  )
+    if (!is_empty(attr(j , "parameters")))
+      names(attr(j , "parameters"))
+  })
 
   out <- unique(unlist(out))
-  if(sort_names) sort(out)
+  if (sort_names)
+    sort(out)
   out
 }
-

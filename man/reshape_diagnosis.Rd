@@ -4,14 +4,17 @@
 \alias{reshape_diagnosis}
 \title{Clean up DeclareDesign diagnosis object for printing}
 \usage{
-reshape_diagnosis(diagnosis, digits = 2, is.extracted = FALSE)
+reshape_diagnosis(diagnosis, digits = 2, selection = TRUE,
+  is.extracted = FALSE)
 }
 \arguments{
 \item{diagnosis}{An object from \code{diagnose_design}, either a diagnosand dataframe or a list containing a diagnosand dataframe}
 
 \item{digits}{Number of digits.}
 
-\item{is.extracted}{Should be TRUE if diagnosis is a diagnosands dataframe; set to FALSE if diagnosis is a list containing the diagnosands data frame as its second element}
+\item{selection}{List of columns to include in output. Defaults to all.}
+
+\item{is.extracted}{Should be TRUE if diagnosis is a diagnosands dataframe; set to FALSE if diagnosis is a list containing the diagnosands dataframe as its second element}
 }
 \value{
 A formatted text table with bootstrapped standard errors in parentheses.
@@ -23,4 +26,5 @@ If diagnosands are bootstrapped, se's are put in parenthese on a second line and
 # library(DesignLibrary)
 # diagnosis <- diagnose_design(simple_two_arm_designer(), sims = 3)
 # reshape_diagnosis(diagnosis)
+# reshape_diagnosis(diagnosis, selection = c("bias", "power"))
 }
