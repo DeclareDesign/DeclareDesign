@@ -49,6 +49,8 @@
 
 simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
 
+  if(min(sims) < 1) stop("Sims should be >= 1")
+
   designs <- list(...)
 
   inferred_names <- paste(substitute(list(...)))[-1]
@@ -84,6 +86,14 @@ simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
     if(any(duplicated(names(designs)) | names(designs) == "")) stop("Please provide unique names for designs")
   }
 
+  # Ensure designs are length of sims if vector of sims is provided
+  if(!is.data.frame(sims)) if(length(sims) > 1) {
+    sim_length_check <- lapply(designs, length) != length(sims)
+    if(any(sim_length_check)) warning(
+      paste0("sims is of different length to designs for designs: ",
+      paste0(names(designs[sim_length_check]), collapse = ", ")))
+  }
+
   # Simulate single design
   if(length(designs) == 1) {
     out <- simulate_single_design(designs[[1]], sims = sims, add_parameters = add_parameters)
@@ -114,6 +124,9 @@ simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
   simulations_df <- do.call(rbind, simulations_list)
   simulations_df <- data.frame(simulations_df)
   rownames(simulations_df) <- NULL
+
+  # Check that there are the expected number of simulations
+  check_sim_number(simulations_df, sims)
 
   # Block to reorder  columns if add_parameters is TRUE
   if(add_parameters){
