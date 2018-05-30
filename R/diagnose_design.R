@@ -84,12 +84,6 @@ simulate_design <- function(...,  sims = 500, add_parameters = FALSE) {
     if(any(duplicated(names(designs)) | names(designs) == "")) stop("Please provide unique names for designs")
   }
 
-  # Make sure no designs have repeated estimator labels
-  duplicate_estimator_labels <- unlist(lapply(designs, check_design_estimator_labels))
-  if(any(duplicate_estimator_labels)) stop(
-    paste0("Duplicated labels in designs: ",
-          paste(names(designs)[duplicate_estimator_labels], collapse = ", ")))
-
   # Simulate single design
   if(length(designs) == 1) {
     out <- simulate_single_design(designs[[1]], sims = sims, add_parameters = add_parameters)
