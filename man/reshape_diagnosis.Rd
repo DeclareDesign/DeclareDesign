@@ -26,5 +26,5 @@ If diagnosands are bootstrapped, se's are put in parenthese on a second line and
 # library(DesignLibrary)
 # diagnosis <- diagnose_design(simple_two_arm_designer(), sims = 3)
 # reshape_diagnosis(diagnosis)
-# reshape_diagnosis(diagnosis, selection = c("bias", "power"))
+# reshape_diagnosis(diagnosis, selection = c("Bias", "Power"))
 }

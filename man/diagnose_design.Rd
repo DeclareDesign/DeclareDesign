@@ -11,7 +11,7 @@ diagnose_design(..., simulations_df = NULL, add_parameters = FALSE,
 \arguments{
 \item{...}{A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.}
 
-\item{add_parameters}{If TRUE, add any design parameters to the diagnosands_df inherited from simulation_df (and ultimately, from designs)}
+\item{add_parameters}{If TRUE, add any design parameters to the diagnosands_df and the bootrap_df, inherited from simulation_df (and ultimately, from designs)}
 
 \item{diagnosands}{A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).}
 
@@ -24,7 +24,7 @@ diagnose_design(..., simulations_df = NULL, add_parameters = FALSE,
 \item{simulations}{A dataframe with simulations of a design. user must provide either a simulations data frame or a design or list of designs. Should have a sims attribute indicating the number of simulations used.}
 }
 \description{
-Applies a diagnosand function to the simulations of a design results.
+Generates diagnosands from a design or simulations of a design. Returns a list with (1) simulations (2) diagnosands (3) bootstrapped diagnosands
 }
 \details{
 If the diagnosand function contains a \code{group_by} attribute, it will be used to split-apply-combine diagnosands rather than the intersecting column names.
