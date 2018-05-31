@@ -23,10 +23,11 @@ test_that("send estimand to estimator works", {
                               pate_estimator)
 
   rm(list = ls()[-which(ls() %in% "my_design")])
-  diag <- diagnose_design(my_design, sims = 2, bootstrap = 2)
+  diag <- diagnose_design(my_design, sims = 2, bootstrap = 3)
 
-  expect_equal(names(diag), c("simulations", "diagnosands"))
+  expect_equal(names(diag), c("simulations", "diagnosands", "bootstraps"))
   expect_equal(nrow(diag$simulations), 2)
   expect_equal(nrow(diag$diagnosands), 1)
+  expect_equal(nrow(diag$bootstraps), 3)
 
 })

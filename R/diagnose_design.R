@@ -430,10 +430,13 @@ diagnose_design <-
                                                cbind(bootstrap_id = i, boot_function()), # Add boostrap ID
                                              future.seed = NA,
                                              future.globals = "boot_function")
+      # Make diagnosand_replicates
       diagnosand_replicates <-
         do.call(rbind.data.frame, diagnosand_replicates)
       attr(diagnosand_replicates, "group_by_set") <- group_by_set
+      rownames(diagnosand_replicates)  <- NULL
 
+      # Prep for se calculation
       group_by_list <-
         diagnosand_replicates[, group_by_set, drop = FALSE]
 
@@ -449,8 +452,8 @@ diagnose_design <-
       diagnosands_df <- diagnosands_df[names(labels_df)]
 
       # Calculate standard errors
-#     diagnosand_replicates[, group_by_set] <- NULL
-      use_vars <- names(diagnosand_replicates)[!(names(diagnosand_replicates) %in% c(group_by_set, "bootstrap_id"))]
+      use_vars <- names(diagnosand_replicates)[!(names(diagnosand_replicates) %in%
+                                                   c(group_by_set, "bootstrap_id"))]
       diagnosands_se_df <-
         split(diagnosand_replicates[use_vars], group_by_list, drop = TRUE)
       diagnosands_se_df <- lapply(diagnosands_se_df, lapply, sd)
@@ -486,7 +489,6 @@ diagnose_design <-
     }
 
     rownames(diagnosands_df)         <- rnames
-    rownames(diagnosand_replicates)  <- NULL
 
     # Reorder by estimator labels in design
     estimator_labels <- unique(simulations_df$estimator_label)
@@ -506,10 +508,9 @@ diagnose_design <-
     attr(diagnosands_df, "n_diagosands")   <-
       nrow(diagnosands(simulations_df))
 
-
-    structure(list(simulations = simulations_df,
-                   diagnosands = diagnosands_df,
-                   bootstraps  = diagnosand_replicates),
-              class = "diagnosis")
+    # Return frames
+    out <- list(simulations = simulations_df, diagnosands = diagnosands_df)
+    if(bootstrap!=0) out$bootstraps <-  diagnosand_replicates
+    structure(out, class = "diagnosis")
 
   }
