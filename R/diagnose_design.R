@@ -412,24 +412,27 @@ diagnose_design <-
     rnames <- rownames(diagnosands_df)
 
     ################### Bootstrapping standard errors
-    if (bootstrap > 0) {
+
+    # Bootstrap function
+      if (bootstrap > 0) {
       boot_indicies_by_id <-
         split(1:nrow(simulations_df), simulations_df$sim_ID)
       nsims <- max(simulations_df$sim_ID)
       boot_function <- function() {
-        boot_ids <- sample.int(nsims, nsims, TRUE)
+        boot_ids      <- sample.int(nsims, nsims, TRUE)
         boot_indicies <- unlist(boot_indicies_by_id[boot_ids])
         calculate_diagnosands(simulations_df[boot_indicies, , drop = FALSE], diagnosands)
       }
 
+      # Bootstrap dataset
       diagnosand_replicates <- future_lapply(seq_len(bootstrap),
                                              function(i)
-                                               boot_function(), # this pattern seems to make the NSE happy for now
+                                               cbind(bootstrap_id = i, boot_function()), # Add boostrap ID
                                              future.seed = NA,
                                              future.globals = "boot_function")
       diagnosand_replicates <-
         do.call(rbind.data.frame, diagnosand_replicates)
-
+      attr(diagnosand_replicates, "group_by_set") <- group_by_set
 
       group_by_list <-
         diagnosand_replicates[, group_by_set, drop = FALSE]
@@ -445,12 +448,14 @@ diagnose_design <-
         split(diagnosands_df, diagnosands_df_group, drop = TRUE)
       diagnosands_df <- diagnosands_df[names(labels_df)]
 
-      diagnosand_replicates[group_by_set] <- NULL
-
+      # Calculate standard errors
+#     diagnosand_replicates[, group_by_set] <- NULL
+      use_vars <- names(diagnosand_replicates)[!(names(diagnosand_replicates) %in% c(group_by_set, "bootstrap_id"))]
       diagnosands_se_df <-
-        split(diagnosand_replicates, group_by_list, drop = TRUE)
+        split(diagnosand_replicates[use_vars], group_by_list, drop = TRUE)
       diagnosands_se_df <- lapply(diagnosands_se_df, lapply, sd)
 
+      # Clean up
       diagnosands_se_df <-
         lapply(diagnosands_se_df,
                setNames,
@@ -480,7 +485,8 @@ diagnose_design <-
       names(diagnosands_df)[ix] <- dim_cols
     }
 
-    rownames(diagnosands_df)  <- rnames
+    rownames(diagnosands_df)         <- rnames
+    rownames(diagnosand_replicates)  <- NULL
 
     # Reorder by estimator labels in design
     estimator_labels <- unique(simulations_df$estimator_label)
@@ -501,7 +507,9 @@ diagnose_design <-
       nrow(diagnosands(simulations_df))
 
 
-    structure(list(simulations = simulations_df, diagnosands = diagnosands_df),
+    structure(list(simulations = simulations_df,
+                   diagnosands = diagnosands_df,
+                   bootstraps  = diagnosand_replicates),
               class = "diagnosis")
 
   }
