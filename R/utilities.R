@@ -139,3 +139,20 @@ rbind_disjoint <- function(list_of_df, infill=NA) {
 `%i%` <- intersect
 
 `%||%` <- function(e1, e2) if(is.null(e1)) e2 else e1
+
+
+###############################################################################
+
+# helpers for summary.design
+
+get_added_variables <- function(last_df = NULL, current_df) {
+  setdiff(names(current_df), names(last_df))
+}
+
+get_modified_variables <- function(last_df = NULL, current_df) {
+  is_modified <- function(j) !isTRUE(all.equal(last_df[[j]], current_df[[j]]))
+  shared <- intersect(names(current_df), names(last_df))
+
+  Filter(is_modified, shared)
+}
+
