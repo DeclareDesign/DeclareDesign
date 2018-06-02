@@ -66,7 +66,7 @@ test_that("test assignment and probability functions", {
 
   # Complete Random Assignment assignments
   assignment_0 <- declare_assignment() %>% expect_assignment # blug
-  assignment_1 <- declare_assignment(conditions = c(0, 1))%>% expect_assignment
+  assignment_1 <- declare_assignment(conditions = c(0, 1)) %>% expect_assignment
   assignment_2 <- declare_assignment(m = 60, conditions = c(0, 1))%>% expect_assignment
   assignment_3 <- declare_assignment(m_each = c(20, 30, 50))%>% expect_assignment
   assignment_4 <- declare_assignment(m_each =c(20, 80), conditions = c(0, 1))%>% expect_assignment
@@ -123,6 +123,17 @@ test_that("declare_assignment expected failures via validation fn", {
   expect_error(declare_assignment(clusters='character'), "clusters")
 
   expect_error(declare_assignment(assignment_variable = NULL), "assignment_variable")
+})
+
+
+test_that("can append probabiliies matrix",{
+
+  pop <- declare_population(N = 10)
+  assignment <- declare_assignment(m = 5, append_probabilities_matrix = TRUE)
+  dat <- draw_data(declare_design(pop, assignment))
+
+  expect_true("Z_prob_0" %in% colnames(dat))
+
 })
 
 
