@@ -4,27 +4,29 @@
 \alias{diagnose_design}
 \title{Diagnose the Design}
 \usage{
-diagnose_design(..., simulations_df = NULL, add_parameters = FALSE,
-  diagnosands = default_diagnosands, sims = 500, bootstrap = 100,
-  add_grouping_variables = NULL)
+diagnose_design(..., diagnosands = default_diagnosands, sims = 500,
+  bootstrap_sims = 100, add_grouping_variables = NULL)
 }
 \arguments{
-\item{...}{A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.}
-
-\item{add_parameters}{If TRUE, add any design parameters to the diagnosands_df and the bootrap_df, inherited from simulation_df (and ultimately, from designs)}
+\item{...}{A design or set of designs, typically created by \code{\link{declare_design}}.}
 
 \item{diagnosands}{A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).}
 
 \item{sims}{The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}}
 
-\item{bootstrap}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}.}
+\item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.}
 
 \item{add_grouping_variables}{Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_ID", "estimand_label", "estimator_label", "coefficient")}
 
-\item{simulations}{A dataframe with simulations of a design. user must provide either a simulations data frame or a design or list of designs. Should have a sims attribute indicating the number of simulations used.}
+\item{designs}{A list of designs, typically created by \code{\link{expand_design}}.}
+
+\item{simulations_df}{A dataframe with simulations of a design. user must provide either a simulations data frame or a design or list of designs. Should have a sims attribute indicating the number of simulations used.}
+}
+\value{
+a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
 }
 \description{
-Generates diagnosands from a design or simulations of a design. Returns a list with (1) simulations (2) diagnosands (3) bootstrapped diagnosands
+Generates diagnosands from a design or simulations of a design.
 }
 \details{
 If the diagnosand function contains a \code{group_by} attribute, it will be used to split-apply-combine diagnosands rather than the intersecting column names.
@@ -76,7 +78,7 @@ get_simulations(diagnosis)
 # Using an existing data frame of simulations
 \dontrun{
 simulations <- simulate_design(designs, sims = 2)
-diagnosis   <- diagnose_design(simulations_df = simulations)
+diagnosis   <- diagnose_design(simulations_df = simulations_df)
 
 }
 }

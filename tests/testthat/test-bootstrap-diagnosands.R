@@ -24,7 +24,7 @@ test_that("test diagnosands", {
                               pate_estimator2)
 
   # default set
-  diagnosis <- diagnose_design(my_design, sims = 2, bootstrap = 2)
+  diagnosis <- diagnose_design(my_design, sims = 2, bootstrap_sims = 2)
 
   expect_equal(dim(diagnosis$diagnosands), c(2,21))
 

@@ -1,263 +1,21 @@
-#' Simulate a design
-#'
-#' Runs many simulations of a design and saves to a dataframe.
-#'
-#'
-#' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.
-#'
-#' @param sims The number of simulations, defaulting to 500. If sims is a vector of the form c(10, 1, 2, 1) then different steps of a design will be simulated different numbers of times.  See details.
-#'
-#' @param add_parameters If TRUE, add any design parameters to the simulations_df and add the names of parameters as attributes to the simulations_df to be picked up by \code{\link{diagnose_design}}
-#' @importFrom stats setNames
-#' @importFrom utils head
-#' @export
-#' @examples
-#' my_population <- declare_population(N = 500, noise = rnorm(N))
-#'
-#' my_potential_outcomes <- declare_potential_outcomes(
-#'   Y_Z_0 = noise, Y_Z_1 = noise +
-#'   rnorm(N, mean = 2, sd = 2))
-#'
-#' my_assignment <- declare_assignment()
-#'
-#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-#'
-#' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-#'
-#' my_reveal <- declare_reveal()
-#'
-#' design <- declare_design(my_population,
-#'                          my_potential_outcomes,
-#'                          my_estimand,
-#'                          my_assignment,
-#'                          my_reveal,
-#'                          my_estimator)
-#'
-#' \dontrun{
-#' simulations <- simulate_design(designs, sims = 2)
-#' diagnosis   <- diagnose_design(simulations_df = simulations)
-#' }
-#'
-#' \dontrun{
-#' # A fixed population with simulations over assignment only
-#' head(simulate_design(design, sims = c(1,1,1,100,1)))
-#'}
-#'
-#'@details
-#'
-#' Different steps of a design may each be simulated different a number of times, as specified by sims. In this case simulations are grouped into "fans", eg "fan_1" indicates all the simulations that have the same draw from the first level of the design. For efficiency there are generally fewer fans than design steps where all contiguous steps with 1 sim specified are combined into a single fan.
-
-simulate_design <-
-  function(...,
-           sims = 500,
-           add_parameters = FALSE) {
-    if (min(sims) < 1)
-      stop("Sims should be >= 1")
-
-    designs <- list(...)
-
-    inferred_names <- paste(substitute(list(...)))[-1]
-
-    ## Two cases:
-    ## 1. send one or more design objects created by declare_design
-    ## 2. send a single list of design objects e.g. created by expand_design
-    ## Approach: unpack designs if a list of designs was sent as a single list object
-    if (length(designs) == 1 &&
-        is.list(designs[[1]]) && !"design" %in% class(designs[[1]])) {
-      designs <- designs[[1]]
-      if (!is.null(names(designs))) {
-        inferred_names <- names(designs)
-      } else {
-        inferred_names <- paste0("design_", 1:length(designs))
-      }
-    }
-
-    ## Do not allow users to send more than one object if any is not a design object
-    if (!all(vapply(designs, inherits, FALSE, "design"))) {
-      stop("Please only send design objects to simulate_design.")
-    }
-
-    # Ensure designs have names
-    if (is.null(names(designs)))
-      names(designs) <- inferred_names
-    names(designs)[names(designs) == ""] <-
-      inferred_names[names(designs) == ""]
-
-    # Make sure no duplicated or empty names
-    dupes <- duplicated(names(designs)) | names(designs) == ""
-    if (any(dupes)) {
-      warning("Duplicated or missing names for some designs.")
-      n_dupes <- sum(dupes)
-      names(designs)[dupes] <-
-        paste0("_tempname_", (1:length(designs))[dupes])
-      if (any(duplicated(names(designs)) |
-              names(designs) == ""))
-        stop("Please provide unique names for designs")
-    }
-
-    # Ensure designs are length of sims if vector of sims is provided
-    if (!is.data.frame(sims))
-      if (length(sims) > 1) {
-        sim_length_check <- lapply(designs, length) != length(sims)
-        if (any(sim_length_check))
-          warning(paste0(
-            "sims is of different length to designs for designs: ",
-            paste0(names(designs[sim_length_check]), collapse = ", ")
-          ))
-      }
-
-    # Simulate single design
-    if (length(designs) == 1) {
-      out <-
-        simulate_single_design(designs[[1]], sims = sims, add_parameters = add_parameters)
-      return(out)
-    }
-
-    # Simulate Multiple Designs
-    simulations_list <- lapply(designs,
-                               simulate_single_design,
-                               sims = sims,
-                               add_parameters = add_parameters)
-
-    simulations_list <-
-      Map(cbind,  design_ID = names(simulations_list), simulations_list)
-
-    # Create columns for non-existing attributes to allow merging
-    col_list <-
-      unique(unlist(as.vector(sapply(
-        simulations_list, names
-      ))))
-    simulations_list <- lapply(simulations_list, function(x) {
-      if (!identical(col_list , colnames(x))) {
-        missing_cols <- col_list[!col_list %in% colnames(x)]
-        append       <- replicate(length(missing_cols), rep(NA, sims))
-        colnames(append) <- missing_cols
-        x <- cbind(x, append)
-      }
-      x <- x[, col_list]
-    })
-
-    # Cleanup
-    simulations_df <- do.call(rbind, simulations_list)
-    simulations_df <- data.frame(simulations_df)
-    rownames(simulations_df) <- NULL
-
-    # Check that there are the expected number of simulations
-    check_sim_number(simulations_df, sims)
-
-    # Block to reorder  columns if add_parameters is TRUE
-    if (add_parameters) {
-      allcolnames <- colnames(simulations_df)
-      part_1 <- c("design_ID", "sim_ID")
-      part_1 <- part_1[part_1 %in%  allcolnames]
-      part_2 <- get_parnames(designs)
-      part_3 <- allcolnames[!(allcolnames %in% c(part_1, part_2))]
-      simulations_df <- simulations_df[, c(part_1, part_2, part_3)]
-      attr(simulations_df, "parameters") <- part_2
-    }
-
-    # Add attributes
-    attr(simulations_df, "sims") <- sims
-
-    structure(simulations_df)
-
-  }
-
-
-
-####################
-
-#' Run Single Design -- Basic simulation script that is called on by simulate_design
-
-simulate_single_design <-
-  function(design, sims, add_parameters = FALSE) {
-    ### If sims is set correctly, fan out
-
-    if (length(sims) == 1 && is.null(names(sims))) {
-      results_list <- future_lapply(seq_len(sims),
-                                    function(i)
-                                      run_design(design),
-                                    future.seed = NA, future.globals = "design")
-    } else {
-      sims <- check_sims(design, sims)
-      results_list <- fan_out(design, sims)
-      fan_id <-
-        setNames(rev(do.call(expand.grid, lapply(
-          rev(sims$n), seq
-        ))), paste0("fan_", seq_len(nrow(sims))))
-      fan_id$sim_ID <- seq_len(nrow(fan_id))
-    }
-
-    results2x <- function(results_list, what) {
-      subresult <- lapply(results_list, `[[`, what)
-      df <- do.call(rbind.data.frame, subresult)
-      if (nrow(df) == 0)
-        return(df)
-
-      df <-
-        cbind(sim_ID = rep(seq_along(subresult), vapply(subresult, nrow, 0L)), df)
-    }
-
-    estimates_df <- results2x(results_list, "estimates_df")
-    estimands_df <- results2x(results_list, "estimands_df")
-
-
-    if (nrow(estimands_df) == 0 && nrow(estimates_df) > 0) {
-      simulations_df <- estimates_df
-    } else if (nrow(estimands_df) > 0 && nrow(estimates_df) == 0) {
-      simulations_df <- estimands_df
-    } else {
-      simulations_df <-
-        merge(
-          estimands_df,
-          estimates_df,
-          by = colnames(estimands_df) %i% colnames(estimates_df),
-          all = TRUE,
-          sort = FALSE
-        )
-
-      if (nrow(simulations_df) > max(nrow(estimands_df), nrow(estimates_df))) {
-        warning(
-          "Estimators lack estimand/coefficient labels for matching, a many-to-many merge was performed."
-        )
-      }
-    }
-
-    if (exists("fan_id")) {
-      simulations_df <- merge(simulations_df, fan_id, by = "sim_ID")
-    }
-
-    # Optionally add columns containing parameter attributes of a design
-
-    if (add_parameters) {
-      if (!is_empty(attr(design , "parameters"))) {
-        parameters <- sapply(attr(design , "parameters"), rep, sims)
-        if (sims == 1)
-          parameters <- t(parameters)
-        simulations_df <-
-          cbind(parameters, simulations_df)
-      }
-    }
-
-    attr(simulations_df, "sims") <- sims
-
-    structure(simulations_df)
-
-  }
-
 
 #' Diagnose the Design
 #'
-#' Generates diagnosands from a design or simulations of a design. Returns a list with (1) simulations (2) diagnosands (3) bootstrapped diagnosands
+#' Generates diagnosands from a design or simulations of a design. 
 #'
-#' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.
-#' @param simulations A dataframe with simulations of a design. user must provide either a simulations data frame or a design or list of designs. Should have a sims attribute indicating the number of simulations used.
+#' @param ... A design or set of designs, typically created by \code{\link{declare_design}}.
+#' @param designs A list of designs, typically created by \code{\link{expand_design}}.
+#' @param simulations_df A dataframe with simulations of a design. user must provide either a simulations data frame or a design or list of designs. Should have a sims attribute indicating the number of simulations used.
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
-#' @param add_parameters If TRUE, add any design parameters to the diagnosands_df and the bootrap_df, inherited from simulation_df (and ultimately, from designs)
 #' @param add_grouping_variables Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_ID", "estimand_label", "estimator_label", "coefficient")
 #'
 #' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}
-#' @param bootstrap Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}.
+#' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.
+#'
+#' @return a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
+#'
+#'
+#'
 #'
 #' @details
 #'
@@ -311,207 +69,186 @@ simulate_single_design <-
 #' # Using an existing data frame of simulations
 #' \dontrun{
 #' simulations <- simulate_design(designs, sims = 2)
-#' diagnosis   <- diagnose_design(simulations_df = simulations)
+#' diagnosis   <- diagnose_design(simulations_df = simulations_df)
 #'
 #' }
 
 #' @importFrom stats setNames
 #' @importFrom utils head
-#' @export
+#' @export 
 diagnose_design <-
   function(...,
-           simulations_df = NULL,
-           add_parameters = FALSE,
            diagnosands = default_diagnosands,
            sims = 500,
-           bootstrap = 100,
+           bootstrap_sims = 100,
            add_grouping_variables = NULL) {
-    designs <- list(...)
-
-    grouping_variables <-
-      c(
-        "design_ID",
-        "estimand_label",
-        "estimator_label",
-        "coefficient",
-        add_grouping_variables
-      )
-
-    ## Two cases:
-    ## 1. send one or more design objects created by declare_design
-    ## 2. send a single list of design objects e.g. created by expand_design
-    ## Approach: unpack designs if a list of designs was sent as a single list object
-    if (length(designs) == 1 &&
-        is.list(designs[[1]]) && !"design" %in% class(designs[[1]])) {
-      ## this unpacks designs if a list of designs was sent as a single list object, i.e.
-      ##   as created by expand_design
-      designs <- designs[[1]]
-      if (!is.null(names(designs))) {
-        inferred_names <- names(designs)
-      } else {
-        inferred_names <- paste0("design_", 1:length(designs))
+    
+    dots_quos <- quos(...)
+    dots <- lapply(dots_quos, eval_tidy)
+    
+    # three cases:
+    # 1. it's a data frame -- this is the simulations df
+    # 2. it's a single object that is a list of designs -- unpack designs
+    # 3. it's a ... of one or more designs
+    if (length(dots) == 1 && inherits(dots[[1]], "data.frame")) {
+      simulations_df <- dots[[1]]
+      if (!any(names(simulations_df) %in% c("estimator_label", "estimand_label"))) {
+        stop("Can't calculate diagnosands on this data.frame, which does not include either an estimator_label or an estimand_label. Did you send a simulations data frame?")
       }
-    }
-
-    if (length(designs) > 0) {
+    } else {
+      if (inherits(dots[[1]], "list")) {
+        designs <- dots[[1]]
+      } else {
+        designs <- dots
+      }
       if (!all(vapply(designs, inherits, FALSE, "design"))) {
         stop(
-          "Please only send design objects to diagnose_design. If providing simulations_df use simulations_df = simulations_df."
+          "Please only send design objects created by declare_design to diagnose_design."
         )
       }
     }
-
-    if (is.null(simulations_df) + (length(designs) == 0) != 1) {
-      stop("Must provide either a design or a simulations data frame (not both, not neither!)")
+    
+    # simulate if needed ------------------------------------------------------
+    
+    if (!exists("simulations_df")) {
+#      simulations_df <- do.call(what = simulate_design, args = list(designs, sims = sims))
+      simulations_df <- simulate_design(!!!dots_quos, sims = sims)
     }
-
-
-    # Update sims to reflect actual simulation dataframe
-    if (!is.null(simulations_df))
-      sims <- attr(simulations_df, "sims")
-
-    if (is.null(simulations_df))
-      simulations_df <- simulate_design(designs,
-                                        sims = sims,
-                                        add_parameters = add_parameters)
-
-    group_by_set <- attr(diagnosands, "group_by") %||%
-      colnames(simulations_df) %i% grouping_variables
-
-    ## Get the list of parameter attributes in design list since these are to be preserved in dataframe
-    if (add_parameters) {
+    
+    # figure out what to group by ---------------------------------------------
+    
+    group_by_set <-
+      c("design_ID",
+        "estimand_label",
+        "estimator_label",
+        "coefficient")
+    
+    if (!is_empty(attr(simulations_df, "parameters"))) {
       group_by_set <- c(group_by_set, attr(simulations_df, "parameters"))
     }
-
-    calculate_diagnosands <- function(simulations_df, diagnosands) {
-      group_by_list <- simulations_df[, group_by_set, drop = FALSE]
-
-      labels_df <- split(group_by_list, group_by_list, drop = TRUE)
-      labels_df <- lapply(labels_df, head, n = 1)
-
-      diagnosands_df <-
-        split(simulations_df, group_by_list, drop = TRUE)
-      diagnosands_df <-
-        lapply(
-          diagnosands_df,
-          FUN = function(x) {
-            dg <- diagnosands(x)
-            setNames(dg[[2]], dg[[1]])
-          }
-        )
-
-      diagnosands_df <-
-        as.data.frame(t(mapply(c, labels_df, diagnosands_df)), stringsAsFactors =
-                        FALSE) # c appropriate and fast here bc labels_df must be a list (drop=FALSE above)
-      diagnosands_df[] <- lapply(diagnosands_df, unlist)
-
-      return(diagnosands_df)
+    
+    if (!is.null(add_grouping_variables)) {
+      group_by_set <- c(group_by_set, add_grouping_variables)
     }
-
-    diagnosands_df <-
-      calculate_diagnosands(simulations_df, diagnosands)
-    rnames <- rownames(diagnosands_df)
-
-    ################### Bootstrapping standard errors
-
-    # Bootstrap function
-      if (bootstrap > 0) {
-      boot_indicies_by_id <-
-        split(1:nrow(simulations_df), simulations_df$sim_ID)
-      nsims <- max(simulations_df$sim_ID)
-      boot_function <- function() {
-        boot_ids      <- sample.int(nsims, nsims, TRUE)
-        boot_indicies <- unlist(boot_indicies_by_id[boot_ids])
-        calculate_diagnosands(simulations_df[boot_indicies, , drop = FALSE], diagnosands)
-      }
-
-      # Bootstrap dataset
-      diagnosand_replicates <- future_lapply(seq_len(bootstrap),
-                                             function(i)
-                                               cbind(bootstrap_id = i, boot_function()), # Add boostrap ID
-                                             future.seed = NA,
-                                             future.globals = "boot_function")
-      # Make diagnosand_replicates
-      diagnosand_replicates <-
-        do.call(rbind.data.frame, diagnosand_replicates)
-      attr(diagnosand_replicates, "group_by_set") <- group_by_set
-      rownames(diagnosand_replicates)  <- NULL
-
-      # Prep for se calculation
-      group_by_list <-
-        diagnosand_replicates[, group_by_set, drop = FALSE]
-
-      labels_df <- split(group_by_list, group_by_list, drop = TRUE)
-      labels_df <- lapply(labels_df, head, n = 1)
-
-      diagnosands_df_group <-
-        diagnosands_df[, group_by_set, drop = FALSE]
-      diagnosands_df[group_by_set] <- NULL
-      diagnosands_names <- colnames(diagnosands_df)
-      diagnosands_df <-
-        split(diagnosands_df, diagnosands_df_group, drop = TRUE)
-      diagnosands_df <- diagnosands_df[names(labels_df)]
-
-      # Calculate standard errors
-      use_vars <- names(diagnosand_replicates)[!(names(diagnosand_replicates) %in%
-                                                   c(group_by_set, "bootstrap_id"))]
-      diagnosands_se_df <-
-        split(diagnosand_replicates[use_vars], group_by_list, drop = TRUE)
-      diagnosands_se_df <- lapply(diagnosands_se_df, lapply, sd)
-
-      # Clean up
-      diagnosands_se_df <-
-        lapply(diagnosands_se_df,
-               setNames,
-               sprintf("se(%s)", diagnosands_names))
-
-      diagnosands_df <- as.data.frame(t(mapply(
-        c, labels_df, diagnosands_df, diagnosands_se_df
-      )),
-      stringsAsFactors = FALSE)
-      diagnosands_df[] <- lapply(diagnosands_df, unlist)
-
-      # Permute columns so SEs are right of diagnosands
-      n_diag <- length(diagnosands_names)
-      i <-
-        c(
-          seq_along(group_by_set),
-          length(group_by_set) + rep(seq_len(n_diag), each = 2) + c(0, n_diag)
-        )
-      diagnosands_df <- diagnosands_df[, i, drop = FALSE]
-
-
-      # Reordering columns
-      dim_cols <-
-        c("estimator_label", "coefficient", "estimand_label") %i% group_by_set
-      ix <- sort(match(dim_cols, colnames(diagnosands_df)))
-      diagnosands_df[ix] <- diagnosands_df[dim_cols]
-      names(diagnosands_df)[ix] <- dim_cols
+    
+    group_by_set <- colnames(simulations_df) %i% group_by_set
+    
+    # Actually calculate diagnosands ------------------------------------------
+    
+    diagnosands_df <- calculate_diagnosands(simulations_df = simulations_df,
+                                            diagnosands = diagnosands,
+                                            group_by_set = group_by_set)
+    
+    diagnosand_names <- names(diagnosands_df)[!(names(diagnosands_df) %in% group_by_set)]
+    
+    # Bootstrap ---------------------------------------------------------------
+    
+    if (bootstrap_sims > 0) {
+      bootout <- bootstrap_diagnosands(bootstrap_sims = bootstrap_sims,
+                                       diagnosands = diagnosands,
+                                       simulations_df = simulations_df,
+                                       diagnosands_df = diagnosands_df,
+                                       group_by_set = group_by_set)
+      diagnosands_df <- bootout$diagnosands_df
     }
-
-    rownames(diagnosands_df)         <- rnames
-
-    # Reorder by estimator labels in design
-    estimator_labels <- unique(simulations_df$estimator_label)
-    if (length(estimator_labels) > 1) {
-      estimator_f <-
-        factor(diagnosands_df$estimator_label, estimator_labels)
-      if (length(designs) == 1) {
-        diagnosands_df <- diagnosands_df[order(estimator_f), , drop = FALSE]
-      } else {
-        diagnosands_df <-
-          diagnosands_df[order(diagnosands_df$design_ID, estimator_f), , drop = FALSE]
-      }
-    }
-
-    attr(diagnosands_df, "sims")      <- sims
-    attr(diagnosands_df, "bootstrap") <- bootstrap
-    attr(diagnosands_df, "n_diagosands")   <-
-      nrow(diagnosands(simulations_df))
-
+    
+    # prep for return ---------------------------------------------------------
+    
+    rownames(diagnosands_df) <- NULL
+    
+    # Reorder rows
+    sort_by_list <- colnames(simulations_df) %i% c("design_ID", "estimator_label", "coefficient", "estimand_label", "statistic")
+    simulations_df <- simulations_df[do.call(order, as.list(simulations_df[sort_by_list])), , drop = FALSE]
+    
     # Return frames
-    out <- list(simulations = simulations_df, diagnosands = diagnosands_df)
-    if(bootstrap!=0) out$bootstraps <-  diagnosand_replicates
+    out <- list(simulations_df = simulations_df, diagnosands = diagnosands_df, diagnosand_names = diagnosand_names)
+    
+    if (bootstrap_sims != 0) {
+      out$bootstrap_replicates <- bootout$diagnosand_replicates
+    }
+    
     structure(out, class = "diagnosis")
-
+    
   }
+
+calculate_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
+  group_by_list <- simulations_df[, group_by_set, drop = FALSE]
+  
+  labels_df <- split(group_by_list, group_by_list, drop = TRUE)
+  labels_df <- lapply(labels_df, head, n = 1)
+  
+  diagnosands_df <- split(simulations_df, group_by_list, drop = TRUE)
+  diagnosands_df <- lapply(diagnosands_df, FUN = function(x) {   
+    dg <- diagnosands(x)  
+    setNames(dg[[2]], dg[[1]]) 
+  })
+  
+  # c appropriate and fast here bc labels_df must be a list (drop=FALSE above)
+  diagnosands_df <- as.data.frame(t(mapply(c, labels_df, diagnosands_df)), stringsAsFactors = FALSE)
+  
+  diagnosands_df[] <- lapply(diagnosands_df, unlist)
+  
+  return(diagnosands_df)
+}
+
+bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, diagnosands_df, group_by_set) {
+  
+  boot_indicies_by_id <- split(1:nrow(simulations_df), simulations_df$sim_ID)
+  nsims <- max(simulations_df$sim_ID)
+  
+  boot_function <- function() {
+    boot_ids      <- sample.int(nsims, nsims, TRUE)
+    boot_indicies <- unlist(boot_indicies_by_id[boot_ids])
+    calculate_diagnosands(simulations_df = simulations_df[boot_indicies, , drop = FALSE],
+                          diagnosands = diagnosands,
+                          group_by_set = group_by_set)
+  }
+  
+  # Make a list of diagnosand replicates
+  diagnosand_replicates <- future_lapply(seq_len(bootstrap_sims),
+                                         function(i) cbind(bootstrap_id = i, boot_function()), # Add boostrap ID
+                                         future.seed = NA,
+                                         future.globals = "boot_function")
+  
+  # Make a data.frame of diagnosand replicates
+  diagnosand_replicates <- do.call(rbind.data.frame, diagnosand_replicates)
+  rownames(diagnosand_replicates)  <- NULL
+  
+  # Prep for se calculation
+  group_by_list <- diagnosand_replicates[, group_by_set, drop = FALSE]
+  labels_df <- split(group_by_list, group_by_list, drop = TRUE)
+  labels_df <- lapply(labels_df, head, n = 1)
+  
+  diagnosands_df_group <- diagnosands_df[, group_by_set, drop = FALSE]
+  diagnosands_df[group_by_set] <- NULL
+  diagnosands_names <- colnames(diagnosands_df)
+  
+  diagnosands_df <- split(diagnosands_df, diagnosands_df_group, drop = TRUE)
+  diagnosands_df <- diagnosands_df[names(labels_df)]
+  
+  # Calculate standard errors
+  use_vars <- names(diagnosand_replicates)[!(names(diagnosand_replicates) %in% c(group_by_set, "bootstrap_id"))]
+  diagnosands_se_df <- split(diagnosand_replicates[use_vars], group_by_list, drop = TRUE)
+  diagnosands_se_df <- lapply(diagnosands_se_df, lapply, sd)
+  
+  # Clean up
+  diagnosands_se_df <- lapply(diagnosands_se_df, setNames, sprintf("se(%s)", diagnosands_names))
+  
+  diagnosands_df <- as.data.frame(t(mapply(c, labels_df, diagnosands_df, diagnosands_se_df)),
+                                  stringsAsFactors = FALSE)
+  diagnosands_df[] <- lapply(diagnosands_df, unlist)
+  
+  # Permute columns so SEs are right of diagnosands
+  n_diag <- length(diagnosands_names)
+  i <- c(seq_along(group_by_set),
+         length(group_by_set) + rep(seq_len(n_diag), each = 2) + c(0, n_diag))
+  diagnosands_df <- diagnosands_df[, i, drop = FALSE]
+  
+  # Reordering columns
+  dim_cols <- c("estimator_label", "coefficient", "estimand_label") %i% group_by_set
+  ix <- sort(match(dim_cols, colnames(diagnosands_df)))
+  diagnosands_df[ix] <- diagnosands_df[dim_cols]
+  names(diagnosands_df)[ix] <- dim_cols
+  
+  return(list(diagnosands_df = diagnosands_df, diagnosand_replicates = diagnosand_replicates))
+}

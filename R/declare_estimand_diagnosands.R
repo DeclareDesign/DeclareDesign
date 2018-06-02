@@ -88,7 +88,8 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label){
 declare_diagnosands <- make_declarations(diagnosand_handler, "diagnosand", "diagnosands")
 
 # Defaults are implemented directly.
-default_diagnosands <- function(data, alpha=.05){
+default_diagnosands <-
+  function(data, alpha = .05){
 
   est      <- data$est         %||% NA
   estimand <- data$estimand    %||% NA
@@ -110,6 +111,6 @@ default_diagnosands <- function(data, alpha=.05){
 
 
   data.frame(estimand_label = c("bias", "rmse", "power", "coverage", "mean_estimate", "sd_estimate", "mean_se", "type_s_rate", "mean_estimand"),
-             estimand       = c( bias ,  rmse ,  power ,  coverage ,  mean_estimate ,  sd_estimate , mean_se,  type_s_rate ,  mean_estimand ))
+             estimand = c( bias ,  rmse ,  power ,  coverage ,  mean_estimate ,  sd_estimate , mean_se,  type_s_rate ,  mean_estimand ))
 }
 

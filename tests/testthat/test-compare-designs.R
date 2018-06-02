@@ -30,38 +30,33 @@ test_that("compare_designs works", {
                                 sate_estimator)
 
 
-  diagnosis_1 <- diagnose_design(my_design_1, sims = 2, bootstrap = FALSE)
-  diagnosis_2 <- diagnose_design(my_design_2, sims = 2, bootstrap = FALSE)
+  diagnosis_1 <- diagnose_design(my_design_1, sims = 2, bootstrap_sims = FALSE)
+  diagnosis_2 <- diagnose_design(my_design_2, sims = 2, bootstrap_sims = FALSE)
 
   # designs not in list, no names, names are imputed
-  comparison <- diagnose_design(my_design_1, my_design_2, sims = 2, bootstrap = FALSE)
-  expect_equal(comparison$diagnosands$design_ID, factor(c("design_1","design_2")))
+  comparison <- diagnose_design(my_design_1, my_design_2, sims = 2, bootstrap_sims = FALSE)
+  expect_equal(comparison$diagnosands$design_ID, c("my_design_1","my_design_2"))
 
   # designs in list, no names, names are imputed
-  comparison <- diagnose_design(list(my_design_1, my_design_2), sims = 2, bootstrap = FALSE)
-  expect_equal(comparison$diagnosands$design_ID, factor(c("design_1","design_2")))
+  comparison <- diagnose_design(list(my_design_1, my_design_2), sims = 2, bootstrap_sims = FALSE)
+  expect_equal(comparison$diagnosands$design_ID, c("design_1","design_2"))
 
   # designs not in list, all names, names used
-  comparison <- diagnose_design(d1 = my_design_1, d2 = my_design_2, sims = 2, bootstrap = FALSE)
-  expect_equal(comparison$diagnosands$design_ID, factor(c("d1", "d2")))
+  comparison <- diagnose_design(d1 = my_design_1, d2 = my_design_2, sims = 2, bootstrap_sims = FALSE)
+  expect_equal(comparison$diagnosands$design_ID, c("d1", "d2"))
 
   # designs in list, all names, names used
-  comparison <- diagnose_design(list(d1 = my_design_1, d2 = my_design_2), sims = 2, bootstrap = FALSE)
-  expect_equal(comparison$diagnosands$design_ID, factor(c("d1", "d2")))
+  comparison <- diagnose_design(list(d1 = my_design_1, d2 = my_design_2), sims = 2, bootstrap_sims = FALSE)
+  expect_equal(comparison$diagnosands$design_ID, c("d1", "d2"))
 
   # designs not in list, some names, available names used, others unhappily imputed
-  comparison <- diagnose_design(my_design_1, design_2 = my_design_2, sims = 2, bootstrap = FALSE)
-  expect_equal(comparison$diagnosands$design_ID, factor(c("_tempname_1", "design_2")))
+  comparison <- diagnose_design(my_design_1, a_design_2 = my_design_2, sims = 2, bootstrap_sims = FALSE)
+  expect_equal(comparison$diagnosands$design_ID, c("my_design_1", "a_design_2"))
 
-  # designs not in list, duplicated names used, new ones unhappily imputed
-  comparison <- diagnose_design(d1 = my_design_1, d1 = my_design_2, sims = 2, bootstrap = FALSE)
-  expect_equal(as.character(comparison$diagnosands$design_ID),
-               c("d1", "_tempname_2"))
+  # designs not in list, duplicated names used, error
+  expect_error(comparison <- diagnose_design(d1 = my_design_1, d1 = my_design_2, sims = 2, bootstrap_sims = FALSE))
 
-  # designs in list, duplicated names used, new ones unhappily imputed
-  comparison <- diagnose_design(list(d1 = my_design_1, d1 = my_design_2), sims = 2, bootstrap = FALSE)
-  expect_equal(as.character(comparison$diagnosands$design_ID),
-               c("d1", "_tempname_2"))
-
+  # designs in list, duplicated names used, error
+  expect_error(comparison <- diagnose_design(list(d1 = my_design_1, d1 = my_design_2), sims = 2, bootstrap_sims = FALSE))
 
   })

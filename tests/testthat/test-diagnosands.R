@@ -21,6 +21,32 @@ my_design <- declare_design(my_population(),
                             reveal_outcomes,
                             pate_estimator)
 
+my_design_2 <- my_design
+my_design_3 <- my_design
+
+
+test_that("s3 dispatch works",{
+  diagnosis <- diagnose_design(my_design, sims = 20)
+  expect_equal(nrow(diagnosis$diagnosands), 1)
+  
+  diagnosis <- diagnose_design(my_design, my_design_2, sims = 20)
+  expect_equal(nrow(diagnosis$diagnosands), 2)
+  
+  diagnosis <- diagnose_design(list(my_design, my_design_2), sims = 20)
+  expect_equal(nrow(diagnosis$diagnosands), 2)
+  
+  expect_error(diagnose_design(list(my_design, my_design_2), my_design_3, sims = 20))
+  
+  sims_df <- simulate_design(my_design, my_design_2, sims = 20)
+  diagnosis <- diagnose_design(sims_df)
+  
+  expect_equal(nrow(diagnosis$diagnosands), 1)
+  
+})
+
+
+
+
 
 test_that("parallel works.", {
   #TODO use future
@@ -29,7 +55,7 @@ test_that("parallel works.", {
   skip_on_cran()
 
   suppressWarnings(
-    diag <- diagnose_design(my_design, sims = 2, bootstrap = FALSE)
+    diag <- diagnose_design(my_design, sims = 2, bootstrap_sims = FALSE)
   )
 
   expect_output(print(diag), regexp = "Research design diagnosis")
@@ -39,9 +65,9 @@ test_that("parallel works.", {
 test_that("Diagnosis prints ok", {
 
 
-  diag <- diagnose_design(my_design, sims = 2, bootstrap = FALSE)
+  diag <- diagnose_design(my_design, sims = 2, bootstrap_sims = FALSE)
 
-  ## diagnose_design(my_design, sims = 2, bootstrap = FALSE, parallel = TRUE)
+  ## diagnose_design(my_design, sims = 2, bootstrap_sims = FALSE, parallel = TRUE)
 
   expect_output(print(diag), regexp = "Research design diagnosis")
 
@@ -57,7 +83,7 @@ test_that("test diagnosands without estimands", {
                               no_estimand=declare_estimator(Y~Z))
 
   my_dig <-  declare_diagnosands(mean_est = mean(est), sd_est = sd(est))
-  diagnosis <- diagnose_design(my_design2, sims = 2, diagnosands = my_dig, bootstrap = FALSE)
+  diagnosis <- diagnose_design(my_design2, sims = 2, diagnosands = my_dig, bootstrap_sims = FALSE)
 
   head(diagnosis$simulations)
 
@@ -73,13 +99,13 @@ test_that("custom diagnosand function", {
   my_dig <-  declare_diagnosands(mean_x5 = mean_custom(est), mean_true = mean(est))
 
   rm(mean_custom)
-  diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_dig, bootstrap = FALSE)
+  diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_dig, bootstrap_sims = FALSE)
 
   expect_true("mean_x5" %in% names(diagnosis$diagnosands))
 
 
   # works with two with bootstrapping
-  diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_dig, bootstrap = 2)
+  diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_dig, bootstrap_sims = 2)
 
   expect_true("se(mean_x5)" %in% names(diagnosis$diagnosands))
 })
@@ -101,7 +127,7 @@ test_that("no estimates, no estimators should error", {
   my_design <- declare_design(my_population)
   head(draw_data(my_design))
 
-  expect_error(diagnose_design(my_design, sims = 2, bootstrap = FALSE))
+  expect_error(diagnose_design(my_design, sims = 2, bootstrap_sims = FALSE))
 
 })
 
@@ -115,7 +141,7 @@ test_that("diagnosis, list of designs",{
 
   diagnosand <- declare_diagnosands(z=mean(est> 0))
 
-  expect_error(diagnose_design(sleep), "Please only send design objects to diagnose_design")
+  expect_error(diagnose_design(sleep), "Can't calculate diagnosands on this data.frame, which does not include either an estimator_label or an estimand_label. Did you send a simulations data frame?")
 
   diag1 <- diagnose_design(list(d,d), diagnosands = diagnosand, sims = 5)
   diag2 <- diagnose_design(design_1=d,design_2=d, diagnosands = diagnosand, sims = 5)
@@ -136,7 +162,7 @@ test_that("diagnosis, no estimator", {
 
   diagnosand <- declare_diagnosands(z=mean(estimand > 0))
 
-  expect_equivalent( diagnose_design(d, diagnosands = diagnosand, sims = 5)$diagnosand,
+  expect_equivalent( diagnose_design(d, diagnosands = diagnosand, sims = 5)$diagnosands,
                     structure(list(estimand_label = c("bar", "foo"), z = c(1, 1),
                                    `se(z)` = c(0, 0)), .Names = c("estimand_label", "z", "se(z)"
                                    ), class = "data.frame", row.names = c("bar", "foo"))
@@ -215,22 +241,6 @@ test_that("diagnosis, NAs if no estimand", {
   expect_equivalent( diagnose_design(d, sims=4)$diagnosands, golden)
 
 })
-
-
-test_that("diagnosis, sorted by estimator order in design", {
-  d <- declare_design(sleep,
-                      declare_estimand(m=mean(extra)),
-                      declare_estimator(extra~group, label="X4", estimand="m"),
-                      declare_estimator(extra~group, label="X3", estimand="m"),
-                      declare_estimator(extra~group, label="X2", estimand="m"),
-                      declare_estimator(extra~group, label="X1", estimand="m"))
-
-  dx <- diagnose_design(design = d, sims = 5)
-
-  expect_true(!is.unsorted(rev(dx$diagnosands$estimator_label)))
-})
-
-
 
 test_that("error if diagnosand not named", {
   expect_error(declare_diagnosands(mean(foo)), "All diagnosands must be named")

@@ -44,26 +44,31 @@
 #' @export
 
 
-expand_design <- function(template, expand = TRUE, name_stub = "", ...) {
+expand_design <- function(template, expand = TRUE, prefix = "design", ...) {
 
-  template_args_matrix <- if (expand)
-    expand.grid(..., stringsAsFactors = FALSE)
-  else
-    cbind.data.frame(..., stringsAsFactors=FALSE)
+  if (expand) {
+    template_args_matrix <- expand.grid(..., stringsAsFactors = FALSE)
+  } else { 
+    template_args_matrix <- cbind.data.frame(..., stringsAsFactors = FALSE)
+  }
+  
   k <- nrow(template_args_matrix)
-
-  if(k == 1) {
-    design_args <- list(...)
-    return(do.call(template, design_args))
+  
+  out <- by(template_args_matrix, seq_len(k), do.call, what = template, simplify = FALSE)
+  
+  # Add attribute
+  for (j in seq_len(k)) {
+    attr(out[[j]], "parameters") <- setNames(template_args_matrix[j,], names(template_args_matrix))
+  }
+  
+  # if it only produces a single design, return the design object rather than a list of length 1
+  if (length(out) == 1) {
+    out <- out[[1]]
   } else {
-    out <- by(template_args_matrix, 1:k, do.call, what=template, simplify = FALSE)
+    out <- as(out, "list")
+    names(out) <- paste0(prefix, "_", seq_len(length(out)))
   }
 
-  # Add attribute
-  for(j in 1:k) {attr(out[[j]], "parameters") <-
-    setNames(template_args_matrix[j,], names(template_args_matrix) )}
-
-  names(out) <- paste0(name_stub, 1:length(out))
   return(out)
 
 }

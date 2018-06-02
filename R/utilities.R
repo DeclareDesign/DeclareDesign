@@ -132,25 +132,19 @@ rbind_disjoint <- function(list_of_df, infill=NA) {
 
   list_of_df <- lapply(list_of_df, `[`, all_columns)
 
-  do.call(rbind.data.frame, append(list_of_df, list(make.row.names=FALSE, stringsAsFactors=FALSE)))
+  do.call(rbind.data.frame, append(list_of_df, list(make.row.names = FALSE, stringsAsFactors = FALSE)))
 }
 
 
-`%i%` <- intersect
-
-`%||%` <- function(e1, e2) if(is.null(e1)) e2 else e1
 
 add_parens <- function(x, digits = 3) {
-  x <- as.numeric(x)
-  return_vec <- sprintf("(%s)", format_num(x, digits))
-  return(return_vec)
+  return(sprintf("(%s)", format_num(x, digits)))
 }
 
 format_num <- function(x, digits = 3) {
   x <- as.numeric(x)
-  return(paste0(sprintf(paste0("%.", digits, "f"), x)))
+  return(sprintf(paste0("%.", digits, "f"), x))
 }
-
 
 # Function to check whether there are more sims run than expected, possibly because of repeated labels
 check_sim_number <- function(simulations_df,

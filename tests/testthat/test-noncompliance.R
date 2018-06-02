@@ -57,7 +57,7 @@ test_that("Noncompliance", {
   df <- draw_data(design)
   expect_true("complier" %in% colnames(df))
 
-  diag <- diagnose_design(design, sims = 2, bootstrap = FALSE)
+  diag <- diagnose_design(design, sims = 2, bootstrap_sims = FALSE)
 
   expect_equal(diag$diagnosands$mean_estimand, 2)
   expect_equal(diag$diagnosands$estimator_label, "CACE_hat") # ITT_d is not in output - not estimated

@@ -137,7 +137,7 @@ ggplot(plot_frame,aes(x = X, y = Y, color = as.factor(Z))) +
 #   population, potential_outcomes, estimand, sampling, reveal_outcomes, estimator)
 
 ## ----echo = FALSE, eval = FALSE------------------------------------------
-#  diagnosis <- diagnose_design(rd_template(), bootstrap = TRUE, sims = 10000,bootstrap_sims = 1000)
+#  diagnosis <- diagnose_design(rd_template(), sims = 10000, bootstrap_sims = 1000)
 #  saveRDS(diagnosis, file = "regression_discontinuity_diagnosis.RDS")
 
 ## ----echo = FALSE,eval = TRUE, include = FALSE---------------------------

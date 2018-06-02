@@ -4,8 +4,7 @@
 \alias{reshape_diagnosis}
 \title{Clean up DeclareDesign diagnosis object for printing}
 \usage{
-reshape_diagnosis(diagnosis, digits = 2, selection = TRUE,
-  is.extracted = FALSE)
+reshape_diagnosis(diagnosis, digits = 2, select = NULL)
 }
 \arguments{
 \item{diagnosis}{An object from \code{diagnose_design}, either a diagnosand dataframe or a list containing a diagnosand dataframe}
