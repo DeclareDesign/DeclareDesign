@@ -140,3 +140,12 @@ test_that("power curve", {
 
 })
 
+test_that("single design can be created by expand_design", {
+  
+  my_template <- function(N = 10){ pop <- declare_population(N = N); design <- declare_design(pop); design}
+  
+  my_design <- expand_design(my_template)
+  
+  expect_s3_class(my_design, "design")
+  
+})
