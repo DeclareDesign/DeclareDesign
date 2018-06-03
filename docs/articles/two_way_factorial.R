@@ -118,7 +118,7 @@ design <- declare_design(
 #                          beta_A = 0,
 #                          beta_B = 0,
 #                          beta_AB = .25)
-#  diagnoses_N <- diagnose_design(designs, sims = 1000, bootstrap = FALSE)
+#  diagnoses_N <- diagnose_design(designs, sims = 1000, bootstrap_sims = FALSE)
 #  diagnosis <- diagnose_design(design, sims = 10000, bootstrap_sims = 1000)
 #  saveRDS(diagnoses_N,"two_way_factorial_diagnoses_N.RDS")
 #  saveRDS(diagnosis,"two_way_factorial_diagnosis.RDS")
@@ -158,7 +158,7 @@ if(exists("diagnosis")) {
 #                          beta_A = 0,
 #                          beta_B = 0,
 #                          beta_AB = .25)
-#  diagnoses_N <- diagnose_design(designs, sims = 1000, bootstrap = FALSE)
+#  diagnoses_N <- diagnose_design(designs, sims = 1000, bootstrap_sims = FALSE)
 
 ## ---- echo = FALSE-------------------------------------------------------
 if(exists("diagnoses_N")) {

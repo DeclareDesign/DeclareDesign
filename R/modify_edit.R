@@ -6,12 +6,14 @@
 #' \dontrun{
 #' here_i_am <- "foo"
 #' dot <- quo(here_i_am)
-#' dot2 <- clone_dot_edit_env(dot, here_i_am="blank_message", xyxyx="bar")
+#' dot2 <- clone_dot_edit_env(dot, here_i_am="some_message", xyxyx="bar")
 #' eval_tidy(dot)
 #' eval_tidy(dot2)
 #' }
 clone_dot_edit_env <- function(dot, ..., to_replace=list(...)){
-  if(is.null(environment(dot))) return(dot)
+  if (is.null(environment(dot))) {
+    return(dot)
+  }
   environment(dot) <- list2env(to_replace, parent = environment(dot))
 
   dot

@@ -132,14 +132,30 @@ rbind_disjoint <- function(list_of_df, infill=NA) {
 
   list_of_df <- lapply(list_of_df, `[`, all_columns)
 
-  do.call(rbind.data.frame, append(list_of_df, list(make.row.names=FALSE, stringsAsFactors=FALSE)))
+  do.call(rbind.data.frame, append(list_of_df, list(make.row.names = FALSE, stringsAsFactors = FALSE)))
 }
 
+add_parens <- function(x, digits = 3) {
+  return(sprintf("(%s)", format_num(x, digits)))
+}
 
-`%i%` <- intersect
+format_num <- function(x, digits = 3) {
+  x <- as.numeric(x)
+  return(sprintf(paste0("%.", digits, "f"), x))
+}
 
-`%||%` <- function(e1, e2) if(is.null(e1)) e2 else e1
+# Function to check whether there are more sims run than expected, possibly because of repeated labels
+check_sim_number <- function(simulations_df,
+                             sims,
+                             grouping_variables = c("design_ID",  "estimand_label", "estimator_label", "coefficient")) {
 
+  group_by_set  <- colnames(simulations_df) %i% grouping_variables
+  group_by_list <- simulations_df[, group_by_set, drop=FALSE]
+  check_df      <- split(group_by_list, group_by_list, drop = TRUE)
+  check_sims    <- unlist(lapply(check_df, nrow)) != prod(sims)
+  if(any(check_sims))  warning(paste0("More simulations than expected for profiles:",
+                                      paste0(names(check_sims)[check_sims], collapse = ", ")))
+}
 
 ###############################################################################
 

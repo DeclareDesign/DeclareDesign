@@ -7,7 +7,8 @@
 \usage{
 declare_assignment(..., handler = assignment_handler, label = NULL)
 
-assignment_handler(data, ..., assignment_variable = "Z")
+assignment_handler(data, ..., assignment_variable = "Z",
+  append_probabilities_matrix = FALSE)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -19,6 +20,8 @@ assignment_handler(data, ..., assignment_variable = "Z")
 \item{data}{a data.frame}
 
 \item{assignment_variable}{name for assignment variable}
+
+\item{append_probabilities_matrix}{Should the condition probabilities matrix be appended to the data? Defaults to FALSE}
 }
 \value{
 a function that takes a data.frame as an argument and returns a data.frame with additional columns appended including an assignment variable and (optionally) probabilities of assignment.
