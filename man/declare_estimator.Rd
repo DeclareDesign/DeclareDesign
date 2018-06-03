@@ -187,7 +187,7 @@ design <- replace_step(design_def, my_estimator_dim, my_estimator_median)
 run_design(design)
 
 my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand))
-diagnose_design(design, diagnosands = my_diagnosand, sims = 5, bootstrap = FALSE)
+diagnose_design(design, diagnosands = my_diagnosand, sims = 5, bootstrap_sims = FALSE)
 
 # ----------
 # 4. Multiple estimators per estimand
@@ -196,6 +196,6 @@ diagnose_design(design, diagnosands = my_diagnosand, sims = 5, bootstrap = FALSE
 design_two <- insert_step(design_def,  my_estimator_lm,  after=my_estimator_dim)
 
 run_design(design_two)
-diagnose_design(design_two, sims = 5, bootstrap = FALSE)
+diagnose_design(design_two, sims = 5, bootstrap_sims = FALSE)
 
 }

@@ -372,3 +372,16 @@ test_that("estimators have different columns", {
 
 })
 
+
+test_that("when a coefficient is missing from a model there is an informative error", {
+  
+  data <- fabricate(
+    N = 100,
+    Y = rbinom(N,1,.5),
+    Z = rbinom(N,1,.5)
+  )
+  ols <- declare_estimator(Y ~ Z, model = lm_robust, coefficients = "X")
+
+  expect_error(ols(data), "Not all of the coefficients declared in your estimator are present in the model output, including X.")
+  
+})

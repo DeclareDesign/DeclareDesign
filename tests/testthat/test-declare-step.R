@@ -10,5 +10,6 @@ test_that("test declare step ", {
   design <- declare_design(my_population,
                            my_assignment,
                            my_step)
-  design
+  df <- draw_data(design)
+  expect_equal(df$Z2, df$Z)
 })

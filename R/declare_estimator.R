@@ -153,7 +153,7 @@
 #' run_design(design)
 #'
 #' my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand))
-#' diagnose_design(design, diagnosands = my_diagnosand, sims = 5, bootstrap = FALSE)
+#' diagnose_design(design, diagnosands = my_diagnosand, sims = 5, bootstrap_sims = FALSE)
 #'
 #' # ----------
 #' # 4. Multiple estimators per estimand
@@ -162,7 +162,7 @@
 #' design_two <- insert_step(design_def,  my_estimator_lm,  after=my_estimator_dim)
 #'
 #' run_design(design_two)
-#' diagnose_design(design_two, sims = 5, bootstrap = FALSE)
+#' diagnose_design(design_two, sims = 5, bootstrap_sims = FALSE)
 #'
 declare_estimator <- make_declarations(estimator_handler, step_type="estimator", causal_type="estimator", default_label="my_estimator")
 
@@ -231,11 +231,10 @@ model_handler <- function(data, ..., model = estimatr::difference_in_means, coef
     coefficient_names <- enquo(coefficients) # forces evaluation of quosure
     coefficient_names <- reveal_nse_helper(coefficient_names)
 
-    # estimator_function_internal <- function(data) {
     args <- quos(...)
 
     # todo special case weights offsets for glm etc?
-
+    
     results <- eval_tidy(quo(model(!!!args, data=data)))
 
     results <- fit2tidy(results, coefficient_names)
@@ -280,6 +279,11 @@ fit2tidy <- function(fit, coefficients = FALSE) {
 
 
   if (is.character(coefficients)) {
+    coefs_in_output <- coefficients %in% return_data$coefficient
+    if (!all(coefs_in_output)) {
+      stop("Not all of the coefficients declared in your estimator are present in the model output, including ", 
+           paste(coefficients[!coefs_in_output], collapse = ", "), ".", call. = FALSE)
+    }
     return_data <- return_data[return_data$coefficient %in% coefficients, ,drop = FALSE]
   } else if(is.logical(coefficients) && !coefficients) {
     return_data <- return_data[which.max(return_data$coefficient != "(Intercept)"), ,drop = FALSE]

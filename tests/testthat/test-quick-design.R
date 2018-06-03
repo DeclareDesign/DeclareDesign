@@ -81,14 +81,14 @@ test_that("vary works", {
   design <- expand_design(template = two_arm_trial,
                          N = c(100, 200, 300), noise_sd = 1)
   expect_length(design, 3)
-  diagnose_design(design, sims = 2, bootstrap = FALSE)
+  diagnose_design(design, sims = 2, bootstrap_sims = FALSE)
 
 
 
   design <- expand_design(template = two_arm_trial,
                      N = c(100, 200, 300), noise_sd = c(.1, .2, .3))
   expect_length(design, 9)
-  diagnose_design(design, sims = 2, bootstrap = FALSE)
+  diagnose_design(design, sims = 2, bootstrap_sims = FALSE)
 
 
 
@@ -96,7 +96,7 @@ test_that("vary works", {
   design <- expand_design(template = two_arm_trial, expand = FALSE,
                      N = c(100, 200, 300), noise_sd = c(.1, .2, .3))
   expect_length(design, 3)
-  diagnose_design(design, sims = 2, bootstrap = FALSE)
+  diagnose_design(design, sims = 2, bootstrap_sims = FALSE)
 
 
 
@@ -125,12 +125,11 @@ test_that("power curve", {
     return(my_design)
   }
 
-  design <- expand_design(template = two_arm_trial,
-                     N = c(100, 200, 300, 500, 1000))
+  design <- expand_design(template = two_arm_trial, N = c(100, 200, 300, 500, 1000))
 
   expect_length(design, 5)
 
-  diagnosis <- diagnose_design(design, sims = 2, bootstrap = FALSE)
+  diagnosis <- diagnose_design(design, sims = 2, bootstrap_sims = FALSE)
   #
   #   library(ggplot2)
   #   ggplot(get_diagnosands(diagnosis), aes(x = N, y = power)) +
@@ -140,3 +139,4 @@ test_that("power curve", {
 #
 
 })
+
