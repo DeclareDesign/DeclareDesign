@@ -58,6 +58,8 @@ expand_design <- function(template, expand = TRUE, ...) {
 
 #'
 #' \code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters internally. (Advanced).
+#' 
+#' Importantly, \code{redesign} will edit any symbol in your design, but if the symbol you attempt to change does not exist no changes will be made and no error or warning will be issued.
 #'
 #' @param design a design
 #' @export
