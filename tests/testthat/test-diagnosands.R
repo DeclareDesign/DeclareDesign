@@ -27,20 +27,22 @@ my_design_3 <- my_design
 
 test_that("s3 dispatch works",{
   diagnosis <- diagnose_design(my_design, sims = 20)
-  expect_equal(nrow(diagnosis$diagnosands), 1)
+  diagnosis <- diagnose_design(my_design, sims = 20, bootstrap_sims = FALSE)
+  expect_equal(nrow(diagnosis$diagnosands_df), 1)
   
-  diagnosis <- diagnose_design(my_design, my_design_2, sims = 20)
-  expect_equal(nrow(diagnosis$diagnosands), 2)
+  diagnosis <- diagnose_design(my_design, my_design_2, sims = list(my_design = 10, my_design_2 = 20))
+  expect_equal(nrow(diagnosis$diagnosands_df), 2)
+  expect_true(all(diagnosis$diagnosands_df$n_sims %in% c(10, 20)))
   
   diagnosis <- diagnose_design(list(my_design, my_design_2), sims = 20)
-  expect_equal(nrow(diagnosis$diagnosands), 2)
+  expect_equal(nrow(diagnosis$diagnosands_df), 2)
   
   expect_error(diagnose_design(list(my_design, my_design_2), my_design_3, sims = 20))
   
   sims_df <- simulate_design(my_design, my_design_2, sims = 20)
   diagnosis <- diagnose_design(sims_df)
   
-  expect_equal(nrow(diagnosis$diagnosands), 1)
+  expect_equal(nrow(diagnosis$diagnosands_df), 2)
   
 })
 
@@ -85,9 +87,9 @@ test_that("test diagnosands without estimands", {
   my_dig <-  declare_diagnosands(mean_est = mean(est), sd_est = sd(est))
   diagnosis <- diagnose_design(my_design2, sims = 2, diagnosands = my_dig, bootstrap_sims = FALSE)
 
-  head(diagnosis$simulations)
+  head(diagnosis$simulations_df)
 
-  expect_equal(dim(diagnosis$diagnosands), c(1,4))
+  expect_equal(dim(diagnosis$diagnosands_df), c(1,5))
 
 })
 
@@ -158,14 +160,14 @@ test_that("diagnosis, unlinked estimator", {
 
 
 test_that("diagnosis, no estimator", {
-  d <- declare_design(sleep, declare_estimand(foo=2, bar=3))
+  d <- declare_design(sleep, declare_estimand(foo = 2, bar = 3))
 
-  diagnosand <- declare_diagnosands(z=mean(estimand > 0))
+  diagnosand <- declare_diagnosands(z = mean(estimand > 0))
 
-  expect_equivalent( diagnose_design(d, diagnosands = diagnosand, sims = 5)$diagnosands,
-                    structure(list(estimand_label = c("bar", "foo"), z = c(1, 1),
-                                   `se(z)` = c(0, 0)), .Names = c("estimand_label", "z", "se(z)"
-                                   ), class = "data.frame", row.names = c("bar", "foo"))
+  expect_equivalent(diagnose_design(d, diagnosands = diagnosand, sims = 5)$diagnosands_df,
+                    structure(list(estimand_label = c("bar", "foo"), z = c(1, 1), `se(z)` = c(0, 0), n_sims = c(5, 5)), 
+                              .Names = c("estimand_label", "z", "se(z)", "n_sims"), 
+                              class = "data.frame", row.names = c("bar", "foo"))
                     )
 })
 
@@ -198,47 +200,47 @@ test_that("Overriding join conditions",{
 
   diagnosands <- get_diagnosands(diagnose_design(design, diagnosands = custom))
 
-  expect_true(is.data.frame(diagnosands) && nrow(diagnosands) == 1)
+  expect_true(is.data.frame(diagnosands) && nrow(diagnosands) == 2)
 
 })
 
 test_that("diagnosis, NAs if no estimand", {
-  d <- declare_design(sleep, ols = declare_estimator(extra~group))
+  d <- declare_design(sleep, ols = declare_estimator(extra ~ group))
 
-golden <-
+sleep_ols <-
   structure(list(estimator_label = "ols", coefficient = "group2",
                  bias = NA_real_, `se(bias)` = NA_real_, rmse = NA_real_,
                  `se(rmse)` = NA_real_, power = 0, `se(power)` = 0, coverage = NA_real_,
                  `se(coverage)` = NA_real_, mean_estimate = 1.58, `se(mean_estimate)` = 0,
                  sd_estimate = 0, `se(sd_estimate)` = 0, mean_se = 0.849091017238762,
                  `se(mean_se)` = 0, type_s_rate = NaN, `se(type_s_rate)` = NA_real_,
-                 mean_estimand = NA_real_, `se(mean_estimand)` = NA_real_), .Names = c("estimator_label",
+                 mean_estimand = NA_real_, `se(mean_estimand)` = NA_real_, n_sims = 4), .Names = c("estimator_label",
                    "coefficient", "bias", "se(bias)", "rmse", "se(rmse)", "power",
                    "se(power)", "coverage", "se(coverage)", "mean_estimate", "se(mean_estimate)",
                    "sd_estimate", "se(sd_estimate)", "mean_se", "se(mean_se)", "type_s_rate",
-                   "se(type_s_rate)", "mean_estimand", "se(mean_estimand)"), row.names = "ols.group2", class = "data.frame")
+                   "se(type_s_rate)", "mean_estimand", "se(mean_estimand)", "n_sims"), row.names = "ols.group2", class = "data.frame")
 
 
-  expect_equivalent( diagnose_design(d, sims=4)$diagnosands, golden)
+expect_equivalent(diagnose_design(d, sims = 4)$diagnosands_df, sleep_ols)
 
   })
 
 test_that("diagnosis, NAs if no estimand", {
   d <- declare_design(sleep, mu = declare_estimand(mean(extra)))
 
-  golden <-
+  sleep_ols <-
     structure(list(estimand_label = "mu", bias = NA_real_, `se(bias)` = NA_real_,
                    rmse = NA_real_, `se(rmse)` = NA_real_, power = NA_real_,
                    `se(power)` = NA_real_, coverage = NA_real_, `se(coverage)` = NA_real_,
                    mean_estimate = NA_real_, `se(mean_estimate)` = NA_real_,
                    sd_estimate = NA_real_, `se(sd_estimate)` = NA_real_, mean_se = NA_real_,
                    `se(mean_se)` = NA_real_, type_s_rate = NA_real_, `se(type_s_rate)` = NA_real_,
-                   mean_estimand = 1.54, `se(mean_estimand)` = 0), .Names = c("estimand_label",
+                   mean_estimand = 1.54, `se(mean_estimand)` = 0, n_sims = 4), .Names = c("estimand_label",
                       "bias", "se(bias)", "rmse", "se(rmse)", "power", "se(power)",
                       "coverage", "se(coverage)", "mean_estimate", "se(mean_estimate)",
                       "sd_estimate", "se(sd_estimate)", "mean_se", "se(mean_se)", "type_s_rate",
-                      "se(type_s_rate)", "mean_estimand", "se(mean_estimand)"), row.names = "mu", class = "data.frame")
-  expect_equivalent( diagnose_design(d, sims=4)$diagnosands, golden)
+                      "se(type_s_rate)", "mean_estimand", "se(mean_estimand)", "n_sims"), row.names = "mu", class = "data.frame")
+  expect_equivalent(diagnose_design(d, sims = 4)$diagnosands_df, sleep_ols)
 
 })
 

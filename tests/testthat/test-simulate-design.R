@@ -30,7 +30,7 @@ test_that("Simulate Design works", {
   sims <- simulate_design(list(my_design_1, my_design_2), sims = 5)
   expect_equal(nrow(sims), 10)
   
-  expect_true(all(sims$design_ID %in% c("my_design_1", "my_design_2")))
+  expect_true(all(sims$design_ID %in% c("design_1", "design_2")))
   
   sims <-
     simulate_design(a = my_design_1, b = my_design_2, sims = 5)
@@ -61,3 +61,4 @@ test_that("expand and simulate", {
   expect_true(all(sims$design_ID %in% c("custom_prefix_1", "custom_prefix_2", "custom_prefix_3", "custom_prefix_4")))
   expect_true(all(c("N", "tau") %in% colnames(sims)))
 })
+

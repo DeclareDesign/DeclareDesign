@@ -26,8 +26,8 @@ test_that("test diagnosands", {
   # default set
   diagnosis <- diagnose_design(my_design, sims = 2, bootstrap_sims = 2)
 
-  expect_equal(dim(diagnosis$diagnosands), c(2,21))
+  expect_equal(dim(diagnosis$diagnosands_df), c(2,22))
 
-  expect_equal(dim(diagnosis$simulations), c(4,10))
+  expect_equal(dim(diagnosis$simulations_df), c(4,10))
 
 })

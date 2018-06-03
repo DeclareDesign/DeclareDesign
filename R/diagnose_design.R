@@ -139,7 +139,15 @@ diagnose_design <-
                                             diagnosands = diagnosands,
                                             group_by_set = group_by_set)
     
+    
+    
     diagnosand_names <- names(diagnosands_df)[!(names(diagnosands_df) %in% group_by_set)]
+    
+
+    # Calculate n_sims --------------------------------------------------------
+
+    n_sims_df <- calculate_sims(simulations_df = simulations_df, group_by_set = group_by_set)    
+    
     
     # Bootstrap ---------------------------------------------------------------
     
@@ -154,6 +162,7 @@ diagnose_design <-
     
     # prep for return ---------------------------------------------------------
     
+    diagnosands_df <- merge(x = diagnosands_df, y = n_sims_df, by = group_by_set, all = TRUE)
     rownames(diagnosands_df) <- NULL
     
     # Reorder rows
@@ -161,11 +170,12 @@ diagnose_design <-
     simulations_df <- simulations_df[do.call(order, as.list(simulations_df[sort_by_list])), , drop = FALSE]
     
     # Return frames
-    out <- list(simulations_df = simulations_df, diagnosands = diagnosands_df, diagnosand_names = diagnosand_names)
+    out <- list(simulations_df = simulations_df, diagnosands_df = diagnosands_df, diagnosand_names = diagnosand_names)
     
     if (bootstrap_sims != 0) {
       out$bootstrap_replicates <- bootout$diagnosand_replicates
     }
+    out$bootstrap_sims <- bootstrap_sims
     
     structure(out, class = "diagnosis")
     
@@ -190,6 +200,26 @@ calculate_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
   
   return(diagnosands_df)
 }
+
+calculate_sims <- function(simulations_df, group_by_set) {
+  group_by_list <- simulations_df[, group_by_set, drop = FALSE]
+  
+  labels_df <- split(group_by_list, group_by_list, drop = TRUE)
+  labels_df <- lapply(labels_df, head, n = 1)
+  
+  n_sims_df <- split(simulations_df, group_by_list, drop = TRUE)
+  n_sims_df <- lapply(n_sims_df, FUN = function(x) {   
+    data.frame(n_sims = nrow(x))
+  })
+  
+  # c appropriate and fast here bc labels_df must be a list (drop=FALSE above)
+  n_sims_df <- as.data.frame(t(mapply(c, labels_df, n_sims_df)), stringsAsFactors = FALSE)
+  n_sims_df[] <- lapply(n_sims_df, unlist)
+  
+  return(n_sims_df)
+}
+
+
 
 bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, diagnosands_df, group_by_set) {
   

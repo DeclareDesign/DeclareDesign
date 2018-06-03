@@ -74,17 +74,15 @@ summary.diagnosis <- function(object, ...) {
 
 #' @export
 print.summary.diagnosis <- function(x, ...) {
-  
-  sims <- max(x$sim_ID)
-  bootstraps <- nrow(x$bootstrap_replicates)
-  
-  if(length(sims) > 1) sims <- paste0("(", paste0(sims, collapse = ", "), ")")
-  cat(paste0("\nResearch design diagnosis, based on ", sims, " simulations and ",
-             bootstraps, " bootstrap draws.\n\n"))
+  n_sims <- unique(x$diagnosands_df$n_sims)
+  cat(paste0("\nResearch design diagnosis", ifelse(length(n_sims) == 1, paste0(" based on ", n_sims, " simulations"), ""), "."))
+  if (x$bootstrap_sims > 0) {
+    cat(" Diagnosand estimates with bootstrapped standard errors (", x$bootstrap_sims, " replicates).", sep = "")
+  }
+  cat("\n\n")
   x <- reshape_diagnosis(x)
   class(x) <- "data.frame"
   print(x, row.names = FALSE)
-  cat("\n")
   invisible(x)
 }
 

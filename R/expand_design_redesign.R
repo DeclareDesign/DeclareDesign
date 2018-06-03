@@ -41,6 +41,7 @@
 #' attr(design_vary_N[[1]], "parameters")
 #'
 #' @importFrom rlang quo_expr quos
+#' @importFrom methods as
 #' @export
 
 
