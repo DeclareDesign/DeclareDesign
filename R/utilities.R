@@ -31,6 +31,12 @@ maybe_add_labels <- function(quotations){
     quotations[[i]] <- labeller(quotations[[i]], names(quotations)[i])
   }
 
+  if (any(duplicated(names(quotations)))) {
+    stop(paste0("Please provide unique names for each design step. Duplicates include ", 
+                paste(names(quotations)[duplicated(names(quotations))], collapse = ", "), 
+                ". You can name steps within declare design, e.g. declare_design(my_pop = pop_step)."), call. = FALSE)
+  }
+  
   quotations
 }
 
