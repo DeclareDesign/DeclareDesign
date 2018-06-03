@@ -55,19 +55,25 @@ expand_design <- function(template, expand = TRUE, prefix = "design", ...) {
   
   k <- nrow(template_args_matrix)
   
-  out <- by(template_args_matrix, seq_len(k), do.call, what = template, simplify = FALSE)
+  if(k > 0){
   
-  # Add attribute
-  for (j in seq_len(k)) {
-    attr(out[[j]], "parameters") <- setNames(template_args_matrix[j,], names(template_args_matrix))
-  }
-  
-  # if it only produces a single design, return the design object rather than a list of length 1
-  if (length(out) == 1) {
-    out <- out[[1]]
+    out <- by(template_args_matrix, seq_len(k), do.call, what = template, simplify = FALSE)
+    
+    # Add attribute
+    for (j in seq_len(k)) {
+      attr(out[[j]], "parameters") <- setNames(template_args_matrix[j,], names(template_args_matrix))
+    }
+    
+    # if it only produces a single design, return the design object rather than a list of length 1
+    if (length(out) == 1) {
+      out <- out[[1]]
+    } else {
+      out <- as(out, "list")
+      names(out) <- paste0(prefix, "_", seq_len(length(out)))
+    }
+    
   } else {
-    out <- as(out, "list")
-    names(out) <- paste0(prefix, "_", seq_len(length(out)))
+    out <- template()
   }
 
   return(out)
