@@ -24,6 +24,9 @@ if set of designs is size one, the design, otherwise a `by`-list of designs.
 \description{
 \code{expand_design} easily generates a set of design from a template function.
 
+\code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters internally. (Advanced).
+}
+\details{
 Importantly, \code{redesign} will edit any symbol in your design, but if the symbol you attempt to change does not exist no changes will be made and no error or warning will be issued.
 }
 \examples{
