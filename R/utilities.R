@@ -26,6 +26,8 @@ maybe_add_labels <- function(quotations){
   }
 
   for(i in seq_along(quotations)){
+    if(names(quotations)[i] == "")
+      names(quotations)[i] <- f_text(quotations[[i]])
     quotations[[i]] <- labeller(quotations[[i]], names(quotations)[i])
   }
 
