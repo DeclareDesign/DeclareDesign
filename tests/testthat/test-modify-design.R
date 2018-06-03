@@ -18,13 +18,13 @@ test_that("test modify declare design ", {
 
   my_assignment_2 <- declare_assignment(m = 25, assignment_variable = "Z2")
 
-  expect_length(replace_step(design, new_step = my_assignment_2, step = my_assignment), 4)
+  expect_length(replace_step(design, new_step = my_assignment_2, step = 4), 4)
 
-  expect_length(insert_step(design, dplyr::mutate(blah = 6), before = my_potential_outcomes), 5)
+  expect_length(insert_step(design, dplyr::mutate(blah = 6), before = 2), 5)
 
-  expect_length(insert_step(design, dplyr::mutate(blah = 6), after = my_potential_outcomes), 5)
+  expect_length(insert_step(design, dplyr::mutate(blah = 6), after = 2), 5)
 
-  expect_length(replace_step(design, dplyr::mutate(blah = 10), step = my_population), 4)
+  expect_length(replace_step(design, dplyr::mutate(blah = 10), step = 1), 4)
 
   expect_length(delete_step(design, 3), 3)
 
@@ -48,12 +48,14 @@ test_that("placement doesn't matter", {
 
   design
 
-  expect_length( insert_step(design, dplyr::mutate(income = noise^2), after = my_assignment), 4)
-  expect_length( insert_step(design, dplyr::mutate(income = noise^2), before = my_assignment), 4)
+  expect_length( insert_step(design, dplyr::mutate(income = noise^2), after = 3), 4)
+  expect_length( insert_step(design, dplyr::mutate(income = noise^2), before = 3), 4)
   expect_length( insert_step(design, dplyr::mutate(income = noise^2), before = "mypop"), 4)
 
 
   expect_error(  insert_step(design, dplyr::mutate(income = noise^2), before = "notfound") )
+
+  expect_error(  insert_step(design,  dplyr::mutate(income = noise^2), before=my_assignment) )
 
 
 

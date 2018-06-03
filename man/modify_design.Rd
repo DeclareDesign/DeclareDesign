@@ -18,11 +18,11 @@ replace_step(design, step, new_step)
 
 \item{new_step}{the new step - either a function or a partial call}
 
-\item{before}{the step before which to add steps}
+\item{before}{the index or label of the step before which to add steps}
 
 \item{after}{same}
 
-\item{step}{the step to be deleted or replaced}
+\item{step}{the index or label of the step to be deleted or replaced}
 }
 \value{
 A new design object. See \code{\link{declare_design}} for details.
@@ -41,7 +41,7 @@ see \code{\link{modify_design}} for details.
    declare_potential_outcomes(Y_Z_0 = noise,
                               Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
- my_assignment <- declare_assignment(m = 50)
+ my_assignment <- declare_assignment(m = 50, label="assn")
  my_assignment_2 <- declare_assignment(m = 25)
 
  design <- declare_design(my_population,
@@ -51,10 +51,10 @@ see \code{\link{modify_design}} for details.
  design
 
 
- insert_step(design, dplyr::mutate(income = noise^2), after = my_assignment)
- insert_step(design, dplyr::mutate(income = noise^2), before = my_assignment)
+ insert_step(design, dplyr::mutate(income = noise^2), after = "assn")
+ insert_step(design, dplyr::mutate(income = noise^2), before = "assn")
 
 
- delete_step(design, my_assignment)
- replace_step(design, my_assignment, dplyr::mutate(words="HIARYLAH"))
+ delete_step(design, "assn")
+ replace_step(design, "assn", dplyr::mutate(words="HIARYLAH"))
 }

@@ -74,7 +74,8 @@
 #'
 #' my_estimator_custom <- declare_estimator(
 #'   handler = tidy_estimator(my_estimator_function),
-#'   estimand = my_estimand
+#'   estimand = my_estimand,
+#'   label = "CUSTOM"
 #' )
 #'
 #' # Use a custom estimator function with custom labelling
@@ -116,17 +117,17 @@
 #' # 2. Using existing estimators
 #' # ----------
 #'
-#' design <- replace_step(design_def, my_estimator_dim, my_estimator_lm_rob)
+#' design <- replace_step(design_def, "DIM", my_estimator_lm_rob)
 #'
 #' run_design(design)
 #'
 #'
-#' design <- replace_step(design_def, my_estimator_dim, my_estimator_lm)
+#' design <- replace_step(design_def, "DIM", my_estimator_lm)
 #'
 #' run_design(design)
 #'
 #'
-#' design <- replace_step(design_def, my_estimator_dim, my_estimator_glm)
+#' design <- replace_step(design_def, "DIM", my_estimator_glm)
 #'
 #' run_design(design)
 #'
@@ -135,7 +136,7 @@
 #' # ----------
 #'
 #'
-#' design <- replace_step(design_def, my_estimator_dim, my_estimator_custom)
+#' design <- replace_step(design_def, "DIM", my_estimator_custom)
 #'
 #' run_design(design)
 #'
@@ -145,10 +146,11 @@
 #'
 #' my_estimator_median <- declare_estimator(
 #'   handler = tidy_estimator(my_median),
-#'   estimand = my_estimand
+#'   estimand = my_estimand,
+#'   label = "Median"
 #' )
 #'
-#' design <- replace_step(design_def, my_estimator_dim, my_estimator_median)
+#' design <- replace_step(design_def, "DIM", my_estimator_median)
 #'
 #' run_design(design)
 #'
@@ -159,7 +161,7 @@
 #' # 4. Multiple estimators per estimand
 #' # ----------
 #'
-#' design_two <- insert_step(design_def,  my_estimator_lm,  after=my_estimator_dim)
+#' design_two <- insert_step(design_def,  my_estimator_lm,  after="DIM")
 #'
 #' run_design(design_two)
 #' diagnose_design(design_two, sims = 5, bootstrap_sims = FALSE)
