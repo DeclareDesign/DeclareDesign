@@ -34,6 +34,9 @@ test_that("Basic design summary", {
   # Last step
   expect_equal(s$formulae[[8]], Y~Z)
 
+  s_short <- summary(design, verbose = FALSE)
+
+  expect_failure(expect_output(print(summary(design, verbose = FALSE)), "Formula"))
 
 })
 

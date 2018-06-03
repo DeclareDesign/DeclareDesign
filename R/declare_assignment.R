@@ -53,10 +53,11 @@ declare_assignment <- make_declarations(assignment_handler, "assignment" )
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo f_rhs
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
 #' @param assignment_variable name for assignment variable
+#' @param append_probabilities_matrix Should the condition probabilities matrix be appended to the data? Defaults to FALSE
 #' @param data a data.frame
 #' @rdname declare_assignment
 assignment_handler <-
-  function(data, ..., assignment_variable = "Z") {
+  function(data, ..., assignment_variable = "Z", append_probabilities_matrix = FALSE) {
     ## draw assignment
 
     options <- quos(...)
@@ -70,6 +71,13 @@ assignment_handler <-
                         !!cond_prob := obtain_condition_probabilities(!!!options, assignment = !!assn),
        ID_label = NA
       )
+      if(append_probabilities_matrix) {
+        options$N <- quo(nrow(data))
+        ra_dec <- eval_tidy(quo(declare_ra(!!!options)))
+        probabilities_matrix <- ra_dec$probabilities_matrix
+        colnames(probabilities_matrix) <- paste0(assn, "_", colnames(probabilities_matrix))
+        data <- data.frame(data, probabilities_matrix)
+      }
     }
 
 

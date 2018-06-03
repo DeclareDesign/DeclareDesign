@@ -135,8 +135,6 @@ rbind_disjoint <- function(list_of_df, infill=NA) {
   do.call(rbind.data.frame, append(list_of_df, list(make.row.names = FALSE, stringsAsFactors = FALSE)))
 }
 
-
-
 add_parens <- function(x, digits = 3) {
   return(sprintf("(%s)", format_num(x, digits)))
 }
@@ -158,3 +156,19 @@ check_sim_number <- function(simulations_df,
   if(any(check_sims))  warning(paste0("More simulations than expected for profiles:",
                                       paste0(names(check_sims)[check_sims], collapse = ", ")))
 }
+
+###############################################################################
+
+# helpers for summary.design
+
+get_added_variables <- function(last_df = NULL, current_df) {
+  setdiff(names(current_df), names(last_df))
+}
+
+get_modified_variables <- function(last_df = NULL, current_df) {
+  is_modified <- function(j) !isTRUE(all.equal(last_df[[j]], current_df[[j]]))
+  shared <- intersect(names(current_df), names(last_df))
+
+  Filter(is_modified, shared)
+}
+
