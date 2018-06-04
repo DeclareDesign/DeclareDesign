@@ -72,7 +72,7 @@ test_that("Hooke's law",{
 
   estimator <- declare_estimator(length~force, model=lm, coefficients=TRUE)
 
-  design <- pop / estimand / sampling / assignment / reveal / estimator
+  design <- declare_design(pop, estimand, sampling, assignment, reveal, estimator)
 
   df <- draw_data(design)
 
