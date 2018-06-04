@@ -42,8 +42,6 @@
 #'
 #' @importFrom rlang quo_expr quos
 #' @export
-
-
 expand_design <- function(template, expand = TRUE, prefix = "design", ...) {
 
   if (expand) {
@@ -54,8 +52,8 @@ expand_design <- function(template, expand = TRUE, prefix = "design", ...) {
   
   k <- nrow(template_args_matrix)
   
-  if(k > 0){
-  
+  if (k > 0) {
+    
     out <- by(template_args_matrix, seq_len(k), do.call, what = template, simplify = FALSE)
     
     # Add attribute
@@ -93,6 +91,8 @@ expand_design <- function(template, expand = TRUE, prefix = "design", ...) {
 #' @rdname expand_design
 redesign <- function(design, expand=TRUE, ...) {
   f <- function(...) clone_design_edit(design, ...)
-  expand_design(f, expand, ...)
+  design <- expand_design(f, expand, ...)
+  attributes(design, "code") <- NULL
+  design
 }
 
