@@ -3,28 +3,36 @@
 \name{post_design}
 \alias{post_design}
 \alias{draw_data}
-\alias{get_estimates}
 \alias{get_estimands}
+\alias{get_estimates}
 \alias{summary.design}
 \title{Explore your design}
 \usage{
 draw_data(design)
 
-get_estimates(design)
+get_estimands(...)
 
-get_estimands(design)
+get_estimates(...)
 
 \method{summary}{design}(object, verbose = TRUE, ...)
 }
 \arguments{
 \item{design}{A design created by \code{\link{declare_design}}.}
 
-\item{object}{a design object created by \code{\link{declare_design}}}
-
 \item{...}{optional arguments to be sent to summary function}
+
+\item{object}{a design object created by \code{\link{declare_design}}}
 }
 \description{
 Explore your design
+
+#' @rdname post_design
+#'
+#' @export
+get_estimates <- function(design) {
+  results <- list("estimator" = vector("list", length(design)))
+  run_design_internal.default(design, results = results)$estimates_df
+}
 }
 \examples{
 
