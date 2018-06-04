@@ -92,7 +92,6 @@ expand_design <- function(template, expand = TRUE, prefix = "design", ...) {
 redesign <- function(design, expand=TRUE, ...) {
   f <- function(...) clone_design_edit(design, ...)
   design <- expand_design(f, expand, ...)
-  attributes(design, "code") <- NULL
-  design
+  structure(design, code = NULL)
 }
 

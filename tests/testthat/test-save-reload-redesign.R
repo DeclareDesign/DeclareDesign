@@ -21,4 +21,5 @@ test_that("Save Reload Redesign works",{
 
   expect_true(is.data.frame(draw_data(d2)))
 
-})
+
+  })
