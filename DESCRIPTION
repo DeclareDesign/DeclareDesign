@@ -18,11 +18,11 @@ Depends:
     R (>= 3.4.0),
     randomizr (>= 0.12.0),
     fabricatr (>= 0.4.0),
-    estimatr (>= 0.6.0),
+    estimatr (>= 0.6.0)
 Imports:
-    rlang
+    rlang, methods
 License: MIT + file LICENSE
-URL: http://declaredesign.org, https://github.com/DeclareDesign/DeclareDesign
+URL: https://declaredesign.org, https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues
 Encoding: UTF-8
 LazyData: true

@@ -14,6 +14,8 @@ redesign(design, expand = TRUE, ...)
 
 \item{expand}{boolean - if true, form the crossproduct of the ..., otherwise recycle them}
 
+\item{prefix}{prefix for the names of the designs, i.e. if you create two designs they would be named prefix_1, prefix_2}
+
 \item{...}{Options sent to the template.}
 
 \item{design}{a design}

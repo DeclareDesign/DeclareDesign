@@ -113,7 +113,6 @@ simulate_design <-
     
   }
 
-#' Run Single Design -- Basic simulation script that is called on by simulate_design
 
 #' @importFrom rlang as_list
 simulate_single_design <-

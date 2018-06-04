@@ -11,9 +11,7 @@ reshape_diagnosis(diagnosis, digits = 2, select = NULL)
 
 \item{digits}{Number of digits.}
 
-\item{selection}{List of columns to include in output. Defaults to all.}
-
-\item{is.extracted}{Should be TRUE if diagnosis is a diagnosands dataframe; set to FALSE if diagnosis is a list containing the diagnosands dataframe as its second element}
+\item{select}{List of columns to include in output. Defaults to all.}
 }
 \value{
 A formatted text table with bootstrapped standard errors in parentheses.
@@ -25,5 +23,5 @@ If diagnosands are bootstrapped, se's are put in parenthese on a second line and
 # library(DesignLibrary)
 # diagnosis <- diagnose_design(simple_two_arm_designer(), sims = 3)
 # reshape_diagnosis(diagnosis)
-# reshape_diagnosis(diagnosis, selection = c("Bias", "Power"))
+# reshape_diagnosis(diagnosis, select = c("Bias", "Power"))
 }

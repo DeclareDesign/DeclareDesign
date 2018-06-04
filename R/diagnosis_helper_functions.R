@@ -93,8 +93,7 @@ print.summary.diagnosis <- function(x, ...) {
 #'
 #' @param diagnosis An object from \code{diagnose_design}, either a diagnosand dataframe or a list containing a diagnosand dataframe
 #' @param digits Number of digits.
-#' @param selection List of columns to include in output. Defaults to all.
-#' @param is.extracted Should be TRUE if diagnosis is a diagnosands dataframe; set to FALSE if diagnosis is a list containing the diagnosands dataframe as its second element
+#' @param select List of columns to include in output. Defaults to all.
 #' @return A formatted text table with bootstrapped standard errors in parentheses.
 #' @export
 #'
@@ -102,7 +101,7 @@ print.summary.diagnosis <- function(x, ...) {
 #' # library(DesignLibrary)
 #' # diagnosis <- diagnose_design(simple_two_arm_designer(), sims = 3)
 #' # reshape_diagnosis(diagnosis)
-#' # reshape_diagnosis(diagnosis, selection = c("Bias", "Power"))
+#' # reshape_diagnosis(diagnosis, select = c("Bias", "Power"))
 reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   
   diagnosands_df <- diagnosis$diagnosands
@@ -155,7 +154,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   if (!is.null(select)) {
     if (any(!(select %in% names(return_df))))
       stop(paste(
-        "selection argument must only include elements from: ",
+        "select argument must only include elements from: ",
         paste(c(group_columns, diagnosand_columns), collapse = ",")
       ))
     return_df <- return_df[, select]
