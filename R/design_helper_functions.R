@@ -269,6 +269,20 @@ print.design_step <- function(x, ...) {
   # invisible(summary(x))
 }
 
+#' Print code to recreate a design
+#' 
+#' @param design A design object, typically created by \code{\link{declare_design}}
+#'
+#' @examples 
+#' 
+#' my_population <- declare_population(N = 100)
+#' 
+#' my_assignment <- declare_assignment(m = 50)
+#' 
+#' my_design <- declare_design(my_population, my_assignment)
+#' 
+#' print_code(my_design)
+#'
 #' @export
 print_code <- function(design) {
   
