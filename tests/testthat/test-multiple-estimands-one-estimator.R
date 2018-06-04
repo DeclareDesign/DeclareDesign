@@ -1,7 +1,7 @@
 context("Multiple estimands can be mapped to one estimator")
 
 
-test_that("", {
+test_that("Multiple estimands can be mapped to one estimator", {
   pop_var <- function(x) mean((x - mean(x))^2)
   x <- rnorm(100)
   dat <- data.frame(X = x)
@@ -19,7 +19,7 @@ test_that("", {
     model = estimatr::lm_robust,
     se_type = "classical",
     estimand = c(dgp_se, obs_se),
-    coefficient_name = "X"
+    coefficients = "X"
   )
 
   des <- declare_design(
@@ -38,7 +38,7 @@ test_that("", {
     sd_estimand = sd(estimand)
   )
 
-  diag <- diagnose_design(des, sims = 2, diagnosands = my_dig, bootstrap = FALSE)
+  diag <- diagnose_design(des, sims = 2, diagnosands = my_dig, bootstrap_sims = FALSE)
 
   expect_equal(nrow(get_diagnosands(diag)), 2)
   expect_true(!any(is.na(get_diagnosands(diag)$bias_se)))

@@ -1,19 +1,19 @@
-
+###############################################################################
+# Copies an environment chain
 #' @importFrom rlang env_clone
 env_deep_copy <- function(e) {
+  if(environmentName(e) == "CheckExEnv") e else # Cloning the CheckExEnv causes examples to autofail, it has delayedAssign("F", stop())
   if(identical(e, emptyenv())) emptyenv() else
     if(identical(e, globalenv())) env_clone(e) else # don't clone attached packages
       env_clone(e, Recall(parent.env(e)))
 }
 
+###############################################################################
+# For set of dots, copy environment chain, reusing the new env if possible
+# to save memory
+#' @importFrom rlang env_clone
 
-currydata <- function(FUN, dots, addDataArg=TRUE,strictDataParam=TRUE) {
-  # dots <- quos(...)
-
-  #  for(i in seq_along(dots)) {
-  #    environment(dots[[i]]) <- env_clone(dots[[i]])
-
-  # heuristic to reuse deep clones
+dots_env_copy <- function(dots) {
   eprev <- NULL
   for(i in seq_along(dots)) {
     ecurrent <- environment(dots[[i]])
@@ -25,6 +25,37 @@ currydata <- function(FUN, dots, addDataArg=TRUE,strictDataParam=TRUE) {
       environment(dots[[i]]) <- eclone
     }
   }
+  dots
+}
+
+
+# Given a function and dots, rename dots based on how things will positionally match
+#' @importFrom rlang is_empty
+rename_dots <- function(handler, dots, addData=TRUE){
+  if(is_empty(dots)) return(dots)
+  f <- function(...) as.list(match.call(handler)[-1])
+
+  d_idx <- setNames(seq_along(dots), names(dots))
+
+  if(addData) d_idx["data"] <- list(NULL)
+
+  d_idx <- eval_tidy(quo(f(!!!d_idx)))
+
+  if(addData) d_idx$data <- NULL
+
+  d_idx <- unlist(d_idx)
+  # browser()
+  d_idx <- d_idx[names(d_idx) != "" ]
+
+  names(dots)[d_idx] <- names(d_idx)
+
+  dots
+}
+
+# Returns a new function(data) which calls FUN(data, dots)
+currydata <- function(FUN, dots, addDataArg=TRUE,strictDataParam=TRUE, cloneDots=TRUE) {
+  # heuristic to reuse deep clones
+  if(cloneDots) dots <- dots_env_copy(dots)
 
   quoNoData <- quo((FUN)(!!!dots))
 
@@ -44,6 +75,9 @@ currydata <- function(FUN, dots, addDataArg=TRUE,strictDataParam=TRUE) {
   }
 }
 
+# Implementation for declarations
+# captures the dots and handler, and returns a function that calls the handler with dots
+# also deals with labeling and can trigger step validation
 #' @importFrom rlang enquo
 declaration_template <- function(..., handler, label=NULL){
   #message("Declared")
@@ -55,10 +89,11 @@ declaration_template <- function(..., handler, label=NULL){
     dots$label <- NULL
   }
 
+  dots <- rename_dots(handler, dots, this$strictDataParam)
+  dots <- dots_env_copy(dots)
 
 
-
-  ret <- build_step(currydata(handler, dots, strictDataParam=this$strictDataParam),
+  ret <- build_step(currydata(handler, dots, strictDataParam=this$strictDataParam, cloneDots = FALSE),
             handler=handler,
             dots=dots,
             label=label,
@@ -71,6 +106,7 @@ declaration_template <- function(..., handler, label=NULL){
   ret
 }
 
+# data structure for steps
 build_step <- function(curried_fn, handler, dots, label, step_type, causal_type, call){
   structure(curried_fn,
             handler=handler,
@@ -79,9 +115,10 @@ build_step <- function(curried_fn, handler, dots, label, step_type, causal_type,
             step_type=step_type,
             causal_type=causal_type,
             call=call,
-            class=c("design_step", "function"))
+            class=c("design_step", "d_par","function"))
 }
 
+# generate declaration steps (eg declare_population) by setting the default handler and metadata
 make_declarations <- function(default_handler, step_type, causal_type='dgp', default_label, strictDataParam=TRUE) {
 
   declaration <- declaration_template
@@ -97,7 +134,12 @@ make_declarations <- function(default_handler, step_type, causal_type='dgp', def
             strictDataParam=strictDataParam)
 }
 
-########################################################################
+###############################################################################
+# internal helpers for step-specific validation code
+# set on a handler (see eg reveal_outcomes_handler)
+# called at declare time
+#
+# to debug, use debug(DeclareDesign:::validation_fn(DeclareDesign:::reveal_outcomes_handler))
 
 validation_fn <- function(f){
   attr(f, "validation_fn")
@@ -115,3 +157,13 @@ has_validation_fn <- function(f){
 validate <- function(handler, ret, dots, label) {
   validation_fn(handler)(ret, dots, label)
 }
+
+
+###############################################################################
+# used to inherit roxygen docs
+
+#' @param ...      arguments to be captured, and later passed to the handler
+#' @param handler  a tidy-in, tidy-out function
+#' @param label    a string describing the step
+#' @keywords internal
+declare_internal_inherit_params <- make_declarations(function(data, ...) data.frame(BLNK = "MSG"), step_type = "BLNKMSG")

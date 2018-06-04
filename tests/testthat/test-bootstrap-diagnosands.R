@@ -14,14 +14,20 @@ test_that("test diagnosands", {
   pate_estimator1 <- declare_estimator(Y ~ Z, estimand = pate, label = "test1")
   pate_estimator2 <- declare_estimator(Y ~ Z - 1, estimand = pate, label = "test2")
 
+  reveal <- declare_reveal()
+
   my_design <- declare_design(my_population(),
                               my_potential_outcomes, pate,
                               my_assignment,
-                              reveal_outcomes(),
+                              reveal,
                               pate_estimator1,
                               pate_estimator2)
 
   # default set
-  diagnosis <- diagnose_design(my_design, sims = 2, bootstrap = 2)
+  diagnosis <- diagnose_design(my_design, sims = 2, bootstrap_sims = 2)
+
+  expect_equal(dim(diagnosis$diagnosands_df), c(2,22))
+
+  expect_equal(dim(diagnosis$simulations_df), c(4,10))
 
 })

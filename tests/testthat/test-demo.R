@@ -9,7 +9,8 @@ test_that("demo runs", {
                        age = sample(18:95, N, replace = T))
 
   pop <- my_population()
-  head(pop)
+  expect_equal(nrow(pop), 1000)
+  expect_equal(colnames(pop), c("ID", "income", "age"))
 
   ## ------------------------------------------------------------------------
   my_population_nested <- declare_population(
@@ -78,6 +79,7 @@ test_that("demo runs", {
   my_estimand(pop_pos)
 
   ## ------------------------------------------------------------------------
+  reveal_outcomes <- declare_reveal()
   smp <- reveal_outcomes(smp)
   my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
   my_estimator_dim(smp)
@@ -86,7 +88,7 @@ test_that("demo runs", {
   my_estimator_lm <-
     declare_estimator(Y ~ Z,
                       model = estimatr::lm_robust,
-                      coefficient_name = "Z",
+                      coefficients = "Z",
                       estimand = my_estimand)
 
   my_estimator_lm(smp)
@@ -204,19 +206,14 @@ test_that("demo runs", {
     return(my_design)
   }
 
-  my_1000_design <- fill_out(template = m_arm_trial, numb = 1000)
+  my_1000_design <- expand_design(template = m_arm_trial, numb = 1000)
   head(draw_data(my_1000_design))
 
   ## ------------------------------------------------------------------------
   my_potential_outcomes_continuous <- declare_potential_outcomes(
     formula = Y ~ .25 * Z + .01 * age * Z, conditions = seq(0, 1, by = .1))
 
-  continuous_treatment_function <- function(data){
-    data$Z <- sample(seq(0, 1, by = .1), size = nrow(data), replace = TRUE)
-    data
-  }
-
-  my_assignment_continuous <- declare_assignment(handler = continuous_treatment_function)
+  my_assignment_continuous <- declare_assignment(conditions = seq(0, 1, by = .1))
 
   my_design <- declare_design(my_population(),
                               my_potential_outcomes_continuous,
@@ -233,8 +230,8 @@ test_that("demo runs", {
                               my_potential_outcomes,
                               my_potential_outcomes_attrition,
                               my_assignment,
-                              reveal_outcomes(outcome_variables = "R"),
-                              reveal_outcomes(attrition_variables = "R"))
+                              declare_reveal(outcome_variables = "R"),
+                              declare_reveal(attrition_variables = "R"))
 
   head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
 

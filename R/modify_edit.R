@@ -6,12 +6,14 @@
 #' \dontrun{
 #' here_i_am <- "foo"
 #' dot <- quo(here_i_am)
-#' dot2 <- clone_dot_edit_env(dot, here_i_am="Rock you like a hurricane", xyxyx="bar")
+#' dot2 <- clone_dot_edit_env(dot, here_i_am="some_message", xyxyx="bar")
 #' eval_tidy(dot)
 #' eval_tidy(dot2)
 #' }
 clone_dot_edit_env <- function(dot, ..., to_replace=list(...)){
-
+  if (is.null(environment(dot))) {
+    return(dot)
+  }
   environment(dot) <- list2env(to_replace, parent = environment(dot))
 
   dot
@@ -37,7 +39,7 @@ clone_step_edit <- function(step, ..., to_replace=list(...)) {
 
   step_attributes$dots[] <- lapply(step_attributes$dots, clone_dot_edit_env, to_replace=to_replace)
 
-  f <- with(step_attributes, currydata(handler, dots, strictDataParam=!is.null(formals(step)$data)))
+  f <- with(step_attributes, currydata(handler, dots, strictDataParam=!is.null(formals(step)$data), cloneDots=FALSE))
   attributes(f) <- step_attributes
   f
 }

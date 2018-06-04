@@ -31,12 +31,14 @@ smp <- my_assignment(smp)
 
 my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
-smp <- reveal_outcomes(smp)
+my_reveal <- declare_reveal()
+
+smp <- my_reveal(smp)
 ```
 
 # Quick design
 
-You can also write a design maker function that declares a design based on a set of parameters like `N`, the number of clusters, etc. and use the function `fill_out()` to make designs using just those parameters.
+You can also write a design maker function that declares a design based on a set of parameters like `N`, the number of clusters, etc. and use the function `expand_design()` to make designs using just those parameters.
 
 ```{r echo=TRUE, results="hide"}
 m_arm_trial <- function(numb){
@@ -49,17 +51,18 @@ m_arm_trial <- function(numb){
   my_assignment <- declare_assignment(m = 25)
   my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
   my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
+  my_reveal <- declare_reveal()
   my_design <- declare_design(my_population,
                               my_potential_outcomes,
                               my_estimand,
                               my_sampling,
                               my_assignment,
-                              reveal_outcomes,
+                              my_reveal,
                               my_estimator_dim)
   return(my_design)
 }
 
-my_1000_design <- fill_out(template = m_arm_trial, numb = 1000)
+my_1000_design <- expand_design(template = m_arm_trial, numb = 1000)
 head(draw_data(my_1000_design))
 ```
 ```{r echo=FALSE}
@@ -79,10 +82,13 @@ continuous_treatment_function <- function(data){
 
 my_assignment_continuous <- declare_assignment(handler = continuous_treatment_function)
 
+my_reveal <- declare_reveal()
+
+
 my_design <- declare_design(my_population(),
                             my_potential_outcomes_continuous,
                             my_assignment_continuous,
-                            reveal_outcomes)
+                            my_reveal)
 
 head(draw_data(my_design))
 ```
@@ -98,12 +104,15 @@ Attrition can be thought of as just another potential outcome. That is, one desc
 my_potential_outcomes_attrition <- declare_potential_outcomes(
   formula = R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
 
+reveal_R <- declare_reveal(outcome_variables = "R")
+reveal_Y <- declare_reveal(outcome_variables = "Y", attrition_variables = "R")
+
 my_design <- declare_design(my_population(),
                             my_potential_outcomes,
                             my_potential_outcomes_attrition,
                             my_assignment,
-                            reveal_outcomes(outcome_variables = "R"),
-                            reveal_outcomes(attrition_variables = "R"))
+                            reveal_R,
+                            reveal_Y)
 
 head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
 ```

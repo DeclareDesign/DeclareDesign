@@ -1,8 +1,18 @@
+# File is named so that it collates after declare_estimand
+# Diagnosands use the same handler as estimands
+diagnosand_handler <- estimand_handler
+validation_fn(diagnosand_handler) <- function(ret, dots, label){
+
+  if(is.null(names(dots)) || "" %in% names(dots)) {
+    declare_time_error("All diagnosands must be named", ret)
+  }
+
+  ret
+}
+
 #' Declare Diagnosands
 #'
-#' @param ... A set of diagnosands, i.e. bias = mean(est - estimand). The diagnostic statistic (i.e., est - estimand) and its associated summary function (i.e., mean) are declared at the same time.
-#' @param handler a diagnosand handler
-#' @param label a step label
+#' @inheritParams declare_internal_inherit_params
 #'
 #' @details
 #'
@@ -16,7 +26,7 @@
 #' coverage = mean(estimand <= ci_upper & estimand >= ci_lower)\cr
 #' mean_estimate = mean(est)\cr
 #' sd_estimate = sd(est)\cr
-#' type_s_rate = mean((sign(est) != sign(estimand)) & p < .05)\cr
+#' type_s_rate = mean((sign(est) != sign(estimand))[p < alpha])\cr
 #' mean_estimand = mean(estimand)\cr
 #'
 #' @return a function that returns a data.frame
@@ -39,11 +49,13 @@
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 #'
+#' my_reveal <- declare_reveal()
+#'
 #' design <- declare_design(my_population,
 #'                          my_potential_outcomes,
 #'                          my_estimand,
 #'                          my_assignment,
-#'                          reveal_outcomes,
+#'                          my_reveal,
 #'                          my_estimator)
 #'
 #' \dontrun{
@@ -73,29 +85,32 @@
 #'  type_s_rate = mean((sign(est) != sign(estimand)) & p < .05),
 #'  mean_estimand = mean(estimand))
 #'
-declare_diagnosands <- make_declarations(estimand_handler, "diagnosand", "diagnosands")
+declare_diagnosands <- make_declarations(diagnosand_handler, "diagnosand", "diagnosands")
 
+# Defaults are implemented directly.
+default_diagnosands <-
+  function(data, alpha = .05){
 
-default_diagnosands <- function(data, alpha=.05){
-
-  est <- data$est
-  estimand <- data$estimand
-  p <- data$p
-  ci_lower <- data$ci_lower
-  ci_upper <- data$ci_upper
+  est      <- data$est         %||% NA
+  estimand <- data$estimand    %||% NA
+  p        <- data$p           %||% NA
+  se       <- data$se          %||% NA
+  ci_lower <- data$ci_lower    %||% NA
+  ci_upper <- data$ci_upper    %||% NA
 
   bias = mean(est - estimand)
   rmse = sqrt(mean((est - estimand) ^ 2))
   power = mean(p < alpha)
   coverage = mean(estimand <= ci_upper &
-                    estimand >= ci_lower)
+                  estimand >= ci_lower)
   mean_estimate = mean(est)
   sd_estimate = sd(est)
+  mean_se     = mean(se)
   type_s_rate = mean((sign(est) != sign(estimand))[ p < alpha ] )
   mean_estimand = mean(estimand)
 
 
-  data.frame(estimand_label = c("bias", "rmse", "power", "coverage", "mean_estimate", "sd_estimate", "type_s_rate", "mean_estimand"),
-             estimand       = c( bias ,  rmse ,  power ,  coverage ,  mean_estimate ,  sd_estimate ,  type_s_rate ,  mean_estimand ))
+  data.frame(estimand_label = c("bias", "rmse", "power", "coverage", "mean_estimate", "sd_estimate", "mean_se", "type_s_rate", "mean_estimand"),
+             estimand = c( bias ,  rmse ,  power ,  coverage ,  mean_estimate ,  sd_estimate , mean_se,  type_s_rate ,  mean_estimand ))
 }
 

@@ -23,7 +23,24 @@ test_that("randomizr works through declare_sampling", {
 
 })
 
+expect_sampling_step <- function(step, df, n, clusters=NULL, strata=NULL ){
+  df <- step(df)
 
+  if(!is.na(n)){
+    expect_equal(nrow(df), n)
+  }
+
+  expect_true(is.numeric(df$S_inclusion_prob))
+
+  if(is.character(clusters)){
+
+  }
+  if(is.character(strata)){
+
+  }
+
+
+}
 
 test_that("test sampling and probability functions", {
 
@@ -33,52 +50,30 @@ test_that("test sampling and probability functions", {
     individuals = add_level(N = 10, noise = rnorm(N),
                         ideo_3 = sample(c('Liberal', 'Moderate', 'Conservative'),
                                         size = N, prob = c(.2, .3, .5), replace = TRUE))
-)
+  )
+  # Draw Data
+  population <- population()
+
+
   # "complete" sampling
-  sampling_1 <- declare_sampling()
-  sampling_2 <- declare_sampling(n = 60)
+  expect_sampling_step(declare_sampling(), population, n=500)
+  expect_sampling_step(declare_sampling(n = 60), population, n=60)
 
   # stratified sampling
-  sampling_3 <- declare_sampling(strata = ideo_3)
-  sampling_4 <- declare_sampling(strata = ideo_3, strata_prob = c(.3, .6, .1))
-
-  sampling_5 <- declare_sampling(strata = ideo_3,
-                                 strata_n = c(10, 10, 10))
+  expect_sampling_step(declare_sampling(strata=ideo_3), population, n=NA)
+  expect_sampling_step(declare_sampling(strata=ideo_3, strata_prob = c(.3, .6, .1)), population, n=NA)
+  expect_sampling_step(declare_sampling(strata=ideo_3,  strata_n = c(10, 10, 10)), population, n=30)
 
   # Clustered sampling
-  sampling_6 <- declare_sampling(clusters = villages)
+  expect_sampling_step(declare_sampling(clusters = villages), population, n=500)
 
   # Stratified and Clustered assignments
-  sampling_7 <- declare_sampling(clusters = villages,
-                                      strata = high_elevation)
-
-  # Draw Data
-  smp_draw <- population()
-
-  # Attempt to Assign
-
-  smp_draw %>% nrow
-  smp_draw %>% sampling_1() %>% nrow
-  smp_draw %>% sampling_2() %>% nrow
-  smp_draw %>% sampling_3() %>% with(.,table(ideo_3))
-  smp_draw %>% sampling_4() %>% with(.,table(ideo_3))
-  smp_draw %>% sampling_5() %>% with(.,table(ideo_3))
-  smp_draw %>% sampling_6() %>% with(.,table(villages))
-  smp_draw %>% sampling_7() %>% with(.,table(villages, high_elevation))
-
-  # Obtain Treatment Probabilities
-  smp_draw %>% sampling_1() %>% .$S_inclusion_prob %>% head()
-  smp_draw %>% sampling_2() %>% .$S_inclusion_prob %>% head()
-  smp_draw %>% sampling_3() %>% .$S_inclusion_prob %>% head()
-  smp_draw %>% sampling_4() %>% .$S_inclusion_prob %>% head()
-  smp_draw %>% sampling_5() %>% .$S_inclusion_prob %>% head()
-  smp_draw %>% sampling_6() %>% .$S_inclusion_prob %>% head()
-  smp_draw %>% sampling_7() %>% .$S_inclusion_prob %>% head()
+  expect_sampling_step(declare_sampling(clusters = villages,strata = high_elevation), population, n=NA)
 
 })
 
 
-test_that("declare_assignment expected failures via validation fn", {
+test_that("declare_sampling expected failures via validation fn", {
 
   expect_true(is.function(declare_sampling()))
 
@@ -88,6 +83,36 @@ test_that("declare_assignment expected failures via validation fn", {
 
   expect_error(declare_sampling(sampling_variable = NULL), "sampling_variable")
 })
+
+
+
+
+
+
+test_that("Factor out declarations", {
+
+  skip_if_not_installed("randomizr", "0.15.0")
+
+  N <- 500
+  n <- 250
+  m <- 25
+
+  expect_message(
+    design <- declare_design(
+      declare_population(N = N, noise = 1:N),
+      declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + 1),
+      declare_sampling(N=N, n = n),
+      declare_assignment(N=n, m = m),
+      declare_reveal()
+    ),
+    "declaration"
+  )
+
+  expect_true(inherits(attr(design[[3]], "dots")$declaration, "rs_complete"))
+  expect_true(inherits(attr(design[[4]], "dots")$declaration, "ra_complete"))
+
+})
+
 
 
 

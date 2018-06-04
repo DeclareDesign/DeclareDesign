@@ -3,32 +3,33 @@
 \name{declare_potential_outcomes}
 \alias{declare_potential_outcomes}
 \alias{potential_outcomes.formula}
-\alias{potential_outcomes.default}
+\alias{potential_outcomes.NULL}
 \title{Potential Outcomes}
 \usage{
 declare_potential_outcomes(..., handler = potential_outcomes_handler,
   label = NULL)
 
-potential_outcomes.formula(formula, data, conditions = c(0, 1),
-  assignment_variable = "Z", level = NULL)
+potential_outcomes.formula(formula, conditions = c(0, 1),
+  assignment_variables = "Z", data, level = NULL,
+  label = outcome_variable)
 
-potential_outcomes.default(formula = stop("Not provided"), ..., data,
+potential_outcomes.NULL(formula = stop("Not provided"), ..., data,
   level = NULL)
 }
 \arguments{
-\item{...}{Arguments to the potential_outcomes_function}
+\item{...}{arguments to be captured, and later passed to the handler}
 
-\item{handler}{A function that accepts a data.frame as an argument and returns a data.frame with potential outcomes columns appended. See the examples for the behavior of the default function.}
+\item{handler}{a tidy-in, tidy-out function}
 
-\item{label}{A step label}
+\item{label}{a string describing the step}
 
 \item{formula}{a formula to calculate Potential outcomes as functions of assignment variables}
 
+\item{conditions}{see \code{\link{expand_conditions}}}
+
+\item{assignment_variables}{The name of the assignment variable}
+
 \item{data}{a data.frame}
-
-\item{conditions}{vector specifying the values the assignment variable can realize}
-
-\item{assignment_variable}{The name of the assignment variable}
 
 \item{level}{a character specifying a level of hierarchy for fabricate to calculate at}
 }
@@ -44,36 +45,48 @@ A `declare_potential_outcomes` declaration returns a function. That function tak
 The potential outcomes function can sometimes be a stumbling block for users, as some are uncomfortable asserting anything in particular about the very causal process that they are conducting a study to learn about! We recommend trying to imagine what your preferred theory would predict, what an alternative theory would predict, and what your study would reveal if there were no differences in potential outcomes for any unit (i.e., all treatment effects are zero).
 }
 \examples{
-my_population <-
-declare_population(N = 1000,
-                   income = rnorm(N),
-                   age = sample(18:95, N, replace = TRUE))
-pop <- my_population()
+########################################################
+# Default handler
 
 # By default, there are two ways of declaring potential outcomes:
 # as separate variables or using a formula:
 
 # As separate variables
 
-my_potential_outcomes <-
-     declare_potential_outcomes(
-        Y_Z_0 = .05,
-        Y_Z_1 = .30 + .01 * age)
+my_potential_outcomes <- declare_potential_outcomes(
+  Y_Z_0 = .05,
+  Y_Z_1 = .30 + .01 * age
+)
 
-head(my_potential_outcomes(pop))
+
 
 # Using a formula
- my_potential_outcomes <- declare_potential_outcomes(
- formula = Y ~ .25 * Z + .01 * age * Z)
- pop_pos <- my_potential_outcomes(pop)
- head(pop_pos)
+ my_potential_outcomes <- declare_potential_outcomes(Y ~ .05 + .25 * Z + .01 * age * Z)
 
  # conditions defines the "range" of the potential outcomes function
- my_potential_outcomes <-
-      declare_potential_outcomes(
-      formula = Y ~ .25 * Z + .01 * age * Z,
-      conditions = 1:4)
+ my_potential_outcomes <- declare_potential_outcomes(
+   formula = Y ~ .05 + .25 * Z + .01 * age * Z,
+   conditions = 1:4
+ )
 
-head(my_potential_outcomes(pop))
+ # Multiple assignment variables can be specified in conditions.
+ # A 2x2 factorial potential outcome:
+
+ my_potential_outcomes <- declare_potential_outcomes(
+   formula = Y ~ .05 + .25 * Z1 + .01 * age * Z2,
+   conditions = list(Z1=0:1, Z2=0:1)
+ )
+
+########################################################
+# Custom handler
+
+my_potential_outcome_f <- function(data) {
+
+  data$Y_treated   <- rexp(nrow(data), .2)
+  data$Y_untreated <- rexp(nrow(data), .4)
+  data
+}
+
+custom_potential <- declare_potential_outcomes(handler=my_potential_outcome_f)
 
 }

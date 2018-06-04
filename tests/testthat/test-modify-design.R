@@ -9,7 +9,7 @@ test_that("test modify declare design ", {
 
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-  my_assignment <- declare_assignment(m = 25)
+  my_assignment <- declare_assignment(m = 25, label = "a_label")
 
   design <- declare_design(my_population,
                            my_potential_outcomes,
@@ -19,6 +19,8 @@ test_that("test modify declare design ", {
   my_assignment_2 <- declare_assignment(m = 25, assignment_variable = "Z2")
 
   expect_length(replace_step(design, new_step = my_assignment_2, step = my_assignment), 4)
+  expect_length(replace_step(design, new_step = my_assignment_2, step = 4), 4)
+  expect_length(replace_step(design, new_step = my_assignment_2, step = "a_label"), 4)
 
   expect_length(insert_step(design, dplyr::mutate(blah = 6), before = my_potential_outcomes), 5)
 

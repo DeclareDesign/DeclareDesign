@@ -2,16 +2,26 @@
 % Please edit documentation in R/declare_assignment.R
 \name{declare_assignment}
 \alias{declare_assignment}
+\alias{assignment_handler}
 \title{Declare Assignment Procedure}
 \usage{
 declare_assignment(..., handler = assignment_handler, label = NULL)
+
+assignment_handler(data, ..., assignment_variable = "Z",
+  append_probabilities_matrix = FALSE)
 }
 \arguments{
-\item{...}{Arguments to the assignment function.}
+\item{...}{arguments to be captured, and later passed to the handler}
 
-\item{handler}{A function that takes a data.frame, adds an assignment variable and optionally assignment probabilities or other relevant quantities, and returns a data.frame. By default, the assignment_function uses the \link{randomizr} functions \code{\link{conduct_ra}} and \code{\link{obtain_condition_probabilities}} to conduct random assignment and obtain the probabilities of assignment to each condition.}
+\item{handler}{a tidy-in, tidy-out function}
 
-\item{label}{a step label}
+\item{label}{a string describing the step}
+
+\item{data}{a data.frame}
+
+\item{assignment_variable}{name for assignment variable}
+
+\item{append_probabilities_matrix}{Should the condition probabilities matrix be appended to the data? Defaults to FALSE}
 }
 \value{
 a function that takes a data.frame as an argument and returns a data.frame with additional columns appended including an assignment variable and (optionally) probabilities of assignment.
@@ -20,47 +30,39 @@ a function that takes a data.frame as an argument and returns a data.frame with 
 Declare Assignment Procedure
 }
 \details{
-While declare_assignment can work with any assignment_function that takes data and returns data, most random assignment procedures can be easily implemented with randomizr. The arguments to \code{\link{conduct_ra}} can include N, block_var, clust_var, m, m_each, prob, prob_each, block_m, block_m_each = NULL, block_prob, block_prob_each, num_arms, and conditions. The arguments you need to specify are different for different designs. Check the help files for \code{\link{complete_ra}}, \code{\link{block_ra}}, \code{\link{cluster_ra}}, or \code{\link{block_and_cluster_ra}} for details on how to execute many common designs.
+While declare_assignment can work with any assignment_function that takes data and returns data, most random assignment procedures can be easily implemented with randomizr.
+The arguments to \code{\link{conduct_ra}} can include N, block_var, clust_var, m, m_each, prob, prob_each, block_m, block_m_each = NULL, block_prob, block_prob_each, num_arms, and conditions.
+The arguments you need to specify are different for different designs. Check the help files for \code{\link{complete_ra}},
+\code{\link{block_ra}}, \code{\link{cluster_ra}}, or \code{\link{block_and_cluster_ra}} for details on how to execute many common designs.
+
+Custom assignment handlers should augment the data frame with an appropriate column for the assignments.
 }
 \examples{
 
-my_population <- declare_population(N = 100, female = rbinom(N, 1, .5))
-df <- my_population()
-
-# Complete random assignment using randomizr
-# use any arguments you would use in conduct_ra.
+########################################################
+# Default Handler
+# Delegates to conduct_ra
 
 my_assignment <- declare_assignment(m = 50)
-df <- my_assignment(df)
-head(df)
-table(df$Z)
+my_assignment <- declare_assignment(block_prob = 1/3, blocks = female)
+my_assignment <- declare_assignment(block_prob = 1/4, clusters = classrooms)
 
-# Block random assignment
+my_assignment <- declare_assignment(
+  block_prob = 1/4,
+  clusters = classrooms,
+  assignment_variable = "X1"
+)
 
-my_blocked_assignment <- declare_assignment(blocks = female)
-
-df <- my_population()
-
-df <- my_blocked_assignment(df)
-head(df)
-with(df, table(Z, female))
-
-
-# Custom random assignment functions
-
-df <- my_population()
+########################################################
+#' # Custom random assignment functions
 
 my_assignment_function <- function(data) {
-   data$Z <- rbinom(n = nrow(data),
-   size = 1,
-   prob = 0.5)
+   data$Z <- ifelse(data$extra <= median(data$extra), 1, 0)
    data
-   }
+}
 
-my_assignment_custom <- declare_assignment(
-   handler = my_assignment_function)
+my_assignment_custom <- declare_assignment(handler = my_assignment_function)
 
-df <- my_assignment_custom(df)
-head(df)
-table(df$Z)
+df <- my_assignment_custom(sleep)
+table(df$Z, df$group)
 }

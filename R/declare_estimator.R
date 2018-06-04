@@ -1,9 +1,8 @@
-#' Declare an Estimator
+#' Declare Estimator
 #'
-#' @param ... Arguments to the estimation function. For example, you could specify the formula for your estimator, i.e., formula = Y ~ Z + age.
-#' @param handler the handler function
-#' @param label An optional label to name the estimator, such as DIM.
-#' @param data a data.frame
+#' @description Declares an estimator which generates estimates and associated statistics
+#'
+#' @inheritParams declare_internal_inherit_params
 #'
 #' @export
 #' @importFrom estimatr difference_in_means
@@ -18,71 +17,163 @@
 #'
 #' @examples
 #'
-#' my_population <- declare_population(N = 100)
+#' ########################################################
+#' # Default handler
 #'
-#' my_potential_outcomes <- declare_potential_outcomes(
-#'   formula = Y ~ .25 * Z,
-#'   conditions = c(0, 1))
+#' my_estimand <- declare_estimand(ATE=mean(Y_Z_1-Y_Z_0))
 #'
-#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+#' # Automatically uses first non-intercept coefficient as estimate
+#' # Default method is the `difference_in_means` estimator from `estimatr`
 #'
-#' my_assignment <- declare_assignment(m = 50)
+#' my_estimator_dim <- declare_estimator(Y ~ Z, estimand = "ATE", label = "DIM")
 #'
-#' design <- declare_design(
-#'  my_population, my_potential_outcomes,
-#'  my_estimand, my_assignment, reveal_outcomes
+#' # lm from base R
+#' my_estimator_lm <- declare_estimator(Y ~ Z, estimand = "ATE", model = lm, label = "LM")
+#
+#' # Use linear regression with robust standard errors from `estimatr` package
+#' my_estimator_lm_rob <- declare_estimator(
+#'   Y ~ Z,
+#'   estimand = "ATE",
+#'   model = estimatr::lm_robust,
+#'   label = "LM_Robust"
 #' )
 #'
-#' df <- draw_data(design)
+#' # Set `coefficient`` if estimate of interest is not the first non-intercept variable
+#' my_estimator_lm_rob_x <- declare_estimator(
+#'   Y ~ X + Z,
+#'   estimand = my_estimand,
+#'   coefficients = "Z",
+#'   model = estimatr::lm_robust
+#' )
 #'
-#' my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
+#' # Use glm from base R
+#' my_estimator_glm <- declare_estimator(
+#'   Y ~ X + Z,
+#'   family = "gaussian",
+#'   estimand = my_estimand,
+#'   coefficients = "Z",
+#'   model = glm
+#' )
 #'
-#' my_estimator_dim(df)
+#' # A probit
+#' estimator_probit <- declare_estimator(
+#'   Y ~ Z,
+#'   model = glm,
+#'   family = binomial(link = "probit"),
+#'   coefficients = "Z"
+#' )
 #'
-#' # Use the linear regression (lm) function
-#' # with robust standard errors from the estimatr package
+#' ########################################################
+#' # Custom handlers
 #'
-#' my_estimator_lm <-
-#'  declare_estimator(Y ~ Z,
-#'                    model = estimatr::lm_robust,
-#'                    coefficient_name = "Z",
-#'                    estimand = my_estimand)
-#'
-#' my_estimator_lm(df)
-#'
-#' # Use R's built-in lm function via model
-#'
-#' estimator_lm <- declare_estimator(Y ~ Z, model = lm)
-#'
-#' # Run a probit regression using glm via model
-#'
-#' estimator_probit <-
-#'   declare_estimator(
-#'     Y ~ Z,
-#'     model = glm,
-#'     family = binomial(link = "probit"),
-#'     coefficient_name = "Z"
-#'  )
-#'
-#' # Use a custom estimator function
-#'
+#' # Define your own estimator and use the `tidy_estimator` function for labeling
+#' # Must have `data` argument that is a data.frame
 #' my_estimator_function <- function(data){
 #'   data.frame(est = with(data, mean(Y)))
 #' }
 #'
-#' my_estimator_custom <-
-#'   declare_estimator(handler = tidy_estimator(my_estimator_function),
-#'                     estimand = my_estimand)
+#' my_estimator_custom <- declare_estimator(
+#'   handler = tidy_estimator(my_estimator_function),
+#'   estimand = my_estimand
+#' )
 #'
-#' my_estimator_custom(df)
+#' # Use a custom estimator function with custom labelling
+#'
+#' my_estimator_function <- function(data){
+#'   data.frame(
+#'     estimator_label="foo",
+#'     estimand_label="bar",
+#'     est = with(data, mean(Y)),
+#'     n = nrow(data),
+#'     stringsAsFactors=FALSE
+#'   )
+#' }
+#'
+#' my_estimator_custom2 <- declare_estimator(handler = my_estimator_function)
+#'
+#' ########################################################
+#' # Examples
+#'
+#' # First, set up the rest of a design
+#' set.seed(42)
+#'
+#' design_def <- declare_design(
+#'   declare_population(N = 100, X = rnorm(N), W=rexp(N,1), noise=rnorm(N)),
+#'   declare_potential_outcomes(Y ~ .25 * Z + noise),
+#'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)),
+#'   declare_assignment(m = 50),
+#'   declare_reveal(),
+#'   my_estimator_dim
+#' )
+#'
+#' run_design(design_def)
+#'
+#' # Can also use declared estimator on a data.frame
+#' dat <- draw_data(design_def)
+#' my_estimator_dim(dat)
+#'
+#' # ----------
+#' # 2. Using existing estimators
+#' # ----------
+#'
+#' design <- replace_step(design_def, my_estimator_dim, my_estimator_lm_rob)
+#'
+#' run_design(design)
+#'
+#'
+#' design <- replace_step(design_def, my_estimator_dim, my_estimator_lm)
+#'
+#' run_design(design)
+#'
+#'
+#' design <- replace_step(design_def, my_estimator_dim, my_estimator_glm)
+#'
+#' run_design(design)
+#'
+#' # ----------
+#' # 3. Using custom estimators
+#' # ----------
+#'
+#'
+#' design <- replace_step(design_def, my_estimator_dim, my_estimator_custom)
+#'
+#' run_design(design)
+#'
+#' # The names in your custom estimator return should match with
+#' # your diagnosands when diagnosing a design
+#' my_median <- function(data) data.frame(med = median(data$Y))
+#'
+#' my_estimator_median <- declare_estimator(
+#'   handler = tidy_estimator(my_median),
+#'   estimand = my_estimand
+#' )
+#'
+#' design <- replace_step(design_def, my_estimator_dim, my_estimator_median)
+#'
+#' run_design(design)
+#'
+#' my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand))
+#' diagnose_design(design, diagnosands = my_diagnosand, sims = 5, bootstrap_sims = FALSE)
+#'
+#' # ----------
+#' # 4. Multiple estimators per estimand
+#' # ----------
+#'
+#' design_two <- insert_step(design_def,  my_estimator_lm,  after=my_estimator_dim)
+#'
+#' run_design(design_two)
+#' diagnose_design(design_two, sims = 5, bootstrap_sims = FALSE)
 #'
 declare_estimator <- make_declarations(estimator_handler, step_type="estimator", causal_type="estimator", default_label="my_estimator")
 
 #' \code{tidy_estimator} takes an untidy estimation function, and returns a tidy handler which accepts standard labelling options.
 #'
+#' The intent here is to factor out the estimator/estimand labeling so that it can be reused by other model handlers.
+#'
 #' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.
 #' @rdname declare_estimator
 #' @export
+#' @importFrom rlang UQ
 tidy_estimator <- function(estimator_function){
 
   if (!("data" %in% names(formals(estimator_function)))) {
@@ -92,9 +183,21 @@ tidy_estimator <- function(estimator_function){
 
   f <- function(data, ..., estimand=NULL, label) {
 
+    calling_args <- names(match.call(expand.dots = FALSE)) %i% names(formals(estimator_function))
+
+    dots <- if("..." %in% calling_args) quos(...) else list()
+
+    calling_args <- setdiff(calling_args, c("", "data", "..."))
+
+    for(e in calling_args) {
+      dots[[e]] <- do.call(enquo, list(as.symbol(e))) # this *should* retrieve coefficient names as quosure. IDK
+    }
+
+    ret <- eval_tidy(quo(estimator_function(data, !!!dots)))
+
     ret <- data.frame(
       estimator_label = label,
-      estimator_function(data, ...),
+      ret,
       stringsAsFactors = FALSE
     )
 
@@ -106,41 +209,49 @@ tidy_estimator <- function(estimator_function){
 
   }
 
+
+  formals(f) <- formals(estimator_function)
+  if(!"estimand" %in% names(formals(f))){formals(f)["estimand"] <- list(NULL)}
+  if(!"label"%in% names(formals(f))){formals(f)$label <- alist(a=)$a}
+
   attributes(f) <- attributes(estimator_function)
+
 
   f
 }
 
 
 
-
+#' @param data a data.frame
 #' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
-#' @param coefficient_name A character vector of coefficients that represent quantities of interest, i.e. Z. Only relevant when a \code{model} is chosen or for some \code{estimator_function}'s such as \code{difference_in_means} and \code{lm_robust}.
+#' @param coefficients Symbols or literal character vector of coefficients that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept coefficient; if TRUE return all coefficients. To escape non-standard-evaluation use \code{!!}.
 #' @rdname declare_estimator
-model_handler <-
-  function(data, ...,
-    model = estimatr::difference_in_means,
-    coefficient_name = Z)
-  {
+model_handler <- function(data, ..., model = estimatr::difference_in_means, coefficients = FALSE) {
 
-    coefficient_name <- reveal_nse_helper(substitute(coefficient_name))
+    coefficient_names <- enquo(coefficients) # forces evaluation of quosure
+    coefficient_names <- reveal_nse_helper(coefficient_names)
 
-    # estimator_function_internal <- function(data) {
     args <- quos(...)
-    W <- quo(model(!!!args, data=data))
-    results <- eval(quo_expr(W))
 
-    results <- fit2tidy(results, coefficient_name)
+    # todo special case weights offsets for glm etc?
+    
+    results <- eval_tidy(quo(model(!!!args, data=data)))
+
+    results <- fit2tidy(results, coefficient_names)
 
     results
 }
 
 validation_fn(model_handler) <-  function(ret, dots, label){
+  declare_time_error_if_data(ret)
+
+
   if("model" %in% names(dots)) {
     model <- eval_tidy(dots$model)
     if(!is.function(model) || ! "data" %in% names(formals(model))){
       declare_time_error("Must provide a function for `model` which takes a `data` argument.", ret)
     }
+    attr(ret, "extra_summary") <- sprintf("Model:\t%s", as.character(f_rhs(dots$model)))
   }
   ret
 }
@@ -151,26 +262,39 @@ validation_fn(model_handler) <-  function(ret, dots, label){
 #' @rdname declare_estimator
 estimator_handler <- tidy_estimator(model_handler)
 
-fit2tidy <- function(fit, coefficient_name = NULL) {
-  summ <- summary(fit)$coefficients
+
+
+# called by model_handler, resets columns names !!!
+fit2tidy <- function(fit, coefficients = FALSE) {
+  summ <- coef(summary(fit))
   summ <-
     summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
   ci <- suppressMessages(as.data.frame(confint(fit)))
   return_data <-
-    data.frame(coefficient_name = rownames(summ),
+    data.frame(coefficient = rownames(summ),
                summ,
                ci,
                stringsAsFactors = FALSE, row.names = NULL)
-  colnames(return_data) <- c("coefficient_name","est", "se", "p", "ci_lower", "ci_upper")
+  colnames(return_data) <- c("coefficient","est", "se", "p", "ci_lower", "ci_upper")
 
 
-  if (is.character(coefficient_name)) {
-    return_data <- return_data[return_data$coefficient_name %in% coefficient_name, ,drop = FALSE]
+  if (is.character(coefficients)) {
+    coefs_in_output <- coefficients %in% return_data$coefficient
+    if (!all(coefs_in_output)) {
+      stop("Not all of the coefficients declared in your estimator are present in the model output, including ", 
+           paste(coefficients[!coefs_in_output], collapse = ", "), ".", call. = FALSE)
+    }
+    return_data <- return_data[return_data$coefficient %in% coefficients, ,drop = FALSE]
+  } else if(is.logical(coefficients) && !coefficients) {
+    return_data <- return_data[which.max(return_data$coefficient != "(Intercept)"), ,drop = FALSE]
   }
+
 
   return_data
 }
 
+# helper methods for estimand=my_estimand arguments to estimator_handler
+#
 get_estimand_label <- function(estimand){
   force(estimand) # no promise nonsense when we look at it
   switch(class(estimand)[1],

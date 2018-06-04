@@ -12,13 +12,13 @@ citation_handler(data = stop("Don't evaluate data argument"), title = NULL,
   timestamp = Sys.time(), citation = NULL)
 }
 \arguments{
-\item{...}{Arguments to the citation function}
+\item{...}{arguments to be captured, and later passed to the handler}
 
-\item{handler}{A function that takes a data.frame and yield citation data}
+\item{handler}{a tidy-in, tidy-out function}
 
-\item{label}{a step label}
+\item{label}{a string describing the step}
 
-\item{data}{a data.frame}
+\item{data}{Do not use}
 
 \item{title}{(optional) The title of the study, as a character string.}
 
@@ -35,4 +35,10 @@ a function that takes a data.frame as an argument and returns citation data
 }
 \description{
 Declare Research Study Citation
+}
+\examples{
+
+ cite <- declare_citation(title="example", author="Neal")
+ design <- declare_design(cite)
+ cite_design(design)
 }

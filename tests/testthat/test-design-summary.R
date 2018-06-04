@@ -14,6 +14,8 @@ test_that("Basic design summary", {
 
   my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
+  reveal_outcomes <- declare_reveal()
+
   design <- declare_design(my_population,
                            my_potential_outcomes,
                            my_sampling,
@@ -32,6 +34,9 @@ test_that("Basic design summary", {
   # Last step
   expect_equal(s$formulae[[8]], Y~Z)
 
+  s_short <- summary(design, verbose = FALSE)
+
+  expect_failure(expect_output(print(summary(design, verbose = FALSE)), "Formula"))
 
 })
 
@@ -60,17 +65,30 @@ test_that("Add Quantitites and Alter Variables", {
   )
 })
 
-test_that("str() works",
+test_that("str() works", {
 
   expect_output(str(declare_population(N = 50)), "design_step:\\t declare_population[(]N = 50[)] ")
+  expect_output(str(declare_design(sleep)), "seed_data:\\t sleep")
 
-)
+})
 
-test_that("summary, custom estimand, numeric value", {
+test_that("summary, custom estimator handler, numeric value", {
       d <- declare_design(sleep, extra=declare_estimator(handler=function(data) mean(data$extra)))
 
       expect_output(print(d), "1.54")
 
 })
 
+test_that("summary, estimator formula print formula", {
+  d <- declare_design(sleep, extra=declare_estimator(extra~group))
 
+  expect_output(print(d), "extra ~ group")
+
+})
+
+test_that("summary, estimator print model", {
+  d <- declare_design(sleep, declare_estimator(extra~group, model=lm))
+
+  expect_output(print(d), "Model:\\s*lm")
+
+})

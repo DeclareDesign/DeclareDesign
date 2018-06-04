@@ -1,17 +1,20 @@
 
 #' Declare Research Study Citation
 #'
-#' @param ... Arguments to the citation function
-#' @param handler A function that takes a data.frame and yield citation data
-#' @param label a step label
-#' @param data a data.frame
+#' @inheritParams declare_internal_inherit_params
 #'
 #' @return a function that takes a data.frame as an argument and returns citation data
 #' @export
 #'
+#' @examples
+#'
+#'  cite <- declare_citation(title="example", author="Neal")
+#'  design <- declare_design(cite)
+#'  cite_design(design)
 
 declare_citation <- make_declarations(citation_handler, "citation", causal_type="citation", strictDataParam=FALSE)
 
+#' @param data Do not use
 #' @param title (optional) The title of the study, as a character string.
 #' @param authors (optional) The authors of the study, as a character string.
 #' @param description (optional) A description of the design in words, as a character string, stored alongside the declaration in code.

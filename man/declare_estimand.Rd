@@ -2,49 +2,152 @@
 % Please edit documentation in R/declare_estimand.R
 \name{declare_estimand}
 \alias{declare_estimand}
+\alias{estimand_handler}
 \title{Declare Estimand}
 \usage{
 declare_estimand(..., handler = estimand_handler, label = "my_estimand")
+
+estimand_handler(data, ..., subset = NULL, coefficients = FALSE, label)
 }
 \arguments{
-\item{...}{Arguments to the estimand function. For example, you might specify ATE = mean(Y_Z_1 - Y_Z_0), which would declare the estimand to be named ATE and to be the mean of the difference in the control and treatment potential outcome.}
+\item{...}{arguments to be captured, and later passed to the handler}
 
-\item{handler}{A function that takes a data.frame as an argument and returns a data.frame with the estimand and a label. By default, the estimand function accepts an expression such as ATE = mean(Y_Z_1-Y_Z_0).}
+\item{handler}{a tidy-in, tidy-out function}
 
-\item{label}{An optional label to name the estimand, such as ATE. Typically, the label is inferred from how you specify the estimand in \code{...}, i.e. if you specify ATE = mean(Y_Z_1 - Y_Z_0) the estimand label will be ATE.}
+\item{label}{a string describing the step}
+
+\item{data}{a data.frame}
+
+\item{subset}{a subset expression}
+
+\item{coefficients}{TRUE/FALSE}
 }
 \value{
 a function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimand.
 }
 \description{
-Declare Estimand
+Declares estimands which are the subjects of inquiry and can be estimated by an estimator
+}
+\details{
+For the default diagnosands, the return value of the handler should have `estimand_label` and `estimand` columns.
+
+If coefficients is TRUE, the names of ... will be returned in a `coefficients` column, and `estimand_label`
+will contain the step label. This can be used as an additional dimension for use in diagnosis.
 }
 \examples{
 
-my_population <- declare_population(N = 100)
+########################################################
+# Default handler
 
-my_potential_outcomes <- declare_potential_outcomes(
-  formula = Y ~ .25 * Z,
-  conditions = c(0, 1))
+my_estimand_ATE <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
-df <- my_potential_outcomes(my_population())
+my_estimand_ATT <- declare_estimand(ATT = mean(Y_Z_1 - Y_Z_0), subset=Z==1)
 
-# Use the default estimand setup to
-# declare an average treatment effect estimand
+# You can also use different coefficients from an model-based estimator for
+# two estimands, with a slightly different syntax
 
-my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+# Name your estimands the coefficient name they get in your
+# estimator, and set `coefficients = TRUE`
 
-my_estimand(df)
+my_estimand_regression <- declare_estimand(
+  `(Intercept)` = mean(Y_Z_0),
+  `Z` = mean(Y_Z_1 - Y_Z_0),
+  coefficients = TRUE,
+  label="TrueRegressionParams"
+)
 
+########################################################
 # Custom random assignment functions
 
 my_estimand_function <- function(data, label) {
   ret <- with(data, median(Y_Z_1 - Y_Z_0))
-  data.frame(setNames(ret, label))
+  data.frame(estimand_label=label,
+             estimand=ret,
+             time=Sys.time(),
+             stringsAsFactors=FALSE)
 }
-my_estimand_custom <- declare_estimand(
-  handler = my_estimand_function, label = "medianTE")
+my_estimand_custom <- declare_estimand(handler = my_estimand_function, label = "medianTE")
 
-my_estimand_custom(df)
+########################################################
+# Using with estimators
 
+
+# First, set up the rest of a design for use below
+set.seed(42)
+
+design_stub <- declare_design(
+  pop=declare_population(N = 100, X = rnorm(N)),
+  po=declare_potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N)),
+  assn=declare_assignment(m = 50),
+  reveal=declare_reveal()
+)
+
+# Get example data to compute estimands on
+dat <- draw_data(design_stub)
+
+# ----------
+# 1. Single estimand
+# ----------
+
+# Use the default estimand setup to
+# declare an average treatment effect estimand
+
+my_estimand_ATE(dat)
+
+my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand_ATE, label="estimator")
+
+design_def <- insert_step(design_stub, my_estimand_ATE, before="assn")
+design_def <- insert_step(design_def, my_estimator, after="reveal")
+
+run_design(design_def)
+
+# ----------
+# 2. Multiple estimands
+# ----------
+
+# You can also specify multiple estimands at a time
+
+# With multiple estimands, you can use one estimator for both...
+my_estimator_two <- declare_estimator(Y ~ Z, estimand = c(my_estimand_ATE, my_estimand_ATT))
+
+design_two <- insert_step(design_stub, my_estimand_ATE, before="assn")
+design_two <- insert_step(design_two, my_estimand_ATT, after="assn")
+design_two <- insert_step(design_two, my_estimator_two, after="reveal")
+
+run_design(design_two)
+
+
+# For the model based estimator, specify the estimand as usual,
+# but also set `coefficients = TRUE`
+my_estimator_double <- declare_estimator(
+  Y ~ Z,
+  estimand = my_estimand_regression,
+  model = lm,
+  coefficients = TRUE
+)
+
+design_double <- insert_step(design_stub, my_estimand_regression, after="po")
+design_double <- insert_step(design_double, my_estimator_double, after="reveal")
+
+run_design(design_double)
+
+# ----------
+# 3. Custom estimands
+# ----------
+
+
+my_estimand_custom(dat)
+
+# Can also use custom estimator
+my_estimator_function <- function(data){
+  data.frame(est = with(data, median(Y)))
+}
+my_estimator_custom <-
+  declare_estimator(handler = tidy_estimator(my_estimator_function),
+                    estimand = my_estimand_custom)
+
+design_cust <- insert_step(design_stub, my_estimand_custom, before="assn")
+design_cust <- insert_step(design_cust, my_estimator_custom, after="reveal")
+
+run_design(design_cust)
 }
