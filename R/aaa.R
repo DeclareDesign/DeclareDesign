@@ -44,7 +44,7 @@ rename_dots <- function(handler, dots, addData=TRUE){
   if(addData) d_idx$data <- NULL
 
   d_idx <- unlist(d_idx)
-  # browser()
+
   d_idx <- d_idx[names(d_idx) != "" ]
 
   names(dots)[d_idx] <- names(d_idx)
