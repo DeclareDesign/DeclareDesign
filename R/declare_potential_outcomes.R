@@ -72,23 +72,20 @@ declare_potential_outcomes <- make_declarations(potential_outcomes_handler, "pot
 ### this makes tracing the execution in run_design much simpler
 
 potential_outcomes_handler <-  function(..., data, level) {
-  (function(formula, ...) UseMethod("potential_outcomes"))(..., data=data, level=level)
-
+  (function(formula, ...) UseMethod("potential_outcomes"))(..., data = data, level = level)
 }
 
 validation_fn(potential_outcomes_handler) <-  function(ret, dots, label) {
-  if(getOption("debug.DeclareDesign.potential_outcome_validation", FALSE)) browser()
 
   declare_time_error_if_data(ret)
 
 
   # Below is a similar redispatch strategy, only at declare time
   validation_delegate <- function(formula=NULL, ...) {
-    if(getOption("debug.DeclareDesign.potential_outcome_validation_s3_lookup", FALSE)) browser()
     potential_outcomes <- function(formula, ...) UseMethod("potential_outcomes", formula)
-    for(c in class(formula)){
+    for (c in class(formula)) {
       s3method <- getS3method("potential_outcomes", class(formula))
-      if(is.function(s3method)) return(s3method)
+      if (is.function(s3method)) return(s3method)
     }
     declare_time_error("Could not find appropriate implementation", ret)
   }
@@ -98,21 +95,21 @@ validation_fn(potential_outcomes_handler) <-  function(ret, dots, label) {
   # explicitly name all dots, for easier s3 handler validation
   dots <- rename_dots(s3method, dots)
 
-  if("level" %in% names(dots)){
+  if ("level" %in% names(dots)) {
     dots$level <- reveal_nse_helper(dots$level)
   }
 
 
-  ret <- build_step(currydata(s3method, dots, strictDataParam=attr(ret, "strictDataParam")),
-                    handler=s3method,
-                    dots=dots,
-                    label=label,
-                    step_type=attr(ret, "step_type"),
-                    causal_type=attr(ret,"causal_type"),
-                    call=attr(ret, "call"))
+  ret <- build_step(
+    currydata(s3method, dots, strictDataParam = attr(ret, "strictDataParam")),
+    handler = s3method,
+    dots = dots,
+    label = label,
+    step_type = attr(ret, "step_type"),
+    causal_type = attr(ret, "causal_type"),
+    call = attr(ret, "call"))
 
-  if(has_validation_fn(s3method)) ret <- validate(s3method, ret, dots, label)
-
+  if (has_validation_fn(s3method)) ret <- validate(s3method, ret, dots, label)
 
   ret
 }
@@ -143,8 +140,8 @@ potential_outcomes.formula <-
     condition_quos <- quos()
 
     ### If assn vars already present, swap them out
-    if(length(to_restore) > 0){
-      restore_mangled <- paste(rep("_", max(nchar(colnames(data)))), collapse="")
+    if (length(to_restore) > 0) {
+      restore_mangled <- paste(rep("_", max(nchar(colnames(data)))), collapse = "")
 
       restore_mangled <- setNames(
         lapply(to_restore, as.symbol),
@@ -157,16 +154,16 @@ potential_outcomes.formula <-
 
     # build call
     expr = as_quosure(formula)
-    for(i in 1:nrow(conditions)){
-
-      condition_values <- conditions[i,,drop=FALSE]
+    for (i in 1:nrow(conditions)) {
+      
+      condition_values <- conditions[i, , drop = FALSE]
       out_name <- paste0(outcome_variable, "_", paste0(assignment_variables, "_", condition_values, collapse = "_"))
 
       condition_quos <- c(condition_quos, quos(!!!condition_values, !!out_name := !!expr) )
     }
 
     # clean up
-    if(length(to_restore) > 0) {
+    if (length(to_restore) > 0) {
       to_restore <-  setNames(
         lapply(names(restore_mangled), as.symbol),
         to_restore
@@ -175,23 +172,23 @@ potential_outcomes.formula <-
       condition_quos <- c(condition_quos, quos(!!!to_restore), quos(!!!restore_mangled))
     }
 
-    if(length(to_null) > 0) {
-      to_null <-  lapply(setNames(nm=to_null), function(x) NULL)
+    if (length(to_null) > 0) {
+      to_null <-  lapply(setNames(nm = to_null), function(x) NULL)
       condition_quos <- c(condition_quos, quos(!!!to_null))
     }
 
 
-    if(is.character(level)) {
+    if (is.character(level)) {
       condition_quos <- quos(!!level := modify_level(!!!condition_quos))
     }
 
     ### Actually do it and return
     ### Note ID_label=NA
     structure(
-      fabricate(data=data, !!!condition_quos, ID_label=NA),
-      outcome_variable=outcome_variable,
-      assignment_variables=assignment_variables)
-
+      fabricate(data = data,!!!condition_quos, ID_label = NA),
+      outcome_variable = outcome_variable,
+      assignment_variables = assignment_variables)
+    
   }
 
 
@@ -204,11 +201,11 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
     declare_time_error("Must provide an outcome  in potential outcomes formula", ret)
   }
 
-  if("ID_label" %in% names(dots)){
+  if ("ID_label" %in% names(dots)) {
     declare_time_error("Must not pass ID_label.", ret)
   }
 
-  if("assignment_variable" %in% dots){
+  if ("assignment_variable" %in% dots) {
     dots$assignment_variables <- reveal_nse_helper(dots$assignment_variables)
   }
 
@@ -216,21 +213,30 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
   dots$assignment_variables <- names(dots$conditions)
 
 
-  ret <- build_step(currydata(potential_outcomes.formula, dots, strictDataParam=attr(ret, "strictDataParam"), cloneDots=FALSE),
-                    handler=potential_outcomes.formula,
-                    dots=dots,
-                    label=label,
-                    step_type=attr(ret, "step_type"),
-                    causal_type=attr(ret,"causal_type"),
-                    call=attr(ret, "call"))
+  ret <-
+    build_step(
+      currydata(
+        potential_outcomes.formula,
+        dots,
+        strictDataParam = attr(ret, "strictDataParam"),
+        cloneDots = FALSE
+      ),
+      handler = potential_outcomes.formula,
+      dots = dots,
+      label = label,
+      step_type = attr(ret, "step_type"),
+      causal_type = attr(ret, "causal_type"),
+      call = attr(ret, "call")
+    )
 
 
   ### Note that this sets a design_validation callback for later use!!! see below
   ### step_meta is the data that design_validation will use for design time checks
   structure(ret,
             potential_outcomes_formula = formula,
-            step_meta=list(outcome_variables=outcome_variable, assignment_variables=names(dots$conditions)),
-            design_validation=pofdv)
+            step_meta = list(outcome_variables = outcome_variable,
+                             assignment_variables = names(dots$conditions)),
+            design_validation = pofdv)
 }
 
 
@@ -243,8 +249,8 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
 ###
 pofdv <- function(design, i, step){
 
-  if(i == length(design)) {
-    warning("Potential outcome is the final step in the design.", call.=FALSE)
+  if (i == length(design)) {
+    warning("Potential outcome is the final step in the design.", call. = FALSE)
     return(design)
   }
 
@@ -257,35 +263,35 @@ pofdv <- function(design, i, step){
     assn_steps <- Filter(function(step_j) attr(step_j, "step_type") == step_type,
                          design[from:to])
 
-    for(step_j in assn_steps) {
-      if(is.null(step_meta <- attr(step_j, "step_meta"))) next;
+    for (step_j in assn_steps) {
+      if (is.null(step_meta <- attr(step_j, "step_meta"))) next;
       step_assn <- step_meta[[step_attr]]
       vars <- setdiff(vars, step_assn)
-      if(length(vars) == 0) return(c())
+      if (length(vars) == 0) return(c())
     }
 
     callback(vars)
   }
 
   unrevealed_outcomes <- check("outcome_variables", "reveal_outcomes", "outcome_variables",
-                               from=i+1,
+                               from = i + 1,
                                function(vars){
                                  vars
                                }
   )
 
-  if(length(unrevealed_outcomes) == 0) return(design)
+  if (length(unrevealed_outcomes) == 0) return(design)
 
   warning(
-    "Outcome variables (", paste(unrevealed_outcomes, sep=", "),
-    ") were declared in a Potential Outcome step (", attr(step, "label"),
-    "), but never later revealed.", call.=FALSE)
+    "Outcome variables (", paste(unrevealed_outcomes, sep = ", "),
+    ") were declared in a potential outcomes step (", attr(step, "label"),
+    "), but never later revealed.", call. = FALSE)
+  
 
 
+  prev_unassigned <- check("assignment_variables",  "assignment", "assignment_variables", to = i - 1)
 
-  prev_unassigned <- check("assignment_variables",  "assignment", "assignment_variables", to=i-1)
-
-  prev_unrevealed <- check("assignment_variables", "reveal_outcomes", "outcome_variables", to=i-1)
+  prev_unrevealed <- check("assignment_variables", "reveal_outcomes", "outcome_variables", to = i - 1)
 
   if (length(prev_unassigned %i% prev_unrevealed) == 0) {
     new_step <- eval_tidy(quo(declare_reveal(outcome_variables = !!this_step_meta$outcome_variables,
@@ -295,50 +301,49 @@ pofdv <- function(design, i, step){
     warning("Attempting to inject a `declare_reveal(", this_step_meta$outcome_variables, ", ",
             this_step_meta$assignment_variables,
             ")` step after PO (", attr(step, "label"),
-            ")", call.=FALSE)
+            ")", call. = FALSE)
     design <- insert_step(design, new_step, after = i)
     return(design)
   }
 
-  unassigned_vars <- check("assignment_variables", "assignment", "assignment_variables", from=i+1)
-  unrevealed_vars <- check("assignment_variables", "reveal_outcomes", "outcome_variables", from=i+1)
+  unassigned_vars <- check("assignment_variables", "assignment", "assignment_variables", from = i + 1)
+  unrevealed_vars <- check("assignment_variables", "reveal_outcomes", "outcome_variables", from = i + 1)
 
   cant_find <- prev_unassigned %i% prev_unrevealed %i% unassigned_vars %i% unrevealed_vars
 
 
-  if(length(cant_find) > 0){
+  if (length(cant_find) > 0) {
     warning(
-      "Assignment variables (", paste(cant_find, sep=", "),
-      ") were declared in a Potential Outcome step (", attr(step, "label"),
-      "), but never later assigned by an assigment step.", call.=FALSE)
+      "Assignment variables (", paste(cant_find, sep = ", "),
+      ") were declared in a potential outcomes step (", attr(step, "label"),
+      "), but never later assigned by an assignment step.", call. = FALSE)
   } else {
 
     new_step <- eval_tidy(quo(declare_reveal(outcome_variables = !!this_step_meta$outcome_variables,
                                  assignment_variables = !!this_step_meta$assignment_variables,
                                  label = !!paste("Autogenerated by", attr(step, "label"))) ))
 
-    for(step_j in design[length(design):(i+1)]) {
-      if(is.null(step_meta <- attr(step_j, "step_meta"))) next;
+    for (step_j in design[length(design):(i + 1)]) {
+      if (is.null(step_meta <- attr(step_j, "step_meta"))) next;
 
-      if(attr(step_j, "step_type") == "assignment"){
+      if (attr(step_j, "step_type") == "assignment") {
 
-
-        if(any(step_meta$assignment_variables %in% attr(step, "step_meta")$assignment_variables)){
+        if (any(step_meta$assignment_variables %in% attr(step, "step_meta")$assignment_variables)) {
           warning("Attempting to inject a `declare_reveal(", this_step_meta$outcome_variables, ", ",
                   this_step_meta$assignment_variables,
-                  ")` step after Assignment step (", attr(step_j, "label"),
-                  ")", call.=FALSE)
+                  ")` step after assignment step (", attr(step_j, "label"),
+                  ")", call. = FALSE)
           design <- insert_step(design, new_step, after = step_j)
           break;
         }
       }
-      else if(attr(step_j, "step_type") == "reveal_outcomes"){
+      else if (attr(step_j, "step_type") == "reveal_outcomes") {
 
-        if(any(step_meta$outcome_variables %in% attr(step, "step_meta")$assignment_variables)){
+        if (any(step_meta$outcome_variables %in% attr(step, "step_meta")$assignment_variables)) {
           warning("Attempting to inject a `declare_reveal(", this_step_meta$outcome_variables, ", ",
                   this_step_meta$assignment_variables,
-                  ")` step after Reveal step (", attr(step_j, "label"),
-                  ")", call.=FALSE)
+                  ")` step after reveal step (", attr(step_j, "label"),
+                  ")", call. = FALSE)
           design <- insert_step(design, new_step, after = step_j)
           break;
         }
@@ -359,14 +364,14 @@ pofdv <- function(design, i, step){
 potential_outcomes.NULL <- function(formula=stop("Not provided"), ..., data, level = NULL) {
 
     if (is.character(level)) {
-      fabricate(data=data, !!level := modify_level(...))
+      fabricate(data = data,!!level := modify_level(...))
     } else {
-      fabricate(data=data, ..., ID_label=NA)
+      fabricate(data = data, ..., ID_label = NA)
     }
 }
 
 validation_fn(potential_outcomes.NULL) <- function(ret, dots, label){
-  if("ID_label" %in% names(dots)){
+  if ("ID_label" %in% names(dots)) {
     declare_time_error("Must not pass ID_label.", ret)
   }
 
@@ -397,8 +402,8 @@ validation_fn(potential_outcomes.NULL) <- function(ret, dots, label){
 #' @return a data.frame of potential outcome conditions
 #' @keywords internal
 expand_conditions <- function() {
-  if(!is.data.frame(conditions)){
-    if(!is.list(conditions)){
+  if (!is.data.frame(conditions)) {
+    if (!is.list(conditions)) {
       conditions <- setNames(list(conditions), assignment_variables)
     }
 

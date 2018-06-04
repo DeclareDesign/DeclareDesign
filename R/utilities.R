@@ -68,7 +68,6 @@ future_lapply <- function(..., future.seed = NA, future.globals=TRUE){
   }
 }
 
-###############################################################################
 # Descriptive statistics to be used in summary
 
 
@@ -127,7 +126,6 @@ describe_variable_impl.default <- function(x, num_unique) {
 }
 
 
-###############################################################################
 
 # Like rbind, but fill missing columns with NA
 rbind_disjoint <- function(list_of_df, infill=NA) {
@@ -165,7 +163,6 @@ check_sim_number <- function(simulations_df,
                                       paste0(names(check_sims)[check_sims], collapse = ", ")))
 }
 
-###############################################################################
 
 # helpers for summary.design
 

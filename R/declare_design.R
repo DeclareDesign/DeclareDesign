@@ -77,13 +77,15 @@ declare_design <- function(...) {
 
   # for each step in qs, eval, and handle edge cases (dplyr calls, non-declared functions)
   for (i in seq_along(qs)) {
+    
+    # check if object exists
 
     # wrap step is nasty, converts partial call to curried function
     ret[[i]] <- tryCatch(
       eval_tidy(qs[[i]]),
       error = function(e) tryCatch(callquos_to_step(qs[[i]], qnames[[i]]),
-                                   error = function(e) stop("Could not evaluate step ", i,
-                                                            " as either a step or call."))
+                                   error = function(e) stop("Could not evaluate step `", qnames[[i]],
+                                                            "` as either a step or call. Does the object exist?"))
     )
 
     # Is it a non-declared function
