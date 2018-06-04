@@ -79,10 +79,10 @@ test_that("Declare a bare function", {
 
 test_that("error message in declare_design", {
 
-  design <- expect_error(declare_design(
+  expect_error(declare_design(
     sleep,
     foo
-  ), "step 2")
+  ), "Could not evaluate step `foo` as either a step or call. Does the object exist?")
 
 })
 
