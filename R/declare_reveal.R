@@ -51,6 +51,12 @@ declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal_outcomes")
 #' design <- declare_design(my_population,
 #'                          my_potential_outcomes,
 #'                          my_assignment)
+#'                          
+#' Declaring multiple assignment variables can be done easily with !!! syntax.
+#' 
+#' my_outcomes <- c("Y1", "Y2", "Y3")
+#' 
+#' my_reveal <- declare_reveal(outcome_variables = !!!my_outcomes)
 #'
 reveal_outcomes_handler <-
   function(data = NULL,
