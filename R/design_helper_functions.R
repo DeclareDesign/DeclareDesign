@@ -269,7 +269,7 @@ print.design_step <- function(x, ...) {
   # invisible(summary(x))
 }
 
-
+#' @param verbose print full summary of design
 #' @export
 print.design <- function(x, verbose = TRUE, ...) {
   print(summary(x, verbose = verbose, ... = ...))

@@ -4,6 +4,7 @@
 #'
 #' @param template a function which yields a design.
 #' @param expand boolean - if true, form the crossproduct of the ..., otherwise recycle them
+#' @param prefix prefix for the names of the designs, i.e. if you create two designs they would be named prefix_1, prefix_2
 #' @param ... Options sent to the template.
 #'
 #' @return if set of designs is size one, the design, otherwise a `by`-list of designs. Designs are given a parameters attribute with the values of parameters assigned by expand_design.
@@ -41,6 +42,7 @@
 #' attr(design_vary_N[[1]], "parameters")
 #'
 #' @importFrom rlang quo_expr quos
+#' @importFrom methods as
 #' @export
 expand_design <- function(template, expand = TRUE, prefix = "design", ...) {
 
