@@ -149,23 +149,101 @@ execution_st <- function(design, current_df=NULL, results=NULL, start=1, end=len
 #'
 #' @export
 draw_data <- function(design) {
-  run_design_internal(design, results=list(current_df=0))$current_df
+  run_design_internal(design, results = list(current_df = 0))$current_df
+}
+
+#' #' @rdname post_design
+#' #'
+#' #' @export
+#' get_estimates <- function(design) {
+#'   results <- list("estimator" = vector("list", length(design)))
+#'   run_design_internal.default(design, results = results)$estimates_df
+#' }
+
+#' @rdname post_design
+#'
+#' @export
+get_estimands <- function(...) {
+  
+  designs_quos <- quos(...)
+  designs <- lapply(designs_quos, eval_tidy)
+  
+  ## Two cases:
+  ## 1. send one or more design objects created by declare_design
+  ## 2. send a single list of design objects e.g. created by expand_design
+  ## Approach: unpack designs if a list of designs was sent as a single list object
+  if (length(designs) == 1 &&
+      is.list(designs[[1]]) &&
+      !"design" %in% class(designs[[1]])) {
+    designs <- designs[[1]]
+    names(designs) <- infer_names_list(designs)
+  } else {
+    names(designs) <- infer_names_quos(designs_quos)
+  }
+  
+  ## Do not allow users to send more than one object if any is not a design object
+  if (!all(vapply(designs, inherits, FALSE, "design"))) {
+    stop("Please only send design objects to simulate_design.")
+  }
+  
+  estimands_list <- lapply(designs, get_estimands_single_design)
+  
+  if (length(designs) > 1) {
+    estimands_list <- Map(cbind, design_ID = names(estimands_list), estimands_list, stringsAsFactors = FALSE)
+  }
+  
+  estimands_df <- rbind_disjoint(estimands_list)
+  
+  estimands_df
+  
 }
 
 #' @rdname post_design
 #'
 #' @export
-get_estimates <- function(design) {
-  results=list("estimator"=vector("list", length(design)))
-  run_design_internal.default(design, results=results)$estimates_df
+get_estimates <- function(...) {
+  
+  designs_quos <- quos(...)
+  designs <- lapply(designs_quos, eval_tidy)
+  
+  ## Two cases:
+  ## 1. send one or more design objects created by declare_design
+  ## 2. send a single list of design objects e.g. created by expand_design
+  ## Approach: unpack designs if a list of designs was sent as a single list object
+  if (length(designs) == 1 &&
+      is.list(designs[[1]]) &&
+      !"design" %in% class(designs[[1]])) {
+    designs <- designs[[1]]
+    names(designs) <- infer_names_list(designs)
+  } else {
+    names(designs) <- infer_names_quos(designs_quos)
+  }
+  
+  ## Do not allow users to send more than one object if any is not a design object
+  if (!all(vapply(designs, inherits, FALSE, "design"))) {
+    stop("Please only send design objects to simulate_design.")
+  }
+  
+  estimates_list <- lapply(designs, get_estimates_single_design)
+  
+  if (length(designs) > 1) {
+    estimates_list <- Map(cbind, design_ID = names(estimates_list), estimates_list, stringsAsFactors = FALSE)
+  }
+  
+  estimates_df <- rbind_disjoint(estimates_list)
+  
+  estimates_df
+  
 }
 
-#' @rdname post_design
-#'
-#' @export
-get_estimands <- function(design) {
-  results=list("estimand"=vector("list", length(design)))
-  run_design_internal.default(design, results=results)$estimands_df
+get_estimates_single_design <- function(design) {
+  results <- list("estimator" = vector("list", length(design)))
+  run_design_internal.default(design, results = results)$estimates_df
+}
+
+get_estimands_single_design <- function(design) {
+  results <- list("estimand" = vector("list", length(design)))
+  run_design_internal.default(design, results = results)$estimands_df
 }
 
 #' Obtain the preferred citation for a design
