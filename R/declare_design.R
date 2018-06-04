@@ -1,73 +1,4 @@
 
-# Some testing code
-# d1 <- make_declarations(summary, step_type='summary')
-# dd <- d1()
-# dd(sleep)
-#
-#
-# me <- FALSE
-#
-# declare_scale <- make_declarations(default_handler=scale, step_type="scale")
-# f <- declare_scale(scale=me)
-#
-# me <- !me
-# f(mtcars)
-#
-# me <- !me
-# f(mtcars)
-
-
-###############################################################################
-# In declare_design, if a step is a dplyr style call mutate(foo=bar),
-# it will fail to evaluate - we can catch that and try to curry it
-
-#' @importFrom rlang quos lang_fn lang_modify eval_tidy
-callquos_to_step <- function(step_call, label="") {
-  ## this function allows you to put any R expression
-  ## such a dplyr::mutate partial call
-  ## into the causal order, i.e.
-  ## declare_design(pop(), po, mutate(q = 5))
-
-  # match to .data or data, preference to .data
-  data_name <- intersect( names(formals(lang_fn(step_call))),
-                          c(".data", "data") )[1]
-
-  stopifnot(is.character(data_name))
-
-
-  #splits each argument in to own quosure with common parent environment
-  dots <- lapply(step_call[[2]], function(d){
-    dot <- step_call
-    dot[[2]] <- d
-    dot
-
-  })
-
-  fun <- eval_tidy(dots[[1]])
-  dots <- dots[-1]
-
-  dots <- quos(!!data_name := data, !!!dots)
-
-  #quo <- quo(currydata(fun, !!!dots))
-
-  curried <- currydata(fun, dots)
-
-  # curried <- eval_tidy(quo)
-
-  build_step(curried, handler=fun, dots=dots,  label, step_type="wrapped", causal_type="dgp", call=step_call)
-
-  # structure(curried,
-  #           call = step_call[[2]],
-  #           step_type = "wrapped",
-  #           causal_type="dgp")
-
-}
-
-
-
-
-
-
 #' Declare Design
 #'
 #' @param ... A set of steps in a research design, beginning with a \code{data.frame} representing the population or a function that draws the population. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a \code{data.frame} as an argument and return a \code{data.frame}. Typically, many steps are declared using the \code{declare_} functions, i.e., \code{\link{declare_population}}, \code{\link{declare_population}}, \code{\link{declare_sampling}}, \code{\link{declare_potential_outcomes}}, \code{\link{declare_estimand}}, \code{\link{declare_assignment}}, and \code{\link{declare_estimator}}. Functions from the \code{dplyr} package such as mutate can also be usefully included.
@@ -138,16 +69,16 @@ declare_design <- function(...) {
   qs <- maybe_add_labels(qs)
   qnames <- names(qs)
 
-  ret <- structure(vector("list", length(qs)), call=match.call(), class=c("design", "d_par"))
+  ret <- structure(vector("list", length(qs)),
+              call = match.call(),
+              class = c("design", "d_par"))
 
   names(ret)[qnames != ""] <- qnames[qnames != ""]
 
-  if(getOption("DD.debug.declare_design", FALSE)) browser()
-
   # for each step in qs, eval, and handle edge cases (dplyr calls, non-declared functions)
-  for(i in  seq_along(qs)) {
+  for (i in seq_along(qs)) {
 
-    #wrap step is nasty, converts partial call to curried function
+    # wrap step is nasty, converts partial call to curried function
     ret[[i]] <- tryCatch(
       eval_tidy(qs[[i]]),
       error = function(e) tryCatch(callquos_to_step(qs[[i]], qnames[[i]]),
@@ -156,8 +87,8 @@ declare_design <- function(...) {
     )
 
     # Is it a non-declared function
-    if(is.function(ret[[i]]) && !inherits(ret[[i]], "design_step")){
-      if(!identical(names(formals(ret[[i]])), "data")){
+    if (is.function(ret[[i]]) && !inherits(ret[[i]], "design_step")){
+      if (!identical(names(formals(ret[[i]])), "data")){
         warning("Undeclared Step ", i, " function arguments are not exactly 'data'")
       }
 
@@ -180,7 +111,6 @@ declare_design <- function(...) {
 
   # Assert that all labels are unique
   local({
-
     labels <- sapply(ret, attr, "label")
     function_types <- sapply(ret, attr, "step_type")
 
@@ -190,9 +120,7 @@ declare_design <- function(...) {
         "You have ", what, "s with identical labels: ",
         unique(ss[duplicated(ss)]),
         "\nPlease provide ", what, "s with unique labels"
-
       )
-
     }
 
     check_unique_labels(labels, function_types, "estimand")
@@ -209,7 +137,47 @@ declare_design <- function(...) {
     }
   }
 
-
   ret
 }
 
+###############################################################################
+# In declare_design, if a step is a dplyr style call mutate(foo=bar),
+# it will fail to evaluate - we can catch that and try to curry it
+
+#' @importFrom rlang quos lang_fn lang_modify eval_tidy
+callquos_to_step <- function(step_call, label="") {
+  ## this function allows you to put any R expression
+  ## such a dplyr::mutate partial call
+  ## into the causal order, i.e.
+  ## declare_design(pop(), po, mutate(q = 5))
+  
+  # match to .data or data, preference to .data
+  data_name <- intersect(names(formals(lang_fn(step_call))), c(".data", "data") )[1]
+  
+  stopifnot(is.character(data_name))
+  
+  # splits each argument in to own quosure with common parent environment
+  dots <- lapply(step_call[[2]], function(d){
+    dot <- step_call
+    dot[[2]] <- d
+    dot
+  })
+  
+  fun <- eval_tidy(dots[[1]])
+  dots <- dots[-1]
+  
+  dots <- quos(!!data_name := data, !!!dots)
+  
+  curried <- currydata(fun, dots)
+  
+  build_step(
+    curried,
+    handler = fun,
+    dots = dots,
+    label,
+    step_type = "wrapped",
+    causal_type = "dgp",
+    call = step_call
+  )
+  
+}

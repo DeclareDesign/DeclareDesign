@@ -128,7 +128,7 @@
 #' design_cust <- insert_step(design_cust, my_estimator_custom, after="reveal")
 #'
 #' run_design(design_cust)
-declare_estimand <- make_declarations(estimand_handler, "estimand", causal_type="estimand", default_label="my_estimand")
+declare_estimand <- make_declarations(estimand_handler, "estimand", causal_type = "estimand", default_label = "my_estimand")
 
 #' @param subset a subset expression
 #' @param coefficients TRUE/FALSE
@@ -143,32 +143,34 @@ declare_estimand <- make_declarations(estimand_handler, "estimand", causal_type=
 #' @rdname declare_estimand
 estimand_handler <- function(data, ..., subset = NULL, coefficients=FALSE, label) {
   options <- quos(...)
-  if(names(options)[1] == "") names(options)[1] <- label
+  if (names(options)[1] == "") names(options)[1] <- label
 
   subset <- substitute(subset)
-  if(is_quosure(subset)) subset <- subset[[2]]
+  if (is_quosure(subset)) subset <- subset[[2]]
   idx <- eval_tidy(subset, data = data)
   if (!is.null(idx)) {
     data <- data[idx, , drop = FALSE]
   }
 
   ret <- vector("list", length(options))
-  for(i in seq_along(options)){
-    ret[i] <- eval_tidy(options[[i]], data=data)
+  for (i in seq_along(options)) {
+    ret[i] <- eval_tidy(options[[i]], data = data)
   }
   ret <- simplify2array(ret)
 
-  if(coefficients){
-    data.frame(estimand_label=label,
-               coefficient=names(options),
-               estimand=ret,
-               stringsAsFactors = FALSE)
-
-
+  if (coefficients) {
+    data.frame(
+      estimand_label = label,
+      coefficient = names(options),
+      estimand = ret,
+      stringsAsFactors = FALSE
+    )
   } else {
-    data.frame(estimand_label=names(options),
-               estimand=ret,
-               stringsAsFactors = FALSE)
+    data.frame(
+      estimand_label = names(options),
+      estimand = ret,
+      stringsAsFactors = FALSE
+    )
   }
 }
 
@@ -179,12 +181,15 @@ validation_fn(estimand_handler) <-  function(ret, dots, label){
 
   declare_time_error_if_data(ret)
 
-
   # Don't overwrite label-label with splat label if coefficient names are true
-  if("coefficients" %in% dotnames && isTRUE(eval_tidy(dots$coefficients))) return(ret)
+  if ("coefficients" %in% dotnames && isTRUE(eval_tidy(dots$coefficients))) return(ret)
 
-  maybeDotLabel <- dotnames[! dotnames %in% c("", names(formals(estimand_handler)) )]
-  if(length(maybeDotLabel) == 1 ){
+  maybeDotLabel <- dotnames[!dotnames %in% c("", names(formals(estimand_handler)) )]
+  if (any(duplicated(maybeDotLabel))) {
+    stop(paste0("Please provide unique names for each estimand. Duplicates include ", 
+                paste(maybeDotLabel[duplicated(maybeDotLabel)], collapse = ", "), "."), call. = FALSE)
+  }
+  if (length(maybeDotLabel) == 1) {
     attr(ret, "steplabel") <- attr(ret, "label")
     attr(ret, "label") <- maybeDotLabel[1]
   }
