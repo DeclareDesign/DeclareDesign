@@ -272,21 +272,32 @@ print.design_step <- function(x, ...) {
 #' @export
 print_code <- function(design) {
   
-  clean_call <- function(call){
-    paste(sapply(deparse(call), trimws), collapse = " ")
-  }
+  # if there is not a code attribute, construct code via the calls for each step 
+  #   and the call for the declare step 
   
-  # print each step
-  for(i in seq_along(design)) {
-    if(class(attributes(design)$call[[i+1]]) == "name"){
-      cat(attributes(design)$call[[i + 1]], "<-", clean_call(attributes(design[[i]])$call), "\n\n")
+  if (is.null(attributes(design)$code)) {
+    
+    clean_call <- function(call){
+      paste(sapply(deparse(call), trimws), collapse = " ")
     }
+    
+    # print each step
+    
+    for (i in seq_along(design)) {
+      # only print steps that are not calls within the design call i.e. mutate(q = 5)
+      if (class(attributes(design)$call[[i + 1]]) == "name") {
+        cat(attributes(design)$call[[i + 1]], "<-", clean_call(attributes(design[[i]])$call), "\n\n")
+      }
+    }
+    
+    # print the design declaration
+    
+    cat("my_design <-", clean_call(attributes(design)$call), "\n\n")
+    
+  } else {
+    print(attributes(design)$code)
   }
   
-  # print the design declaration
-  
-  cat("my_design <- ", clean_call(attributes(design)$call), "\n")
-
 }
 
 #' @param verbose print full summary of design
