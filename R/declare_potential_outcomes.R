@@ -122,74 +122,73 @@ validation_fn(potential_outcomes_handler) <-  function(ret, dots, label) {
 #' @importFrom fabricatr fabricate
 #' @importFrom rlang quos := !! !!! as_quosure
 #' @rdname declare_potential_outcomes
-potential_outcomes.formula <-
-  function(formula,
-           conditions = c(0, 1),
-           assignment_variables = "Z", # only used to provide a default - read from names of conditions immediately after.
-           data,
-           level = NULL,
-           label = outcome_variable) {
+potential_outcomes.formula <- function(formula,
+                                       conditions = c(0, 1),
+                                       assignment_variables = "Z", # only used to provide a default - read from names of conditions immediately after.
+                                       data,
+                                       level = NULL,
+                                       label = outcome_variable) {
 
-    outcome_variable <- as.character(formula[[2]])
+  outcome_variable <- as.character(formula[[2]])
 
-    to_restore <- assignment_variables %i% colnames(data)
-    to_null <- setdiff(assignment_variables, to_restore)
+  to_restore <- assignment_variables %i% colnames(data)
+  to_null <- setdiff(assignment_variables, to_restore)
 
-    # Build a single large fabricate call -
-    # fabricate( Z=1, Y_Z_1=f(Z), Z=2, Y_Z_2=f(Z), ..., Z=NULL)
-    condition_quos <- quos()
+  # Build a single large fabricate call -
+  # fabricate( Z=1, Y_Z_1=f(Z), Z=2, Y_Z_2=f(Z), ..., Z=NULL)
+  condition_quos <- quos()
 
-    ### If assn vars already present, swap them out
-    if (length(to_restore) > 0) {
-      restore_mangled <- paste(rep("_", max(nchar(colnames(data)))), collapse = "")
+  ### If assn vars already present, swap them out
+  if (length(to_restore) > 0) {
+    restore_mangled <- paste(rep("_", max(nchar(colnames(data)))), collapse = "")
 
-      restore_mangled <- setNames(
-        lapply(to_restore, as.symbol),
-        paste0(".", restore_mangled, to_restore)
-      )
+    restore_mangled <- setNames(
+      lapply(to_restore, as.symbol),
+      paste0(".", restore_mangled, to_restore)
+    )
 
-      condition_quos <- c(condition_quos, quos(!!!restore_mangled))
+    condition_quos <- c(condition_quos, quos(!!!restore_mangled))
 
-    }
-
-    # build call
-    expr = as_quosure(formula)
-    for (i in 1:nrow(conditions)) {
-      
-      condition_values <- conditions[i, , drop = FALSE]
-      out_name <- paste0(outcome_variable, "_", paste0(assignment_variables, "_", condition_values, collapse = "_"))
-
-      condition_quos <- c(condition_quos, quos(!!!condition_values, !!out_name := !!expr) )
-    }
-
-    # clean up
-    if (length(to_restore) > 0) {
-      to_restore <-  setNames(
-        lapply(names(restore_mangled), as.symbol),
-        to_restore
-      )
-      restore_mangled <- lapply(restore_mangled, function(x) NULL)
-      condition_quos <- c(condition_quos, quos(!!!to_restore), quos(!!!restore_mangled))
-    }
-
-    if (length(to_null) > 0) {
-      to_null <-  lapply(setNames(nm = to_null), function(x) NULL)
-      condition_quos <- c(condition_quos, quos(!!!to_null))
-    }
-
-
-    if (is.character(level)) {
-      condition_quos <- quos(!!level := modify_level(!!!condition_quos))
-    }
-
-    ### Actually do it and return
-    ### Note ID_label=NA
-    structure(
-      fabricate(data = data,!!!condition_quos, ID_label = NA),
-      outcome_variable = outcome_variable,
-      assignment_variables = assignment_variables)
-    
   }
+
+  # build call
+  expr = as_quosure(formula)
+  for (i in 1:nrow(conditions)) {
+
+    condition_values <- conditions[i, , drop = FALSE]
+    out_name <- paste0(outcome_variable, "_", paste0(assignment_variables, "_", condition_values, collapse = "_"))
+
+    condition_quos <- c(condition_quos, quos(!!!condition_values, !!out_name := !!expr) )
+  }
+
+  # clean up
+  if (length(to_restore) > 0) {
+    to_restore <-  setNames(
+      lapply(names(restore_mangled), as.symbol),
+      to_restore
+    )
+    restore_mangled <- lapply(restore_mangled, function(x) NULL)
+    condition_quos <- c(condition_quos, quos(!!!to_restore), quos(!!!restore_mangled))
+  }
+
+  if (length(to_null) > 0) {
+    to_null <-  lapply(setNames(nm = to_null), function(x) NULL)
+    condition_quos <- c(condition_quos, quos(!!!to_null))
+  }
+
+
+  if (is.character(level)) {
+    condition_quos <- quos(!!level := modify_level(!!!condition_quos))
+  }
+
+  ### Actually do it and return
+  ### Note ID_label=NA
+  structure(
+    fabricate(data = data,!!!condition_quos, ID_label = NA),
+    outcome_variable = outcome_variable,
+    assignment_variables = assignment_variables)
+
+}
 
 
 validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
@@ -213,30 +212,26 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
   dots$assignment_variables <- names(dots$conditions)
 
 
-  ret <-
-    build_step(
-      currydata(
-        potential_outcomes.formula,
-        dots,
-        strictDataParam = attr(ret, "strictDataParam"),
-        cloneDots = FALSE
-      ),
-      handler = potential_outcomes.formula,
-      dots = dots,
-      label = label,
-      step_type = attr(ret, "step_type"),
-      causal_type = attr(ret, "causal_type"),
-      call = attr(ret, "call")
-    )
+  ret <- build_step(currydata(potential_outcomes.formula,
+                              dots,
+                              strictDataParam = attr(ret, "strictDataParam"),
+                              cloneDots = FALSE
+                            ),
+                    handler = potential_outcomes.formula,
+                    dots = dots,
+                    label = label,
+                    step_type = attr(ret, "step_type"),
+                    causal_type = attr(ret, "causal_type"),
+                    call = attr(ret, "call"))
 
 
-  ### Note that this sets a design_validation callback for later use!!! see below
-  ### step_meta is the data that design_validation will use for design time checks
-  structure(ret,
-            potential_outcomes_formula = formula,
-            step_meta = list(outcome_variables = outcome_variable,
-                             assignment_variables = names(dots$conditions)),
-            design_validation = pofdv)
+### Note that this sets a design_validation callback for later use!!! see below
+### step_meta is the data that design_validation will use for design time checks
+structure(ret,
+          potential_outcomes_formula = formula,
+          step_meta = list(outcome_variables = outcome_variable,
+                           assignment_variables = names(dots$conditions)),
+          design_validation = pofdv)
 }
 
 
