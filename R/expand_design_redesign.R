@@ -41,43 +41,98 @@
 #' design_vary_N <- redesign(my_design, N = seq(500, 1000, 100))
 #' attr(design_vary_N[[1]], "parameters")
 #'
-#' @importFrom rlang quo_expr quos
-#' @importFrom methods as
 #' @export
 expand_design <- function(template, expand = TRUE, prefix = "design", ...) {
-
-  if (expand) {
-    template_args_matrix <- expand.grid(..., stringsAsFactors = FALSE)
-  } else { 
-    template_args_matrix <- cbind.data.frame(..., stringsAsFactors = FALSE)
-  }
   
-  k <- nrow(template_args_matrix)
+  dots_quos <- quos(...)
   
-  if (k > 0) {
+  if (length(dots_quos) > 0) {
     
-    out <- by(template_args_matrix, seq_len(k), do.call, what = template, simplify = FALSE)
+    args_list <- expand_args(..., expand = expand)
+    args_names <- expand_args_names(!!!dots_quos, expand = expand)
     
-    # Add attribute
-    for (j in seq_len(k)) {
-      attr(out[[j]], "parameters") <- setNames(template_args_matrix[j,], names(template_args_matrix))
+    designs <- lapply(args_list, function(x) do.call(template, args = x))
+    
+    for (i in seq_along(designs)) {
+      attr(designs[[i]], "parameters") <- setNames(args_names[i,], names(args_names))  
     }
     
-    # if it only produces a single design, return the design object rather than a list of length 1
-    if (length(out) == 1) {
-      out <- out[[1]]
+    if (length(designs) == 1){
+      designs <- designs[[1]]
     } else {
-      out <- as(out, "list")
-      names(out) <- paste0(prefix, "_", seq_len(length(out)))
+      names(designs) <- paste0(prefix, "_", seq_len(length(designs)))
     }
     
   } else {
-    out <- template()
+    designs <- template()
   }
-
-  return(out)
-
+  
+  return(designs)
+  
 }
+
+
+expand_args <- function(..., expand = TRUE) {
+  
+  dots <- list(...)
+  
+  if(expand){
+    lens <- lapply(dots, function(x) seq_len(length(x)))
+    args_positions <- do.call(expand.grid, args = lens)
+    args_list <- vector("list", nrow(args_positions))
+    for (i in 1:nrow(args_positions)) {
+      current_list_row <- vector("list", ncol(args_positions))
+      names(current_list_row) <- names(dots)
+      for (j in 1:ncol(args_positions)) {
+        if (length(dots[[j]]) > 1) {
+          current_list_row[[j]] <- dots[[j]][[args_positions[i, j]]]
+        } else {
+          current_list_row[[j]] <- dots[[j]]
+        }
+      }
+      args_list[[i]] <- current_list_row
+    }
+  } else {
+    args_list <- vector("list", length(dots[[1]]))
+    for (i in 1:length(args_list)) {
+      current_list_row <- vector("list", length(dots))
+      names(current_list_row) <- names(dots)
+      for (j in 1:length(dots)) {
+        if (length(dots[[j]]) > 1) {
+          current_list_row[[j]] <- dots[[j]][j]
+        } else {
+          current_list_row[[j]] <- dots[[j]]
+        }
+      }
+      args_list[[i]] <- current_list_row
+    }
+  }
+  args_list
+}
+
+#' @importFrom rlang quo_squash is_call call_args
+expand_args_names <- function(..., expand = TRUE){
+  dots_quos <- quos(...)
+  
+  dots_names <- lapply(dots_quos, function(x) {
+    x_expr <- quo_squash(x)
+    x_is_call <- is_call(x_expr)
+    if (x_is_call) {
+      as.character(call_args(x_expr))
+    } else {
+      as.character(x_expr)
+    }
+  })
+  if(expand){
+    ret <- expand.grid(dots_names)
+  } else {
+    ret <- data.frame(dots_names)
+  }
+  ret
+}
+
+
+
 
 
 #' Redesign
