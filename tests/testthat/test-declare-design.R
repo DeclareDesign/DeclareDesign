@@ -27,6 +27,8 @@ test_that("test the full declare design setup", {
                            my_assignment,
                            my_reveal,
                            my_estimator)
+  
+  my_population +  my_potential_outcomes + my_sampling +  my_estimand + my_assignment + my_reveal + my_estimator
 
   df <- (draw_data(design))
   expect_equal(dim(df), c(250,9))
