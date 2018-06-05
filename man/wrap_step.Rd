@@ -7,7 +7,7 @@
 wrap_step(...)
 }
 \arguments{
-\item{...}{}
+\item{...}{A function of data and other arguments that returns data}
 }
 \value{
 A function that takes only data. (is a quosure).
@@ -32,7 +32,7 @@ data$new_variable <- rnorm(n = nrow(data), mean = my_mean)
 data
 }
 
-my_design <- my_population + wrap_step(my_function)
+my_design <- my_population + wrap_step(my_function(my_mean = 5))
 my_design
 
 

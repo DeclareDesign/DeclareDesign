@@ -5,7 +5,7 @@
 #'
 #' Wrap a data-in, data-out function call
 #'
-#' @param ... 
+#' @param ... A function of data and other arguments that returns data
 #'
 #' @return A function that takes only data. (is a quosure).
 #' @export
@@ -27,7 +27,7 @@
 #' data
 #' }
 #' 
-#' my_design <- my_population + wrap_step(my_function)
+#' my_design <- my_population + wrap_step(my_function(my_mean = 5))
 #' my_design
 #' 
 #' 

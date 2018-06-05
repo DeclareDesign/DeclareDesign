@@ -1,4 +1,4 @@
-
+context("print")
 
 N <- 500
 
@@ -25,6 +25,10 @@ design <- declare_design(my_population,
                          my_assignment,
                          my_reveal,
                          my_estimator)
+
+# debugonce(print_code)
+# print_code(design)
+
 
 # test_that("print full design", {
 # 
