@@ -92,7 +92,6 @@ test_that("vary works", {
 
 
 
-
   design <- expand_design(template = two_arm_trial, expand = FALSE,
                      N = c(100, 200, 300), noise_sd = c(.1, .2, .3))
   expect_length(design, 3)
