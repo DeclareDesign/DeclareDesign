@@ -6,7 +6,7 @@
 #
 #' @importFrom rlang f_text f_env
 
-maybe_add_labels <- function(quotations){
+maybe_add_labels <- function(quotations) {
 
   labeller <- function(quotation, lbl) {
     cx <- quotation[[2]]
@@ -43,15 +43,15 @@ maybe_add_labels <- function(quotations){
 ###############################################################################
 # Helpers for declare_time checking
 
-declare_time_error <- function(message, declaration){
+declare_time_error <- function(message, declaration) {
   stop( simpleError(message, call = attr(declaration, "call")) )
 }
 
-declare_time_warn <- function(message, declaration){
+declare_time_warn <- function(message, declaration) {
   warning( simpleWarning(message, call = attr(declaration, "call")) )
 }
 
-declare_time_error_if_data <- function(declaration){
+declare_time_error_if_data <- function(declaration) {
   if("data" %in% names(attr(declaration, "dots")))
     declare_time_error("`data` should not be a declared argument.", declaration)
 }
@@ -60,7 +60,7 @@ declare_time_error_if_data <- function(declaration){
 # Wrapper function, use future_lapply if we have it, fallback to lapply if not
 
 
-future_lapply <- function(..., future.seed = NA, future.globals=TRUE){
+future_lapply <- function(..., future.seed = NA, future.globals=TRUE) {
   if (requireNamespace("future.apply", quietly = TRUE)) {
     future.apply::future_lapply(..., future.seed=future.seed, future.globals = future.globals)
   } else {
@@ -142,12 +142,11 @@ rbind_disjoint <- function(list_of_df, infill=NA) {
 }
 
 add_parens <- function(x, digits = 3) {
-  return(sprintf("(%s)", format_num(x, digits)))
+  sprintf("(%s)", format_num(x, digits)))
 }
 
 format_num <- function(x, digits = 3) {
-  x <- as.numeric(x)
-  return(sprintf(paste0("%.", digits, "f"), x))
+  sprintf(paste0("%.", digits, "f"), as.numeric(x))
 }
 
 # Function to check whether there are more sims run than expected, possibly because of repeated labels
