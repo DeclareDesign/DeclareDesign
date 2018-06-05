@@ -5,6 +5,7 @@
 \alias{draw_data}
 \alias{get_estimands}
 \alias{get_estimates}
+\alias{print.design}
 \alias{summary.design}
 \title{Explore your design}
 \usage{
@@ -14,12 +15,18 @@ get_estimands(...)
 
 get_estimates(...)
 
+\method{print}{design}(x, verbose = TRUE, ...)
+
 \method{summary}{design}(object, verbose = TRUE, ...)
 }
 \arguments{
 \item{design}{A design created by \code{\link{declare_design}}.}
 
 \item{...}{optional arguments to be sent to summary function}
+
+\item{x}{a design object, typically created by \code{\link{declare_design}}}
+
+\item{verbose}{an indicator for printing a long summary of the design, defaults to \code{TRUE}}
 
 \item{object}{a design object created by \code{\link{declare_design}}}
 }

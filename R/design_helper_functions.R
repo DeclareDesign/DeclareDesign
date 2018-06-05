@@ -58,7 +58,7 @@ check_sims <- function(design, sims) {
     last_1 <- ret[i, "n"] == 1
   }
   
-  ret[include, ,drop=FALSE]
+  ret[include, ,drop = FALSE]
 }
 
 #' Execute a design
@@ -67,7 +67,6 @@ check_sims <- function(design, sims) {
 #'
 #' @export
 run_design <- function(design) run_design_internal(design)
-
 
 run_design_internal <- function(design, ...) UseMethod("run_design_internal", design)
 
@@ -83,9 +82,9 @@ next_step <- function(step, current_df, i) {
 
 run_design_internal.default <- function(design, current_df=NULL, results=NULL, start=1, end=length(design), ...) {
   
-  if(!is.list(results)) {
-    results <- list(estimand=vector("list", length(design)),
-                    estimator=vector("list", length(design)))
+  if (!is.list(results)) {
+    results <- list(estimand = vector("list", length(design)),
+                    estimator = vector("list", length(design)))
   }
   
   for (i in seq(start, end)) {
@@ -99,29 +98,36 @@ run_design_internal.default <- function(design, current_df=NULL, results=NULL, s
     # if it's a dgp
     if ("dgp" %in% causal_type) {
       current_df <- next_step(step, current_df, i)
-    } else if(step_type %in% names(results) ) {
+    } else if (step_type %in% names(results) ) {
       results[[step_type]][[i]] <- next_step(step, current_df, i)
     } else {
       NULL # skipping steps not in the requested results types
     }
   }
   
-  if(i == length(design)) {
-    if("estimator" %in% names(results)){
+  if (i == length(design)) {
+    if ("estimator" %in% names(results)) {
       results[["estimates_df"]] <-  rbind_disjoint(results[["estimator"]])
       results[["estimator"]] <- NULL
     }
-    if("estimand" %in% names(results)){
+    if ("estimand" %in% names(results)) {
       results[["estimands_df"]] <- rbind_disjoint(results[["estimand"]])
       results[["estimand"]] <- NULL
       
     }
-    if("current_df" %in% names(results)){
+    if ("current_df" %in% names(results)) {
       results[["current_df"]] <- current_df
     }
     results
     
-  } else execution_st(design=design, current_df=current_df, results=results, start=i+1, end=length(design))
+  } else
+    execution_st(
+      design = design,
+      current_df = current_df,
+      results = results,
+      start = i + 1,
+      end = length(design)
+    )
   
 }
 
@@ -136,11 +142,17 @@ run_design_internal.execution_st <- function(design, ...) do.call(run_design_int
 #' @param end  index of ending step
 #'
 #' @export
-execution_st <- function(design, current_df=NULL, results=NULL, start=1, end=length(design)){
+execution_st <- function(design, current_df = NULL, results = NULL, start = 1, end = length(design)){
   # An execution state are the arguments needed to run run_design
   structure(
-    list(design=design, current_df=current_df, results=results, start=start, end=end),
-    class="execution_st"
+    list(
+      design = design,
+      current_df = current_df,
+      results = results,
+      start = start,
+      end = end
+    ),
+    class = "execution_st"
   )
 }
 
@@ -314,7 +326,8 @@ print_code <- function(design) {
   
 }
 
-#' @param verbose print full summary of design
+#' @param x a design object, typically created by \code{\link{declare_design}}
+#' @rdname post_design
 #' @export
 print.design <- function(x, verbose = TRUE, ...) {
   print(summary(x, verbose = verbose, ... = ...))
@@ -322,6 +335,7 @@ print.design <- function(x, verbose = TRUE, ...) {
 }
 
 #' @param object a design object created by \code{\link{declare_design}}
+#' @param verbose an indicator for printing a long summary of the design, defaults to \code{TRUE}
 #' @param ... optional arguments to be sent to summary function
 #'
 #' @examples
