@@ -115,14 +115,13 @@ build_step <- function(curried_fn, handler, dots, label, step_type, causal_type,
             step_type=step_type,
             causal_type=causal_type,
             call=call,
-            class=c("design_step", "d_par","function"))
+            class=c("design_step", "dd","function"))
 }
 
 # generate declaration steps (eg declare_population) by setting the default handler and metadata
 make_declarations <- function(default_handler, step_type, causal_type='dgp', default_label, strictDataParam=TRUE) {
 
   declaration <- declaration_template
-
 
   formals(declaration)$handler <- substitute(default_handler)
   if(!missing(default_label)) formals(declaration)$label <- default_label
