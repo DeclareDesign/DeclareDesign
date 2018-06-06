@@ -11,10 +11,10 @@ test_that("test modify declare design ", {
 
   my_assignment <- declare_assignment(m = 25, label = "a_label")
 
-  design <- declare_design(my_population,
-                           my_potential_outcomes,
-                           dplyr::mutate(q = 5),
-                           my_assignment)
+  design <- my_population +
+    my_potential_outcomes +
+    tidy_step(dplyr::mutate(q = 5)) +
+    my_assignment
 
   my_assignment_2 <- declare_assignment(m = 25, assignment_variable = "Z2")
 
@@ -35,37 +35,24 @@ test_that("test modify declare design ", {
 
 
 test_that("placement doesn't matter", {
-  my_population <- declare_population(N = 100, noise = rnorm(N), label="mypop")
+  my_population <-
+    declare_population(N = 100,
+                       noise = rnorm(N),
+                       label = "mypop")
 
   my_potential_outcomes <-
     declare_potential_outcomes(Y_Z_0 = noise,
                                Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
-
+  
   my_assignment <- declare_assignment(m = 50)
   my_assignment_2 <- declare_assignment(m = 25)
+  
+  design <- my_population + my_potential_outcomes + my_assignment
+  
+  expect_length(insert_step(design, dplyr::mutate(income = noise ^ 2), after = my_assignment), 4)
+  expect_length(insert_step(design, dplyr::mutate(income = noise ^ 2), before = my_assignment), 4)
+  expect_length(insert_step(design, dplyr::mutate(income = noise ^ 2), before = "mypop"), 4)
 
-  design <- declare_design(my_population,
-                           my_potential_outcomes,
-                           my_assignment)
-
-  design
-
-  expect_length( insert_step(design, dplyr::mutate(income = noise^2), after = my_assignment), 4)
-  expect_length( insert_step(design, dplyr::mutate(income = noise^2), before = my_assignment), 4)
-  expect_length( insert_step(design, dplyr::mutate(income = noise^2), before = "mypop"), 4)
-
-
-  expect_error(  insert_step(design, dplyr::mutate(income = noise^2), before = "notfound") )
-
-
-
-  expect_error(  insert_step(design,  dplyr::mutate(income = noise^2)) )
-
-
+  expect_error(insert_step(design, dplyr::mutate(income = noise ^ 2), before = "notfound"))
+  expect_error(insert_step(design,  dplyr::mutate(income = noise ^ 2)))
 })
-
-
-
-
-
-

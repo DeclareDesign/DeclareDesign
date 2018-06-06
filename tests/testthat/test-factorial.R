@@ -20,26 +20,19 @@ test_that("Factorial", {
   reveal_outcomes <- declare_reveal()
 
   my_design <-
-    declare_design(
-      my_population,
-      my_potential_outcomes,
-      my_estimand,
-      my_assignment,
-      dplyr::mutate(Z1 = as.numeric(Z %in% c("T2", "T4")),
-             Z2 = as.numeric(Z %in% c("T3", "T4"))),
-      reveal_outcomes,
+      my_population + 
+      my_potential_outcomes + 
+      my_estimand + 
+      my_assignment + 
+      tidy_step(dplyr::mutate(Z1 = as.numeric(Z %in% c("T2", "T4")),
+             Z2 = as.numeric(Z %in% c("T3", "T4")))) +
+      reveal_outcomes +
       my_estimator
-    )
 
   expect_equal(my_design %>% draw_data %>% nrow, 2000)
-
   expect_equal(my_design %>% run_design %>% names, c("estimates_df", "estimands_df"))
 
-
   diagnosis <- diagnose_design(my_design, sims = 2, bootstrap_sims = FALSE)
-
   expect_equal(diagnosis %>% get_simulations %>% dim, c(2, 10))
-
   expect_equal(diagnosis %>%  get_diagnosands %>% dim, c(1,13))
-
 })

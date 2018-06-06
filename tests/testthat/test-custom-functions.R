@@ -1,7 +1,6 @@
 context("Custom Functions")
 
 test_that("custom population", {
-
   ## population
   my_population_function <- function(N) {
     data.frame(u = rnorm(N))
@@ -17,7 +16,6 @@ test_that("custom population", {
 })
 
 test_that("custom PO", {
-
   ## potential outcomes
   my_potential_outcomes_function <-
     function(data) {

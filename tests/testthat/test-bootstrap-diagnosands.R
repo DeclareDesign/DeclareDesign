@@ -16,12 +16,15 @@ test_that("test diagnosands", {
 
   reveal <- declare_reveal()
 
-  my_design <- declare_design(my_population(),
-                              my_potential_outcomes, pate,
-                              my_assignment,
-                              reveal,
-                              pate_estimator1,
-                              pate_estimator2)
+  fixed_data <- my_population()
+  
+  my_design <- declare_population(data = fixed_data) +
+    my_potential_outcomes +
+    pate +
+    my_assignment +
+    reveal +
+    pate_estimator1 +
+    pate_estimator2
 
   # default set
   diagnosis <- diagnose_design(my_design, sims = 2, bootstrap_sims = 2)

@@ -11,7 +11,6 @@ my_template <- function(N = 100,
   my_design
 }
 
-# debugonce(DeclareDesign:::expand_design)
 design_list <-
   expand_design(
     template = my_template,
@@ -58,7 +57,4 @@ test_that("template with vector argument works", {
       N = list(c(20, 20, 20), c(20, 20, 20), c(20, 20, 20)),
       my_estimand_func = c(mean, median)
     ), 6)
-  
 })
-
-
