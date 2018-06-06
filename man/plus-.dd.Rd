@@ -58,6 +58,19 @@ df <- draw_data(design)
 estimates <- get_estimates(design)
 estimands <- get_estimands(design)
 
+# You can add steps to a design
+
+design <- my_population + my_potential_outcomes
+design + my_sampling
+
+# Special Cases
+
+# You may wish to have a design with only one step:
+
+design <- my_population + NULL
+design
+
+
 \dontrun{
 diagnosis <- diagnose_design(design)
 
