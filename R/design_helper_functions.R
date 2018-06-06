@@ -93,8 +93,6 @@ run_design_internal.default <- function(design, current_df=NULL, results=NULL, s
     causal_type <- attr(step, "causal_type")
     step_type <- attr(step, "step_type")
     
-    
-    
     # if it's a dgp
     if ("dgp" %in% causal_type) {
       current_df <- next_step(step, current_df, i)

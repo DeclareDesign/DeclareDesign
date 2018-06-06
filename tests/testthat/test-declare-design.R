@@ -67,7 +67,7 @@ test_that("Declare a bare function", {
   
   design <-
     declare_population(sleep) + 
-    function(foo) foo
+    tidy_step(function(foo) foo)
   
   # design <- expect_warning(declare_design(
   #   sleep,

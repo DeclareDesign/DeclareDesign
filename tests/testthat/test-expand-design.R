@@ -11,34 +11,34 @@ my_template <- function(N = 100,
   my_design
 }
 
-design_list <-
+expect_length(design_list <-
   expand_design(
     template = my_template,
     N = c(c(20, 20, 20), c(20, 20, 20), c(20, 20, 20)),
     my_estimand_func = c(mean, median)
-  )
+  ), 18)
 
-design_list <-
+expect_length(design_list <-
   expand_design(
     template = my_template,
     N = c(10, 50, 100),
     my_estimand_func = c(mean, median)
-  )
+  ), 6)
 
-design_list <-
+  expect_length(design_list <-
   expand_design(
     template = my_template,
     N = c(10, 50, 100),
     my_estimand_func = list(mean, median)
-  )
+  ), 6)
 
 
-design_list <-
+  expect_length(design_list <-
   expand_design(
     template = my_template,
     N = c(10, 50, 100),
     my_estimand_func = mean
-  )
+  ), 3)
 })
 
 

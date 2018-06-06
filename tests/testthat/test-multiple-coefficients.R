@@ -18,12 +18,12 @@ test_that("Factorial", {
   
   OLS = declare_estimator(Y ~ X,
                           model = lm,
-                          estimand = "theta",
+                          estimand = theta,
                           coefficients = TRUE)
 
   my_design <- my_pop + theta + OLS
   diagnosis <- diagnose_design(my_design, sims = 2, bootstrap_sims = FALSE)
 
-  expect_equal(diagnosis %>% get_simulations %>% dim, c(4, 10))
-  expect_equal(diagnosis %>% get_diagnosands %>% dim, c(2,13))
+  expect_equal(dim(get_simulations(diagnosis)), c(4, 10))
+  expect_equal(dim(get_diagnosands(diagnosis)), c(2, 13))
 })

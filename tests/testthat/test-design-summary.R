@@ -69,9 +69,6 @@ test_that("str() works", {
 
   expect_output(str(declare_population(N = 50)), "design_step:\\t declare_population[(]N = 50[)] ")
   
-  
-  expect_output(str(declare_population(sleep)), "seed_data:\\t sleep")
-
 })
 
 test_that("summary, custom estimator handler, numeric value", {

@@ -66,12 +66,11 @@
   # 1. lhs is a step
   # 2. lhs is a design
   
-  # browser()
+  browser()
   
   if (!inherits(rhs, "dd")) {
     stop("The right hand side does not appear to be a dd object. Can you wrap the step with `tidy_step()`?", call. = FALSE)
   }
-  
   
   if (inherits(lhs, "design")) {
     
@@ -85,7 +84,7 @@
     
     # browser()
     
-    names(ret)[length(ret)] <- expr_deparse(enexpr(rhs))
+    names(ret)[length(ret)] <- expr_text(enexpr(rhs), nlines = 1)
     
     ret <- do.call(construct_design, ret)
     
@@ -93,7 +92,7 @@
     
     ret <- append(lhs, rhs) 
     
-    names(ret) <- c(expr_deparse(enexpr(lhs)), expr_deparse(enexpr(rhs)))
+    names(ret) <- c(expr_text(enexpr(lhs), nlines = 1), expr_text(enexpr(rhs), nlines = 1))
     
     ret <- do.call(construct_design, ret)
     
@@ -113,6 +112,11 @@ construct_design <- function(...) {
   
   qnames <- names(qs)
   names(ret)[qnames != ""] <- qnames[qnames != ""]
+  
+  if (any(duplicated(names(ret)))) {
+    stop("You have steps with identical names: ",
+         unique(names(ret)[duplicated(names(ret))]), ".", call. = FALSE)
+  }
   
   # for each step in qs, eval, and handle edge cases (dplyr calls, non-declared functions)
   for (i in seq_along(qs)) {
