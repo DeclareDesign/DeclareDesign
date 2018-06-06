@@ -15,45 +15,32 @@ expect_estimates <- function(estimates, label = NULL) {
   }
 }
 
-
-
 test_that("difference in means", {
-
   my_estimator <- declare_estimator(Y ~ Z)
   my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes %>% my_estimator %>% expect_estimates
 })
 
-
-
 test_that("lm with robust ses", {
-
   my_estimator <- declare_estimator(Y ~ Z, model = lm_robust)
   my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes %>% my_estimator%>% expect_estimates
 })
 
 
 test_that("lm with HC3 robust ses", {
-
   my_estimator <- declare_estimator(Y ~ Z, model = lm_robust, se_type = "HC3")
   my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes %>% my_estimator%>% expect_estimates
 })
 
 test_that("custom estimator function", {
-
   my_mean <- function(data){
     data.frame(est = with(data, 2), foo=mean(data$Y))
   }
-
   my_estimator_custom <- declare_estimator(handler = tidy_estimator(my_mean))
-
   cust <- my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes %>% my_estimator_custom
-
   expect_equal(cust$est, 2)
 })
 
 test_that("check blocked d-i-m estimator", {
-
-
   my_population <- declare_population(N = 500, noise = rnorm(N), blocks = sample(rep(c("A", "B"), each = 250), N, replace = F))
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2) + 5 * (blocks == "A"))
   my_assignment <- declare_assignment(blocks = blocks)
@@ -63,8 +50,8 @@ test_that("check blocked d-i-m estimator", {
   df <- my_population() %>% my_potential_outcomes %>% my_assignment %>% declare_reveal()()
   my_estimator_notblocked <- declare_estimator(Y ~ Z)
 
-  df %>% my_estimator_notblocked%>% expect_estimates
-  df %>% my_estimator_blocked%>% expect_estimates ## it is different!
+  df %>% my_estimator_notblocked %>% expect_estimates
+  df %>% my_estimator_blocked %>% expect_estimates ## it is different!
 
 })
 
@@ -82,50 +69,35 @@ test_that("regression from estimatr works as an estimator", {
                                       estimand = pate, label = "pate")
   reveal_outcomes <- declare_reveal()
 
-  my_design <- declare_design(my_population,
-                              my_potential_outcomes,
-                              pate,
-                              my_assignment,
-                              reveal_outcomes,
-                              pate_estimator)
-
+  my_design <- my_population +
+    my_potential_outcomes +
+    pate +
+    my_assignment +
+    reveal_outcomes +
+    pate_estimator
+  
   est <- get_estimates(my_design)
   expect_equal(est$estimator_label, "pate")
   expect_equal(est$coefficient, "noise")
   expect_equal(est$estimand_label, "pate")
 
-
 })
 
+population <- declare_population(N = 200, noise = rnorm(N))
 
-################
-population <- declare_population(
-  N = 200,
-  noise = rnorm(N)
-)
-
-potential_outcomes <- declare_potential_outcomes(
-  formula = Y ~ noise + Z*.5)
+potential_outcomes <- declare_potential_outcomes(formula = Y ~ noise + Z*.5)
 
 pop <- potential_outcomes(population())
 
+sampling <- declare_sampling(n = 100)
 
-sampling <- declare_sampling(
-  n = 100
-)
-
-
-assignment <- declare_assignment(
-  m = 50
-)
+assignment <- declare_assignment(m = 50)
 
 sate <- declare_estimand(SATE = mean(Y_Z_1 - Y_Z_0))
 
 reveal_outcomes <- declare_reveal()
 
-
 test_that("multiple estimator declarations work", {
-
 
   estimator_1 <-
     declare_estimator(formula = Y ~ Z,
@@ -139,16 +111,15 @@ test_that("multiple estimator declarations work", {
                       estimand = sate,
                       label = "estimator_2")
 
-  design <- declare_design(population,
-                 potential_outcomes,
-                 sampling,
-                 sate,
-                 assignment,
-                 reveal_outcomes,
-                 estimator_1,
-                 estimator_2
-  )
-
+  design <- population +
+    potential_outcomes +
+    sampling +
+    sate +
+    assignment +
+    reveal_outcomes +
+    estimator_1 +
+    estimator_2
+  
   e <- get_estimates(design)
 
   expect_equal(e$estimator_label, c("estimator_1", "estimator_2"))
@@ -169,15 +140,14 @@ test_that("multiple estimator declarations work", {
                       estimand = sate,
                       label = "estimator_4")
 
-  design <-  declare_design(population,
-                           potential_outcomes,
-                           sampling,
-                           sate,
-                           assignment,
-                           reveal_outcomes,
-                           estimator_3,
-                           estimator_4
-  )
+  design <- population + 
+    potential_outcomes + 
+    sampling + 
+    sate + 
+    assignment + 
+    reveal_outcomes + 
+    estimator_3 + 
+    estimator_4
 
   e <- get_estimates(design)
 
@@ -199,21 +169,17 @@ test_that("multiple estimator declarations work", {
 
   # This could eventually be fixed so that the estimator names are inherited
   expect_error({
-    design <- declare_design(population,
-                             potential_outcomes,
-                             sampling,
-                             sate,
-                             assignment,
-                             reveal_outcomes,
-                             estimator_5,
-                             estimator_6
-                             )
+    design <- population +
+      potential_outcomes +
+      sampling +
+      sate +
+      assignment +
+      reveal_outcomes +
+      estimator_5 +
+      estimator_6
   })
 
-
-
 })
-
 
 context("Labeling estimator output with estimands")
 
@@ -225,32 +191,27 @@ expect_label <- function(df, expected_label, estimand_label){
   expect_equal(df$estimand_label, estimand_label)
 }
 
-df <- data.frame(Y=c(0,0,0,0,1,1,1,1), Z=c(0,0,0,0,1,1,1,1))
+df <- data.frame(Y = c(0, 0, 0, 0, 1, 1, 1, 1),
+                 Z = c(0, 0, 0, 0, 1, 1, 1, 1))
 
 test_that("labels for estimates and estimands work estimand splat labeld estimator default", {
-
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_arg_label)
-
   df %>% mator_no_label %>% expect_label("my_estimator", "ATE")
 })
+
 test_that("labels for estimates and estimands work, label explicit, estimand splat labeled", {
   mator_label <- declare_estimator(Y ~ Z, estimand = mand_arg_label, label = "an_estimator")
   df %>% mator_label %>% expect_label("an_estimator", "ATE")
-
 })
 
 test_that("labels for estimates and estimands work estimand splat labeld label =NULL", {
   mator_label_null <- declare_estimator(Y ~ Z, estimand = mand_arg_label, label = NULL)
   expect_error(df %>% mator_label_null)
-
 })
 
-
 test_that("labels for estimates and estimands work - label default", {
-
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label)
   df %>% mator_no_label %>% expect_label("my_estimator", "ATE")
-
 })
 
 test_that("labels for estimates and estimands work - label explicit", {
@@ -266,17 +227,19 @@ test_that("labels for estimates and estimands work- label=NULL", {
 
 
 test_that("labels for estimates and estimands work estimand label, estimator default", {
-
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label)
   df %>% mator_no_label %>% expect_label("my_estimator", "ATE")
-
 })
 
 
-
-
 test_that("coefficient_names = TRUE returns all coefficients", {
-  tst <- data.frame(x = runif(100), y = runif(100), wt = runif(100), clust = sample(1:10, 100, replace = TRUE))
+  tst <-
+    data.frame(
+      x = runif(100),
+      y = runif(100),
+      wt = runif(100),
+      clust = sample(1:10, 100, replace = TRUE)
+    )
 
   est4 <- declare_estimator(
       y ~ x + as.factor(clust),
@@ -292,8 +255,8 @@ test_that("coefficient_names = TRUE returns all coefficients", {
 
 
 test_that("default estimator handler validation fn", {
-  expect_error(declare_estimator(model="Neal"))
-  expect_error(declare_estimator(model=I))
+  expect_error(declare_estimator(model = "Test"))
+  expect_error(declare_estimator(model = I))
 })
 
 test_that("tidy_estimator, handler does not take data", {
@@ -301,22 +264,17 @@ test_that("tidy_estimator, handler does not take data", {
 })
 
 test_that("model_handler runs directly", {
-
-  golden <- structure(list(coefficient = "group2", est = 1.58, se = 0.849091017238762,
+  lm_out <- structure(list(coefficient = "group2", est = 1.58, se = 0.849091017238762,
     p = 0.0791867142159381, ci_lower = -0.203874032287599, ci_upper = 3.3638740322876), .Names = c("coefficient",
     "est", "se", "p", "ci_lower", "ci_upper"), row.names = 2L, class = "data.frame")
 
-  result <- model_handler(sleep, extra~group, model=lm, coefficients = "group2")
-
-  expect_equal(result, golden)
+  result <- model_handler(sleep, extra ~ group, model = lm, coefficients = "group2")
+  expect_equal(result, lm_out)
 })
 
 
 test_that("estimators have different columns", {
-
   skip_if_not_installed("Matching")
-
-
   population <- declare_population(
     N = 1000,
     X1 = rnorm(N),
@@ -354,18 +312,14 @@ test_that("estimators have different columns", {
     label = "matching"
   )
 
-  matching <- declare_design(
-    population,
-    potential_outcomes,
-    assignment,
-    declare_reveal(Y, Z),
-    estimator_d_i_m,
+  matching <- population + 
+    potential_outcomes + 
+    assignment + 
+    declare_reveal(Y, Z) + 
+    estimator_d_i_m + 
     estimator_m
-  )
-
 
   result <- get_estimates(matching)
-
 
   expect_length(result, 8)
   expect_equal(nrow(result), 2)

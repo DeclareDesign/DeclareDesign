@@ -168,21 +168,20 @@ test_that("Population declaration variations", {
 
   # Way 1
 
-  design <- declare_design(my_population, my_potential_outcomes)
+  design <- my_population + my_potential_outcomes
   df1 <- draw_data(design)
 
   # Way 2
 
-  design <- declare_design(my_population(), my_potential_outcomes)
+  fixed_df <- my_population()
+  design <- declare_population(fixed_df) + my_potential_outcomes
   df2 <- draw_data(design)
 
   # Way 3
 
-  df <- my_population()
-  design <- declare_design(df, my_potential_outcomes)
-  df3<- draw_data(design)
-
-
+  design <- declare_population(my_population()) +  my_potential_outcomes
+  df3 <- draw_data(design)
+  
   expect_identical(df1, df2)
   expect_identical(df1, df3)
 })

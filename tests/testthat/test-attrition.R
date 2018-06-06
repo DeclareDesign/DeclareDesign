@@ -21,14 +21,14 @@ test_that("attrition / formula PO", {
   my_reveal_attrition <- declare_reveal(outcome_variables = "R")
   my_reveal_outcomes <- declare_reveal(outcome_variables = "Y", attrition_variables = "R")
 
-  my_design <- declare_design(
-    my_population,
-    my_potential_outcomes_Y,
-    my_potential_outcomes_attrition,
-    my_assignment,
-    my_reveal_attrition,
+  my_design <- 
+    my_population +
+    my_potential_outcomes_Y +
+    my_potential_outcomes_attrition +
+    my_assignment +
+    my_reveal_attrition +
     my_reveal_outcomes
-  )
+  
 
   out <- head(draw_data(my_design))
 
@@ -44,14 +44,14 @@ test_that("attrition / legacy PO", {
     R_Z_0 = rbinom(n = N, size = 1, prob = pnorm(income)),
     R_Z_1 = rbinom(n = N, size = 1, prob = pnorm(income + .2)))
 
-  my_design <- declare_design(
-    my_population,
-    my_potential_outcomes_Y,
-    my_potential_outcomes_attrition,
-    my_assignment,
-    declare_reveal(outcome_variables = "R"),
+  my_design <-
+    my_population +
+    my_potential_outcomes_Y +
+    my_potential_outcomes_attrition +
+    my_assignment +
+    declare_reveal(outcome_variables = "R") +
     declare_reveal(attrition_variables = "R")
-  )
+  
 
   out <- head(draw_data(my_design))
 

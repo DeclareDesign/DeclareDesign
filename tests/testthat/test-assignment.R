@@ -130,7 +130,7 @@ test_that("can append probabiliies matrix",{
 
   pop <- declare_population(N = 10)
   assignment <- declare_assignment(m = 5, append_probabilities_matrix = TRUE)
-  dat <- draw_data(declare_design(pop, assignment))
+  dat <- draw_data(pop +  assignment)
 
   expect_true("Z_prob_0" %in% colnames(dat))
 

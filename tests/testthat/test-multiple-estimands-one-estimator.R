@@ -2,10 +2,14 @@ context("Multiple estimands can be mapped to one estimator")
 
 
 test_that("Multiple estimands can be mapped to one estimator", {
-  pop_var <- function(x) mean((x - mean(x))^2)
+  pop_var <- function(x) {mean((x - mean(x))^2)}
+  
   x <- rnorm(100)
   dat <- data.frame(X = x)
   sx <- sum((dat$X - mean(dat$X))^2)
+  
+  
+  
   simp_pop <- declare_population(
     epsilon = rnorm(N, sd = 2),
     Y = X + epsilon
@@ -22,12 +26,12 @@ test_that("Multiple estimands can be mapped to one estimator", {
     coefficients = "X"
   )
 
-  des <- declare_design(
-    dat,
-    simp_pop,
-    dgp_se, obs_se,
+  des <- 
+    declare_population(dat) +
+    simp_pop + 
+    dgp_se + 
+    obs_se +
     lmc
-  )
 
   my_dig <- declare_diagnosands(
     bias_se = mean(se - estimand),

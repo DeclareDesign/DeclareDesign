@@ -16,7 +16,13 @@ test_that("multiple design get_estimates", {
     
     my_reveal <- declare_reveal()
     
-    my_design <- declare_design(my_population, my_potential_outcomes, my_estimand, my_assignment, my_reveal, my_estimator)
+    my_design <-
+        my_population +
+        my_potential_outcomes +
+        my_estimand +
+        my_assignment +
+        my_reveal +
+        my_estimator
     
     my_design
   }
@@ -33,7 +39,12 @@ test_that("multiple design get_estimates", {
   
   my_reveal <- declare_reveal()
   
-  design_1 <- declare_design(my_population, my_potential_outcomes, my_estimand, my_assignment, my_reveal, my_estimator)
+  design_1 <- my_population +
+    my_potential_outcomes +
+    my_estimand +
+    my_assignment +
+    my_reveal +
+    my_estimator
   
   my_assignment_2 <- declare_assignment(m = 50)
   
