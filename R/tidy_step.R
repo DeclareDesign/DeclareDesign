@@ -1,13 +1,13 @@
 
 
 
-#' Wrap a step
+#' Convert a step to a tidy function for use in a design
 #'
-#' Wrap a data-in, data-out function call
+#' Wrap a data-in, data-out function call as a tidy function
 #'
 #' @param ... A function of data and other arguments that returns data
 #'
-#' @return A function that takes only data. (is a quosure).
+#' @return A function that takes only data compatible with creating a design
 #' @export
 #'
 #' @examples
@@ -32,7 +32,7 @@
 #' 
 #' 
 
-wrap_step <- function(...){
+tidy_step <- function(...){
   qs <- quo(...)
   qnames <- names(qs)
   

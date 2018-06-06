@@ -20,5 +20,6 @@ my_assignment <- declare_assignment(m = 50)
 
 my_design <- declare_design(my_population, my_assignment)
 
+print_code(my_design)
 
 }

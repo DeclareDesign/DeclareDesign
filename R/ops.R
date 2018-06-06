@@ -26,7 +26,7 @@
   # browser()
   
   if (!inherits(rhs, "d_par")) {
-    stop("The right hand side does not appear to be a dd object. Can you wrap the step with `wrap_step()`?", call. = FALSE)
+    stop("The right hand side does not appear to be a dd object. Can you wrap the step with `tidy_step()`?", call. = FALSE)
   }
   
   
