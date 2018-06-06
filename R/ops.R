@@ -14,6 +14,8 @@
 #' 
 #' my_design <- pop + smp + assgn
 #' 
+#' @importFrom rlang enexpr expr_deparse
+#' 
 #' @export
 `+.d_par` <- function(lhs, rhs){
   
@@ -38,7 +40,9 @@
     
     ret <- append(lhs, rhs)
     
-    names(ret)[length(ret)] <- paste(deparse(substitute(rhs)), collapse = " ")
+    # browser()
+    
+    names(ret)[length(ret)] <- expr_deparse(enexpr(rhs))
     
     ret <- do.call(declare_design_internal, ret)
     
@@ -46,7 +50,7 @@
     
     ret <- append(lhs, rhs) 
     
-    names(ret) <- c(paste(deparse(substitute(lhs)), collapse = " "), paste(deparse(substitute(rhs)), collapse = " "))
+    names(ret) <- c(expr_deparse(enexpr(lhs)), expr_deparse(enexpr(rhs)))
     
     ret <- do.call(declare_design_internal, ret)
     
