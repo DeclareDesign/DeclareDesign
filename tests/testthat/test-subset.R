@@ -16,13 +16,7 @@ test_that("Test Subsetting on default estimand handler", {
 
 
 
-  design <- declare_design(my_population,
-                           my_potential_outcomes,
-                           my_sampling,
-                           my_estimand,
-                           my_estimand2
-  )
-
+  design <- my_population + my_potential_outcomes + my_sampling + my_estimand + my_estimand2
 
   expect_true(design  %>%  get_estimands() %>% with(estimand[1] > 2 && estimand[2] < 0))
   # > z <- replicate(10000, design  %>%  get_estimands() %>% with(estimand[[1]] > 2 && estimand[2] < 0)) %>% table

@@ -8,7 +8,7 @@ test_that("dplyr verbs wrap", {
   
   expect_equal(nrow(a_wrapped_mutate(my_population())), 10)
   
-  des <- declare_design(my_population, a_wrapped_mutate)
+  des <- my_population + a_wrapped_mutate
   expect_equal(names(des), c("my_population", "a_wrapped_mutate"))
   
   des1 <- my_population + a_wrapped_mutate

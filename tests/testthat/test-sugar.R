@@ -7,11 +7,9 @@ test_that("multiple PO / reveal", {
 
   multi_po <- rlang:::quos()
   multi_po[paste0("Y", 1:3, "_Z_0")] <- list(rlang::quo(noise))
-  multi_po[paste0("Y", 1:3, "_Z_1")] <- list(rlang::quo(noise + rnorm(N, mean=2, sd=2)))
-
+  multi_po[paste0("Y", 1:3, "_Z_1")] <- list(rlang::quo(noise + rnorm(N, mean = 2, sd = 2)))
 
   my_potential_outcomes3 <- declare_potential_outcomes(!!!multi_po)
-
 
   my_assignment <- declare_assignment(m = 50)
 
@@ -19,21 +17,14 @@ test_that("multiple PO / reveal", {
 
   reveal_multiple <- declare_reveal(outcome_variables = !!my_outcomes)
 
-
-  design <- declare_design(
-    my_population,
-    my_potential_outcomes3,
-    my_assignment,
-    reveal_multiple
-  )
+  design <- my_population + my_potential_outcomes3 + my_assignment + reveal_multiple
 
   expect_equal(grep("^Y\\d$", colnames(draw_data(design)), value = TRUE), my_outcomes)
-
 
 })
 
 
-test_that("slash constructors", {
+test_that("+ constructors", {
   d <- declare_population(sleep) + declare_sampling() + declare_assignment()
   expect_equal(dim(draw_data(d)), c(10,6))
 })
@@ -46,12 +37,10 @@ outcomes <- lapply(LETTERS, function(l) quo(preference == !!l))
 names(outcomes) <- paste0("Y_Z_", LETTERS)
 
 
-design <- declare_design(
-  pop = declare_population(N=26000, preference = sample(LETTERS, N, replace=TRUE)),
-  Y_Z = declare_potential_outcomes(!!!outcomes),
-  Z = declare_assignment(conditions=!!LETTERS),
-  Y = declare_reveal()
-)
+design <- declare_population(N = 26000, preference = sample(LETTERS, N, replace = TRUE)) +
+  declare_potential_outcomes(!!!outcomes) +
+  declare_assignment(conditions = !!LETTERS) +  
+  declare_reveal()
 
  expect_equal(colnames(draw_data(design)), c("ID", "preference", "Y_Z_A", "Y_Z_B", "Y_Z_C", "Y_Z_D", "Y_Z_E",
                                              "Y_Z_F", "Y_Z_G", "Y_Z_H", "Y_Z_I", "Y_Z_J", "Y_Z_K", "Y_Z_L",
