@@ -287,3 +287,13 @@ test_that("select, subtract, add diagnosands",{
   expect_error(my_diags <- declare_diagnosands(select = c(bias, rmse), subtract = bias))
   
 })
+
+test_that("subset diagnosands",{
+  
+  # add a diagnosand
+  my_diags <- declare_diagnosands(perc_above_p05 = mean(p > .05), subset = p < .05)
+
+  dx <- diagnose_design(my_design, diagnosands = my_diags, sims = 4, bootstrap_sims = FALSE)
+  expect_equal( dx$diagnosands_df$perc_above_p05, 0)
+  
+})

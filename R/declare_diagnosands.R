@@ -29,8 +29,7 @@ diagnosand_handler <- function(data, ...,
   # subsetting the data -----------------------------------------------------
 
   # browser()
-  subset <- substitute(subset)
-  if (is_quosure(subset)) subset <- subset[[2]]
+  subset <- enquo(subset)
   idx <- eval_tidy(subset, data = data)
   if (!is.null(idx)) {
     data <- data[idx, , drop = FALSE]
