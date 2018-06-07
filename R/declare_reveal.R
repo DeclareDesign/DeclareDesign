@@ -149,28 +149,3 @@ switching_equation <- function(data, outcome, assignments) {
   
 }
 
-###############################################################################
-## Helper functions for declaratiosn that should work either with symbols,
-## string literals, or functions of either
-## eg Y:Z => c("Y","Z")
-
-reveal_nse_helper <- function(X) {
-  if (is.character(X) || is.logical(X))
-    X
-  else if (is.name(X))
-    as.character(X)
-  else if (is_quosure(X))
-    reveal_nse_helper(quo_expr(X))
-  else if (is.call(X))
-    unlist(lapply(X[-1], reveal_nse_helper))
-}
-
-reveal_nse_helper_dots <- function(dots, what, handler) {
-  if (what %in% names(dots)) {
-    dots[[what]] <- reveal_nse_helper(dots[[what]])
-  } else if (!is.null(formals(handler)[[what]])) {
-    dots[[what]] <- as.character(formals(handler)[[what]])
-  }
-  
-  dots
-}
