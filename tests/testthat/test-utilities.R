@@ -28,7 +28,7 @@ test_that("fallback to lapply", {
 
 test_that("names from quos",{
   blank_fun <- function(select){
-    names_from_quos(enquo(select))
+   reveal_nse_helper(enquo(select))
   }
   
   expect_equal("bias", blank_fun(select = bias))
@@ -36,3 +36,10 @@ test_that("names from quos",{
   
 })
   
+
+
+
+
+
+
+
