@@ -21,6 +21,8 @@ declare_diagnosands(..., handler = diagnosand_handler, label = NULL)
 
 \item{keep_defaults}{A flag for whether to report the default diagnosands. Defaults to \code{TRUE}.}
 
+\item{subset}{A subset of the simulations data frame within which to calculate diagnosands e.g. \code{subset = p < .05}.}
+
 \item{alpha}{Alpha significance level. Defaults to \code{.05}.}
 
 \item{label}{Label for the set of diagnosands.}

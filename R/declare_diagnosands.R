@@ -2,6 +2,7 @@
 #' @param select A set of the default diagnosands to report e.g., \code{select = c(bias, rmse)}
 #' @param subtract A set of the default diagnosands to NOT report e.g., \code{subtract = c(bias, rmse)}
 #' @param keep_defaults A flag for whether to report the default diagnosands. Defaults to \code{TRUE}.
+#' @param subset A subset of the simulations data frame within which to calculate diagnosands e.g. \code{subset = p < .05}.
 #' @param alpha Alpha significance level. Defaults to \code{.05}.
 #' @param label Label for the set of diagnosands.
 #' @param data a data.frame

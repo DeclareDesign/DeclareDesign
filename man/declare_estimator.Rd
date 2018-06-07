@@ -186,7 +186,7 @@ design <- replace_step(design_def, my_estimator_dim, my_estimator_median)
 
 run_design(design)
 
-my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand))
+my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand), keep_defaults = FALSE)
 diagnose_design(design, diagnosands = my_diagnosand, sims = 5, bootstrap_sims = FALSE)
 
 # ----------

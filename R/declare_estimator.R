@@ -152,7 +152,7 @@
 #'
 #' run_design(design)
 #'
-#' my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand))
+#' my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand), keep_defaults = FALSE)
 #' diagnose_design(design, diagnosands = my_diagnosand, sims = 5, bootstrap_sims = FALSE)
 #'
 #' # ----------
@@ -164,7 +164,7 @@
 #' run_design(design_two)
 #' diagnose_design(design_two, sims = 5, bootstrap_sims = FALSE)
 #'
-declare_estimator <- make_declarations(estimator_handler, step_type="estimator", causal_type="estimator", default_label="my_estimator")
+declare_estimator <- make_declarations(estimator_handler, step_type = "estimator", causal_type = "estimator", default_label = "my_estimator")
 
 #' \code{tidy_estimator} takes an untidy estimation function, and returns a tidy handler which accepts standard labelling options.
 #'
