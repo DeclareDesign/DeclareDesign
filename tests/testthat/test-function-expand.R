@@ -52,3 +52,5 @@ test_that("expand_design works",{
   expect_true(all(c("N", "my_estimand_func") %in% names(diag$diagnosands_df)))
   
 })
+
+

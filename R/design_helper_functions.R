@@ -201,7 +201,7 @@ get_estimands <- function(...) {
   estimands_list <- lapply(designs, get_estimands_single_design)
   
   if (length(designs) > 1) {
-    estimands_list <- Map(cbind, design_ID = names(estimands_list), estimands_list, stringsAsFactors = FALSE)
+    estimands_list <- Map(cbind, design_label = names(estimands_list), estimands_list, stringsAsFactors = FALSE)
   }
   
   estimands_df <- rbind_disjoint(estimands_list)
@@ -239,7 +239,7 @@ get_estimates <- function(...) {
   estimates_list <- lapply(designs, get_estimates_single_design)
   
   if (length(designs) > 1) {
-    estimates_list <- Map(cbind, design_ID = names(estimates_list), estimates_list, stringsAsFactors = FALSE)
+    estimates_list <- Map(cbind, design_label = names(estimates_list), estimates_list, stringsAsFactors = FALSE)
   }
   
   estimates_df <- rbind_disjoint(estimates_list)

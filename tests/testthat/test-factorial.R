@@ -38,8 +38,8 @@ test_that("Factorial", {
 
   diagnosis <- diagnose_design(my_design, sims = 2, bootstrap_sims = FALSE)
 
-  expect_equal(diagnosis %>% get_simulations %>% dim, c(2, 10))
+  expect_equal(diagnosis %>% get_simulations %>% dim, c(2, 11))
 
-  expect_equal(diagnosis %>%  get_diagnosands %>% dim, c(1,13))
+  expect_equal(diagnosis %>%  get_diagnosands %>% dim, c(1,14))
 
 })
