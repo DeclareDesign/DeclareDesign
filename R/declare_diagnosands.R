@@ -28,6 +28,7 @@ diagnosand_handler <- function(data, ...,
 
   # subsetting the data -----------------------------------------------------
 
+  # browser()
   subset <- substitute(subset)
   if (is_quosure(subset)) subset <- subset[[2]]
   idx <- eval_tidy(subset, data = data)
@@ -105,7 +106,41 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label){
     stop("You may not provide arguments to `select` and `subtract` at the same time.", call. = FALSE)
   }
   
+  default_diagnosand_names <- 
+    c("bias", "rmse", "power", "coverage", "mean_estimate", "sd_estimate", 
+      "mean_se", "type_s_rate", "mean_estimand")
   
+  if (!missing(select)) {
+    select_quo <- dots["select"]
+    if (quo_is_call(select_quo)) {
+      select_set <- as.character(call_args(select_quo))
+    } else {
+      select_set <- quo_text(select_quo)
+    }
+
+    if (!all(select_set %in% default_diagnosand_names)) {
+      stop("Some of your select set are not included in default diagnosands: ", paste(select_set[!select_set %in% default_diagnosand_names], collapse = ", "), ".")
+    }
+  }
+
+  if (!missing(subtract)) {
+    subtract_quo <- dots["subtract"]
+    if (quo_is_call(subtract_quo)) {
+      subtract_set <- as.character(call_args(subtract_quo))
+    } else {
+      subtract_set <- quo_text(enquo(subtract_quo))
+    }
+    if (!all(subtract_set %in% default_diagnosand_names)) {
+      stop("Some of your subtract set are not included in default diagnosands: ", paste(subtract_set[!subtract_set %in% default_diagnosand_names], collapse = ", "), ".")
+    }
+  }
+
+  # # check if there are no diagnosands
+  # if (length(options) == 0) {
+  #   stop("No diagnosands were declared.", call. = FALSE)
+  # }
+  
+  # check whether all diagnosands are named
   if (is.null(names(dots)) || "" %in% names(dots)) {
     declare_time_error("All diagnosands must be named", ret)
   }
