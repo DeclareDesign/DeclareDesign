@@ -120,7 +120,7 @@ simulate_design <-
       out 
     })
     parameters_df <- rbind_disjoint(parameters_df_list)
-    parameters_df <- data.frame(lapply(parameters_df, type.convert, as.is = TRUE), stringsAsFactors = FALSE)
+    parameters_df <- data.frame(lapply(parameters_df, type_convert), stringsAsFactors = FALSE)
     
     attr(simulations_df, "parameters") <- parameters_df
     
@@ -255,3 +255,20 @@ infer_names_quos <-
     
     
   }
+
+
+# x <- c("1", "2", NA)
+# x2 <- c("a", "b", NA)
+# type_convert(x)
+# type_convert(x2)
+
+type_convert <- function(x) {
+  if (inherits(x, "character")) {
+    x <- type.convert(x, as.is = TRUE)
+  } else {
+    x
+  }
+  x
+}
+
+
