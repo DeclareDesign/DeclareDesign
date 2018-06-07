@@ -1,5 +1,11 @@
-#' @param subset a subset expression
+#' @param ... A set of new diagnosands
+#' @param select A set of the default diagnosands to report e.g., \code{select = c(bias, rmse)}
+#' @param subtract A set of the default diagnosands to NOT report e.g., \code{subtract = c(bias, rmse)}
+#' @param keep_defaults A flag for whether to report the default diagnosands. Defaults to \code{TRUE}.
+#' @param alpha Alpha significance level. Defaults to \code{.05}.
+#' @param label Label for the set of diagnosands.
 #' @param data a data.frame
+#'
 #' @details
 #'
 #' If coefficients is TRUE, the names of ... will be returned in a `coefficients` column, and `estimand_label`
@@ -7,7 +13,7 @@
 #'
 #'
 #' @importFrom rlang eval_tidy quos  is_quosure quo_is_call
-#' @rdname declare_estimand
+#' @rdname declare_diagnosands
 diagnosand_handler <- function(data, ..., 
                                select,
                                subtract,
