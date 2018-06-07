@@ -197,7 +197,7 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
 
 
   if (length(dots$formula) < 3) {
-    declare_time_error("Must provide an outcome  in potential outcomes formula", ret)
+    declare_time_error("Must provide an outcome in potential outcomes formula", ret)
   }
 
   if ("ID_label" %in% names(dots)) {
@@ -210,7 +210,6 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
 
   dots$conditions <- eval_tidy(quo(expand_conditions(!!!dots)))
   dots$assignment_variables <- names(dots$conditions)
-
 
   ret <- build_step(currydata(potential_outcomes.formula,
                               dots,
@@ -225,8 +224,8 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
                     call = attr(ret, "call"))
 
 
-### Note that this sets a design_validation callback for later use!!! see below
-### step_meta is the data that design_validation will use for design time checks
+# Note that this sets a design_validation callback for later use!!! see below
+# step_meta is the data that design_validation will use for design time checks
 structure(ret,
           potential_outcomes_formula = formula,
           step_meta = list(outcome_variables = outcome_variable,
@@ -235,24 +234,22 @@ structure(ret,
 }
 
 
-### A design time validation
-###
-###  Checks for unrevealed outcome variables.
-###
-###  If there are any, inject a declare_reveal step after the latest assign/reveal of an assn variable
-###
-###
+# A design time validation
+#
+#  Checks for unrevealed outcome variables.
+#
+#  If there are any, inject a declare_reveal step after the latest assign/reveal of an assn variable
+#
+#
 pofdv <- function(design, i, step){
 
   if (i == length(design)) {
-    warning("Potential outcome is the final step in the design.", call. = FALSE)
     return(design)
   }
 
   this_step_meta <- attr(step, "step_meta")
 
-
-  check <- function(var_type, step_type, step_attr, callback=identity, from=1, to=length(design)) {
+  check <- function(var_type, step_type, step_attr, callback = identity, from = 1, to = length(design)) {
     vars <- this_step_meta[[var_type]]
 
     assn_steps <- Filter(function(step_j) attr(step_j, "step_type") == step_type,
@@ -277,13 +274,11 @@ pofdv <- function(design, i, step){
 
   if (length(unrevealed_outcomes) == 0) return(design)
 
-  warning(
-    "Outcome variables (", paste(unrevealed_outcomes, sep = ", "),
-    ") were declared in a potential outcomes step (", attr(step, "label"),
-    "), but never later revealed.", call. = FALSE)
+  # warning(
+  #   "Outcome variables (", paste(unrevealed_outcomes, sep = ", "),
+  #   ") were declared in a potential outcomes step (", attr(step, "label"),
+  #   "), but never later revealed.", call. = FALSE)
   
-
-
   prev_unassigned <- check("assignment_variables",  "assignment", "assignment_variables", to = i - 1)
 
   prev_unrevealed <- check("assignment_variables", "reveal_outcomes", "outcome_variables", to = i - 1)
@@ -306,12 +301,11 @@ pofdv <- function(design, i, step){
 
   cant_find <- prev_unassigned %i% prev_unrevealed %i% unassigned_vars %i% unrevealed_vars
 
-
   if (length(cant_find) > 0) {
-    warning(
-      "Assignment variables (", paste(cant_find, sep = ", "),
-      ") were declared in a potential outcomes step (", attr(step, "label"),
-      "), but never later assigned by an assignment step.", call. = FALSE)
+    # warning(
+    #   "Assignment variables (", paste(cant_find, sep = ", "),
+    #   ") were declared in a potential outcomes step (", attr(step, "label"),
+    #   "), but never later assigned by an assignment step.", call. = FALSE)
   } else {
 
     new_step <- eval_tidy(quo(declare_reveal(outcome_variables = !!this_step_meta$outcome_variables,
@@ -324,10 +318,10 @@ pofdv <- function(design, i, step){
       if (attr(step_j, "step_type") == "assignment") {
 
         if (any(step_meta$assignment_variables %in% attr(step, "step_meta")$assignment_variables)) {
-          warning("Attempting to inject a `declare_reveal(", this_step_meta$outcome_variables, ", ",
-                  this_step_meta$assignment_variables,
-                  ")` step after assignment step (", attr(step_j, "label"),
-                  ")", call. = FALSE)
+          # warning("Attempting to inject a `declare_reveal(", this_step_meta$outcome_variables, ", ",
+          #         this_step_meta$assignment_variables,
+          #         ")` step after assignment step (", attr(step_j, "label"),
+          #         ")", call. = FALSE)
           design <- insert_step(design, new_step, after = step_j)
           break;
         }
@@ -335,10 +329,10 @@ pofdv <- function(design, i, step){
       else if (attr(step_j, "step_type") == "reveal_outcomes") {
 
         if (any(step_meta$outcome_variables %in% attr(step, "step_meta")$assignment_variables)) {
-          warning("Attempting to inject a `declare_reveal(", this_step_meta$outcome_variables, ", ",
-                  this_step_meta$assignment_variables,
-                  ")` step after reveal step (", attr(step_j, "label"),
-                  ")", call. = FALSE)
+          # warning("Attempting to inject a `declare_reveal(", this_step_meta$outcome_variables, ", ",
+          #         this_step_meta$assignment_variables,
+          #         ")` step after reveal step (", attr(step_j, "label"),
+          #         ")", call. = FALSE)
           design <- insert_step(design, new_step, after = step_j)
           break;
         }
@@ -347,12 +341,10 @@ pofdv <- function(design, i, step){
     }
   }
 
-
   design
 }
 
 
-###############################################################################
 
 #' @importFrom fabricatr fabricate add_level modify_level
 #' @rdname declare_potential_outcomes
@@ -379,7 +371,6 @@ validation_fn(potential_outcomes.NULL) <- function(ret, dots, label){
 
 
 
-###############################################################################
 
 #' Expand assignment conditions
 #'

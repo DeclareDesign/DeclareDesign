@@ -94,7 +94,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label){
     select_set <- reveal_nse_helper(dots[["select"]])
 
     if (!all(select_set %in% default_diagnosand_names)) {
-      stop("Some of your select set are not included in default diagnosands: ", paste(select_set[!select_set %in% default_diagnosand_names], collapse = ", "), ".")
+      declare_time_error(paste0("Some of your select set are not included in default diagnosands: ", paste(select_set[!select_set %in% default_diagnosand_names], collapse = ", "), "."), ret)
     }
     default_diagnosand_names <- default_diagnosand_names[select_set]
   }
@@ -103,7 +103,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label){
     subtract_set <- reveal_nse_helper(dots[["subtract"]])
     
     if (!all(subtract_set %in% default_diagnosand_names)) {
-      stop("Some of your subtract set are not included in default diagnosands: ", paste(subtract_set[!subtract_set %in% default_diagnosand_names], collapse = ", "), ".")
+      declare_time_error(paste0("Some of your subtract set are not included in default diagnosands: ", paste(subtract_set[!subtract_set %in% default_diagnosand_names], collapse = ", "), "."), ret)
     }
     default_diagnosand_names <- default_diagnosand_names[!default_diagnosand_names %in% subtract_set]
   }
@@ -115,7 +115,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label){
   }
   
   if (length(options) == 0) {
-    stop("No diagnosands were declared.", call. = FALSE)
+    declare_time_error("No diagnosands were declared.", ret)
   }
   
   # check whether all diagnosands are named
