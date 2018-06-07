@@ -102,11 +102,15 @@ simulate_design <-
         Map(cbind, design_ID = names(simulations_list), simulations_list, stringsAsFactors = FALSE)
     }
     
+    
     # Cleanup
     simulations_df <- rbind_disjoint(simulations_list)
     rownames(simulations_df) <- NULL
     
-    # # Check that there are the expected number of simulations
+    #Obtain all parameters
+    attr(simulations_df, "parameters") <- names(rbind_disjoint(lapply(designs, function(x) attr(x, "parameters"))))
+    
+    # Check that there are the expected number of simulations
     # check_sim_number(simulations_df, sims)
     
     simulations_df
@@ -182,7 +186,6 @@ simulate_single_design <-
                    as_list(attr(design, "parameters")),
                    simulations_df[, -1, drop = FALSE])
     }
-    
     simulations_df
     
   }
