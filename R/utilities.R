@@ -183,3 +183,19 @@ get_modified_variables <- function(last_df = NULL, current_df) {
   Filter(is_modified, shared)
 }
 
+names_from_quos <- function(x) {
+  if (quo_is_call(x)) {
+    x_set <- as.character(call_args(x))
+  } else {
+    x_set <- quo_text(x)
+  }
+  x_set
+}
+
+
+
+
+
+
+
+
