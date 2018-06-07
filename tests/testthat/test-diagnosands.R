@@ -297,3 +297,17 @@ test_that("subset diagnosands",{
   expect_equal( dx$diagnosands_df$perc_above_p05, 0)
   
 })
+
+test_that("declare time errors",{
+  
+  # add a diagnosand
+  expect_s3_class(declare_diagnosands(), "design_step")
+  expect_error(declare_diagnosands(keep_defaults = FALSE), "No diagnosands were declared.")
+  expect_s3_class(declare_diagnosands(my_diag = mean(p), keep_defaults = FALSE), "design_step")
+  expect_error(declare_diagnosands(select = c()), "No diagnosands were declared.")
+  expect_error(declare_diagnosands(subtract = c("bias", "rmse", "power", "coverage", "mean_estimate", "sd_estimate", 
+                                                "mean_se", "type_s_rate", "mean_estimand")), 
+               "No diagnosands were declared.")
+  expect_error(declare_diagnosands(keep_defaults = FALSE), "No diagnosands were declared.")
+  
+})

@@ -24,11 +24,11 @@ diagnosand_handler <- function(data, ...,
                                label) {
   
   options <- quos(...)
+  
   if (length(options) > 0 && names(options)[1] == "") names(options)[1] <- label
 
   # subsetting the data -----------------------------------------------------
 
-  # browser()
   subset <- enquo(subset)
   idx <- eval_tidy(subset, data = data)
   if (!is.null(idx)) {
@@ -65,10 +65,6 @@ diagnosand_handler <- function(data, ...,
   if (keep_defaults) {
     options <- c(options, defaults_quos[!names(defaults_quos) %in% names(options)])
   }
-  
-  if (length(options) == 0) {
-    stop("No diagnosands were declared.", call. = FALSE)
-  }
     
   ret <- vector("list", length(options))
   for (i in seq_along(options)) {
@@ -86,8 +82,6 @@ diagnosand_handler <- function(data, ...,
 
 validation_fn(diagnosand_handler) <- function(ret, dots, label){
   
-  # browser()
-  
   if (sum(c("select", "subtract") %in% names(dots)) > 1) {
     stop("You may not provide arguments to `select` and `subtract` at the same time.", call. = FALSE)
   }
@@ -102,6 +96,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label){
     if (!all(select_set %in% default_diagnosand_names)) {
       stop("Some of your select set are not included in default diagnosands: ", paste(select_set[!select_set %in% default_diagnosand_names], collapse = ", "), ".")
     }
+    default_diagnosand_names <- default_diagnosand_names[select_set]
   }
 
   if ("subtract" %in% names(dots)) {
@@ -110,6 +105,17 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label){
     if (!all(subtract_set %in% default_diagnosand_names)) {
       stop("Some of your subtract set are not included in default diagnosands: ", paste(subtract_set[!subtract_set %in% default_diagnosand_names], collapse = ", "), ".")
     }
+    default_diagnosand_names <- default_diagnosand_names[!default_diagnosand_names %in% subtract_set]
+  }
+  
+  options <- names(dots)[!names(dots) %in% c("select", "subtract", "keep_defaults", "subset", "alpha", "label")]
+  if (!("keep_defaults" %in% names(dots)) || 
+      ("keep_defaults" %in% names(dots) && eval_tidy(dots[["keep_defaults"]]) == TRUE)) {
+    options <- c(options, default_diagnosand_names)
+  }
+  
+  if (length(options) == 0) {
+    stop("No diagnosands were declared.", call. = FALSE)
   }
   
   # check whether all diagnosands are named
