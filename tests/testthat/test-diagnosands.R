@@ -26,6 +26,7 @@ my_design_3 <- my_design
 
 
 test_that("s3 dispatch works",{
+  
   diagnosis <- diagnose_design(my_design, sims = 5, bootstrap_sims = FALSE)
   diagnosis <- diagnose_design(my_design, sims = 5, bootstrap_sims = FALSE)
   expect_equal(nrow(diagnosis$diagnosands_df), 1)

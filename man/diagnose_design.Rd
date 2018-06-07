@@ -16,7 +16,7 @@ diagnose_design(..., diagnosands = default_diagnosands, sims = 500,
 
 \item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.}
 
-\item{add_grouping_variables}{Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_ID", "estimand_label", "estimator_label", "coefficient")}
+\item{add_grouping_variables}{Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_label", "estimand_label", "estimator_label", "coefficient")}
 }
 \value{
 a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.

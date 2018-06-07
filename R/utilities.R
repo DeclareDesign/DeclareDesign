@@ -157,7 +157,7 @@ format_num <- function(x, digits = 3) {
 # Function to check whether there are more sims run than expected, possibly because of repeated labels
 check_sim_number <- function(simulations_df,
                              sims,
-                             grouping_variables = c("design_ID",  "estimand_label", "estimator_label", "coefficient")) {
+                             grouping_variables = c("design_label",  "estimand_label", "estimator_label", "coefficient")) {
   
   group_by_set  <- colnames(simulations_df) %i% grouping_variables
   group_by_list <- simulations_df[, group_by_set, drop = FALSE]

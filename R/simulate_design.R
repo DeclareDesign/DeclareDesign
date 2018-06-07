@@ -97,10 +97,10 @@ simulate_design <-
       SIMPLIFY = FALSE
     )
     
-    if (length(designs) > 1) {
+    #if (length(designs) > 1) {
       simulations_list <-
-        Map(cbind, design_ID = names(simulations_list), simulations_list, stringsAsFactors = FALSE)
-    }
+        Map(cbind, design_label = names(simulations_list), simulations_list, stringsAsFactors = FALSE)
+    #}
     
     
     # Cleanup
@@ -108,7 +108,21 @@ simulate_design <-
     rownames(simulations_df) <- NULL
     
     #Obtain all parameters
-    attr(simulations_df, "parameters") <- names(rbind_disjoint(lapply(designs, function(x) attr(x, "parameters"))))
+    
+    # browser()
+    
+    parameters_df_list <- lapply(designs, function(x) attr(x, "parameters"))
+    parameters_df_list <- lapply(seq_along(parameters_df_list), function(i) { 
+      out <- data.frame(design_label = names(parameters_df_list[i]))
+      if (!is.null(parameters_df_list[[i]])) {
+        out <- data.frame(out, parameters_df_list[[i]])
+      }
+      out 
+    })
+    parameters_df <- rbind_disjoint(parameters_df_list)
+    parameters_df <- data.frame(lapply(parameters_df, type.convert, as.is = TRUE), stringsAsFactors = FALSE)
+    
+    attr(simulations_df, "parameters") <- parameters_df
     
     # Check that there are the expected number of simulations
     # check_sim_number(simulations_df, sims)

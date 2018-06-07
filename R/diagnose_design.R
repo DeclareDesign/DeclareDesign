@@ -5,7 +5,7 @@
 #'
 #' @param ... A design or set of designs typically created by \code{\link{declare_design}}, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
-#' @param add_grouping_variables Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_ID", "estimand_label", "estimator_label", "coefficient")
+#' @param add_grouping_variables Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_label", "estimand_label", "estimator_label", "coefficient")
 #'
 #' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}
 #' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.
@@ -81,8 +81,9 @@ diagnose_design <- function(...,
                             add_grouping_variables = NULL) {
     
   dots_quos <- quos(...)
+  dots_quos <- maybe_add_labels(dots_quos)
   dots <- lapply(dots_quos, eval_tidy)
-
+  
   # three cases:
   # 1. it's a data frame -- this is the simulations df
   # 2. it's a single object that is a list of designs -- unpack designs
@@ -94,7 +95,12 @@ diagnose_design <- function(...,
     }
   } else {
     if (inherits(dots[[1]], "list")) {
+      
+      if(length(dots) > 1){
+        stop("When you provide a list of designs to `diagnose_design`, for example created by `expand_design`, please don't also provide additional designs. Only send the list of designs.")
+      }
       designs <- dots[[1]]
+      dots_quos <- dots_quos[[1]]
     } else {
       designs <- dots
     }
@@ -113,14 +119,10 @@ diagnose_design <- function(...,
 
   # figure out what to group by ---------------------------------------------
 
-  group_by_set <- c("design_ID",
+  group_by_set <- c("design_label",
                     "estimand_label",
                     "estimator_label",
                     "coefficient")
-
-  if (!is_empty(attr(simulations_df, "parameters"))) {
-    group_by_set <- c(group_by_set, attr(simulations_df, "parameters"))
-  }
 
   if (!is.null(add_grouping_variables)) {
     group_by_set <- c(group_by_set, add_grouping_variables)
@@ -156,13 +158,17 @@ diagnose_design <- function(...,
   }
 
   # prep for return ---------------------------------------------------------
-
+  
   diagnosands_df <- merge(x = diagnosands_df, y = n_sims_df, by = group_by_set, all = TRUE)
   rownames(diagnosands_df) <- NULL
 
+  parameters_df <- attr(simulations_df, "parameters")
+  diagnosands_df <- merge(diagnosands_df, parameters_df, by = "design_label")
+  
   # Reorder rows
-  sort_by_list <- colnames(simulations_df) %i% c("design_ID", "estimator_label", "coefficient", "estimand_label", "statistic")
-  simulations_df <- simulations_df[do.call(order, as.list(simulations_df[sort_by_list])), , drop = FALSE]
+  sort_by_list <- colnames(diagnosands_df) %i% c("estimator_label", "coefficient", "estimand_label", "statistic")
+  design_label_fac <- factor(diagnosands_df$design_label, levels = parameters_df$design_label)
+  diagnosands_df <- diagnosands_df[do.call(order, c(list(design_label_fac), as.list(diagnosands_df[sort_by_list]))), , drop = FALSE]
 
   # Return frames
   out <- list(simulations_df = simulations_df, diagnosands_df = diagnosands_df, diagnosand_names = diagnosand_names)
