@@ -160,18 +160,21 @@ diagnose_design <- function(...,
   # prep for return ---------------------------------------------------------
   
   diagnosands_df <- merge(x = diagnosands_df, y = n_sims_df, by = group_by_set, all = TRUE)
-  rownames(diagnosands_df) <- NULL
 
   parameters_df <- attr(simulations_df, "parameters")
   diagnosands_df <- merge(diagnosands_df, parameters_df, by = "design_label")
   
+  # make design_label a factor
+  diagnosands_df$design_label <- factor(diagnosands_df$design_label, levels = parameters_df$design_label)
+  
   # Reorder rows
-  sort_by_list <- colnames(diagnosands_df) %i% c("estimator_label", "coefficient", "estimand_label", "statistic")
-  design_label_fac <- factor(diagnosands_df$design_label, levels = parameters_df$design_label)
-  diagnosands_df <- diagnosands_df[do.call(order, c(list(design_label_fac), as.list(diagnosands_df[sort_by_list]))), , drop = FALSE]
+  sort_by_list <- colnames(diagnosands_df) %i% c(group_by_set, "statistic")
+  diagnosands_df <- diagnosands_df[do.call(order, as.list(diagnosands_df[sort_by_list])), , drop = FALSE]
 
+  
+  rownames(diagnosands_df) <- NULL
   # Return frames
-  out <- list(simulations_df = simulations_df, diagnosands_df = diagnosands_df, diagnosand_names = diagnosand_names)
+  out <- list(simulations_df = simulations_df, diagnosands_df = diagnosands_df, diagnosand_names = diagnosand_names, group_by_set = group_by_set)
 
   if (bootstrap_sims != 0) {
     out$bootstrap_replicates <- bootout$diagnosand_replicates

@@ -9,7 +9,7 @@
 #'
 #' @importFrom stats setNames
 #' @importFrom rlang is_list
-#' @importFrom utils head
+#' @importFrom utils head type.convert
 #' @export
 #' @examples
 #' my_population <- declare_population(N = 500, noise = rnorm(N))

@@ -106,15 +106,23 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   
   diagnosands_df <- diagnosis$diagnosands
   
+  # If no bootstrapping
+  if (is.null(diagnosis$bootstrap_replicates)) {
+    # Make names nicer
+    names(diagnosands_df) <-
+      gsub("\\b(se[(]|sd |rmse|[[:alpha:]])",
+           "\\U\\1",
+           gsub("_", " ", names(diagnosands_df)),
+           perl = TRUE)
+    rownames(diagnosands_df) <- NULL
+    
+    return(diagnosands_df)
+  }
+  
   # Reshape if there is bootstrapping
   diagnosand_columns <- diagnosis$diagnosand_names
   diagnosand_se_columns <- paste0("se(", diagnosis$diagnosand_names, ")")
   group_columns <- names(diagnosands_df)[!names(diagnosands_df) %in% c(diagnosand_columns, diagnosand_se_columns)]
-  
-  # Finish up if no bootstrapping
-  if (is.null(diagnosis$bootstrap_replicates)) {
-    return(diagnosands_df)
-  }
   
   # Make diagnosand only df
   diagnosands_only_df <-
@@ -143,12 +151,8 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   return_df <- rbind_disjoint(list(diagnosands_only_df, se_only_df), infill = "")
   
   # Reorder rows
-  sort_by_list <- colnames(return_df) %i% c("design_label", "estimator_label", "coefficient", "estimand_label", "statistic")
+  sort_by_list <- colnames(return_df) %i% diagnosis$group_by_set
   return_df <- return_df[do.call(order, as.list(return_df[,sort_by_list])), , drop = FALSE]
-  
-  # NA bootstrap rows
-  
-  return_df[return_df$statistic == "SE (bootstrapped)", sort_by_list] <- ""
   
   # Select columns
   if (!is.null(select)) {
@@ -160,12 +164,17 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
     return_df <- return_df[, select]
   }
   
+  # NA bootstrap rows
+  return_df$design_label <- factor(return_df$design_label, levels = c(levels(return_df$design_label), ""))
+  return_df[return_df$statistic == "SE (bootstrapped)", sort_by_list] <- ""
+  
   # Make names nicer
   names(return_df) <-
     gsub("\\b(se[(]|sd |rmse|[[:alpha:]])",
          "\\U\\1",
          gsub("_", " ", names(return_df)),
          perl = TRUE)
+  rownames(return_df) <- NULL
   
   return(return_df)
   

@@ -166,7 +166,9 @@ test_that("diagnosis, no estimator", {
   diagnosand <- declare_diagnosands(z = mean(estimand > 0), keep_defaults = FALSE)
 
   expect_equivalent(diagnose_design(d, diagnosands = diagnosand, sims = 5, bootstrap_sims = 5)$diagnosands_df,
-                    structure(list(design_label = c("d", "d"), estimand_label = c("bar", "foo"), z = c(1, 1), `se(z)` = c(0, 0), n_sims = c(5L, 5L)), row.names = 1:2, class = "data.frame")
+                    structure(list(design_label = structure(c(1L, 1L), .Label = "d", class = "factor"), 
+                                   estimand_label = c("bar", "foo"), z = c(1, 1), `se(z)` = c(0, 
+                                                                                              0), n_sims = c(5L, 5L)), row.names = c(NA, -2L), class = "data.frame")
   )
 })
 
@@ -207,15 +209,15 @@ test_that("diagnosis, NAs if no estimand", {
   d <- declare_design(sleep, ols = declare_estimator(extra ~ group))
   
 sleep_ols <-
-  structure(list(design_label = "d", estimator_label = "ols", coefficient = "group2", 
-                 bias = NA_real_, `se(bias)` = NA_real_, rmse = NA_real_, 
-                 `se(rmse)` = NA_real_, power = 0, `se(power)` = 0, coverage = NA_real_, 
-                 `se(coverage)` = NA_real_, mean_estimate = 1.58, `se(mean_estimate)` = 0, 
-                 sd_estimate = 0, `se(sd_estimate)` = 0, mean_se = 0.849091017238762, 
-                 `se(mean_se)` = 0, type_s_rate = NaN, `se(type_s_rate)` = NA_real_, 
-                 mean_estimand = NA_real_, `se(mean_estimand)` = NA_real_, 
-                 n_sims = 4L), row.names = 1L, class = "data.frame")
-
+  structure(list(design_label = structure(1L, .Label = "d", class = "factor"), 
+                 estimator_label = "ols", coefficient = "group2", bias = NA_real_, 
+                 `se(bias)` = NA_real_, rmse = NA_real_, `se(rmse)` = NA_real_, 
+                 power = 0, `se(power)` = 0, coverage = NA_real_, `se(coverage)` = NA_real_, 
+                 mean_estimate = 1.58, `se(mean_estimate)` = 0, sd_estimate = 0, 
+                 `se(sd_estimate)` = 0, mean_se = 0.849091017238762, `se(mean_se)` = 0, 
+                 type_s_rate = NaN, `se(type_s_rate)` = NA_real_, mean_estimand = NA_real_, 
+                 `se(mean_estimand)` = NA_real_, n_sims = 4L), row.names = c(NA, 
+                                                                             -1L), class = "data.frame")
 
 expect_equivalent(diagnose_design(d, sims = 4, bootstrap_sims = 5)$diagnosands_df, sleep_ols)
 
@@ -225,13 +227,15 @@ test_that("diagnosis, NAs if no estimand", {
   d <- declare_design(sleep, mu = declare_estimand(mean(extra)))
   
   sleep_ols <-
-    structure(list(design_label = "d", estimand_label = "mu", bias = NA_real_, 
-                   `se(bias)` = NA_real_, rmse = NA_real_, `se(rmse)` = NA_real_, 
-                   power = NA_real_, `se(power)` = NA_real_, coverage = NA_real_, 
-                   `se(coverage)` = NA_real_, mean_estimate = NA_real_, `se(mean_estimate)` = NA_real_, 
+    structure(list(design_label = structure(1L, .Label = "d", class = "factor"), 
+                   estimand_label = "mu", bias = NA_real_, `se(bias)` = NA_real_, 
+                   rmse = NA_real_, `se(rmse)` = NA_real_, power = NA_real_, 
+                   `se(power)` = NA_real_, coverage = NA_real_, `se(coverage)` = NA_real_, 
+                   mean_estimate = NA_real_, `se(mean_estimate)` = NA_real_, 
                    sd_estimate = NA_real_, `se(sd_estimate)` = NA_real_, mean_se = NA_real_, 
                    `se(mean_se)` = NA_real_, type_s_rate = NA_real_, `se(type_s_rate)` = NA_real_, 
-                   mean_estimand = 1.54, `se(mean_estimand)` = 0, n_sims = 4L), row.names = 1L, class = "data.frame")
+                   mean_estimand = 1.54, `se(mean_estimand)` = 0, n_sims = 4L), row.names = c(NA, 
+                                                                                              -1L), class = "data.frame")
   expect_equivalent(diagnose_design(d, sims = 4)$diagnosands_df, sleep_ols)
 })
 
