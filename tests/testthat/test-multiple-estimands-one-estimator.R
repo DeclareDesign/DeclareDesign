@@ -69,7 +69,7 @@ mator_both <- declare_estimator(Y ~ Z, estimand = c(pate, sate))
 
 
 
-des <- declare_design(pop, pos, pate, smp, sate, assgn, my_reveal, mator_both)
+des <- pop + pos + pate + smp + sate + assgn + my_reveal + mator_both
 expect_equal(get_estimates(des)$estimand_label, c("pate", "sate"))
 
 })

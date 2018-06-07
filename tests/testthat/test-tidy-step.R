@@ -26,7 +26,7 @@ test_that("own functions wrap", {
   }
   
   expect_error(des <- my_population + my_function, 
-               regexp = "The right hand side does not appear to be a dd object. Can you wrap the step with `tidy_step()`?")
+               regexp = "The right hand side does not appear to be a DeclareDesign object. Can you wrap the step with `tidy_step()`?")
 
   des <- my_population + tidy_step(my_function(my_mean = 2))
   expect_equal(names(des), c("my_population", "tidy_step(my_function(my_mean = 2))"))

@@ -131,7 +131,7 @@ test_that("POs at a higher level",{
 
   expect_warning(
     my_design <-
-        pop + 
+        declare_population(data = pop) + 
         tidy_step(group_by(villages)) +
         my_potential_outcomes,
     "Potential outcome is the final step in the design."

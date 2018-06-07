@@ -147,7 +147,7 @@ test_that("single design can be created by expand_design", {
     function(N = 10) {
       pop <-
         declare_population(N = N)
-      design <- declare_design(pop)
+      design <- pop
       design
     }
   

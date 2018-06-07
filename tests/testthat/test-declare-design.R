@@ -64,7 +64,6 @@ test_that("No estimators / estimands", {
 
 test_that("Declare a bare function", {
 
-  
   design <-
     declare_population(sleep) + 
     tidy_step(function(foo) foo)
