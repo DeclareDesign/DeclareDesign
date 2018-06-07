@@ -1,6 +1,6 @@
-context("Factorial Design")
+context("Multiple Coefficients")
 
-test_that("Factorial", {
+test_that("Multiple Coefficients", {
 
   alpha = 1
   beta = 3
@@ -23,8 +23,8 @@ test_that("Factorial", {
 
   diagnosis <- diagnose_design(my_design, sims = 2, bootstrap_sims = FALSE)
 
-  expect_equal(diagnosis %>% get_simulations %>% dim, c(4, 10))
+  expect_equal(diagnosis %>% get_simulations %>% dim, c(4, 11))
 
-  expect_equal(diagnosis %>% get_diagnosands %>% dim, c(2,13))
+  expect_equal(diagnosis %>% get_diagnosands %>% dim, c(2,14))
 
 })
