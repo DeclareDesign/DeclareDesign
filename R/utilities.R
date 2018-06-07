@@ -157,7 +157,7 @@ format_num <- function(x, digits = 3) {
 # Function to check whether there are more sims run than expected, possibly because of repeated labels
 check_sim_number <- function(simulations_df,
                              sims,
-                             grouping_variables = c("design_ID",  "estimand_label", "estimator_label", "coefficient")) {
+                             grouping_variables = c("design_label",  "estimand_label", "estimator_label", "coefficient")) {
   
   group_by_set  <- colnames(simulations_df) %i% grouping_variables
   group_by_list <- simulations_df[, group_by_set, drop = FALSE]
@@ -182,4 +182,32 @@ get_modified_variables <- function(last_df = NULL, current_df) {
   
   Filter(is_modified, shared)
 }
+
+
+###############################################################################
+## Helper functions for declaratiosn that should work either with symbols,
+## string literals, or functions of either
+## eg Y:Z => c("Y","Z")
+
+reveal_nse_helper <- function(X) {
+  if (is.character(X) || is.logical(X))
+    X
+  else if (is.name(X))
+    as.character(X)
+  else if (is_quosure(X))
+    reveal_nse_helper(quo_expr(X))
+  else if (is.call(X))
+    unlist(lapply(X[-1], reveal_nse_helper))
+}
+
+reveal_nse_helper_dots <- function(dots, what, handler) {
+  if (what %in% names(dots)) {
+    dots[[what]] <- reveal_nse_helper(dots[[what]])
+  } else if (!is.null(formals(handler)[[what]])) {
+    dots[[what]] <- as.character(formals(handler)[[what]])
+  }
+  
+  dots
+}
+
 

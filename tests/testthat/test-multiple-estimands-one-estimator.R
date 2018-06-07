@@ -47,3 +47,32 @@ test_that("Multiple estimands can be mapped to one estimator", {
   expect_equal(nrow(get_diagnosands(diag)), 2)
   expect_true(!any(is.na(get_diagnosands(diag)$bias_se)))
 })
+
+
+test_that("More multiple estimands",{
+  
+
+my_smp_fun <- function(data) {
+  S <- rbinom(n = nrow(data), size = 1, prob = pnorm(data$noise))
+  return(data[S == 1, , drop = FALSE])
+}
+
+
+pop <- declare_population(N = 100, noise = rnorm(N))
+pos <- declare_potential_outcomes(Y ~ Z*noise)
+pate <- declare_estimand(pate = mean(Y_Z_1 - Y_Z_0))
+smp <- declare_sampling(handler = my_smp_fun)
+sate <- declare_estimand(sate = mean(Y_Z_1 - Y_Z_0))
+assgn <- declare_assignment(m = 10)
+my_reveal <- declare_reveal()
+mator_both <- declare_estimator(Y ~ Z, estimand = c(pate, sate))
+
+
+
+des <- declare_design(pop, pos, pate, smp, sate, assgn, my_reveal, mator_both)
+expect_equal(get_estimates(des)$estimand_label, c("pate", "sate"))
+
+})
+
+
+
