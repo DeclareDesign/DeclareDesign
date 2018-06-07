@@ -26,3 +26,13 @@ test_that("fallback to lapply", {
 })
 
 
+test_that("names from quos",{
+  blank_fun <- function(select){
+    names_from_quos(enquo(select))
+  }
+  
+  expect_equal("bias", blank_fun(select = bias))
+  expect_equal(c("bias","mean"), blank_fun(select = c(bias, mean)))
+  
+})
+  
