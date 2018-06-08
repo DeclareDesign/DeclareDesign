@@ -64,32 +64,26 @@ insert_step <- function(design, new_step, before = NULL, after = NULL) {
 }
 
 insert_step_ <- function(design, new_step_quosure, before = NULL, after = NULL) {
-  if(is.null(after)) {
-    if(is.null(before)) {
+  if (is.null(after)) {
+    if (is.null(before)) {
       stop("Must provide either before or after to add_step()")
     }
     after <- find_step(design, before) - 1
   } else {
     after <- find_step(design, after)
   }
-
+  
   new_step <- tryCatch(
     eval_tidy(new_step_quosure),
     error = function(e) callquos_to_step(new_step_quosure) # DO we really need this
   )
-
-
-  i <- seq_along(design)
-  # structure(
-  #   c(design[i <= after], list(new_step), design[i > after], recursive=FALSE),
-  #   class = "design"
-  # )
-  qs_lhs <- lapply(design[i <= after], quo)
-  new_step <- new_step_quosure
-  qs_rhs <- lapply(design[i > after], quo)
-  qs <- c(qs_lhs, new_step, qs_rhs)
-  construct_design(!!!qs)
   
+  
+  i <- seq_along(design)
+  structure(
+    c(design[i <= after], list(new_step), design[i > after], recursive = FALSE),
+    class = "design"
+  )
 }
 
 #' @param step the step to be deleted or replaced
