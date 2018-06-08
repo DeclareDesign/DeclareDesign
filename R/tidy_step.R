@@ -12,7 +12,7 @@
 #' # With dplyr verbs like mutate
 #' library(dplyr)
 #' my_population <- declare_population(N = 10)
-#' a_wrapped_mutate <- wrap_step(mutate(q = 5))
+#' a_wrapped_mutate <- tidy_step(mutate(q = 5))
 #' 
 #' my_design <- my_population + a_wrapped_mutate
 #' my_design
@@ -24,7 +24,7 @@
 #' data
 #' }
 #' 
-#' my_design <- my_population + wrap_step(my_function(my_mean = 5))
+#' my_design <- my_population + tidy_step(my_function(my_mean = 5))
 #' my_design
 #' 
 tidy_step <- function(...){
