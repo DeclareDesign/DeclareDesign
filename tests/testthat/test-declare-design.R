@@ -63,19 +63,9 @@ test_that("No estimators / estimands", {
 
 
 test_that("Declare a bare function", {
-
-  design <-
-    declare_population(sleep) + 
-    tidy_step(function(foo) foo)
   
-  # design <- expect_warning(declare_design(
-  #   sleep,
-  #   function(foo) foo
-  # ), "data")
-  # 
-  # expect_identical(draw_data(design), sleep)
-
-
+  expect_error(tidy_step(function(foo) foo), "The arguments of the tidy'd function do not include data or .data.")
+  
 })
 
 

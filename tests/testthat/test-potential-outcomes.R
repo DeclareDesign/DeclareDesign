@@ -129,15 +129,25 @@ test_that("POs at a higher level",{
       formula = Y_vil ~ elevation + 5 + 2*Z
     )
 
-  expect_warning(
-    my_design <-
-        declare_population(data = pop) + 
-        tidy_step(group_by(villages)) +
-        my_potential_outcomes,
-    "Potential outcome is the final step in the design."
-  )
+  my_design <-
+    declare_population(data = pop) +
+    tidy_step(group_by(villages)) +
+    my_potential_outcomes
 
-  draw_data(my_design)
+  my_design <-
+    declare_population(data = pop) +
+    tidy_step(group_by(villages)) +
+    my_potential_outcomes
+    
+  # expect_warning(
+  #   my_design <-
+  #       declare_population(data = pop) + 
+  #       tidy_step(group_by(villages)) +
+  #       my_potential_outcomes,
+  #   "Potential outcome is the final step in the design."
+  # )
+
+  expect_equal(nrow(draw_data(my_design)), 12)
 
 })
 
@@ -228,7 +238,8 @@ test_that("Reveal step injected (default names)",{
   pop <- declare_population(N = N, foo = rnorm(N))
   po <- declare_potential_outcomes(Y ~ Z + foo)
   assn <- declare_assignment(N = N, m = N / 2)
-  expect_warning(d <- pop +  po + assn, "inject a `declare_reveal")
+  d <- pop +  po + assn
+  # expect_warning(d <- pop +  po + assn, "inject a `declare_reveal")
   expect_true("Y" %in% colnames(draw_data(d)))
 
 })
@@ -240,14 +251,16 @@ test_that("Reveal step injected (default names)",{
   # Assn is buggy, but masked by po autoreveal error
   pop <- declare_population(N = N, foo = rnorm(N))
   po <- declare_potential_outcomes(Q ~ T + foo, assignment_variables = list(T = 1:3))
-  assn <- declare_assignment(N = N, m = N / 2, assignment_variable = T)
-  expect_warning(d <- pop + po + assn)
+  assn <- declare_assignment(m = N / 2, assignment_variable = T)
+  d <- pop + po + assn
+  # expect_warning(d <- pop + po + assn)
   # Not autoreveal injected, so length 3
   expect_length(d, 3)
 
   # Now we see it
   po <- declare_potential_outcomes(Q ~ T + foo, conditions = list(T = 1:3))
-  expect_warning(d <- pop + po + assn, "never later revealed")
+  d <- pop + po + assn
+  # expect_warning(d <- pop + po + assn, "never later revealed")
   expect_error(draw_data(d), "Q_T_0")
 
   # Fix it
@@ -258,7 +271,9 @@ test_that("Reveal step injected (default names)",{
       conditions = 1:3,
       assignment_variable = "T"
     )
-  expect_warning(d <- pop + po + assn, "never later revealed")
+  
+  d <- pop + po + assn
+  # expect_warning(d <- pop + po + assn, "never later revealed")
   expect_true("Q" %in% colnames(draw_data(d)))
 
   #expect_warning(d <- declare_design(pop, assn, po, identity), "inject a `declare_reveal")
@@ -275,8 +290,9 @@ test_that("Reveal step injected after another injected reveal step",{
   po <- declare_potential_outcomes(Y ~ draw_binary(plogis(Z + foo)))
   po2 <- declare_potential_outcomes(Q ~ Y + foo, conditions = list(Y = 0:1))
   assn <- declare_assignment(N = N, m = N / 2)
-
-  expect_warning(d <- pop + po + po2 + assn, "inject a `declare_reveal[(]Q, Y")
+  
+  d <- pop + po + po2 + assn
+  # expect_warning(d <- pop + po + po2 + assn, "inject a `declare_reveal[(]Q, Y")
   expect_true("Y" %in% colnames(draw_data(d)))
 
   expect_equal(attr(d[[5]], "step_type"), "reveal_outcomes")

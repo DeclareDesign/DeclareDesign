@@ -48,13 +48,13 @@ assignment <- declare_assignment(m = 50)
 estimator <- declare_estimator(Y ~ Z, estimand = estimand)
 
 # Design: Putting it all together
-design <- declare_design(population, 
-                         potential_outcomes, 
-                         estimand, 
-                         assignment, 
-                         declare_reveal(), 
-                         estimator,
-                         declare_citation(description = "A very simple design"))
+design <- population +
+  potential_outcomes +
+  estimand +
+  assignment +
+  declare_reveal() +
+  estimator +
+  declare_citation(description = "A very simple design")
 ```
 
 ## Making Use of A Design

@@ -89,7 +89,7 @@ validation_fn(assignment_handler) <-   function(ret, dots, label){
   declare_time_error_if_data(ret)
 
   dirty <- FALSE
-  browser()
+  # browser()
 
   if (!"declaration" %in% names(dots)) {
     if ("blocks" %in% names(dots)) {

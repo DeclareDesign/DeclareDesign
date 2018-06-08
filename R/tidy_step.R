@@ -35,12 +35,27 @@
 tidy_step <- function(...){
   qs <- quo(...)
   qnames <- names(qs)
+
+  # TODO: look into qs to see if there is an object that already inherits design_step 
   
-  tryCatch(
+  ret <- tryCatch(
     eval_tidy(qs),
     error = function(e) tryCatch(callquos_to_step(qs, qnames),
                                  error = function(e) stop("Could not evaluate step `", qnames,
                                                           "` as either a step or call. Does the object exist?"))
   )
+  
+  # Is it a non-declared function
+  if (is.function(ret) && !inherits(ret, "design_step")) {
+    if (!any(names(formals(ret)) %in% c("data", ".data"))) {
+      stop("The arguments of the tidy'd function do not include data or .data.", call. = FALSE)
+    }
+    
+    ret <- build_step(
+      ret, handler = NULL, dots = list(), label = qnames, step_type = "undeclared", causal_type = "dgp", call = qs[[2]]
+    )
+  }
+  
+  ret
   
 }

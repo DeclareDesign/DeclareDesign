@@ -1,9 +1,11 @@
 
 #' Deprecated functions
 #' 
+#' @param ... options sent to the old version of \code{declare_design}.
+#' 
 #' @name DeclareDesign-deprecated
 #' @section For \code{declare_design}:
-#' \code{declare_design}, instead use the \code{\link{`+.dd`}} operator to create a design, i.e. \code{pop + smp + assgn}.
+#' \code{declare_design}, instead use the \code{+} operator to create a design, i.e. \code{pop + smp + assgn}.
 #' @export
 #' 
 declare_design <- function(...) {

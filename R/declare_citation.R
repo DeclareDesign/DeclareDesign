@@ -8,11 +8,12 @@
 #'
 #' @examples
 #'
-#'  cite <- declare_citation(title="example", author="Neal")
-#'  design <- declare_design(cite)
+#'  cite <- declare_citation(title = "Reducing intergroup prejudice and conflict using the media: A field experiment in Rwanda", 
+#'     author = "Paluck, E.L.", description = "Journal of Personality and Social Psychology, 96, 574-587.")
+#'  design <- cite + NULL
 #'  cite_design(design)
 
-declare_citation <- make_declarations(citation_handler, "citation", causal_type="citation", strictDataParam=FALSE)
+declare_citation <- make_declarations(citation_handler, "citation", causal_type = "citation", strictDataParam = FALSE)
 
 #' @param data Do not use
 #' @param title (optional) The title of the study, as a character string.

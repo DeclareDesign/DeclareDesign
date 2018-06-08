@@ -122,7 +122,10 @@ test_that("single diagnosand function", {
 test_that("no estimates, no estimators should error", {
   
   my_population <- declare_population(N = 50)
-  head(draw_data(my_population))
+  
+  my_design <- my_population + NULL 
+  
+  head(draw_data(my_design))
   expect_error(diagnose_design(my_population, sims = 2, bootstrap_sims = FALSE))
 
 })

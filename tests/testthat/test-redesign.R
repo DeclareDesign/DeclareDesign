@@ -3,7 +3,7 @@ context("redesign")
 test_that("N not changed",{
 
   N <- 100
-  d <- declare_population(N = N)
+  d <- declare_population(N = N) + NULL
   expect_equal(N, 100)
 
   expect_length(draw_data(d)$ID, 100)

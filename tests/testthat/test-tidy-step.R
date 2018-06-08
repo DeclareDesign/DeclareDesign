@@ -4,6 +4,7 @@ my_population <- declare_population(N = 10)
 
 test_that("dplyr verbs wrap", {
   library(dplyr)
+  debugonce(tidy_step)
   a_wrapped_mutate <- tidy_step(mutate(q = 5))
   
   expect_equal(nrow(a_wrapped_mutate(my_population())), 10)

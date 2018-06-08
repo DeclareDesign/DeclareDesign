@@ -80,10 +80,16 @@ insert_step_ <- function(design, new_step_quosure, before = NULL, after = NULL) 
 
 
   i <- seq_along(design)
-  structure(
-    c(design[i <= after], list(new_step), design[i > after], recursive=FALSE),
-    class = "design"
-  )
+  # structure(
+  #   c(design[i <= after], list(new_step), design[i > after], recursive=FALSE),
+  #   class = "design"
+  # )
+  qs_lhs <- lapply(design[i <= after], quo)
+  new_step <- new_step_quosure
+  qs_rhs <- lapply(design[i > after], quo)
+  qs <- c(qs_lhs, new_step, qs_rhs)
+  construct_design(!!!qs)
+  
 }
 
 #' @param step the step to be deleted or replaced
