@@ -35,16 +35,16 @@
 #'
 #' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 #'
-#' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-#'
 #' my_reveal <- declare_reveal()
 #'
-#' design <- declare_design(my_population,
-#'                          my_potential_outcomes,
-#'                          my_estimand,
-#'                          my_assignment,
-#'                          my_reveal,
-#'                          my_estimator)
+#' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+#'
+#' design <- my_population +
+#'    my_potential_outcomes +
+#'    my_estimand +
+#'    my_assignment +
+#'    my_reveal +
+#'    my_estimator
 #'
 #' \dontrun{
 #' # using built-in defaults:

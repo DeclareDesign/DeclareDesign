@@ -44,9 +44,7 @@ see \code{\link{modify_design}} for details.
  my_assignment <- declare_assignment(m = 50)
  my_assignment_2 <- declare_assignment(m = 25)
 
- design <- declare_design(my_population,
-                          my_potential_outcomes,
-                          my_assignment)
+ design <- my_population + my_potential_outcomes + my_assignment
 
  design
 

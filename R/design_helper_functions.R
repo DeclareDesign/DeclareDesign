@@ -4,16 +4,15 @@
 #'
 #' @examples
 #'
-#' design <- declare_design(
-#'   my_population = declare_population(N = 500, noise = rnorm(N)),
-#'   my_potential_outcomes = declare_potential_outcomes(Y ~ noise + Z * rnorm(N, 2, 2)),
-#'   my_sampling = declare_sampling(n = 250),
-#'   my_estimand = declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)),
-#'   dplyr::mutate(noise_sq = noise^2),
-#'   my_assignment =  declare_assignment(m = 25),
-#'   my_reveal = declare_reveal(),
-#'   my_estimator = declare_estimator(Y ~ Z, estimand = "my_estimand")
-#' )
+#' design <- 
+#'   declare_population(N = 500, noise = rnorm(N)) +
+#'   declare_potential_outcomes(Y ~ noise + Z * rnorm(N, 2, 2)) +
+#'   declare_sampling(n = 250) +
+#'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   tidy_step(dplyr::mutate(noise_sq = noise^2)) +
+#'   declare_assignment(m = 25) +
+#'   declare_reveal() +
+#'   declare_estimator(Y ~ Z, estimand = "my_estimand")
 #'
 #' design
 #'
@@ -26,7 +25,6 @@
 NULL
 
 
-###############################################################################
 # For fan-out execution, convert the vector representation to (end, n) pairs
 
 check_sims <- function(design, sims) {
@@ -162,14 +160,6 @@ draw_data <- function(design) {
   run_design_internal(design, results = list(current_df = 0))$current_df
 }
 
-#' #' @rdname post_design
-#' #'
-#' #' @export
-#' get_estimates <- function(design) {
-#'   results <- list("estimator" = vector("list", length(design)))
-#'   run_design_internal.default(design, results = results)$estimates_df
-#' }
-
 #' @rdname post_design
 #'
 #' @export
@@ -289,7 +279,7 @@ print.design_step <- function(x, ...) {
 #' 
 #' my_assignment <- declare_assignment(m = 50)
 #' 
-#' my_design <- declare_design(my_population, my_assignment)
+#' my_design <- my_population + my_assignment
 #' 
 #' print_code(my_design)
 #'
@@ -354,14 +344,14 @@ print.design <- function(x, verbose = TRUE, ...) {
 #'
 #' my_reveal <- declare_reveal()
 #'
-#' design <- declare_design(my_population,
-#'                          my_potential_outcomes,
-#'                          my_sampling,
-#'                          my_estimand,
-#'                          dplyr::mutate(noise_sq = noise^2),
-#'                          my_assignment,
-#'                          my_reveal,
-#'                          my_estimator)
+#' design <- my_population +
+#'   my_potential_outcomes +
+#'   my_sampling +
+#'   my_estimand +
+#'   tidy_step(dplyr::mutate(noise_sq = noise ^ 2)) +
+#'   my_assignment +
+#'   my_reveal +
+#'   my_estimator
 #'
 #' summary(design)
 #' @rdname post_design
@@ -595,10 +585,7 @@ str.design_step <- function(object, ...) cat("design_step:\t", paste0(deparse(at
 str.seed_data <- function(object, ...) cat("seed_data:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
 
 
-
-### A wrapper around conduct design for fan-out execution strategies
-###
-###
+# A wrapper around conduct design for fan-out execution strategies
 fan_out <- function(design, fan) {
   
   st <- list( execution_st(design) )

@@ -42,7 +42,8 @@
 #' my_reveal <- declare_reveal()
 #'
 #' design <- my_population + my_potential_outcomes + my_sampling + 
-#'          my_estimand + dplyr::mutate(noise_sq = noise^2) + my_assignment + my_reveal + my_estimator
+#'          my_estimand + tidy_step(dplyr::mutate(noise_sq = noise^2)) + 
+#'          my_assignment + my_reveal + my_estimator
 #'
 #' design
 #'

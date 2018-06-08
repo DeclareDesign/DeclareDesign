@@ -29,7 +29,7 @@ design <- population + sampling
 # returns a single, modified design
 modified_design <- redesign(design, n = 200)
 
-returns a list of six modified designs
+# returns a list of six modified designs
 design_vary_N <- redesign(design, n = seq(400, 900, 100))
 
 }

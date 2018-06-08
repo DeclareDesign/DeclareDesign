@@ -1,13 +1,13 @@
 # index of a step (specified by object, label or position)
 find_step <- function(design, step) {
-  if(is.numeric(step) && step <= length(design) && step > 0) return(step)
-  if(is.character(step)) {
+  if (is.numeric(step) && step <= length(design) && step > 0) return(step)
+  if (is.character(step)) {
     design <- lapply(design, attr, "label")
   }
   w <- vapply(design, identical, FALSE, step)
 
   w <- which(w)
-  if(length(w) == 0){
+  if (length(w) == 0) {
     stop("Could not find step (", substitute(step), ") in design")
   }
 
@@ -39,9 +39,7 @@ find_step <- function(design, step) {
 #'  my_assignment <- declare_assignment(m = 50)
 #'  my_assignment_2 <- declare_assignment(m = 25)
 #'
-#'  design <- declare_design(my_population,
-#'                           my_potential_outcomes,
-#'                           my_assignment)
+#'  design <- my_population + my_potential_outcomes + my_assignment
 #'
 #'  design
 #'
