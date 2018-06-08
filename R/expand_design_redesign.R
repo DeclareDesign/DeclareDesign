@@ -131,10 +131,10 @@ expand_args_names <- function(..., expand = TRUE){
 #' \code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters internally. (Advanced).
 #' 
 #' Importantly, \code{redesign} will edit any symbol in your design, but if the symbol you attempt to change does not exist no changes will be made and no error or warning will be issued.
-#' 
-#' 
 #'
 #' @param design a design
+#' @param expand boolean - if true, form the crossproduct of the ..., otherwise recycle them
+#' @param ... arguments to redesign e.g., n = 100
 #' 
 #' @examples 
 #' 
@@ -148,7 +148,6 @@ expand_args_names <- function(..., expand = TRUE){
 #'
 #' returns a list of six modified designs
 #' design_vary_N <- redesign(design, n = seq(400, 900, 100))
-
 #' 
 #' @export
 redesign <- function(design, expand = TRUE, ...) {

@@ -8,6 +8,10 @@ redesign(design, expand = TRUE, ...)
 }
 \arguments{
 \item{design}{a design}
+
+\item{expand}{boolean - if true, form the crossproduct of the ..., otherwise recycle them}
+
+\item{...}{arguments to redesign e.g., n = 100}
 }
 \description{
 \code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters internally. (Advanced).
