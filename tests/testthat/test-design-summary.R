@@ -16,15 +16,15 @@ test_that("Basic design summary", {
 
   reveal_outcomes <- declare_reveal()
 
-  design <- declare_design(my_population,
-                           my_potential_outcomes,
-                           my_sampling,
-                           my_estimand,
-                           dplyr::mutate(q = 5),
-                           my_assignment,
-                           reveal_outcomes,
-                           my_estimator)
-
+  design <- my_population + 
+    my_potential_outcomes + 
+    my_sampling + 
+    my_estimand + 
+    tidy_step(dplyr::mutate(q = 5)) + 
+    my_assignment + 
+    reveal_outcomes + 
+    my_estimator
+  
   s <- summary(design)
 
   # First step
@@ -47,13 +47,13 @@ test_that("Add Quantitites and Alter Variables", {
   my_estimand   <- declare_estimand(foo = mean(noise))
   my_transform  <- declare_population(noise = noise / 2)
   my_estimand2  <- declare_estimand(foo2 = mean(noise))
-
-
-  design <- declare_design(my_population,
-                           my_estimand,
-                           my_transform,
-                           my_estimand2)
-
+  
+  
+  design <- my_population + 
+    my_estimand + 
+    my_transform + 
+    my_estimand2
+  
   # Adding Quantitites
   expect_output(
     print(design), "A single draw of the"
@@ -68,27 +68,28 @@ test_that("Add Quantitites and Alter Variables", {
 test_that("str() works", {
 
   expect_output(str(declare_population(N = 50)), "design_step:\\t declare_population[(]N = 50[)] ")
-  expect_output(str(declare_design(sleep)), "seed_data:\\t sleep")
-
+  
 })
 
 test_that("summary, custom estimator handler, numeric value", {
-      d <- declare_design(sleep, extra=declare_estimator(handler=function(data) mean(data$extra)))
-
-      expect_output(print(d), "1.54")
+  
+  extra <- declare_estimator(
+    handler = function(data)
+      mean(data$extra)
+  )
+  d <- declare_population(sleep) + extra
+  
+ expect_output(print(d), "1.54")
 
 })
 
 test_that("summary, estimator formula print formula", {
-  d <- declare_design(sleep, extra=declare_estimator(extra~group))
-
+  extra = declare_estimator(extra ~ group)
+  d <- declare_population(sleep) + extra
   expect_output(print(d), "extra ~ group")
-
 })
 
 test_that("summary, estimator print model", {
-  d <- declare_design(sleep, declare_estimator(extra~group, model=lm))
-
+  d <- declare_population(sleep) + declare_estimator(extra ~ group, model = lm)
   expect_output(print(d), "Model:\\s*lm")
-
 })

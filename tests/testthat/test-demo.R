@@ -94,14 +94,14 @@ test_that("demo runs", {
   my_estimator_lm(smp)
 
   ## ------------------------------------------------------------------------
-  design <- declare_design(my_population,
-                           my_potential_outcomes,
-                           my_estimand,
-                           dplyr::mutate(big_income = 5*income), #whoa!
-                           my_sampling,
-                           my_assignment,
-                           reveal_outcomes,
-                           my_estimator_dim)
+  design <- my_population + 
+    my_potential_outcomes + 
+    my_estimand + 
+    tidy_step(dplyr::mutate(big_income = 5*income)) + 
+    my_sampling + 
+    my_assignment + 
+    reveal_outcomes + 
+    my_estimator_dim
 
   ## ------------------------------------------------------------------------
   dat <- draw_data(design)
@@ -196,13 +196,13 @@ test_that("demo runs", {
     my_assignment <- declare_assignment(m = 25)
     my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
     my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
-    my_design <- declare_design(my_population,
-                                my_potential_outcomes,
-                                my_estimand,
-                                my_sampling,
-                                my_assignment,
-                                reveal_outcomes,
-                                my_estimator_dim)
+    my_design <- my_population + 
+      my_potential_outcomes + 
+      my_estimand + 
+      my_sampling + 
+      my_assignment + 
+      reveal_outcomes + 
+      my_estimator_dim
     return(my_design)
   }
 
@@ -215,23 +215,23 @@ test_that("demo runs", {
 
   my_assignment_continuous <- declare_assignment(conditions = seq(0, 1, by = .1))
 
-  my_design <- declare_design(my_population(),
-                              my_potential_outcomes_continuous,
-                              my_assignment_continuous,
-                              reveal_outcomes)
-
+  my_design <- declare_population(my_population()) + 
+    my_potential_outcomes_continuous + 
+    my_assignment_continuous + 
+    reveal_outcomes
+  
   head(draw_data(my_design))
 
   ## ------------------------------------------------------------------------
   my_potential_outcomes_attrition <- declare_potential_outcomes(
     formula = R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
 
-  my_design <- declare_design(my_population(),
-                              my_potential_outcomes,
-                              my_potential_outcomes_attrition,
-                              my_assignment,
-                              declare_reveal(outcome_variables = "R"),
-                              declare_reveal(attrition_variables = "R"))
+  my_design <- declare_population(my_population()) +
+    my_potential_outcomes +
+    my_potential_outcomes_attrition +
+    my_assignment +
+    declare_reveal(outcome_variables = "R") +
+    declare_reveal(attrition_variables = "R")
 
   head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
 

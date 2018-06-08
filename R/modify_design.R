@@ -1,13 +1,13 @@
 # index of a step (specified by object, label or position)
 find_step <- function(design, step) {
-  if(is.numeric(step) && step <= length(design) && step > 0) return(step)
-  if(is.character(step)) {
+  if (is.numeric(step) && step <= length(design) && step > 0) return(step)
+  if (is.character(step)) {
     design <- lapply(design, attr, "label")
   }
   w <- vapply(design, identical, FALSE, step)
 
   w <- which(w)
-  if(length(w) == 0){
+  if (length(w) == 0) {
     stop("Could not find step (", substitute(step), ") in design")
   }
 
@@ -39,9 +39,7 @@ find_step <- function(design, step) {
 #'  my_assignment <- declare_assignment(m = 50)
 #'  my_assignment_2 <- declare_assignment(m = 25)
 #'
-#'  design <- declare_design(my_population,
-#'                           my_potential_outcomes,
-#'                           my_assignment)
+#'  design <- my_population + my_potential_outcomes + my_assignment
 #'
 #'  design
 #'
@@ -64,24 +62,24 @@ insert_step <- function(design, new_step, before = NULL, after = NULL) {
 }
 
 insert_step_ <- function(design, new_step_quosure, before = NULL, after = NULL) {
-  if(is.null(after)) {
-    if(is.null(before)) {
+  if (is.null(after)) {
+    if (is.null(before)) {
       stop("Must provide either before or after to add_step()")
     }
     after <- find_step(design, before) - 1
   } else {
     after <- find_step(design, after)
   }
-
+  
   new_step <- tryCatch(
     eval_tidy(new_step_quosure),
     error = function(e) callquos_to_step(new_step_quosure) # DO we really need this
   )
-
-
+  
+  
   i <- seq_along(design)
   structure(
-    c(design[i <= after], list(new_step), design[i > after], recursive=FALSE),
+    c(design[i <= after], list(new_step), design[i > after], recursive = FALSE),
     class = "design"
   )
 }

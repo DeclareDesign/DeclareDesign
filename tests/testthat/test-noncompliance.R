@@ -43,16 +43,16 @@ test_that("Noncompliance", {
 
   cace_hat <- declare_estimator(handler=tidy_estimator(cace_estimator), estimand = CACE, label="CACE_hat")
 
-  design <- declare_design(my_population,
-                           POS_Y,
-                           POS_Z,
-                           dplyr::mutate(complier = as.numeric(D_Z_0 == 0 & D_Z_1 == 1)),
-                           ITT_d,
-                           CACE,
-                           my_assignment,
-                           declare_reveal(outcome_variables = "D", assignment_variables = "Z"),
-                           declare_reveal(outcome_variables = "Y", assignment_variables = "D"),
-                           cace_hat)
+  design <- my_population +
+    POS_Y +
+    POS_Z +
+    declare_step(complier = as.numeric(D_Z_0 == 0 & D_Z_1 == 1)) +
+    ITT_d +
+    CACE +
+    my_assignment +
+    declare_reveal(outcome_variables = "D", assignment_variables = "Z") +
+    declare_reveal(outcome_variables = "Y", assignment_variables = "D") +
+    cace_hat
 
   df <- draw_data(design)
   expect_true("complier" %in% colnames(df))

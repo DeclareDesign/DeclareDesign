@@ -2,10 +2,9 @@
 #'
 #' Runs many simulations of a design and saves to a dataframe.
 #'
-#'
 #' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.
 #'
-#' @param sims The number of simulations, defaulting to 500. If sims is a vector of the form c(10, 1, 2, 1) then different steps of a design will be simulated different numbers of times.  See details.
+#' @param sims The number of simulations, defaulting to 500. If sims is a vector of the form c(10, 1, 2, 1) then different steps of a design will be simulated different numbers of times.
 #'
 #' @importFrom stats setNames
 #' @importFrom rlang is_list
@@ -26,16 +25,16 @@
 #'
 #' my_reveal <- declare_reveal()
 #'
-#' design <- declare_design(my_population,
-#'                          my_potential_outcomes,
-#'                          my_estimand,
-#'                          my_assignment,
-#'                          my_reveal,
-#'                          my_estimator)
+#' design <- my_population +
+#'   my_potential_outcomes +
+#'   my_estimand +
+#'   my_assignment +
+#'   my_reveal +
+#'   my_estimator
 #'
 #' \dontrun{
 #' simulations <- simulate_design(designs, sims = 2)
-#' diagnosis   <- diagnose_design(simulations_df = simulations)
+#' diagnosis <- diagnose_design(simulations_df = simulations)
 #' }
 #'
 #' \dontrun{
@@ -107,9 +106,7 @@ simulate_design <-
     simulations_df <- rbind_disjoint(simulations_list)
     rownames(simulations_df) <- NULL
     
-    #Obtain all parameters
-    
-    # browser()
+    # Obtain all parameters
     
     parameters_df_list <- lapply(designs, function(x) attr(x, "parameters"))
     parameters_df_list <- lapply(seq_along(parameters_df_list), function(i) { 
@@ -138,7 +135,7 @@ simulate_single_design <-
     if (min(sims) < 1)
       stop("Sims should be >= 1")
     
-    ### If sims is set correctly, fan out
+    # If sims is set correctly, fan out
     
     if (length(sims) == 1 && is.null(names(sims))) {
       results_list <- future_lapply(seq_len(sims),
@@ -160,8 +157,7 @@ simulate_single_design <-
       if (nrow(df) == 0)
         return(df)
       
-      df <-
-        cbind(sim_ID = rep(seq_along(subresult), vapply(subresult, nrow, 0L)), df)
+      df <- cbind(sim_ID = rep(seq_along(subresult), vapply(subresult, nrow, 0L)), df)
     }
     
     estimates_df <- results2x(results_list, "estimates_df")
@@ -250,17 +246,8 @@ infer_names_quos <-
     if (any(duplicated(inferred_names))) {
       stop("You have more than one design named ", inferred_names[duplicated(inferred_names)])
     }
-    
     inferred_names
-    
-    
   }
-
-
-# x <- c("1", "2", NA)
-# x2 <- c("a", "b", NA)
-# type_convert(x)
-# type_convert(x2)
 
 type_convert <- function(x) {
   if (inherits(x, "character")) {

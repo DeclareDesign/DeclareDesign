@@ -26,36 +26,29 @@ pos_Y <- declare_potential_outcomes(
 assignment <- declare_assignment(prob = 0.5)
 
 suppressWarnings(
-noncompliance <-
-  declare_design(pop,
-                 pos_D,
-                 assignment,
-                 #declare_reveal(D, Z),
-                 pos_Y,
-                 declare_reveal(Y, D)
-  )
+  noncompliance <-
+    pop + 
+    pos_D + 
+    assignment + 
+    #declare_reveal(D, Z) + 
+    pos_Y + 
+    declare_reveal(Y, D)
 )
 
 e <- (noncompliance[[4]])
 
 expect_true(inherits(e, "design_step"))
-
 expect_equal(attr(e, "step_type"), "reveal_outcomes")
-
 expect_equal(attr(e, "step_meta")$assignment_variables, "Z")
 expect_equal(attr(e, "step_meta")$outcome_variables, "D")
-
 
 })
 
 
 test_that("POS don't erase Z",{
 
-  pop <- declare_population(N=10, Z=rbinom(N, size=1, prob=.5))
-
-  po <- declare_potential_outcomes(Y~Z)
-
+  pop <- declare_population(N = 10, Z = rbinom(N, size = 1, prob = .5))
+  po <- declare_potential_outcomes(Y ~ Z)
   df <- pop()
-
   expect_equal(df$Z, po(df)$Z)
 })

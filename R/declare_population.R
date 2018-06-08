@@ -7,7 +7,6 @@
 #'
 #' @examples
 #'
-#' ########################################################
 #' # Default handler is fabricate
 #'
 #' # Declare a single-level population with no covariates
@@ -43,4 +42,4 @@
 #' my_population_custom <- declare_population(N = 10, handler = my_population_function)
 #'
 #' my_population_custom()
-declare_population <- make_declarations(fabricate, "population", strictDataParam=FALSE)
+declare_population <- make_declarations(fabricate, "population", strictDataParam = FALSE)

@@ -38,7 +38,11 @@ Declare Research Study Citation
 }
 \examples{
 
- cite <- declare_citation(title="example", author="Neal")
- design <- declare_design(cite)
+ cite <- declare_citation(
+    title = paste("Reducing intergroup prejudice and conflict using the media:", 
+    "A field experiment in Rwanda"), 
+    author = "Paluck, E.L.", 
+    description = "Journal of Personality and Social Psychology, 96, 574-587.")
+ design <- cite + NULL
  cite_design(design)
 }

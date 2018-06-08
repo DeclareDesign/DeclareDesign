@@ -133,7 +133,7 @@ A `declare_potential_outcomes()` declaration also returns a function. That funct
 
 ```{r echo=TRUE, results="hide"}
 my_potential_outcomes <- declare_potential_outcomes(
-  formula = Y ~ .25 * Z + .01 * age * Z)
+  Y ~ .25 * Z + .01 * age * Z)
 pop_pos <- my_potential_outcomes(pop)
 head(pop_pos)
 ```
@@ -146,8 +146,8 @@ This has defaults set for conditions (0, 1) and the assignment variable name (Z)
 
 ```{r echo=TRUE, results="hide"}
 my_potential_outcomes <- declare_potential_outcomes(
-  formula = Y ~ .25 * Z + .01 * age * Z,
-  conditions = 1:4)
+  Y ~ .25 * Z + .01 * age * Z,
+  conditions = 0:1)
 head(my_potential_outcomes(pop))
 ```
 ```{r echo=FALSE}
@@ -159,12 +159,12 @@ knitr::kable(head(my_potential_outcomes(pop)))
 The second way is to define each potential outcome yourself. This bakes in the condition names and assignment variable.
 
 ```{r echo=TRUE, results="hide"}
-my_potential_outcomes <-
+my_potential_outcomes_alt <-
   declare_potential_outcomes(
     Y_Z_0 = .05,
     Y_Z_1 = .30 + .01 * age)
 
-head(my_potential_outcomes(pop))
+head(my_potential_outcomes_alt(pop))
 ```
 ```{r echo=FALSE}
 knitr::kable(head(my_potential_outcomes(pop)))
@@ -230,7 +230,10 @@ The only part baked in to **DeclareDesign** is the naming structure, *outcome_as
 To declare an estimator, you declare an estimator function, a [`difference_in_means()`](/R/estimatr/reference/difference_in_means.html) by default. Optionally you also declare an estimand that is attached to the estimator.
 
 ```{r echo=TRUE, results="hide"}
-smp <- reveal_outcomes(smp)
+reveal_step <- declare_reveal()
+
+smp <- reveal_step(smp)
+
 my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
 my_estimator_dim(smp)
 ```
@@ -262,13 +265,7 @@ Instead of defining your population, potential outcomes, and so on, you simply g
 Here is an example of a design declaration:
 
 ```{r echo=TRUE, results="hide"}
-design <- declare_design(my_population,
-                         my_potential_outcomes,
-                         my_estimand,
-                         my_sampling,
-                         my_assignment,
-                         reveal_outcomes,
-                         my_estimator_dim)
+design <- my_population + my_potential_outcomes + my_estimand + my_sampling + my_assignment + my_estimator_dim
 ```
 
 Remarks re: `declare_design()`:

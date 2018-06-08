@@ -8,14 +8,7 @@ my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 my_reveal <- declare_reveal()
 
-my_design_1 <- declare_design(
-  my_population,
-  my_potential_outcomes,
-  my_estimand,
-  my_assignment,
-  my_reveal,
-  my_estimator
-)
+my_design_1 <- my_population + my_potential_outcomes + my_estimand + my_assignment + my_reveal + my_estimator
 
 my_design_2 <- my_design_1
 
@@ -46,8 +39,7 @@ my_design_template <- function(N, tau) {
   my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
   my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
   my_reveal <- declare_reveal()
-  my_design_1 <-
-    declare_design(pop, pos, my_estimand, my_assignment, my_reveal, my_estimator)
+  my_design_1 <- pop + pos + my_estimand + my_assignment + my_reveal + my_estimator
   my_design_1
 }
 

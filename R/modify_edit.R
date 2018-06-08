@@ -1,12 +1,12 @@
 #' Override environment via shim
-#'
+#' 
 #' @rdname edit
 #' @keywords internal
 #' @examples
 #' \dontrun{
 #' here_i_am <- "foo"
 #' dot <- quo(here_i_am)
-#' dot2 <- clone_dot_edit_env(dot, here_i_am="some_message", xyxyx="bar")
+#' dot2 <- clone_dot_edit_env(dot, here_i_am="some_message", xyxyx = "bar")
 #' eval_tidy(dot)
 #' eval_tidy(dot2)
 #' }
@@ -18,7 +18,6 @@ clone_dot_edit_env <- function(dot, ..., to_replace=list(...)){
 
   dot
 }
-
 
 #' @rdname edit
 #' @keywords internal
@@ -43,9 +42,6 @@ clone_step_edit <- function(step, ..., to_replace=list(...)) {
   attributes(f) <- step_attributes
   f
 }
-
-
-
 
 #' @rdname edit
 #' @keywords internal

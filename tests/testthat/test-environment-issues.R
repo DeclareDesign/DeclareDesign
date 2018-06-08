@@ -16,12 +16,13 @@ test_that("send estimand to estimator works", {
 
   reveal_outcomes <- declare_reveal()
 
-  my_design <- declare_design(my_population(),
-                              my_potential_outcomes, pate,
-                              my_assignment,
-                              reveal_outcomes,
-                              pate_estimator)
-
+  my_design <- my_population +
+    my_potential_outcomes +
+    pate +
+    my_assignment +
+    reveal_outcomes +
+    pate_estimator
+  
   rm(list = ls()[-which(ls() %in% "my_design")])
   diag <- diagnose_design(my_design, sims = 2, bootstrap_sims = 3)
 
@@ -29,5 +30,4 @@ test_that("send estimand to estimator works", {
   expect_equal(nrow(diag$simulations_df), 2)
   expect_equal(nrow(diag$diagnosands_df), 1)
   expect_equal(nrow(diag$bootstrap_replicates), 3)
-
 })

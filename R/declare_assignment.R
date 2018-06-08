@@ -21,7 +21,6 @@
 #'
 #' @examples
 #'
-#' ########################################################
 #' # Default Handler
 #' # Delegates to conduct_ra
 #'
@@ -35,8 +34,7 @@
 #'   assignment_variable = "X1"
 #' )
 #'
-#' ########################################################
-#' #' # Custom random assignment functions
+#' # Custom random assignment functions
 #'
 #' my_assignment_function <- function(data) {
 #'    data$Z <- ifelse(data$extra <= median(data$extra), 1, 0)
@@ -47,6 +45,7 @@
 #'
 #' df <- my_assignment_custom(sleep)
 #' table(df$Z, df$group)
+#' 
 declare_assignment <- make_declarations(assignment_handler, "assignment" )
 
 
@@ -63,15 +62,15 @@ assignment_handler <-
     options <- quos(...)
 
 
-    for(assn in assignment_variable){
+    for (assn in assignment_variable) {
       cond_prob <- as.symbol(paste0(assn, "_cond_prob"))
       assn <- as.symbol(assn)
       data <- fabricate(data,
-                        !!assn      := conduct_ra(N=N, !!!options),
+                        !!assn      := conduct_ra(N = N,!!!options),
                         !!cond_prob := obtain_condition_probabilities(!!!options, assignment = !!assn),
-       ID_label = NA
+                        ID_label = NA
       )
-      if(append_probabilities_matrix) {
+      if (append_probabilities_matrix) {
         options$N <- quo(nrow(data))
         ra_dec <- eval_tidy(quo(declare_ra(!!!options)))
         probabilities_matrix <- ra_dec$probabilities_matrix
@@ -91,7 +90,7 @@ validation_fn(assignment_handler) <-   function(ret, dots, label){
   dirty <- FALSE
   # browser()
 
-  if(! "declaration" %in% names(dots)) {
+  if (!"declaration" %in% names(dots)) {
     if ("blocks" %in% names(dots)) {
       if (class(f_rhs(dots[["blocks"]])) == "character") {
         declare_time_error("Must provide the bare (unquoted) block variable name to blocks.", ret)
@@ -108,11 +107,11 @@ validation_fn(assignment_handler) <-   function(ret, dots, label){
 
     ra_dots <- dots[ra_args]
 
-    if(length(ra_dots) > 0) {
-      declaration <- tryCatch(eval_tidy(quo(declare_ra(!!!ra_dots))), error=function(e)e)
+    if (length(ra_dots) > 0) {
+      declaration <- tryCatch(eval_tidy(quo(declare_ra(!!!ra_dots))), error = function(e)e)
 
-      if(inherits(declaration, "ra_declaration")) {
-        message("Assignment declaration factored out from execution path.")
+      if (inherits(declaration, "ra_declaration")) {
+        # message("Assignment declaration factored out from execution path.")
         dots[ra_args] <- NULL
         dots$declaration <- declaration
         dirty <- TRUE
@@ -122,7 +121,7 @@ validation_fn(assignment_handler) <-   function(ret, dots, label){
 
   }
 
-  if("assignment_variable" %in% names(dots)){
+  if ("assignment_variable" %in% names(dots)) {
     if (class(f_rhs(dots[["assignment_variable"]])) == "NULL") {
       declare_time_error("Must provide assignment_variable.", ret)
     }
@@ -132,24 +131,22 @@ validation_fn(assignment_handler) <-   function(ret, dots, label){
 
     dirty <- TRUE
 
-  }
-  else {
+  } else {
     assn <- formals(assignment_handler)$assignment_variable
   }
 
-  if(dirty) {
-    ret <- build_step(currydata(assignment_handler, dots, strictDataParam=attr(ret, "strictDataParam")),
-                      handler=assignment_handler,
-                      dots=dots,
-                      label=label,
-                      step_type=attr(ret, "step_type"),
-                      causal_type=attr(ret,"causal_type"),
-                      call=attr(ret, "call"))
+  if (dirty) {
+    ret <- build_step(currydata(assignment_handler, dots, strictDataParam = attr(ret, "strictDataParam")),
+                      handler = assignment_handler,
+                      dots = dots,
+                      label = label,
+                      step_type = attr(ret, "step_type"),
+                      causal_type = attr(ret, "causal_type"),
+                      call = attr(ret, "call"))
   }
 
-
-
-  structure(ret, step_meta=list(assignment_variables=assn))
+  structure(ret, step_meta = list(assignment_variables = assn))
+  
 }
 
 ###############################################################################

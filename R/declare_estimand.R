@@ -14,7 +14,6 @@
 #'
 #' @examples
 #'
-#' ########################################################
 #' # Default handler
 #'
 #' my_estimand_ATE <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
@@ -34,7 +33,6 @@
 #'   label="TrueRegressionParams"
 #' )
 #'
-#' ########################################################
 #' # Custom random assignment functions
 #'
 #' my_estimand_function <- function(data, label) {
@@ -46,19 +44,20 @@
 #' }
 #' my_estimand_custom <- declare_estimand(handler = my_estimand_function, label = "medianTE")
 #'
-#' ########################################################
-#' # Using with estimators
 #'
+#' # Using with estimators
 #'
 #' # First, set up the rest of a design for use below
 #' set.seed(42)
 #'
-#' design_stub <- declare_design(
-#'   pop=declare_population(N = 100, X = rnorm(N)),
-#'   po=declare_potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N)),
-#'   assn=declare_assignment(m = 50),
-#'   reveal=declare_reveal()
-#' )
+#' pop <- declare_population(N = 100, X = rnorm(N))
+#' pos <- declare_potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N))
+#' assgn <- declare_assignment(m = 50)
+#' 
+#' design_stub <- pop + 
+#'   pos + 
+#'   assgn + 
+#'   declare_reveal()
 #'
 #' # Get example data to compute estimands on
 #' dat <- draw_data(design_stub)
@@ -74,10 +73,10 @@
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand_ATE, label="estimator")
 #'
-#' design_def <- insert_step(design_stub, my_estimand_ATE, before="assn")
-#' design_def <- insert_step(design_def, my_estimator, after="reveal")
+#' design_def <- insert_step(design_stub, my_estimand_ATE, before = assgn)
+#' design_def <- insert_step(design_def, my_estimator, after = "declare_reveal()")
 #'
-#' run_design(design_def)
+#' get_estimands(design_def)
 #'
 #' # ----------
 #' # 2. Multiple estimands
@@ -88,11 +87,11 @@
 #' # With multiple estimands, you can use one estimator for both...
 #' my_estimator_two <- declare_estimator(Y ~ Z, estimand = c(my_estimand_ATE, my_estimand_ATT))
 #'
-#' design_two <- insert_step(design_stub, my_estimand_ATE, before="assn")
-#' design_two <- insert_step(design_two, my_estimand_ATT, after="assn")
-#' design_two <- insert_step(design_two, my_estimator_two, after="reveal")
+#' design_two <- insert_step(design_stub, my_estimand_ATE, before = assgn)
+#' design_two <- insert_step(design_two, my_estimand_ATT, after = assgn)
+#' design_two <- insert_step(design_two, my_estimator_two, after = "declare_reveal()")
 #'
-#' run_design(design_two)
+#' get_estimands(design_two)
 #'
 #'
 #' # For the model based estimator, specify the estimand as usual,
@@ -104,8 +103,8 @@
 #'   coefficients = TRUE
 #' )
 #'
-#' design_double <- insert_step(design_stub, my_estimand_regression, after="po")
-#' design_double <- insert_step(design_double, my_estimator_double, after="reveal")
+#' design_double <- insert_step(design_stub, my_estimand_regression, after = pos)
+#' design_double <- insert_step(design_double, my_estimator_double, after = "declare_reveal()")
 #'
 #' run_design(design_double)
 #'
@@ -124,10 +123,11 @@
 #'   declare_estimator(handler = tidy_estimator(my_estimator_function),
 #'                     estimand = my_estimand_custom)
 #'
-#' design_cust <- insert_step(design_stub, my_estimand_custom, before="assn")
-#' design_cust <- insert_step(design_cust, my_estimator_custom, after="reveal")
+#' design_cust <- insert_step(design_stub, my_estimand_custom, before = assgn)
+#' design_cust <- insert_step(design_cust, my_estimator_custom, after = "declare_reveal()")
 #'
 #' run_design(design_cust)
+#' 
 declare_estimand <- make_declarations(estimand_handler, "estimand", causal_type = "estimand", default_label = "my_estimand")
 
 #' @param subset a subset expression

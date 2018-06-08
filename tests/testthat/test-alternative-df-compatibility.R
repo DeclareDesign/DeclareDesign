@@ -6,7 +6,7 @@ test_that("data.frame", {
 
   pos <- declare_potential_outcomes(Y_Z_0 = y * 5, Y_Z_1 =  y * 5 + 3)
 
-  design <- declare_design(dat, pos)
+  design <- declare_population(dat) + pos
 
   df <- draw_data(design)
 
@@ -23,7 +23,7 @@ test_that("tibble", {
 
   pos <- declare_potential_outcomes(Y_Z_0 = y * 5, Y_Z_1 =  y * 5 + 3)
 
-  design <- declare_design(dat, pos)
+  design <- declare_population(dat) + pos
 
   df <- draw_data(design)
 
@@ -43,7 +43,7 @@ test_that("data.table", {
 
   pos <- declare_potential_outcomes(Y_Z_0 = y * 5, Y_Z_1 =  y * 5 + 3)
 
-  design <- declare_design(dat, pos)
+  design <- declare_population(dat) + pos
 
   df <- draw_data(design)
 
@@ -62,7 +62,7 @@ test_that("sf", {
 
   pos <- declare_potential_outcomes(Y_Z_0 = y * 5, Y_Z_1 =  y * 5 + 3)
 
-  design <- declare_design(dat, pos)
+  design <- declare_population(dat) + pos
 
   df <- draw_data(design)
 

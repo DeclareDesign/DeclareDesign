@@ -52,13 +52,13 @@ m_arm_trial <- function(numb){
   my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
   my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
   my_reveal <- declare_reveal()
-  my_design <- declare_design(my_population,
-                              my_potential_outcomes,
-                              my_estimand,
-                              my_sampling,
-                              my_assignment,
-                              my_reveal,
-                              my_estimator_dim)
+  my_design <- my_population +
+    my_potential_outcomes +
+    my_estimand +
+    my_sampling +
+    my_assignment +
+    my_reveal +
+    my_estimator_dim
   return(my_design)
 }
 
@@ -85,10 +85,10 @@ my_assignment_continuous <- declare_assignment(handler = continuous_treatment_fu
 my_reveal <- declare_reveal()
 
 
-my_design <- declare_design(my_population(),
-                            my_potential_outcomes_continuous,
-                            my_assignment_continuous,
-                            my_reveal)
+my_design <- my_population + 
+             my_potential_outcomes_continuous + 
+             my_assignment_continuous + 
+             my_reveal
 
 head(draw_data(my_design))
 ```
@@ -107,12 +107,12 @@ my_potential_outcomes_attrition <- declare_potential_outcomes(
 reveal_R <- declare_reveal(outcome_variables = "R")
 reveal_Y <- declare_reveal(outcome_variables = "Y", attrition_variables = "R")
 
-my_design <- declare_design(my_population(),
-                            my_potential_outcomes,
-                            my_potential_outcomes_attrition,
-                            my_assignment,
-                            reveal_R,
-                            reveal_Y)
+my_design <- my_population + 
+             my_potential_outcomes + 
+             my_potential_outcomes_attrition + 
+             my_assignment + 
+             reveal_R + 
+             reveal_Y
 
 head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
 ```

@@ -20,7 +20,7 @@ my_population <-
 pop <- my_population()
 
 my_potential_outcomes <- declare_potential_outcomes(
-  formula = Y ~ .25 * Z + .01 * age * Z)
+  Y ~ .25 * Z + .01 * age * Z)
 pop_pos <- my_potential_outcomes(pop)
 
 my_sampling <- declare_sampling(n = 250)
