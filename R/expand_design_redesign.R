@@ -151,8 +151,9 @@ expand_args_names <- function(..., expand = TRUE){
 #' 
 #' @export
 redesign <- function(design, expand = TRUE, ...) {
-  f <- function(...)
+  f <- function(...) {
     clone_design_edit(design, ...)
+  }
   design <- expand_design(f, expand, ...)
   structure(design, code = NULL)
 }
