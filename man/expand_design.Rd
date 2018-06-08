@@ -2,12 +2,9 @@
 % Please edit documentation in R/expand_design_redesign.R
 \name{expand_design}
 \alias{expand_design}
-\alias{redesign}
 \title{Declare a Design via a Template Function}
 \usage{
 expand_design(template, expand = TRUE, prefix = "design", ...)
-
-redesign(design, expand = TRUE, ...)
 }
 \arguments{
 \item{template}{a function which yields a design.}
@@ -17,50 +14,37 @@ redesign(design, expand = TRUE, ...)
 \item{prefix}{prefix for the names of the designs, i.e. if you create two designs they would be named prefix_1, prefix_2}
 
 \item{...}{Options sent to the template.}
-
-\item{design}{a design}
 }
 \value{
 if set of designs is size one, the design, otherwise a `by`-list of designs. Designs are given a parameters attribute with the values of parameters assigned by expand_design.
 }
 \description{
 \code{expand_design} easily generates a set of design from a template function.
-
-\code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters internally. (Advanced).
-}
-\details{
-Importantly, \code{redesign} will edit any symbol in your design, but if the symbol you attempt to change does not exist no changes will be made and no error or warning will be issued.
 }
 \examples{
 
-design_template <- function(N = 100) {
-  population <- declare_population(N = N)
-  return(declare_design(population))
-  }
+template <- function(N) {
+  pop <- declare_population(N = N, noise = rnorm(N))
+  pos <- declare_potential_outcomes(Y ~ 0.20 * Z + noise)
+  assgn <- declare_assignment(m = N / 2)
+  mand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+  mator <- declare_estimator(Y ~ Z, estimand = mand)
+  pop + pos + assgn + mand + mator
+}
 
 # returns list of eight designs
-vary_n <- expand_design(design_template, N = seq(30, 100, 10))
+designs <- expand_design(template, N = seq(30, 100, 10))
 
 \dontrun{
  # diagnose a list of designs created by expand_design or redesign
- diagnose_vary_n <- diagnose_design(vary_n)
+ diagnosis <- diagnose_design(designs, sims = 50)
 }
 
 # returns a single design
-large_design <- expand_design(design_template, N = 200)
+large_design <- expand_design(template, N = 200)
 
 \dontrun{
- diagnose_large_design <- diagnose_design(large_design)
+ diagnose_large_design <- diagnose_design(large_design, sims = 50)
 }
-
-my_population <- declare_population(N = 100)
-my_design <- declare_design(my_population)
-
-# returns a single, modified design
-design_large_N <- redesign(my_design, N = 1000)
-
-# returns a list of six modified designs
-design_vary_N <- redesign(my_design, N = seq(500, 1000, 100))
-attr(design_vary_N[[1]], "parameters")
 
 }

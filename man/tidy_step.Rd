@@ -35,5 +35,4 @@ data
 my_design <- my_population + wrap_step(my_function(my_mean = 5))
 my_design
 
-
 }
