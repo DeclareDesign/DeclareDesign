@@ -1,6 +1,3 @@
-
-
-
 #' Convert a step to a tidy function for use in a design
 #'
 #' Wrap a data-in, data-out function call as a tidy function
@@ -30,8 +27,6 @@
 #' my_design <- my_population + wrap_step(my_function(my_mean = 5))
 #' my_design
 #' 
-#' 
-
 tidy_step <- function(...){
   qs <- quo(...)
   qnames <- names(qs)
@@ -50,12 +45,10 @@ tidy_step <- function(...){
     if (!any(names(formals(ret)) %in% c("data", ".data"))) {
       stop("The arguments of the tidy'd function do not include data or .data.", call. = FALSE)
     }
-    
     ret <- build_step(
       ret, handler = NULL, dots = list(), label = qnames, step_type = "undeclared", causal_type = "dgp", call = qs[[2]]
     )
   }
   
   ret
-  
 }

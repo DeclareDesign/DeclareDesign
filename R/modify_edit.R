@@ -19,7 +19,6 @@ clone_dot_edit_env <- function(dot, ..., to_replace=list(...)){
   dot
 }
 
-
 #' @rdname edit
 #' @keywords internal
 #' @examples
@@ -43,9 +42,6 @@ clone_step_edit <- function(step, ..., to_replace=list(...)) {
   attributes(f) <- step_attributes
   f
 }
-
-
-
 
 #' @rdname edit
 #' @keywords internal
