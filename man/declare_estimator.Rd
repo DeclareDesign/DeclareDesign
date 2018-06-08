@@ -52,7 +52,6 @@ The intent here is to factor out the estimator/estimand labeling so that it can 
 
 \examples{
 
-########################################################
 # Default handler
 
 my_estimand <- declare_estimand(ATE=mean(Y_Z_1-Y_Z_0))
@@ -97,7 +96,6 @@ estimator_probit <- declare_estimator(
   coefficients = "Z"
 )
 
-########################################################
 # Custom handlers
 
 # Define your own estimator and use the `tidy_estimator` function for labeling
@@ -125,22 +123,21 @@ my_estimator_function <- function(data){
 
 my_estimator_custom2 <- declare_estimator(handler = my_estimator_function)
 
-########################################################
+
 # Examples
 
 # First, set up the rest of a design
 set.seed(42)
 
-design_def <- declare_design(
-  declare_population(N = 100, X = rnorm(N), W=rexp(N,1), noise=rnorm(N)),
-  declare_potential_outcomes(Y ~ .25 * Z + noise),
-  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)),
-  declare_assignment(m = 50),
-  declare_reveal(),
+design_def <- 
+  declare_population(N = 100, X = rnorm(N), W=rexp(N,1), noise=rnorm(N)) + 
+  declare_potential_outcomes(Y ~ .25 * Z + noise) + 
+  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+  declare_assignment(m = 50) + 
+  declare_reveal() + 
   my_estimator_dim
-)
 
-run_design(design_def)
+get_estimates(design_def)
 
 # Can also use declared estimator on a data.frame
 dat <- draw_data(design_def)
@@ -152,26 +149,25 @@ my_estimator_dim(dat)
 
 design <- replace_step(design_def, my_estimator_dim, my_estimator_lm_rob)
 
-run_design(design)
+get_estimates(design)
 
 
 design <- replace_step(design_def, my_estimator_dim, my_estimator_lm)
 
-run_design(design)
+get_estimates(design)
 
 
 design <- replace_step(design_def, my_estimator_dim, my_estimator_glm)
 
-run_design(design)
+get_estimates(design)
 
 # ----------
 # 3. Using custom estimators
 # ----------
 
-
 design <- replace_step(design_def, my_estimator_dim, my_estimator_custom)
 
-run_design(design)
+get_estimates(design)
 
 # The names in your custom estimator return should match with
 # your diagnosands when diagnosing a design
@@ -184,9 +180,10 @@ my_estimator_median <- declare_estimator(
 
 design <- replace_step(design_def, my_estimator_dim, my_estimator_median)
 
-run_design(design)
+get_estimates(design)
 
 my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand), keep_defaults = FALSE)
+
 diagnose_design(design, diagnosands = my_diagnosand, sims = 5, bootstrap_sims = FALSE)
 
 # ----------
@@ -195,7 +192,8 @@ diagnose_design(design, diagnosands = my_diagnosand, sims = 5, bootstrap_sims = 
 
 design_two <- insert_step(design_def,  my_estimator_lm,  after=my_estimator_dim)
 
-run_design(design_two)
+get_estimates(design_two)
+
 diagnose_design(design_two, sims = 5, bootstrap_sims = FALSE)
 
 }

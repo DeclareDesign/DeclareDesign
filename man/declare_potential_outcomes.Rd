@@ -45,7 +45,7 @@ A `declare_potential_outcomes` declaration returns a function. That function tak
 The potential outcomes function can sometimes be a stumbling block for users, as some are uncomfortable asserting anything in particular about the very causal process that they are conducting a study to learn about! We recommend trying to imagine what your preferred theory would predict, what an alternative theory would predict, and what your study would reveal if there were no differences in potential outcomes for any unit (i.e., all treatment effects are zero).
 }
 \examples{
-########################################################
+
 # Default handler
 
 # By default, there are two ways of declaring potential outcomes:

@@ -19,7 +19,7 @@
 #'
 #'
 #' @examples
-#' ########################################################
+#' 
 #' # Default handler
 #'
 #' # By default, there are two ways of declaring potential outcomes:

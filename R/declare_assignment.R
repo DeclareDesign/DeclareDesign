@@ -21,7 +21,6 @@
 #'
 #' @examples
 #'
-#' ########################################################
 #' # Default Handler
 #' # Delegates to conduct_ra
 #'
@@ -35,8 +34,7 @@
 #'   assignment_variable = "X1"
 #' )
 #'
-#' ########################################################
-#' #' # Custom random assignment functions
+#' # Custom random assignment functions
 #'
 #' my_assignment_function <- function(data) {
 #'    data$Z <- ifelse(data$extra <= median(data$extra), 1, 0)
@@ -47,6 +45,7 @@
 #'
 #' df <- my_assignment_custom(sleep)
 #' table(df$Z, df$group)
+#' 
 declare_assignment <- make_declarations(assignment_handler, "assignment" )
 
 

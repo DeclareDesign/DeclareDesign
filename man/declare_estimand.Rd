@@ -36,7 +36,6 @@ will contain the step label. This can be used as an additional dimension for use
 }
 \examples{
 
-########################################################
 # Default handler
 
 my_estimand_ATE <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
@@ -56,7 +55,6 @@ my_estimand_regression <- declare_estimand(
   label="TrueRegressionParams"
 )
 
-########################################################
 # Custom random assignment functions
 
 my_estimand_function <- function(data, label) {
@@ -68,19 +66,16 @@ my_estimand_function <- function(data, label) {
 }
 my_estimand_custom <- declare_estimand(handler = my_estimand_function, label = "medianTE")
 
-########################################################
-# Using with estimators
 
+# Using with estimators
 
 # First, set up the rest of a design for use below
 set.seed(42)
 
-design_stub <- declare_design(
-  pop=declare_population(N = 100, X = rnorm(N)),
-  po=declare_potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N)),
-  assn=declare_assignment(m = 50),
-  reveal=declare_reveal()
-)
+design_stub <- declare_population(N = 100, X = rnorm(N)) + 
+  declare_potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N)) + 
+  declare_assignment(m = 50) + 
+  declare_reveal()
 
 # Get example data to compute estimands on
 dat <- draw_data(design_stub)
@@ -150,4 +145,5 @@ design_cust <- insert_step(design_stub, my_estimand_custom, before="assn")
 design_cust <- insert_step(design_cust, my_estimator_custom, after="reveal")
 
 run_design(design_cust)
+
 }

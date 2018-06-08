@@ -7,7 +7,6 @@
 #'
 #' @examples
 #'
-#' ########################################################
 #' # Default handler is fabricate
 #'
 #' # Declare a single-level population with no covariates

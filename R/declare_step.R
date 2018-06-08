@@ -10,8 +10,6 @@
 #' my_assignment <- declare_assignment(m = 25)
 #' my_step <- declare_step(Z2 = Z, q = 5)
 #'
-#' design <- declare_design(my_population,
-#'                          my_assignment,
-#'                          my_step)
+#' design <- my_population + my_assignment + my_step
 #'
 declare_step <- make_declarations(fabricate, "custom")
