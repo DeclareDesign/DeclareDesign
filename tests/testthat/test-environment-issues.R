@@ -26,7 +26,7 @@ test_that("send estimand to estimator works", {
   rm(list = ls()[-which(ls() %in% "my_design")])
   diag <- diagnose_design(my_design, sims = 2, bootstrap_sims = 3)
 
-  expect_equal(names(diag), c("simulations_df", "diagnosands_df", "diagnosand_names", "group_by_set", "bootstrap_replicates", "bootstrap_sims"))
+  expect_equal(names(diag), c("simulations_df", "diagnosands_df", "diagnosand_names", "group_by_set", "parameters_df", "bootstrap_replicates", "bootstrap_sims"))
   expect_equal(nrow(diag$simulations_df), 2)
   expect_equal(nrow(diag$diagnosands_df), 1)
   expect_equal(nrow(diag$bootstrap_replicates), 3)

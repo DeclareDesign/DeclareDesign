@@ -174,8 +174,8 @@ diagnose_design <- function(...,
   
   rownames(diagnosands_df) <- NULL
   # Return frames
-  out <- list(simulations_df = simulations_df, diagnosands_df = diagnosands_df, diagnosand_names = diagnosand_names, group_by_set = group_by_set)
-
+  out <- list(simulations_df = simulations_df, diagnosands_df = diagnosands_df, diagnosand_names = diagnosand_names, group_by_set = group_by_set, parameters_df = parameters_df)
+  
   if (bootstrap_sims != 0) {
     out$bootstrap_replicates <- bootout$diagnosand_replicates
   }

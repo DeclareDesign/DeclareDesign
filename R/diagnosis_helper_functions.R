@@ -168,11 +168,13 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   return_df$design_label <- factor(return_df$design_label, levels = c(levels(return_df$design_label), ""))
   return_df[return_df$statistic == "SE (bootstrapped)", sort_by_list] <- ""
   
+  parameter_names <- names(diagnosis$parameters_df)[-1]
+  
   # Make names nicer
-  names(return_df) <-
+  names(return_df)[which(!names(return_df) %in% parameter_names)] <-
     gsub("\\b(se[(]|sd |rmse|[[:alpha:]])",
          "\\U\\1",
-         gsub("_", " ", names(return_df)),
+         gsub("_", " ", names(return_df)[which(!names(return_df) %in% parameter_names)]),
          perl = TRUE)
   rownames(return_df) <- NULL
   
