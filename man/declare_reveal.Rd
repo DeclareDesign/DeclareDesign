@@ -29,7 +29,7 @@ reveal_outcomes_handler(data = NULL, outcome_variables = Y,
 Potential outcomes declarations indicating what outcomes exist as a function of assignment variables. But one more step is required, revealing outcomes after treatment is realized. \code{declare_reveal} declares the set of outcome variable names, for example created by \code{declare_potential_outcomes} and the set of assignment variables \code{declare_assignment}.
 }
 \details{
-\code{declare_reveal} declares the realization of outcomes. Typically, when you create a design with \code{declare_design}, the reveal outcomes step is automatically added. When you use the outcome `Y` and a single assignment variable named `Z`, \code{declare_design} adds a reveal outcomes step at the appropriate point. If you have multiple outcomes to reveal or different names for the outcome or assignment variables, use \code{declare_reveal} to customize which outcomes are revealed.
+\code{declare_reveal} declares the realization of outcomes. Typically, when you create a design with the + operator, the reveal outcomes step is automatically added. When you use the outcome `Y` and a single assignment variable named `Z`, the + operator adds a reveal outcomes step at the appropriate point. If you have multiple outcomes to reveal or different names for the outcome or assignment variables, use \code{declare_reveal} to customize which outcomes are revealed.
 
 Designs for causal inference includes a potential outcomes declaration and an assignment declaration. Reveal outcomes uses the random assignment to pluck out the correct potential outcomes. This is analogous to the "switching equation" (Gerber and Green 2012, Chapter 2).
 }
@@ -52,7 +52,7 @@ design <- my_population +
 
 design
 
-# By default, declare_design, results in the same design being 
+# By default, the + operator results in the same design being 
 #  created, because it automatically adds a declare_reveal step.
 
 design <- my_population + my_potential_outcomes + my_assignment

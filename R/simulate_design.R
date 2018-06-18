@@ -2,7 +2,7 @@
 #'
 #' Runs many simulations of a design and saves to a dataframe.
 #'
-#' @param ... A design created by \code{\link{declare_design}}, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.
+#' @param ... A design created using the + operator, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.
 #'
 #' @param sims The number of simulations, defaulting to 500. If sims is a vector of the form c(10, 1, 2, 1) then different steps of a design will be simulated different numbers of times.
 #'
@@ -51,7 +51,7 @@ simulate_design <-
     designs <- lapply(designs_quos, eval_tidy)
     
     ## Two cases:
-    ## 1. send one or more design objects created by declare_design
+    ## 1. send one or more design objects created by the + operator
     ## 2. send a single list of design objects e.g. created by expand_design
     ## Approach: unpack designs if a list of designs was sent as a single list object
     if (length(designs) == 1 &&

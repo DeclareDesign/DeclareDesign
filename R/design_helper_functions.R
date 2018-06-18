@@ -1,6 +1,6 @@
 #' Explore your design
 #'
-#' @param design A design created by \code{\link{declare_design}}.
+#' @param design A design object, typically created using the + operator
 #'
 #' @examples
 #'
@@ -169,7 +169,7 @@ get_estimands <- function(...) {
   designs <- lapply(designs_quos, eval_tidy)
   
   ## Two cases:
-  ## 1. send one or more design objects created by declare_design
+  ## 1. send one or more design objects created using the + operator
   ## 2. send a single list of design objects e.g. created by expand_design
   ## Approach: unpack designs if a list of designs was sent as a single list object
   if (length(designs) == 1 &&
@@ -207,7 +207,7 @@ get_estimates <- function(...) {
   designs <- lapply(designs_quos, eval_tidy)
   
   ## Two cases:
-  ## 1. send one or more design objects created by declare_design
+  ## 1. send one or more design objects created using the + operator
   ## 2. send a single list of design objects e.g. created by expand_design
   ## Approach: unpack designs if a list of designs was sent as a single list object
   if (length(designs) == 1 &&
@@ -248,7 +248,7 @@ get_estimands_single_design <- function(design) {
 
 #' Obtain the preferred citation for a design
 #'
-#' @param design a design object created by \code{declare_design}
+#' @param design a design object created using the + operator
 #'
 #' @param ... options for printing the citation if it is a BibTeX entry
 #'
@@ -271,7 +271,7 @@ print.design_step <- function(x, ...) {
 
 #' Print code to recreate a design
 #' 
-#' @param design A design object, typically created by \code{\link{declare_design}}
+#' @param design A design object, typically created using the + operator
 #'
 #' @examples 
 #' 
@@ -314,7 +314,7 @@ print_code <- function(design) {
   
 }
 
-#' @param x a design object, typically created by \code{\link{declare_design}}
+#' @param x a design object, typically created using the + operator
 #' @rdname post_design
 #' @export
 print.design <- function(x, verbose = TRUE, ...) {
@@ -322,7 +322,7 @@ print.design <- function(x, verbose = TRUE, ...) {
   # invisible(summary(x))
 }
 
-#' @param object a design object created by \code{\link{declare_design}}
+#' @param object a design object created using the + operator
 #' @param verbose an indicator for printing a long summary of the design, defaults to \code{TRUE}
 #' @param ... optional arguments to be sent to summary function
 #'

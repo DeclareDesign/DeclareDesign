@@ -15,7 +15,7 @@
 #'
 #' The location of the estimand and estimator functions in the pipeline of functions determine *when* the values of the estimand and estimator are calculated. This allows users to, for example, differentiate between a population average treatment effect and a sample average treatment effect by placing the estimand function before or after sampling.
 #'
-#' Designs declared with declare_design can be investigated with a series of post-declaration commands, such as \code{\link{draw_data}}, \code{\link{get_estimands}}, \code{\link{get_estimates}}, and \code{\link{diagnose_design}}.
+#' Design objects declared with the + operator can be investigated with a series of post-declaration commands, such as \code{\link{draw_data}}, \code{\link{get_estimands}}, \code{\link{get_estimates}}, and \code{\link{diagnose_design}}.
 #'
 #' The print and summary methods for a design object return some helpful descriptions of the steps in your research design. If randomizr functions are used for any assignment or sampling steps, additional details about those steps are provided.
 #'
@@ -199,7 +199,7 @@ construct_design <- function(...) {
 }
 
 ###############################################################################
-# In declare_design, if a step is a dplyr style call mutate(foo=bar),
+# In a design created using the + operator, if a step is a dplyr style call mutate(foo = bar),
 # it will fail to evaluate - we can catch that and try to curry it
 
 #' @importFrom rlang quos lang_fn lang_modify eval_tidy
@@ -207,7 +207,7 @@ callquos_to_step <- function(step_call, label="") {
   ## this function allows you to put any R expression
   ## such a dplyr::mutate partial call
   ## into the causal order, i.e.
-  ## declare_design(pop(), po, mutate(q = 5))
+  ## pop + po + mutate(q = 5))
   
   # match to .data or data, preference to .data
   data_name <- intersect(names(formals(lang_fn(step_call))), c(".data", "data") )[1]

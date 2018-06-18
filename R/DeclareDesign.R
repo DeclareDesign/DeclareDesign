@@ -17,7 +17,7 @@
 #'
 #' @section Design Objects:
 #' \describe{
-#'   \item{\code{\link{declare_design}}}{Declare a design from steps}
+#'   \item{+}{Declare a design}
 #'   \item{\code{\link{draw_data}}}{Simulate the DGP}
 #'   \item{\code{\link{run_design}}}{Simulate the DGP with estimands/estimators}
 #'   \item{\code{\link{diagnose_design}}}{Diagnose a design}

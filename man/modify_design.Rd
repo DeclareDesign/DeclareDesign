@@ -14,7 +14,7 @@ delete_step(design, step)
 replace_step(design, step, new_step)
 }
 \arguments{
-\item{design}{a design object, usually created by \code{\link{declare_design}}, \code{\link{expand_design}}, or the design library.}
+\item{design}{a design object, usually created using the + operator, \code{\link{expand_design}}, or the design library.}
 
 \item{new_step}{the new step - either a function or a partial call}
 
@@ -25,7 +25,7 @@ replace_step(design, step, new_step)
 \item{step}{the step to be deleted or replaced}
 }
 \value{
-A new design object. See \code{\link{declare_design}} for details.
+A new design object
 }
 \description{
 Insert, delete and replace steps in an (already declared) design object.

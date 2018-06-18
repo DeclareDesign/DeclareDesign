@@ -1,5 +1,5 @@
 
-# Helper function for "floating labels to the right" in declare_design
+# Helper function for "floating labels to the right" when creating a design via + operator
 #
 # eg declare_design(pop=declare_population(N=100))
 # step 1 will have label set to pop

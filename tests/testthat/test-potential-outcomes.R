@@ -276,7 +276,7 @@ test_that("Reveal step injected (default names)",{
   # expect_warning(d <- pop + po + assn, "never later revealed")
   expect_true("Q" %in% colnames(draw_data(d)))
 
-  #expect_warning(d <- declare_design(pop, assn, po, identity), "inject a `declare_reveal")
+  #expect_warning(d <- pop + assn + po + identity, "inject a `declare_reveal")
   #expect_equal(attr(d[[4]], "step_type"), "reveal_outcomes")
 
 })
