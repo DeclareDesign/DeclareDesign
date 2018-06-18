@@ -7,7 +7,7 @@
 cite_design(design, ...)
 }
 \arguments{
-\item{design}{a design object created by \code{declare_design}}
+\item{design}{a design object created using the + operator}
 
 \item{...}{options for printing the citation if it is a BibTeX entry}
 }

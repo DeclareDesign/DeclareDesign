@@ -20,15 +20,15 @@ get_estimates(...)
 \method{summary}{design}(object, verbose = TRUE, ...)
 }
 \arguments{
-\item{design}{A design created by \code{\link{declare_design}}.}
+\item{design}{A design object, typically created using the + operator}
 
 \item{...}{optional arguments to be sent to summary function}
 
-\item{x}{a design object, typically created by \code{\link{declare_design}}}
+\item{x}{a design object, typically created using the + operator}
 
 \item{verbose}{an indicator for printing a long summary of the design, defaults to \code{TRUE}}
 
-\item{object}{a design object created by \code{\link{declare_design}}}
+\item{object}{a design object created using the + operator}
 }
 \description{
 Explore your design

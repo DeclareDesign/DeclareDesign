@@ -8,7 +8,7 @@ diagnose_design(..., diagnosands = default_diagnosands, sims = 500,
   bootstrap_sims = 100, add_grouping_variables = NULL)
 }
 \arguments{
-\item{...}{A design or set of designs typically created by \code{\link{declare_design}}, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.}
+\item{...}{A design or set of designs typically created using the + operator, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.}
 
 \item{diagnosands}{A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).}
 

@@ -3,7 +3,7 @@
 #'
 #' Generates diagnosands from a design or simulations of a design. 
 #'
-#' @param ... A design or set of designs typically created by \code{\link{declare_design}}, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.
+#' @param ... A design or set of designs typically created using the + operator, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
 #' @param add_grouping_variables Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_label", "estimand_label", "estimator_label", "coefficient")
 #'
@@ -106,7 +106,7 @@ diagnose_design <- function(...,
     }
     if (!all(vapply(designs, inherits, FALSE, "design"))) {
       stop(
-        "Please only send design objects created by declare_design to diagnose_design."
+        "Please only send design objects created using the + operator to diagnose_design."
       )
     }
   }

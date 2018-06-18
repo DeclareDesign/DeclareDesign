@@ -38,9 +38,7 @@ N <- 50
 
 \dontrun{
 
-my_design <- declare_design(
-  declare_population(N=N, noise=rnorm(N))
-)
+my_design <- declare_population(N=N, noise=rnorm(N)) + NULL
 my_design2 <- DeclareDesign:::clone_design_edit(my_design, N=100)
 
 nrow(draw_data(my_design))

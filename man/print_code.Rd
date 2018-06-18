@@ -7,7 +7,7 @@
 print_code(design)
 }
 \arguments{
-\item{design}{A design object, typically created by \code{\link{declare_design}}}
+\item{design}{A design object, typically created using the + operator}
 }
 \description{
 Print code to recreate a design
