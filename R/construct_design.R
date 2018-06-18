@@ -80,7 +80,7 @@
   # 1. lhs is a step
   # 2. lhs is a design
   
-  # browser()
+  browser()
   
   if (is_missing(rhs) || is_null(rhs)) {
     
@@ -92,7 +92,7 @@
     
   } else{
     
-    if (!inherits(rhs, "dd")) {
+    if (!inherits(rhs, "dd") & !inherits(rhs, "function")) {
       stop("The right hand side does not appear to be a DeclareDesign object. Can you wrap the step with `tidy_step()`?", call. = FALSE)
     }
     
