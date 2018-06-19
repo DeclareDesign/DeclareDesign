@@ -80,7 +80,7 @@
   # 1. lhs is a step
   # 2. lhs is a design
   
-  browser()
+  # browser()
   
   if (is_missing(rhs) || is_null(rhs)) {
     
@@ -154,7 +154,11 @@ construct_design <- function(...) {
     
     # Is it a non-declared function
     if (is.function(ret[[i]]) && !inherits(ret[[i]], "design_step")) {
-      if (!identical(names(formals(ret[[i]])), "data")) {
+      
+      # warn if the function call does not have exactly data as arguments
+      #  except: if it is a dplyr pipeline (class fseq)
+      if (!identical(names(formals(ret[[i]])), "data") && 
+          !inherits(ret[[i]], "fseq")) {
         warning("Undeclared Step ", i, " function arguments are not exactly 'data'")
       }
       
