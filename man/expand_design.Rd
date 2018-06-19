@@ -4,16 +4,16 @@
 \alias{expand_design}
 \title{Declare a Design via a Template Function}
 \usage{
-expand_design(template, expand = TRUE, prefix = "design", ...)
+expand_design(template, ..., expand = TRUE, prefix = "design")
 }
 \arguments{
 \item{template}{a function which yields a design.}
 
+\item{...}{Options sent to the template.}
+
 \item{expand}{boolean - if true, form the crossproduct of the ..., otherwise recycle them}
 
 \item{prefix}{prefix for the names of the designs, i.e. if you create two designs they would be named prefix_1, prefix_2}
-
-\item{...}{Options sent to the template.}
 }
 \value{
 if set of designs is size one, the design, otherwise a `by`-list of designs. Designs are given a parameters attribute with the values of parameters assigned by expand_design.
