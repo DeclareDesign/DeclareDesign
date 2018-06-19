@@ -127,6 +127,14 @@ run_design_internal.default <- function(design, current_df=NULL, results=NULL, s
   
 }
 
+# for when the user sends a function that runs a design itself 
+#   to run_design (or simulate_design / diagnose_design above it)
+run_design_internal.function <- function(design) {
+  
+  design()
+  
+}
+
 run_design_internal.execution_st <- function(design, ...) do.call(run_design_internal.default, design)
 
 #' Build an execution strategy object

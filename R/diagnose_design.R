@@ -104,10 +104,10 @@ diagnose_design <- function(...,
     } else {
       designs <- dots
     }
-    if (!all(vapply(designs, inherits, FALSE, "design"))) {
-      stop(
-        "Please only send design objects created using the + operator to diagnose_design."
-      )
+    if (!all(sapply(designs, function(x) {
+      inherits(x, "design") || ( inherits(x, "function") && is.null(formals(x)))
+    }))) {
+      stop("Please only send design objects or functions with no arguments to simulate_design.")
     }
   }
 
