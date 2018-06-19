@@ -131,22 +131,14 @@ test_that("POs at a higher level",{
 
   my_design <-
     declare_population(data = pop) +
-    tidy_step(group_by(villages)) +
+    declare_step(group_by, villages) +
     my_potential_outcomes
 
   my_design <-
     declare_population(data = pop) +
-    tidy_step(group_by(villages)) +
+    declare_step(group_by, villages) +
     my_potential_outcomes
     
-  # expect_warning(
-  #   my_design <-
-  #       declare_population(data = pop) + 
-  #       tidy_step(group_by(villages)) +
-  #       my_potential_outcomes,
-  #   "Potential outcome is the final step in the design."
-  # )
-
   expect_equal(nrow(draw_data(my_design)), 12)
 
 })

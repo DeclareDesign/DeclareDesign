@@ -20,8 +20,8 @@ design <- my_population +
   my_potential_outcomes +
   my_sampling +
   my_estimand +
-  tidy_step(dplyr::mutate(q = 5)) +
-  tidy_step(dplyr::mutate(q = 6)) +
+  declare_step(dplyr::mutate, q = 5) +
+  declare_step(dplyr::mutate, q = 6) +
   my_assignment +
   my_reveal +
   my_estimator

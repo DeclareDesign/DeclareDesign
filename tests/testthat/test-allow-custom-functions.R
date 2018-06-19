@@ -37,25 +37,3 @@ test_that("a dplyr pipeline can be used in a design", {
   
 })
 
-
-# case 3
-
-test_that("a function call can be used in a design", {
-  
-  `%dd%` <- DeclareDesign:::`+.dd`
-  
-  my_func <- function(data, my_n = 50){
-    data %>% sample_n(n = my_n)
-  }
-  
-  # errors before sending to our operator function
-  my_pop + my_func(my_n = 50)
-  
-  # sends into our operator function
-  my_pop %dd% my_func(my_n = 50)
-  
-  dat <- draw_data(des)
-  
-  expect_equal(nrow(dat), 50)
-  
-})

@@ -38,11 +38,13 @@
 #' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+#' 
+#' my_mutate <- declare_step(dplyr::mutate, noise_sq = noise^2)
 #'
 #' my_reveal <- declare_reveal()
 #'
 #' design <- my_population + my_potential_outcomes + my_sampling + 
-#'          my_estimand + tidy_step(dplyr::mutate(noise_sq = noise^2)) + 
+#'          my_estimand + my_mutate + 
 #'          my_assignment + my_reveal + my_estimator
 #'
 #' design
@@ -93,7 +95,7 @@
   } else{
     
     if (!inherits(rhs, "dd") & !inherits(rhs, "function")) {
-      stop("The right hand side does not appear to be a DeclareDesign object. Can you wrap the step with `tidy_step()`?", call. = FALSE)
+      stop("The right hand side does not appear to be a DeclareDesign object or a function", call. = FALSE)
     }
     
     if (inherits(lhs, "design")) {

@@ -46,10 +46,12 @@ my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
 my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
+my_mutate <- declare_step(dplyr::mutate, noise_sq = noise^2)
+
 my_reveal <- declare_reveal()
 
 design <- my_population + my_potential_outcomes + my_sampling + 
-         my_estimand + tidy_step(dplyr::mutate(noise_sq = noise^2)) + 
+         my_estimand + my_mutate + 
          my_assignment + my_reveal + my_estimator
 
 design

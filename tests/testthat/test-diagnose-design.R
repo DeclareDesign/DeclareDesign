@@ -24,7 +24,7 @@ test_that("allow design functions to be sent to simulate design and diagnose_des
       my_potential_outcomes +
       my_sampling +
       my_estimand +
-      tidy_step(dplyr::mutate(q = 5)) +
+      declare_step(dplyr::mutate, q = 5) +
       my_assignment +
       my_reveal +
       my_estimator
