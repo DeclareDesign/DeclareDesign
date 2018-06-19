@@ -104,11 +104,8 @@ diagnose_design <- function(...,
     } else {
       designs <- dots
     }
-    if (!all(vapply(designs, inherits, FALSE, "design"))) {
-      stop(
-        "Please only send design objects created using the + operator to diagnose_design."
-      )
-    }
+    
+    check_design_class(designs)
   }
 
   # simulate if needed ------------------------------------------------------
@@ -183,6 +180,14 @@ diagnose_design <- function(...,
 
   structure(out, class = "diagnosis")
 
+}
+
+check_design_class <- function(designs){
+  if (!all(sapply(designs, function(x) {
+    inherits(x, "design") || ( inherits(x, "function") && is.null(formals(x)))
+  }))) {
+    stop("Please only send design objects or functions with no arguments to simulate_design.")
+  }
 }
 
 calculate_diagnosands <- function(simulations_df, diagnosands, group_by_set) {

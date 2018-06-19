@@ -47,6 +47,7 @@
 #' Different steps of a design may each be simulated different a number of times, as specified by sims. In this case simulations are grouped into "fans", eg "fan_1" indicates all the simulations that have the same draw from the first level of the design. For efficiency there are generally fewer fans than design steps where all contiguous steps with 1 sim specified are combined into a single fan.
 simulate_design <-
   function(..., sims = 500) {
+    
     designs_quos <- quos(...)
     designs <- lapply(designs_quos, eval_tidy)
     
@@ -63,10 +64,8 @@ simulate_design <-
       names(designs) <- infer_names_quos(designs_quos)
     }
     
-    ## Do not allow users to send more than one object if any is not a design object
-    if (!all(vapply(designs, inherits, FALSE, "design"))) {
-      stop("Please only send design objects to simulate_design.")
-    }
+    # do not allow users to send more than one object if any is not a design object
+    check_design_class(designs)
     
     # if you provide a list of sims for each design, i.e.
     #   sims = list(my_design_1 = c(100, 1, 1), my_design_2 = 200)
@@ -96,11 +95,7 @@ simulate_design <-
       SIMPLIFY = FALSE
     )
     
-    #if (length(designs) > 1) {
-      simulations_list <-
-        Map(cbind, design_label = names(simulations_list), simulations_list, stringsAsFactors = FALSE)
-    #}
-    
+    simulations_list <- Map(cbind, design_label = names(simulations_list), simulations_list, stringsAsFactors = FALSE)
     
     # Cleanup
     simulations_df <- rbind_disjoint(simulations_list)
