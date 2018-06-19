@@ -65,11 +65,7 @@ simulate_design <-
     }
     
     # do not allow users to send more than one object if any is not a design object
-    if (!all(sapply(designs, function(x) {
-      inherits(x, "design") || ( inherits(x, "function") && is.null(formals(x)))
-    }))) {
-      stop("Please only send design objects or functions with no arguments to simulate_design.")
-    }
+    check_design_class(designs)
     
     # if you provide a list of sims for each design, i.e.
     #   sims = list(my_design_1 = c(100, 1, 1), my_design_2 = 200)
@@ -99,8 +95,7 @@ simulate_design <-
       SIMPLIFY = FALSE
     )
     
-    simulations_list <-
-      Map(cbind, design_label = names(simulations_list), simulations_list, stringsAsFactors = FALSE)
+    simulations_list <- Map(cbind, design_label = names(simulations_list), simulations_list, stringsAsFactors = FALSE)
     
     # Cleanup
     simulations_df <- rbind_disjoint(simulations_list)

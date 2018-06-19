@@ -51,3 +51,11 @@ test_that("allow design functions to be sent to simulate design and diagnose_des
                               coefficient = "Z"), class = "data.frame", row.names = c(NA, 
                                                                                       -1L)))
 })
+
+
+test_that("error when you send other objects to diagnose", {
+  
+  # must send a function or a design object
+  expect_error(diagnose_design(rep(3, 2)), "Please only send design objects or functions with no arguments to simulate_design.")
+  
+})

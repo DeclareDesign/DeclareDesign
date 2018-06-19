@@ -78,7 +78,11 @@ next_step <- function(step, current_df, i) {
   nxt
 }
 
-run_design_internal.default <- function(design, current_df=NULL, results=NULL, start=1, end=length(design), ...) {
+run_design_internal.default <- function(design){
+  stop("Please only send design objects or functions with no arguments to run_design.")
+}
+
+run_design_internal.design <- function(design, current_df=NULL, results=NULL, start=1, end=length(design), ...) {
   
   if (!is.list(results)) {
     results <- list(estimand = vector("list", length(design)),
@@ -135,7 +139,7 @@ run_design_internal.function <- function(design) {
   
 }
 
-run_design_internal.execution_st <- function(design, ...) do.call(run_design_internal.default, design)
+run_design_internal.execution_st <- function(design, ...) do.call(run_design_internal.design, design)
 
 #' Build an execution strategy object
 #'
@@ -246,12 +250,12 @@ get_estimates <- function(...) {
 
 get_estimates_single_design <- function(design) {
   results <- list("estimator" = vector("list", length(design)))
-  run_design_internal.default(design, results = results)$estimates_df
+  run_design_internal.design(design, results = results)$estimates_df
 }
 
 get_estimands_single_design <- function(design) {
   results <- list("estimand" = vector("list", length(design)))
-  run_design_internal.default(design, results = results)$estimands_df
+  run_design_internal.design(design, results = results)$estimands_df
 }
 
 #' Obtain the preferred citation for a design
