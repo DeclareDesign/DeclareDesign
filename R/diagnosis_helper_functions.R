@@ -174,7 +174,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   # Select columns
   if (!is.null(select)) {
     available_to_select <- make_nice_names(c(group_columns, diagnosand_columns))
-    if (any(!(select %in% available_to_select)))
+    if (!all(select %in% available_to_select))
       stop(paste(
         "select argument must only include elements from: ",
         paste(available_to_select, collapse = ", ")

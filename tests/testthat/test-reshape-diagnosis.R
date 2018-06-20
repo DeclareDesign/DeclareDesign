@@ -29,8 +29,8 @@ test_that("reshape works", {
     my_estimator
   
   dx <- diagnose_design(design, sims = 10, bootstrap_sims = 5)
-  #debugonce(reshape_diagnosis)
   reshape_diagnosis(dx)
-  expect_error(reshape_diagnosis(dx, select = "mean_estimand"))
+  expect_error(reshape_diagnosis(dx, select = "mean_estimand"),
+               regexp = "select argument must only include elements from")
   reshape_diagnosis(dx, select = "Mean Estimand")
 })
