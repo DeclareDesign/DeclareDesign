@@ -73,8 +73,8 @@ diagnosand_handler <- function(data, ...,
   ret <- simplify2array(ret)
   
   data.frame(
-    estimand_label = names(options),
-    estimand = ret,
+    diagnosand_label = names(options),
+    diagnosand = ret,
     stringsAsFactors = FALSE
   )
 }
@@ -227,8 +227,8 @@ default_diagnosands <- function(data, alpha = .05){
   mean_estimand <- mean(estimand)
   
   
-  data.frame(estimand_label = c("bias", "rmse", "power", "coverage", "mean_estimate", "sd_estimate", "mean_se", "type_s_rate", "mean_estimand"),
-             estimand = c( bias ,  rmse ,  power ,  coverage ,  mean_estimate ,  sd_estimate , mean_se,  type_s_rate ,  mean_estimand ))
+  data.frame(diagnosand_label = c("bias", "rmse", "power", "coverage", "mean_estimate", "sd_estimate", "mean_se", "type_s_rate", "mean_estimand"),
+             diagnosand = c( bias ,  rmse ,  power ,  coverage ,  mean_estimate ,  sd_estimate , mean_se,  type_s_rate ,  mean_estimand ))
 }
 
 
