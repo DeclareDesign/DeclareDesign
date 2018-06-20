@@ -87,7 +87,7 @@ print.summary.diagnosis <- function(x, ...) {
 }
 
 
-#' Clean up DeclareDesign diagnosis object for printing
+#' Clean up a diagnosis object for printing
 #'
 #' If diagnosands are bootstrapped, se's are put in parenthese on a second line and rounded to \code{digits}.
 #'
@@ -182,8 +182,6 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
     
     return_df <- return_df[, c(make_nice_names(c(sort_by_list, "n_sims")), select), drop = FALSE]
   }
-  
-  
   
   rownames(return_df) <- NULL
   return(return_df)

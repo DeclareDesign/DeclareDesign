@@ -206,7 +206,7 @@ test_that("demo runs", {
     return(my_design)
   }
 
-  my_1000_design <- expand_design(template = m_arm_trial, numb = 1000)
+  my_1000_design <- expand_design(designer = m_arm_trial, numb = 1000)
   head(draw_data(my_1000_design))
 
   ## ------------------------------------------------------------------------

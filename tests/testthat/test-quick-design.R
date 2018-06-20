@@ -21,7 +21,7 @@ test_that("expand_design works", {
   set.seed(1999)
   direct <- draw_data(two_arm_trial(N = 50))
   
-  design <- expand_design(template = two_arm_trial, N = 50)
+  design <- expand_design(designer = two_arm_trial, N = 50)
   set.seed(1999)
   qd <- draw_data(design)
   
@@ -48,7 +48,7 @@ test_that("expand_design works some more", {
   expect_equal(nrow(draw_data(two_arm_trial(N = 5))), 5)
   expect_equal(nrow(draw_data(two_arm_trial(N = 15))), 15)
   
-  a_expand_design <- expand_design(template = two_arm_trial, N = 50)
+  a_expand_design <- expand_design(designer = two_arm_trial, N = 50)
   
   df <- draw_data(a_expand_design)
   
@@ -75,14 +75,14 @@ test_that("vary works", {
     return(my_design)
   }
   
-  design <- expand_design(template = two_arm_trial,
+  design <- expand_design(designer = two_arm_trial,
                           N = c(100, 200, 300),
                           noise_sd = 1)
   expect_length(design, 3)
   diagnose_design(design, sims = 2, bootstrap_sims = FALSE)
   
   design <- expand_design(
-    template = two_arm_trial,
+    designer = two_arm_trial,
     N = c(100, 200, 300),
     noise_sd = c(.1, .2, .3)
   )
@@ -90,7 +90,7 @@ test_that("vary works", {
   diagnose_design(design, sims = 2, bootstrap_sims = FALSE)
   
   design <- expand_design(
-    template = two_arm_trial,
+    designer = two_arm_trial,
     expand = FALSE,
     N = c(100, 200, 300),
     noise_sd = c(.1, .2, .3)
@@ -99,7 +99,7 @@ test_that("vary works", {
   diagnose_design(design, sims = 2, bootstrap_sims = FALSE)
   
   expect_error(expand_design(
-    template = two_arm_trial,
+    designer = two_arm_trial,
     expand = FALSE,
     N = c(100, 200, 300),
     noise_sd = c(.1, .2)
@@ -126,7 +126,7 @@ test_that("power curve", {
   }
   
   design <-
-    expand_design(template = two_arm_trial, N = c(100, 200, 300, 500, 1000))
+    expand_design(designer = two_arm_trial, N = c(100, 200, 300, 500, 1000))
   
   expect_length(design, 5)
   
@@ -152,17 +152,17 @@ test_that("single design can be created by expand_design", {
       design
     }
   
-  my_design <- expand_design(my_template)
+  my_design <- expand_design(my_designer)
 
   expect_s3_class(my_design, "design")
   # 
-  # my_design <- expand_design(my_template, N = 50)
+  # my_design <- expand_design(my_designer, N = 50)
   # 
   # expect_s3_class(my_design, "design")
   # 
   # expect_equal(nrow(draw_data(my_design)), 50)
   # 
-  # my_designs <- expand_design(my_template, N = c(50, 100))
+  # my_designs <- expand_design(my_designer, N = c(50, 100))
   # 
   # expect_equal(length(my_designs), 2)
   

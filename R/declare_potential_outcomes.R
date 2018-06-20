@@ -6,17 +6,11 @@
 #'
 #' @export
 #'
-#'
-#'
 #' @details
 #'
 #' A `declare_potential_outcomes` declaration returns a function. That function takes data and returns data with potential outcomes columns appended. These columns describe the outcomes that each unit would express if that unit were in the corresponding treatment condition.
 #'
 #' The potential outcomes function can sometimes be a stumbling block for users, as some are uncomfortable asserting anything in particular about the very causal process that they are conducting a study to learn about! We recommend trying to imagine what your preferred theory would predict, what an alternative theory would predict, and what your study would reveal if there were no differences in potential outcomes for any unit (i.e., all treatment effects are zero).
-#'
-#'
-#'
-#'
 #'
 #' @examples
 #' 
@@ -32,8 +26,6 @@
 #'   Y_Z_1 = .30 + .01 * age
 #' )
 #'
-#'
-#'
 #' # Using a formula
 #'  my_potential_outcomes <- declare_potential_outcomes(Y ~ .05 + .25 * Z + .01 * age * Z)
 #'
@@ -48,20 +40,20 @@
 #'
 #'  my_potential_outcomes <- declare_potential_outcomes(
 #'    formula = Y ~ .05 + .25 * Z1 + .01 * age * Z2,
-#'    conditions = list(Z1=0:1, Z2=0:1)
+#'    conditions = list(Z1 = 0:1, Z2 = 0:1)
 #'  )
 #'
 #' ########################################################
 #' # Custom handler
 #'
-#' my_potential_outcome_f <- function(data) {
+#' my_po_function <- function(data) {
 #'
 #'   data$Y_treated   <- rexp(nrow(data), .2)
 #'   data$Y_untreated <- rexp(nrow(data), .4)
 #'   data
 #' }
 #'
-#' custom_potential <- declare_potential_outcomes(handler=my_potential_outcome_f)
+#' custom_potential <- declare_potential_outcomes(handler = my_po_function)
 #'
 declare_potential_outcomes <- make_declarations(potential_outcomes_handler, "potential_outcomes");
 
@@ -78,7 +70,6 @@ potential_outcomes_handler <-  function(..., data, level) {
 validation_fn(potential_outcomes_handler) <-  function(ret, dots, label) {
   
   declare_time_error_if_data(ret)
-  
   
   # Below is a similar redispatch strategy, only at declare time
   validation_delegate <- function(formula=NULL, ...) {
@@ -114,7 +105,7 @@ validation_fn(potential_outcomes_handler) <-  function(ret, dots, label) {
   ret
 }
 
-#' @param formula a formula to calculate Potential outcomes as functions of assignment variables
+#' @param formula a formula to calculate potential outcomes as functions of assignment variables
 #' @param conditions see \code{\link{expand_conditions}}
 #' @param assignment_variables The name of the assignment variable
 #' @param level a character specifying a level of hierarchy for fabricate to calculate at

@@ -31,7 +31,7 @@ test_that("Simulate Design works", {
 })
 
 
-my_design_template <- function(N, tau) {
+my_designer <- function(N, tau) {
   pop <- declare_population(N = N)
   pos <-
     declare_potential_outcomes(Y_Z_0 = rnorm(N), Y_Z_1 = Y_Z_0 + tau)
@@ -45,7 +45,7 @@ my_design_template <- function(N, tau) {
 
 test_that("expand and simulate", {
   my_designs <-
-    expand_design(my_design_template,
+    expand_design(my_designer,
                   N = c(10, 50),
                   tau = c(5, 1), prefix = "custom_prefix")
   sims <- simulate_design(my_designs, sims = 5)

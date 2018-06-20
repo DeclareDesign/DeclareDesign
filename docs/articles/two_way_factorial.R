@@ -3,7 +3,7 @@ library(DeclareDesign)
 library(dplyr)
 library(ggplot2)
 
-two_way_factorial_template <- function(N = c(30, 100, 500, 1000),
+two_way_factorial_designer <- function(N = c(30, 100, 500, 1000),
                              beta_A = c(1, -1, 0),
                              beta_B = c(-1, 0, 1),
                              beta_AB = c(.5, -1, -.5, 0, 1))
@@ -57,13 +57,13 @@ two_way_factorial_template <- function(N = c(30, 100, 500, 1000),
   
   design
 }
-attr(two_way_factorial_template, "tips") <- c(
+attr(two_way_factorial_designer, "tips") <- c(
   "N" = "Size of population",
   "beta_A" = "Main effect of A",
   "beta_B" = "Main effect of B",
   "beta_AB" = "Interaction effect of A and B"
 )
-attr(two_way_factorial_template, "description") <- "
+attr(two_way_factorial_designer, "description") <- "
 <p> A two way factorial design with a size <code>N</code>, 
     main effects <code>beta_A</code> and <code>beta_B</code>, 
     and interaction <code>beta_AB</code>. 
@@ -113,7 +113,7 @@ design <- declare_design(
   estimator)
 
 ## ----eval = FALSE, echo = FALSE------------------------------------------
-#  designs <- fill_out(two_way_factorial_template,
+#  designs <- fill_out(two_way_factorial_designer,
 #                          N = seq(150,3000,150),
 #                          beta_A = 0,
 #                          beta_B = 0,
@@ -153,7 +153,7 @@ if(exists("diagnosis")) {
 }
 
 ## ----eval = FALSE, echo = TRUE-------------------------------------------
-#  designs <- fill_out(two_way_factorial_template,
+#  designs <- fill_out(two_way_factorial_designer,
 #                          N = seq(150,3000,150),
 #                          beta_A = 0,
 #                          beta_B = 0,
