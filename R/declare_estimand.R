@@ -130,6 +130,10 @@
 #' 
 declare_estimand <- make_declarations(estimand_handler, "estimand", causal_type = "estimand", default_label = "my_estimand")
 
+#' @rdname declare_estimand
+#' @export
+declare_estimands <- declare_estimand
+
 #' @param subset a subset expression
 #' @param coefficients TRUE/FALSE
 #' @param data a data.frame
