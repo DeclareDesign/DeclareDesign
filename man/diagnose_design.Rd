@@ -2,7 +2,7 @@
 % Please edit documentation in R/diagnose_design.R
 \name{diagnose_design}
 \alias{diagnose_design}
-\title{Diagnose the Design}
+\title{Diagnose the design}
 \usage{
 diagnose_design(..., diagnosands = default_diagnosands, sims = 500,
   bootstrap_sims = 100, add_grouping_variables = NULL)

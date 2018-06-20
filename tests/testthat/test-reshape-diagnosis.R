@@ -23,7 +23,7 @@ test_that("reshape works", {
     my_potential_outcomes +
     my_sampling +
     my_estimand +
-    tidy_step(dplyr::mutate(q = 5)) +
+    declare_step(dplyr::mutate, q = 5) +
     my_assignment +
     my_reveal +
     my_estimator

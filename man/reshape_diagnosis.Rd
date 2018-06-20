@@ -2,7 +2,7 @@
 % Please edit documentation in R/diagnosis_helper_functions.R
 \name{reshape_diagnosis}
 \alias{reshape_diagnosis}
-\title{Clean up DeclareDesign diagnosis object for printing}
+\title{Clean up a diagnosis object for printing}
 \usage{
 reshape_diagnosis(diagnosis, digits = 2, select = NULL)
 }

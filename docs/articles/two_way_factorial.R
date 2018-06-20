@@ -113,7 +113,7 @@ design <- declare_design(
   estimator)
 
 ## ----eval = FALSE, echo = FALSE------------------------------------------
-#  designs <- fill_out(two_way_factorial_designer,
+#  designs <- expand_design(two_way_factorial_designer,
 #                          N = seq(150,3000,150),
 #                          beta_A = 0,
 #                          beta_B = 0,
@@ -153,7 +153,7 @@ if(exists("diagnosis")) {
 }
 
 ## ----eval = FALSE, echo = TRUE-------------------------------------------
-#  designs <- fill_out(two_way_factorial_designer,
+#  designs <- expand_design(two_way_factorial_designer,
 #                          N = seq(150,3000,150),
 #                          beta_A = 0,
 #                          beta_B = 0,

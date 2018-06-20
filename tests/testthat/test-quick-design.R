@@ -144,7 +144,7 @@ test_that("power curve", {
 
 test_that("single design can be created by expand_design", {
   # need to fix this population business single step
-  my_template <-
+  my_designer <-
     function(N = 10) {
       pop <-
         declare_population(N = N)

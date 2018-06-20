@@ -3,7 +3,7 @@
 \name{declare_citation}
 \alias{declare_citation}
 \alias{citation_handler}
-\title{Declare Research Study Citation}
+\title{Declare research study citation}
 \usage{
 declare_citation(..., handler = citation_handler, label = NULL)
 
@@ -34,7 +34,7 @@ citation_handler(data = stop("Don't evaluate data argument"), title = NULL,
 a function that takes a data.frame as an argument and returns citation data
 }
 \description{
-Declare Research Study Citation
+Declare research study citation
 }
 \examples{
 

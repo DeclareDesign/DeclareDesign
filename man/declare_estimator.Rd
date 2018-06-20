@@ -5,7 +5,7 @@
 \alias{tidy_estimator}
 \alias{model_handler}
 \alias{estimator_handler}
-\title{Declare Estimator}
+\title{Declare estimator}
 \usage{
 declare_estimator(..., handler = estimator_handler, label = "my_estimator")
 
@@ -54,20 +54,21 @@ The intent here is to factor out the estimator/estimand labeling so that it can 
 
 # Default handler
 
-my_estimand <- declare_estimand(ATE=mean(Y_Z_1-Y_Z_0))
+my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
-# Automatically uses first non-intercept coefficient as estimate
+# By default, uses first non-intercept coefficient as estimate
 # Default method is the `difference_in_means` estimator from `estimatr`
 
 my_estimator_dim <- declare_estimator(Y ~ Z, estimand = "ATE", label = "DIM")
 
 # lm from base R
 my_estimator_lm <- declare_estimator(Y ~ Z, estimand = "ATE", model = lm, label = "LM")
-# Use linear regression with robust standard errors from `estimatr` package
+# Use lm_robust (linear regression with robust standard errors) from `estimatr` package
+
 my_estimator_lm_rob <- declare_estimator(
   Y ~ Z,
   estimand = "ATE",
-  model = estimatr::lm_robust,
+  model = lm_robust,
   label = "LM_Robust"
 )
 
@@ -76,7 +77,7 @@ my_estimator_lm_rob_x <- declare_estimator(
   Y ~ X + Z,
   estimand = my_estimand,
   coefficients = "Z",
-  model = estimatr::lm_robust
+  model = lm_robust
 )
 
 # Use glm from base R
@@ -113,11 +114,11 @@ my_estimator_custom <- declare_estimator(
 
 my_estimator_function <- function(data){
   data.frame(
-    estimator_label="foo",
-    estimand_label="bar",
+    estimator_label = "foo",
+    estimand_label = "bar",
     est = with(data, mean(Y)),
     n = nrow(data),
-    stringsAsFactors=FALSE
+    stringsAsFactors = FALSE
   )
 }
 
@@ -130,7 +131,7 @@ my_estimator_custom2 <- declare_estimator(handler = my_estimator_function)
 set.seed(42)
 
 design_def <- 
-  declare_population(N = 100, X = rnorm(N), W=rexp(N,1), noise=rnorm(N)) + 
+  declare_population(N = 100, X = rnorm(N), W = rexp(N, 1), noise = rnorm(N)) + 
   declare_potential_outcomes(Y ~ .25 * Z + noise) + 
   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) + 
   declare_assignment(m = 50) + 
