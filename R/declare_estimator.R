@@ -165,6 +165,10 @@
 #'
 declare_estimator <- make_declarations(estimator_handler, step_type = "estimator", causal_type = "estimator", default_label = "my_estimator")
 
+#' @rdname declare_estimator
+#' @export
+declare_estimators <- declare_estimator
+
 #' \code{tidy_estimator} takes an untidy estimation function, and returns a tidy handler which accepts standard labelling options.
 #'
 #' The intent here is to factor out the estimator/estimand labeling so that it can be reused by other model handlers.

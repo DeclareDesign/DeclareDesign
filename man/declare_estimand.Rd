@@ -2,10 +2,13 @@
 % Please edit documentation in R/declare_estimand.R
 \name{declare_estimand}
 \alias{declare_estimand}
+\alias{declare_estimands}
 \alias{estimand_handler}
 \title{Declare estimand}
 \usage{
 declare_estimand(..., handler = estimand_handler, label = "my_estimand")
+
+declare_estimands(..., handler = estimand_handler, label = "my_estimand")
 
 estimand_handler(data, ..., subset = NULL, coefficients = FALSE, label)
 }
