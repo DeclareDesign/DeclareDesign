@@ -18,13 +18,15 @@ test_that(
     
     my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
     
+    my_mutate <- declare_step(dplyr::mutate, noise_sq = noise^2)
+    
     my_reveal <- declare_reveal()
     
     design <- my_population +
       my_potential_outcomes +
       my_sampling +
       my_estimand +
-      tidy_step(dplyr::mutate(q = 5)) +
+      my_mutate +
       my_assignment +
       my_reveal +
       my_estimator
@@ -58,14 +60,4 @@ test_that("No estimators / estimands", {
 
 
 })
-
-
-
-
-test_that("Declare a bare function", {
-  
-  expect_error(tidy_step(function(foo) foo), "The arguments of the tidy'd function do not include data or .data.")
-  
-})
-
 

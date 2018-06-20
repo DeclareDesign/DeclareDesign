@@ -1,4 +1,4 @@
-#' Declare Sampling Procedure
+#' Declare sampling procedure
 #'
 #' @inheritParams declare_internal_inherit_params
 #'
@@ -113,11 +113,8 @@ validation_fn(sampling_handler) <- function(ret, dots, label){
                           causal_type=attr(ret,"causal_type"),
                           call=attr(ret, "call"))
 
-
       }
     }
   }
-
   ret
-
 }

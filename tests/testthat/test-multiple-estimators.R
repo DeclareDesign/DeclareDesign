@@ -12,7 +12,7 @@ test_that("Two estimators, Two estimands (matched)",{
                      subset = ID %in% 1:5) +
     declare_estimand(CATE_6_10 = mean(extra[group == 2]) - mean(extra[group == 1]),
                      subset = ID %in% 6:10) +
-    declare_step(extra = extra + rnorm(N)) +
+    declare_step(fabricate, extra = extra + rnorm(N)) +
     declare_estimator(
       extra ~ group,
       subset = ID %in% 1:5,

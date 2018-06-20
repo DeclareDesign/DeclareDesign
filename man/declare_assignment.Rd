@@ -3,7 +3,7 @@
 \name{declare_assignment}
 \alias{declare_assignment}
 \alias{assignment_handler}
-\title{Declare Assignment Procedure}
+\title{Declare assignment procedure}
 \usage{
 declare_assignment(..., handler = assignment_handler, label = NULL)
 
@@ -27,13 +27,12 @@ assignment_handler(data, ..., assignment_variable = "Z",
 a function that takes a data.frame as an argument and returns a data.frame with additional columns appended including an assignment variable and (optionally) probabilities of assignment.
 }
 \description{
-Declare Assignment Procedure
+Declare assignment procedure
 }
 \details{
 While declare_assignment can work with any assignment_function that takes data and returns data, most random assignment procedures can be easily implemented with randomizr.
 The arguments to \code{\link{conduct_ra}} can include N, block_var, clust_var, m, m_each, prob, prob_each, block_m, block_m_each = NULL, block_prob, block_prob_each, num_arms, and conditions.
-The arguments you need to specify are different for different designs. Check the help files for \code{\link{complete_ra}},
-\code{\link{block_ra}}, \code{\link{cluster_ra}}, or \code{\link{block_and_cluster_ra}} for details on how to execute many common designs.
+The arguments you need to specify are different for different designs. Check the help files for \code{\link{complete_ra}}, \code{\link{block_ra}}, \code{\link{cluster_ra}}, or \code{\link{block_and_cluster_ra}} for details on how to execute many common designs.
 
 Custom assignment handlers should augment the data frame with an appropriate column for the assignments.
 }

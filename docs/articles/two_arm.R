@@ -1,7 +1,7 @@
 ## ----MIDA, echo = FALSE,include = FALSE----------------------------------
 library(DeclareDesign)
 
-two_arm_template <- function(
+two_arm_designer <- function(
   N = c(500, 100, 1000, 2000),
   n = c(250, 50, 500, 1000),
   m = c(100, 10, 30, 50, 75, 150, 200), 
@@ -29,7 +29,7 @@ two_arm_template <- function(
 		population, potential_outcomes, sampling, estimand, assignment, reveal_outcomes, estimator)
 }
 
-attr(two_arm_template,"tips") <- c(
+attr(two_arm_designer,"tips") <- c(
 	N = "Size of population", n = "Size of sample", 
 	m = "Number assigned to treatment", tau = "Average treatment effect", 
 	sigma = "Additional (square root of) variance added by treatment"
@@ -70,7 +70,7 @@ two_arm <- declare_design(population,
 			  estimator)
 
 ## ----eval = FALSE, echo = FALSE------------------------------------------
-#  diagnosis <- diagnose_design(two_arm, sims = 10000, bootstrap_sims = 1000)
+#  diagnosis <- diagnose_design(two_arm_designer, sims = 10000, bootstrap_sims = 1000)
 #  saveRDS(diagnosis,"two_arm_diagnosis.RDS")
 
 ## ----eval = FALSE, echo = TRUE-------------------------------------------

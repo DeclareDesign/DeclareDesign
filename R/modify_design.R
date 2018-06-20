@@ -21,7 +21,6 @@ find_step <- function(design, step) {
 #'
 #' @param design a design object, usually created using the + operator, \code{\link{expand_design}}, or the design library.
 #'
-#'
 #' @return A new design object
 #'
 #' @importFrom rlang lang_name quos quo_expr

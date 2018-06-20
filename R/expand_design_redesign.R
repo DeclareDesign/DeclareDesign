@@ -1,17 +1,17 @@
-#' Declare a Design via a Template Function
+#' Declare a design via a designer
 #'
-#' \code{expand_design} easily generates a set of design from a template function.
+#' \code{expand_design} easily generates a set of design from a designer function.
 #'
-#' @param template a function which yields a design.
+#' @param designer a function which yields a design
 #' @param expand boolean - if true, form the crossproduct of the ..., otherwise recycle them
 #' @param prefix prefix for the names of the designs, i.e. if you create two designs they would be named prefix_1, prefix_2
-#' @param ... Options sent to the template.
+#' @param ... Options sent to the designer
 #'
 #' @return if set of designs is size one, the design, otherwise a `by`-list of designs. Designs are given a parameters attribute with the values of parameters assigned by expand_design.
 #'
 #' @examples
 #'
-#' template <- function(N) {
+#' designer <- function(N) {
 #'   pop <- declare_population(N = N, noise = rnorm(N))
 #'   pos <- declare_potential_outcomes(Y ~ 0.20 * Z + noise)
 #'   assgn <- declare_assignment(m = N / 2)
@@ -21,7 +21,7 @@
 #' }
 #'
 #' # returns list of eight designs
-#' designs <- expand_design(template, N = seq(30, 100, 10))
+#' designs <- expand_design(designer, N = seq(30, 100, 10))
 #'
 #' \dontrun{
 #'  # diagnose a list of designs created by expand_design or redesign
@@ -29,14 +29,14 @@
 #' }
 #'
 #' # returns a single design
-#' large_design <- expand_design(template, N = 200)
+#' large_design <- expand_design(designer, N = 200)
 #'
 #' \dontrun{
 #'  diagnose_large_design <- diagnose_design(large_design, sims = 50)
 #' }
 #'
 #' @export
-expand_design <- function(template, expand = TRUE, prefix = "design", ...) {
+expand_design <- function(designer, expand = TRUE, prefix = "design", ...) {
   
   dots_quos <- quos(...)
   
@@ -45,7 +45,7 @@ expand_design <- function(template, expand = TRUE, prefix = "design", ...) {
     args_list <- expand_args(..., expand = expand)
     args_names <- expand_args_names(!!!dots_quos, expand = expand)
     
-    designs <- lapply(args_list, function(x) do.call(template, args = x))
+    designs <- lapply(args_list, function(x) do.call(designer, args = x))
     
     for (i in seq_along(designs)) {
       attr(designs[[i]], "parameters") <- setNames(args_names[i, , drop = FALSE], names(args_names))  
@@ -58,7 +58,7 @@ expand_design <- function(template, expand = TRUE, prefix = "design", ...) {
     }
     
   } else {
-    designs <- template()
+    designs <- designer()
   }
   
   return(designs)

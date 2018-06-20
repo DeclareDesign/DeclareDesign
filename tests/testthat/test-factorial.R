@@ -24,10 +24,11 @@ test_that("Factorial", {
       my_potential_outcomes + 
       my_estimand + 
       my_assignment + 
-      tidy_step(dplyr::mutate(Z1 = as.numeric(Z %in% c("T2", "T4")),
-             Z2 = as.numeric(Z %in% c("T3", "T4")))) +
-      reveal_outcomes +
-      my_estimator
+    declare_step(dplyr::mutate, 
+                 Z1 = as.numeric(Z %in% c("T2", "T4")),
+                 Z2 = as.numeric(Z %in% c("T3", "T4"))) +
+    reveal_outcomes +
+    my_estimator
 
   expect_equal(my_design %>% draw_data %>% nrow, 2000)
   expect_equal(my_design %>% run_design %>% names, c("estimates_df", "estimands_df"))

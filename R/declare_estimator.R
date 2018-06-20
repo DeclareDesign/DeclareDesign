@@ -1,4 +1,4 @@
-#' Declare Estimator
+#' Declare estimator
 #'
 #' @description Declares an estimator which generates estimates and associated statistics
 #'
@@ -19,9 +19,9 @@
 #'
 #' # Default handler
 #'
-#' my_estimand <- declare_estimand(ATE=mean(Y_Z_1-Y_Z_0))
+#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 #'
-#' # Automatically uses first non-intercept coefficient as estimate
+#' # By default, uses first non-intercept coefficient as estimate
 #' # Default method is the `difference_in_means` estimator from `estimatr`
 #'
 #' my_estimator_dim <- declare_estimator(Y ~ Z, estimand = "ATE", label = "DIM")
@@ -29,11 +29,12 @@
 #' # lm from base R
 #' my_estimator_lm <- declare_estimator(Y ~ Z, estimand = "ATE", model = lm, label = "LM")
 #
-#' # Use linear regression with robust standard errors from `estimatr` package
+#' # Use lm_robust (linear regression with robust standard errors) from `estimatr` package
+#' 
 #' my_estimator_lm_rob <- declare_estimator(
 #'   Y ~ Z,
 #'   estimand = "ATE",
-#'   model = estimatr::lm_robust,
+#'   model = lm_robust,
 #'   label = "LM_Robust"
 #' )
 #'
@@ -42,7 +43,7 @@
 #'   Y ~ X + Z,
 #'   estimand = my_estimand,
 #'   coefficients = "Z",
-#'   model = estimatr::lm_robust
+#'   model = lm_robust
 #' )
 #'
 #' # Use glm from base R
@@ -79,11 +80,11 @@
 #'
 #' my_estimator_function <- function(data){
 #'   data.frame(
-#'     estimator_label="foo",
-#'     estimand_label="bar",
+#'     estimator_label = "foo",
+#'     estimand_label = "bar",
 #'     est = with(data, mean(Y)),
 #'     n = nrow(data),
-#'     stringsAsFactors=FALSE
+#'     stringsAsFactors = FALSE
 #'   )
 #' }
 #'
@@ -96,7 +97,7 @@
 #' set.seed(42)
 #'
 #' design_def <- 
-#'   declare_population(N = 100, X = rnorm(N), W=rexp(N,1), noise=rnorm(N)) + 
+#'   declare_population(N = 100, X = rnorm(N), W = rexp(N, 1), noise = rnorm(N)) + 
 #'   declare_potential_outcomes(Y ~ .25 * Z + noise) + 
 #'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) + 
 #'   declare_assignment(m = 50) + 
@@ -207,18 +208,14 @@ tidy_estimator <- function(estimator_function){
 
   }
 
-
   formals(f) <- formals(estimator_function)
   if(!"estimand" %in% names(formals(f))){formals(f)["estimand"] <- list(NULL)}
   if(!"label"%in% names(formals(f))){formals(f)$label <- alist(a=)$a}
 
   attributes(f) <- attributes(estimator_function)
 
-
   f
 }
-
-
 
 #' @param data a data.frame
 #' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
@@ -254,13 +251,9 @@ validation_fn(model_handler) <-  function(ret, dots, label){
   ret
 }
 
-
-
 #' @param estimand a declare_estimand step object, or a character label, or a list of either
 #' @rdname declare_estimator
 estimator_handler <- tidy_estimator(model_handler)
-
-
 
 # called by model_handler, resets columns names !!!
 fit2tidy <- function(fit, coefficients = FALSE) {

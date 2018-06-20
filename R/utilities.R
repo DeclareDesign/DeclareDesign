@@ -144,10 +144,7 @@ rbind_disjoint <- function(list_of_df, infill=NA) {
   do.call(rbind.data.frame, append(list_of_df, list(make.row.names = FALSE, stringsAsFactors = FALSE)))
 }
 
-
-
 # Formatting --------------------------------------------------------------
-
 
 add_parens <- function(x, digits = 3) {
   sprintf("(%s)", format_num(x, digits))
@@ -172,10 +169,7 @@ check_sim_number <- function(simulations_df,
   }
 }
 
-
-
 # helpers for summary.design ----------------------------------------------
-
 
 get_added_variables <- function(last_df = NULL, current_df) {
   setdiff(names(current_df), names(last_df))
