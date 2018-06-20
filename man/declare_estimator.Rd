@@ -2,12 +2,15 @@
 % Please edit documentation in R/declare_estimator.R
 \name{declare_estimator}
 \alias{declare_estimator}
+\alias{declare_estimators}
 \alias{tidy_estimator}
 \alias{model_handler}
 \alias{estimator_handler}
 \title{Declare estimator}
 \usage{
 declare_estimator(..., handler = estimator_handler, label = "my_estimator")
+
+declare_estimators(..., handler = estimator_handler, label = "my_estimator")
 
 tidy_estimator(estimator_function)
 
