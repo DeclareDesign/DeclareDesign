@@ -1,6 +1,6 @@
-#' Declare Design
+#' Add steps to create a design
 #'
-#' @param lhs A step in a research design, beginning with a function that draws the population. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a \code{data.frame} as an argument and return a \code{data.frame}. Typically, many steps are declared using the \code{declare_} functions, i.e., \code{\link{declare_population}}, \code{\link{declare_population}}, \code{\link{declare_sampling}}, \code{\link{declare_potential_outcomes}}, \code{\link{declare_estimand}}, \code{\link{declare_assignment}}, and \code{\link{declare_estimator}}. Functions from the \code{dplyr} package such as mutate can also be usefully included.
+#' @param lhs A step in a research design, beginning with a function that draws the population. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a \code{data.frame} as an argument and return a \code{data.frame}. Typically, many steps are declared using the \code{declare_} functions, i.e., \code{\link{declare_population}}, \code{\link{declare_population}}, \code{\link{declare_sampling}}, \code{\link{declare_potential_outcomes}}, \code{\link{declare_estimand}}, \code{\link{declare_assignment}}, and \code{\link{declare_estimator}}. 
 #' @param rhs A second step in a research design
 #'
 #' @details
@@ -38,11 +38,13 @@
 #' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+#' 
+#' my_mutate <- declare_step(dplyr::mutate, noise_sq = noise^2)
 #'
 #' my_reveal <- declare_reveal()
 #'
 #' design <- my_population + my_potential_outcomes + my_sampling + 
-#'          my_estimand + tidy_step(dplyr::mutate(noise_sq = noise^2)) + 
+#'          my_estimand + my_mutate + 
 #'          my_assignment + my_reveal + my_estimator
 #'
 #' design
@@ -92,8 +94,8 @@
     
   } else{
     
-    if (!inherits(rhs, "dd")) {
-      stop("The right hand side does not appear to be a DeclareDesign object. Can you wrap the step with `tidy_step()`?", call. = FALSE)
+    if (!inherits(rhs, "dd") && !inherits(rhs, "function")) {
+      stop("The right hand side does not appear to be a DeclareDesign object or a function", call. = FALSE)
     }
     
     if (inherits(lhs, "design")) {
@@ -154,7 +156,11 @@ construct_design <- function(...) {
     
     # Is it a non-declared function
     if (is.function(ret[[i]]) && !inherits(ret[[i]], "design_step")) {
-      if (!identical(names(formals(ret[[i]])), "data")) {
+      
+      # warn if the function call does not have exactly data as arguments
+      #  except: if it is a dplyr pipeline (class fseq)
+      if (!identical(names(formals(ret[[i]])), "data") && 
+          !inherits(ret[[i]], "fseq")) {
         warning("Undeclared Step ", i, " function arguments are not exactly 'data'")
       }
       

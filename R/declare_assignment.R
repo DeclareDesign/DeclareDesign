@@ -1,6 +1,4 @@
-
-
-#' Declare Assignment Procedure
+#' Declare assignment procedure
 #'
 #' @inheritParams declare_internal_inherit_params
 #'
@@ -11,8 +9,7 @@
 #'
 #' While declare_assignment can work with any assignment_function that takes data and returns data, most random assignment procedures can be easily implemented with randomizr.
 #' The arguments to \code{\link{conduct_ra}} can include N, block_var, clust_var, m, m_each, prob, prob_each, block_m, block_m_each = NULL, block_prob, block_prob_each, num_arms, and conditions.
-#' The arguments you need to specify are different for different designs. Check the help files for \code{\link{complete_ra}},
-#' \code{\link{block_ra}}, \code{\link{cluster_ra}}, or \code{\link{block_and_cluster_ra}} for details on how to execute many common designs.
+#' The arguments you need to specify are different for different designs. Check the help files for \code{\link{complete_ra}}, \code{\link{block_ra}}, \code{\link{cluster_ra}}, or \code{\link{block_and_cluster_ra}} for details on how to execute many common designs.
 #'
 #' Custom assignment handlers should augment the data frame with an appropriate column for the assignments.
 #'
@@ -57,11 +54,9 @@ declare_assignment <- make_declarations(assignment_handler, "assignment" )
 #' @rdname declare_assignment
 assignment_handler <-
   function(data, ..., assignment_variable = "Z", append_probabilities_matrix = FALSE) {
-    ## draw assignment
-
+    
     options <- quos(...)
-
-
+    
     for (assn in assignment_variable) {
       cond_prob <- as.symbol(paste0(assn, "_cond_prob"))
       assn <- as.symbol(assn)
@@ -79,7 +74,6 @@ assignment_handler <-
       }
     }
 
-
     data
   }
 
@@ -88,7 +82,6 @@ validation_fn(assignment_handler) <-   function(ret, dots, label){
   declare_time_error_if_data(ret)
 
   dirty <- FALSE
-  # browser()
 
   if (!"declaration" %in% names(dots)) {
     if ("blocks" %in% names(dots)) {
@@ -117,8 +110,6 @@ validation_fn(assignment_handler) <-   function(ret, dots, label){
         dirty <- TRUE
       }
     }
-
-
   }
 
   if ("assignment_variable" %in% names(dots)) {
@@ -148,7 +139,3 @@ validation_fn(assignment_handler) <-   function(ret, dots, label){
   structure(ret, step_meta = list(assignment_variables = assn))
   
 }
-
-###############################################################################
-
-

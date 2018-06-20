@@ -1,6 +1,4 @@
-
-
-#' Declare a Reveal Outcomes step
+#' Declare a reveal outcomes step
 #' 
 #' Potential outcomes declarations indicating what outcomes exist as a function of assignment variables. But one more step is required, revealing outcomes after treatment is realized. \code{declare_reveal} declares the set of outcome variable names, for example created by \code{declare_potential_outcomes} and the set of assignment variables \code{declare_assignment}. 
 #'

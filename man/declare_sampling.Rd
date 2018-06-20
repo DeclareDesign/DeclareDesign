@@ -3,7 +3,7 @@
 \name{declare_sampling}
 \alias{declare_sampling}
 \alias{sampling_handler}
-\title{Declare Sampling Procedure}
+\title{Declare sampling procedure}
 \usage{
 declare_sampling(..., handler = sampling_handler, label = NULL)
 
@@ -24,7 +24,7 @@ sampling_handler(data, ..., sampling_variable = "S")
 a function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
 }
 \description{
-Declare Sampling Procedure
+Declare sampling procedure
 }
 \details{
 While declare_sampling can work with any sampling_function that takes data and returns data, most random sampling procedures can be easily implemented with randomizr.

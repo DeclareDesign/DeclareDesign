@@ -20,7 +20,7 @@ test_that("Basic design summary", {
     my_potential_outcomes + 
     my_sampling + 
     my_estimand + 
-    tidy_step(dplyr::mutate(q = 5)) + 
+    declare_step(dplyr::mutate, q = 5) + 
     my_assignment + 
     reveal_outcomes + 
     my_estimator

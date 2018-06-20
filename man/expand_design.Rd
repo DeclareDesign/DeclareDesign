@@ -2,28 +2,29 @@
 % Please edit documentation in R/expand_design_redesign.R
 \name{expand_design}
 \alias{expand_design}
-\title{Declare a Design via a Template Function}
+\title{Declare a design via a designer}
 \usage{
-expand_design(template, ..., expand = TRUE, prefix = "design")
+expand_design(designer, expand = TRUE, prefix = "design", ...)
 }
 \arguments{
-\item{template}{a function which yields a design.}
+\item{designer}{a function which yields a design}
 
 \item{...}{Options sent to the template.}
 
 \item{expand}{boolean - if true, form the crossproduct of the ..., otherwise recycle them}
 
 \item{prefix}{prefix for the names of the designs, i.e. if you create two designs they would be named prefix_1, prefix_2}
+\item{...}{Options sent to the designer}
 }
 \value{
 if set of designs is size one, the design, otherwise a `by`-list of designs. Designs are given a parameters attribute with the values of parameters assigned by expand_design.
 }
 \description{
-\code{expand_design} easily generates a set of design from a template function.
+\code{expand_design} easily generates a set of design from a designer function.
 }
 \examples{
 
-template <- function(N) {
+designer <- function(N) {
   pop <- declare_population(N = N, noise = rnorm(N))
   pos <- declare_potential_outcomes(Y ~ 0.20 * Z + noise)
   assgn <- declare_assignment(m = N / 2)
@@ -33,7 +34,7 @@ template <- function(N) {
 }
 
 # returns list of eight designs
-designs <- expand_design(template, N = seq(30, 100, 10))
+designs <- expand_design(designer, N = seq(30, 100, 10))
 
 \dontrun{
  # diagnose a list of designs created by expand_design or redesign
@@ -41,7 +42,7 @@ designs <- expand_design(template, N = seq(30, 100, 10))
 }
 
 # returns a single design
-large_design <- expand_design(template, N = 200)
+large_design <- expand_design(designer, N = 200)
 
 \dontrun{
  diagnose_large_design <- diagnose_design(large_design, sims = 50)

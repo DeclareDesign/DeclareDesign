@@ -3,7 +3,7 @@
 \name{declare_estimand}
 \alias{declare_estimand}
 \alias{estimand_handler}
-\title{Declare Estimand}
+\title{Declare estimand}
 \usage{
 declare_estimand(..., handler = estimand_handler, label = "my_estimand")
 
@@ -40,7 +40,7 @@ will contain the step label. This can be used as an additional dimension for use
 
 my_estimand_ATE <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
-my_estimand_ATT <- declare_estimand(ATT = mean(Y_Z_1 - Y_Z_0), subset=Z==1)
+my_estimand_ATT <- declare_estimand(ATT = mean(Y_Z_1 - Y_Z_0), subset = Z == 1)
 
 # You can also use different coefficients from an model-based estimator for
 # two estimands, with a slightly different syntax
@@ -59,10 +59,10 @@ my_estimand_regression <- declare_estimand(
 
 my_estimand_function <- function(data, label) {
   ret <- with(data, median(Y_Z_1 - Y_Z_0))
-  data.frame(estimand_label=label,
-             estimand=ret,
-             time=Sys.time(),
-             stringsAsFactors=FALSE)
+  data.frame(estimand_label = label,
+             estimand = ret,
+             time = Sys.time(),
+             stringsAsFactors = FALSE)
 }
 my_estimand_custom <- declare_estimand(handler = my_estimand_function, label = "medianTE")
 
@@ -93,7 +93,7 @@ dat <- draw_data(design_stub)
 
 my_estimand_ATE(dat)
 
-my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand_ATE, label="estimator")
+my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand_ATE, label = "estimator")
 
 design_def <- insert_step(design_stub, my_estimand_ATE, before = assgn)
 design_def <- insert_step(design_def, my_estimator, after = "declare_reveal()")

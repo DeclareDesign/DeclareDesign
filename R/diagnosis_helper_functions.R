@@ -87,7 +87,7 @@ print.summary.diagnosis <- function(x, ...) {
 }
 
 
-#' Clean up DeclareDesign diagnosis object for printing
+#' Clean up a diagnosis object for printing
 #'
 #' If diagnosands are bootstrapped, se's are put in parenthese on a second line and rounded to \code{digits}.
 #'
@@ -122,7 +122,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   # Reshape if there is bootstrapping
   diagnosand_columns <- diagnosis$diagnosand_names
   diagnosand_se_columns <- paste0("se(", diagnosis$diagnosand_names, ")")
-  group_columns <- names(diagnosands_df)[!names(diagnosands_df) %in% c(diagnosand_columns, diagnosand_se_columns)]
+  group_columns <- setdiff(names(diagnosands_df), c(diagnosand_columns, diagnosand_se_columns))
   
   # Make diagnosand only df
   diagnosands_only_df <-
@@ -154,30 +154,36 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   sort_by_list <- colnames(return_df) %i% diagnosis$group_by_set
   return_df <- return_df[do.call(order, as.list(return_df[,sort_by_list])), , drop = FALSE]
   
-  # Select columns
-  if (!is.null(select)) {
-    if (any(!(select %in% names(return_df))))
-      stop(paste(
-        "select argument must only include elements from: ",
-        paste(c(group_columns, diagnosand_columns), collapse = ",")
-      ))
-    return_df <- return_df[, select]
-  }
-  
   # NA bootstrap rows
   return_df$design_label <- factor(return_df$design_label, levels = c(levels(return_df$design_label), ""))
-  return_df[return_df$statistic == "SE (bootstrapped)", sort_by_list] <- ""
+  return_df[return_df$statistic == "SE (bootstrapped)", c(sort_by_list, "n_sims")] <- ""
   
   parameter_names <- names(diagnosis$parameters_df)[-1]
   
   # Make names nicer
-  names(return_df)[which(!names(return_df) %in% parameter_names)] <-
+  make_nice_names <- function(x){
     gsub("\\b(se[(]|sd |rmse|[[:alpha:]])",
          "\\U\\1",
-         gsub("_", " ", names(return_df)[which(!names(return_df) %in% parameter_names)]),
+         gsub("_", " ", x),
          perl = TRUE)
-  rownames(return_df) <- NULL
+  }
   
+  names_to_change <- setdiff(names(return_df), parameter_names)
+  names(return_df)[names(return_df) %in% names_to_change] <- make_nice_names(names_to_change)
+    
+  # Select columns
+  if (!is.null(select)) {
+    available_to_select <- make_nice_names(c(group_columns, diagnosand_columns))
+    if (!all(select %in% available_to_select))
+      stop(paste(
+        "select argument must only include elements from: ",
+        paste(available_to_select, collapse = ", ")
+      ))
+    
+    return_df <- return_df[, c(make_nice_names(c(sort_by_list, "n_sims")), select), drop = FALSE]
+  }
+  
+  rownames(return_df) <- NULL
   return(return_df)
   
 }

@@ -7,16 +7,16 @@
 \title{DeclareDesign package}
 \description{
 The four main types of functions are to declare a step, combine steps into designs,
-and manipulate designs and design templates.
+and manipulate designs and designers (functions that return designs).
 }
 \section{Design Steps}{
 
 \describe{
   \item{\code{\link{declare_population}}}{Population step}
-  \item{\code{\link{declare_potential_outcomes}}}{Potential Outcomes step}
+  \item{\code{\link{declare_potential_outcomes}}}{Potential outcomes step}
   \item{\code{\link{declare_sampling}}}{Sampling step}
   \item{\code{\link{declare_assignment}}}{Assignment step}
-  \item{\code{\link{declare_reveal}}}{Reveal Outcomes step}
+  \item{\code{\link{declare_reveal}}}{Reveal outcomes step}
   \item{\code{\link{declare_estimand}}}{Estimand step}
   \item{\code{\link{declare_estimator}}}{Estimator step}
   \item{\code{\link{declare_citation}}}{Citation step}
@@ -26,7 +26,7 @@ and manipulate designs and design templates.
 \section{Design Objects}{
 
 \describe{
-  \item{+}{Declare a design}
+  \item{+}{Add steps to create a design}
   \item{\code{\link{draw_data}}}{Simulate the DGP}
   \item{\code{\link{run_design}}}{Simulate the DGP with estimands/estimators}
   \item{\code{\link{diagnose_design}}}{Diagnose a design}
@@ -45,7 +45,7 @@ and manipulate designs and design templates.
 \section{Designers}{
 
 \describe{
-  \item{\code{\link{expand_design}}}{Generate Designs from a Designer}
+  \item{\code{\link{expand_design}}}{Generate designs from a designer}
   \item{designs}{See also the \code{DesignLibrary} package for designers to use}
 }
 }

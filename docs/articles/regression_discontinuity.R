@@ -4,7 +4,7 @@ library(DeclareDesign)
 library(ggplot2)
 
 ## ----MIDA, echo = FALSE--------------------------------------------------
-regression_discontinuity_template <- function(
+regression_discontinuity_designer <- function(
 	N = c(1000, 50,100,250, 500, 2500, 5000, 10000),
 	tau = c(.15, 0, -1, -.5, -.15,  .5, 1),
 	cutoff = c(.5, .01, .1, .25, .75, .9, .99), 
@@ -49,7 +49,7 @@ estimator <- declare_estimator(
 declare_design(
  population, potential_outcomes, estimand, sampling, reveal_outcomes, estimator)
 }
-attr(regression_discontinuity_template,"tips") <- 
+attr(regression_discontinuity_designer,"tips") <- 
 	c(N = "Size of population to sample from",
 		tau = "Difference in potential outcomes functions at the threshold",
 		cutoff = "Threshold on running variable beyond which units are treated", 
@@ -63,7 +63,7 @@ control <- function(X) {
 treatment <- function(X) {
   as.vector(poly(X, 4, raw = T) %*% c(0, -1.5, .5, .8)) + .15}
 pro_con_colors <- c("#C67800", "#205C8A")
-mock_data <- draw_data(regression_discontinuity_template())
+mock_data <- draw_data(regression_discontinuity_designer())
 X <- seq(-.5,.5,.005)
 treatment_frame <- data.frame(
 	X = X,
@@ -137,7 +137,7 @@ ggplot(plot_frame,aes(x = X, y = Y, color = as.factor(Z))) +
 #   population, potential_outcomes, estimand, sampling, reveal_outcomes, estimator)
 
 ## ----echo = FALSE, eval = FALSE------------------------------------------
-#  diagnosis <- diagnose_design(rd_template(), sims = 10000, bootstrap_sims = 1000)
+#  diagnosis <- diagnose_design(regression_discontinuity_designer(), sims = 10000, bootstrap_sims = 1000)
 #  saveRDS(diagnosis, file = "regression_discontinuity_diagnosis.RDS")
 
 ## ----echo = FALSE,eval = TRUE, include = FALSE---------------------------

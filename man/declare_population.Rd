@@ -2,7 +2,7 @@
 % Please edit documentation in R/declare_population.R
 \name{declare_population}
 \alias{declare_population}
-\title{Declare the Size and Features of the Population}
+\title{Declare the size and features of the population}
 \usage{
 declare_population(..., handler = fabricate, label = NULL)
 }
@@ -17,7 +17,7 @@ declare_population(..., handler = fabricate, label = NULL)
 a function that returns a data.frame
 }
 \description{
-Declare the Size and Features of the Population
+Declare the size and features of the population
 }
 \examples{
 
@@ -32,8 +32,8 @@ my_population <- declare_population(sleep)
 # Declare a single-level population with a covariate
 my_population <- declare_population(
   N = 6,
-  gender=draw_binary(N, prob=.5),
-  height_ft = rnorm(N, mean=5 + 4/12 + 4/12 * gender, sd=3/12)
+  gender = draw_binary(N, prob = 0.5),
+  height_ft = rnorm(N, mean = 5 + 4/12 + 4/12 * gender, sd = 3/12)
 )
 my_population()
 

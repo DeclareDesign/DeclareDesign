@@ -1,9 +1,9 @@
 
 
-context("functions in templates")
+context("functions in designers")
 
-test_that("simple template works", {
-my_template <- function(N = 100,
+test_that("simple designer works", {
+my_designer <- function(N = 100,
                         my_estimand_func = mean) {
   my_pop <- declare_population(N = N, Y = rnorm(N))
   my_estimand <- declare_estimand(mand = my_estimand_func(Y))
@@ -13,21 +13,21 @@ my_template <- function(N = 100,
 
 expect_length(design_list <-
   expand_design(
-    template = my_template,
+    designer = my_designer,
     N = c(c(20, 20, 20), c(20, 20, 20), c(20, 20, 20)),
     my_estimand_func = c(mean, median)
   ), 18)
 
 expect_length(design_list <-
   expand_design(
-    template = my_template,
+    designer = my_designer,
     N = c(10, 50, 100),
     my_estimand_func = c(mean, median)
   ), 6)
 
   expect_length(design_list <-
   expand_design(
-    template = my_template,
+    designer = my_designer,
     N = c(10, 50, 100),
     my_estimand_func = list(mean, median)
   ), 6)
@@ -35,15 +35,15 @@ expect_length(design_list <-
 
   expect_length(design_list <-
   expand_design(
-    template = my_template,
+    designer = my_designer,
     N = c(10, 50, 100),
     my_estimand_func = mean
   ), 3)
 })
 
 
-test_that("template with vector argument works", {
-  my_template <- function(N = c(100, 50),
+test_that("designer with vector argument works", {
+  my_designer <- function(N = c(100, 50),
                           my_estimand_func = mean) {
     my_pop <- declare_population(N = min(N), Y = rnorm(N))
     my_estimand <- declare_estimand(mand = my_estimand_func(Y))
@@ -53,7 +53,7 @@ test_that("template with vector argument works", {
   
   expect_length(design_list <-
     expand_design(
-      template = my_template,
+    designer = my_designer,
       N = list(c(20, 20, 20), c(20, 20, 20), c(20, 20, 20)),
       my_estimand_func = c(mean, median)
     ), 6)
@@ -62,9 +62,9 @@ test_that("template with vector argument works", {
 
 
 
-context("functions in templates")
+context("functions in designers")
 
-my_template <- function(N = 100,
+my_designer <- function(N = 100,
                         my_estimand_func = mean) {
   my_pop <- declare_population(N = N, Y = rnorm(N))
   my_estimand <- declare_estimand(mand = my_estimand_func(Y))
@@ -77,7 +77,7 @@ test_that("expand_design works",{
   
   design_list <-
     expand_design(
-      template = my_template,
+    designer = my_designer,
       N = c(c(20, 20, 20), c(20, 20, 20), c(20, 20, 20)),
       my_estimand_func = c(mean, median)
     )
@@ -86,7 +86,7 @@ test_that("expand_design works",{
   
   design_list <-
     expand_design(
-      template = my_template,
+    designer = my_designer,
       N = c(10, 50, 100),
       my_estimand_func = c(mean, median)
     )
@@ -95,7 +95,7 @@ test_that("expand_design works",{
   
   design_list <-
     expand_design(
-      template = my_template,
+    designer = my_designer,
       N = c(10, 50, 100),
       my_estimand_func = list(mean, median)
     )
@@ -105,7 +105,7 @@ test_that("expand_design works",{
   
   design_list <-
     expand_design(
-      template = my_template,
+    designer = my_designer,
       N = c(10, 50, 100),
       my_estimand_func = mean
     )
@@ -116,7 +116,7 @@ test_that("expand_design works",{
 })
 
 test_that("capitalization of parameter names are retained", {
-  my_template <- function(N = 100, n = 50) {
+  my_designer <- function(N = 100, n = 50) {
     my_pop <- declare_population(N = N, noise = rnorm(N))
     my_pos <-
       declare_potential_outcomes(Y_Z_0 = noise,
@@ -131,7 +131,7 @@ test_that("capitalization of parameter names are retained", {
   
   design_list <-
     expand_design(
-      template = my_template,
+    designer = my_designer,
       N = c(100, 50), n = c(50, 25), expand = FALSE
     )
   

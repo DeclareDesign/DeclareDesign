@@ -4,7 +4,8 @@
 \alias{declare_step}
 \title{Declare a custom step}
 \usage{
-declare_step(..., handler = fabricate, label = NULL)
+declare_step(..., handler = function(data, ...f, ...) ...f(data, ...),
+  label = NULL)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -17,14 +18,14 @@ declare_step(..., handler = fabricate, label = NULL)
 a function that returns a data.frame
 }
 \description{
-Declare a custom step
+With declare_step, you can include any function that takes data as one of its arguments and returns data in a design declaration. The first argument is always a "handler", which is the name of the data-in, data-out function.
 }
 \examples{
 
 N <- 50
 my_population <- declare_population(N = N, noise = rnorm(N))
 my_assignment <- declare_assignment(m = 25)
-my_step <- declare_step(Z2 = Z, q = 5)
+my_step <- declare_step(fabricate, Z2 = Z, q = 5)
 
 design <- my_population + my_assignment + my_step
 

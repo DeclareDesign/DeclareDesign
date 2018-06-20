@@ -2,7 +2,7 @@
 
 test_that("multiple design get_estimates", {
   
-  my_template <- function(N = 50){
+  my_designer <- function(N = 50){
     
     my_population <- declare_population(N = N, noise = rnorm(N))
     
@@ -50,7 +50,7 @@ test_that("multiple design get_estimates", {
   
   design_2 <- replace_step(design_1, my_assignment, my_assignment_2)
   
-  my_designs <- expand_design(my_template, N = c(50, 100))
+  my_designs <- expand_design(my_designer, N = c(50, 100))
   
   get_estimands(design_1)
   

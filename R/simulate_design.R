@@ -1,6 +1,6 @@
 #' Simulate a design
 #'
-#' Runs many simulations of a design and saves to a dataframe.
+#' Runs many simulations of a design and returns a simulations data.frame.
 #'
 #' @param ... A design created using the + operator, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.
 #'
@@ -39,7 +39,7 @@
 #'
 #' \dontrun{
 #' # A fixed population with simulations over assignment only
-#' head(simulate_design(design, sims = c(1,1,1,100,1)))
+#' head(simulate_design(design, sims = c(1, 1, 1, 100, 1)))
 #' }
 #'
 #' @details

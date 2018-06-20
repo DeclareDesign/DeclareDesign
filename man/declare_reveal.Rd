@@ -3,7 +3,7 @@
 \name{declare_reveal}
 \alias{declare_reveal}
 \alias{reveal_outcomes_handler}
-\title{Declare a Reveal Outcomes step}
+\title{Declare a reveal outcomes step}
 \usage{
 declare_reveal(..., handler = reveal_outcomes_handler, label = NULL)
 

@@ -46,7 +46,7 @@ test_that("Noncompliance", {
   design <- my_population +
     POS_Y +
     POS_Z +
-    declare_step(complier = as.numeric(D_Z_0 == 0 & D_Z_1 == 1)) +
+    declare_step(fabricate, complier = as.numeric(D_Z_0 == 0 & D_Z_1 == 1)) +
     ITT_d +
     CACE +
     my_assignment +

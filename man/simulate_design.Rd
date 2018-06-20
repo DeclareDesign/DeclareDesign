@@ -12,7 +12,7 @@ simulate_design(..., sims = 500)
 \item{sims}{The number of simulations, defaulting to 500. If sims is a vector of the form c(10, 1, 2, 1) then different steps of a design will be simulated different numbers of times.}
 }
 \description{
-Runs many simulations of a design and saves to a dataframe.
+Runs many simulations of a design and returns a simulations data.frame.
 }
 \details{
 Different steps of a design may each be simulated different a number of times, as specified by sims. In this case simulations are grouped into "fans", eg "fan_1" indicates all the simulations that have the same draw from the first level of the design. For efficiency there are generally fewer fans than design steps where all contiguous steps with 1 sim specified are combined into a single fan.
@@ -46,7 +46,7 @@ diagnosis <- diagnose_design(simulations_df = simulations)
 
 \dontrun{
 # A fixed population with simulations over assignment only
-head(simulate_design(design, sims = c(1,1,1,100,1)))
+head(simulate_design(design, sims = c(1, 1, 1, 100, 1)))
 }
 
 }
