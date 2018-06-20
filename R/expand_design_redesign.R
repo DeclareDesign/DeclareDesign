@@ -154,7 +154,7 @@ redesign <- function(design, ..., expand = TRUE) {
   f <- function(...) {
     clone_design_edit(design, ...)
   }
-  design <- expand_design(f, ..., expand)
+  design <- expand_design(f, ..., expand = expand)
   structure(design, code = NULL)
 }
 
