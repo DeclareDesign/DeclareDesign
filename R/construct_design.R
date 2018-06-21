@@ -89,7 +89,7 @@
     qs <- enquos(lhs, rhs)
   }
   
-  if (!inherits(rhs, "dd") && !inherits(rhs, "function")) {
+  if (!inherits(rhs, "dd") && !inherits(rhs, "function") && !is.null(rhs)) {
     stop("The right hand side does not appear to be a DeclareDesign object or a function", call. = FALSE)
   }
   
