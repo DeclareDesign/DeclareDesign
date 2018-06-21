@@ -183,10 +183,10 @@ potential_outcomes.formula <- function(formula,
 
 
 validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
+  
   dots$formula <- eval_tidy(dots$formula)
   outcome_variable <- as.character(dots$formula[[2]])
-  
-  
+
   if (length(dots$formula) < 3) {
     declare_time_error("Must provide an outcome in potential outcomes formula", ret)
   }
@@ -195,7 +195,7 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
     declare_time_error("Must not pass ID_label.", ret)
   }
   
-  if ("assignment_variable" %in% dots) {
+  if ("assignment_variables" %in% names(dots)) {
     dots$assignment_variables <- reveal_nse_helper(dots$assignment_variables)
   }
   
@@ -366,7 +366,8 @@ validation_fn(potential_outcomes.NULL) <- function(ret, dots, label){
 expand_conditions <- function() {
   if (!is.data.frame(conditions)) {
     if (!is.list(conditions)) {
-      conditions <- setNames(list(conditions), assignment_variables)
+      conditions <- rep(list(conditions), length(assignment_variables))
+      conditions <- setNames(conditions, assignment_variables)
     }
     
     conditions <- expand.grid(conditions, stringsAsFactors = FALSE)
