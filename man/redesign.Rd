@@ -4,14 +4,14 @@
 \alias{redesign}
 \title{Redesign}
 \usage{
-redesign(design, expand = TRUE, ...)
+redesign(design, ..., expand = TRUE)
 }
 \arguments{
 \item{design}{a design}
 
-\item{expand}{boolean - if true, form the crossproduct of the ..., otherwise recycle them}
-
 \item{...}{arguments to redesign e.g., n = 100}
+
+\item{expand}{boolean - if true, form the crossproduct of the ..., otherwise recycle them}
 }
 \description{
 \code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters internally. (Advanced).

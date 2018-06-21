@@ -2,10 +2,11 @@
 #'
 #' \code{expand_design} easily generates a set of design from a designer function.
 #'
+
 #' @param designer a function which yields a design
+#' @param ... Options sent to the designer
 #' @param expand boolean - if true, form the crossproduct of the ..., otherwise recycle them
 #' @param prefix prefix for the names of the designs, i.e. if you create two designs they would be named prefix_1, prefix_2
-#' @param ... Options sent to the designer
 #'
 #' @return if set of designs is size one, the design, otherwise a `by`-list of designs. Designs are given a parameters attribute with the values of parameters assigned by expand_design.
 #'
@@ -36,7 +37,7 @@
 #' }
 #'
 #' @export
-expand_design <- function(designer, expand = TRUE, prefix = "design", ...) {
+expand_design <- function(designer, ..., expand = TRUE, prefix = "design") {
   
   dots_quos <- quos(...)
   
@@ -44,6 +45,7 @@ expand_design <- function(designer, expand = TRUE, prefix = "design", ...) {
     
     args_list <- expand_args(..., expand = expand)
     args_names <- expand_args_names(!!!dots_quos, expand = expand)
+    # args_names <- rbind_disjoint(lapply(args_list, data.frame))
     
     designs <- lapply(args_list, function(x) do.call(designer, args = x))
     
@@ -110,11 +112,16 @@ expand_args_names <- function(..., expand = TRUE){
   
   dots_names <- lapply(dots_quos, function(x) {
     x_expr <- quo_squash(x)
-    x_is_call <- is_call(x_expr)
-    if (x_is_call) {
-      as.character(call_args(x_expr))
+    is_list_c <- expr_text(as.list(x_expr)[[1]]) %in% c("c", "list")
+    if(!is_list_c){ 
+      x_is_call <- is_call(x_expr)
+      if (x_is_call) {
+        as.character(eval_tidy(x))
+      } else {
+        as.character(x_expr)
+      }
     } else {
-      as.character(x_expr)
+      as.character(call_args(x_expr))
     }
   })
   if(expand){
@@ -133,8 +140,8 @@ expand_args_names <- function(..., expand = TRUE){
 #' Importantly, \code{redesign} will edit any symbol in your design, but if the symbol you attempt to change does not exist no changes will be made and no error or warning will be issued.
 #'
 #' @param design a design
-#' @param expand boolean - if true, form the crossproduct of the ..., otherwise recycle them
 #' @param ... arguments to redesign e.g., n = 100
+#' @param expand boolean - if true, form the crossproduct of the ..., otherwise recycle them
 #' 
 #' @examples 
 #' 
@@ -150,11 +157,11 @@ expand_args_names <- function(..., expand = TRUE){
 #' design_vary_N <- redesign(design, n = seq(400, 900, 100))
 #' 
 #' @export
-redesign <- function(design, expand = TRUE, ...) {
+redesign <- function(design, ..., expand = TRUE) {
   f <- function(...) {
     clone_design_edit(design, ...)
   }
-  design <- expand_design(f, expand, ...)
+  design <- expand_design(f, ..., expand = expand)
   structure(design, code = NULL)
 }
 
