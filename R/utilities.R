@@ -5,34 +5,29 @@
 # step 1 will have label set to pop
 #
 #' @importFrom rlang f_text f_env
-maybe_add_names <- function(quotations, step_number) {
+maybe_add_labels <- function(quotations) {
   
-  namer <- function(quotation, step_number) {
+  labeller <- function(quotation, lbl) {
     cx <- quotation[[2]]
     
-    if (is.call(cx) && is.symbol(cx[[1]])) {
+    if (lbl == "") {
+      lbl <- f_text(quotation)
+    }
+    
+    if (is.call(cx) && is.symbol(cx[[1]]) && !"label" %in% names(cx)) {
       
       f <- get0(as.character(cx[[1]]), f_env(quotation), "function") #match.fun does not repect quosures environment, doing get manually
-      if ("declaration" %in% class(f)) {
-        if(!is.null(quotation[[2]][["label"]])){
-          nm <- quotation[[2]][["label"]]
-        } else {
-          nm <- paste0(attr(f, "step_type"), "_", step_number)
-        }
-      } else {
-        nm <- f_text(quotation)
+      if ("declaration" %in% class(f) && "label" %in% names(formals(f))) {
+        quotation[[2]][["label"]] <- lbl
       }
-      
-    } else {
-      nm <- f_text(quotation)
     }
-    return(nm)
+    quotation
   }
-
+  
   for (i in seq_along(quotations)) {
-    if (names(quotations)[i] == ""){
-      names(quotations)[i] <- namer(quotations[[i]], step_number[i])
-    }
+    if (names(quotations)[i] == "")
+      names(quotations)[i] <- f_text(quotations[[i]])
+    quotations[[i]] <- labeller(quotations[[i]], names(quotations)[i])
   }
   
   if (any(duplicated(names(quotations)))) {
