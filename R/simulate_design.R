@@ -45,8 +45,7 @@
 #' @details
 #'
 #' Different steps of a design may each be simulated different a number of times, as specified by sims. In this case simulations are grouped into "fans", eg "fan_1" indicates all the simulations that have the same draw from the first level of the design. For efficiency there are generally fewer fans than design steps where all contiguous steps with 1 sim specified are combined into a single fan.
-simulate_design <-
-  function(..., sims = 500) {
+simulate_design <- function(..., sims = 500) {
     
     designs_quos <- quos(...)
     designs <- lapply(designs_quos, eval_tidy)
@@ -71,8 +70,7 @@ simulate_design <-
     #   sims = list(my_design_1 = c(100, 1, 1), my_design_2 = 200)
     # use it! otherwise, create a list of length designs that repeats the sims
     if (!is_list(sims)) {
-      sims <- lapply(1:length(designs), function(i)
-        sims)
+      sims <- lapply(1:length(designs), function(i) sims)
     }
     
     sims_match_steps <-
@@ -115,9 +113,6 @@ simulate_design <-
     parameters_df <- data.frame(lapply(parameters_df, type_convert), stringsAsFactors = FALSE)
     
     attr(simulations_df, "parameters") <- parameters_df
-    
-    # Check that there are the expected number of simulations
-    # check_sim_number(simulations_df, sims)
     
     simulations_df
     
