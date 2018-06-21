@@ -72,6 +72,6 @@ test_that("step name conflicts in design", {
   pop <- declare_population(N = 6, Y = rnorm(N))
   assign_1 <- declare_assignment(m = 2)
   mand_1 <- declare_estimand(some_stat = mean(Y))
-  expect_error(design <- pop + mand_1 + mand_1, "You have steps with identical names: mand_1.")
-  expect_error(design <- pop + assign_1 + assign_1, "You have steps with identical names: assign_1.")
+  expect_error(design <- pop + mand_1 + mand_1, "You have estimands with identical labels: some_stat\nPlease provide estimands with unique labels")
+  expect_equal(names(pop + assign_1 + assign_1), c("pop", "assign_1", "assign_1_1"))
 })

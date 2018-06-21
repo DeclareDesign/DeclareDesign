@@ -20,7 +20,7 @@ test_that("test modify declare design ", {
 
   expect_length(replace_step(design, new_step = my_assignment_2, step = my_assignment), 4)
   expect_length(replace_step(design, new_step = my_assignment_2, step = 4), 4)
-  expect_length(replace_step(design, new_step = my_assignment_2, step = "my_assignment"), 4)
+  expect_length(replace_step(design, new_step = my_assignment_2, step = "a_label"), 4)
 
   expect_length(insert_step(design, declare_step(mutate, blah = 6), before = my_potential_outcomes), 5)
 
@@ -51,7 +51,7 @@ test_that("placement doesn't matter", {
   
   expect_length(insert_step(design, declare_step(mutate, income = noise ^ 2), after = my_assignment), 4)
   expect_length(insert_step(design, declare_step(mutate, income = noise ^ 2), before = my_assignment), 4)
-  expect_length(insert_step(design, declare_step(mutate, income = noise ^ 2), before = "my_population"), 4)
+  expect_length(insert_step(design, declare_step(mutate, income = noise ^ 2), before = "mypop"), 4)
 
   expect_error(insert_step(design, declare_step(mutate, income = noise ^ 2), before = "notfound"))
   expect_error(insert_step(design, declare_step(mutate, income = noise ^ 2)))
