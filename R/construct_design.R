@@ -85,7 +85,6 @@
   if (is_missing(rhs) || is_null(rhs)) {
     
     qs <- enquos(lhs)
-    qs <- maybe_add_names(qs, 1)
     
   } else {
     
@@ -95,8 +94,8 @@
     
     if (inherits(lhs, "design")) {
       
-     auto_steps <- sapply(lhs, function(x) !is_null(attr(x, "auto-generated")))
-        
+      auto_steps <- sapply(lhs, function(x) !is_null(attr(x, "auto-generated")))
+      
       if (any(auto_steps)) {
         lhs <- lhs[!auto_steps]
       }
@@ -104,13 +103,11 @@
       qs_lhs <- lapply(lhs, quo)
       
       qs_rhs <- enquos(rhs)
-      qs_rhs <- maybe_add_names(qs_rhs, length(lhs) + 1)
       
       qs <- c(qs_lhs, qs_rhs)
       
     } else {
       qs <- enquos(lhs, rhs)
-      qs <- maybe_add_names(qs, 1:2)
     }
   }
   
@@ -122,31 +119,19 @@
 construct_design <- function(...) {
   
   qs <- quos(...)
+  qs <- maybe_add_names_qs(qs)
   
   ret <- structure(vector("list", length(qs)),
                    call = match.call(),
                    class = c("design", "dd"))
   
   qnames <- names(qs)
-  names(ret)[qnames != ""] <- qnames[qnames != ""]
-  
-  if (any(duplicated(names(ret)))) {
-    stop("You have steps with identical names: ",
-         unique(names(ret)[duplicated(names(ret))]), ".", call. = FALSE)
-  }
+  names(ret) <- qnames
   
   # for each step in qs, eval, and handle edge cases (dplyr calls, non-declared functions)
   for (i in seq_along(qs)) {
     
-    # check if object exists
-    
-    # wrap step is nasty, converts partial call to curried function
-    ret[[i]] <- tryCatch(
-      eval_tidy(qs[[i]]),
-      error = function(e) tryCatch(callquos_to_step(qs[[i]], qnames[[i]]),
-                                   error = function(e) stop("Could not evaluate step `", qnames[[i]],
-                                                            "` as either a step or call. Does the object exist?"))
-    )
+    ret[[i]] <- eval_tidy(qs[[i]]) 
     
     # Is it a non-declared function
     if (is.function(ret[[i]]) && !inherits(ret[[i]], "design_step")) {
@@ -165,6 +150,22 @@ construct_design <- function(...) {
       )
     }
     
+  }
+  
+  # If there is a design-time validation, trigger it
+  for (i in seq_along(ret)) {
+    step <- ret[[i]]
+    callback <- attr(step, "design_validation")
+    if (is.function(callback)) {
+      ret <- callback(ret, i, step)
+    }
+  }
+  
+  ret <- maybe_add_names_ret(ret)
+  
+  if (any(duplicated(names(ret)))) {
+    stop("You have steps with identical names: ",
+         unique(names(ret)[duplicated(names(ret))]), ".", call. = FALSE)
   }
   
   # Assert that all labels are unique
@@ -186,56 +187,6 @@ construct_design <- function(...) {
     
   })
   
-  # If there is a design-time validation, trigger it
-  for (i in seq_along(ret)) {
-    step <- ret[[i]]
-    callback <- attr(step, "design_validation")
-    if (is.function(callback)) {
-      ret <- callback(ret, i, step)
-    }
-  }
-  
   ret
 }
 
-###############################################################################
-# In a design created using the + operator, if a step is a dplyr style call mutate(foo = bar),
-# it will fail to evaluate - we can catch that and try to curry it
-
-#' @importFrom rlang quos lang_fn lang_modify eval_tidy
-callquos_to_step <- function(step_call, label="") {
-  ## this function allows you to put any R expression
-  ## such a dplyr::mutate partial call
-  ## into the causal order, i.e.
-  ## pop + po + mutate(q = 5))
-  
-  # match to .data or data, preference to .data
-  data_name <- intersect(names(formals(lang_fn(step_call))), c(".data", "data") )[1]
-  
-  stopifnot(is.character(data_name))
-  
-  # splits each argument in to own quosure with common parent environment
-  dots <- lapply(step_call[[2]], function(d){
-    dot <- step_call
-    dot[[2]] <- d
-    dot
-  })
-  
-  fun <- eval_tidy(dots[[1]])
-  dots <- dots[-1]
-  
-  dots <- quos(!!data_name := data, !!!dots)
-  
-  curried <- currydata(fun, dots)
-  
-  build_step(
-    curried,
-    handler = fun,
-    dots = dots,
-    label,
-    step_type = "wrapped",
-    causal_type = "dgp",
-    call = step_call
-  )
-  
-}

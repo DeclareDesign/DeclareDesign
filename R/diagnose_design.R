@@ -77,7 +77,7 @@ diagnose_design <- function(...,
                             add_grouping_variables = NULL) {
     
   dots_quos <- quos(...)
-  dots_quos <- maybe_add_labels(dots_quos)
+  dots_quos <- maybe_add_names_qs(dots_quos)
   dots <- lapply(dots_quos, eval_tidy)
   
   # three cases:

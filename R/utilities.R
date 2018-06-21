@@ -5,9 +5,29 @@
 # step 1 will have label set to pop
 #
 #' @importFrom rlang f_text f_env
-maybe_add_names <- function(quotations, step_number) {
+maybe_add_names_ret <- function(ret) {
   
-  namer <- function(quotation, step_number) {
+  step_types <- sapply(ret, attr, "step_type")
+  auto_generated <- sapply(ret, function(x) attr(x,  "auto-generated") %||% FALSE)
+  step_types[auto_generated] <- "auto_reveal"
+  
+  for (i in seq_along(ret)) {
+    if (names(ret)[i] == "") {
+      if (inherits(ret[[i]], "design_step")){
+        numb <- sum(step_types[1:i] == step_types[i])
+        names(ret)[i] <- paste0(step_types[i], ifelse(numb > 1, paste0("_", numb), ""), collapse = "")
+      } else {
+        names(ret)[i] <- paste0("unknown_step_", i)
+      }
+    }
+  }
+  
+  ret
+}
+
+maybe_add_names_qs <- function(quotations) {
+  
+  namer <- function(quotation) {
     cx <- quotation[[2]]
     
     if (is.call(cx) && is.symbol(cx[[1]])) {
@@ -17,28 +37,21 @@ maybe_add_names <- function(quotations, step_number) {
         if(!is.null(quotation[[2]][["label"]])){
           nm <- quotation[[2]][["label"]]
         } else {
-          nm <- paste0(attr(f, "step_type"), "_", step_number)
-        }
+          nm <- ""
+        } 
       } else {
         nm <- f_text(quotation)
       }
-      
     } else {
       nm <- f_text(quotation)
     }
-    return(nm)
-  }
-
-  for (i in seq_along(quotations)) {
-    if (names(quotations)[i] == ""){
-      names(quotations)[i] <- namer(quotations[[i]], step_number[i])
-    }
+    
   }
   
-  if (any(duplicated(names(quotations)))) {
-    stop(paste0("Please provide unique names for each design step. Duplicates include ", 
-                paste(names(quotations)[duplicated(names(quotations))], collapse = ", "), 
-                ". You can name steps within declare design, e.g. declare_design(my_pop = pop_step)."), call. = FALSE)
+  for (i in seq_along(quotations)) {
+    if (names(quotations)[i] == ""){
+      names(quotations)[i] <- namer(quotations[[i]])
+    }
   }
   
   quotations

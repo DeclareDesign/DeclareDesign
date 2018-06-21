@@ -269,7 +269,7 @@ test_that("Reveal step injected (default names)",{
   expect_true("Q" %in% colnames(draw_data(d)))
 
   #expect_warning(d <- pop + assn + po + identity, "inject a `declare_reveal")
-  #expect_equal(attr(d[[4]], "step_type"), "reveal_outcomes")
+  #expect_equal(attr(d[[4]], "step_type"), "reveal")
 
 })
 
@@ -287,8 +287,8 @@ test_that("Reveal step injected after another injected reveal step",{
   # expect_warning(d <- pop + po + po2 + assn, "inject a `declare_reveal[(]Q, Y")
   expect_true("Y" %in% colnames(draw_data(d)))
 
-  expect_equal(attr(d[[5]], "step_type"), "reveal_outcomes")
-  expect_equal(attr(d[[6]], "step_type"), "reveal_outcomes")
+  expect_equal(attr(d[[5]], "step_type"), "reveal")
+  expect_equal(attr(d[[6]], "step_type"), "reveal")
 })
 
 

@@ -38,7 +38,7 @@ suppressWarnings(
 e <- (noncompliance[[4]])
 
 expect_true(inherits(e, "design_step"))
-expect_equal(attr(e, "step_type"), "reveal_outcomes")
+expect_equal(attr(e, "step_type"), "reveal")
 expect_equal(attr(e, "step_meta")$assignment_variables, "Z")
 expect_equal(attr(e, "step_meta")$outcome_variables, "D")
 

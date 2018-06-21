@@ -70,11 +70,7 @@ insert_step_ <- function(design, new_step_quosure, before = NULL, after = NULL) 
     after <- find_step(design, after)
   }
   
-  new_step <- tryCatch(
-    eval_tidy(new_step_quosure),
-    error = function(e) callquos_to_step(new_step_quosure) # DO we really need this
-  )
-  
+  new_step <- eval_tidy(new_step_quosure) 
   
   i <- seq_along(design)
   structure(

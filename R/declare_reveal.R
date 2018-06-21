@@ -5,7 +5,7 @@
 #' @inheritParams declare_internal_inherit_params
 #'
 #' @export
-declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal_outcomes")
+declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal")
 
 #' @param data A data.frame containing columns of potential outcomes and an assignment variable
 #'
