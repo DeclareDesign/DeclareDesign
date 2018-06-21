@@ -112,10 +112,7 @@ diagnose_design <- function(...,
 
   # figure out what to group by ---------------------------------------------
 
-  group_by_set <- c("design_label",
-                    "estimand_label",
-                    "estimator_label",
-                    "coefficient")
+  group_by_set <- c("design_label", "estimand_label", "estimator_label", "coefficient")
 
   if (!is.null(add_grouping_variables)) {
     group_by_set <- c(group_by_set, add_grouping_variables)
@@ -129,10 +126,7 @@ diagnose_design <- function(...,
                                           diagnosands = diagnosands,
                                           group_by_set = group_by_set)
 
-
-
   diagnosand_names <- setdiff(names(diagnosands_df), group_by_set)
-
 
   # Calculate n_sims --------------------------------------------------------
 
