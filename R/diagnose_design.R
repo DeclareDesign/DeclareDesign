@@ -112,16 +112,13 @@ diagnose_design <- function(...,
 
   # figure out what to group by ---------------------------------------------
 
-  group_by_set <- c("design_label",
-                    "estimand_label",
-                    "estimator_label",
-                    "coefficient")
+  group_by_set <- c("design_label", "estimand_label", "estimator_label", "coefficient")
 
   if (!is.null(add_grouping_variables)) {
     group_by_set <- c(group_by_set, add_grouping_variables)
   }
 
-  group_by_set <- colnames(simulations_df) %i% group_by_set
+  group_by_set <- group_by_set %i% colnames(simulations_df)
 
   # Actually calculate diagnosands ------------------------------------------
 
@@ -129,15 +126,11 @@ diagnose_design <- function(...,
                                           diagnosands = diagnosands,
                                           group_by_set = group_by_set)
 
-
-
   diagnosand_names <- setdiff(names(diagnosands_df), group_by_set)
-
 
   # Calculate n_sims --------------------------------------------------------
 
   n_sims_df <- calculate_sims(simulations_df = simulations_df, group_by_set = group_by_set)    
-
 
   # Bootstrap ---------------------------------------------------------------
 
@@ -161,10 +154,9 @@ diagnose_design <- function(...,
   diagnosands_df$design_label <- factor(diagnosands_df$design_label, levels = parameters_df$design_label)
   
   # Reorder rows
-  sort_by_list <- colnames(diagnosands_df) %i% c(group_by_set, "statistic")
+  sort_by_list <- c(group_by_set, "statistic") %i% colnames(diagnosands_df) 
   diagnosands_df <- diagnosands_df[do.call(order, as.list(diagnosands_df[sort_by_list])), , drop = FALSE]
 
-  
   rownames(diagnosands_df) <- NULL
   # Return frames
   out <- list(simulations_df = simulations_df, diagnosands_df = diagnosands_df, diagnosand_names = diagnosand_names, group_by_set = group_by_set, parameters_df = parameters_df)
