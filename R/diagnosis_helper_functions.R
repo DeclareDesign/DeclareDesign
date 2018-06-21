@@ -145,7 +145,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   colnames(se_only_df) <- diagnosand_columns
   
   se_only_df <- cbind(diagnosands_only_df[, group_columns, drop = FALSE],
-                      data.frame(statistic = "SE (bootstrapped)", stringsAsFactors = FALSE), se_only_df)
+                      data.frame(statistic = "SE", stringsAsFactors = FALSE), se_only_df)
   
   # Merge
   return_df <- rbind_disjoint(list(diagnosands_only_df, se_only_df), infill = "")
@@ -156,7 +156,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   
   # NA bootstrap rows
   return_df$design_label <- factor(return_df$design_label, levels = c(levels(return_df$design_label), ""))
-  return_df[return_df$statistic == "SE (bootstrapped)", c(sort_by_list, "n_sims")] <- ""
+  return_df[return_df$statistic == "SE", c(sort_by_list, "n_sims")] <- ""
   
   parameter_names <- names(diagnosis$parameters_df)[-1]
   
