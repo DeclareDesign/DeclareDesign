@@ -74,7 +74,7 @@
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand_ATE, label = "estimator")
 #'
 #' design_def <- insert_step(design_stub, my_estimand_ATE, before = assgn)
-#' design_def <- insert_step(design_def, my_estimator, after = "declare_reveal()")
+#' design_def <- insert_step(design_def, my_estimator, after = "reveal")
 #'
 #' get_estimands(design_def)
 #'
@@ -89,7 +89,7 @@
 #'
 #' design_two <- insert_step(design_stub, my_estimand_ATE, before = assgn)
 #' design_two <- insert_step(design_two, my_estimand_ATT, after = assgn)
-#' design_two <- insert_step(design_two, my_estimator_two, after = "declare_reveal()")
+#' design_two <- insert_step(design_two, my_estimator_two, after = "reveal")
 #'
 #' get_estimands(design_two)
 #'
@@ -104,7 +104,7 @@
 #' )
 #'
 #' design_double <- insert_step(design_stub, my_estimand_regression, after = pos)
-#' design_double <- insert_step(design_double, my_estimator_double, after = "declare_reveal()")
+#' design_double <- insert_step(design_double, my_estimator_double, after = "reveal")
 #'
 #' run_design(design_double)
 #'
@@ -124,7 +124,7 @@
 #'                     estimand = my_estimand_custom)
 #'
 #' design_cust <- insert_step(design_stub, my_estimand_custom, before = assgn)
-#' design_cust <- insert_step(design_cust, my_estimator_custom, after = "declare_reveal()")
+#' design_cust <- insert_step(design_cust, my_estimator_custom, after = "reveal")
 #'
 #' run_design(design_cust)
 #' 

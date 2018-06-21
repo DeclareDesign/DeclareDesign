@@ -52,8 +52,8 @@ NULL
 #' @rdname modify_design
 #' @examples
 #'
-#'  insert_step(design, dplyr::mutate(income = noise^2), after = my_assignment)
-#'  insert_step(design, dplyr::mutate(income = noise^2), before = my_assignment)
+#'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), after = my_assignment)
+#'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), before = my_assignment)
 #'
 #' @export
 insert_step <- function(design, new_step, before = NULL, after = NULL) {
@@ -94,7 +94,7 @@ delete_step <- function(design, step) {
 #' @export
 #' @rdname modify_design
 #' @examples
-#'  replace_step(design, my_assignment, declare_step(mutate, words = "income"))
+#'  replace_step(design, my_assignment, declare_step(dplyr::mutate, words = "income"))
 replace_step <- function(design, step, new_step) {
   delete_step(
     insert_step_(design, after = step, new_step_quosure = enquo(new_step)),
