@@ -1,4 +1,4 @@
-
+context("diagnose design")
 
 test_that("allow design functions to be sent to simulate design and diagnose_design", {
   
@@ -43,11 +43,11 @@ test_that("allow design functions to be sent to simulate design and diagnose_des
                ), sim_ID = 1:2), class = "data.frame", row.names = c(NA, -2L
                )))
   
-  diag_out <- diagnose_design(my_design_function, sims = 2)
+  diag_out <- diagnose_design(my_design_function, sims = 2, bootstrap_sims = FALSE)
   
   expect_equal(diag_out$diagnosands_df[, 1:4], 
                structure(list(design_label = structure(1L, .Label = "my_design_function", class = "factor"), 
-                              estimand_label = "ATE", estimator_label = "my_estimator", 
+                              estimand_label = "ATE", estimator_label = "estimator", 
                               coefficient = "Z"), class = "data.frame", row.names = c(NA, 
                                                                                       -1L)))
 })

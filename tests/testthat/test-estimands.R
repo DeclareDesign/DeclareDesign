@@ -18,10 +18,10 @@ test_that("default label", {
   my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
   expect_identical(
     my_estimand(df),
-    structure(list(estimand_label = "my_estimand", estimand = 2), .Names = c("estimand_label",
+    structure(list(estimand_label = "estimand", estimand = 2), .Names = c("estimand_label",
        "estimand"), row.names = c(NA, -1L), class = "data.frame")
   )
-  expect_equal(attr(my_estimand, "label"), "my_estimand")
+  expect_equal(attr(my_estimand, "label"), "estimand")
 })
 
 test_that("manual label", {

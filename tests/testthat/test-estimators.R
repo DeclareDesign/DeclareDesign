@@ -196,7 +196,7 @@ df <- data.frame(Y = c(0, 0, 0, 0, 1, 1, 1, 1),
 
 test_that("labels for estimates and estimands work estimand splat labeld estimator default", {
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_arg_label)
-  df %>% mator_no_label %>% expect_label("my_estimator", "ATE")
+  df %>% mator_no_label %>% expect_label("estimator", "ATE")
 })
 
 test_that("labels for estimates and estimands work, label explicit, estimand splat labeled", {
@@ -211,7 +211,7 @@ test_that("labels for estimates and estimands work estimand splat labeld label =
 
 test_that("labels for estimates and estimands work - label default", {
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label)
-  df %>% mator_no_label %>% expect_label("my_estimator", "ATE")
+  df %>% mator_no_label %>% expect_label("estimator", "ATE")
 })
 
 test_that("labels for estimates and estimands work - label explicit", {
@@ -228,7 +228,7 @@ test_that("labels for estimates and estimands work- label=NULL", {
 
 test_that("labels for estimates and estimands work estimand label, estimator default", {
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label)
-  df %>% mator_no_label %>% expect_label("my_estimator", "ATE")
+  df %>% mator_no_label %>% expect_label("estimator", "ATE")
 })
 
 

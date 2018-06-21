@@ -128,7 +128,7 @@
 #'
 #' run_design(design_cust)
 #' 
-declare_estimand <- make_declarations(estimand_handler, "estimand", causal_type = "estimand", default_label = "my_estimand")
+declare_estimand <- make_declarations(estimand_handler, "estimand", causal_type = "estimand", default_label = "estimand")
 
 #' @rdname declare_estimand
 #' @export

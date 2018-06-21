@@ -6,9 +6,9 @@
 \alias{estimand_handler}
 \title{Declare estimand}
 \usage{
-declare_estimand(..., handler = estimand_handler, label = "my_estimand")
+declare_estimand(..., handler = estimand_handler, label = "estimand")
 
-declare_estimands(..., handler = estimand_handler, label = "my_estimand")
+declare_estimands(..., handler = estimand_handler, label = "estimand")
 
 estimand_handler(data, ..., subset = NULL, coefficients = FALSE, label)
 }

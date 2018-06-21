@@ -209,7 +209,7 @@ test_that("diagnosis, NAs if no estimand", {
   d <- declare_population(sleep) + ols
   
 sleep_ols <- structure(list(design_label = structure(1L, .Label = "d", class = "factor"), 
-                           estimator_label = "my_estimator", coefficient = "group2", 
+                           estimator_label = "estimator", coefficient = "group2", 
                            bias = NA_real_, `se(bias)` = NA_real_, rmse = NA_real_, 
                            `se(rmse)` = NA_real_, power = 0, `se(power)` = 0, coverage = NA_real_, 
                            `se(coverage)` = NA_real_, mean_estimate = 1.58, `se(mean_estimate)` = 0, 
@@ -227,7 +227,7 @@ test_that("diagnosis, NAs if no estimand", {
   d <- declare_population(sleep) + mu
   
   sleep_ols <- structure(list(design_label = structure(1L, .Label = "d", class = "factor"), 
-                              estimand_label = "my_estimand", bias = NA_real_, `se(bias)` = NA_real_, 
+                              estimand_label = "estimand", bias = NA_real_, `se(bias)` = NA_real_, 
                               rmse = NA_real_, `se(rmse)` = NA_real_, power = NA_real_, 
                               `se(power)` = NA_real_, coverage = NA_real_, `se(coverage)` = NA_real_, 
                               mean_estimate = NA_real_, `se(mean_estimate)` = NA_real_, 
@@ -305,3 +305,4 @@ test_that("declare time errors",{
   expect_error(declare_diagnosands(keep_defaults = FALSE), "No diagnosands were declared.")
   
 })
+

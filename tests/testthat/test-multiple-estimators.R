@@ -1,7 +1,3 @@
-require(testthat)
-require(DeclareDesign)
-require(estimatr)
-
 context("Multiple estimators")
 
 test_that("Two estimators, Two estimands (matched)",{

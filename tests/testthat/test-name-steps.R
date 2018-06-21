@@ -1,9 +1,11 @@
 
+context("naming steps")
+
 test_that("design steps are named appropriately when blank", {
   
   pop <- declare_population(n = 25)
   des <- pop + declare_population(N = 50)
-  expect_equal(names(des), c("pop", "population_2"))
+  expect_equal(names(des), c("pop", "population"))
   
   smp <- declare_sampling(n = 25)
   des <- declare_population(N = 50) + smp

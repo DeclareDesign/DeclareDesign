@@ -13,7 +13,7 @@ test_that("estimand labels work",{
   names(design)
   diagnosis <- diagnose_design(design, sims = 10, bootstrap_sims = FALSE)
   
-  expect_true(all(diagnosis$simulations_df$estimand_label == "my_estimand"))
+  expect_true(all(diagnosis$simulations_df$estimand_label == "estimand"))
   
   # declare_estimand(b = 2) --> Label is b
   mand_2 <- declare_estimand(some_stat = mean(Y))
