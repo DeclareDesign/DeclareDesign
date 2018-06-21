@@ -43,7 +43,15 @@ maybe_add_names_qs <- function(quotations) {
         nm <- f_text(quotation)
       }
     } else {
-      nm <- f_text(quotation)
+      # TODO: want to move labels into names
+      #  this seems like a terrible way to do so
+      obj <- eval_tidy(quotation)
+      lbl <- attr(obj, "label")
+      if(!is.null(lbl)) {
+        nm <- lbl
+      } else {
+        nm <- f_text(quotation)
+      }
     }
     
   }

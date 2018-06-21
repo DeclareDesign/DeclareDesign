@@ -66,7 +66,7 @@ test_that("regression from estimatr works as an estimator", {
   pate_estimator <- declare_estimator(Y ~ Z + noise,
                                       model = lm_robust,
                                       coefficients = "noise",
-                                      estimand = pate, label = "pate")
+                                      estimand = pate, label = "pate_hat")
   reveal_outcomes <- declare_reveal()
 
   my_design <- my_population +
@@ -77,7 +77,7 @@ test_that("regression from estimatr works as an estimator", {
     pate_estimator
   
   est <- get_estimates(my_design)
-  expect_equal(est$estimator_label, "pate")
+  expect_equal(est$estimator_label, "pate_hat")
   expect_equal(est$coefficient, "noise")
   expect_equal(est$estimand_label, "pate")
 
@@ -339,3 +339,4 @@ test_that("when a coefficient is missing from a model there is an informative er
   expect_error(ols(data), "Not all of the coefficients declared in your estimator are present in the model output, including X.")
   
 })
+

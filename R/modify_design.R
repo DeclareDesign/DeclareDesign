@@ -2,7 +2,7 @@
 find_step <- function(design, step) {
   if (is.numeric(step) && step <= length(design) && step > 0) return(step)
   if (is.character(step)) {
-    design <- lapply(design, attr, "label")
+    design <- names(design)
   }
   w <- vapply(design, identical, FALSE, step)
 
@@ -94,7 +94,7 @@ delete_step <- function(design, step) {
 #' @export
 #' @rdname modify_design
 #' @examples
-#'  replace_step(design, my_assignment, dplyr::mutate(words="HIARYLAH"))
+#'  replace_step(design, my_assignment, declare_step(mutate, words = "income"))
 replace_step <- function(design, step, new_step) {
   delete_step(
     insert_step_(design, after = step, new_step_quosure = enquo(new_step)),
