@@ -44,6 +44,7 @@ expand_design <- function(designer, expand = TRUE, prefix = "design", ...) {
     
     args_list <- expand_args(..., expand = expand)
     args_names <- expand_args_names(!!!dots_quos, expand = expand)
+    # args_names <- rbind_disjoint(lapply(args_list, data.frame))
     
     designs <- lapply(args_list, function(x) do.call(designer, args = x))
     
@@ -110,11 +111,16 @@ expand_args_names <- function(..., expand = TRUE){
   
   dots_names <- lapply(dots_quos, function(x) {
     x_expr <- quo_squash(x)
-    x_is_call <- is_call(x_expr)
-    if (x_is_call) {
-      as.character(call_args(x_expr))
+    is_list_c <- expr_text(as.list(x_expr)[[1]]) %in% c("c", "list")
+    if(!is_list_c){ 
+      x_is_call <- is_call(x_expr)
+      if (x_is_call) {
+        as.character(eval_tidy(x))
+      } else {
+        as.character(x_expr)
+      }
     } else {
-      as.character(x_expr)
+      as.character(call_args(x_expr))
     }
   })
   if(expand){
