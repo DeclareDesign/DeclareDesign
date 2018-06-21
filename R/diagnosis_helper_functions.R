@@ -134,7 +134,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   
   diagnosands_only_df <-
     cbind(diagnosands_only_df[, group_columns, drop = FALSE],
-          data.frame(statistic = "Diagnosand Estimate", stringsAsFactors = FALSE),
+          data.frame(statistic = "Estimate", stringsAsFactors = FALSE),
           clean_values_df)
   
   names(diagnosands_only_df) <- c(group_columns, "statistic", diagnosand_columns)
@@ -151,7 +151,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   return_df <- rbind_disjoint(list(diagnosands_only_df, se_only_df), infill = "")
   
   # Reorder rows
-  sort_by_list <- colnames(return_df) %i% diagnosis$group_by_set
+  sort_by_list <- diagnosis$group_by_set %i% colnames(return_df)
   return_df <- return_df[do.call(order, as.list(return_df[,sort_by_list])), , drop = FALSE]
   
   # NA bootstrap rows
