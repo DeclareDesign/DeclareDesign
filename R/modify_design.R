@@ -63,7 +63,7 @@ insert_step <- function(design, new_step, before, after) {
   insert_step_(design, new_step, before, after, enexpr(new_step))
 }
 
-insert_step_ <- function(design, new_step_quosure, before = NULL, after = NULL, new_step_expr) {
+insert_step_ <- function(design, new_step, before = NULL, after = NULL, new_step_expr) {
   if (is.null(after)) {
     if (is.null(before)) {
       stop("Must provide either before or after to add_step()")
