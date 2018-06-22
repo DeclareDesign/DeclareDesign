@@ -22,6 +22,11 @@ test_that("test modify declare design ", {
   expect_length(replace_step(design, new_step = my_assignment_2, step = 4), 4)
   expect_length(replace_step(design, new_step = my_assignment_2, step = "a_label"), 4)
 
+  redesigned <- replace_step(design, new_step = my_assignment_2, step = my_assignment)
+  
+  expect_equal(names(redesigned), c("my_population", "my_potential_outcomes", "custom", "my_assignment_2"
+  ))
+  
   expect_length(insert_step(design, declare_step(mutate, blah = 6), before = my_potential_outcomes), 5)
 
   expect_length(insert_step(design, declare_step(mutate, blah = 6), after = my_potential_outcomes), 5)
