@@ -7,7 +7,7 @@
 \alias{replace_step}
 \title{Modify a design after the fact}
 \usage{
-insert_step(design, new_step, before = NULL, after = NULL)
+insert_step(design, new_step, before, after)
 
 delete_step(design, step)
 
