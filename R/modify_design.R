@@ -100,7 +100,7 @@ delete_step <- function(design, step) {
 #'  replace_step(design, my_assignment, declare_step(dplyr::mutate, words = "income"))
 replace_step <- function(design, step, new_step) {
   i <- find_step(design, step, "replace")
-  new_step <- wrap_step(step, enexpr(step))
+  new_step <- wrap_step(new_step, enexpr(new_step))
   design[i] <- new_step
   names(design)[i] <- names(new_step)
   
