@@ -70,7 +70,7 @@ insert_step_ <- function(design, new_step_quosure, before = NULL, after = NULL, 
     }
     after <- find_step(design, before, "insert after") - 1
   } else {
-    after <- find_step(design, after, "insert befor")
+    after <- find_step(design, after, "insert before")
   }
   
   new_step <- wrap_step(new_step, new_step_expr)
