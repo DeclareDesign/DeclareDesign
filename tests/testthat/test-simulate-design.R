@@ -54,3 +54,33 @@ test_that("expand and simulate", {
   expect_true(all(c("N", "tau") %in% colnames(sims)))
 })
 
+test_that("wrong number of sims yields error", {
+  
+  expect_error(simulate_design(my_design_1, sims = rep(5, 3)), "The sims argument you provided for the designs named my_design_1 are not correct. Sims should be of length the number of steps in a design or one.")
+  
+})
+
+test_that("zero sims yields error", {
+  
+  expect_error(simulate_design(my_design_1, sims = -1), "Sims should be >= 1")
+  
+})
+
+test_that("dupe designs give error", {
+  
+  expect_error(simulate_design(my_design_1, my_design_1), "You have more than one design named my_design_1")
+  
+})
+
+
+
+test_that("no estimates estimands declared", {
+  
+  my_design_noestmand <- delete_step(my_design_1, my_estimand)
+  my_design_noestmand <- delete_step(my_design_noestmand, my_estimator)
+  
+  expect_error(simulate_design(my_design_noestmand, sims = 2), "No estimates or estimands were declared, so design cannot be simulated.")
+  
+})
+
+  
