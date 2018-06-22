@@ -22,7 +22,7 @@ A [library](http://declaredesign.org/articles/design_library.html) of declared d
 Installing DeclareDesign
 ------------------------
 
-To install the latest development release of all of the packages, please ensure that you are running version 3.3 or later of R and run the following code:
+To install the latest development release of all of the packages, please ensure that you are running version 3.4 or later of R and run the following code:
 
 ``` r
 install.packages("DeclareDesign", dependencies = TRUE, 
