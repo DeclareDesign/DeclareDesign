@@ -1,14 +1,16 @@
 # index of a step (specified by object, label or position)
 find_step <- function(design, step) {
-  if (is.numeric(step) && step <= length(design) && step > 0) return(step)
+  step_obj <- eval_tidy(step)
+  
+  if (is.numeric(step_obj) && step <= length(design) && step_obj > 0) return(step_obj)
   if (is.character(step)) {
     design <- names(design)
   }
-  w <- vapply(design, identical, FALSE, step)
+  w <- vapply(design, identical, FALSE, step_obj)
 
   w <- which(w)
   if (length(w) == 0) {
-    stop("Could not find step (", substitute(step), ") in design")
+    stop("Could not find step (", quo_expr(step), ") in design")
   }
 
   w[1]
@@ -56,13 +58,13 @@ NULL
 #'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), before = my_assignment)
 #'
 #' @export
-insert_step <- function(design, new_step, before = NULL, after = NULL) {
-  insert_step_(design, enquo(new_step), before, after)
+insert_step <- function(design, new_step, before, after) {
+  insert_step_(design, enquo(new_step), enquo(before), enquo(after))
 }
 
-insert_step_ <- function(design, new_step_quosure, before = NULL, after = NULL) {
-  if (is.null(after)) {
-    if (is.null(before)) {
+insert_step_ <- function(design, new_step_quosure, before, after) {
+  if (quo_is_missing(after)) {
+    if (quo_is_missing(before)) {
       stop("Must provide either before or after to add_step()")
     }
     after <- find_step(design, before) - 1
@@ -70,13 +72,12 @@ insert_step_ <- function(design, new_step_quosure, before = NULL, after = NULL) 
     after <- find_step(design, after)
   }
   
-  new_step <- eval_tidy(new_step_quosure) 
+  new_step <- wrap_step(eval_tidy(new_step_quosure), f_rhs(new_step_quosure))
   
   i <- seq_along(design)
-  structure(
-    c(design[i <= after], list(new_step), design[i > after], recursive = FALSE),
-    class = "design"
-  )
+  steps <- c(design[i <= after], new_step, design[i > after], recursive = FALSE)
+  
+  construct_design(steps)
 }
 
 #' @param step the step to be deleted or replaced
@@ -87,7 +88,7 @@ insert_step_ <- function(design, new_step_quosure, before = NULL, after = NULL) 
 #'
 #'  delete_step(design, my_assignment)
 delete_step <- function(design, step) {
-  i <- find_step(design, step)
+  i <- find_step(design, enquo(step))
   structure(design[-i], class = "design")
 }
 
@@ -97,6 +98,6 @@ delete_step <- function(design, step) {
 #'  replace_step(design, my_assignment, declare_step(dplyr::mutate, words = "income"))
 replace_step <- function(design, step, new_step) {
   delete_step(
-    insert_step_(design, after = step, new_step_quosure = enquo(new_step)),
+    insert_step_(design, after = enquo(step), new_step_quosure = enquo(new_step)),
     step)
 }
