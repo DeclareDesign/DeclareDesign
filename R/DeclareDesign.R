@@ -12,7 +12,6 @@
 #'   \item{\code{\link{declare_reveal}}}{Reveal outcomes step}
 #'   \item{\code{\link{declare_estimand}}}{Estimand step}
 #'   \item{\code{\link{declare_estimator}}}{Estimator step}
-#'   \item{\code{\link{declare_citation}}}{Citation step}
 #' }
 #'
 #' @section Design Objects:

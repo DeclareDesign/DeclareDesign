@@ -53,8 +53,7 @@ design <- population +
   estimand +
   assignment +
   declare_reveal() +
-  estimator +
-  declare_citation(description = "A very simple design")
+  estimator 
 ```
 
 ## Making Use of A Design

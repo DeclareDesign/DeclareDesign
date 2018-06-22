@@ -1,10 +1,11 @@
 #' Add a citation to a design
 #' 
-#' @param title (optional) The title of the design, as a character string.
-#' @param authors (optional) The authors of the design, as a character string.
-#' @param description (optional) A description of the design in words, as a character string.
-#' @param year (optional) The year of the design, as a character string.
-#' @param citation (optional) The preferred citation for the design, as a character string. 
+#' @param design A design typically created using the + operator
+#' @param title The title of the design, as a character string.
+#' @param author The author(s) of the design, as a character string.
+#' @param year The year of the design, as a character string.
+#' @param description A description of the design in words, as a character string.
+#' @param citation (optional) The preferred citation for the design, as a character string, in which case title, author, year, and description may be left unspecified.
 #' 
 #' @return a design object with a citation attribute
 #' 
@@ -15,7 +16,7 @@
 #'   declare_sampling(n = 10)
 #' 
 #' design <- 
-#'   add_citation(design,
+#'   set_citation(design,
 #'                author = "Lovelace, Ada",
 #'                title = "Notes",
 #'                year = 1953,
@@ -24,7 +25,7 @@
 #' cite_design(design)
 #' 
 #' @export
-add_citation <-
+set_citation <-
   function(design,
            title = NULL,
            author = NULL,
