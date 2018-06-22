@@ -1,6 +1,6 @@
 # index of a step (specified by object, label or position)
-find_step <- function(design, step, depth=1) {
-
+find_step <- function(design, step, verb) {
+  
   if (is.numeric(step) && step <= length(design) && step > 0) return(step)
   if (is.character(step)) {
     design <- names(design)
@@ -9,9 +9,7 @@ find_step <- function(design, step, depth=1) {
   
   w <- which(w)
   if (length(w) == 0) {
-    step_name <- match.call(sys.function(sys.parent(depth)), 
-                            sys.call(sys.parent(depth)) )[[match.call()[["step"]]]]
-    stop("Could not find step (", step_name, ") in design")
+    stop("Could not find step to ", verb, " in design")
   }
   
   w[1]
@@ -61,26 +59,27 @@ NULL
 #' @export
 insert_step <- function(design, new_step, before, after) {
   if(missing(before)) before <- NULL
-  if(missing(after))  after <- NULL
-  insert_step_(design, new_step, before, after, depth=2, enexpr(new_step))
+  if(missing(after)) after <- NULL
+  insert_step_(design, new_step, before, after, enexpr(new_step))
 }
 
-insert_step_ <- function(design, new_step, before=NULL, after=NULL, depth=1, new_step_expr) {
+insert_step_ <- function(design, new_step_quosure, before = NULL, after = NULL, new_step_expr) {
   if (is.null(after)) {
     if (is.null(before)) {
       stop("Must provide either before or after to add_step()")
     }
-    after <- find_step(design, before, depth) - 1
+    after <- find_step(design, before, "insert after") - 1
   } else {
-    after <- find_step(design, after, depth)
+    after <- find_step(design, after, "insert befor")
   }
-
+  
   new_step <- wrap_step(new_step, new_step_expr)
   
   i <- seq_along(design) <= after
-  steps <- c(design[i], new_step, after[!i])
+  steps <- c(design[i], new_step, design[!i], recursive = FALSE)
   
   construct_design(steps)
+  
 }
 
 #' @param step the step to be deleted or replaced
@@ -91,8 +90,8 @@ insert_step_ <- function(design, new_step, before=NULL, after=NULL, depth=1, new
 #'
 #'  delete_step(design, my_assignment)
 delete_step <- function(design, step) {
-  i <- find_step(design, step)
-  structure(design[-i], class = "design")
+  i <- find_step(design, step, "delete")
+  construct_design(design[-i])
 }
 
 #' @export
@@ -100,11 +99,10 @@ delete_step <- function(design, step) {
 #' @examples
 #'  replace_step(design, my_assignment, declare_step(dplyr::mutate, words = "income"))
 replace_step <- function(design, step, new_step) {
-  i <- find_step(design, step)
-  new_step <- wrap_step(new_step, enexpr(new_step))
-  
+  i <- find_step(design, step, "replace")
+  new_step <- wrap_step(step, enexpr(step))
   design[i] <- new_step
   names(design)[i] <- names(new_step)
   
-  design
+  construct_design(design)
 }
