@@ -17,7 +17,7 @@ reshape_diagnosis(diagnosis, digits = 2, select = NULL)
 A formatted text table with bootstrapped standard errors in parentheses.
 }
 \description{
-If diagnosands are bootstrapped, se's are put in parenthese on a second line and rounded to \code{digits}.
+If diagnosands are bootstrapped, se's are put in parentheses on a second line and rounded to \code{digits}.
 }
 \examples{
 # library(DesignLibrary)

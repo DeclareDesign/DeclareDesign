@@ -266,13 +266,13 @@ get_estimands_single_design <- function(design) {
 #'
 #' @export
 cite_design <- function(design, ...) {
-  citation <- Filter(function(step) attr(step, "causal_type") == 'citation', design)[[1]]()
+  citation <- attr(design, "citation")
   if (class(citation) == "bibentry") {
     print(citation, style = "bibtex", ... = ...)
-    cat("\n")
+  } else {
+    print(citation, style = "text", ... = ...)
   }
-  print(citation, style = "text", ... = ...)
-  invisible(design)
+#  invisible(design)
 }
 
 #' @export
