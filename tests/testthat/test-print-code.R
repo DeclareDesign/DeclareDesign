@@ -26,8 +26,15 @@ design <- my_population +
   my_reveal +
   my_estimator
 
-# debugonce(print_code)
-# print_code(design)
+test_that("print code works", {
+  
+  expect_output(print_code(design), "my_population <- declare")
+  
+  attr(design, "code") <- "code"
+  
+  expect_output(print_code(design), "code")
+  
+})
 
 
 # test_that("print full design", {

@@ -375,10 +375,10 @@ summary.design <- function(object, verbose = TRUE, ...) {
   
   design <- object
   
-  title = NULL
-  authors = NULL
-  description = NULL
-  citation = NULL #cite_design(design)
+  title <- NULL
+  authors <- NULL
+  description <- NULL
+  citation <- NULL #cite_design(design)
   
   get_formula_from_step <- function(step){
     call <- attr(step, "call")
@@ -415,7 +415,7 @@ summary.design <- function(object, verbose = TRUE, ...) {
   
   for (i in 1 + seq_along(design[-1])) {
     causal_type <- attr(design[[i]], "causal_type")
-    if(is.null(causal_type)) next;
+    if(is.null(causal_type)) next
     
     extra_summary[i] <- list(attr(design[[i]], "extra_summary"))
     
@@ -462,9 +462,9 @@ summary.design <- function(object, verbose = TRUE, ...) {
     } else if (causal_type == "citation") {
       citation <- design[[i]]()
       if(!is.character(citation)) {
-        title = citation$title
-        authors = citation$author
-        description = citation$note
+        title <- citation$title
+        authors <- citation$author
+        description <- citation$note
       }
       calls[i] <- list(NULL)
     }
@@ -595,16 +595,12 @@ print.summary.design <- function(x, ...) {
 #' @export
 str.design_step <- function(object, ...) cat("design_step:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
 
-#' @export
-str.seed_data <- function(object, ...) cat("seed_data:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
-
-
 # A wrapper around conduct design for fan-out execution strategies
 fan_out <- function(design, fan) {
   
   st <- list( execution_st(design) )
   
-  for(i in 1:nrow(fan)){
+  for (i in seq_len(nrow(fan))){
     
     end <- fan[i, "end"]
     n   <- fan[i, "n"]

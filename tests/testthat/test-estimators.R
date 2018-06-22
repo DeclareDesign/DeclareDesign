@@ -66,7 +66,7 @@ test_that("regression from estimatr works as an estimator", {
   pate_estimator <- declare_estimator(Y ~ Z + noise,
                                       model = lm_robust,
                                       coefficients = "noise",
-                                      estimand = pate, label = "pate")
+                                      estimand = pate, label = "pate_hat")
   reveal_outcomes <- declare_reveal()
 
   my_design <- my_population +
@@ -77,7 +77,7 @@ test_that("regression from estimatr works as an estimator", {
     pate_estimator
   
   est <- get_estimates(my_design)
-  expect_equal(est$estimator_label, "pate")
+  expect_equal(est$estimator_label, "pate_hat")
   expect_equal(est$coefficient, "noise")
   expect_equal(est$estimand_label, "pate")
 
@@ -196,7 +196,7 @@ df <- data.frame(Y = c(0, 0, 0, 0, 1, 1, 1, 1),
 
 test_that("labels for estimates and estimands work estimand splat labeld estimator default", {
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_arg_label)
-  df %>% mator_no_label %>% expect_label("my_estimator", "ATE")
+  df %>% mator_no_label %>% expect_label("estimator", "ATE")
 })
 
 test_that("labels for estimates and estimands work, label explicit, estimand splat labeled", {
@@ -211,7 +211,7 @@ test_that("labels for estimates and estimands work estimand splat labeld label =
 
 test_that("labels for estimates and estimands work - label default", {
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label)
-  df %>% mator_no_label %>% expect_label("my_estimator", "ATE")
+  df %>% mator_no_label %>% expect_label("estimator", "ATE")
 })
 
 test_that("labels for estimates and estimands work - label explicit", {
@@ -228,7 +228,7 @@ test_that("labels for estimates and estimands work- label=NULL", {
 
 test_that("labels for estimates and estimands work estimand label, estimator default", {
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label)
-  df %>% mator_no_label %>% expect_label("my_estimator", "ATE")
+  df %>% mator_no_label %>% expect_label("estimator", "ATE")
 })
 
 
@@ -339,3 +339,4 @@ test_that("when a coefficient is missing from a model there is an informative er
   expect_error(ols(data), "Not all of the coefficients declared in your estimator are present in the model output, including X.")
   
 })
+

@@ -76,10 +76,10 @@ expand_args <- function(..., expand = TRUE) {
     lens <- lapply(dots, function(x) seq_len(length(x)))
     args_positions <- do.call(expand.grid, args = list(lens, stringsAsFactors = TRUE))
     args_list <- vector("list", nrow(args_positions))
-    for (i in 1:nrow(args_positions)) {
+    for (i in seq_len(nrow(args_positions))) {
       current_list_row <- vector("list", ncol(args_positions))
       names(current_list_row) <- names(dots)
-      for (j in 1:ncol(args_positions)) {
+      for (j in seq_len(ncol(args_positions))) {
         if (length(dots[[j]]) > 1) {
           current_list_row[[j]] <- dots[[j]][[args_positions[i, j]]]
         } else {
@@ -90,10 +90,10 @@ expand_args <- function(..., expand = TRUE) {
     }
   } else {
     args_list <- vector("list", length(dots[[1]]))
-    for (i in 1:length(args_list)) {
+    for (i in seq_along(args_list)) {
       current_list_row <- vector("list", length(dots))
       names(current_list_row) <- names(dots)
-      for (j in 1:length(dots)) {
+      for (j in seq_along(dots)) {
         if (length(dots[[j]]) > 1) {
           current_list_row[[j]] <- dots[[j]][j]
         } else {

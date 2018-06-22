@@ -5,7 +5,7 @@
 #' @inheritParams declare_internal_inherit_params
 #'
 #' @export
-declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal_outcomes")
+declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal")
 
 #' @param data A data.frame containing columns of potential outcomes and an assignment variable
 #'
@@ -138,7 +138,7 @@ switching_equation <- function(data, outcome, assignments) {
   
   data <- data[, upoc, drop = FALSE]
   
-  R <- 1:nrow(data)
+  R <- seq_len(nrow(data))
   C <- match(potential_cols, colnames(data))
   
   data[cbind(R, C)]

@@ -43,7 +43,7 @@
 #' df <- my_assignment_custom(sleep)
 #' table(df$Z, df$group)
 #' 
-declare_assignment <- make_declarations(assignment_handler, "assignment" )
+declare_assignment <- make_declarations(assignment_handler, "assignment")
 
 
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo f_rhs

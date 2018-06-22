@@ -45,7 +45,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
   
   my_estimand <- function(data) {
     with(data,
-         data.frame(estimand_label="my_estimand", estimand=mean(Y_Z_1 - Y_Z_0), stringsAsFactors = FALSE)
+         data.frame(estimand_label="estimand", estimand=mean(Y_Z_1 - Y_Z_0), stringsAsFactors = FALSE)
     )
   }
   
