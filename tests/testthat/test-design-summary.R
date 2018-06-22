@@ -84,7 +84,7 @@ test_that("summary, custom estimator handler, numeric value", {
 })
 
 test_that("summary, estimator formula print formula", {
-  extra = declare_estimator(extra ~ group)
+  extra <- declare_estimator(extra ~ group)
   d <- declare_population(sleep) + extra
   expect_output(print(d), "extra ~ group")
 })

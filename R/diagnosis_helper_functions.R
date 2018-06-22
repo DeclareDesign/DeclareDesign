@@ -89,7 +89,7 @@ print.summary.diagnosis <- function(x, ...) {
 
 #' Clean up a diagnosis object for printing
 #'
-#' If diagnosands are bootstrapped, se's are put in parenthese on a second line and rounded to \code{digits}.
+#' If diagnosands are bootstrapped, se's are put in parentheses on a second line and rounded to \code{digits}.
 #'
 #' @param diagnosis An object from \code{diagnose_design}, either a diagnosand dataframe or a list containing a diagnosand dataframe
 #' @param digits Number of digits.

@@ -128,7 +128,8 @@
 #'
 #' run_design(design_cust)
 #' 
-declare_estimand <- make_declarations(estimand_handler, "estimand", causal_type = "estimand", default_label = "estimand")
+declare_estimand <- make_declarations(estimand_handler, "estimand", 
+                                      causal_type = "estimand", default_label = "estimand")
 
 #' @rdname declare_estimand
 #' @export
@@ -145,7 +146,7 @@ declare_estimands <- declare_estimand
 #'
 #' @importFrom rlang eval_tidy quos  is_quosure
 #' @rdname declare_estimand
-estimand_handler <- function(data, ..., subset = NULL, coefficients=FALSE, label) {
+estimand_handler <- function(data, ..., subset = NULL, coefficients = FALSE, label) {
   options <- quos(...)
   if (names(options)[1] == "") names(options)[1] <- label
 
@@ -186,7 +187,8 @@ validation_fn(estimand_handler) <-  function(ret, dots, label){
   declare_time_error_if_data(ret)
 
   # Don't overwrite label-label with splat label if coefficient names are true
-  if ("coefficients" %in% dotnames && isTRUE(eval_tidy(dots$coefficients))) return(ret)
+  if ("coefficients" %in% dotnames && isTRUE(eval_tidy(dots$coefficients))) 
+    return(ret)
 
   maybeDotLabel <- dotnames[!dotnames %in% c("", names(formals(estimand_handler)) )]
   if (any(duplicated(maybeDotLabel))) {

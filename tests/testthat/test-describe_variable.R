@@ -1,19 +1,19 @@
 context("Describe Variable")
 
 test_that("Describle Variable",{
-  data_littleint = c(rep(1, 10), rep(2, 10), rep(3, 10))
-  data_littlechar = c(rep("test", 10), rep("that", 10))
-  data_littlefactor = as.factor(data_littlechar)
-  data_littlemissing = c(rep(1, 10), rep(NA, 3))
+  data_littleint <- c(rep(1, 10), rep(2, 10), rep(3, 10))
+  data_littlechar <- c(rep("test", 10), rep("that", 10))
+  data_littlefactor <- as.factor(data_littlechar)
+  data_littlemissing <- c(rep(1, 10), rep(NA, 3))
 
-  data_bigint = 1:20
-  data_bigchar = c("a", "b", "c", "d", "e", "f", "g")
-  data_bigfactor = as.factor(data_bigchar)
-  data_bigmissing = c(1:10, rep(NA, 3))
+  data_bigint <- 1:20
+  data_bigchar <- c("a", "b", "c", "d", "e", "f", "g")
+  data_bigfactor <- as.factor(data_bigchar)
+  data_bigmissing <- c(1:10, rep(NA, 3))
 
-  data_logical = c(rep(TRUE, 11), rep(FALSE, 9))
-  data_true_mixed = c(TRUE, 5, NA, "test") # Should induce coercion to character
-  data_mixed_numeric = c(TRUE, FALSE, TRUE, 5, 7, 8, 9) # Should induce coercion to 1/0
+  data_logical <- c(rep(TRUE, 11), rep(FALSE, 9))
+  data_true_mixed <- c(TRUE, 5, NA, "test") # Should induce coercion to character
+  data_mixed_numeric <- c(TRUE, FALSE, TRUE, 5, 7, 8, 9) # Should induce coercion to 1/0
 
   describe_variable(data_littleint)
   describe_variable(data_littlechar)

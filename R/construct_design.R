@@ -90,7 +90,8 @@
   }
   
   if (!inherits(rhs, "dd") && !inherits(rhs, "function") && !is.null(rhs)) {
-    stop("The right hand side of the + does not appear to be a DeclareDesign object or a function.", call. = FALSE)
+    stop("The right hand side of the + does not appear to be a ",
+         "DeclareDesign object or a function.", call. = FALSE)
   }
   
   lhs <- if (inherits(lhs, "design")) {

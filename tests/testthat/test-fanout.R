@@ -2,7 +2,7 @@ context("Fanout execution")
 
 test_that("Fanout does something",{
 
-  N = 100
+  N <- 100
 
   pop <- declare_population(N = N)
   pop2 <- declare_population(noise = rnorm(N))
@@ -20,7 +20,7 @@ test_that("Fanout does something",{
 
 test_that("Diagnosing a fanout",{
 
-  N = 100
+  N <- 100
 
   pop <- declare_population(N = N, noise = rnorm(N))
 

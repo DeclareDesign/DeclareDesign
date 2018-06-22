@@ -138,7 +138,7 @@ switching_equation <- function(data, outcome, assignments) {
   
   data <- data[, upoc, drop = FALSE]
   
-  R <- 1:nrow(data)
+  R <- seq_len(nrow(data))
   C <- match(potential_cols, colnames(data))
   
   data[cbind(R, C)]

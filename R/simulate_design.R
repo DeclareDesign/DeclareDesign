@@ -70,7 +70,7 @@ simulate_design <- function(..., sims = 500) {
     #   sims = list(my_design_1 = c(100, 1, 1), my_design_2 = 200)
     # use it! otherwise, create a list of length designs that repeats the sims
     if (!is_list(sims)) {
-      sims <- lapply(1:length(designs), function(i) sims)
+      sims <- lapply(seq_along(designs), function(i) sims)
     }
     
     sims_match_steps <-

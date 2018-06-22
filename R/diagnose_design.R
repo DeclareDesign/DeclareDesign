@@ -220,7 +220,7 @@ calculate_sims <- function(simulations_df, group_by_set) {
 
 bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, diagnosands_df, group_by_set) {
   
-  boot_indicies_by_id <- split(1:nrow(simulations_df), simulations_df$sim_ID)
+  boot_indicies_by_id <- split(seq_len(nrow(simulations_df)), simulations_df$sim_ID)
   nsims <- max(simulations_df$sim_ID)
   
   boot_function <- function() {

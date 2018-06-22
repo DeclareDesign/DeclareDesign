@@ -163,7 +163,8 @@
 #' 
 #' diagnose_design(design_two, sims = 5, bootstrap_sims = FALSE)
 #'
-declare_estimator <- make_declarations(estimator_handler, step_type = "estimator", causal_type = "estimator", default_label = "estimator")
+declare_estimator <- make_declarations(estimator_handler, step_type = "estimator", 
+                                       causal_type = "estimator", default_label = "estimator")
 
 #' @rdname declare_estimator
 #' @export

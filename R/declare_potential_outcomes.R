@@ -143,8 +143,8 @@ potential_outcomes.formula <- function(formula,
   }
   
   # build call
-  expr = as_quosure(formula)
-  for (i in 1:nrow(conditions)) {
+  expr <- as_quosure(formula)
+  for (i in seq_len(nrow(conditions))) {
     
     condition_values <- conditions[i, , drop = FALSE]
     out_name <- paste0(outcome_variable, "_", paste0(assignment_variables, "_", condition_values, collapse = "_"))
@@ -247,7 +247,7 @@ pofdv <- function(design, i, step){
                          design[from:to])
     
     for (step_j in assn_steps) {
-      if (is.null(step_meta <- attr(step_j, "step_meta"))) next;
+      if (is.null(step_meta <- attr(step_j, "step_meta"))) next
       step_assn <- step_meta[[step_attr]]
       vars <- setdiff(vars, step_assn)
       if (length(vars) == 0) return(c())
@@ -301,17 +301,17 @@ pofdv <- function(design, i, step){
   attr(new_step, "auto-generated") <- TRUE
   
   for (step_j in design[length(design):(i + 1)]) {
-    if (is.null(step_meta <- attr(step_j, "step_meta"))) next;
+    if (is.null(step_meta <- attr(step_j, "step_meta"))) next
     if (attr(step_j, "step_type") == "assignment") {
       if (any(step_meta$assignment_variables %in% attr(step, "step_meta")$assignment_variables)) {
         design <- insert_step(design, new_step, after = step_j)
-        break;
+        break
       }
     }
     else if (attr(step_j, "step_type") == "reveal") {
       if (any(step_meta$outcome_variables %in% attr(step, "step_meta")$assignment_variables)) {
         design <- insert_step(design, new_step, after = step_j)
-        break;
+        break
       }
     }
   }
