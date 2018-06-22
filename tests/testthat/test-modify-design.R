@@ -51,8 +51,57 @@ test_that("placement doesn't matter", {
   
   expect_length(insert_step(design, declare_step(mutate, income = noise ^ 2), after = my_assignment), 4)
   expect_length(insert_step(design, declare_step(mutate, income = noise ^ 2), before = my_assignment), 4)
+  
   expect_length(insert_step(design, declare_step(mutate, income = noise ^ 2), before = "mypop"), 4)
 
   expect_error(insert_step(design, declare_step(mutate, income = noise ^ 2), before = "notfound"))
   expect_error(insert_step(design, declare_step(mutate, income = noise ^ 2)))
+})
+
+
+test_that("names are correct",{
+  my_population <- declare_population(N = 100, noise = rnorm(N))
+  
+  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+  
+  my_assignment <- declare_assignment(m = 25, label = "a_label")
+  
+  design <- my_population +
+    my_potential_outcomes +
+    my_assignment +
+    declare_reveal()
+  
+  
+  processing <- declare_step(handler = fabricate, q = 5)
+  
+  linear     <- declare_estimator(Y ~ Z, model = lm_robust, 
+                                  label = "linear")
+  
+  saturated  <- declare_estimator(Y ~ Z, label = "saturated", model = lm_robust)
+  
+  neighbors_design <- insert_step(design, after = 3, processing) 
+  
+  expect_equal(
+    names(neighbors_design),
+    c("my_population", "my_potential_outcomes", "a_label", "processing", "reveal"))
+  
+  check0 <- neighbors_design + linear 
+  check1 <- neighbors_design + saturated 
+  check2 <- neighbors_design + linear + saturated
+  
+  expect_equal(
+  names(check0),
+  c("my_population", "my_potential_outcomes", "a_label", "processing", 
+    "reveal", "linear"))
+  
+  expect_equal(
+    names(check1),
+  c("my_population", "my_potential_outcomes", "a_label", "processing", 
+    "reveal", "saturated"))
+  expect_equal(
+    names(check2),
+  c("my_population", "my_potential_outcomes", "a_label", "processing", 
+    "reveal", "linear", "saturated"))
+  
+  
 })

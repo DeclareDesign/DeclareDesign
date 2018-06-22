@@ -3,7 +3,7 @@ find_step <- function(design, step) {
   step_obj <- eval_tidy(step)
   
   if (is.numeric(step_obj) && step <= length(design) && step_obj > 0) return(step_obj)
-  if (is.character(step)) {
+  if (is.character(step_obj)) {
     design <- names(design)
   }
   w <- vapply(design, identical, FALSE, step_obj)
@@ -25,7 +25,7 @@ find_step <- function(design, step) {
 #'
 #' @return A new design object
 #'
-#' @importFrom rlang lang_name quos quo_expr
+#' @importFrom rlang lang_name quos quo_expr quo_is_missing
 #' @name modify_design
 #' @rdname modify_design
 #'
