@@ -595,10 +595,6 @@ print.summary.design <- function(x, ...) {
 #' @export
 str.design_step <- function(object, ...) cat("design_step:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
 
-#' @export
-str.seed_data <- function(object, ...) cat("seed_data:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse=""), "\n")
-
-
 # A wrapper around conduct design for fan-out execution strategies
 fan_out <- function(design, fan) {
   

@@ -1,30 +1,6 @@
 
-# Helper function for "floating labels to the right" when creating a design via + operator
-#
-# eg declare_design(pop=declare_population(N=100))
-# step 1 will have label set to pop
-#
-#' @importFrom rlang f_text f_env
-maybe_add_names_ret <- function(ret) {
-  
-  step_types <- sapply(ret, attr, "step_type")
-  auto_generated <- sapply(ret, function(x) attr(x,  "auto-generated") %||% FALSE)
-  step_types[auto_generated] <- "auto_reveal"
-  
-  for (i in seq_along(ret)) {
-    if (names(ret)[i] == "") {
-      if (inherits(ret[[i]], "design_step")){
-        numb <- sum(step_types[1:i] == step_types[i])
-        names(ret)[i] <- paste0(step_types[i], ifelse(numb > 1, paste0("_", numb), ""), collapse = "")
-      } else {
-        names(ret)[i] <- paste0("unknown_step_", i)
-      }
-    }
-  }
-  
-  ret
-}
 
+#' @importFrom rlang f_text f_env
 maybe_add_names_qs <- function(quotations) {
   
   namer <- function(quotation) {
@@ -180,21 +156,6 @@ format_num <- function(x, digits = 3) {
   sprintf(paste0("%.", digits, "f"), as.numeric(x))
 }
 
-# Function to check whether there are more sims run than expected, possibly because of repeated labels
-check_sim_number <- function(simulations_df,
-                             sims,
-                             grouping_variables = c("design_label",  "estimand_label", "estimator_label", "coefficient")) {
-  
-  group_by_set  <- colnames(simulations_df) %i% grouping_variables
-  group_by_list <- simulations_df[, group_by_set, drop = FALSE]
-  check_df      <- split(group_by_list, group_by_list, drop = TRUE)
-  check_sims    <- unlist(lapply(check_df, nrow)) != prod(sims)
-  if (any(check_sims)) {
-    warning(paste0("More simulations than expected for profiles:",
-                   paste0(names(check_sims)[check_sims], collapse = ", ")))
-  }
-}
-
 # helpers for summary.design ----------------------------------------------
 
 get_added_variables <- function(last_df = NULL, current_df) {
@@ -249,7 +210,6 @@ wrap_step <- function(step, expr) {
   valid <- is_symbol(expr)
   lbl <- attr(step, "label")
   nm <- if(!is_null(lbl)) lbl else if (valid) expr_name(expr) else step_type(step)
-  # nm <- if(valid) expr_name(expr) else step_type(step)
   if(is.null(attr(step,"call"))) attr(step, "call") <- expr
   structure(setNames(list(step), nm), valid=valid)
 }

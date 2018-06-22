@@ -90,7 +90,7 @@
   }
   
   if (!inherits(rhs, "dd") && !inherits(rhs, "function") && !is.null(rhs)) {
-    stop("The right hand side does not appear to be a DeclareDesign object or a function", call. = FALSE)
+    stop("The right hand side of the + does not appear to be a DeclareDesign object or a function.", call. = FALSE)
   }
   
   lhs <- if (inherits(lhs, "design")) {
@@ -104,7 +104,7 @@
   unique_nms <- make.unique(c(names(lhs), names(rhs)), sep = "_")
   
   if (!is.null(rhs)){
-    names(rhs) <- unique_nms[length(lhs) + 1]
+    names(rhs) <- unique_nms[(length(lhs) + 1):length(unique_nms)]
   }
   
   steps <- append(lhs, rhs)
@@ -152,12 +152,11 @@ construct_design <- function(steps) {
     }
   }
   
-  ret <- maybe_add_names_ret(ret)
+  # name new auto-reveal steps
+  names(ret)[sapply(ret, function(x) attr(x,  "auto-generated") %||% FALSE)] <- "auto_reveal"
   
-  if (any(duplicated(names(ret)))) {
-    stop("You have steps with identical names: ",
-         unique(names(ret)[duplicated(names(ret))]), ".", call. = FALSE)
-  }
+  # ensure all names are unique
+  unique_nms <- make.unique(names(ret), sep = "_")
   
   # Assert that all labels are unique
   local({
