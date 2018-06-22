@@ -68,9 +68,9 @@ insert_step_ <- function(design, new_step, before = NULL, after = NULL, new_step
     if (is.null(before)) {
       stop("Must provide either before or after to add_step()")
     }
-    after <- find_step(design, before, "insert after") - 1
+    after <- find_step(design, before, "insert before") - 1
   } else {
-    after <- find_step(design, after, "insert before")
+    after <- find_step(design, after, "insert after")
   }
   
   new_step <- wrap_step(new_step, new_step_expr)
