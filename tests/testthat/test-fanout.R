@@ -40,7 +40,6 @@ test_that("Diagnosing a fanout",{
 
   strategy <- c(1, 1, 5, 20)
 
-  debugonce(DeclareDesign:::simulate_design)
   dx <- diagnose_design(D, sims = strategy)
 
   # estimands don't vary overall
