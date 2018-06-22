@@ -3,21 +3,21 @@ context("Multiple Coefficients")
 
 test_that("Multiple Coefficients", {
 
-  alpha = 1
-  beta = 3
+  alpha <- 1
+  beta <- 3
   
-  my_pop = declare_population(
+  my_pop <- declare_population(
     N = 30,
     noise = rnorm(N, mean = 0, sd = 1),
     X = 1:N,
     Y = alpha + beta * X + noise
   )
   
-  theta = declare_estimand(`(Intercept)` = alpha,
+  theta <- declare_estimand(`(Intercept)` = alpha,
                            X = beta,
                            coefficients = TRUE)
   
-  OLS = declare_estimator(Y ~ X,
+  OLS <- declare_estimator(Y ~ X,
                           model = lm,
                           estimand = theta,
                           coefficients = TRUE)

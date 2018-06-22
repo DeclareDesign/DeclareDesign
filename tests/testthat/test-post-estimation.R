@@ -1,4 +1,4 @@
-
+context("post estimation")
 
 test_that("multiple design get_estimates", {
   
@@ -60,12 +60,11 @@ test_that("multiple design get_estimates", {
   
   get_estimands(my_designs)
   
-  
   get_estimates(design_1)
   
   get_estimates(design_2)
   
-  get_estimates(design_1, design_2)
+  expect_equal(get_estimates(design_1, design_2)$design_label, c("design_1", "design_2"))
   
   get_estimates(my_designs)
   

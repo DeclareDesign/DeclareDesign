@@ -2,7 +2,7 @@
 find_step <- function(design, step) {
   if (is.numeric(step) && step <= length(design) && step > 0) return(step)
   if (is.character(step)) {
-    design <- lapply(design, attr, "label")
+    design <- names(design)
   }
   w <- vapply(design, identical, FALSE, step)
 
@@ -52,8 +52,8 @@ NULL
 #' @rdname modify_design
 #' @examples
 #'
-#'  insert_step(design, dplyr::mutate(income = noise^2), after = my_assignment)
-#'  insert_step(design, dplyr::mutate(income = noise^2), before = my_assignment)
+#'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), after = my_assignment)
+#'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), before = my_assignment)
 #'
 #' @export
 insert_step <- function(design, new_step, before = NULL, after = NULL) {
@@ -70,11 +70,7 @@ insert_step_ <- function(design, new_step_quosure, before = NULL, after = NULL) 
     after <- find_step(design, after)
   }
   
-  new_step <- tryCatch(
-    eval_tidy(new_step_quosure),
-    error = function(e) callquos_to_step(new_step_quosure) # DO we really need this
-  )
-  
+  new_step <- eval_tidy(new_step_quosure) 
   
   i <- seq_along(design)
   structure(
@@ -98,7 +94,7 @@ delete_step <- function(design, step) {
 #' @export
 #' @rdname modify_design
 #' @examples
-#'  replace_step(design, my_assignment, dplyr::mutate(words="HIARYLAH"))
+#'  replace_step(design, my_assignment, declare_step(dplyr::mutate, words = "income"))
 replace_step <- function(design, step, new_step) {
   delete_step(
     insert_step_(design, after = step, new_step_quosure = enquo(new_step)),

@@ -37,8 +37,13 @@ test_that("names from quos",{
 })
   
 
-
-
+test_that("clone_dot_edit_env", {
+  
+  dot <- quo(test_obj)
+  environment(dot) <- NULL
+  expect_s3_class(clone_dot_edit_env(dot, here_i_am = "some_message", xyxyx = "bar"), "quosure")
+  
+})
 
 
 

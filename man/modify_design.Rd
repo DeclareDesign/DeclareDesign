@@ -49,10 +49,10 @@ see \code{\link{modify_design}} for details.
  design
 
 
- insert_step(design, dplyr::mutate(income = noise^2), after = my_assignment)
- insert_step(design, dplyr::mutate(income = noise^2), before = my_assignment)
+ insert_step(design, declare_step(dplyr::mutate, income = noise^2), after = my_assignment)
+ insert_step(design, declare_step(dplyr::mutate, income = noise^2), before = my_assignment)
 
 
  delete_step(design, my_assignment)
- replace_step(design, my_assignment, dplyr::mutate(words="HIARYLAH"))
+ replace_step(design, my_assignment, declare_step(dplyr::mutate, words = "income"))
 }

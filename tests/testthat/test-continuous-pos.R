@@ -4,7 +4,7 @@ test_that("you can do continuous POs", {
   my_population <- declare_population(
     N = 100, income = rnorm(N), age = sample(18:95, N, replace = T))
 
-  conditions = seq(0, 1, by = .1)
+  conditions <- seq(0, 1, by = .1)
 
   my_potential_outcomes <- declare_potential_outcomes(
     formula = Y ~ .25 * Z + .01 * age * Z, conditions = conditions)
@@ -75,7 +75,7 @@ test_that("Hooke's law",{
   df <- draw_data(design)
 
   # Not all forces are realized
-  expect_lt(length(unique(df$force)), sum(choose(length(w), 1:length(w))))
+  expect_lt(length(unique(df$force)), sum(choose(length(w), seq_along(w))))
 
   # No PO columns created in df
   expect_false(any(grep("length_force_", names(df))))

@@ -8,9 +8,7 @@ my_population <- declare_population(
 my_potential_outcomes_Y <- declare_potential_outcomes(
   formula = Y ~ .25 * Z + .01 * age * Z)
 
-
 my_assignment <- declare_assignment(m = 25)
-
 
 test_that("attrition / formula PO", {
 
@@ -51,7 +49,6 @@ test_that("attrition / legacy PO", {
     my_assignment +
     declare_reveal(outcome_variables = "R") +
     declare_reveal(attrition_variables = "R")
-  
 
   out <- head(draw_data(my_design))
 

@@ -47,8 +47,8 @@ NULL
 
 
 .onLoad <- function(libname, pkgname) {
-  repos = getOption("repos")
-  repos["declaredesign"] = "https://declaredesign.github.io"
+  repos <- getOption("repos")
+  repos["declaredesign"] <- "https://declaredesign.github.io"
   options(repos = repos)
   invisible(repos)
 }

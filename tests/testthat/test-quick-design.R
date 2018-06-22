@@ -7,7 +7,7 @@ test_that("expand_design works", {
     my_assignment <- declare_assignment(m = N / 2)
     pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
-      declare_estimator(Y ~ Z, estimand = pate, label = "pate")
+      declare_estimator(Y ~ Z, estimand = pate, label = "pate_hat")
     reveal_outcomes <- declare_reveal()
     my_design <- my_population +
       my_potential_outcomes +
@@ -64,7 +64,7 @@ test_that("vary works", {
     my_assignment <- declare_assignment(m = N / 2)
     pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
-      declare_estimator(Y ~ Z, estimand = pate, label = "pate")
+      declare_estimator(Y ~ Z, estimand = pate, label = "pate_hat")
     reveal_outcomes <- declare_reveal()
     my_design <- my_population +
       my_potential_outcomes +
@@ -114,7 +114,7 @@ test_that("power curve", {
     my_assignment <- declare_assignment(m = N / 2)
     pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
-      declare_estimator(Y ~ Z, estimand = pate, label = "pate")
+      declare_estimator(Y ~ Z, estimand = pate, label = "pate_hat")
     reveal_outcomes <- declare_reveal()
     my_design <- my_population +
       my_potential_outcomes +
@@ -167,3 +167,4 @@ test_that("single design can be created by expand_design", {
   # expect_equal(length(my_designs), 2)
   
 })
+
