@@ -5,7 +5,7 @@ test_that("Fanout does something",{
   N <- 100
 
   pop <- declare_population(N = N)
-  pop2 <- declare_population(noise = rnorm(N))
+  pop2 <- declare_step(fabricate, noise = rnorm(N))
   estimand <- declare_estimand(foo = mean(noise))
   D <- pop + pop2 + estimand
   
@@ -40,6 +40,7 @@ test_that("Diagnosing a fanout",{
 
   strategy <- c(1, 1, 5, 20)
 
+  debugonce(DeclareDesign:::simulate_design)
   dx <- diagnose_design(D, sims = strategy)
 
   # estimands don't vary overall
@@ -91,6 +92,7 @@ test_that("fan_out ids are correct",{
   
   fan <- data.frame(end = 1:3, n = c(5, 5, 5))
 
+  debugonce(diagnose_design)
   fo <- diagnose_design(design, sims = fan)
 
   fo_id <- fo$simulations[paste0("fan_", 1:3)]
