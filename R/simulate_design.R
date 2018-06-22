@@ -54,7 +54,7 @@ simulate_design <- function(..., sims = 500) {
     ## 1. send one or more design objects created by the + operator
     ## 2. send a single list of design objects e.g. created by expand_design
     ## Approach: unpack designs if a list of designs was sent as a single list object
-    if (length(designs) == 1 &&
+     if (length(designs) == 1 &&
         is.list(designs[[1]]) &&
         !"design" %in% class(designs[[1]])) {
       designs <- designs[[1]]
@@ -81,7 +81,7 @@ simulate_design <- function(..., sims = 500) {
       stop(
         "The sims argument you provided for the designs named ",
         paste(wrong_designs, collapse = ", "),
-        "are not correct. Sims should be of length the number of steps in a design or one."
+        " are not correct. Sims should be of length the number of steps in a design or one.", call. = FALSE
       )
     }
     
