@@ -150,7 +150,7 @@ diagnose_design <- function(...,
 
 }
 
-check_design_class <- function(designs, lbl){
+check_design_class <- function(designs){
   if (!all(sapply(designs, function(x) {
     inherits(x, "design") || ( inherits(x, "function") && is.null(formals(x)))
   }))) {
