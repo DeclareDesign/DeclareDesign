@@ -186,7 +186,7 @@ apply_on_design_dots <- function(FUN, ...) {
   
   designs <- dots_to_list_of_designs(...)
   
-  elist <- lapply(designs, get_estimands_single_design)
+  elist <- lapply(designs, FUN)
   
   if (length(designs) > 1) {
     elist <- Map(cbind, design_label = names(elist), elist, stringsAsFactors = FALSE)
@@ -196,23 +196,21 @@ apply_on_design_dots <- function(FUN, ...) {
 }
 
 dots_to_list_of_designs <- function(...) {
-  
-  designs_quos <- enquos(...)
-  
-  d1 <- eval_tidy(designs_quos[[1]])
+  dotqs <- enquos(...)
+  d1 <- eval_tidy(dotqs[[1]])
 
   ## Two cases:
   ## 1. send one or more design objects created by the + operator
   ## 2. send a single list of design objects e.g. created by expand_design
   ## Approach: unpack designs if a list of designs was sent as a single list object
-  if (length(designs_quos) == 1 &&
+  if (length(dotqs) == 1 &&
       is.list(d1) &&
       !inherits(d1, "design")) {
     designs <- d1
     names(designs) <- infer_names(designs)
   } else {
-    names(designs_quos) <- infer_names(designs_quos)
-    designs <- eval_tidy(quo(list(!!!designs_quos)))
+    names(dotqs) <- infer_names(dotqs)
+    designs <- eval_tidy(quo(list(!!!dotqs)))
   }
   
   # do not allow users to send more than one object if any is not a design object
@@ -224,12 +222,12 @@ dots_to_list_of_designs <- function(...) {
 
 get_estimates_single_design <- function(design) {
   results <- list("estimator" = vector("list", length(design)))
-  run_design_internal.design(design, results = results)$estimates_df
+  run_design_internal(design, results = results)$estimates_df
 }
 
 get_estimands_single_design <- function(design) {
   results <- list("estimand" = vector("list", length(design)))
-  run_design_internal.design(design, results = results)$estimands_df
+  run_design_internal(design, results = results)$estimands_df
 }
 
 #' Obtain the preferred citation for a design

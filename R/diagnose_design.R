@@ -75,43 +75,23 @@ diagnose_design <- function(...,
                             sims = 500,
                             bootstrap_sims = 100,
                             add_grouping_variables = NULL) {
-    
-  dots_quos <- quos(...)
-  dots_quos <- maybe_add_names_qs(dots_quos)
-  dots <- lapply(dots_quos, eval_tidy)
   
-  # three cases:
+  dots <- quos(...)  
+
+  # two cases:
   # 1. it's a data frame -- this is the simulations df
-  # 2. it's a single object that is a list of designs -- unpack designs
-  # 3. it's a ... of one or more designs
-  if (length(dots) == 1 && inherits(dots[[1]], "data.frame")) {
-    simulations_df <- dots[[1]]
-    if (!any(names(simulations_df) %in% c("estimator_label", "estimand_label"))) {
+  # 2. it's something else, and needs to be simulated
+  if (is.data.frame(..1)) {
+    simulations_df <- ..1
+    if (is_empty(names(simulations_df) %i% c("estimator_label", "estimand_label"))) {
       stop("Can't calculate diagnosands on this data.frame, which does not include either an estimator_label or an estimand_label. Did you send a simulations data frame?")
     }
   } else {
-    if (inherits(dots[[1]], "list")) {
-      
-      if(length(dots) > 1){
-        stop("When you provide a list of designs to `diagnose_design`, for example created by `expand_design`, please don't also provide additional designs. Only send the list of designs.")
-      }
-      designs <- dots[[1]]
-      dots_quos <- dots_quos[[1]]
-    } else {
-      designs <- dots
-    }
-    
-    check_design_class(designs)
-  }
-
-  # simulate if needed ------------------------------------------------------
-
-  if (!exists("simulations_df")) {
-    simulations_df <- simulate_design(!!!dots_quos, sims = sims)
+    # simulate if needed ------------------------------------------------------
+    simulations_df <- simulate_design(!!!dots, sims = sims)
   }
 
   # figure out what to group by ---------------------------------------------
-
   group_by_set <- c("design_label", "estimand_label", "estimator_label", "coefficient")
 
   if (!is.null(add_grouping_variables)) {
@@ -170,11 +150,11 @@ diagnose_design <- function(...,
 
 }
 
-check_design_class <- function(designs){
+check_design_class <- function(designs, lbl){
   if (!all(sapply(designs, function(x) {
     inherits(x, "design") || ( inherits(x, "function") && is.null(formals(x)))
   }))) {
-    stop("Please only send design objects or functions with no arguments to simulate_design.")
+    stop("Please only send design objects or functions with no arguments.")
   }
 }
 
