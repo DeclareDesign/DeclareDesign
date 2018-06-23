@@ -118,9 +118,11 @@ simulate_single_design <- function(design, sims) {
   } else {
     sims <- check_sims(design, sims)
     results_list <- fan_out(design, sims)
-    fan_id <- setNames(rev(do.call(expand.grid, lapply(
-      rev(sims$n), seq
-    ))), paste0("fan_", seq_len(nrow(sims))))
+    fan_id <- setNames(
+      lapply(rev(sims$n), seq),
+      paste0("fan_", seq_len(nrow(sims)))
+    )
+    fan_id <- expand.grid(fan_id)
     fan_id$sim_ID <- seq_len(nrow(fan_id))
   }
   
@@ -136,11 +138,11 @@ simulate_single_design <- function(design, sims) {
   estimates_df <- results2x(results_list, "estimates_df")
   estimands_df <- results2x(results_list, "estimands_df")
   
-  if (nrow(estimates_df) == 0 & nrow(estimands_df) == 0) {
+  if (is_empty(estimates_df) && is_empty(estimands_df)) {
     stop("No estimates or estimands were declared, so design cannot be simulated.", call. = FALSE)
-  } else if (nrow(estimands_df) == 0 && nrow(estimates_df) > 0) {
+  } else if (is_empty(estimands_df)) {
     simulations_df <- estimates_df
-  } else if (nrow(estimands_df) > 0 && nrow(estimates_df) == 0) {
+  } else if (is_empty(estimates_df)) {
     simulations_df <- estimands_df
   } else {
     simulations_df <- merge(
@@ -168,8 +170,8 @@ simulate_single_design <- function(design, sims) {
                  as_list(attr(design, "parameters")),
                  simulations_df[, -1, drop = FALSE])
   }
-  simulations_df
   
+  simulations_df
 }
 
 
