@@ -182,7 +182,7 @@ infer_names <- function(x, type = "design") {
     function(i, xi=x[[i]], nm=inferred_names[i]) {
       if (nm != "") 
         nm
-      else if (!is_quosure(x) || is_call(quo_squash(xi))) 
+      else if (!is_quosure(xi) || is_call(quo_squash(xi))) 
         paste0(type, "_", i)
       else 
         quo_text(xi)
