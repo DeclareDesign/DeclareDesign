@@ -138,17 +138,27 @@ diagnose_design <- function(...,
   diagnosands_df <- diagnosands_df[do.call(order, as.list(diagnosands_df[sort_by_list])), , drop = FALSE]
 
   rownames(diagnosands_df) <- NULL
+  
+  # reorder columns
+  
+  diagnosands_df <- diagnosands_df[, reorder_columns(parameters_df, diagnosands_df), drop = FALSE]
+  
   # Return frames
   out <- list(simulations_df = simulations_df, diagnosands_df = diagnosands_df, diagnosand_names = diagnosand_names, group_by_set = group_by_set, parameters_df = parameters_df)
   
   if (bootstrap_sims != 0) {
     out$bootstrap_replicates <- bootout$diagnosand_replicates
+    out$bootstrap_replicates <- merge(out$bootstrap_replicates, parameters_df, by = "design_label")
+    out$bootstrap_replicates <- out$bootstrap_replicates[, reorder_columns(parameters_df, out$bootstrap_replicates), drop = FALSE]
   }
   out$bootstrap_sims <- bootstrap_sims
 
   structure(out, class = "diagnosis")
 
 }
+
+reorder_columns <- function(a, b, n1 = colnames(a), n2 = colnames(b))
+  c(n1, setdiff(n2, n1))
 
 check_design_class <- function(designs){
   if (!all(sapply(designs, function(x) {
