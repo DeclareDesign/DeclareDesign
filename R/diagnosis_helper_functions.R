@@ -151,7 +151,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   return_df <- rbind_disjoint(list(diagnosands_only_df, se_only_df), infill = "")
   
   # Reorder rows
-  sort_by_list <- diagnosis$group_by_set %i% colnames(return_df)
+  sort_by_list <- diagnosis$group_by_set %icn% return_df
   return_df <- return_df[do.call(order, as.list(return_df[,sort_by_list])), , drop = FALSE]
   
   # NA bootstrap rows

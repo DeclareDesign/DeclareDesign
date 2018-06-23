@@ -83,7 +83,7 @@ diagnose_design <- function(...,
   # 2. it's something else, and needs to be simulated
   if (is.data.frame(..1)) {
     simulations_df <- ..1
-    if (is_empty(names(simulations_df) %i% c("estimator_label", "estimand_label"))) {
+    if (is_empty(c("estimator_label", "estimand_label") %icn% simulations_df)) {
       stop("Can't calculate diagnosands on this data.frame, which does not include either an estimator_label or an estimand_label. Did you send a simulations data frame?")
     }
   } else {
@@ -98,7 +98,7 @@ diagnose_design <- function(...,
     group_by_set <- c(group_by_set, add_grouping_variables)
   }
 
-  group_by_set <- group_by_set %i% colnames(simulations_df)
+  group_by_set <- group_by_set %icn% simulations_df
 
   # Actually calculate diagnosands ------------------------------------------
 
@@ -134,7 +134,7 @@ diagnose_design <- function(...,
   diagnosands_df$design_label <- factor(diagnosands_df$design_label, levels = parameters_df$design_label)
   
   # Reorder rows
-  sort_by_list <- c(group_by_set, "statistic") %i% colnames(diagnosands_df) 
+  sort_by_list <- c(group_by_set, "statistic") %icn% diagnosands_df
   diagnosands_df <- diagnosands_df[do.call(order, as.list(diagnosands_df[sort_by_list])), , drop = FALSE]
 
   rownames(diagnosands_df) <- NULL
@@ -200,7 +200,7 @@ calculate_sims <- function(simulations_df, group_by_set) {
 
 bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, diagnosands_df, group_by_set) {
   
-  bootstrap_level <- ifelse("fan_1" %in% names(simulations_df), "fan_1", "sim_ID")
+  bootstrap_level <- if("fan_1" %in% names(simulations_df)) "fan_1" else "sim_ID"
   
   boot_indicies_by_id <- split(seq_len(nrow(simulations_df)), simulations_df[, bootstrap_level])
   nsims <- max(simulations_df[, bootstrap_level])
@@ -236,7 +236,7 @@ bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, d
   diagnosands_df <- diagnosands_df[names(labels_df)]
   
   # Calculate standard errors
-  use_vars <- names(diagnosand_replicates)[!(names(diagnosand_replicates) %in% c(group_by_set, "bootstrap_id"))]
+  use_vars <- setdiff(names(diagnosand_replicates), c(group_by_set, "bootstrap_id"))
   diagnosands_se_df <- split(diagnosand_replicates[use_vars], group_by_list, drop = TRUE)
   diagnosands_se_df <- lapply(diagnosands_se_df, lapply, sd)
   

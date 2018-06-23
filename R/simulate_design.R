@@ -146,7 +146,7 @@ simulate_single_design <- function(design, sims) {
     simulations_df <- merge(
       estimands_df,
       estimates_df,
-      by = colnames(estimands_df) %i% colnames(estimates_df),
+      by = colnames(estimands_df) %icn% estimates_df,
       all = TRUE,
       sort = FALSE
     )
