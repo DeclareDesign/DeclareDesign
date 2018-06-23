@@ -207,9 +207,8 @@ step_type.default <- function(x) "unknown"
 
 #' @importFrom rlang is_symbol expr_name
 wrap_step <- function(step, expr) {
-  valid <- is_symbol(expr)
-  lbl <- attr(step, "label")
-  nm <- if(!is_null(lbl)) lbl else if (valid) expr_name(expr) else step_type(step)
+  expr_txt <- if(is_symbol(expr)) expr_name(expr)
+  nm <- attr(step, "label") %||%  expr_txt %||% step_type(step)
   if(is.null(attr(step,"call"))) attr(step, "call") <- expr
-  structure(setNames(list(step), nm), valid=valid)
+  structure(setNames(list(step), nm), valid=!is.null(expr_txt))
 }
