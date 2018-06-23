@@ -112,6 +112,8 @@ simulate_design <- function(..., sims = 500) {
     parameters_df <- rbind_disjoint(parameters_df_list)
     parameters_df <- data.frame(lapply(parameters_df, type_convert), stringsAsFactors = FALSE)
     
+    simulations_df <- simulations_df[ , reorder_columns(parameters_df, simulations_df), drop = FALSE]
+    
     attr(simulations_df, "parameters") <- parameters_df
     
     simulations_df

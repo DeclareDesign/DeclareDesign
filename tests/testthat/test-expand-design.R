@@ -139,7 +139,7 @@ test_that("capitalization of parameter names are retained", {
   
   reshape <- reshape_diagnosis(des)
   
-  expect_equal(names(reshape)[6:7], c("N", "n"))
+  expect_equal(names(reshape)[2:3], c("N", "n"))
   
 })
 
