@@ -106,57 +106,63 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   
   diagnosands_df <- diagnosis$diagnosands
   
-  # If no bootstrapping
-  if (is.null(diagnosis$bootstrap_replicates)) {
-    # Make names nicer
-    names(diagnosands_df) <-
-      gsub("\\b(se[(]|sd |rmse|[[:alpha:]])",
-           "\\U\\1",
-           gsub("_", " ", names(diagnosands_df)),
-           perl = TRUE)
-    rownames(diagnosands_df) <- NULL
+  # # If no bootstrapping
+  # if (is.null(diagnosis$bootstrap_replicates)) {
+  #   # Make names nicer
+  #   names(diagnosands_df) <-
+  #     gsub("\\b(se[(]|sd |rmse|[[:alpha:]])",
+  #          "\\U\\1",
+  #          gsub("_", " ", names(diagnosands_df)),
+  #          perl = TRUE)
+  #   rownames(diagnosands_df) <- NULL
+  #   
+  #   return(diagnosands_df)
+  # }
+  
+  if(!is.null(diagnosis$bootstrap_replicates)){
     
-    return(diagnosands_df)
+    # Reshape if there is bootstrapping
+    diagnosand_columns <- diagnosis$diagnosand_names
+    diagnosand_se_columns <- paste0("se(", diagnosis$diagnosand_names, ")")
+    group_columns <- setdiff(names(diagnosands_df), c(diagnosand_columns, diagnosand_se_columns))
+    
+    # Make diagnosand only df
+    diagnosands_only_df <-
+      diagnosands_df[, c(group_columns, diagnosand_columns), drop = FALSE]
+    
+    clean_values_df <-
+      data.frame(lapply(diagnosands_only_df[, diagnosand_columns, drop = FALSE],
+                        format_num, digits = digits), stringsAsFactors = FALSE)
+    
+    diagnosands_only_df <-
+      cbind(diagnosands_only_df[, group_columns, drop = FALSE],
+            data.frame(statistic = "Estimate", stringsAsFactors = FALSE),
+            clean_values_df)
+    
+    names(diagnosands_only_df) <- c(group_columns, "statistic", diagnosand_columns)
+    
+    # Make se only df
+    se_only_df <- diagnosands_df[, diagnosand_se_columns, drop = FALSE]
+    se_only_df <- data.frame(lapply(se_only_df, add_parens, digits = digits), stringsAsFactors = FALSE)
+    colnames(se_only_df) <- diagnosand_columns
+    
+    se_only_df <- cbind(diagnosands_only_df[, group_columns, drop = FALSE],
+                        data.frame(statistic = "SE", stringsAsFactors = FALSE), se_only_df)
+    
+    # Merge
+    return_df <- rbind_disjoint(list(diagnosands_only_df, se_only_df), infill = "")
+    
+    # Reorder rows
+    sort_by_list <- diagnosis$group_by_set %i% colnames(return_df)
+    return_df <- return_df[do.call(order, as.list(return_df[,sort_by_list])), , drop = FALSE]
+    
+    # NA bootstrap rows
+    return_df$design_label <- factor(return_df$design_label, levels = c(levels(return_df$design_label), ""))
+    return_df[return_df$statistic == "SE", c(sort_by_list, "n_sims")] <- ""
+    
+  } else {
+    return_df <- diagnosands_df
   }
-  
-  # Reshape if there is bootstrapping
-  diagnosand_columns <- diagnosis$diagnosand_names
-  diagnosand_se_columns <- paste0("se(", diagnosis$diagnosand_names, ")")
-  group_columns <- setdiff(names(diagnosands_df), c(diagnosand_columns, diagnosand_se_columns))
-  
-  # Make diagnosand only df
-  diagnosands_only_df <-
-    diagnosands_df[, c(group_columns, diagnosand_columns), drop = FALSE]
-  
-  clean_values_df <-
-    data.frame(lapply(diagnosands_only_df[, diagnosand_columns, drop = FALSE],
-                      format_num, digits = digits), stringsAsFactors = FALSE)
-  
-  diagnosands_only_df <-
-    cbind(diagnosands_only_df[, group_columns, drop = FALSE],
-          data.frame(statistic = "Estimate", stringsAsFactors = FALSE),
-          clean_values_df)
-  
-  names(diagnosands_only_df) <- c(group_columns, "statistic", diagnosand_columns)
-  
-  # Make se only df
-  se_only_df <- diagnosands_df[, diagnosand_se_columns, drop = FALSE]
-  se_only_df <- data.frame(lapply(se_only_df, add_parens, digits = digits), stringsAsFactors = FALSE)
-  colnames(se_only_df) <- diagnosand_columns
-  
-  se_only_df <- cbind(diagnosands_only_df[, group_columns, drop = FALSE],
-                      data.frame(statistic = "SE", stringsAsFactors = FALSE), se_only_df)
-  
-  # Merge
-  return_df <- rbind_disjoint(list(diagnosands_only_df, se_only_df), infill = "")
-  
-  # Reorder rows
-  sort_by_list <- diagnosis$group_by_set %i% colnames(return_df)
-  return_df <- return_df[do.call(order, as.list(return_df[,sort_by_list])), , drop = FALSE]
-  
-  # NA bootstrap rows
-  return_df$design_label <- factor(return_df$design_label, levels = c(levels(return_df$design_label), ""))
-  return_df[return_df$statistic == "SE", c(sort_by_list, "n_sims")] <- ""
   
   parameter_names <- names(diagnosis$parameters_df)[-1]
   
@@ -170,7 +176,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   
   names_to_change <- setdiff(names(return_df), parameter_names)
   names(return_df)[names(return_df) %in% names_to_change] <- make_nice_names(names_to_change)
-    
+  
   # Select columns
   if (!is.null(select)) {
     available_to_select <- make_nice_names(c(group_columns, diagnosand_columns))
@@ -180,7 +186,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
         paste(available_to_select, collapse = ", ")
       ))
     
-    return_df <- return_df[, c(make_nice_names(c(sort_by_list, "n_sims")), select), drop = FALSE]
+    return_df <- return_df[, c(make_nice_names(c(sort_by_list, "n_sims", "statistic")), select), drop = FALSE]
   }
   
   rownames(return_df) <- NULL
