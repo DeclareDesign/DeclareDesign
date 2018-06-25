@@ -77,7 +77,7 @@ print.summary.diagnosis <- function(x, ...) {
   n_sims <- unique(x$diagnosands_df$n_sims)
   cat(paste0("\nResearch design diagnosis", ifelse(length(n_sims) == 1, paste0(" based on ", n_sims, " simulations"), ""), "."))
   if (x$bootstrap_sims > 0) {
-    cat(" Diagnosand estimates with bootstrapped standard errors (", x$bootstrap_sims, " replicates).", sep = "")
+    cat(" Diagnosand estimates with bootstrapped standard errors in parentheses (", x$bootstrap_sims, " replicates).", sep = "")
   }
   cat("\n\n")
   x <- reshape_diagnosis(x)
@@ -105,19 +105,6 @@ print.summary.diagnosis <- function(x, ...) {
 reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   
   diagnosands_df <- diagnosis$diagnosands
-  
-  # # If no bootstrapping
-  # if (is.null(diagnosis$bootstrap_replicates)) {
-  #   # Make names nicer
-  #   names(diagnosands_df) <-
-  #     gsub("\\b(se[(]|sd |rmse|[[:alpha:]])",
-  #          "\\U\\1",
-  #          gsub("_", " ", names(diagnosands_df)),
-  #          perl = TRUE)
-  #   rownames(diagnosands_df) <- NULL
-  #   
-  #   return(diagnosands_df)
-  # }
   
   if(!is.null(diagnosis$bootstrap_replicates)){
     
@@ -164,6 +151,8 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
     return_df <- diagnosands_df
   }
   
+  return_df$statistic <- NULL
+  
   parameter_names <- names(diagnosis$parameters_df)[-1]
   
   # Make names nicer
@@ -186,7 +175,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
         paste(available_to_select, collapse = ", ")
       ))
     
-    return_df <- return_df[, c(make_nice_names(c(sort_by_list, "n_sims", "statistic")), select), drop = FALSE]
+    return_df <- return_df[, c(make_nice_names(c(sort_by_list, "n_sims")), select), drop = FALSE]
   }
   
   rownames(return_df) <- NULL
