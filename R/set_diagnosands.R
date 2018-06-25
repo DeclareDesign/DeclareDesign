@@ -20,7 +20,7 @@
 #' 
 #' design <- set_diagnosands(design, diagnosands)
 #' 
-#' \notrun{
+#' \dontrun{
 #' diagnose_design(design)
 #' }
 #' 
