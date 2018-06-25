@@ -27,7 +27,7 @@
 #' @export
 set_diagnosands <- function(design, diagnosands = default_diagnosands) {
   
-  attr(design, "citation") <- diagnosands
+  attr(design, "diagnosands") <- diagnosands
   
   design
 }
