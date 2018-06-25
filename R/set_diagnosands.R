@@ -13,14 +13,16 @@
 #' declare_population(data = sleep) + 
 #'   declare_estimand(mean_outcome = mean(extra)) +
 #'   declare_sampling(n = 10) + 
-#'   declare_estimator(extra ~ 1, estimand = mean_outcome) 
+#'   declare_estimator(extra ~ 1, estimand = "mean_outcome", coefficients = '(Intercept)', model = lm_robust) 
 #' 
 #' diagnosands <- declare_diagnosands(
 #'   median_bias = median(est - estimand), keep_defaults = FALSE)
 #' 
 #' design <- set_diagnosands(design, diagnosands)
 #' 
+#' \notrun{
 #' diagnose_design(design)
+#' }
 #' 
 #' @export
 set_diagnosands <- function(design, diagnosands = default_diagnosands) {
