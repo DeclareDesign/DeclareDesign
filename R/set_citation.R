@@ -1,4 +1,4 @@
-#' Add a citation to a design
+#' Set the citation of a design
 #' 
 #' @param design A design typically created using the + operator
 #' @param title The title of the design, as a character string.
