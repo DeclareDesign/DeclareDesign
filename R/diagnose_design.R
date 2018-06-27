@@ -71,11 +71,11 @@
 #' @importFrom utils head
 #' @export 
 diagnose_design <- function(...,
-                            diagnosands = default_diagnosands,
+                            diagnosands = NULL,
                             sims = 500,
                             bootstrap_sims = 100,
                             add_grouping_variables = NULL) {
-    
+  
   dots_quos <- quos(...)
   dots_quos <- maybe_add_names_qs(dots_quos)
   dots <- lapply(dots_quos, eval_tidy)
@@ -103,37 +103,41 @@ diagnose_design <- function(...,
     
     check_design_class(designs)
   }
-
-  # simulate if needed ------------------------------------------------------
-
+  
+  
   if (!exists("simulations_df")) {
+    # simulate if needed ------------------------------------------------------
     simulations_df <- simulate_design(!!!dots_quos, sims = sims)
+    diagnosands <- lapply(designs, function(x) 
+      diagnosands %||% attr(x, "diagnosands") %||% default_diagnosands)
+  } else {
+    diagnosands <- list(diagnosands %||% default_diagnosands)
   }
-
+  
   # figure out what to group by ---------------------------------------------
-
+  
   group_by_set <- c("design_label", "estimand_label", "estimator_label", "coefficient")
-
+  
   if (!is.null(add_grouping_variables)) {
     group_by_set <- c(group_by_set, add_grouping_variables)
   }
-
+  
   group_by_set <- group_by_set %i% colnames(simulations_df)
-
+  
   # Actually calculate diagnosands ------------------------------------------
-
+  
   diagnosands_df <- calculate_diagnosands(simulations_df = simulations_df,
                                           diagnosands = diagnosands,
                                           group_by_set = group_by_set)
-
+  
   diagnosand_names <- setdiff(names(diagnosands_df), group_by_set)
-
+  
   # Calculate n_sims --------------------------------------------------------
-
+  
   n_sims_df <- calculate_sims(simulations_df = simulations_df, group_by_set = group_by_set)    
-
+  
   # Bootstrap ---------------------------------------------------------------
-
+  
   if (bootstrap_sims > 0) {
     bootout <- bootstrap_diagnosands(bootstrap_sims = bootstrap_sims,
                                      diagnosands = diagnosands,
@@ -142,11 +146,11 @@ diagnose_design <- function(...,
                                      group_by_set = group_by_set)
     diagnosands_df <- bootout$diagnosands_df
   }
-
+  
   # prep for return ---------------------------------------------------------
   
   diagnosands_df <- merge(x = diagnosands_df, y = n_sims_df, by = group_by_set, all = TRUE)
-
+  
   parameters_df <- attr(simulations_df, "parameters")
   diagnosands_df <- merge(diagnosands_df, parameters_df, by = "design_label")
   
@@ -156,7 +160,7 @@ diagnose_design <- function(...,
   # Reorder rows
   sort_by_list <- c(group_by_set, "statistic") %i% colnames(diagnosands_df) 
   diagnosands_df <- diagnosands_df[do.call(order, as.list(diagnosands_df[sort_by_list])), , drop = FALSE]
-
+  
   rownames(diagnosands_df) <- NULL
   
   # reorder columns
@@ -172,9 +176,9 @@ diagnose_design <- function(...,
     out$bootstrap_replicates <- out$bootstrap_replicates[, reorder_columns(parameters_df, out$bootstrap_replicates), drop = FALSE]
   }
   out$bootstrap_sims <- bootstrap_sims
-
+  
   structure(out, class = "diagnosis")
-
+  
 }
 
 reorder_columns <- function(a, b, n1 = colnames(a), n2 = colnames(b))
@@ -189,6 +193,29 @@ check_design_class <- function(designs){
 }
 
 calculate_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
+  
+  if ("design_label" %in% group_by_set) {
+    group_by_list <- simulations_df[, "design_label", drop = FALSE]
+    labels_df <- split(group_by_list, group_by_list, drop = TRUE)
+    labels_df <- lapply(labels_df, head, n = 1)
+    
+    simulations_df <- split(simulations_df, group_by_list, drop = TRUE)
+    diagnosands_df <- lapply(seq_along(simulations_df), FUN = function(i) {  
+      dg <- calculate_diagnosands_single_design(
+        simulations_df[[i]], diagnosands[[i]], group_by_set[-1])
+      data.frame(labels_df[[i]], dg)
+    })
+    diagnosands_df <- rbind_disjoint(diagnosands_df)
+  } else {
+    diagnosands_df <- calculate_diagnosands_single_design(
+      simulations_df, diagnosands[[1]], group_by_set)
+  }
+  
+  diagnosands_df
+  
+}
+
+calculate_diagnosands_single_design <- function(simulations_df, diagnosands, group_by_set) {
   group_by_list <- simulations_df[, group_by_set, drop = FALSE]
   
   labels_df <- split(group_by_list, group_by_list, drop = TRUE)

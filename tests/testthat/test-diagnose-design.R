@@ -59,3 +59,74 @@ test_that("error when you send other objects to diagnose", {
   expect_error(diagnose_design(rep(3, 2)), "Please only send design objects or functions with no arguments to simulate_design.")
   
 })
+
+
+test_that("default diagnosands work", {
+  
+  my_designer <- function(N = 500){
+    my_population <- declare_population(N = N, noise = rnorm(N))
+    
+    my_potential_outcomes <-
+      declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+    
+    my_assignment <- declare_assignment(m = 25)
+    
+    my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+    
+    my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+    
+    my_reveal <- declare_reveal()
+    
+    design <- my_population +
+      my_potential_outcomes +
+      my_estimand +
+      declare_step(dplyr::mutate, q = 5) +
+      my_assignment +
+      my_reveal +
+      my_estimator
+    
+    diagnosands <- declare_diagnosands(med_bias = median(est - estimand), keep_defaults = FALSE)
+    
+    set_diagnosands(design, diagnosands)
+    
+  }
+  
+  # five cases
+  
+  # designs
+  
+  # // single design
+  
+  # w/ set diagnosands
+  
+  # w/o set diagnosands
+  
+  # // ... of designs
+  
+  # w/ set diagnosands each
+  
+  # w/ mix of set and unset
+  
+  # w/ none set
+  
+  # // expand_designs list
+  
+  # w/ diagnosands set
+  
+  designs <- expand_design(my_designer, N = c(100, 200))
+  
+  diag <- diagnose_design(designs, sims = 5, bootstrap_sims = 0)
+  
+  expect_equal(ncol(diag$diagnosands_df), 7)
+  
+  # w mix of diagnosands set
+  
+  attr(designs[[1]], "diagnosands") <- NULL
+  
+  diag <- diagnose_design(designs, sims = 5, bootstrap_sims = 0)
+  
+  expect_equal(ncol(diag$diagnosands_df), 16)
+  
+  # // simulation df
+  
+})
