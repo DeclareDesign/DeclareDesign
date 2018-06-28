@@ -162,7 +162,8 @@ test_that("default diagnosands work", {
   
   diag <- diagnose_design(designs, sims = 5, bootstrap_sims = 0)
   
-  expect_equal(ncol(diag$diagnosands_df), 7)
+  expect_equal(names(diag$diagnosands_df), c("design_label", "N", "estimand_label", "estimator_label", "coefficient", 
+                                             "med_bias", "n_sims"))
   
   # w mix of diagnosands set
   
@@ -175,3 +176,4 @@ test_that("default diagnosands work", {
   # // simulation df
   
 })
+  

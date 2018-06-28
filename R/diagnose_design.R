@@ -270,7 +270,7 @@ bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, d
   
   # Make a list of diagnosand replicates
   diagnosand_replicates <- future_lapply(seq_len(bootstrap_sims),
-                                         function(i) cbind(bootstrap_id = i, boot_function()), # Add boostrap ID
+                                         function(i) cbind(bootstrap_id = i, boot_function()), # Add bootstrap ID
                                          future.seed = NA,
                                          future.globals = "boot_function")
   

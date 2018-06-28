@@ -126,6 +126,10 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   # Reorder rows
   return_df <- return_df[do.call(order, as.list(return_df[,sort_by_list])), , drop = FALSE]
   
+  # blank cells for SE rows 
+  return_df[return_df$statistic == "SE", c(sort_by_list, parameter_names, "n_sims")] <- ""
+  return_df$statistic <- NULL
+  
   # Make names nicer
   make_nice_names <- function(x){
     gsub("\\b(se[(]|sd |rmse|[[:alpha:]])",
@@ -188,10 +192,6 @@ clean_bootstrap_df <- function(diagnosis, digits, diagnosand_columns,
   
   # NA bootstrap rows
   return_df$design_label <- factor(return_df$design_label, levels = c(levels(return_df$design_label), ""))
-  
-  # blank cells for SE rows 
-  return_df[return_df$statistic == "SE", c(diagnosis$group_by_set %i% colnames(return_df), parameter_names, "n_sims")] <- ""
-  return_df$statistic <- NULL
   
   return(return_df)
 }
