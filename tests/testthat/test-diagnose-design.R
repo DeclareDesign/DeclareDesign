@@ -103,11 +103,56 @@ test_that("default diagnosands work", {
   
   # // ... of designs
   
-  # w/ set diagnosands each
+  design_1 <- my_designer(N = 100)
+  design_2 <- my_designer(N = 200)
+  
+  # w/ set diagnosands outside diagnose_design
+  
+  diag <- diagnose_design(
+    design_2 = design_2,
+    design_1 = design_1,
+    sims = 2
+  )
+  expect_equal(names(diag$diagnosands_df), c("design_label", "estimand_label", "estimator_label", "coefficient", 
+                                               "med_bias", "se(med_bias)", "n_sims"))
+  
+  # w/ set diagnosands each manually
+  
+  design_1 <- set_diagnosands(my_designer(N = 100), NULL)
+  design_2 <- set_diagnosands(my_designer(N = 200), NULL)
+  
+  diagnosand_1 <- declare_diagnosands(my_bias  = median(est - estimand), keep_defaults = FALSE)
+  diagnosand_2 <- declare_diagnosands(my_power = mean(p <= .5), keep_defaults = FALSE)
+  
+  # intentionally out of order to confirm they don't get mixed
+  diag <- diagnose_design(
+    design_2 = set_diagnosands(design_2, diagnosand_2),
+    design_1 = set_diagnosands(design_1, diagnosand_1),
+    sims = 2
+  )
+  
+  expect_equal(names(diag$diagnosands_df), c("design_label", "estimand_label", "estimator_label", "coefficient", 
+                                            "my_bias", "se(my_bias)", "my_power", "se(my_power)", "n_sims"))
+  
+  # w/ none set
+  
+  diag <- diagnose_design(
+    design_2 = design_2,
+    design_1 = design_1,
+    sims = 2
+  )
+  
+  expect_equal(names(diag$diagnosands_df), c("design_label", "estimand_label", "estimator_label", "coefficient", 
+                                             "bias", "se(bias)", "rmse", "se(rmse)", "power", "se(power)", 
+                                             "coverage", "se(coverage)", "mean_estimate", "se(mean_estimate)", 
+                                             "sd_estimate", "se(sd_estimate)", "mean_se", "se(mean_se)", "type_s_rate", 
+                                             "se(type_s_rate)", "mean_estimand", "se(mean_estimand)", "n_sims"
+  ))
+  
   
   # w/ mix of set and unset
   
-  # w/ none set
+  
   
   # // expand_designs list
   

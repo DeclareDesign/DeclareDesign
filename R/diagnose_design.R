@@ -108,8 +108,7 @@ diagnose_design <- function(...,
   if (!exists("simulations_df")) {
     # simulate if needed ------------------------------------------------------
     simulations_df <- simulate_design(!!!dots_quos, sims = sims)
-    diagnosands <- lapply(designs, function(x) 
-      diagnosands %||% attr(x, "diagnosands") %||% default_diagnosands)
+    diagnosands <- diagnosands %||% lapply(designs, function(x) attr(x, "diagnosands") %||% default_diagnosands)
   } else {
     diagnosands <- list(diagnosands %||% default_diagnosands)
   }
@@ -199,12 +198,14 @@ calculate_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
     labels_df <- split(group_by_list, group_by_list, drop = TRUE)
     labels_df <- lapply(labels_df, head, n = 1)
     
-    simulations_df <- split(simulations_df, group_by_list, drop = TRUE)
-    diagnosands_df <- lapply(seq_along(simulations_df), FUN = function(i) {  
-      dg <- calculate_diagnosands_single_design(
-        simulations_df[[i]], diagnosands[[i]], group_by_set[-1])
-      data.frame(labels_df[[i]], dg)
-    })
+    # ensure diagnosand functions are in the same order as designs
+    diagnosands <- diagnosands[names(labels_df)]
+    
+    simulations_list <- split(simulations_df, group_by_list, drop = TRUE)
+  
+    diagnosands_df <- mapply(calculate_diagnosands_single_design, simulations_list, diagnosands, 
+                             MoreArgs = list(group_by_set), SIMPLIFY = FALSE)
+    
     diagnosands_df <- rbind_disjoint(diagnosands_df)
   } else {
     diagnosands_df <- calculate_diagnosands_single_design(
@@ -252,7 +253,6 @@ calculate_sims <- function(simulations_df, group_by_set) {
   
   n_sims_df
 }
-
 
 
 bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, diagnosands_df, group_by_set) {
