@@ -45,6 +45,7 @@ test_that("allow design functions to be sent to simulate design and diagnose_des
   
   diag_out <- diagnose_design(my_design_function, sims = 2, bootstrap_sims = FALSE)
   
+  
   expect_equal(diag_out$diagnosands_df[, 1:4], 
                structure(list(design_label = structure(1L, .Label = "my_design_function", class = "factor"), 
                               estimand_label = "ATE", estimator_label = "estimator", 
@@ -56,7 +57,7 @@ test_that("allow design functions to be sent to simulate design and diagnose_des
 test_that("error when you send other objects to diagnose", {
   
   # must send a function or a design object
-  expect_error(diagnose_design(rep(3, 2)), "Please only send design objects or functions with no arguments to simulate_design.")
+  expect_error(diagnose_design(rep(3, 2)), "Please only send design objects or functions with no arguments.")
   
 })
 
