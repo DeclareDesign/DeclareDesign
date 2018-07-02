@@ -1,34 +1,142 @@
+DeclareDesign: Declare and diagnose research designs to understand and
+improve them
+================
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-DeclareDesign: Declare and diagnose research designs to understand and improve them
-===================================================================================
 
-[![Travis-CI Build Status](https://travis-ci.org/DeclareDesign/DeclareDesign.svg?branch=master)](https://travis-ci.org/DeclareDesign/DeclareDesign) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/DeclareDesign/DeclareDesign?branch=master&svg=true)](https://ci.appveyor.com/project/DeclareDesign/DeclareDesign) [![Coverage Status](https://coveralls.io/repos/github/DeclareDesign/DeclareDesign/badge.svg?branch=master)](https://coveralls.io/github/DeclareDesign/DeclareDesign?branch=master)
+[![Travis-CI Build
+Status](https://travis-ci.org/DeclareDesign/DeclareDesign.svg?branch=master)](https://travis-ci.org/DeclareDesign/DeclareDesign)
+[![AppVeyor Build
+Status](https://ci.appveyor.com/api/projects/status/github/DeclareDesign/DeclareDesign?branch=master&svg=true)](https://ci.appveyor.com/project/DeclareDesign/DeclareDesign)
+[![Coverage
+Status](https://coveralls.io/repos/github/DeclareDesign/DeclareDesign/badge.svg?branch=master)](https://coveralls.io/github/DeclareDesign/DeclareDesign?branch=master)
 
-**DeclareDesign** is statistical software that makes it easier for researchers to characterize and learn about the properties of research designs before implementation. Ex ante declaration and diagnosis of designs can help researchers clarify the strengths and limitations of their designs and to improve their properties. It can make it easier for readers to evaluate a research strategy prior to implementation and without access to results. It can also make it easier for designs to be shared, replicated, and critiqued.
+## Overview
 
-Get started <!-- with our Web-based [design builder](http://shiny.declaredesign.org/builder/) or --> by reading about [the idea behind DeclareDesign](articles/idea.html).
+DeclareDesign is a system for describing research designs in code and
+simulating them in order to understand their properties. Because
+DeclareDesign employs a consistent grammar of designs, you can focus on
+the intellectually challenging part – designing good research studies –
+without having to code up simulations from scratch.
 
-The motivation for the software is described in a [working paper](http://declaredesign.org/paper.pdf) by the authors.
+## Installation
 
-**DeclareDesign** consists of a core package, which is documented on this web site, as well as three companion packages that stand on their own but are also called on by the core package. They are:
-
-1.  [randomizr](http://randomizr.declaredesign.org): Easy to use tools for common forms of random assignment and sampling.
-2.  [fabricatr](http://fabricatr.declaredesign.org): Imagine your data before you collect it.
-3.  [estimatr](http://estimatr.declaredesign.org): Fast estimators for social scientists.
-
-A [library](http://declaredesign.org/articles/design_library.html) of declared designs is under construction. The library includes canonical designs that users can download, modify, and deploy. To get underway with your own designs, follow the install instructions below and check out our guide on [getting started with DeclareDesign](articles/DeclareDesign.html), which covers the main functionality of the software.
-
-Installing DeclareDesign
-------------------------
-
-To install the latest development release of all of the packages, please ensure that you are running version 3.4 or later of R and run the following code:
+To install the latest development release of all of the packages, please
+ensure that you are running version 3.4 or later of R and run the
+following code:
 
 ``` r
-install.packages("DeclareDesign", dependencies = TRUE, 
+install.packages("DeclareDesign", dependencies = TRUE,
                  repos = c("http://R.declaredesign.org", "https://cloud.r-project.org"))
 ```
 
-------------------------------------------------------------------------
+## Usage
 
-This project is generously supported by a grant from the [Laura and John Arnold Foundation](http://www.arnoldfoundation.org) and seed funding from [EGAP](http://egap.org).
+Designs are declared by adding together design elements. Here’s a
+minimal example that describes a 100 unit randomized controlled trial
+with a binary outcome. Half the units are assigned to treatment and the
+remainder to control. The true value of the average treatment effect is
+0.05 and it will be estimated with the difference-in-means estimator.
+The diagnosis shows that the study is unbiased but underpowered.
+
+``` r
+library(DeclareDesign)
+
+design <-
+  declare_population(N = 100) +
+  declare_potential_outcomes(Y ~ rbinom(n = N, size = 1, prob = 0.5 + 0.05 * Z)) +
+  declare_estimand(ATE = 0.05) +
+  declare_assignment(m = 50) +
+  declare_estimator(Y ~ Z)
+
+diagnosis <- diagnose_design(design, diagnosands = declare_diagnosands(select = c("power", "bias")))
+diagnosis
+```
+
+    ## 
+    ## Research design diagnosis based on 500 simulations. Diagnosand estimates with bootstrapped standard errors in parentheses (100 replicates).
+    ## 
+    ##  Design Label Estimand Label Estimator Label Coefficient N Sims  Power
+    ##        design            ATE       estimator           Z    500   0.10
+    ##                                                                 (0.01)
+    ##    Bias
+    ##   -0.01
+    ##  (0.00)
+
+## Companion software
+
+The core DeclareDesign package relies on three companion packages, each
+of which is useful in its own right.
+
+1.  [randomizr](https://declaredesign.org/R/randomizr/): Easy to use
+    tools for common forms of random assignment and sampling.
+2.  [fabricatr](https://declaredesign.org/R/fabricatr/): Imagine your
+    data before you collect it.
+3.  [estimatr](https://declaredesign.org/R/estimatr/): Fast estimators
+    for social scientists.
+
+## Learning DeclareDesign
+
+1.  To get started, have a look at this vignette on [the idea behind
+    DeclareDesign](https://declaredesign.org/idea/), which covers the
+    main functionality of the software.
+
+2.  You can also browse a [library](https://declaredesign.org/library/)
+    of already declared designs. The library includes canonical designs
+    that you can download, modify, and deploy.
+
+3.  A fuller description of the philosophy underlying the software is
+    described in this [working
+    paper](https://declaredesign.org/paper.pdf).
+
+## Package structure
+
+Each of these `declare_*()` functions returns a *function*. The function
+`declare_design()` can take any of these six functions, plus any R
+function that takes data and returns data.
+
+1.  `declare_population()` (describes dimensions and distributions over
+    the variables in the population)
+2.  `declare_potential_outcomes()` (takes population or sample and adds
+    potential outcomes produced by interventions)
+3.  `declare_sampling()` (takes a population and selects a sample)
+4.  `declare_assignment()` (takes a population or sample and adds
+    treatment assignments)
+5.  `declare_estimand()` (takes potential outcomes and calculates a
+    quantity of interest)
+6.  `declare_estimator()` (takes data produced by sampling and
+    assignment and returns estimates)
+
+Once you have declared your design, there are six core
+post-design-declaration commands used to modify or diagnose your design:
+
+1.  `modify_design()` (takes a design and a set of modifications,
+    returns a design)
+2.  `diagnose_design()` (takes a design, returns simulations and
+    diagnosis)
+3.  `compare_designs()` (takes a list of designs and diagnoses them all)
+4.  `draw_data()` (takes a design and returns a single draw of the data)
+5.  `get_estimates()` (takes a design a returns a single simulation of
+    estimates)
+6.  `get_estimands()` (takes a design a returns a single simulation of
+    estimands)
+
+A few other features:
+
+1.  A designer is a function that takes parameters (e.g., `N`) and
+    returns a design. `expand_design()` is a function of a designer and
+    parameters that returns a design.
+2.  You can change the features of the design to be diagnosed with
+    `declare_diagnosands()`.
+3.  `declare_reveal()` implements a general switching equation, which
+    allows you to reveal outcomes from potential outcomes and a
+    treatment assignment.
+4.  You can provide custom functions to any `declare_*` step, as
+    described in the [custom functions
+    vignette](/R/DeclareDesign/articles/custom_functions.html).
+
+-----
+
+This project is generously supported by a grant from the [Laura and John
+Arnold Foundation](http://www.arnoldfoundation.org) and seed funding
+from [EGAP](http://egap.org).

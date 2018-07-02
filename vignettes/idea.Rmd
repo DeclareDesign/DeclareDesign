@@ -98,4 +98,8 @@ coverage = temp_d[1, 4]
 kable(temp_d, align = c("cccccccc"))
 ```
 
-The diagnosis here confirms the fact that random assignment to treatment allows for unbiased estimates of treatment effects. We can also observe that under the current design, coverage is higher than the nominal 95% rate. This reflects the fact that the typical standard error estimators are conservative.
+The diagnosis here confirms the fact that random assignment to treatment allows for unbiased estimates of treatment effects. We can also observe that under the current design, coverage is higher than the nominal 95% rate. Coverage is higher than 95\% because the standard errors are biased upward. The standard errors are biased upward because they make a worst-case scenario assumption of constant effects but the effects in this simulation are heterogeneous from subject to subject. This design fails to reject the null hypothesis of no effect too often because the standard error estimator is conservative.
+
+## More examples
+For more examples of designs, check out the [design library](https://declaredesign.org/library/).
+

@@ -11,149 +11,70 @@ vignette: >
 set.seed(42)
 library(DeclareDesign)
 options(digits=2)
-
-my_population <-
-  declare_population(N = 1000,
-  income = rnorm(N),
-  age = sample(18:95, N, replace = TRUE))
-
-pop <- my_population()
-
-my_potential_outcomes <- declare_potential_outcomes(
-  Y ~ .25 * Z + .01 * age * Z)
-pop_pos <- my_potential_outcomes(pop)
-
-my_sampling <- declare_sampling(n = 250)
-smp <- my_sampling(pop_pos)
-
-my_assignment <- declare_assignment(m = 25)
-smp <- my_assignment(smp)
-
-my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-
-my_reveal <- declare_reveal()
-
-smp <- my_reveal(smp)
 ```
 
-Because all inputs to `declare_design()` are functions, it's easy for you to provide custom functions instead of using our defaults.
+The `declare_*` functions in **DeclareDesign** use functions in the **fabricatr**, **randomizr**, and **estimatr** packages as defaults, which work great for most designs. Sometimes, however, you might want to write your own function. This advanced vignette declares a design using only custom functions.
 
-# Custom Population
+First, we'll write custom functions for each of the steps in the design. All functions must take a data.frame and return a data.frame, with the exception of a population step, whose inputs can be anything but whose output must be a data.frame.
 
-You can use a custom function to generate your population entirely on your own, too:
-
-```{r echo=TRUE, results="hide"}
-my_population_function <- function(N) {
+```{r}
+# M: Model
+custom_population <- function(N) {
   data.frame(u = rnorm(N))
 }
-
-my_population_custom <- declare_population(
-  handler = my_population_function, N = 100)
-
-pop_custom <- my_population_custom()
-
-head(pop_custom)
-```
-```{r echo=FALSE}
-knitr::kable(head(pop_custom))
-```
-
-# Custom Potential Outcomes
-
-```{r echo=TRUE, results="hide"}
-my_potential_outcomes_function <-
+custom_potential_outcomes <-
   function(data) {
-    data$Y_Z_0 <- with(data, u)
-    data$Y_Z_1 <- with(data, 0.25 + u)
-    data
+    within(data,{
+      Y_Z_0 <- u
+      Y_Z_1 <- 0.25 + u
+    })
   }
-my_potential_outcomes_custom <- declare_potential_outcomes(
-  handler = my_potential_outcomes_function
-)
 
-pop_pos_custom <- my_potential_outcomes_custom(pop_custom)
+# I: Inquiry
+custom_estimand <- function(data, label) {
+  data.frame(estimand_label = label,
+  estimand = with(data, median(Y_Z_1 - Y_Z_0)))
+}
 
-head(pop_pos_custom[, c("u", "Y_Z_0", "Y_Z_1")])
-```
-```{r echo=FALSE}
-knitr::kable(head(pop_pos_custom[, c("u", "Y_Z_0", "Y_Z_1")]))
-```
-
-# Custom Sampling
-
-Again, you can still use a custom sampling function easily. In this case, the requirement is simply that the function  takes population data and returns sampled data. You can also include inclusion weights if you wish in the function (as the default function does). 
-
-```{r echo=TRUE, results="hide"}
-my_sampling_function <- function(data) {
+# D: Data Strategy
+custom_sampling <- function(data) {
      data$S <- rbinom(n = nrow(data),
             size = 1,
             prob = 0.1)
      data[data$S == 1, ]
 }
 
-my_sampling_custom <- declare_sampling(
-  handler = my_sampling_function)
-
-smp_custom <- my_sampling_custom(pop_pos)
-
-nrow(smp_custom)
-```
-`r nrow(smp_custom)`
-
-# Custom Assignment
-
-```{r echo=TRUE, results="hide"}
-my_assignment_function <- function(data) {
+custom_assignment <- function(data) {
   data$Z <- rbinom(n = nrow(data),
          size = 1,
          prob = 0.5)
   data
 }
-my_assignment_custom <- declare_assignment(
-  handler = my_assignment_function)
 
-table(my_assignment_custom(pop_pos)$Z)
-```
-```{r echo=FALSE}
-knitr::kable(t(as.matrix(table(my_assignment_custom(pop_pos)$Z))))
-```
-
-# Custom Estimand
-
-Handlers can also make use of labels, if it's declared as an argument to the custom handler function.
-
-```{r echo=TRUE, results="hide"}
-my_estimand_function <- function(data, label) {
-    data.frame(
-      estimand_label=label,
-      estimand=with(data, median(Y_Z_1 - Y_Z_0))
-    )
+custom_reveal <- function(data){
+  within(data, Y <- Y_Z_1 * Z + Y_Z_0 * (1 - Z))
 }
-my_estimand_custom <- declare_estimand(
-  handler = my_estimand_function, label = "medianTE")
 
-my_estimand_custom(pop_pos)
-```
-```{r echo=FALSE}
-knitr::kable(my_estimand_custom(pop_pos))
-```
-
-# Custom Estimator
-
-Custom estimators are slightly different - the default handler itself calls a model function. To implement a new handler, you can use the tidy_estimator
-wrapper to handle the bookkeeping associated with estimator and estimand labeling.
-
-```{r echo=TRUE, results="hide"}
-my_estimator_function <- function(data){
+# A: Answer strategy
+custom_estimator <- function(data){
   data.frame(est = with(data, mean(Y)))
 }
-
-my_estimator_custom <- 
-  declare_estimator(handler = tidy_estimator(my_estimator_function), 
-                    estimand = my_estimand)
-
-my_estimator_custom(smp)
 ```
-```{r echo=FALSE}
-knitr::kable(my_estimator_custom(smp))
+
+In order to declare the design, we pass each of the custom functions to the `handler` argument of each declaration step:
+
+```{r}
+design <- 
+  declare_population(handler = custom_population, N = 100) + 
+  declare_potential_outcomes(handler = custom_potential_outcomes) + 
+  declare_estimand(handler = custom_estimand, label = "medianTE") + 
+  declare_sampling(handler = custom_sampling) + 
+  declare_assignment(handler = custom_assignment) + 
+  declare_reveal(handler = custom_reveal) + 
+  declare_estimator(handler = tidy_estimator(custom_estimator), 
+                    estimand = "medianTE")
+head(draw_data(design))
+run_design(design)
 ```
+
+This example used very simple custom functions, but this framework is flexible enough to accomodate any design step that can be expressed as a function of data that returns data.
