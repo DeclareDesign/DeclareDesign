@@ -193,9 +193,17 @@ calculate_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
     }
     
     simulations_list <- split(simulations_df, group_by_list, drop = TRUE)
-  
-    diagnosands_df <- mapply(calculate_diagnosands_single_design, simulations_list, diagnosands, 
-                             MoreArgs = list(group_by_set), SIMPLIFY = FALSE)
+    
+    if(is.list(diagnosands)) {
+      diagnosands_df <- mapply(calculate_diagnosands_single_design, simulations_list, diagnosands, 
+                               MoreArgs = list(group_by_set), SIMPLIFY = FALSE)
+    } else {
+      diagnosands_df <- mapply(calculate_diagnosands_single_design, simulations_list, 
+                               MoreArgs = list(
+                                 diagnosands = diagnosands,
+                                 group_by_set = group_by_set), 
+                               SIMPLIFY = FALSE)
+    }
     
     diagnosands_df <- rbind_disjoint(diagnosands_df)
   } else {
