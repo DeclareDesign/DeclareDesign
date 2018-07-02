@@ -149,7 +149,9 @@ rbind_disjoint <- function(list_of_df, infill=NA) {
 # Formatting --------------------------------------------------------------
 
 add_parens <- function(x, digits = 3) {
-  sprintf("(%s)", format_num(x, digits))
+  ret <- sprintf("(%s)", format_num(x, digits))
+  ret[is.na(x)] <- "NA"
+  ret
 }
 
 format_num <- function(x, digits = 3) {
