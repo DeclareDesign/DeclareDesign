@@ -53,7 +53,7 @@ simulate_design <- function(..., sims = 500) {
     # if you provide a list of sims for each design, i.e.
     #   sims = list(my_design_1 = c(100, 1, 1), my_design_2 = 200)
     # use it! otherwise, create a list of length designs that repeats the sims
-    if (!inherits(sims, "list")) {
+    if (!is_list(sims)) {
       sims <- lapply(seq_along(designs), function(i) sims)
     }
     

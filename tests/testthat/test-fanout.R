@@ -81,5 +81,3 @@ test_that("sims expansion is correct",{
   expect_equal(expanded$n, c(1, 2, 1))
 
 })
-
-
