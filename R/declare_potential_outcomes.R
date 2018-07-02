@@ -122,7 +122,7 @@ potential_outcomes.formula <- function(formula,
   
   outcome_variable <- as.character(formula[[2]])
   
-  to_restore <- assignment_variables %i% colnames(data)
+  to_restore <- assignment_variables %icn% data
   to_null <- setdiff(assignment_variables, to_restore)
   
   # Build a single large fabricate call -
