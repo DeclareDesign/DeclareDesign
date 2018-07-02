@@ -150,6 +150,23 @@ test_that("default diagnosands work", {
                                              "se(type_s_rate)", "mean_estimand", "se(mean_estimand)", "n_sims"
   ))
   
+  # w/ none set and override
+  
+  diag <- diagnose_design(
+    design_2 = design_2,
+    design_1 = design_1,
+    diagnosands = declare_diagnosands(med_bias = median(est - estimand), keep_defaults = FALSE),
+    sims = 2
+  )
+    
+  expect_equal(names(diag$diagnosands_df), c("design_label", "estimand_label", "estimator_label", "coefficient", 
+                                             "bias", "se(bias)", "rmse", "se(rmse)", "power", "se(power)", 
+                                             "coverage", "se(coverage)", "mean_estimate", "se(mean_estimate)", 
+                                             "sd_estimate", "se(sd_estimate)", "mean_se", "se(mean_se)", "type_s_rate", 
+                                             "se(type_s_rate)", "mean_estimand", "se(mean_estimand)", "n_sims"
+  ))
+  
+  
   
   # w/ mix of set and unset
   
@@ -175,6 +192,7 @@ test_that("default diagnosands work", {
   expect_equal(ncol(diag$diagnosands_df), 16)
   
   # // simulation df
-  
+  sims <- set_diagnosands(simulate_design(designs, sims = 5), declare_diagnosands(med_bias = median(est - estimand)))
+  diag <- diagnose_design(sims)
 })
   

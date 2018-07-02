@@ -85,11 +85,11 @@ diagnose_design <- function(...,
     if (is_empty(c("estimator_label", "estimand_label") %icn% simulations_df)) {
       stop("Can't calculate diagnosands on this data.frame, which does not include either an estimator_label or an estimand_label. Did you send a simulations data frame?")
     }
-    diagnosands <- diagnosands %||% lapply(designs, function(x) attr(x, "diagnosands") %||% default_diagnosands)
+    diagnosands <- diagnosands %||% attr(simulations_df, "diagnosands") %||% default_diagnosands
   } else {
     # simulate if needed ------------------------------------------------------
     simulations_df <- simulate_design(!!!dots, sims = sims)
-    diagnosands <- list(diagnosands %||% default_diagnosands)
+    diagnosands <- setup_diagnosands(!!!dots, diagnosands = diagnosands)
   }
   
   # figure out what to group by ---------------------------------------------
@@ -133,7 +133,7 @@ diagnose_design <- function(...,
   diagnosands_df <- merge(diagnosands_df, parameters_df, by = "design_label")
   
   # make design_label a factor
-  diagnosands_df$design_label <- factor(diagnosands_df$design_label, levels = parameters_df$design_label)
+  diagnosands_df$design_label <- factor(diagnosands_df$design_label, levels = as.character(parameters_df$design_label))
   
   # Reorder rows
   sort_by_list <- c(group_by_set, "statistic") %icn% diagnosands_df
@@ -170,6 +170,14 @@ check_design_class <- function(designs){
   }
 }
 
+setup_diagnosands <- function(..., diagnosands) {
+  
+  designs <- dots_to_list_of_designs(...)
+  
+  diagnosands %||% lapply(designs, function(x) attr(x, "diagnosands") %||% default_diagnosands)
+  
+}
+
 calculate_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
   
   if ("design_label" %in% group_by_set) {
@@ -178,7 +186,11 @@ calculate_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
     labels_df <- lapply(labels_df, head, n = 1)
     
     # ensure diagnosand functions are in the same order as designs
-    diagnosands <- diagnosands[names(labels_df)]
+    # diagnosands <- diagnosands[names(labels_df)]
+    
+    if(is.list(diagnosands)){
+      diagnosands <- diagnosands[names(labels_df)]
+    }
     
     simulations_list <- split(simulations_df, group_by_list, drop = TRUE)
   

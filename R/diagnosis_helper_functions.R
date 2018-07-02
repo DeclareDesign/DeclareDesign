@@ -129,6 +129,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   return_df <- return_df[do.call(order, as.list(return_df[,sort_by_list])), , drop = FALSE]
   
   # blank cells for SE rows 
+  levels(return_df$design_label) <- c(levels(return_df$design_label), "")
   return_df[return_df$statistic == "SE", c(sort_by_list, parameter_names, "n_sims")] <- ""
   return_df$statistic <- NULL
   
