@@ -10,8 +10,15 @@
 #' N <- 50
 #' my_population <- declare_population(N = N, noise = rnorm(N))
 #' my_assignment <- declare_assignment(m = 25)
-#' my_step <- declare_step(fabricate, Z2 = Z, q = 5)
+#' 
+#' # use fabricate as the custom step
+#' my_step <- declare_step(handler = fabricate, Z2 = Z, q = 5)
+#'
+#' design <- my_population + my_assignment + my_step
+#' 
+#' # use dplyr's mutate
+#' my_step <- declare_step(handler = dplyr::mutate, Z2 = Z, q = 5)
 #'
 #' design <- my_population + my_assignment + my_step
 #'
-declare_step <- make_declarations(function(data, ...f, ...) ...f(data, ...), "custom")
+declare_step <- make_declarations(fabricate, "custom")

@@ -4,8 +4,7 @@
 \alias{declare_step}
 \title{Declare a custom step}
 \usage{
-declare_step(..., handler = function(data, ...f, ...) ...f(data, ...),
-  label = NULL)
+declare_step(..., handler = fabricate, label = NULL)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -25,7 +24,14 @@ With declare_step, you can include any function that takes data as one of its ar
 N <- 50
 my_population <- declare_population(N = N, noise = rnorm(N))
 my_assignment <- declare_assignment(m = 25)
+
+# use fabricate as the custom step
 my_step <- declare_step(fabricate, Z2 = Z, q = 5)
+
+design <- my_population + my_assignment + my_step
+
+# use dplyr's mutate
+my_step <- declare_step(dplyr::mutate, Z2 = Z, q = 5)
 
 design <- my_population + my_assignment + my_step
 
