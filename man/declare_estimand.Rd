@@ -142,7 +142,7 @@ my_estimand_custom(dat)
 
 # Can also use custom estimator
 my_estimator_function <- function(data){
-  data.frame(est = with(data, median(Y)))
+  data.frame(estimate = with(data, median(Y)))
 }
 my_estimator_custom <-
   declare_estimator(handler = tidy_estimator(my_estimator_function),

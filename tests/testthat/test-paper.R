@@ -54,13 +54,13 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
   my_estimator <- function(data) {
     reg <- lm(Y ~ Z, data = data)
     phi <- t(data.frame(summary(reg)$term["Z", ]))
-    colnames(phi) <- c("est", "se", "t", "p")
+    colnames(phi) <- c("estimate", "se", "t", "p")
     phi
   }
   
   estimator <- declare_estimator(handler = tidy_estimator(my_estimator), estimand = estimand)
 
-  diagnosand <- declare_diagnosands(bias = mean(est - estimand), keep_defaults = FALSE)
+  diagnosand <- declare_diagnosands(bias = mean(estimate - estimand), keep_defaults = FALSE)
 
   reveal_outcomes <- declare_reveal()
   

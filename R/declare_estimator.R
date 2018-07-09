@@ -68,7 +68,7 @@
 #' # Define your own estimator and use the `tidy_estimator` function for labeling
 #' # Must have `data` argument that is a data.frame
 #' my_estimator_function <- function(data){
-#'   data.frame(est = with(data, mean(Y)))
+#'   data.frame(estimate = with(data, mean(Y)))
 #' }
 #'
 #' my_estimator_custom <- declare_estimator(
@@ -82,7 +82,7 @@
 #'   data.frame(
 #'     estimator_label = "foo",
 #'     estimand_label = "bar",
-#'     est = with(data, mean(Y)),
+#'     estimate = with(data, mean(Y)),
 #'     n = nrow(data),
 #'     stringsAsFactors = FALSE
 #'   )
@@ -301,7 +301,7 @@ fit2tidy <- function(fit, term = FALSE) {
   } else{
     summ <- coef(summary(fit))
     summ <-
-      summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
+      summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("estimate", "std", "pr("), drop = FALSE]
     ci <- suppressMessages(as.data.frame(confint(fit)))
     tidy_df <-
       data.frame(

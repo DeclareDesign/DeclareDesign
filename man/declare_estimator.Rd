@@ -105,7 +105,7 @@ estimator_probit <- declare_estimator(
 # Define your own estimator and use the `tidy_estimator` function for labeling
 # Must have `data` argument that is a data.frame
 my_estimator_function <- function(data){
-  data.frame(est = with(data, mean(Y)))
+  data.frame(estimate = with(data, mean(Y)))
 }
 
 my_estimator_custom <- declare_estimator(
@@ -119,7 +119,7 @@ my_estimator_function <- function(data){
   data.frame(
     estimator_label = "foo",
     estimand_label = "bar",
-    est = with(data, mean(Y)),
+    estimate = with(data, mean(Y)),
     n = nrow(data),
     stringsAsFactors = FALSE
   )

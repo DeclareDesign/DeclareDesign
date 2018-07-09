@@ -176,7 +176,7 @@ test_that("demo runs", {
 
   ## ------------------------------------------------------------------------
   my_mean <- function(data){
-    data.frame(est = with(data, mean(Y)))
+    data.frame(estimate = with(data, mean(Y)))
   }
 
   my_estimator_custom <-

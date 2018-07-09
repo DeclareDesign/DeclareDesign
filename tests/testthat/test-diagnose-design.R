@@ -86,7 +86,7 @@ test_that("default diagnosands work", {
       my_reveal +
       my_estimator
     
-    diagnosands <- declare_diagnosands(med_bias = median(est - estimand), keep_defaults = FALSE)
+    diagnosands <- declare_diagnosands(med_bias = median(estimate - estimand), keep_defaults = FALSE)
     
     set_diagnosands(design, diagnosands)
     
@@ -122,7 +122,7 @@ test_that("default diagnosands work", {
   design_1 <- set_diagnosands(my_designer(N = 100), NULL)
   design_2 <- set_diagnosands(my_designer(N = 200), NULL)
   
-  diagnosand_1 <- declare_diagnosands(my_bias  = median(est - estimand), keep_defaults = FALSE)
+  diagnosand_1 <- declare_diagnosands(my_bias  = median(estimate - estimand), keep_defaults = FALSE)
   diagnosand_2 <- declare_diagnosands(my_power = mean(p <= .5), keep_defaults = FALSE)
   
   # intentionally out of order to confirm they don't get mixed
@@ -155,7 +155,7 @@ test_that("default diagnosands work", {
   diag <- diagnose_design(
     design_2 = design_2,
     design_1 = design_1,
-    diagnosands = declare_diagnosands(med_bias = median(est - estimand), keep_defaults = FALSE),
+    diagnosands = declare_diagnosands(med_bias = median(estimate - estimand), keep_defaults = FALSE),
     sims = 2
   )
     
@@ -188,7 +188,7 @@ test_that("default diagnosands work", {
   expect_equal(ncol(diag$diagnosands_df), 16)
   
   # // simulation df
-  sims <- set_diagnosands(simulate_design(designs, sims = 5), declare_diagnosands(med_bias = median(est - estimand)))
+  sims <- set_diagnosands(simulate_design(designs, sims = 5), declare_diagnosands(med_bias = median(estimate - estimand)))
   diag <- diagnose_design(sims)
 })
   

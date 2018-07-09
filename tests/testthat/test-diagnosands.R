@@ -87,7 +87,7 @@ test_that("test diagnosands without estimands", {
     reveal_outcomes +
     declare_estimator(Y ~ Z)
 
-  my_dig <-  declare_diagnosands(mean_est = mean(est), sd_est = sd(est), keep_defaults = FALSE)
+  my_dig <-  declare_diagnosands(mean_est = mean(estimate), sd_est = sd(estimate), keep_defaults = FALSE)
   diagnosis <- diagnose_design(my_design2, sims = 2, diagnosands = my_dig, bootstrap_sims = FALSE)
 
 
@@ -98,7 +98,7 @@ test_that("test diagnosands without estimands", {
 
 test_that("custom diagnosand function", {
   mean_custom <- function(x) return(mean(x * 5))
-  my_dig <- declare_diagnosands(mean_x5 = mean_custom(est), mean_true = mean(est))
+  my_dig <- declare_diagnosands(mean_x5 = mean_custom(estimate), mean_true = mean(estimate))
   
   rm(mean_custom)
   diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_dig, bootstrap_sims = FALSE)
@@ -139,7 +139,7 @@ test_that("diagnosis, list of designs",{
   d <- declare_population(sleep) + 
     declare_estimator(extra ~ group, term = group2)
 
-  diagnosand <- declare_diagnosands(z = mean(est > 0), keep_defaults = FALSE)
+  diagnosand <- declare_diagnosands(z = mean(estimate > 0), keep_defaults = FALSE)
 
   expect_error(diagnose_design(sleep), "Can't calculate diagnosands on this data.frame, which does not include either an estimator_label or an estimand_label. Did you send a simulations data frame?")
 
@@ -247,14 +247,14 @@ test_that("error if diagnosand not named", {
 test_that("select, subtract, add diagnosands",{
   
   # add a diagnosand
-  my_diags <- declare_diagnosands(new_diag = mean(est - estimand))
+  my_diags <- declare_diagnosands(new_diag = mean(estimate - estimand))
   dx <- diagnose_design(my_design, diagnosands = my_diags, sims = 4, bootstrap_sims = FALSE)
   
   expect_true(all(dx$diagnosand_names %in% c("new_diag", "bias", "rmse", "power", "coverage", "mean_estimate", 
                                  "sd_estimate", "mean_se", "type_s_rate", "mean_estimand")))
   
   # add a diagnosand, dont keep
-  my_diags <- declare_diagnosands(new_diag = mean(est - estimand), keep_defaults = FALSE)
+  my_diags <- declare_diagnosands(new_diag = mean(estimate - estimand), keep_defaults = FALSE)
   dx <- diagnose_design(my_design, diagnosands = my_diags, sims = 4, bootstrap_sims = FALSE)
   expect_true(all(dx$diagnosand_names %in% c("new_diag")))
   

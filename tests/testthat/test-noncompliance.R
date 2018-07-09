@@ -32,7 +32,7 @@ test_that("Noncompliance", {
     return_frame <-
       data.frame(
         variable_names = names(coef),
-        est = coef,
+        estimate = coef,
         se = se,
         p = p,
         conf.low = conf.low,
