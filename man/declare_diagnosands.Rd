@@ -97,13 +97,15 @@ my_diagnosands <- declare_diagnosands(median_bias = median(estimate - estimand),
 # You can use these as a model when writing your own diagnosands.
 
 default_diagnosands <- declare_diagnosands(
- bias = mean(estimate - estimand),
- rmse = sqrt(mean((estimate - estimand)^2)),
- power = mean(p.value < .05),
- coverage = mean(estimand <= conf.high & estimand >= conf.low),
- mean_estimate = mean(estimate),
- sd_estimate = sd(estimate),
- type_s_rate = mean((sign(estimate) != sign(estimand)) & p.value < .05),
- mean_estimand = mean(estimand))
+bias = mean(estimate - estimand),
+rmse = sqrt(mean((estimate - estimand) ^ 2)),
+power = mean(p.value < alpha),
+coverage = mean(estimand <= conf.high & estimand >= conf.low),
+mean_estimate = mean(estimate),
+sd_estimate = sd(estimate),
+mean_se = mean(std.error),
+type_s_rate = mean((sign(estimate) != sign(estimand))[p.value < alpha]),
+mean_estimand = mean(estimand)
+)
 
 }

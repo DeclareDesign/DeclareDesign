@@ -200,14 +200,14 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label){
 #' # You can use these as a model when writing your own diagnosands.
 #'
 #' default_diagnosands <- declare_diagnosands(
-#' bias = mean(estimate - estimand)
-#' rmse = sqrt(mean((estimate - estimand) ^ 2))
-#' power = mean(p.value < alpha)
-#' coverage = mean(estimand <= conf.high & estimand >= conf.low)
-#' mean_estimate = mean(estimate)
-#' sd_estimate = sd(estimate)
-#' mean_se = mean(std.error)
-#' type_s_rate = mean((sign(estimate) != sign(estimand))[p.value < alpha])
+#' bias = mean(estimate - estimand),
+#' rmse = sqrt(mean((estimate - estimand) ^ 2)),
+#' power = mean(p.value < alpha),
+#' coverage = mean(estimand <= conf.high & estimand >= conf.low),
+#' mean_estimate = mean(estimate),
+#' sd_estimate = sd(estimate),
+#' mean_se = mean(std.error),
+#' type_s_rate = mean((sign(estimate) != sign(estimand))[p.value < alpha]),
 #' mean_estimand = mean(estimand)
 #' )
 #'

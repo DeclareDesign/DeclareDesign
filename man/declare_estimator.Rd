@@ -133,12 +133,12 @@ my_estimator_custom2 <- declare_estimator(handler = my_estimator_function)
 # First, set up the rest of a design
 set.seed(42)
 
-design_def <- 
-  declare_population(N = 100, X = rnorm(N), W = rexp(N, 1), noise = rnorm(N)) + 
-  declare_potential_outcomes(Y ~ .25 * Z + noise) + 
-  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-  declare_assignment(m = 50) + 
-  declare_reveal() + 
+design_def <-
+  declare_population(N = 100, X = rnorm(N), W = rexp(N, 1), noise = rnorm(N)) +
+  declare_potential_outcomes(Y ~ .25 * Z + noise) +
+  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_assignment(m = 50) +
+  declare_reveal() +
   my_estimator_dim
 
 get_estimates(design_def)
