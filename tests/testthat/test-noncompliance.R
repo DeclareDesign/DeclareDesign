@@ -23,17 +23,17 @@ test_that("Noncompliance", {
     df <- N - k
 
     coef <- coef(fit)
-    se <- sqrt(diag(vcov(fit)))
+    std.error <- sqrt(diag(vcov(fit)))
 
     p <- 2 * pt(abs(coef), df = df, lower.tail = FALSE)
-    conf.low <- coef - qt(1 - alpha / 2, df = df) * se
-    conf.high <- coef + qt(1 - alpha / 2, df = df) * se
+    conf.low <- coef - qt(1 - alpha / 2, df = df) * std.error
+    conf.high <- coef + qt(1 - alpha / 2, df = df) * std.error
 
     return_frame <-
       data.frame(
         variable_names = names(coef),
         estimate = coef,
-        se = se,
+        std.error = std.error,
         p = p,
         conf.low = conf.low,
         conf.high = conf.high

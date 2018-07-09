@@ -112,7 +112,7 @@ test_that("custom diagnosand function", {
 
 test_that("single diagnosand function", {
   # works with only one diagnosand with bootstrapping (!)
-  my_one_dig <-  declare_diagnosands(se_bias = mean(se - sd(estimand)))
+  my_one_dig <-  declare_diagnosands(se_bias = mean(std.error - sd(estimand)))
   diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_one_dig, bootstrap_sims = 5)
 
   expect_true("se_bias" %in% names(diagnosis$diagnosands))
