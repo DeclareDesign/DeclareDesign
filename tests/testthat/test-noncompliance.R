@@ -25,7 +25,7 @@ test_that("Noncompliance", {
     coef <- coef(fit)
     std.error <- sqrt(diag(vcov(fit)))
 
-    p <- 2 * pt(abs(coef), df = df, lower.tail = FALSE)
+    p.value <- 2 * pt(abs(coef), df = df, lower.tail = FALSE)
     conf.low <- coef - qt(1 - alpha / 2, df = df) * std.error
     conf.high <- coef + qt(1 - alpha / 2, df = df) * std.error
 
@@ -34,7 +34,7 @@ test_that("Noncompliance", {
         variable_names = names(coef),
         estimate = coef,
         std.error = std.error,
-        p = p,
+        p.value = p.value,
         conf.low = conf.low,
         conf.high = conf.high
       )

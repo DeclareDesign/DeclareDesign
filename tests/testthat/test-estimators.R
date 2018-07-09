@@ -8,7 +8,7 @@ reveal_outcomes <- declare_reveal()
 expect_estimates <- function(estimates, label = NULL) {
   expect_equal(
     names(estimates),
-    c("estimator_label", "term", "estimate", "std.error", "p", "conf.low", "conf.high")
+    c("estimator_label", "term", "estimate", "std.error", "p.value", "conf.low", "conf.high")
   )
   if(is.character(label)){
     expect_equal( estimates$estimator_label, label)
@@ -265,8 +265,8 @@ test_that("tidy_estimator, handler does not take data", {
 
 test_that("model_handler runs directly", {
   lm_out <- structure(list(term = "group2", estimate = 1.58, std.error = 0.849091017238762,
-    p = 0.0791867142159381, conf.low = -0.203874032287599, conf.high = 3.3638740322876), .Names = c("term",
-    "estimate", "std.error", "p", "conf.low", "conf.high"), row.names = 2L, class = "data.frame")
+    p.value = 0.0791867142159381, conf.low = -0.203874032287599, conf.high = 3.3638740322876), .Names = c("term",
+    "estimate", "std.error", "p.value", "conf.low", "conf.high"), row.names = 2L, class = "data.frame")
 
   result <- model_handler(sleep, extra ~ group, model = lm, term = "group2")
   expect_equal(result, lm_out)

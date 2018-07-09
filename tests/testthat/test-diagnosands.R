@@ -183,9 +183,9 @@ test_that("Overriding join conditions",{
 
   custom <- declare_diagnosands(handler = function(data) {
                                   data %>% group_by(sim_ID) %>%
-                                  summarize(any_significant = any(p < alpha),
-                                            num_significant = sum(p < alpha),
-                                            all_significant = all(p < alpha)) %>%
+                                  summarize(any_significant = any(p.value < alpha),
+                                            num_significant = sum(p.value < alpha),
+                                            all_significant = all(p.value < alpha)) %>%
                                   summarize(any_significant = mean(any_significant),
                                             num_significant = mean(num_significant),
                                             all_significant = mean(all_significant)) %>%
@@ -285,7 +285,7 @@ test_that("select, subtract, add diagnosands",{
 test_that("subset diagnosands",{
   
   # add a diagnosand
-  my_diags <- declare_diagnosands(perc_above_p05 = mean(p > .05), subset = p < .05)
+  my_diags <- declare_diagnosands(perc_above_p05 = mean(p.value > .05), subset = p.value < .05)
 
   dx <- diagnose_design(my_design, diagnosands = my_diags, sims = 4, bootstrap_sims = FALSE)
   expect_equal( dx$diagnosands_df$perc_above_p05, 0)
@@ -297,7 +297,7 @@ test_that("declare time errors",{
   # add a diagnosand
   expect_s3_class(declare_diagnosands(), "design_step")
   expect_error(declare_diagnosands(keep_defaults = FALSE), "No diagnosands were declared.")
-  expect_s3_class(declare_diagnosands(my_diag = mean(p), keep_defaults = FALSE), "design_step")
+  expect_s3_class(declare_diagnosands(my_diag = mean(p.value), keep_defaults = FALSE), "design_step")
   expect_error(declare_diagnosands(select = c()), "No diagnosands were declared.")
   expect_error(declare_diagnosands(subtract = c("bias", "rmse", "power", "coverage", "mean_estimate", "sd_estimate", 
                                                 "mean_se", "type_s_rate", "mean_estimand")), 
