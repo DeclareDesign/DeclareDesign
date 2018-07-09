@@ -75,5 +75,5 @@ test_that("capitalization of parameter names are retained", {
 test_that("select", {
   dx <- diagnose_design(design, sims = 10, bootstrap_sims = 5)
   reshape <- reshape_diagnosis(dx, select = "Bias")
-  expect_equal(colnames(reshape), c("Design Label", "Estimand Label", "Estimator Label", "Coefficient", "N Sims" , "Bias"))
+  expect_equal(colnames(reshape), c("Design Label", "Estimand Label", "Estimator Label", "Term", "N Sims" , "Bias"))
 })

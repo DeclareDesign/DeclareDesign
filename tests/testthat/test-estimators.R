@@ -8,7 +8,7 @@ reveal_outcomes <- declare_reveal()
 expect_estimates <- function(estimates, label = NULL) {
   expect_equal(
     names(estimates),
-    c("estimator_label", "term", "estimate", "std.error", "p.value", "conf.low", "conf.high")
+    c("estimator_label", "term", "estimate", "std.error", "statistic", "p.value", "conf.low", "conf.high", "df", "outcome")
   )
   if(is.character(label)){
     expect_equal( estimates$estimator_label, label)
@@ -264,9 +264,9 @@ test_that("tidy_estimator, handler does not take data", {
 })
 
 test_that("model_handler runs directly", {
-  lm_out <- structure(list(term = "group2", estimate = 1.58, std.error = 0.849091017238762,
-    p.value = 0.0791867142159381, conf.low = -0.203874032287599, conf.high = 3.3638740322876), .Names = c("term",
-    "estimate", "std.error", "p.value", "conf.low", "conf.high"), row.names = 2L, class = "data.frame")
+  lm_out <- structure(list(term = "group2", estimate = 1.58, std.error = 0.849091017238762, 
+                           statistic = 1.86081346748685, p.value = 0.0791867142159382, 
+                           conf.low = -0.203874032287599, conf.high = 3.3638740322876), row.names = 2L, class = "data.frame")
 
   result <- model_handler(sleep, extra ~ group, model = lm, term = "group2")
   expect_equal(result, lm_out)
@@ -303,7 +303,7 @@ test_that("estimators have different columns", {
       Tr = Z,
       X = cbind(X1, X2, X3)
     ))
-    return(data.frame(estimate = match_out$estimate))
+    return(data.frame(estimate = match_out$est))
   }
 
   estimator_m <- declare_estimator(
@@ -321,7 +321,7 @@ test_that("estimators have different columns", {
 
   result <- get_estimates(matching)
 
-  expect_length(result, 8)
+  expect_length(result, 11)
   expect_equal(nrow(result), 2)
 
 })
@@ -336,7 +336,7 @@ test_that("when a term is missing from a model there is an informative error", {
   )
   ols <- declare_estimator(Y ~ Z, model = lm_robust, term = "X")
 
-  expect_error(ols(data), "Not all of the term declared in your estimator are present in the model output, including X.")
+  expect_error(ols(data), "Not all of the terms declared in your estimator are present in the model output, including X.")
   
 })
 
