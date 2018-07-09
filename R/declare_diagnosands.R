@@ -190,11 +190,14 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label){
 #' 
 #' # You can add your own diagnosands in addition to or instead of the defaults e.g.,
 #' 
-#' my_diagnosands <- declare_diagnosands(median_bias = median(estimate - estimand))
+#' my_diagnosands <- 
+#'   declare_diagnosands(median_bias = median(estimate - estimand))
 #' 
 #' # or to report only \code{median_bias}
 #' 
-#' my_diagnosands <- declare_diagnosands(median_bias = median(estimate - estimand), keep_defaults = FALSE)
+#' my_diagnosands <- 
+#'    declare_diagnosands(median_bias = median(estimate - estimand), 
+#'                        keep_defaults = FALSE)
 #'
 #' # Below is the code that makes the default diagnsoands.
 #' # You can use these as a model when writing your own diagnosands.

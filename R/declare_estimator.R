@@ -296,7 +296,7 @@ fit2tidy <- function(fit, term = FALSE) {
   if (requireNamespace("broom", quietly = TRUE)) {
     
     # broom if possible
-    tidy_df <- tidy(fit, conf.int = TRUE)
+    tidy_df <- broom::tidy(fit, conf.int = TRUE)
     
   } else{
     summ <- coef(summary(fit))
