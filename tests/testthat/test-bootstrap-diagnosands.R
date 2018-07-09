@@ -32,6 +32,6 @@ test_that("test diagnosands", {
 
   expect_equal(dim(diagnosis$diagnosands_df), c(2,23))
 
-  expect_equal(dim(diagnosis$simulations_df), c(4,11))
+  expect_equal(dim(diagnosis$simulations_df), c(4,14))
 
 })

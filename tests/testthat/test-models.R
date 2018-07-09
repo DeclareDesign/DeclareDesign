@@ -14,67 +14,53 @@ pop <- declare_population(dat)
 
 
 test_that("AER", {
-  skip_if_not_installed("AER")
+  skip_if_not_installed(c("AER", "broom"))
   des <- pop + declare_estimator(Y ~ D | Z, model = AER::ivreg)
-  expect_equal(ncol(get_estimates(des)), 7)
+  expect_equal(ncol(get_estimates(des)), 9)
 })
 
 test_that("lm", {
   des <- pop + declare_estimator(Y ~ Z, model = lm)
-  expect_equal(ncol(get_estimates(des)), 7)
+  expect_equal(ncol(get_estimates(des)), 9)
 })
 
 test_that("glm", {
   des <- pop + declare_estimator(D ~ Z, model = glm, family = binomial(link = "probit"))
-  expect_equal(ncol(get_estimates(des)), 7)
+  expect_equal(ncol(get_estimates(des)), 9)
   des <- pop + declare_estimator(D ~ Z, model = glm, family = binomial(link = "logit"))
-  expect_equal(ncol(get_estimates(des)), 7)
+  expect_equal(ncol(get_estimates(des)), 9)
 })
 
 
 test_that("betareg", {
-  # fails
-  skip_if_not_installed("betareg")
+  skip_if_not_installed(c("betareg", "broom"))
   des <- pop + declare_estimator(D2 ~ Z, model = betareg::betareg)
-  expect_error(ncol(get_estimates(des)))
-  
-  fit <- betareg::betareg(D2 ~ Z, data = dat)
-  summary(fit)
-  confint(fit)
-  
+  expect_equal(ncol(get_estimates(des)), 9)
 })
 
 
 test_that("biglm", {
-  # Fails
+  skip_if_not_installed(c("biglm", "broom"))
   des <- pop + declare_estimator(Y ~ Z, model = biglm::biglm)
-  expect_error(ncol(get_estimates(des)))
-
-  fit <- biglm::biglm(Y ~ Z, data = dat)
-  summary(fit)
+  expect_equal(ncol(get_estimates(des)), 7)
 })
 
 test_that("gam", {
-  # Fails
+  skip_if_not_installed(c("gam", "broom"))
   des <- pop + declare_estimator(Y ~ Z, model = gam::gam)
-  expect_error(ncol(get_estimates(des)))
-  
-  fit <- gam::gam(Y ~ Z, data = dat)
-  summary(fit)
+  expect_equal(ncol(get_estimates(des)), 7)
 })
 
 test_that("lfe", {
+  skip_if_not_installed(c("lfe", "broom"))
   des <- pop + declare_estimator(Y ~ Z, model = lfe::felm)
-  expect_equal(ncol(get_estimates(des)), 7)
+  expect_equal(ncol(get_estimates(des)), 8)
 })
 
 
 test_that("polr", {
-  # Fails
+  skip_if_not_installed(c("polr", "broom"))
   des <- pop + declare_estimator(Y_fac ~ Z, model = MASS::polr)
-  expect_error(ncol(get_estimates(des)))
-  
-  fit <- MASS::polr(Y_fac ~ Z, data = dat)
-  summary(fit)
-  confint(fit)
+  suppressWarnings(expect_error(get_estimates(des)))
 })
+  

@@ -20,16 +20,16 @@
 #'
 #' my_estimand_ATT <- declare_estimand(ATT = mean(Y_Z_1 - Y_Z_0), subset = Z == 1)
 #'
-#' # You can also use different coefficients from an model-based estimator for
+#' # You can also use different term from an model-based estimator for
 #' # two estimands, with a slightly different syntax
 #'
-#' # Name your estimands the coefficient name they get in your
-#' # estimator, and set `coefficients = TRUE`
+#' # Name your estimands the term name they get in your
+#' # estimator, and set `term = TRUE`
 #'
 #' my_estimand_regression <- declare_estimand(
 #'   `(Intercept)` = mean(Y_Z_0),
 #'   `Z` = mean(Y_Z_1 - Y_Z_0),
-#'   coefficients = TRUE,
+#'   term = TRUE,
 #'   label="TrueRegressionParams"
 #' )
 #'
@@ -95,12 +95,12 @@
 #'
 #'
 #' # For the model based estimator, specify the estimand as usual,
-#' # but also set `coefficients = TRUE`
+#' # but also set `term = TRUE`
 #' my_estimator_double <- declare_estimator(
 #'   Y ~ Z,
 #'   estimand = my_estimand_regression,
 #'   model = lm,
-#'   coefficients = TRUE
+#'   term = TRUE
 #' )
 #'
 #' design_double <- insert_step(design_stub, my_estimand_regression, after = pos)
@@ -136,17 +136,17 @@ declare_estimand <- make_declarations(estimand_handler, "estimand",
 declare_estimands <- declare_estimand
 
 #' @param subset a subset expression
-#' @param coefficients TRUE/FALSE
+#' @param term TRUE/FALSE
 #' @param data a data.frame
 #' @details
 #'
-#' If coefficients is TRUE, the names of ... will be returned in a `coefficients` column, and `estimand_label`
+#' If term is TRUE, the names of ... will be returned in a `term` column, and `estimand_label`
 #' will contain the step label. This can be used as an additional dimension for use in diagnosis.
 #'
 #'
 #' @importFrom rlang eval_tidy quos  is_quosure
 #' @rdname declare_estimand
-estimand_handler <- function(data, ..., subset = NULL, coefficients = FALSE, label) {
+estimand_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
   options <- quos(...)
   if (names(options)[1] == "") names(options)[1] <- label
 
@@ -163,10 +163,10 @@ estimand_handler <- function(data, ..., subset = NULL, coefficients = FALSE, lab
   }
   ret <- simplify2array(ret)
 
-  if (coefficients) {
+  if (term) {
     data.frame(
       estimand_label = label,
-      coefficient = names(options),
+      term = names(options),
       estimand = ret,
       stringsAsFactors = FALSE
     )
@@ -186,8 +186,8 @@ validation_fn(estimand_handler) <-  function(ret, dots, label){
 
   declare_time_error_if_data(ret)
 
-  # Don't overwrite label-label with splat label if coefficient names are true
-  if ("coefficients" %in% dotnames && isTRUE(eval_tidy(dots$coefficients))) 
+  # Don't overwrite label-label with splat label if term names are true
+  if ("term" %in% dotnames && isTRUE(eval_tidy(dots$term))) 
     return(ret)
 
   maybeDotLabel <- dotnames[!dotnames %in% c("", names(formals(estimand_handler)) )]

@@ -15,12 +15,12 @@ test_that("Multiple Coefficients", {
   
   theta <- declare_estimand(`(Intercept)` = alpha,
                            X = beta,
-                           coefficients = TRUE)
+                           term = TRUE)
   
   OLS <- declare_estimator(Y ~ X,
                           model = lm,
                           estimand = theta,
-                          coefficients = TRUE)
+                          term = TRUE)
 
   my_design <- my_pop + theta + OLS
   diagnosis <- diagnose_design(my_design, sims = 2, bootstrap_sims = FALSE)

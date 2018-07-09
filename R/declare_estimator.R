@@ -21,7 +21,7 @@
 #'
 #' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 #'
-#' # By default, uses first non-intercept coefficient as estimate
+#' # By default, uses first non-intercept term as estimate
 #' # Default method is the `difference_in_means` estimator from `estimatr`
 #'
 #' my_estimator_dim <- declare_estimator(Y ~ Z, estimand = "ATE", label = "DIM")
@@ -30,7 +30,7 @@
 #' my_estimator_lm <- declare_estimator(Y ~ Z, estimand = "ATE", model = lm, label = "LM")
 #
 #' # Use lm_robust (linear regression with robust standard errors) from `estimatr` package
-#' 
+#'
 #' my_estimator_lm_rob <- declare_estimator(
 #'   Y ~ Z,
 #'   estimand = "ATE",
@@ -38,11 +38,11 @@
 #'   label = "LM_Robust"
 #' )
 #'
-#' # Set `coefficient`` if estimate of interest is not the first non-intercept variable
+#' # Set `term`` if estimate of interest is not the first non-intercept variable
 #' my_estimator_lm_rob_x <- declare_estimator(
 #'   Y ~ X + Z,
 #'   estimand = my_estimand,
-#'   coefficients = "Z",
+#'   term = "Z",
 #'   model = lm_robust
 #' )
 #'
@@ -51,7 +51,7 @@
 #'   Y ~ X + Z,
 #'   family = "gaussian",
 #'   estimand = my_estimand,
-#'   coefficients = "Z",
+#'   term = "Z",
 #'   model = glm
 #' )
 #'
@@ -60,7 +60,7 @@
 #'   Y ~ Z,
 #'   model = glm,
 #'   family = binomial(link = "probit"),
-#'   coefficients = "Z"
+#'   term = "Z"
 #' )
 #'
 #' # Custom handlers
@@ -90,18 +90,18 @@
 #'
 #' my_estimator_custom2 <- declare_estimator(handler = my_estimator_function)
 #'
-#' 
+#'
 #' # Examples
 #'
 #' # First, set up the rest of a design
 #' set.seed(42)
 #'
-#' design_def <- 
-#'   declare_population(N = 100, X = rnorm(N), W = rexp(N, 1), noise = rnorm(N)) + 
-#'   declare_potential_outcomes(Y ~ .25 * Z + noise) + 
-#'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-#'   declare_assignment(m = 50) + 
-#'   declare_reveal() + 
+#' design_def <-
+#'   declare_population(N = 100, X = rnorm(N), W = rexp(N, 1), noise = rnorm(N)) +
+#'   declare_potential_outcomes(Y ~ .25 * Z + noise) +
+#'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_assignment(m = 50) +
+#'   declare_reveal() +
 #'   my_estimator_dim
 #'
 #' get_estimates(design_def)
@@ -150,7 +150,7 @@
 #' get_estimates(design)
 #'
 #' my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand), keep_defaults = FALSE)
-#' 
+#'
 #' diagnose_design(design, diagnosands = my_diagnosand, sims = 5, bootstrap_sims = FALSE)
 #'
 #' # ----------
@@ -160,11 +160,16 @@
 #' design_two <- insert_step(design_def,  my_estimator_lm,  after=my_estimator_dim)
 #'
 #' get_estimates(design_two)
-#' 
+#'
 #' diagnose_design(design_two, sims = 5, bootstrap_sims = FALSE)
 #'
-declare_estimator <- make_declarations(estimator_handler, step_type = "estimator", 
-                                       causal_type = "estimator", default_label = "estimator")
+declare_estimator <-
+  make_declarations(
+    estimator_handler,
+    step_type = "estimator",
+    causal_type = "estimator",
+    default_label = "estimator"
+  )
 
 #' @rdname declare_estimator
 #' @export
@@ -178,80 +183,106 @@ declare_estimators <- declare_estimator
 #' @rdname declare_estimator
 #' @export
 #' @importFrom rlang UQ
-tidy_estimator <- function(estimator_function){
-
+tidy_estimator <- function(estimator_function) {
   if (!("data" %in% names(formals(estimator_function)))) {
     stop("Must provide a `estimator_function` function with a data argument.")
   }
-
-
-  f <- function(data, ..., estimand=NULL, label) {
-
-    calling_args <- names(match.call(expand.dots = FALSE)) %i% names(formals(estimator_function))
-
-    dots <- if("..." %in% calling_args) quos(...) else list()
-
+  
+  
+  f <- function(data, ..., estimand = NULL, label) {
+    calling_args <-
+      names(match.call(expand.dots = FALSE)) %i% names(formals(estimator_function))
+    
+    dots <- if ("..." %in% calling_args)
+      quos(...)
+    else
+      list()
+    
     calling_args <- setdiff(calling_args, c("", "data", "..."))
-
-    for(e in calling_args) {
-      dots[[e]] <- do.call(enquo, list(as.symbol(e))) # this *should* retrieve coefficient names as quosure. IDK
+    
+    for (e in calling_args) {
+      dots[[e]] <-
+        do.call(enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. IDK
     }
-
-    ret <- eval_tidy(quo(estimator_function(data, !!!dots)))
-
-    ret <- data.frame(
-      estimator_label = label,
-      ret,
-      stringsAsFactors = FALSE
-    )
-
+    
+    ret <- eval_tidy(quo(estimator_function(data,!!!dots)))
+    
+    ret <- data.frame(estimator_label = label,
+                      ret,
+                      stringsAsFactors = FALSE)
+    
     estimand_label <- get_estimand_label(estimand)
-    if(length(estimand_label) > 0) {
-      ret <- cbind(ret, estimand_label=estimand_label, row.names=NULL, stringsAsFactors=FALSE)
+    if (length(estimand_label) > 0) {
+      ret <-
+        cbind(
+          ret,
+          estimand_label = estimand_label,
+          row.names = NULL,
+          stringsAsFactors = FALSE
+        )
     }
     ret
-
+    
   }
-
+  
   formals(f) <- formals(estimator_function)
-  if(!"estimand" %in% names(formals(f))){formals(f)["estimand"] <- list(NULL)}
-  if(!"label"%in% names(formals(f))){formals(f)$label <- alist(a=)$a}
-
+  if (!"estimand" %in% names(formals(f))) {
+    formals(f)["estimand"] <- list(NULL)
+  }
+  if (!"label" %in% names(formals(f))) {
+    formals(f)$label <- alist(a = )$a
+  }
+  
   attributes(f) <- attributes(estimator_function)
-
+  
   f
 }
 
 #' @param data a data.frame
 #' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
-#' @param coefficients Symbols or literal character vector of coefficients that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept coefficient; if TRUE return all coefficients. To escape non-standard-evaluation use \code{!!}.
+#' @param term Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.
 #' @rdname declare_estimator
-model_handler <- function(data, ..., model = estimatr::difference_in_means, coefficients = FALSE) {
-
-    coefficient_names <- enquo(coefficients) # forces evaluation of quosure
+model_handler <-
+  function(data,
+           ...,
+           model = estimatr::difference_in_means,
+           term = FALSE) {
+    coefficient_names <-
+      enquo(term) # forces evaluation of quosure
     coefficient_names <- reveal_nse_helper(coefficient_names)
-
+    
     args <- quos(...)
-
+    
     # todo special case weights offsets for glm etc?
     
-    results <- eval_tidy(quo(model(!!!args, data=data)))
-
+    results <- eval_tidy(quo(model(!!!args, data = data)))
+    
     results <- fit2tidy(results, coefficient_names)
-
+    
     results
-}
+  }
 
-validation_fn(model_handler) <-  function(ret, dots, label){
+validation_fn(model_handler) <-  function(ret, dots, label) {
   declare_time_error_if_data(ret)
-
-
-  if("model" %in% names(dots)) {
+  
+  if ("model" %in% names(dots)) {
     model <- eval_tidy(dots$model)
-    if(!is.function(model) || ! "data" %in% names(formals(model))){
-      declare_time_error("Must provide a function for `model` which takes a `data` argument.", ret)
+    if (!is.function(model) || !"data" %in% names(formals(model))) {
+      declare_time_error("Must provide a function for `model` which takes a `data` argument.",
+                         ret)
     }
-    attr(ret, "extra_summary") <- sprintf("Model:\t%s", as.character(f_rhs(dots$model)))
+    
+    if(!quo_text(dots$model) 
+       %in% 
+       c("lm", "glm", "lm_robust", "iv_robust", "difference_in_means", "horvitz_thompson")
+       &
+       !requireNamespace("broom", quietly = TRUE)
+    ){
+      stop("You provided a ", quo_text(dots$model), " model, which DeclareDesign does not directly support. It's possible that the broom package can help. Please install the broom package with install.packages('broom') and try declaring your estimator again. If that fix does not work, you may need to write a custom estimator.")
+    }
+    
+    attr(ret, "extra_summary") <-
+      sprintf("Model:\t%s", as.character(f_rhs(dots$model)))
   }
   ret
 }
@@ -261,44 +292,65 @@ validation_fn(model_handler) <-  function(ret, dots, label){
 estimator_handler <- tidy_estimator(model_handler)
 
 # called by model_handler, resets columns names !!!
-fit2tidy <- function(fit, coefficients = FALSE) {
-  summ <- coef(summary(fit))
-  summ <-
-    summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
-  ci <- suppressMessages(as.data.frame(confint(fit)))
-  return_data <-
-    data.frame(coefficient = rownames(summ),
-               summ,
-               ci,
-               stringsAsFactors = FALSE, row.names = NULL)
-  colnames(return_data) <- c("coefficient","est", "se", "p", "ci_lower", "ci_upper")
-
-
-  if (is.character(coefficients)) {
-    coefs_in_output <- coefficients %in% return_data$coefficient
-    if (!all(coefs_in_output)) {
-      stop("Not all of the coefficients declared in your estimator are present in the model output, including ", 
-           paste(coefficients[!coefs_in_output], collapse = ", "), ".", call. = FALSE)
-    }
-    return_data <- return_data[return_data$coefficient %in% coefficients, ,drop = FALSE]
-  } else if(is.logical(coefficients) && !coefficients) {
-    return_data <- return_data[which.max(return_data$coefficient != "(Intercept)"), ,drop = FALSE]
+fit2tidy <- function(fit, term = FALSE) {
+  if (requireNamespace("broom", quietly = TRUE)) {
+    
+    # broom if possible
+    tidy_df <- tidy(fit, conf.int = TRUE)
+    
+  } else{
+    summ <- coef(summary(fit))
+    summ <-
+      summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
+    ci <- suppressMessages(as.data.frame(confint(fit)))
+    tidy_df <-
+      data.frame(
+        term = rownames(summ),
+        summ,
+        ci,
+        stringsAsFactors = FALSE,
+        row.names = NULL
+      )
+    colnames(tidy_df) <-
+      c("term",
+        "estimate",
+        "std.error",
+        "p.value",
+        "conf.low",
+        "conf.high")
+    
   }
-
-
-  return_data
+  
+  if (is.character(term)) {
+    coefs_in_output <- term %in% tidy_df$term
+    if (!all(coefs_in_output)) {
+      stop(
+        "Not all of the terms declared in your estimator are present in the model output, including ",
+        paste(term[!coefs_in_output], collapse = ", "),
+        ".",
+        call. = FALSE
+      )
+    }
+    tidy_df <- tidy_df[tidy_df$term %in% term, , drop = FALSE]
+  } else if (is.logical(term) && !term) {
+    tidy_df <-
+      tidy_df[which.max(tidy_df$term != "(Intercept)"), , drop = FALSE]
+  }
+  
+  tidy_df
 }
 
 # helper methods for estimand=my_estimand arguments to estimator_handler
 #
-get_estimand_label <- function(estimand){
+get_estimand_label <- function(estimand) {
   force(estimand) # no promise nonsense when we look at it
-  switch(class(estimand)[1],
-         "character"=estimand,
-         "design_step"=attributes(estimand)$label,
-         "list"=vapply(estimand, get_estimand_label, NA_character_), #note recursion here
-         NULL=NULL,
-         warning("Did not match class of `estimand`")
+  switch(
+    class(estimand)[1],
+    "character" = estimand,
+    "design_step" = attributes(estimand)$label,
+    "list" = vapply(estimand, get_estimand_label, NA_character_),
+    #note recursion here
+    NULL = NULL,
+    warning("Did not match class of `estimand`")
   )
 }
-

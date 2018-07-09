@@ -10,7 +10,7 @@ declare_estimand(..., handler = estimand_handler, label = "estimand")
 
 declare_estimands(..., handler = estimand_handler, label = "estimand")
 
-estimand_handler(data, ..., subset = NULL, coefficients = FALSE, label)
+estimand_handler(data, ..., subset = NULL, term = FALSE, label)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -23,7 +23,7 @@ estimand_handler(data, ..., subset = NULL, coefficients = FALSE, label)
 
 \item{subset}{a subset expression}
 
-\item{coefficients}{TRUE/FALSE}
+\item{term}{TRUE/FALSE}
 }
 \value{
 a function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimand.
@@ -34,7 +34,7 @@ Declares estimands which are the subjects of inquiry and can be estimated by an 
 \details{
 For the default diagnosands, the return value of the handler should have `estimand_label` and `estimand` columns.
 
-If coefficients is TRUE, the names of ... will be returned in a `coefficients` column, and `estimand_label`
+If term is TRUE, the names of ... will be returned in a `term` column, and `estimand_label`
 will contain the step label. This can be used as an additional dimension for use in diagnosis.
 }
 \examples{
@@ -45,16 +45,16 @@ my_estimand_ATE <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
 my_estimand_ATT <- declare_estimand(ATT = mean(Y_Z_1 - Y_Z_0), subset = Z == 1)
 
-# You can also use different coefficients from an model-based estimator for
+# You can also use different term from an model-based estimator for
 # two estimands, with a slightly different syntax
 
-# Name your estimands the coefficient name they get in your
-# estimator, and set `coefficients = TRUE`
+# Name your estimands the term name they get in your
+# estimator, and set `term = TRUE`
 
 my_estimand_regression <- declare_estimand(
   `(Intercept)` = mean(Y_Z_0),
   `Z` = mean(Y_Z_1 - Y_Z_0),
-  coefficients = TRUE,
+  term = TRUE,
   label="TrueRegressionParams"
 )
 
@@ -120,12 +120,12 @@ get_estimands(design_two)
 
 
 # For the model based estimator, specify the estimand as usual,
-# but also set `coefficients = TRUE`
+# but also set `term = TRUE`
 my_estimator_double <- declare_estimator(
   Y ~ Z,
   estimand = my_estimand_regression,
   model = lm,
-  coefficients = TRUE
+  term = TRUE
 )
 
 design_double <- insert_step(design_stub, my_estimand_regression, after = pos)

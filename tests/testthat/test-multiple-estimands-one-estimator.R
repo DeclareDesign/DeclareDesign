@@ -23,7 +23,7 @@ test_that("Multiple estimands can be mapped to one estimator", {
     model = estimatr::lm_robust,
     se_type = "classical",
     estimand = c(dgp_se, obs_se),
-    coefficients = "X"
+    term = "X"
   )
 
   des <- 

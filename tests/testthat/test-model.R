@@ -14,10 +14,10 @@ my_design <- my_population +
   my_reveal
 dat <- draw_data(my_design)
 
-test_that("test default coefficient Z, lm", {
+test_that("test default term Z, lm", {
   # lm
   estimator_lm <-
-    declare_estimator(Y ~ Z, model = lm, coefficients = "Z")
+    declare_estimator(Y ~ Z, model = lm, term = "Z")
   estimator_lm_nocoef <- declare_estimator(Y ~ Z, model = lm)
   
   expect_equal(
@@ -28,7 +28,7 @@ test_that("test default coefficient Z, lm", {
   estimator_lm_robust <-
     declare_estimator(Y ~ Z,
                       model = lm_robust,
-                      coefficients = "Z")
+                      term = "Z")
   expect_equal(
     estimator_lm(dat),
     estimator_lm_robust(dat)
@@ -40,7 +40,7 @@ test_that("test estimators, labels, quoted Z", {
   estimator_lm <-
     declare_estimator(Y ~ Z,
                       model = lm,
-                      coefficients = "Z",
+                      term = "Z",
                       label = "my_lm")
   estimator_lm_nocoef <-
     declare_estimator(Y ~ Z, model = lm, label = "my_lm")
@@ -53,7 +53,7 @@ test_that("test estimators, labels, quoted Z", {
 
 test_that("test GLM estimators, default vs explicit Z", {
   estimator_glm <-
-    declare_estimator(Y ~ Z, model = glm, coefficients = "Z")
+    declare_estimator(Y ~ Z, model = glm, term = "Z")
 
   estimator_glm_nocoef <- declare_estimator(Y ~ Z, model = glm)
 
@@ -69,7 +69,7 @@ test_that("test GLM estimators with label", {
   estimator_glm <-
     declare_estimator(Y ~ Z,
                       model = glm,
-                      coefficients = "Z",
+                      term = "Z",
                       label = "my_glm")
   estimator_glm_nocoef <-
     declare_estimator(Y ~ Z, model = glm, label = "my_glm")
@@ -88,7 +88,7 @@ test_that("test logit default vs explicit Z", {
     declare_estimator(Y ~ Z,
                       model = glm,
                       family = binomial,
-                      coefficients = "Z")
+                      term = "Z")
   estimator_logit_nocoef <-
     declare_estimator(Y ~ Z, model = glm, family = binomial)
 
@@ -102,7 +102,7 @@ test_that("test logit default vs explicit Z", {
       Y ~ Z,
       model = glm,
       family = binomial,
-      coefficients = "Z",
+      term = "Z",
       label = "my_logit"
     )
   estimator_logit_nocoef <-
@@ -122,7 +122,7 @@ test_that("test logit default vs explicit Z", {
       Y ~ Z,
       model = glm,
       family = binomial(link = "probit"),
-      coefficients = "Z"
+      term = "Z"
     )
   estimator_probit_nocoef <-
     declare_estimator(Y ~ Z, model = glm, family = binomial(link = "probit"))
@@ -138,7 +138,7 @@ test_that("test logit default vs explicit Z", {
       Y ~ Z,
       model = glm,
       family = binomial(link = "probit"),
-      coefficients = "Z",
+      term = "Z",
       label = "my_probit"
     )
   estimator_probit_nocoef <-

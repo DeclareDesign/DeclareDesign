@@ -26,8 +26,8 @@ test_that("Noncompliance", {
     se <- sqrt(diag(vcov(fit)))
 
     p <- 2 * pt(abs(coef), df = df, lower.tail = FALSE)
-    ci_lower <- coef - qt(1 - alpha / 2, df = df) * se
-    ci_upper <- coef + qt(1 - alpha / 2, df = df) * se
+    conf.low <- coef - qt(1 - alpha / 2, df = df) * se
+    conf.high <- coef + qt(1 - alpha / 2, df = df) * se
 
     return_frame <-
       data.frame(
@@ -35,8 +35,8 @@ test_that("Noncompliance", {
         est = coef,
         se = se,
         p = p,
-        ci_lower = ci_lower,
-        ci_upper = ci_upper
+        conf.low = conf.low,
+        conf.high = conf.high
       )
     return_frame[return_frame$variable_names == "D",]
   }

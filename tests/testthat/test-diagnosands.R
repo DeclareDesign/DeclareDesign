@@ -137,7 +137,7 @@ test_that("no estimates, no estimators should error", {
 test_that("diagnosis, list of designs",{
 
   d <- declare_population(sleep) + 
-    declare_estimator(extra ~ group, coefficients = group2)
+    declare_estimator(extra ~ group, term = group2)
 
   diagnosand <- declare_diagnosands(z = mean(est > 0), keep_defaults = FALSE)
 
@@ -153,9 +153,9 @@ test_that("diagnosis, list of designs",{
 test_that("diagnosis, unlinked estimator", {
   d <- declare_population(sleep) + 
     declare_estimand(foo = 2, bar = 3) +
-    declare_estimator(extra ~ group, model = lm, coefficients = TRUE)
+    declare_estimator(extra ~ group, model = lm, term = TRUE)
 
-  expect_warning(diagnose_design(d, sims = 5, bootstrap_sims = FALSE), "Estimators lack estimand/coefficient labels for matching, a many-to-many merge was performed.")
+  expect_warning(diagnose_design(d, sims = 5, bootstrap_sims = FALSE), "Estimators lack estimand/term labels for matching, a many-to-many merge was performed.")
 })
 
 
@@ -195,8 +195,8 @@ test_that("Overriding join conditions",{
   attr(custom, "group_by") <- c("estimand_label", "estimator_label")
 
   design <- declare_population(sleep, handler=fabricatr::resample_data) +
-            declare_estimand(group1=1, group2=2, coefficients=TRUE, label="e") +
-            declare_estimator(extra~group+0, coefficients=TRUE, estimand="e", model=lm, label="my_estimator")
+            declare_estimand(group1=1, group2=2, term=TRUE, label="e") +
+            declare_estimator(extra~group+0, term=TRUE, estimand="e", model=lm, label="my_estimator")
 
   diagnosands <- get_diagnosands(diagnose_design(design, diagnosands = custom, sims = 5, bootstrap_sims = FALSE))
 
@@ -209,7 +209,7 @@ test_that("diagnosis, NAs if no estimand", {
   d <- declare_population(sleep) + ols
   
 sleep_ols <- structure(list(design_label = structure(1L, .Label = "d", class = "factor"), 
-                           estimator_label = "estimator", coefficient = "group2", 
+                           estimator_label = "estimator", term = "group2", 
                            bias = NA_real_, `se(bias)` = NA_real_, rmse = NA_real_, 
                            `se(rmse)` = NA_real_, power = 0, `se(power)` = 0, coverage = NA_real_, 
                            `se(coverage)` = NA_real_, mean_estimate = 1.58, `se(mean_estimate)` = 0, 

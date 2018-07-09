@@ -49,7 +49,7 @@ test_that("allow design functions to be sent to simulate design and diagnose_des
   expect_equal(diag_out$diagnosands_df[, 1:4], 
                structure(list(design_label = structure(1L, .Label = "my_design_function", class = "factor"), 
                               estimand_label = "ATE", estimator_label = "estimator", 
-                              coefficient = "Z"), class = "data.frame", row.names = c(NA, 
+                              term = "Z"), class = "data.frame", row.names = c(NA, 
                                                                                       -1L)))
 })
 
@@ -114,7 +114,7 @@ test_that("default diagnosands work", {
     design_1 = design_1,
     sims = 2
   )
-  expect_equal(names(diag$diagnosands_df), c("design_label", "estimand_label", "estimator_label", "coefficient", 
+  expect_equal(names(diag$diagnosands_df), c("design_label", "estimand_label", "estimator_label", "term", 
                                                "med_bias", "se(med_bias)", "n_sims"))
   
   # w/ set diagnosands each manually
@@ -132,7 +132,7 @@ test_that("default diagnosands work", {
     sims = 2
   )
   
-  expect_equal(names(diag$diagnosands_df), c("design_label", "estimand_label", "estimator_label", "coefficient", 
+  expect_equal(names(diag$diagnosands_df), c("design_label", "estimand_label", "estimator_label", "term", 
                                             "my_bias", "se(my_bias)", "my_power", "se(my_power)", "n_sims"))
   
   # w/ none set
@@ -143,7 +143,7 @@ test_that("default diagnosands work", {
     sims = 2
   )
   
-  expect_equal(names(diag$diagnosands_df), c("design_label", "estimand_label", "estimator_label", "coefficient", 
+  expect_equal(names(diag$diagnosands_df), c("design_label", "estimand_label", "estimator_label", "term", 
                                              "bias", "se(bias)", "rmse", "se(rmse)", "power", "se(power)", 
                                              "coverage", "se(coverage)", "mean_estimate", "se(mean_estimate)", 
                                              "sd_estimate", "se(sd_estimate)", "mean_se", "se(mean_se)", "type_s_rate", 
@@ -159,7 +159,7 @@ test_that("default diagnosands work", {
     sims = 2
   )
     
-  expect_equal(names(diag$diagnosands_df), c("design_label", "estimand_label", "estimator_label", "coefficient", 
+  expect_equal(names(diag$diagnosands_df), c("design_label", "estimand_label", "estimator_label", "term", 
                                              "med_bias", "se(med_bias)", "n_sims"))
   
   
@@ -176,7 +176,7 @@ test_that("default diagnosands work", {
   
   diag <- diagnose_design(designs, sims = 5, bootstrap_sims = 0)
   
-  expect_equal(names(diag$diagnosands_df), c("design_label", "N", "estimand_label", "estimator_label", "coefficient", 
+  expect_equal(names(diag$diagnosands_df), c("design_label", "N", "estimand_label", "estimator_label", "term", 
                                              "med_bias", "n_sims"))
   
   # w mix of diagnosands set

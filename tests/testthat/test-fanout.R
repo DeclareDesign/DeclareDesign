@@ -32,7 +32,7 @@ test_that("Diagnosing a fanout",{
       model = lm,
       estimand = estimand,
       label = "ha",
-      coefficients = TRUE
+      term = TRUE
     )
   
 

@@ -53,7 +53,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
   
   my_estimator <- function(data) {
     reg <- lm(Y ~ Z, data = data)
-    phi <- t(data.frame(summary(reg)$coefficients["Z", ]))
+    phi <- t(data.frame(summary(reg)$term["Z", ]))
     colnames(phi) <- c("est", "se", "t", "p")
     phi
   }
