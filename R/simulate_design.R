@@ -49,7 +49,7 @@ simulate_design <- function(..., sims = 500) {
     
     designs <- dots_to_list_of_designs(...)
     
-    if (is_bare_integerish(sims)) {
+    if (!is_bare_integerish(sims)) {
       stop("Please provide sims a scalar or a numeric vector of length the number of steps in designs.", .call = FALSE)
     }
     
