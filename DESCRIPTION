@@ -35,5 +35,6 @@ Suggests:
     dplyr,
     data.table,
     ggplot2,
-    future.apply
+    future.apply,
+    broom
 VignetteBuilder: knitr
