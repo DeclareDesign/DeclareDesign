@@ -17,6 +17,24 @@ test_that("Fanout does something",{
 
 })
 
+test_that("fanout should not be exposed to users",{
+  
+  N <- 100
+  
+  pop <- declare_population(N = N)
+  pop2 <- declare_step(fabricate, noise = rnorm(N))
+  estimand <- declare_estimand(foo = mean(noise))
+  D <- pop + pop2 + estimand
+  
+  fan_strategy <- data.frame(end = 2:3, n = c(1, 100))
+  expect_error(diagnose_design(D, sims = fan_strategy), 
+               "Please provide sims a scalar or a numeric vector of length the number of steps in designs.")
+  
+  expect_error(simulate_design(D, sims = fan_strategy), 
+               "Please provide sims a scalar or a numeric vector of length the number of steps in designs.")
+  
+})
+
 
 test_that("Diagnosing a fanout",{
 
