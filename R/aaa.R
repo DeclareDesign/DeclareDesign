@@ -177,7 +177,7 @@ has_validation_fn <- function(f){
 validate <- function(handler, ret, dots, label) {
   # error if label is length > 1
   if(is.character(label) && length(label) > 1)
-    declare_time_error("Please provide only one label.", declaration)
+    declare_time_error("Please provide only one label.", ret)
   
   validation_fn(handler)(ret, dots, label)
 }
