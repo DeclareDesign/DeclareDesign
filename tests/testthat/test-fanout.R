@@ -17,7 +17,7 @@ test_that("Fanout does something",{
 
 })
 
-test_that("fanout should not be exposed to users in diagnose_design",{
+test_that("fanout should not be exposed to users",{
   
   N <- 100
   
@@ -28,6 +28,9 @@ test_that("fanout should not be exposed to users in diagnose_design",{
   
   fan_strategy <- data.frame(end = 2:3, n = c(1, 100))
   expect_error(diagnose_design(D, sims = fan_strategy), 
+               "Please provide sims a scalar or a numeric vector of length the number of steps in designs.")
+  
+  expect_error(simulate_design(D, sims = fan_strategy), 
                "Please provide sims a scalar or a numeric vector of length the number of steps in designs.")
   
 })
