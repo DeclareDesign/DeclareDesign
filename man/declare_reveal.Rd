@@ -45,18 +45,18 @@ my_assignment <- declare_assignment(m = 50)
 
 my_reveal <- declare_reveal()
 
-design <- my_population + 
-  my_potential_outcomes + 
-  my_assignment + 
+design <- my_population +
+  my_potential_outcomes +
+  my_assignment +
   my_reveal
 
 design
 
-# By default, the + operator results in the same design being 
+# By default, the + operator results in the same design being
 #  created, because it automatically adds a declare_reveal step.
 
 design <- my_population + my_potential_outcomes + my_assignment
-                         
+
 # Declaring multiple assignment variables can be done easily with !!! syntax.
 
 my_outcomes <- c("Y1", "Y2", "Y3")

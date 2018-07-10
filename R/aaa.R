@@ -3,10 +3,15 @@
 #' @importFrom rlang env_clone
 env_deep_copy <- function(e) {
   # Cloning the CheckExEnv causes examples to autofail, it has delayedAssign("F", stop())
-  if (environmentName(e) == "CheckExEnv") e 
-  else if (identical(e, emptyenv())) emptyenv() 
-  else if (identical(e, globalenv())) env_clone(e) 
-  else env_clone(e, Recall(parent.env(e)))
+  if (environmentName(e) == "CheckExEnv") {
+    e
+  } else if (identical(e, emptyenv())) {
+    emptyenv()
+  } else if (identical(e, globalenv())) {
+    env_clone(e)
+  } else {
+    env_clone(e, Recall(parent.env(e)))
+  }
   # don't clone attached packages
 }
 
@@ -33,31 +38,31 @@ dots_env_copy <- function(dots) {
 
 # Given a function and dots, rename dots based on how things will positionally match
 #' @importFrom rlang is_empty
-rename_dots <- function(handler, dots, addData=TRUE){
+rename_dots <- function(handler, dots, addData = TRUE) {
   if (is_empty(dots)) {
     return(dots)
   }
-  
+
   f <- function(...) as.list(match.call(handler)[-1])
-  
+
   d_idx <- setNames(seq_along(dots), names(dots))
-  
+
   if (addData) {
     d_idx["data"] <- list(NULL)
   }
-  
+
   d_idx <- eval_tidy(quo(f(!!!d_idx)))
-  
+
   if (addData) {
     d_idx$data <- NULL
   }
-  
+
   d_idx <- unlist(d_idx)
-  
+
   d_idx <- d_idx[names(d_idx) != "" ]
-  
+
   names(dots)[d_idx] <- names(d_idx)
-  
+
   dots
 }
 
@@ -67,21 +72,24 @@ currydata <- function(FUN, dots, addDataArg = TRUE, strictDataParam = TRUE, clon
   if (cloneDots) {
     dots <- dots_env_copy(dots)
   }
-  
+
   quoNoData <- quo((FUN)(!!!dots))
-  
-  if (addDataArg && !'data' %in% names(dots) && !'.data' %in% names(dots)) {
+
+  if (addDataArg && !"data" %in% names(dots) && !".data" %in% names(dots)) {
     dots <- append(dots, list(data = quote(data)), after = FALSE)
   }
-  
+
   quo <- quo((FUN)(!!!dots))
-  
-  if (isTRUE(strictDataParam)) function(data) eval_tidy(quo, data = list(data = data))
-  else  function(data=NULL){
-    #message(quo)
-    #used for declare_population with no seed data provided
-    res <- if (is.null(data)) eval_tidy(quoNoData) else eval_tidy(quo, data = list(data = data))
-    res
+
+  if (isTRUE(strictDataParam)) {
+    function(data) eval_tidy(quo, data = list(data = data))
+  } else {
+    function(data = NULL) {
+      # message(quo)
+      # used for declare_population with no seed data provided
+      res <- if (is.null(data)) eval_tidy(quoNoData) else eval_tidy(quo, data = list(data = data))
+      res
+    }
   }
 }
 
@@ -89,40 +97,42 @@ currydata <- function(FUN, dots, addDataArg = TRUE, strictDataParam = TRUE, clon
 # captures the dots and handler, and returns a function that calls the handler with dots
 # also deals with labeling and can trigger step validation
 #' @importFrom rlang enquo
-declaration_template <- function(..., handler, label=NULL){
-  #message("Declared")
-  
+declaration_template <- function(..., handler, label = NULL) {
+  # message("Declared")
+
   dots <- quos(..., label = !!label)
   this <- attributes(sys.function())
-  
+
   if (!"label" %in% names(formals(handler))) {
     dots$label <- NULL
   }
-  
+
   dots <- rename_dots(handler, dots, this$strictDataParam)
   dots <- dots_env_copy(dots)
-  
-  
+
+
   ret <- build_step(currydata(handler,
-                              dots,
-                              strictDataParam = this$strictDataParam,
-                              cloneDots = FALSE),
-                    handler = handler,
-                    dots = dots,
-                    label = label,
-                    step_type = this$step_type,
-                    causal_type = this$causal_type,
-                    call = match.call())
-  
+    dots,
+    strictDataParam = this$strictDataParam,
+    cloneDots = FALSE
+  ),
+  handler = handler,
+  dots = dots,
+  label = label,
+  step_type = this$step_type,
+  causal_type = this$causal_type,
+  call = match.call()
+  )
+
   if (has_validation_fn(handler)) {
-    ret <- validate(handler, ret,  dots, label)
+    ret <- validate(handler, ret, dots, label)
   }
 
   ret
 }
 
 # data structure for steps
-build_step <- function(curried_fn, handler, dots, label, step_type, causal_type, call){
+build_step <- function(curried_fn, handler, dots, label, step_type, causal_type, call) {
   structure(
     curried_fn,
     handler = handler,
@@ -136,18 +146,17 @@ build_step <- function(curried_fn, handler, dots, label, step_type, causal_type,
 }
 
 # generate declaration steps (eg declare_population) by setting the default handler and metadata
-make_declarations <- function(default_handler, step_type, causal_type='dgp', default_label, strictDataParam=TRUE) {
-  
+make_declarations <- function(default_handler, step_type, causal_type = "dgp", default_label, strictDataParam = TRUE) {
   declaration <- declaration_template
-  
+
   formals(declaration)$handler <- substitute(default_handler)
   if (!missing(default_label)) {
     formals(declaration)$label <- default_label
   }
-  
+
   structure(
     declaration,
-    class = c('declaration', 'function'),
+    class = c("declaration", "function"),
     step_type = step_type,
     causal_type = causal_type,
     strictDataParam = strictDataParam
@@ -161,7 +170,7 @@ make_declarations <- function(default_handler, step_type, causal_type='dgp', def
 #
 # to debug, use debug(DeclareDesign:::validation_fn(DeclareDesign:::reveal_outcomes_handler))
 
-validation_fn <- function(f){
+validation_fn <- function(f) {
   attr(f, "validation_fn")
 }
 
@@ -170,7 +179,7 @@ validation_fn <- function(f){
   x
 }
 
-has_validation_fn <- function(f){
+has_validation_fn <- function(f) {
   is.function(validation_fn(f))
 }
 

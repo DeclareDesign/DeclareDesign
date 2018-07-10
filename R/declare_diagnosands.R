@@ -15,16 +15,15 @@
 #'
 #' @importFrom rlang eval_tidy quos  is_quosure quo_is_call %||%
 #' @rdname declare_diagnosands
-diagnosand_handler <- function(data, ..., 
+diagnosand_handler <- function(data, ...,
                                select,
                                subtract,
                                keep_defaults = TRUE,
-                               subset = NULL, 
+                               subset = NULL,
                                alpha = 0.05,
                                label) {
-  
   options <- quos(...)
-  
+
   if (length(options) > 0 && names(options)[1] == "") names(options)[1] <- label
 
   # subsetting the data -----------------------------------------------------
@@ -36,42 +35,42 @@ diagnosand_handler <- function(data, ...,
   }
 
   # defaults ----------------------------------------------------------------
-  
-  defaults_quos <- 
+
+  defaults_quos <-
     quos(
       bias = mean(estimate - estimand),
-      rmse = sqrt(mean((estimate - estimand) ^ 2)),
+      rmse = sqrt(mean((estimate - estimand)^2)),
       power = mean(p.value < alpha),
       coverage = mean(estimand <= conf.high & estimand >= conf.low),
       mean_estimate = mean(estimate),
       sd_estimate = sd(estimate),
       mean_se = mean(std.error),
-      type_s_rate = mean((sign(estimate) != sign(estimand))[ p.value < alpha ] ),
+      type_s_rate = mean((sign(estimate) != sign(estimand))[ p.value < alpha ]),
       mean_estimand = mean(estimand)
     )
-  
+
   if (!missing(select)) {
     select_quo <- enquo(select)
     select_set <- reveal_nse_helper(select_quo)
     defaults_quos <- defaults_quos[select_set]
   }
-  
+
   if (!missing(subtract)) {
     subtract_quo <- enquo(subtract)
     subtract_set <- reveal_nse_helper(subtract_quo)
     defaults_quos <- defaults_quos[!names(defaults_quos) %in% subtract_set]
   }
-  
+
   if (keep_defaults) {
     options <- c(options, defaults_quos[!names(defaults_quos) %in% names(options)])
   }
-    
+
   ret <- vector("list", length(options))
   for (i in seq_along(options)) {
     ret[i] <- eval_tidy(options[[i]], data = data)
   }
   ret <- simplify2array(ret)
-  
+
   data.frame(
     diagnosand_label = names(options),
     diagnosand = ret,
@@ -80,53 +79,60 @@ diagnosand_handler <- function(data, ...,
 }
 
 
-validation_fn(diagnosand_handler) <- function(ret, dots, label){
-  
+validation_fn(diagnosand_handler) <- function(ret, dots, label) {
   if (sum(c("select", "subtract") %in% names(dots)) > 1) {
     stop("You may not provide arguments to `select` and `subtract` at the same time.", call. = FALSE)
   }
-  
-  default_diagnosand_names <- 
-    c("bias", "rmse", "power", "coverage", "mean_estimate", "sd_estimate", 
-      "mean_se", "type_s_rate", "mean_estimand")
-  
+
+  default_diagnosand_names <-
+    c(
+      "bias", "rmse", "power", "coverage", "mean_estimate", "sd_estimate",
+      "mean_se", "type_s_rate", "mean_estimand"
+    )
+
   if ("select" %in% names(dots)) {
     select_set <- reveal_nse_helper(dots[["select"]])
 
     if (!all(select_set %in% default_diagnosand_names)) {
-      declare_time_error(paste0("Some of your select set are not included in default diagnosands: ",
-                                paste(select_set[!select_set %in% default_diagnosand_names], 
-                                      collapse = ", "), "."), ret)
+      declare_time_error(paste0(
+        "Some of your select set are not included in default diagnosands: ",
+        paste(select_set[!select_set %in% default_diagnosand_names],
+          collapse = ", "
+        ), "."
+      ), ret)
     }
     default_diagnosand_names <- default_diagnosand_names[select_set]
   }
 
   if ("subtract" %in% names(dots)) {
     subtract_set <- reveal_nse_helper(dots[["subtract"]])
-    
+
     if (!all(subtract_set %in% default_diagnosand_names)) {
-      declare_time_error(paste0("Some of your subtract set are not included in default diagnosands: ",
-                                paste(subtract_set[!subtract_set %in% default_diagnosand_names], 
-                                      collapse = ", "), "."), ret)
+      declare_time_error(paste0(
+        "Some of your subtract set are not included in default diagnosands: ",
+        paste(subtract_set[!subtract_set %in% default_diagnosand_names],
+          collapse = ", "
+        ), "."
+      ), ret)
     }
     default_diagnosand_names <- default_diagnosand_names[!default_diagnosand_names %in% subtract_set]
   }
-  
+
   options <- names(dots)[!names(dots) %in% c("select", "subtract", "keep_defaults", "subset", "alpha", "label")]
-  if (!("keep_defaults" %in% names(dots)) || 
-      ("keep_defaults" %in% names(dots) && eval_tidy(dots[["keep_defaults"]]) == TRUE)) {
+  if (!("keep_defaults" %in% names(dots)) ||
+    ("keep_defaults" %in% names(dots) && eval_tidy(dots[["keep_defaults"]]) == TRUE)) {
     options <- c(options, default_diagnosand_names)
   }
-  
+
   if (length(options) == 0) {
     declare_time_error("No diagnosands were declared.", ret)
   }
-  
+
   # check whether all diagnosands are named
   if (is.null(names(dots)) || "" %in% names(dots)) {
     declare_time_error("All diagnosands must be named", ret)
   }
-  
+
   ret
 }
 
@@ -180,23 +186,23 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label){
 #' diagnosis
 #' }
 #'
-#' # You can select a set of those diagnosands via the \code{select} argument e.g., 
-#' 
+#' # You can select a set of those diagnosands via the \code{select} argument e.g.,
+#'
 #' my_diagnosands <- declare_diagnosands(select = c(bias, rmse))
-#' 
+#'
 #' # Alternatively, you can report all of the default diagnosands and subtract a subset of them e.g.,
-#' 
+#'
 #' my_diagnosands <- declare_diagnosands(subtract = type_s_rate)
-#' 
+#'
 #' # You can add your own diagnosands in addition to or instead of the defaults e.g.,
-#' 
-#' my_diagnosands <- 
+#'
+#' my_diagnosands <-
 #'   declare_diagnosands(median_bias = median(estimate - estimand))
-#' 
+#'
 #' # or to report only \code{median_bias}
-#' 
-#' my_diagnosands <- 
-#'    declare_diagnosands(median_bias = median(estimate - estimand), 
+#'
+#' my_diagnosands <-
+#'    declare_diagnosands(median_bias = median(estimate - estimand),
 #'                        keep_defaults = FALSE)
 #'
 #' # Below is the code that makes the default diagnsoands.
@@ -216,17 +222,16 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label){
 #'
 declare_diagnosands <- make_declarations(diagnosand_handler, "diagnosand", "diagnosands")
 
-default_diagnosands <- function(data, alpha = .05){
-  
+default_diagnosands <- function(data, alpha = .05) {
   estimate <- data$estimate %||% NA
   estimand <- data$estimand %||% NA
   p.value <- data$p.value %||% NA
   std.error <- data$std.error %||% NA
   conf.low <- data$conf.low %||% NA
   conf.high <- data$conf.high %||% NA
-  
+
   bias <- mean(estimate - estimand)
-  rmse <- sqrt(mean((estimate - estimand) ^ 2))
+  rmse <- sqrt(mean((estimate - estimand)^2))
   power <- mean(p.value < alpha)
   coverage <- mean(estimand <= conf.high & estimand >= conf.low)
   mean_estimate <- mean(estimate)
@@ -234,7 +239,7 @@ default_diagnosands <- function(data, alpha = .05){
   mean_se <- mean(std.error)
   type_s_rate <- mean((sign(estimate) != sign(estimand))[p.value < alpha])
   mean_estimand <- mean(estimand)
-  
+
   data.frame(
     diagnosand_label = c(
       "bias",
@@ -260,5 +265,3 @@ default_diagnosands <- function(data, alpha = .05){
     )
   )
 }
-
-

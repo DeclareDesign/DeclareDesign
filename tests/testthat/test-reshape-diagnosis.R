@@ -27,11 +27,11 @@ design <- my_population +
   my_estimator
 
 test_that("reshape works", {
-  
   dx <- diagnose_design(design, sims = 10, bootstrap_sims = 5)
   reshape_diagnosis(dx)
   expect_error(reshape_diagnosis(dx, select = "mean_estimand"),
-               regexp = "select argument must only include elements from")
+    regexp = "select argument must only include elements from"
+  )
   reshape_diagnosis(dx, select = "Mean Estimand")
 })
 
@@ -40,8 +40,10 @@ test_that("capitalization of parameter names are retained", {
   my_designer <- function(N = 100, n = 50) {
     my_pop <- declare_population(N = N, noise = rnorm(N))
     my_pos <-
-      declare_potential_outcomes(Y_Z_0 = noise,
-                                 Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+      declare_potential_outcomes(
+        Y_Z_0 = noise,
+        Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)
+      )
     my_smp <- declare_sampling(n = n)
     my_asgn <- declare_assignment(m = floor(n / 2))
     my_mand <- declare_estimand(mean(Y_Z_1) - mean(Y_Z_0))
@@ -49,25 +51,24 @@ test_that("capitalization of parameter names are retained", {
     my_design <- my_pop + my_pos + my_mand + my_smp + my_asgn + declare_reveal() + my_estimator
     my_design
   }
-  
+
   design_list <-
     expand_design(
       designer = my_designer,
       N = c(100, 50), n = c(50, 25), expand = FALSE
     )
-  
+
   des <- diagnose_design(design_list, sims = 2)
-  
+
   reshape <- reshape_diagnosis(des)
-  
+
   expect_equal(names(reshape)[2:3], c("N", "n"))
-  
+
   des <- diagnose_design(design_list, sims = 2, bootstrap_sims = 0)
-  
+
   reshape <- reshape_diagnosis(des)
-  
+
   expect_equal(names(reshape)[2:3], c("N", "n"))
-  
 })
 
 
@@ -75,5 +76,5 @@ test_that("capitalization of parameter names are retained", {
 test_that("select", {
   dx <- diagnose_design(design, sims = 10, bootstrap_sims = 5)
   reshape <- reshape_diagnosis(dx, select = "Bias")
-  expect_equal(colnames(reshape), c("Design Label", "Estimand Label", "Estimator Label", "Term", "N Sims" , "Bias"))
+  expect_equal(colnames(reshape), c("Design Label", "Estimand Label", "Estimator Label", "Term", "N Sims", "Bias"))
 })
