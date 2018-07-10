@@ -91,7 +91,7 @@ test_that("test diagnosands without estimands", {
   diagnosis <- diagnose_design(my_design2, sims = 2, diagnosands = my_dig, bootstrap_sims = FALSE)
 
 
-  expect_equal(dim(diagnosis$diagnosands_df), c(1,6))
+  expect_equal(dim(diagnosis$diagnosands_df), c(1,7))
 
 })
 
@@ -164,12 +164,30 @@ test_that("diagnosis, no estimator", {
     declare_estimand(foo = 2, bar = 3)
 
   diagnosand <- declare_diagnosands(z = mean(estimand > 0), keep_defaults = FALSE)
-
-  expect_equivalent(diagnose_design(d, diagnosands = diagnosand, sims = 5, bootstrap_sims = 5)$diagnosands_df,
-                    structure(list(design_label = structure(c(1L, 1L), .Label = "d", class = "factor"), 
-                                   estimand_label = c("bar", "foo"), z = c(1, 1), `se(z)` = c(0, 
-                                                                                              0), n_sims = c(5L, 5L)), row.names = c(NA, -2L), class = "data.frame")
-  )
+  
+  
+  expect_equivalent(
+    diagnose_design(
+      d,
+      diagnosands = diagnosand,
+      sims = 5,
+      bootstrap_sims = 5
+    )$diagnosands_df,
+    structure(
+      list(
+        design_label = structure(c(1L, 1L), .Label = "d", class = "factor"),
+        estimand_label = c("bar", "foo"),
+        z = c(1, 1),
+        `se(z)` = c(0,
+                    0),
+        n_deleted = c(0, 0),
+        `se(n_deleted)` = c(0, 0),
+        n_sims = c(5L,
+                   5L)
+      ),
+      class = "data.frame",
+      row.names = c(NA,-2L)
+    ))
 })
 
 test_that("Overriding join conditions",{
@@ -208,16 +226,18 @@ test_that("diagnosis, NAs if no estimand", {
   ols <- declare_estimator(extra ~ group)
   d <- declare_population(sleep) + ols
   
-sleep_ols <- structure(list(design_label = structure(1L, .Label = "d", class = "factor"), 
-                           estimator_label = "estimator", term = "group2", 
-                           bias = NA_real_, `se(bias)` = NA_real_, rmse = NA_real_, 
-                           `se(rmse)` = NA_real_, power = 0, `se(power)` = 0, coverage = NA_real_, 
-                           `se(coverage)` = NA_real_, mean_estimate = 1.58, `se(mean_estimate)` = 0, 
-                           sd_estimate = 0, `se(sd_estimate)` = 0, mean_se = 0.849091017238762, 
-                           `se(mean_se)` = 0, type_s_rate = NaN, `se(type_s_rate)` = NA_real_, 
-                           mean_estimand = NA_real_, `se(mean_estimand)` = NA_real_, 
-                           n_sims = 4L), row.names = c(NA, -1L), class = "data.frame")
-
+  sleep_ols <-
+    structure(list(design_label = structure(1L, .Label = "d", class = "factor"), 
+                   estimator_label = "estimator", term = "group2", bias = NA_real_, 
+                   `se(bias)` = NA_real_, rmse = NA_real_, `se(rmse)` = NA_real_, 
+                   power = 0, `se(power)` = 0, coverage = NA_real_, `se(coverage)` = NA_real_, 
+                   mean_estimate = 1.58, `se(mean_estimate)` = 0, sd_estimate = 0, 
+                   `se(sd_estimate)` = 0, mean_se = 0.849091017238762, `se(mean_se)` = 0, 
+                   type_s_rate = NaN, `se(type_s_rate)` = NA_real_, mean_estimand = NA_real_, 
+                   `se(mean_estimand)` = NA_real_, n_deleted = 0, `se(n_deleted)` = 0, 
+                   n_sims = 4L), class = "data.frame", row.names = c(NA, -1L
+                   ))
+  
 expect_equivalent(diagnose_design(d, sims = 4, bootstrap_sims = 5)$diagnosands_df, sleep_ols)
 
 })
@@ -227,14 +247,15 @@ test_that("diagnosis, NAs if no estimand", {
   d <- declare_population(sleep) + mu
   
   sleep_ols <- structure(list(design_label = structure(1L, .Label = "d", class = "factor"), 
-                              estimand_label = "estimand", bias = NA_real_, `se(bias)` = NA_real_, 
-                              rmse = NA_real_, `se(rmse)` = NA_real_, power = NA_real_, 
-                              `se(power)` = NA_real_, coverage = NA_real_, `se(coverage)` = NA_real_, 
-                              mean_estimate = NA_real_, `se(mean_estimate)` = NA_real_, 
-                              sd_estimate = NA_real_, `se(sd_estimate)` = NA_real_, mean_se = NA_real_, 
-                              `se(mean_se)` = NA_real_, type_s_rate = NA_real_, `se(type_s_rate)` = NA_real_, 
-                              mean_estimand = 1.54, `se(mean_estimand)` = 0, n_sims = 4L), row.names = c(NA, 
-                                                                                                         -1L), class = "data.frame")
+                                    estimand_label = "estimand", bias = NA_real_, `se(bias)` = NA_real_, 
+                                    rmse = NA_real_, `se(rmse)` = NA_real_, power = NA_real_, 
+                                    `se(power)` = NA_real_, coverage = NA_real_, `se(coverage)` = NA_real_, 
+                                    mean_estimate = NA_real_, `se(mean_estimate)` = NA_real_, 
+                                    sd_estimate = NA_real_, `se(sd_estimate)` = NA_real_, mean_se = NA_real_, 
+                                    `se(mean_se)` = NA_real_, type_s_rate = NA_real_, `se(type_s_rate)` = NA_real_, 
+                                    mean_estimand = 1.54, `se(mean_estimand)` = 0, n_deleted = 0, 
+                                    `se(n_deleted)` = 0, n_sims = 4L), class = "data.frame", row.names = c(NA, 
+                                                                                                           -1L))
   
   expect_equivalent(diagnose_design(d, sims = 4)$diagnosands_df, sleep_ols)
 })
@@ -251,21 +272,21 @@ test_that("select, subtract, add diagnosands",{
   dx <- diagnose_design(my_design, diagnosands = my_diags, sims = 4, bootstrap_sims = FALSE)
   
   expect_true(all(dx$diagnosand_names %in% c("new_diag", "bias", "rmse", "power", "coverage", "mean_estimate", 
-                                 "sd_estimate", "mean_se", "type_s_rate", "mean_estimand")))
+                                 "sd_estimate", "mean_se", "type_s_rate", "mean_estimand", "n_deleted")))
   
   # add a diagnosand, dont keep
   my_diags <- declare_diagnosands(new_diag = mean(estimate - estimand), keep_defaults = FALSE)
   dx <- diagnose_design(my_design, diagnosands = my_diags, sims = 4, bootstrap_sims = FALSE)
-  expect_true(all(dx$diagnosand_names %in% c("new_diag")))
+  expect_true(all(dx$diagnosand_names %in% c("new_diag", "n_deleted")))
   
   # select
   my_diags <- declare_diagnosands(select = bias, keep_defaults = TRUE)
   dx <- diagnose_design(my_design, diagnosands = my_diags, sims = 4, bootstrap_sims = FALSE)
-  expect_true(all(dx$diagnosand_names %in% c("bias")))
+  expect_true(all(dx$diagnosand_names %in% c("bias", "n_deleted")))
   
   my_diags <- declare_diagnosands(select = c(bias, rmse))
   dx <- diagnose_design(my_design, diagnosands = my_diags, sims = 4, bootstrap_sims = FALSE)
-  expect_true(all(dx$diagnosand_names %in% c("bias", "rmse")))
+  expect_true(all(dx$diagnosand_names %in% c("bias", "rmse", "n_deleted")))
 
   
   # subtract
@@ -305,4 +326,55 @@ test_that("declare time errors",{
   expect_error(declare_diagnosands(keep_defaults = FALSE), "No diagnosands were declared.")
   
 })
+
+
+
+test_that("missingness",{
+  
+  my_population <- declare_population(N = 50, noise = rnorm(N))
+  fixed_pop <-  my_population()
+  my_pop <- declare_population(fixed_pop)
+
+  my_odd_estimator <- function(data) {
+    estimate = rnorm(1)
+    if(estimate > 0){
+      estimate <- NA
+    }
+    data.frame(estimate = estimate)
+  }
+  # my_odd_estimator(my_pop)
+  estimator <- declare_estimator(handler = my_odd_estimator)
+  des <- my_pop + estimator
+  
+  dx <- diagnose_design(des, sims = 50, bootstrap_sims = FALSE)
+  expect_equal(
+    names(dx$diagnosands_df),
+    c(
+      "design_label",
+      "bias",
+      "rmse",
+      "power",
+      "coverage",
+      "mean_estimate",
+      "sd_estimate",
+      "mean_se",
+      "type_s_rate",
+      "mean_estimand",
+      "n_deleted",
+      "n_sims"
+    )
+  )
+  
+  diags <- declare_diagnosands(select = c(mean_estimate), na.rm = TRUE)
+  dx <- diagnose_design(des, sims = 50, diagnosands = diags, bootstrap_sims = FALSE)
+  expect_equal(names(dx$diagnosands_df), c("design_label", "mean_estimate", "n_deleted", "n_sims"))
+  
+  diags <- declare_diagnosands(select = c(mean_estimate), na.rm = FALSE)
+  dx <- diagnose_design(des, sims = 50, diagnosands = diags, bootstrap_sims = FALSE)
+  expect_equal(names(dx$diagnosands_df), c("design_label", "mean_estimate", "n_sims"))
+  
+  
+})
+
+
 
