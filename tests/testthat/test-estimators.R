@@ -1,14 +1,16 @@
 context("Estimators")
 
 my_population <- declare_population(N = 500, noise = rnorm(N))
-my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+my_potential_outcomes <- declare_potential_outcomes(
+  Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 my_assignment <- declare_assignment(m = 25)
 reveal_outcomes <- declare_reveal()
 
 expect_estimates <- function(estimates, label = NULL) {
   expect_equal(
     names(estimates),
-    c("estimator_label", "term", "estimate", "std.error", "statistic", "p.value", "conf.low", "conf.high", "df", "outcome")
+    c("estimator_label", "term", "estimate", "std.error", "statistic", 
+      "p.value", "conf.low", "conf.high", "df", "outcome")
   )
   if (is.character(label)) {
     expect_equal(estimates$estimator_label, label)
@@ -17,18 +19,33 @@ expect_estimates <- function(estimates, label = NULL) {
 
 test_that("difference in means", {
   my_estimator <- declare_estimator(Y ~ Z)
-  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% reveal_outcomes() %>% my_estimator() %>% expect_estimates()
+  my_population() %>% 
+    my_potential_outcomes() %>% 
+    my_assignment() %>% 
+    reveal_outcomes() %>% 
+    my_estimator() %>%
+    expect_estimates()
 })
 
 test_that("lm with robust ses", {
   my_estimator <- declare_estimator(Y ~ Z, model = lm_robust)
-  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% reveal_outcomes() %>% my_estimator() %>% expect_estimates()
+  my_population() %>%
+    my_potential_outcomes() %>%
+    my_assignment() %>% 
+    reveal_outcomes() %>% 
+    my_estimator() %>% 
+    expect_estimates()
 })
 
 
 test_that("lm with HC3 robust ses", {
   my_estimator <- declare_estimator(Y ~ Z, model = lm_robust, se_type = "HC3")
-  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% reveal_outcomes() %>% my_estimator() %>% expect_estimates()
+  my_population() %>%
+    my_potential_outcomes() %>%
+    my_assignment() %>%
+    reveal_outcomes() %>%
+    my_estimator() %>% 
+    expect_estimates()
 })
 
 test_that("custom estimator function", {
@@ -36,18 +53,30 @@ test_that("custom estimator function", {
     data.frame(estimate = with(data, 2), foo = mean(data$Y))
   }
   my_estimator_custom <- declare_estimator(handler = tidy_estimator(my_mean))
-  cust <- my_population() %>% my_potential_outcomes() %>% my_assignment() %>% reveal_outcomes() %>% my_estimator_custom()
+  cust <- my_population() %>% 
+    my_potential_outcomes() %>%
+    my_assignment() %>% 
+    reveal_outcomes() %>%
+    my_estimator_custom()
   expect_equal(cust$estimate, 2)
 })
 
 test_that("check blocked d-i-m estimator", {
-  my_population <- declare_population(N = 500, noise = rnorm(N), blocks = sample(rep(c("A", "B"), each = 250), N, replace = F))
-  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2) + 5 * (blocks == "A"))
+  my_population <- declare_population(
+    N = 500, noise = rnorm(N), blocks = 
+      sample(rep(c("A", "B"), each = 250), N, replace = F))
+  my_potential_outcomes <- declare_potential_outcomes(
+    Y_Z_0 = noise, Y_Z_1 = noise + 
+      rnorm(N, mean = 2, sd = 2) + 5 * (blocks == "A"))
   my_assignment <- declare_assignment(blocks = blocks)
 
   ## lm with HC3 robust ses
-  my_estimator_blocked <- declare_estimator(Y ~ Z, model = difference_in_means, blocks = `blocks`)
-  df <- my_population() %>% my_potential_outcomes() %>% my_assignment() %>% declare_reveal()()
+  my_estimator_blocked <- declare_estimator(
+    Y ~ Z, model = difference_in_means, blocks = `blocks`)
+  df <- my_population() %>% 
+    my_potential_outcomes() %>%
+    my_assignment() %>% 
+    declare_reveal()()
   my_estimator_notblocked <- declare_estimator(Y ~ Z)
 
   df %>% my_estimator_notblocked() %>% expect_estimates()
@@ -58,7 +87,9 @@ test_that("check blocked d-i-m estimator", {
 
 test_that("regression from estimatr works as an estimator", {
   my_population <- declare_population(N = 500, noise = rnorm(N))
-  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+  my_potential_outcomes <- 
+    declare_potential_outcomes(
+      Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
   my_assignment <- declare_assignment(m = 100)
   pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
   pate_estimator <- declare_estimator(Y ~ Z + noise,
@@ -200,18 +231,19 @@ df <- data.frame(
   Z = c(0, 0, 0, 0, 1, 1, 1, 1)
 )
 
-test_that("labels for estimates and estimands work estimand splat labeld estimator default", {
+test_that("labels for mator and mand work mand splat labeld mator default", {
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_arg_label)
   df %>% mator_no_label() %>% expect_label("estimator", "ATE")
 })
 
-test_that("labels for estimates and estimands work, label explicit, estimand splat labeled", {
+test_that("labels for mator and mand work, label explicit, mand splat label", {
   mator_label <- declare_estimator(Y ~ Z, estimand = mand_arg_label, label = "an_estimator")
   df %>% mator_label() %>% expect_label("an_estimator", "ATE")
 })
 
-test_that("labels for estimates and estimands work estimand splat labeld label =NULL", {
-  mator_label_null <- declare_estimator(Y ~ Z, estimand = mand_arg_label, label = NULL)
+test_that("labels for mator and mand work estimand splat label =NULL", {
+  mator_label_null <- declare_estimator(
+    Y ~ Z, estimand = mand_arg_label, label = NULL)
   expect_error(df %>% mator_label_null())
 })
 
@@ -221,18 +253,18 @@ test_that("labels for estimates and estimands work - label default", {
 })
 
 test_that("labels for estimates and estimands work - label explicit", {
-  mator_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label, label = "an_estimator")
-  # mator_label_noquote <- declare_estimator(Y ~ Z, estimand = mand_explicit_label, label = an_estimator)
+  mator_label <- declare_estimator(
+    Y ~ Z, estimand = mand_explicit_label, label = "an_estimator")
   df %>% mator_label() %>% expect_label("an_estimator", "ATE")
 })
 
-test_that("labels for estimates and estimands work- label=NULL", {
+test_that("labels for mators and mand work- label=NULL", {
   mator_label_null <- declare_estimator(Y ~ Z, estimand = mand_explicit_label, label = NULL)
   expect_error(df %>% mator_label_null())
 })
 
 
-test_that("labels for estimates and estimands work estimand label, estimator default", {
+test_that("labels for mator and mands work estimand label, mator default", {
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label)
   df %>% mator_no_label() %>% expect_label("estimator", "ATE")
 })
@@ -304,7 +336,8 @@ test_that("estimators have different columns", {
 
   att <- declare_estimand(att = mean(Y_Z_1[Z == 1] - Y_Z_0[Z == 1]))
 
-  estimator_d_i_m <- declare_estimator(Y ~ Z, estimand = "estimand", label = "dim")
+  estimator_d_i_m <- declare_estimator(
+    Y ~ Z, estimand = "estimand", label = "dim")
 
   matching_helper <- function(data) {
     match_out <- with(data, Matching::Match(
@@ -343,5 +376,7 @@ test_that("when a term is missing from a model there is an informative error", {
   )
   ols <- declare_estimator(Y ~ Z, model = lm_robust, term = "X")
 
-  expect_error(ols(data), "Not all of the terms declared in your estimator are present in the model output, including X.")
+  expect_error(
+    ols(data), 
+    "Not all of the terms declared in your estimator are present in the model output, including X.")
 })

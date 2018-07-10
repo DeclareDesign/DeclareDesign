@@ -93,7 +93,9 @@ test_that("Two level", {
 
 
 test_that("use custom data with declare_population", {
-  region_data <- data.frame(regions = as.character(26:30), capital = c(1, 0, 0, 0, 0), stringsAsFactors = FALSE)
+  region_data <- data.frame(regions = as.character(26:30), 
+                            capital = c(1, 0, 0, 0, 0), 
+                            stringsAsFactors = FALSE)
 
   ## create single-level data taking user data
   d1 <- declare_population(data = region_data)()
@@ -165,7 +167,8 @@ test_that("test multi level with transformations", {
 
 test_that("Population declaration variations", {
   my_population <- declare_population(N = 10, noise = 1:N)
-  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + 2)
+  my_potential_outcomes <- declare_potential_outcomes(
+    Y_Z_0 = noise, Y_Z_1 = noise + 2)
 
   # Way 1
 

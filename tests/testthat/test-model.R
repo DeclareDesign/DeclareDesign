@@ -182,9 +182,11 @@ test_that("lm", {
 })
 
 test_that("glm", {
-  des <- pop + declare_estimator(D ~ Z, model = glm, family = binomial(link = "probit"))
+  des <- pop + 
+    declare_estimator(D ~ Z, model = glm, family = binomial(link = "probit"))
   expect_equal(ncol(get_estimates(des)), 8)
-  des <- pop + declare_estimator(D ~ Z, model = glm, family = binomial(link = "logit"))
+  des <- pop +
+    declare_estimator(D ~ Z, model = glm, family = binomial(link = "logit"))
   expect_equal(ncol(get_estimates(des)), 8)
 })
 

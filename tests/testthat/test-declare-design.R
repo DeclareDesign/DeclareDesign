@@ -7,7 +7,8 @@ test_that(
     my_population <- declare_population(N = N, noise = rnorm(N))
 
     my_potential_outcomes <-
-      declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+      declare_potential_outcomes(
+        Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
     my_sampling <- declare_sampling(n = 250)
 
@@ -52,8 +53,10 @@ test_that("No estimators / estimands", {
   expect_identical(
     run_design(design),
     structure(list(
-      estimates_df = structure(list(), class = "data.frame", row.names = integer(0)),
-      estimands_df = structure(list(), class = "data.frame", row.names = integer(0))
+      estimates_df = structure(list(), 
+                               class = "data.frame", row.names = integer(0)),
+      estimands_df = structure(list(), 
+                               class = "data.frame", row.names = integer(0))
     ), .Names = c(
       "estimates_df",
       "estimands_df"
@@ -91,5 +94,6 @@ test_that("test send design as RHS", {
 test_that("send function that doesn't have data as first arg sends warning", {
   my_func <- function(my_arg) return(my_arg)
 
-  expect_warning(declare_population(N = 100) + my_func, "Undeclared Step 2 function arguments are not exactly 'data'")
+  expect_warning(declare_population(N = 100) + my_func, 
+                 "Undeclared Step 2 function arguments are not exactly 'data'")
 })

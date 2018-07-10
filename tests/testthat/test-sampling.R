@@ -62,14 +62,21 @@ test_that("test sampling and probability functions", {
 
   # stratified sampling
   expect_sampling_step(declare_sampling(strata = ideo_3), population, n = NA)
-  expect_sampling_step(declare_sampling(strata = ideo_3, strata_prob = c(.3, .6, .1)), population, n = NA)
-  expect_sampling_step(declare_sampling(strata = ideo_3, strata_n = c(10, 10, 10)), population, n = 30)
+  expect_sampling_step(
+    declare_sampling(strata = ideo_3, strata_prob = c(.3, .6, .1)), 
+    population, n = NA)
+  expect_sampling_step(
+    declare_sampling(strata = ideo_3, strata_n = c(10, 10, 10)),
+    population, n = 30)
 
   # Clustered sampling
-  expect_sampling_step(declare_sampling(clusters = villages), population, n = 500)
+  expect_sampling_step(
+    declare_sampling(clusters = villages), population, n = 500)
 
   # Stratified and Clustered assignments
-  expect_sampling_step(declare_sampling(clusters = villages, strata = high_elevation), population, n = NA)
+  expect_sampling_step(
+    declare_sampling(clusters = villages, strata = high_elevation), 
+    population, n = NA)
 })
 
 
@@ -96,7 +103,11 @@ test_that("Factor out declarations", {
   m <- 25
 
   expect_message(
-    design <- declare_population(N = N, noise = 1:N) + declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + 1) + declare_sampling(N = N, n = n) + declare_assignment(N = n, m = m) + declare_reveal(),
+    design <- declare_population(N = N, noise = 1:N) + 
+      declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + 1) + 
+      declare_sampling(N = N, n = n) +
+      declare_assignment(N = n, m = m) + 
+      declare_reveal(),
     "declaration"
   )
 

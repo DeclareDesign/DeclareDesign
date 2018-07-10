@@ -16,7 +16,8 @@ test_that("custom po handler", {
   rm(my_po_function)
   pop_custom <- my_po_custom(sleep)
 
-  expect_equal(colnames(pop_custom), c("extra", "group", "ID", "Y_Z_0", "Y_Z_1"))
+  expect_equal(colnames(pop_custom), 
+               c("extra", "group", "ID", "Y_Z_0", "Y_Z_1"))
 })
 
 test_that("custom po handler with args", {
@@ -38,7 +39,8 @@ test_that("custom po handler with args", {
   rm(my_po_function)
   pop_custom <- my_po_custom(sleep)
 
-  expect_equal(colnames(pop_custom), c("extra", "group", "ID", "Y_Z_0", "Y_Z_1"))
+  expect_equal(colnames(pop_custom), 
+               c("extra", "group", "ID", "Y_Z_0", "Y_Z_1"))
   expect_equal(pop_custom$Y_Z_1[1] - pop_custom$Y_Z_0[1], -2)
 })
 
@@ -143,7 +145,7 @@ test_that("POs at a higher level", {
 })
 
 
-test_that("error if you try to draw POs at a level using a variable that doesn't exist at that level", {
+test_that("err if draw POs at a level using nonexistent var at that level", {
   my_population <- declare_population(
     villages = add_level(N = 3, elevation = rnorm(N)),
     citizens = add_level(N = 4, income = runif(N))
@@ -253,7 +255,8 @@ test_that("Reveal step injected (default names)", {
   N <- 100
   # Assn is buggy, but masked by po autoreveal error
   pop <- declare_population(N = N, foo = rnorm(N))
-  po <- declare_potential_outcomes(Q ~ T + foo, assignment_variables = list(T = 1:3))
+  po <- declare_potential_outcomes(Q ~ T + foo, 
+                                   assignment_variables = list(T = 1:3))
   assn <- declare_assignment(m = N / 2, assignment_variable = T)
   d <- pop + po + assn
   # expect_warning(d <- pop + po + assn)
@@ -292,7 +295,6 @@ test_that("Reveal step injected after another injected reveal step", {
   assn <- declare_assignment(N = N, m = N / 2)
 
   d <- pop + po + po2 + assn
-  # expect_warning(d <- pop + po + po2 + assn, "inject a `declare_reveal[(]Q, Y")
   expect_true("Y" %in% colnames(draw_data(d)))
 
   expect_equal(attr(d[[5]], "step_type"), "reveal")
@@ -301,8 +303,10 @@ test_that("Reveal step injected after another injected reveal step", {
 
 
 test_that("Multiple assignment variables in PO", {
-  po <- declare_potential_outcomes(Y ~ Z1 + Z2, conditions = list(Z1 = 0:1, Z2 = 0:1))
-  expect_length(colnames(po(sleep)) %i% c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0", "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1"), 4)
+  po <- declare_potential_outcomes(Y ~ Z1 + Z2, 
+                                   conditions = list(Z1 = 0:1, Z2 = 0:1))
+  expect_length(colnames(po(sleep)) %i% c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0",
+                                          "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1"), 4)
 })
 
 
@@ -327,6 +331,8 @@ test_that("handler dispatches correctly", {
       level = NULL
     )
 
-  expect_length(names(po) %i% c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0", "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1"), 4)
-  expect_length(names(po2) %i% c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0", "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1"), 4)
+  expect_length(names(po) %i% c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0", 
+                                "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1"), 4)
+  expect_length(names(po2) %i% c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0", 
+                                 "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1"), 4)
 })

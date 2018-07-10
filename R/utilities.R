@@ -6,7 +6,8 @@ maybe_add_names_qs <- function(quotations) {
     cx <- quotation[[2]]
 
     if (is.call(cx) && is.symbol(cx[[1]])) {
-      f <- get0(as.character(cx[[1]]), f_env(quotation), "function") # match.fun does not repect quosures environment, doing get manually
+      # match.fun does not repect quosures environment, doing get manually
+      f <- get0(as.character(cx[[1]]), f_env(quotation), "function") 
       if ("declaration" %in% class(f)) {
         if (!is.null(quotation[[2]][["label"]])) {
           nm <- quotation[[2]][["label"]]
@@ -61,7 +62,9 @@ declare_time_error_if_data <- function(declaration) {
 
 future_lapply <- function(..., future.seed = NA, future.globals = TRUE) {
   if (requireNamespace("future.apply", quietly = TRUE)) {
-    future.apply::future_lapply(..., future.seed = future.seed, future.globals = future.globals)
+    future.apply::future_lapply(..., 
+                                future.seed = future.seed, 
+                                future.globals = future.globals)
   } else {
     lapply(...)
   }
@@ -86,7 +89,8 @@ describe_variable <- function(x) {
   )
 }
 
-describe_variable_impl <- function(x, num_unique) UseMethod("describe_variable_impl")
+describe_variable_impl <- function(x, num_unique) 
+  UseMethod("describe_variable_impl")
 
 describe_variable_impl.factor <- function(x, num_unique) {
   data.frame(
@@ -139,7 +143,9 @@ rbind_disjoint <- function(list_of_df, infill = NA) {
 
   list_of_df <- lapply(list_of_df, `[`, all_columns)
 
-  do.call(rbind.data.frame, append(list_of_df, list(make.row.names = FALSE, stringsAsFactors = FALSE)))
+  do.call(rbind.data.frame, 
+          append(list_of_df, 
+                 list(make.row.names = FALSE, stringsAsFactors = FALSE)))
 }
 
 # Formatting --------------------------------------------------------------

@@ -48,7 +48,8 @@ expand_design <- function(designer, ..., expand = TRUE, prefix = "design") {
     designs <- lapply(args_list, function(x) do.call(designer, args = x))
 
     for (i in seq_along(designs)) {
-      attr(designs[[i]], "parameters") <- setNames(args_names[i, , drop = FALSE], names(args_names))
+      attr(designs[[i]], "parameters") <- 
+        setNames(args_names[i, , drop = FALSE], names(args_names))
     }
 
     if (length(designs) == 1) {
@@ -69,7 +70,8 @@ expand_args <- function(..., expand = TRUE) {
 
   if (expand) {
     lens <- lapply(dots, function(x) seq_len(length(x)))
-    args_positions <- do.call(expand.grid, args = list(lens, stringsAsFactors = TRUE))
+    args_positions <- do.call(expand.grid, 
+                              args = list(lens, stringsAsFactors = TRUE))
     args_list <- vector("list", nrow(args_positions))
     for (i in seq_len(nrow(args_positions))) {
       current_list_row <- vector("list", ncol(args_positions))

@@ -53,7 +53,10 @@ declare_assignment <- make_declarations(assignment_handler, "assignment")
 #' @param data a data.frame
 #' @rdname declare_assignment
 assignment_handler <-
-  function(data, ..., assignment_variable = "Z", append_probabilities_matrix = FALSE) {
+  function(data,
+           ...,
+           assignment_variable = "Z",
+           append_probabilities_matrix = FALSE) {
     options <- quos(...)
 
     for (assn in assignment_variable) {
@@ -61,14 +64,16 @@ assignment_handler <-
       assn <- as.symbol(assn)
       data <- fabricate(data,
         !!assn := conduct_ra(N = N, !!!options),
-        !!cond_prob := obtain_condition_probabilities(!!!options, assignment = !!assn),
+        !!cond_prob := 
+          obtain_condition_probabilities(!!!options, assignment = !!assn),
         ID_label = NA
       )
       if (append_probabilities_matrix) {
         options$N <- quo(nrow(data))
         ra_dec <- eval_tidy(quo(declare_ra(!!!options)))
         probabilities_matrix <- ra_dec$probabilities_matrix
-        colnames(probabilities_matrix) <- paste0(assn, "_", colnames(probabilities_matrix))
+        colnames(probabilities_matrix) <- 
+          paste0(assn, "_", colnames(probabilities_matrix))
         data <- data.frame(data, probabilities_matrix)
       }
     }
@@ -84,23 +89,33 @@ validation_fn(assignment_handler) <- function(ret, dots, label) {
   if (!"declaration" %in% names(dots)) {
     if ("blocks" %in% names(dots)) {
       if (class(f_rhs(dots[["blocks"]])) == "character") {
-        declare_time_error("Must provide the bare (unquoted) block variable name to blocks.", ret)
+        declare_time_error(
+          "Must provide the bare (unquoted) block variable name to blocks.",
+          ret)
       }
     }
 
     if ("clusters" %in% names(dots)) {
       if (class(f_rhs(dots[["clusters"]])) == "character") {
-        declare_time_error("Must provide the bare (unquoted) cluster variable name to clusters.", ret)
+        declare_time_error(
+          "Must provide the bare (unquoted) cluster variable name to clusters.", 
+          ret)
       }
     }
 
-    ra_args <- setdiff(names(dots), names(formals(assignment_handler))) # removes data and assignment_variable
+    ra_args <- setdiff(names(dots), names(formals(assignment_handler))) 
+    # removes data and assignment_variable
 
     ra_dots <- dots[ra_args]
 
     if (length(ra_dots) > 0) {
-      declaration <- tryCatch(eval_tidy(quo(declare_ra(!!!ra_dots))), error = function(e) e)
-
+      declaration <-
+        tryCatch(
+          eval_tidy(quo(declare_ra(!!!ra_dots))),
+          error = function(e)
+            e
+        )
+      
       if (inherits(declaration, "ra_declaration")) {
         # message("Assignment declaration factored out from execution path.")
         dots[ra_args] <- NULL
@@ -124,7 +139,12 @@ validation_fn(assignment_handler) <- function(ret, dots, label) {
   }
 
   if (dirty) {
-    ret <- build_step(currydata(assignment_handler, dots, strictDataParam = attr(ret, "strictDataParam")),
+    ret <-
+      build_step(currydata(
+        assignment_handler,
+        dots,
+        strictDataParam = attr(ret, "strictDataParam")
+      ),
       handler = assignment_handler,
       dots = dots,
       label = label,

@@ -4,7 +4,8 @@ test_that("multiple design get_estimates", {
   my_designer <- function(N = 50) {
     my_population <- declare_population(N = N, noise = rnorm(N))
 
-    my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+    my_potential_outcomes <- declare_potential_outcomes(
+      Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
     my_assignment <- declare_assignment(m = 25)
 
@@ -27,7 +28,8 @@ test_that("multiple design get_estimates", {
 
   my_population <- declare_population(N = 100, noise = rnorm(N))
 
-  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+  my_potential_outcomes <- declare_potential_outcomes(
+    Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
   my_assignment <- declare_assignment(m = 25)
 
@@ -62,7 +64,8 @@ test_that("multiple design get_estimates", {
 
   get_estimates(design_2)
 
-  expect_equal(get_estimates(design_1, design_2)$design_label, c("design_1", "design_2"))
+  expect_equal(get_estimates(design_1, design_2)$design_label, 
+               c("design_1", "design_2"))
 
   get_estimates(my_designs)
 })

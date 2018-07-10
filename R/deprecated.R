@@ -15,8 +15,10 @@ declare_design <- function(...) {
     new = "+",
     old = "declare_design",
     msg = paste0(
-      "\nDeclareDesign no longer includes the declare_design() function from development versions. ",
-      "Please use the + operator to create designs. For your design, you can try:\n\n",
+      "\nDeclareDesign no longer includes the declare_design() function ", 
+      "from development versions. ",
+      "Please use the + operator to create designs. ",
+      "For your design, you can try:\n\n",
       paste(sapply(qs, quo_text), collapse = " + ")
     )
   )

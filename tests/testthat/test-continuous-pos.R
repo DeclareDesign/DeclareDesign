@@ -48,7 +48,9 @@ test_that("Hooke's law", {
 
   estimand <- declare_estimand(
     `(Intercept)` = mean(potential_outcome_f(resting, stiffness, 0)),
-    stiffness = mean(potential_outcome_f(resting, stiffness, 1) - potential_outcome_f(resting, stiffness, 0)),
+    stiffness = mean(
+      potential_outcome_f(resting, stiffness, 1) - 
+        potential_outcome_f(resting, stiffness, 0)),
     term = TRUE
   )
 

@@ -238,7 +238,8 @@ test_that("demo runs", {
     formula = Y ~ .25 * Z + .01 * age * Z, conditions = seq(0, 1, by = .1)
   )
 
-  my_assignment_continuous <- declare_assignment(conditions = seq(0, 1, by = .1))
+  my_assignment_continuous <- declare_assignment(
+    conditions = seq(0, 1, by = .1))
 
   my_design <- declare_population(my_population()) +
     my_potential_outcomes_continuous +
@@ -259,11 +260,15 @@ test_that("demo runs", {
     declare_reveal(outcome_variables = "R") +
     declare_reveal(attrition_variables = "R")
 
-  head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
+  head(draw_data(my_design)[, 
+                            c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", 
+                              "Z", "R", "Y")])
 
   ## ------------------------------------------------------------------------
   stochastic_population <- declare_population(
-    N = sample(500:1000, 1), income = rnorm(N), age = sample(18:95, N, replace = TRUE)
+    N = sample(500:1000, 1), 
+    income = rnorm(N), 
+    age = sample(18:95, N, replace = TRUE)
   )
 
   c(
@@ -295,7 +300,9 @@ test_that("demo runs", {
   )
 
   ## remove all objects except your pop and PO functions
-  rm(list = ls()[-which(ls() %in% c("my_potential_outcomes_custom", "my_population_custom"))])
+  rm(list = ls()[-which(ls() %in% 
+                          c("my_potential_outcomes_custom", 
+                            "my_population_custom"))])
 
   pop_pos_custom <- my_potential_outcomes_custom(my_population_custom())
 

@@ -12,8 +12,12 @@ test_that("Describle Variable", {
   data_bigmissing <- c(1:10, rep(NA, 3))
 
   data_logical <- c(rep(TRUE, 11), rep(FALSE, 9))
-  data_true_mixed <- c(TRUE, 5, NA, "test") # Should induce coercion to character
-  data_mixed_numeric <- c(TRUE, FALSE, TRUE, 5, 7, 8, 9) # Should induce coercion to 1/0
+  
+  data_true_mixed <- c(TRUE, 5, NA, "test") 
+  # Should induce coercion to character
+  
+  data_mixed_numeric <- c(TRUE, FALSE, TRUE, 5, 7, 8, 9) 
+  # Should induce coercion to 1/0
 
   describe_variable(data_littleint)
   describe_variable(data_littlechar)

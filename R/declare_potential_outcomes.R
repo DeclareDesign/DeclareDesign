@@ -55,14 +55,16 @@
 #'
 #' custom_potential <- declare_potential_outcomes(handler = my_po_function)
 #'
-declare_potential_outcomes <- make_declarations(potential_outcomes_handler, "potential_outcomes")
+declare_potential_outcomes <-
+  make_declarations(potential_outcomes_handler, "potential_outcomes")
 ### Default handler calls either the formula handler or non-formula handler
 ### this can be determind at declare time in the validation_fn, and the correct function returned instead
 ### If possible, we do so, even though much of the logic is essentially duplicated
 ### this makes tracing the execution in run_design much simpler
 
 potential_outcomes_handler <- function(..., data, level) {
-  (function(formula, ...) UseMethod("potential_outcomes"))(..., data = data, level = level)
+  (function(formula, ...)
+    UseMethod("potential_outcomes"))(..., data = data, level = level)
 }
 
 validation_fn(potential_outcomes_handler) <- function(ret, dots, label) {
@@ -70,7 +72,8 @@ validation_fn(potential_outcomes_handler) <- function(ret, dots, label) {
 
   # Below is a similar redispatch strategy, only at declare time
   validation_delegate <- function(formula = NULL, ...) {
-    potential_outcomes <- function(formula, ...) UseMethod("potential_outcomes", formula)
+    potential_outcomes <- function(formula, ...) 
+      UseMethod("potential_outcomes", formula)
     for (c in class(formula)) {
       s3method <- getS3method("potential_outcomes", class(formula))
       if (is.function(s3method)) return(s3method)
@@ -111,14 +114,18 @@ validation_fn(potential_outcomes_handler) <- function(ret, dots, label) {
 #' @importFrom fabricatr fabricate
 #' @importFrom rlang quos := !! !!! as_quosure
 #' @rdname declare_potential_outcomes
-potential_outcomes.formula <- function(formula,
-                                       conditions = c(0, 1),
-                                       assignment_variables = "Z", # only used to provide a default - read from names of conditions immediately after.
-                                       data,
-                                       level = NULL,
-                                       label = outcome_variable) {
+potential_outcomes.formula <- function(
+  formula,
+  conditions = c(0, 1),
+  assignment_variables = "Z",
+  # above only used to provide a default - 
+  #   read from names of conditions immediately after.
+  data,
+  level = NULL,
+  label = outcome_variable) {
+  
   outcome_variable <- as.character(formula[[2]])
-
+  
   to_restore <- assignment_variables %icn% data
   to_null <- setdiff(assignment_variables, to_restore)
 
@@ -128,7 +135,8 @@ potential_outcomes.formula <- function(formula,
 
   ### If assn vars already present, swap them out
   if (length(to_restore) > 0) {
-    restore_mangled <- paste(rep("_", max(nchar(colnames(data)))), collapse = "")
+    restore_mangled <- paste(rep("_", max(nchar(colnames(data)))), 
+                             collapse = "")
 
     restore_mangled <- setNames(
       lapply(to_restore, as.symbol),
@@ -142,9 +150,12 @@ potential_outcomes.formula <- function(formula,
   expr <- as_quosure(formula)
   for (i in seq_len(nrow(conditions))) {
     condition_values <- conditions[i, , drop = FALSE]
-    out_name <- paste0(outcome_variable, "_", paste0(assignment_variables, "_", condition_values, collapse = "_"))
+    out_name <- paste0(outcome_variable, "_", 
+                       paste0(assignment_variables, "_",
+                              condition_values, collapse = "_"))
 
-    condition_quos <- c(condition_quos, quos(!!!condition_values, !!out_name := !!expr))
+    condition_quos <- 
+      c(condition_quos, quos(!!!condition_values, !!out_name := !!expr))
   }
 
   # clean up
@@ -154,7 +165,8 @@ potential_outcomes.formula <- function(formula,
       to_restore
     )
     restore_mangled <- lapply(restore_mangled, function(x) NULL)
-    condition_quos <- c(condition_quos, quos(!!!to_restore), quos(!!!restore_mangled))
+    condition_quos <- 
+      c(condition_quos, quos(!!!to_restore), quos(!!!restore_mangled))
   }
 
   if (length(to_null) > 0) {
@@ -182,7 +194,8 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
   outcome_variable <- as.character(dots$formula[[2]])
 
   if (length(dots$formula) < 3) {
-    declare_time_error("Must provide an outcome in potential outcomes formula", ret)
+    declare_time_error(
+      "Must provide an outcome in potential outcomes formula", ret)
   }
 
   if ("ID_label" %in% names(dots)) {
@@ -237,8 +250,14 @@ pofdv <- function(design, i, step) {
 
   this_step_meta <- attr(step, "step_meta")
 
-  check <- function(var_type, step_type, step_attr, callback = identity, from = 1, to = length(design)) {
-    vars <- this_step_meta[[var_type]]
+  check <-
+    function(var_type,
+             step_type,
+             step_attr,
+             callback = identity,
+             from = 1,
+             to = length(design)) {
+      vars <- this_step_meta[[var_type]]
 
     assn_steps <- Filter(
       function(step_j) attr(step_j, "step_type") == step_type,
@@ -255,7 +274,8 @@ pofdv <- function(design, i, step) {
     callback(vars)
   }
 
-  unrevealed_outcomes <- check("outcome_variables", "reveal", "outcome_variables",
+  unrevealed_outcomes <- check(
+    "outcome_variables", "reveal", "outcome_variables",
     from = i + 1,
     function(vars) {
       vars
@@ -269,8 +289,10 @@ pofdv <- function(design, i, step) {
   #   ") were declared in a potential outcomes step (", attr(step, "label"),
   #   "), but never later revealed.", call. = FALSE)
 
-  prev_unassigned <- check("assignment_variables", "assignment", "assignment_variables", to = i - 1)
-  prev_unrevealed <- check("assignment_variables", "reveal", "outcome_variables", to = i - 1)
+  prev_unassigned <- check(
+    "assignment_variables", "assignment", "assignment_variables", to = i - 1)
+  prev_unrevealed <- check(
+    "assignment_variables", "reveal", "outcome_variables", to = i - 1)
 
   if (length(prev_unassigned %i% prev_unrevealed) == 0) {
     new_step <- eval_tidy(quo(declare_reveal(
@@ -280,7 +302,8 @@ pofdv <- function(design, i, step) {
     )))
     attr(new_step, "auto-generated") <- TRUE
 
-    # warning("Attempting to inject a `declare_reveal(", this_step_meta$outcome_variables, ", ",
+    # warning("Attempting to inject a `declare_reveal(", 
+    #         this_step_meta$outcome_variables, ", ",
     #         this_step_meta$assignment_variables,
     #         ")` step after PO (", attr(step, "label"),
     #         ")", call. = FALSE)
@@ -289,10 +312,15 @@ pofdv <- function(design, i, step) {
     return(design)
   }
 
-  unassigned_vars <- check("assignment_variables", "assignment", "assignment_variables", from = i + 1)
-  unrevealed_vars <- check("assignment_variables", "reveal", "outcome_variables", from = i + 1)
+  unassigned_vars <- check("assignment_variables", "assignment", 
+                           "assignment_variables", from = i + 1)
+  unrevealed_vars <- check("assignment_variables", "reveal", 
+                           "outcome_variables", from = i + 1)
 
-  cant_find <- prev_unassigned %i% prev_unrevealed %i% unassigned_vars %i% unrevealed_vars
+  cant_find <- prev_unassigned %i% 
+    prev_unrevealed %i% 
+    unassigned_vars %i% 
+    unrevealed_vars
 
 
   new_step <- eval_tidy(quo(declare_reveal(
@@ -305,13 +333,15 @@ pofdv <- function(design, i, step) {
   for (step_j in design[length(design):(i + 1)]) {
     if (is.null(step_meta <- attr(step_j, "step_meta"))) next
     if (attr(step_j, "step_type") == "assignment") {
-      if (any(step_meta$assignment_variables %in% attr(step, "step_meta")$assignment_variables)) {
+      if (any(step_meta$assignment_variables %in% 
+              attr(step, "step_meta")$assignment_variables)) {
         design <- insert_step(design, new_step, after = step_j)
         break
       }
     }
     else if (attr(step_j, "step_type") == "reveal") {
-      if (any(step_meta$outcome_variables %in% attr(step, "step_meta")$assignment_variables)) {
+      if (any(step_meta$outcome_variables %in% 
+              attr(step, "step_meta")$assignment_variables)) {
         design <- insert_step(design, new_step, after = step_j)
         break
       }
@@ -325,8 +355,12 @@ pofdv <- function(design, i, step) {
 
 #' @importFrom fabricatr fabricate add_level modify_level
 #' @rdname declare_potential_outcomes
-potential_outcomes.NULL <- function(formula = stop("Not provided"), ..., data, level = NULL) {
-  if (is.character(level)) {
+potential_outcomes.NULL <-
+  function(formula = stop("Not provided"),
+           ...,
+           data,
+           level = NULL) {
+    if (is.character(level)) {
     fabricate(data = data, !!level := modify_level(...))
   } else {
     fabricate(data = data, ..., ID_label = NA)
@@ -375,4 +409,5 @@ expand_conditions <- function() {
   conditions
 }
 formals(expand_conditions) <- formals(potential_outcomes.formula)
-formals(expand_conditions)["label"] <- list(NULL) # Fixes R CMD Check warning outcome is undefined
+formals(expand_conditions)["label"] <- list(NULL) 
+# Fixes R CMD Check warning outcome is undefined
