@@ -82,6 +82,8 @@ diagnosand_handler <- function(data, ...,
 
 validation_fn(diagnosand_handler) <- function(ret, dots, label){
   
+  declare_time_error_label_length(ret, label)
+  
   if (sum(c("select", "subtract") %in% names(dots)) > 1) {
     stop("You may not provide arguments to `select` and `subtract` at the same time.", call. = FALSE)
   }

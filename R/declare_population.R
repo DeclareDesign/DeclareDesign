@@ -43,3 +43,11 @@
 #'
 #' my_population_custom()
 declare_population <- make_declarations(fabricate, "population", strictDataParam = FALSE)
+
+validation_fn(fabricate) <- function(ret, dots, label){
+  
+  declare_time_error_label_length(ret, label)
+  
+  ret
+  
+}

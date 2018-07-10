@@ -71,6 +71,8 @@ validation_fn(potential_outcomes_handler) <-  function(ret, dots, label) {
   
   declare_time_error_if_data(ret)
   
+  declare_time_error_label_length(ret, label)
+  
   # Below is a similar redispatch strategy, only at declare time
   validation_delegate <- function(formula=NULL, ...) {
     potential_outcomes <- function(formula, ...) UseMethod("potential_outcomes", formula)

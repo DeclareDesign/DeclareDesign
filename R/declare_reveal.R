@@ -89,6 +89,8 @@ reveal_outcomes_handler <- function(data = NULL,
 
 validation_fn(reveal_outcomes_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
+  
+  declare_time_error_label_length(ret, label)
 
   dots <- reveal_nse_helper_dots(dots, "outcome_variables", reveal_outcomes_handler)
   dots <- reveal_nse_helper_dots(dots, "assignment_variables", reveal_outcomes_handler)
