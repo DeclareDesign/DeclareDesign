@@ -88,7 +88,7 @@ test_that("demo runs", {
   my_estimator_lm <-
     declare_estimator(Y ~ Z,
                       model = estimatr::lm_robust,
-                      coefficients = "Z",
+                      term = "Z",
                       estimand = my_estimand)
 
   my_estimator_lm(smp)
@@ -176,7 +176,7 @@ test_that("demo runs", {
 
   ## ------------------------------------------------------------------------
   my_mean <- function(data){
-    data.frame(est = with(data, mean(Y)))
+    data.frame(estimate = with(data, mean(Y)))
   }
 
   my_estimator_custom <-

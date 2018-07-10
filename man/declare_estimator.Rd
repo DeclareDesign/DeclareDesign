@@ -15,10 +15,10 @@ declare_estimators(..., handler = estimator_handler, label = "estimator")
 tidy_estimator(estimator_function)
 
 model_handler(data, ..., model = estimatr::difference_in_means,
-  coefficients = FALSE)
+  term = FALSE)
 
 estimator_handler(data, ..., model = estimatr::difference_in_means,
-  coefficients = FALSE, estimand = NULL, label)
+  term = FALSE, estimand = NULL, label)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -33,7 +33,7 @@ estimator_handler(data, ..., model = estimatr::difference_in_means,
 
 \item{model}{A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.}
 
-\item{coefficients}{Symbols or literal character vector of coefficients that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept coefficient; if TRUE return all coefficients. To escape non-standard-evaluation use \code{!!}.}
+\item{term}{Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.}
 
 \item{estimand}{a declare_estimand step object, or a character label, or a list of either}
 }
@@ -59,7 +59,7 @@ The intent here is to factor out the estimator/estimand labeling so that it can 
 
 my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
-# By default, uses first non-intercept coefficient as estimate
+# By default, uses first non-intercept term as estimate
 # Default method is the `difference_in_means` estimator from `estimatr`
 
 my_estimator_dim <- declare_estimator(Y ~ Z, estimand = "ATE", label = "DIM")
@@ -75,11 +75,11 @@ my_estimator_lm_rob <- declare_estimator(
   label = "LM_Robust"
 )
 
-# Set `coefficient`` if estimate of interest is not the first non-intercept variable
+# Set `term`` if estimate of interest is not the first non-intercept variable
 my_estimator_lm_rob_x <- declare_estimator(
   Y ~ X + Z,
   estimand = my_estimand,
-  coefficients = "Z",
+  term = "Z",
   model = lm_robust
 )
 
@@ -88,7 +88,7 @@ my_estimator_glm <- declare_estimator(
   Y ~ X + Z,
   family = "gaussian",
   estimand = my_estimand,
-  coefficients = "Z",
+  term = "Z",
   model = glm
 )
 
@@ -97,7 +97,7 @@ estimator_probit <- declare_estimator(
   Y ~ Z,
   model = glm,
   family = binomial(link = "probit"),
-  coefficients = "Z"
+  term = "Z"
 )
 
 # Custom handlers
@@ -105,7 +105,7 @@ estimator_probit <- declare_estimator(
 # Define your own estimator and use the `tidy_estimator` function for labeling
 # Must have `data` argument that is a data.frame
 my_estimator_function <- function(data){
-  data.frame(est = with(data, mean(Y)))
+  data.frame(estimate = with(data, mean(Y)))
 }
 
 my_estimator_custom <- declare_estimator(
@@ -119,7 +119,7 @@ my_estimator_function <- function(data){
   data.frame(
     estimator_label = "foo",
     estimand_label = "bar",
-    est = with(data, mean(Y)),
+    estimate = with(data, mean(Y)),
     n = nrow(data),
     stringsAsFactors = FALSE
   )
@@ -133,12 +133,12 @@ my_estimator_custom2 <- declare_estimator(handler = my_estimator_function)
 # First, set up the rest of a design
 set.seed(42)
 
-design_def <- 
-  declare_population(N = 100, X = rnorm(N), W = rexp(N, 1), noise = rnorm(N)) + 
-  declare_potential_outcomes(Y ~ .25 * Z + noise) + 
-  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-  declare_assignment(m = 50) + 
-  declare_reveal() + 
+design_def <-
+  declare_population(N = 100, X = rnorm(N), W = rexp(N, 1), noise = rnorm(N)) +
+  declare_potential_outcomes(Y ~ .25 * Z + noise) +
+  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_assignment(m = 50) +
+  declare_reveal() +
   my_estimator_dim
 
 get_estimates(design_def)

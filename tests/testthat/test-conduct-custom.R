@@ -4,7 +4,6 @@ test_that("test the custom execution strategy", {
 
   # closes ticket #62
 
-
   design <- declare_population(sleep) + declare_estimator(extra ~ group)
 
   my_sleep <- sleep
@@ -20,9 +19,10 @@ test_that("test the custom execution strategy", {
   regular <- run_design(design)
   output <- run_design(exst)
 
-  expect_equal(regular$estimates_df$est, output$estimates_df$est + 1)
+  expect_equal(regular$estimates_df$estimate,
+               output$estimates_df$estimate + 1)
   expect_equal(names(output), "estimates_df") # no estimands
-
+  
 }
 )
 

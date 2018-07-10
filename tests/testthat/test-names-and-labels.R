@@ -3,7 +3,7 @@ context("Names and Labels")
 
 test_that("estimand labels work",{
   
-  my_private_estimator <- function(data){data.frame(est = median(data$Y)^2)}
+  my_private_estimator <- function(data){data.frame(estimate = median(data$Y)^2)}
   pop <- declare_population(N = 6, Y = rnorm(N))
   
   # Unmarked case

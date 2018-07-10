@@ -157,7 +157,7 @@ simulate_single_design <- function(design, sims) {
     
     if (nrow(simulations_df) > max(nrow(estimands_df), nrow(estimates_df))) {
       warning(
-        "Estimators lack estimand/coefficient labels for matching, a many-to-many merge was performed."
+        "Estimators lack estimand/term labels for matching, a many-to-many merge was performed."
       )
     }
   }

@@ -57,7 +57,7 @@ custom_reveal <- function(data){
 
 # A: Answer strategy
 custom_estimator <- function(data){
-  data.frame(est = with(data, mean(Y)))
+  data.frame(estimate = with(data, mean(Y)))
 }
 ```
 

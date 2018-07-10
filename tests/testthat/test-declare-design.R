@@ -35,7 +35,7 @@ test_that(
   expect_equal(dim(df), c(250,9))
 
   output <- run_design(design)
-  expect_equal(dim(output$estimates_df), c(1,8))
+  expect_equal(dim(output$estimates_df), c(1,11))
   expect_equal(dim(output$estimands), c(1,2))
 
 })

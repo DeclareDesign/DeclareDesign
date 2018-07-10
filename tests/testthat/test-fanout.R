@@ -32,7 +32,7 @@ test_that("Diagnosing a fanout",{
       model = lm,
       estimand = estimand,
       label = "ha",
-      coefficients = TRUE
+      term = TRUE
     )
   
 
@@ -52,7 +52,7 @@ test_that("Diagnosing a fanout",{
       strategy
     ), seq))), names(D))
 
-  expect_equivalent(tapply(dx$simulations$est, rep_id[dx$simulations$sim_ID, 3], var), c(0, 0, 0, 0, 0))
+  expect_equivalent(tapply(dx$simulations$estimate, rep_id[dx$simulations$sim_ID, 3], var), c(0, 0, 0, 0, 0))
   
   expect_length(paste0("fan_", 1:3) %icn% dx$simulations, 3)
 
