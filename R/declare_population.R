@@ -43,3 +43,4 @@
 #'
 #' my_population_custom()
 declare_population <- make_declarations(fabricate, "population", strictDataParam = FALSE)
+
