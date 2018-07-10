@@ -49,6 +49,9 @@ simulate_design <- function(..., sims = 500) {
     
     designs <- dots_to_list_of_designs(...)
     
+    if (!is.numeric(sims) & !is.vector(sims)) {
+      stop("Please provide sims a scalar or a numeric vector of length the number of steps in designs.", .call = FALSE)
+    }
     
     # if you provide a list of sims for each design, i.e.
     #   sims = list(my_design_1 = c(100, 1, 1), my_design_2 = 200)
