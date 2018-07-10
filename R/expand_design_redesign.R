@@ -156,6 +156,22 @@ expand_args_names <- function(..., expand = TRUE){
 #' # returns a list of six modified designs
 #' design_vary_N <- redesign(design, n = seq(400, 900, 100))
 #' 
+#' # When redesigning with arguments that are vectors, 
+#' #   use list() in redesign, with each list item 
+#' #   representing a design you wish to create
+#' 
+#' prob_each <- c(.1, .5, .4)
+#' 
+#' assignment <- declare_assignment(prob_each = prob_each)
+#' 
+#' design <- population + assignment
+#' 
+#' # returns two designs
+#' 
+#' designs_vary_prob_each <- redesign(
+#'   design, 
+#'   prob_each = list(c(.2, .5, .3), c(0, .5, .5)))
+#' 
 #' @export
 redesign <- function(design, ..., expand = TRUE) {
   f <- function(...) {

@@ -33,9 +33,12 @@ test_that("s3 dispatch works",{
   diagnosis <- diagnose_design(my_design, sims = 5, bootstrap_sims = FALSE)
   expect_equal(nrow(diagnosis$diagnosands_df), 1)
   
-  diagnosis <- diagnose_design(my_design, my_design_2, sims = list(my_design = 5, my_design_2 = 10), bootstrap_sims = FALSE)
+  diagnosis <- diagnose_design(my_design, my_design_2, 
+                               sims = list(my_design = 30, my_design_2 = 31), 
+                               bootstrap_sims = FALSE)
+  
   expect_equal(nrow(diagnosis$diagnosands_df), 2)
-  expect_true(all(diagnosis$diagnosands_df$n_sims %in% c(5, 10)))
+  expect_true(all(diagnosis$diagnosands_df$n_sims %in% c(30, 31)))
   
   diagnosis <- diagnose_design(list(my_design, my_design_2), sims = 5, bootstrap_sims = FALSE)
   expect_equal(nrow(diagnosis$diagnosands_df), 2)
