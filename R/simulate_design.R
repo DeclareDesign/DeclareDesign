@@ -96,7 +96,7 @@ simulate_design <- function(..., sims = 500) {
 simulate_single_design <- function(design, sims) {
   
   if (!is_bare_integerish(sims) || (length(design) != length(sims) & length(sims) != 1)) {
-    stop("Please provide sims a scalar or a numeric vector of length the number of steps in designs.", .call = FALSE)
+    stop("Please provide sims a scalar or a numeric vector of length the number of steps in designs.", call. = FALSE)
   }
   
   if (min(sims) < 1)
