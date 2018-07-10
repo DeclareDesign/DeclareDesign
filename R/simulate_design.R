@@ -49,6 +49,13 @@ simulate_design <- function(..., sims = 500) {
     
     designs <- dots_to_list_of_designs(...)
     
+    if (length(sims) > 1) {
+      if (sims[1] < 30) {
+        warning("We recommend you choose a higher number of simulations than ", sims[1], " for the top level of simulation.")
+      } else if (prod(sims) < 30) {
+        warning("We recommend you choose a higher number of total simulations than ", prod(sims), ".")
+      }
+    }
     
     # if you provide a list of sims for each design, i.e.
     #   sims = list(my_design_1 = c(100, 1, 1), my_design_2 = 200)
