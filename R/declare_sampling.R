@@ -74,8 +74,6 @@ validation_fn(sampling_handler) <- function(ret, dots, label){
 
   declare_time_error_if_data(ret)
   
-  declare_time_error_label_length(ret, label)
-  
   if ("sampling_variable" %in% names(dots) &&
       inherits(f_rhs(dots[["sampling_variable"]]), "NULL")) {
     declare_time_error("Must not provide NULL as sampling_variable.", ret)

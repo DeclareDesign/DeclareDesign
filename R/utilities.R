@@ -58,11 +58,6 @@ declare_time_error_if_data <- function(declaration) {
     declare_time_error("`data` should not be a declared argument.", declaration)
 }
 
-declare_time_error_label_length <- function(declaration, label){
-  if(is.character(label) && length(label) > 1)
-    declare_time_error("Please provide only one label.", declaration)
-}
-
 # Wrapper function, use future_lapply if we have it, fallback to lapply if not
 
 future_lapply <- function(..., future.seed = NA, future.globals=TRUE) {
