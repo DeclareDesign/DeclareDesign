@@ -86,7 +86,8 @@ next_step <- function(step, current_df, i) {
 }
 
 run_design_internal.default <- function(design) {
-  stop("Please only send design objects or functions with no arguments to run_design.")
+  stop("Please only send design objects or functions ", 
+       "with no arguments to run_design.")
 }
 
 run_design_internal.design <-

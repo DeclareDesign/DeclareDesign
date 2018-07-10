@@ -237,7 +237,8 @@ test_that("labels for mator and mand work mand splat labeld mator default", {
 })
 
 test_that("labels for mator and mand work, label explicit, mand splat label", {
-  mator_label <- declare_estimator(Y ~ Z, estimand = mand_arg_label, label = "an_estimator")
+  mator_label <- declare_estimator(
+    Y ~ Z, estimand = mand_arg_label, label = "an_estimator")
   df %>% mator_label() %>% expect_label("an_estimator", "ATE")
 })
 
@@ -259,7 +260,8 @@ test_that("labels for estimates and estimands work - label explicit", {
 })
 
 test_that("labels for mators and mand work- label=NULL", {
-  mator_label_null <- declare_estimator(Y ~ Z, estimand = mand_explicit_label, label = NULL)
+  mator_label_null <- declare_estimator(
+    Y ~ Z, estimand = mand_explicit_label, label = NULL)
   expect_error(df %>% mator_label_null())
 })
 
