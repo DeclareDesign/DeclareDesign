@@ -58,7 +58,7 @@ test_that("Diagnosing a fanout",{
 
   strategy <- c(1, 1, 5, 20)
 
-  dx <- diagnose_design(D, sims = strategy)
+  dx <- expect_warning(diagnose_design(D, sims = strategy))
 
   # estimands don't vary overall
   expect_equal(
@@ -98,4 +98,32 @@ test_that("sims expansion is correct",{
   expanded <- check_sims(design, sims)
   expect_equal(expanded$n, c(1, 2, 1))
 
+})
+
+
+
+test_that("fanout warnings",{
+  
+  N <- 100
+  
+  pop <- declare_population(N = N, noise = rnorm(N))
+  
+  estimand <- declare_estimand(foo = mean(noise))
+  sampl <- declare_sampling(n = N / 2)
+  estimator <-
+    declare_estimator(
+      noise ~ 1,
+      model = lm,
+      estimand = estimand,
+      label = "ha",
+      term = TRUE
+    )
+  
+  
+  D <- pop +  estimand + sampl + estimator
+  
+  strategy <- c(1, 1, 1, 1)
+  
+  expect_warning(diagnose_design(D, sims = strategy))
+  
 })

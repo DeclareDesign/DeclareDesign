@@ -111,7 +111,17 @@ simulate_design <- function(..., sims = 500) {
 #' @importFrom rlang as_list
 simulate_single_design <- function(design, sims) {
   if (min(sims) < 1)
-    stop("Sims should be >= 1")
+    stop("Sims should be >= 1", call. = FALSE)
+  
+  if (length(sims) > 1 &&
+      sims[1] < 30) {
+    warning(
+      "We recommend you choose a higher number of simulations than ",
+      sims[1],
+      " for the top level of simulation.",
+      call. = FALSE
+    )
+  }
   
   # If sims is set correctly, fan out
   
