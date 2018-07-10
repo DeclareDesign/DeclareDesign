@@ -141,15 +141,6 @@ run_design_internal.function <- function(design) {
 
 run_design_internal.execution_st <- function(design, ...) do.call(run_design_internal.design, design)
 
-#' Build an execution strategy object
-#'
-#' @param design a design
-#' @param current_df a data.frame
-#' @param results a list of intermediate results
-#' @param start index of starting step
-#' @param end  index of ending step
-#'
-#' @export
 execution_st <- function(design, current_df = NULL, results = NULL, start = 1, end = length(design)){
   # An execution state are the arguments needed to run run_design
   structure(
