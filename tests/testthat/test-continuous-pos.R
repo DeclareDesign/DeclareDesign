@@ -48,7 +48,7 @@ test_that("Hooke's law",{
   estimand <- declare_estimand(
     `(Intercept)` = mean(potential_outcome_f(resting, stiffness, 0)),
     stiffness = mean(potential_outcome_f(resting, stiffness, 1) - potential_outcome_f(resting, stiffness, 0)),
-    coefficients = TRUE
+    term = TRUE
   )
 
   # 30 is magic
@@ -68,7 +68,7 @@ test_that("Hooke's law",{
                            length = potential_outcome_f(resting, stiffness, force) + 
                              rnorm(N, sd = .1))
   
-  estimator <- declare_estimator(length ~ force, model = lm, coefficients = TRUE)
+  estimator <- declare_estimator(length ~ force, model = lm, term = TRUE)
 
   design <- pop + estimand + sampling + assignment + reveal + estimator
 

@@ -23,7 +23,7 @@ test_that("Multiple estimands can be mapped to one estimator", {
     model = estimatr::lm_robust,
     se_type = "classical",
     estimand = c(dgp_se, obs_se),
-    coefficients = "X"
+    term = "X"
   )
 
   des <- 
@@ -34,10 +34,10 @@ test_that("Multiple estimands can be mapped to one estimator", {
     lmc
 
   my_dig <- declare_diagnosands(
-    bias_se = mean(se - estimand),
-    bias_est = mean(se - sd(estimand)),
-    mean_se = mean(se),
-    sd_se = sd(se),
+    bias_se = mean(std.error - estimand),
+    bias_est = mean(std.error - sd(estimand)),
+    mean_se = mean(std.error),
+    sd_se = sd(std.error),
     mean_estimand = mean(estimand),
     sd_estimand = sd(estimand)
   )

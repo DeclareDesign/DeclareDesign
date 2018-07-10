@@ -15,7 +15,7 @@ test_that("Two estimators, Two estimands (matched)",{
       model = difference_in_means,
       estimand = "CATE_1_5",
       label = "DIM_1_5",
-      coefficients = group2
+      term = group2
     ) +
     declare_estimator(
       extra ~ group,
@@ -23,7 +23,7 @@ test_that("Two estimators, Two estimands (matched)",{
       model = difference_in_means,
       estimand = "CATE_6_10",
       label = "DIM_6_10",
-      coefficients = group2
+      term = group2
     )
   
   diag <- diagnose_design(des, sims = 5, bootstrap_sims = FALSE)

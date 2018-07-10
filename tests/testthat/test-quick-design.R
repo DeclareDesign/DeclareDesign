@@ -39,7 +39,7 @@ test_that("expand_design works some more", {
     my_estimator <-
       declare_estimator(Y ~ Z,
                         model = lm_robust,
-                        coefficients = "Z",
+                        term = "Z",
                         estimand = my_estimand)
     my_design <- pop + my_estimand + my_estimator
     return(my_design)

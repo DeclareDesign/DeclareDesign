@@ -45,7 +45,7 @@ diagnosis
 }
 
 # using a user-defined diagnosand
-my_diagnosand <- declare_diagnosands(absolute_error = mean(abs(est - estimand)))
+my_diagnosand <- declare_diagnosands(absolute_error = mean(abs(estimate - estimand)))
 
 \dontrun{
 diagnosis <- diagnose_design(design, diagnosands = my_diagnosand)

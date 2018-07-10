@@ -8,7 +8,7 @@ reveal_outcomes <- declare_reveal()
 expect_estimates <- function(estimates, label = NULL) {
   expect_equal(
     names(estimates),
-    c("estimator_label", "coefficient", "est", "se", "p", "ci_lower", "ci_upper")
+    c("estimator_label", "term", "estimate", "std.error", "statistic", "p.value", "conf.low", "conf.high", "df", "outcome")
   )
   if(is.character(label)){
     expect_equal( estimates$estimator_label, label)
@@ -33,11 +33,11 @@ test_that("lm with HC3 robust ses", {
 
 test_that("custom estimator function", {
   my_mean <- function(data){
-    data.frame(est = with(data, 2), foo=mean(data$Y))
+    data.frame(estimate = with(data, 2), foo=mean(data$Y))
   }
   my_estimator_custom <- declare_estimator(handler = tidy_estimator(my_mean))
   cust <- my_population() %>% my_potential_outcomes %>% my_assignment %>% reveal_outcomes %>% my_estimator_custom
-  expect_equal(cust$est, 2)
+  expect_equal(cust$estimate, 2)
 })
 
 test_that("check blocked d-i-m estimator", {
@@ -65,7 +65,7 @@ test_that("regression from estimatr works as an estimator", {
   pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
   pate_estimator <- declare_estimator(Y ~ Z + noise,
                                       model = lm_robust,
-                                      coefficients = "noise",
+                                      term = "noise",
                                       estimand = pate, label = "pate_hat")
   reveal_outcomes <- declare_reveal()
 
@@ -76,10 +76,10 @@ test_that("regression from estimatr works as an estimator", {
     reveal_outcomes +
     pate_estimator
   
-  est <- get_estimates(my_design)
-  expect_equal(est$estimator_label, "pate_hat")
-  expect_equal(est$coefficient, "noise")
-  expect_equal(est$estimand_label, "pate")
+  estimate <- get_estimates(my_design)
+  expect_equal(estimate$estimator_label, "pate_hat")
+  expect_equal(estimate$term, "noise")
+  expect_equal(estimate$estimand_label, "pate")
 
 })
 
@@ -232,7 +232,7 @@ test_that("labels for estimates and estimands work estimand label, estimator def
 })
 
 
-test_that("coefficient_names = TRUE returns all coefficients", {
+test_that("coefficient_names = TRUE returns all term", {
   tst <-
     data.frame(
       x = runif(100),
@@ -246,7 +246,7 @@ test_that("coefficient_names = TRUE returns all coefficients", {
       clusters = clust,
       weights = wt,
       model = lm_robust,
-      coefficients = TRUE)
+      term = TRUE)
 
   result <- est4(tst)
 
@@ -264,11 +264,11 @@ test_that("tidy_estimator, handler does not take data", {
 })
 
 test_that("model_handler runs directly", {
-  lm_out <- structure(list(coefficient = "group2", est = 1.58, se = 0.849091017238762,
-    p = 0.0791867142159381, ci_lower = -0.203874032287599, ci_upper = 3.3638740322876), .Names = c("coefficient",
-    "est", "se", "p", "ci_lower", "ci_upper"), row.names = 2L, class = "data.frame")
+  lm_out <- structure(list(term = "group2", estimate = 1.58, std.error = 0.849091017238762, 
+                           statistic = 1.86081346748685, p.value = 0.0791867142159382, 
+                           conf.low = -0.203874032287599, conf.high = 3.3638740322876), row.names = 2L, class = "data.frame")
 
-  result <- model_handler(sleep, extra ~ group, model = lm, coefficients = "group2")
+  result <- model_handler(sleep, extra ~ group, model = lm, term = "group2")
   expect_equal(result, lm_out)
 })
 
@@ -303,7 +303,7 @@ test_that("estimators have different columns", {
       Tr = Z,
       X = cbind(X1, X2, X3)
     ))
-    return(data.frame(est = match_out$est))
+    return(data.frame(estimate = match_out$est))
   }
 
   estimator_m <- declare_estimator(
@@ -321,22 +321,22 @@ test_that("estimators have different columns", {
 
   result <- get_estimates(matching)
 
-  expect_length(result, 8)
+  expect_length(result, 11)
   expect_equal(nrow(result), 2)
 
 })
 
 
-test_that("when a coefficient is missing from a model there is an informative error", {
+test_that("when a term is missing from a model there is an informative error", {
   
   data <- fabricate(
     N = 100,
     Y = rbinom(N,1,.5),
     Z = rbinom(N,1,.5)
   )
-  ols <- declare_estimator(Y ~ Z, model = lm_robust, coefficients = "X")
+  ols <- declare_estimator(Y ~ Z, model = lm_robust, term = "X")
 
-  expect_error(ols(data), "Not all of the coefficients declared in your estimator are present in the model output, including X.")
+  expect_error(ols(data), "Not all of the terms declared in your estimator are present in the model output, including X.")
   
 })
 
