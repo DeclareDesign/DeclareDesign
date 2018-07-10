@@ -49,27 +49,11 @@ simulate_design <- function(..., sims = 500) {
     
     designs <- dots_to_list_of_designs(...)
     
-    if (!is_bare_integerish(sims)) {
-      stop("Please provide sims a scalar or a numeric vector of length the number of steps in designs.", .call = FALSE)
-    }
-    
     # if you provide a list of sims for each design, i.e.
     #   sims = list(my_design_1 = c(100, 1, 1), my_design_2 = 200)
     # use it! otherwise, create a list of length designs that repeats the sims
     if (!is_list(sims)) {
       sims <- lapply(seq_along(designs), function(i) sims)
-    }
-    
-    sims_match_steps <-
-      sapply(designs, length) == sapply(sims, length) |
-      sapply(sims, length) == 1
-    if (!all(sims_match_steps)) {
-      wrong_designs <- names(designs)[which(!sims_match_steps)]
-      stop(
-        "The sims argument you provided for the designs named ",
-        paste(wrong_designs, collapse = ", "),
-        " are not correct. Sims should be of length the number of steps in a design or one.", call. = FALSE
-      )
     }
     
     # Simulate One or More Designs
@@ -110,11 +94,15 @@ simulate_design <- function(..., sims = 500) {
 
 #' @importFrom rlang as_list
 simulate_single_design <- function(design, sims) {
+  
+  if (!is_bare_integerish(sims) || (length(design) != length(sims) & length(sims) != 1)) {
+    stop("Please provide sims a scalar or a numeric vector of length the number of steps in designs.", .call = FALSE)
+  }
+  
   if (min(sims) < 1)
     stop("Sims should be >= 1", call. = FALSE)
   
-  if (length(sims) > 1 &&
-      sims[1] < 30) {
+  if (length(sims) > 1 && sims[1] < 30) {
     warning(
       "We recommend you choose a higher number of simulations than ",
       sims[1],
