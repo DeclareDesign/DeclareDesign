@@ -56,7 +56,7 @@ test_that("expand and simulate", {
 
 test_that("wrong number of sims yields error", {
   
-  expect_error(simulate_design(my_design_1, sims = rep(5, 3)), "The sims argument you provided for the designs named my_design_1 are not correct. Sims should be of length the number of steps in a design or one.")
+  expect_error(simulate_design(my_design_1, sims = rep(5, 3)), "Please provide sims a scalar or a numeric vector of length the number of steps in designs.")
   
 })
 

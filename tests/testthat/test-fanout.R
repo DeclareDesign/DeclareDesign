@@ -17,6 +17,24 @@ test_that("Fanout does something",{
 
 })
 
+test_that("fanout should not be exposed to users",{
+  
+  N <- 100
+  
+  pop <- declare_population(N = N)
+  pop2 <- declare_step(fabricate, noise = rnorm(N))
+  estimand <- declare_estimand(foo = mean(noise))
+  D <- pop + pop2 + estimand
+  
+  fan_strategy <- data.frame(end = 2:3, n = c(1, 100))
+  expect_error(diagnose_design(D, sims = fan_strategy), 
+               "Please provide sims a scalar or a numeric vector of length the number of steps in designs.")
+  
+  expect_error(simulate_design(D, sims = fan_strategy), 
+               "Please provide sims a scalar or a numeric vector of length the number of steps in designs.")
+  
+})
+
 
 test_that("Diagnosing a fanout",{
 
@@ -40,7 +58,7 @@ test_that("Diagnosing a fanout",{
 
   strategy <- c(1, 1, 5, 20)
 
-  dx <- diagnose_design(D, sims = strategy)
+  dx <- expect_warning(diagnose_design(D, sims = strategy))
 
   # estimands don't vary overall
   expect_equal(
@@ -80,4 +98,32 @@ test_that("sims expansion is correct",{
   expanded <- check_sims(design, sims)
   expect_equal(expanded$n, c(1, 2, 1))
 
+})
+
+
+
+test_that("fanout warnings",{
+  
+  N <- 100
+  
+  pop <- declare_population(N = N, noise = rnorm(N))
+  
+  estimand <- declare_estimand(foo = mean(noise))
+  sampl <- declare_sampling(n = N / 2)
+  estimator <-
+    declare_estimator(
+      noise ~ 1,
+      model = lm,
+      estimand = estimand,
+      label = "ha",
+      term = TRUE
+    )
+  
+  
+  D <- pop +  estimand + sampl + estimator
+  
+  strategy <- c(1, 1, 1, 1)
+  
+  expect_warning(diagnose_design(D, sims = strategy))
+  
 })
