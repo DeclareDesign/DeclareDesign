@@ -9,6 +9,8 @@ test_that("test with generated citation", {
     year = 1953,
     description = "This is a text description of a design"
   )
+  
+  expect_output(print(design), "Lovelace")
 
   expect_output(cite <- cite_design(design), "Ada")
 
@@ -43,4 +45,6 @@ test_that("test with user-specified text citation", {
 
   expect_output(cite <- cite_design(design), paste0('[1] "', text, '"'), fixed = TRUE)
   expect_equal(cite, text)
+  
+  expect_output(print(design), "Citation:")
 })

@@ -44,9 +44,6 @@ check_sims <- function(design, sims) {
 
     ret <- data.frame(end = 1:n, n = sims_full)
   }
-  else {
-    ret <- sims
-  }
 
   # Compress sequences of ones into one partial execution
   include <- rep(TRUE, n)
@@ -241,7 +238,6 @@ cite_design <- function(design, ...) {
   } else {
     print(citation, style = "text", ... = ...)
   }
-  #  invisible(design)
 }
 
 #' @export
@@ -342,8 +338,6 @@ summary.design <- function(object, verbose = TRUE, ...) {
 
   title <- NULL
   authors <- NULL
-  description <- NULL
-  citation <- NULL # cite_design(design)
 
   get_formula_from_step <- function(step) {
     call <- attr(step, "call")
@@ -357,7 +351,6 @@ summary.design <- function(object, verbose = TRUE, ...) {
     return(NULL)
   }
 
-
   variables_added <- variables_modified <-
     quantities_added <- quantities_modified <-
     N <- extra_summary <-
@@ -365,7 +358,6 @@ summary.design <- function(object, verbose = TRUE, ...) {
 
   formulae <- lapply(design, get_formula_from_step)
   calls <- lapply(design, attr, "call")
-
 
   current_df <- design[[1]]()
 
@@ -431,16 +423,14 @@ summary.design <- function(object, verbose = TRUE, ...) {
       last_df <- current_df
     } else if (causal_type %in% c("estimand", "estimator")) {
       quantities_added[[i]] <- design[[i]](current_df)
-    } else if (causal_type == "citation") {
-      citation <- design[[i]]()
-      if (!is.character(citation)) {
-        title <- citation$title
-        authors <- citation$author
-        description <- citation$note
-      }
-      calls[i] <- list(NULL)
     }
   }
+  
+  citation <- attr(design, "citation")
+  if (!is.character(citation)) {
+    title <- citation$title
+    authors <- citation$author
+  } 
 
   function_types <- lapply(design, attr, "step_type")
 
@@ -455,7 +445,6 @@ summary.design <- function(object, verbose = TRUE, ...) {
       formulae = formulae,
       title = title,
       authors = authors,
-      description = description,
       citation = citation,
       extra_summary = extra_summary,
       verbose = verbose
@@ -480,10 +469,6 @@ print.summary.design <- function(x, ...) {
       "\n\n",
       sep = ""
     )
-  }
-
-  if (!is.null(x$description)) {
-    cat(x$description, "\n\n")
   }
 
   for (i in 1:max(length(x$variables_added), length(x$quantities_added))) {

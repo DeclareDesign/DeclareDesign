@@ -25,8 +25,6 @@ diagnosand_handler <- function(data, ...,
                                label) {
   options <- quos(...)
   
-  if (length(options) > 0 && names(options)[1] == "") names(options)[1] <- label
-  
   # subsetting the data -----------------------------------------------------
   
   subset <- enquo(subset)
