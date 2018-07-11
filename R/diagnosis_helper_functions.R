@@ -120,11 +120,9 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   } else {
     group_columns <- setdiff(names(diagnosands_df), diagnosand_columns)
     return_df <- diagnosands_df
-    return_df[, diagnosand_columns] <-
-      data.frame(lapply(return_df[, diagnosand_columns, drop = FALSE],
-                        format_num,
-                        digits = digits
-      ), stringsAsFactors = FALSE)
+    
+    return_df[diagnosand_columns] <- lapply(return_df[diagnosand_columns], 
+                                            format_num, digits = digits)
   }
 
   sort_by_list <- diagnosis$group_by_set %i% colnames(return_df)
