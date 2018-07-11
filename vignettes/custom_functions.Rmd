@@ -77,4 +77,4 @@ head(draw_data(design))
 run_design(design)
 ```
 
-This example used very simple custom functions, but this framework is flexible enough to accomodate any design step that can be expressed as a function of data that returns data.
+This example used very simple custom functions, but this framework is flexible enough to accommodate any design step that can be expressed as a function of data that returns data.
