@@ -27,7 +27,7 @@
 #' @section Design Editing:
 #' \describe{
 #'   \item{\code{\link{modify_design}}}{Add, delete or replace a step}
-#'   \item{\code{\link{redesign}}}{Redeclare local variables within a design (advanced)}
+#'   \item{\code{\link{redesign}}}{Modify local variables within a design (advanced)}
 #' }
 #'
 #'

@@ -35,7 +35,7 @@ see \code{\link{modify_design}} for details.
 }
 \examples{
 
- my_population <- declare_population(N = 100, noise = rnorm(N))
+ my_population <- declare_population(N = 100, noise = rnorm(N), label = "my_pop")
 
  my_potential_outcomes <-
    declare_potential_outcomes(Y_Z_0 = noise,
@@ -48,9 +48,17 @@ see \code{\link{modify_design}} for details.
 
  design
 
-
  insert_step(design, declare_step(dplyr::mutate, income = noise^2), after = my_assignment)
  insert_step(design, declare_step(dplyr::mutate, income = noise^2), before = my_assignment)
+
+ # If you are using a design created by a designer, for example from
+ #   the DesignLibrary package, you will not have access to the step
+ #   objects. Instead, you can always use the label of the step.
+ 
+ # get the labels for the steps
+ names(design)
+ 
+ insert_step(design, declare_sampling(n = 50), after = "my_pop")
 
 
  delete_step(design, my_assignment)

@@ -29,7 +29,7 @@ find_step <- function(design, step, verb) {
 #'
 #' @examples
 #'
-#'  my_population <- declare_population(N = 100, noise = rnorm(N))
+#'  my_population <- declare_population(N = 100, noise = rnorm(N), label = "my_pop")
 #'
 #'  my_potential_outcomes <-
 #'    declare_potential_outcomes(Y_Z_0 = noise,
@@ -41,7 +41,6 @@ find_step <- function(design, step, verb) {
 #'  design <- my_population + my_potential_outcomes + my_assignment
 #'
 #'  design
-#'
 NULL
 
 #' @param before the step before which to add steps
@@ -54,6 +53,15 @@ NULL
 #'
 #'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), after = my_assignment)
 #'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), before = my_assignment)
+#'
+#'  # If you are using a design created by a designer, for example from
+#'  #   the DesignLibrary package, you will not have access to the step
+#'  #   objects. Instead, you can always use the label of the step.
+#'  
+#'  # get the labels for the steps
+#'  names(design)
+#'  
+#'  insert_step(design, declare_sampling(n = 50), after = "my_pop")
 #'
 #' @export
 insert_step <- function(design, new_step, before, after) {

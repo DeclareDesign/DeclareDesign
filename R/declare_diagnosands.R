@@ -14,6 +14,7 @@
 #'
 #'
 #' @importFrom rlang eval_tidy quos is_quosure quo_is_call %||%
+#' @importFrom stats na.omit
 #' @rdname declare_diagnosands
 diagnosand_handler <- function(data, ...,
                                select,
