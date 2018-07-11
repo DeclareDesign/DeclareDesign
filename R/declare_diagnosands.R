@@ -242,6 +242,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #'
 declare_diagnosands <- make_declarations(diagnosand_handler, "diagnosand", "diagnosands")
 
+#' @importFrom stats na.omit
 default_diagnosands <- function(data, alpha = .05, na.rm = TRUE){
   
   if(na.rm){
