@@ -114,9 +114,7 @@ declaration_template <- function(..., handler, label=NULL){
                     causal_type = this$causal_type,
                     call = match.call())
   
-  if (has_validation_fn(handler)) {
-    ret <- validate(handler, ret,  dots, label)
-  }
+  ret <- validate(handler, ret,  dots, label)
 
   ret
 }
@@ -175,7 +173,14 @@ has_validation_fn <- function(f){
 }
 
 validate <- function(handler, ret, dots, label) {
-  validation_fn(handler)(ret, dots, label)
+  if(is.character(label) && length(label) > 1)
+    declare_time_error("Please provide only one label.", ret)
+  
+  if (has_validation_fn(handler)) {
+    validation_fn(handler)(ret, dots, label)
+  } else {
+    ret
+  }
 }
 
 
