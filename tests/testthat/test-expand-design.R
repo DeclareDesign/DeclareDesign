@@ -192,3 +192,19 @@ test_that("even more kinds of parameters can be sent, vectors and scalars, etc."
     c("N", "my_estimand_func"), c("design_1", "design_2", "design_3")
   )))
 })
+
+test_that("edge case with expand but one arg works", {
+  
+  my_designer <- function(N = 100,
+                          my_estimand_func = mean) {
+    my_pop <- declare_population(N = N, Y = rnorm(N))
+    my_estimand <- declare_estimand(mand = my_estimand_func(Y))
+    my_design <- my_pop + my_estimand
+    my_design
+  }
+  
+  expect_length(expand_design(
+                    designer = my_designer, N = 5), 2)
+  expect_length(expand_design(
+    designer = my_designer, N = 5, expand = FALSE), 2)
+})

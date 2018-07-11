@@ -345,3 +345,5 @@ test_that("when a term is missing from a model there is an informative error", {
 
   expect_error(ols(data), "Not all of the terms declared in your estimator are present in the model output, including X.")
 })
+
+

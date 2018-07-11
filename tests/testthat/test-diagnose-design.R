@@ -197,3 +197,4 @@ test_that("default diagnosands work", {
   sims <- set_diagnosands(simulate_design(designs, sims = 5), declare_diagnosands(med_bias = median(estimate - estimand)))
   diag <- diagnose_design(sims, sims = 5, bootstrap_sims = FALSE)
 })
+
