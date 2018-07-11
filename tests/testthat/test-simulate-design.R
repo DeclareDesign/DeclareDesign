@@ -15,16 +15,16 @@ my_design_2 <- my_design_1
 test_that("Simulate Design works", {
   sims <- simulate_design(my_design_1, sims = 5)
   expect_equal(nrow(sims), 5)
-  
+
   sims <- simulate_design(my_design_1, my_design_2, sims = 5)
   expect_equal(nrow(sims), 10)
   expect_true(all(sims$design_label %in% c("my_design_1", "my_design_2")))
-  
+
   sims <- simulate_design(list(my_design_1, my_design_2), sims = 5)
   expect_equal(nrow(sims), 10)
-  
+
   expect_true(all(sims$design_label %in% c("design_1", "design_2")))
-  
+
   sims <-
     simulate_design(a = my_design_1, b = my_design_2, sims = 5)
   expect_true(all(sims$design_label %in% c("a", "b")))
@@ -46,8 +46,9 @@ my_designer <- function(N, tau) {
 test_that("expand and simulate", {
   my_designs <-
     expand_design(my_designer,
-                  N = c(10, 50),
-                  tau = c(5, 1), prefix = "custom_prefix")
+      N = c(10, 50),
+      tau = c(5, 1), prefix = "custom_prefix"
+    )
   sims <- simulate_design(my_designs, sims = 5)
   expect_equal(nrow(sims), 20)
   expect_true(all(sims$design_label %in% c("custom_prefix_1", "custom_prefix_2", "custom_prefix_3", "custom_prefix_4")))
@@ -55,32 +56,22 @@ test_that("expand and simulate", {
 })
 
 test_that("wrong number of sims yields error", {
-  
   expect_error(simulate_design(my_design_1, sims = rep(5, 3)), "Please provide sims a scalar or a numeric vector of length the number of steps in designs.")
-  
 })
 
 test_that("zero sims yields error", {
-  
   expect_error(simulate_design(my_design_1, sims = -1), "Sims should be >= 1")
-  
 })
 
 test_that("dupe designs give error", {
-  
   expect_error(simulate_design(my_design_1, my_design_1), "You have more than one design named my_design_1")
-  
 })
 
 
 
 test_that("no estimates estimands declared", {
-  
   my_design_noestmand <- delete_step(my_design_1, my_estimand)
   my_design_noestmand <- delete_step(my_design_noestmand, my_estimator)
-  
-  expect_error(simulate_design(my_design_noestmand, sims = 2), "No estimates or estimands were declared, so design cannot be simulated.")
-  
-})
 
-  
+  expect_error(simulate_design(my_design_noestmand, sims = 2), "No estimates or estimands were declared, so design cannot be simulated.")
+})

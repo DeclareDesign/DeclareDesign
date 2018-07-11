@@ -187,30 +187,33 @@ tidy_estimator <- function(estimator_function) {
   if (!("data" %in% names(formals(estimator_function)))) {
     stop("Must provide a `estimator_function` function with a data argument.")
   }
-  
-  
+
+
   f <- function(data, ..., estimand = NULL, label) {
     calling_args <-
       names(match.call(expand.dots = FALSE)) %i% names(formals(estimator_function))
-    
-    dots <- if ("..." %in% calling_args)
+
+    dots <- if ("..." %in% calling_args) {
       quos(...)
-    else
+    } else {
       list()
-    
+    }
+
     calling_args <- setdiff(calling_args, c("", "data", "..."))
-    
+
     for (e in calling_args) {
       dots[[e]] <-
         do.call(enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. IDK
     }
-    
-    ret <- eval_tidy(quo(estimator_function(data,!!!dots)))
-    
-    ret <- data.frame(estimator_label = label,
-                      ret,
-                      stringsAsFactors = FALSE)
-    
+
+    ret <- eval_tidy(quo(estimator_function(data, !!!dots)))
+
+    ret <- data.frame(
+      estimator_label = label,
+      ret,
+      stringsAsFactors = FALSE
+    )
+
     estimand_label <- get_estimand_label(estimand)
     if (length(estimand_label) > 0) {
       ret <-
@@ -222,9 +225,8 @@ tidy_estimator <- function(estimator_function) {
         )
     }
     ret
-    
   }
-  
+
   formals(f) <- formals(estimator_function)
   if (!"estimand" %in% names(formals(f))) {
     formals(f)["estimand"] <- list(NULL)
@@ -232,9 +234,9 @@ tidy_estimator <- function(estimator_function) {
   if (!"label" %in% names(formals(f))) {
     formals(f)$label <- alist(a = )$a
   }
-  
+
   attributes(f) <- attributes(estimator_function)
-  
+
   f
 }
 
@@ -244,43 +246,45 @@ tidy_estimator <- function(estimator_function) {
 #' @rdname declare_estimator
 model_handler <-
   function(data,
-           ...,
-           model = estimatr::difference_in_means,
-           term = FALSE) {
+             ...,
+             model = estimatr::difference_in_means,
+             term = FALSE) {
     coefficient_names <-
       enquo(term) # forces evaluation of quosure
     coefficient_names <- reveal_nse_helper(coefficient_names)
-    
+
     args <- quos(...)
-    
+
     # todo special case weights offsets for glm etc?
-    
+
     results <- eval_tidy(quo(model(!!!args, data = data)))
-    
+
     results <- fit2tidy(results, coefficient_names)
-    
+
     results
   }
 
-validation_fn(model_handler) <-  function(ret, dots, label) {
+validation_fn(model_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
-  
+
   if ("model" %in% names(dots)) {
     model <- eval_tidy(dots$model)
     if (!is.function(model) || !"data" %in% names(formals(model))) {
-      declare_time_error("Must provide a function for `model` which takes a `data` argument.",
-                         ret)
+      declare_time_error(
+        "Must provide a function for `model` which takes a `data` argument.",
+        ret
+      )
     }
-    
-    if(!quo_text(dots$model) 
-       %in% 
-       c("lm", "glm", "lm_robust", "iv_robust", "difference_in_means", "horvitz_thompson")
-       &
-       !requireNamespace("broom", quietly = TRUE)
-    ){
+
+    if (!quo_text(dots$model)
+    %in%
+      c("lm", "glm", "lm_robust", "iv_robust", "difference_in_means", "horvitz_thompson")
+    &
+      !requireNamespace("broom", quietly = TRUE)
+    ) {
       stop("You provided a ", quo_text(dots$model), " model, which DeclareDesign does not directly support. It's possible that the broom package can help. Please install the broom package with install.packages('broom') and try declaring your estimator again. If that fix does not work, you may need to write a custom estimator.")
     }
-    
+
     attr(ret, "extra_summary") <-
       sprintf("Model:\t%s", as.character(f_rhs(dots$model)))
   }
@@ -294,11 +298,10 @@ estimator_handler <- tidy_estimator(model_handler)
 # called by model_handler, resets columns names !!!
 fit2tidy <- function(fit, term = FALSE) {
   if (requireNamespace("broom", quietly = TRUE)) {
-    
+
     # broom if possible
     tidy_df <- broom::tidy(fit, conf.int = TRUE)
-    
-  } else{
+  } else {
     summ <- coef(summary(fit))
     summ <-
       summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("estimate", "std", "pr("), drop = FALSE]
@@ -312,15 +315,16 @@ fit2tidy <- function(fit, term = FALSE) {
         row.names = NULL
       )
     colnames(tidy_df) <-
-      c("term",
+      c(
+        "term",
         "estimate",
         "std.error",
         "p.value",
         "conf.low",
-        "conf.high")
-    
+        "conf.high"
+      )
   }
-  
+
   if (is.character(term)) {
     coefs_in_output <- term %in% tidy_df$term
     if (!all(coefs_in_output)) {
@@ -336,7 +340,7 @@ fit2tidy <- function(fit, term = FALSE) {
     tidy_df <-
       tidy_df[which.max(tidy_df$term != "(Intercept)"), , drop = FALSE]
   }
-  
+
   tidy_df
 }
 
@@ -349,7 +353,7 @@ get_estimand_label <- function(estimand) {
     "character" = estimand,
     "design_step" = attributes(estimand)$label,
     "list" = vapply(estimand, get_estimand_label, NA_character_),
-    #note recursion here
+    # note recursion here
     NULL = NULL,
     warning("Did not match class of `estimand`")
   )

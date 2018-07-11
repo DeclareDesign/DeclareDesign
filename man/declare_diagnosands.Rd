@@ -79,7 +79,7 @@ diagnosis <- diagnose_design(design)
 diagnosis
 }
 
-# You can select a set of those diagnosands via the \\code{select} argument e.g., 
+# You can select a set of those diagnosands via the \\code{select} argument e.g.,
 
 my_diagnosands <- declare_diagnosands(select = c(bias, rmse))
 
@@ -89,13 +89,13 @@ my_diagnosands <- declare_diagnosands(subtract = type_s_rate)
 
 # You can add your own diagnosands in addition to or instead of the defaults e.g.,
 
-my_diagnosands <- 
+my_diagnosands <-
   declare_diagnosands(median_bias = median(estimate - estimand))
 
 # or to report only \\code{median_bias}
 
-my_diagnosands <- 
-   declare_diagnosands(median_bias = median(estimate - estimand), 
+my_diagnosands <-
+   declare_diagnosands(median_bias = median(estimate - estimand),
                        keep_defaults = FALSE)
 
 # Below is the code that makes the default diagnsoands.

@@ -28,11 +28,11 @@ Set the citation of a design
 }
 \examples{
 
-design <- 
-declare_population(data = sleep) + 
+design <-
+declare_population(data = sleep) +
   declare_sampling(n = 10)
 
-design <- 
+design <-
   set_citation(design,
                author = "Lovelace, Ada",
                title = "Notes",

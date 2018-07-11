@@ -1,6 +1,6 @@
 context("Describe Variable")
 
-test_that("Describle Variable",{
+test_that("Describle Variable", {
   data_littleint <- c(rep(1, 10), rep(2, 10), rep(3, 10))
   data_littlechar <- c(rep("test", 10), rep("that", 10))
   data_littlefactor <- as.factor(data_littlechar)
@@ -34,9 +34,15 @@ test_that("Describle Variable",{
 
   expect_equal(
     describe_variable(data_mixed_numeric),
-    structure(list(min = 0, median = 5, mean = 4.43, max = 9, sd = 3.74,
-                   N_missing = 0L, N_unique = 6L), .Names = c("min", "median",
-                                                              "mean", "max", "sd", "N_missing", "N_unique"),
-              row.names = c(NA, -1L), class = "data.frame")
+    structure(list(
+      min = 0, median = 5, mean = 4.43, max = 9, sd = 3.74,
+      N_missing = 0L, N_unique = 6L
+    ),
+    .Names = c(
+      "min", "median",
+      "mean", "max", "sd", "N_missing", "N_unique"
+    ),
+    row.names = c(NA, -1L), class = "data.frame"
+    )
   )
 })

@@ -1,7 +1,6 @@
 context("Noncompliance")
 
 test_that("Noncompliance", {
-
   skip_if_not_installed("AER")
 
   my_population <- declare_population(N = 100, noise = rnorm(N))
@@ -9,14 +8,15 @@ test_that("Noncompliance", {
   POS_Y <- declare_potential_outcomes(Y_D_0 = noise, Y_D_1 = Y_D_0 + 2)
   POS_Z <- declare_potential_outcomes(
     D_Z_0 = rbinom(n = N, size = 1, prob = pnorm(noise - 1)),
-    D_Z_1 = rbinom(n = N, size = 1, prob = pnorm(noise + 1)))
+    D_Z_1 = rbinom(n = N, size = 1, prob = pnorm(noise + 1))
+  )
 
   my_assignment <- declare_assignment(m = 50)
 
   CACE <- declare_estimand(CACE = mean(Y_D_1[complier == 1] - Y_D_0[complier == 1]))
   ITT_d <- declare_estimand(ITT_d = mean(complier))
 
-  cace_estimator <- function(data, alpha = 0.05){
+  cace_estimator <- function(data, alpha = 0.05) {
     fit <- AER::ivreg(Y ~ D | Z, data = data)
     N <- nrow(data)
     k <- 2
@@ -38,10 +38,10 @@ test_that("Noncompliance", {
         conf.low = conf.low,
         conf.high = conf.high
       )
-    return_frame[return_frame$variable_names == "D",]
+    return_frame[return_frame$variable_names == "D", ]
   }
 
-  cace_hat <- declare_estimator(handler=tidy_estimator(cace_estimator), estimand = CACE, label="CACE_hat")
+  cace_hat <- declare_estimator(handler = tidy_estimator(cace_estimator), estimand = CACE, label = "CACE_hat")
 
   design <- my_population +
     POS_Y +
@@ -61,59 +61,58 @@ test_that("Noncompliance", {
 
   expect_equal(diag$diagnosands$mean_estimand, 2)
   expect_equal(diag$diagnosands$estimator_label, "CACE_hat") # ITT_d is not in output - not estimated
-
 })
 
 test_that("POs correctly assembled for noncompliance case", {
-  
-  pop <- declare_population(N = 10000,
-                            type = sample(
-                              c("Complier", "Never-taker", "Always-taker"),
-                              size = N,
-                              prob = c(0.5, 0.2, 0.3),
-                              replace = TRUE),
-                            noise = rnorm(N))
-  
-  df <- pop()
-  
-  pos_D <- declare_potential_outcomes(D ~ as.numeric(type == "Always-taker" | type == "Complier" & Z == 1))
-  
-  
-  expect_equal(colnames(pos_D(df)), c("ID", "type", "noise", "D_Z_0", "D_Z_1"))
-  
-  pos_Y <- declare_potential_outcomes(
-    Y ~ 0.4 * D * (type == "Complier") -0.2 * (type == "Never-taker") +
-      0.5 * (type == "Always-taker") +
-      noise, assignment_variables = "D"
+  pop <- declare_population(
+    N = 10000,
+    type = sample(
+      c("Complier", "Never-taker", "Always-taker"),
+      size = N,
+      prob = c(0.5, 0.2, 0.3),
+      replace = TRUE
+    ),
+    noise = rnorm(N)
   )
-  
+
+  df <- pop()
+
+  pos_D <- declare_potential_outcomes(D ~ as.numeric(type == "Always-taker" | type == "Complier" & Z == 1))
+
+
+  expect_equal(colnames(pos_D(df)), c("ID", "type", "noise", "D_Z_0", "D_Z_1"))
+
+  pos_Y <- declare_potential_outcomes(
+    Y ~ 0.4 * D * (type == "Complier") - 0.2 * (type == "Never-taker") +
+      0.5 * (type == "Always-taker") +
+      noise,
+    assignment_variables = "D"
+  )
+
   assignment <- declare_assignment(prob = 0.5)
-  
+
   suppressWarnings(
     noncompliance <-
-      pop + 
-      pos_D + 
-      assignment + 
-      #declare_reveal(D, Z) + 
-      pos_Y + 
+      pop +
+      pos_D +
+      assignment +
+      # declare_reveal(D, Z) +
+      pos_Y +
       declare_reveal(Y, D)
   )
-  
+
   e <- (noncompliance[[4]])
-  
+
   expect_true(inherits(e, "design_step"))
   expect_equal(attr(e, "step_type"), "reveal")
   expect_equal(attr(e, "step_meta")$assignment_variables, "Z")
   expect_equal(attr(e, "step_meta")$outcome_variables, "D")
-  
 })
 
 
-test_that("POS don't erase Z",{
-  
+test_that("POS don't erase Z", {
   pop <- declare_population(N = 10, Z = rbinom(N, size = 1, prob = .5))
   po <- declare_potential_outcomes(Y ~ Z)
   df <- pop()
   expect_equal(df$Z, po(df)$Z)
 })
-

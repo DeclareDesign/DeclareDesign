@@ -38,41 +38,36 @@
 #'
 #' @export
 expand_design <- function(designer, ..., expand = TRUE, prefix = "design") {
-  
   dots_quos <- quos(...)
-  
+
   if (length(dots_quos) > 0) {
-    
     args_list <- expand_args(..., expand = expand)
     args_names <- expand_args_names(!!!dots_quos, expand = expand)
     # args_names <- rbind_disjoint(lapply(args_list, data.frame))
-    
+
     designs <- lapply(args_list, function(x) do.call(designer, args = x))
-    
+
     for (i in seq_along(designs)) {
-      attr(designs[[i]], "parameters") <- setNames(args_names[i, , drop = FALSE], names(args_names))  
+      attr(designs[[i]], "parameters") <- setNames(args_names[i, , drop = FALSE], names(args_names))
     }
-    
-    if (length(designs) == 1){
+
+    if (length(designs) == 1) {
       designs <- designs[[1]]
     } else {
       names(designs) <- paste0(prefix, "_", seq_len(length(designs)))
     }
-    
   } else {
     designs <- designer()
   }
-  
+
   return(designs)
-  
 }
 
 
 expand_args <- function(..., expand = TRUE) {
-  
   dots <- list(...)
-  
-  if(expand){
+
+  if (expand) {
     lens <- lapply(dots, function(x) seq_len(length(x)))
     args_positions <- do.call(expand.grid, args = list(lens, stringsAsFactors = TRUE))
     args_list <- vector("list", nrow(args_positions))
@@ -107,13 +102,13 @@ expand_args <- function(..., expand = TRUE) {
 }
 
 #' @importFrom rlang quo_squash is_call call_args
-expand_args_names <- function(..., expand = TRUE){
+expand_args_names <- function(..., expand = TRUE) {
   dots_quos <- quos(...)
-  
+
   dots_names <- lapply(dots_quos, function(x) {
     x_expr <- quo_squash(x)
     is_list_c <- expr_text(as.list(x_expr)[[1]]) %in% c("c", "list")
-    if(!is_list_c){ 
+    if (!is_list_c) {
       x_is_call <- is_call(x_expr)
       if (x_is_call) {
         as.character(eval_tidy(x))
@@ -124,7 +119,7 @@ expand_args_names <- function(..., expand = TRUE){
       as.character(call_args(x_expr))
     }
   })
-  if(expand){
+  if (expand) {
     ret <- expand.grid(dots_names, stringsAsFactors = FALSE)
   } else {
     ret <- data.frame(dots_names, stringsAsFactors = FALSE)
@@ -132,52 +127,4 @@ expand_args_names <- function(..., expand = TRUE){
   ret
 }
 
-
-#' Redesign
-#' 
-#' \code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters internally. (Advanced).
-#' 
-#' Importantly, \code{redesign} will edit any symbol in your design, but if the symbol you attempt to change does not exist no changes will be made and no error or warning will be issued.
-#'
-#' @param design a design
-#' @param ... arguments to redesign e.g., n = 100
-#' @param expand boolean - if true, form the crossproduct of the ..., otherwise recycle them
-#' 
-#' @examples 
-#' 
-#' n <- 500
-#' population <- declare_population(N = 1000)
-#' sampling <- declare_sampling(n = n)
-#' design <- population + sampling
-#'
-#' # returns a single, modified design
-#' modified_design <- redesign(design, n = 200)
-#'
-#' # returns a list of six modified designs
-#' design_vary_N <- redesign(design, n = seq(400, 900, 100))
-#' 
-#' # When redesigning with arguments that are vectors, 
-#' #   use list() in redesign, with each list item 
-#' #   representing a design you wish to create
-#' 
-#' prob_each <- c(.1, .5, .4)
-#' 
-#' assignment <- declare_assignment(prob_each = prob_each)
-#' 
-#' design <- population + assignment
-#' 
-#' # returns two designs
-#' 
-#' designs_vary_prob_each <- redesign(
-#'   design, 
-#'   prob_each = list(c(.2, .5, .3), c(0, .5, .5)))
-#' 
-#' @export
-redesign <- function(design, ..., expand = TRUE) {
-  f <- function(...) {
-    clone_design_edit(design, ...)
-  }
-  design <- expand_design(f, ..., expand = expand)
-  structure(design, code = NULL)
-}
 

@@ -2,14 +2,16 @@ context("Multiple estimands can be mapped to one estimator")
 
 
 test_that("Multiple estimands can be mapped to one estimator", {
-  pop_var <- function(x) {mean((x - mean(x))^2)}
-  
+  pop_var <- function(x) {
+    mean((x - mean(x))^2)
+  }
+
   x <- rnorm(100)
   dat <- data.frame(X = x)
   sx <- sum((dat$X - mean(dat$X))^2)
-  
-  
-  
+
+
+
   simp_pop <- declare_population(
     epsilon = rnorm(N, sd = 2),
     Y = X + epsilon
@@ -26,10 +28,10 @@ test_that("Multiple estimands can be mapped to one estimator", {
     term = "X"
   )
 
-  des <- 
+  des <-
     declare_population(dat) +
-    simp_pop + 
-    dgp_se + 
+    simp_pop +
+    dgp_se +
     obs_se +
     lmc
 
@@ -49,30 +51,24 @@ test_that("Multiple estimands can be mapped to one estimator", {
 })
 
 
-test_that("More multiple estimands",{
-  
-
-my_smp_fun <- function(data) {
-  S <- rbinom(n = nrow(data), size = 1, prob = pnorm(data$noise))
-  return(data[S == 1, , drop = FALSE])
-}
+test_that("More multiple estimands", {
+  my_smp_fun <- function(data) {
+    S <- rbinom(n = nrow(data), size = 1, prob = pnorm(data$noise))
+    return(data[S == 1, , drop = FALSE])
+  }
 
 
-pop <- declare_population(N = 100, noise = rnorm(N))
-pos <- declare_potential_outcomes(Y ~ Z*noise)
-pate <- declare_estimand(pate = mean(Y_Z_1 - Y_Z_0))
-smp <- declare_sampling(handler = my_smp_fun)
-sate <- declare_estimand(sate = mean(Y_Z_1 - Y_Z_0))
-assgn <- declare_assignment(m = 10)
-my_reveal <- declare_reveal()
-mator_both <- declare_estimator(Y ~ Z, estimand = c(pate, sate))
+  pop <- declare_population(N = 100, noise = rnorm(N))
+  pos <- declare_potential_outcomes(Y ~ Z * noise)
+  pate <- declare_estimand(pate = mean(Y_Z_1 - Y_Z_0))
+  smp <- declare_sampling(handler = my_smp_fun)
+  sate <- declare_estimand(sate = mean(Y_Z_1 - Y_Z_0))
+  assgn <- declare_assignment(m = 10)
+  my_reveal <- declare_reveal()
+  mator_both <- declare_estimator(Y ~ Z, estimand = c(pate, sate))
 
 
 
-des <- pop + pos + pate + smp + sate + assgn + my_reveal + mator_both
-expect_equal(get_estimates(des)$estimand_label, c("pate", "sate"))
-
+  des <- pop + pos + pate + smp + sate + assgn + my_reveal + mator_both
+  expect_equal(get_estimates(des)$estimand_label, c("pate", "sate"))
 })
-
-
-

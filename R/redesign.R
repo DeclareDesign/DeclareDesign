@@ -1,0 +1,49 @@
+#' Redesign
+#'
+#' \code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters internally. (Advanced).
+#'
+#' Importantly, \code{redesign} will edit any symbol in your design, but if the symbol you attempt to change does not exist no changes will be made and no error or warning will be issued. 
+#' 
+#' Please note that \code{redesign} functionality is experimental and may be changed in future versions.  
+#'
+#' @param design a design
+#' @param ... arguments to redesign e.g., n = 100
+#' @param expand boolean - if true, form the crossproduct of the ..., otherwise recycle them
+#'
+#' @examples
+#'
+#' n <- 500
+#' population <- declare_population(N = 1000)
+#' sampling <- declare_sampling(n = n)
+#' design <- population + sampling
+#'
+#' # returns a single, modified design
+#' modified_design <- redesign(design, n = 200)
+#'
+#' # returns a list of six modified designs
+#' design_vary_N <- redesign(design, n = seq(400, 900, 100))
+#'
+#' # When redesigning with arguments that are vectors,
+#' #   use list() in redesign, with each list item
+#' #   representing a design you wish to create
+#'
+#' prob_each <- c(.1, .5, .4)
+#'
+#' assignment <- declare_assignment(prob_each = prob_each)
+#'
+#' design <- population + assignment
+#'
+#' # returns two designs
+#'
+#' designs_vary_prob_each <- redesign(
+#'   design,
+#'   prob_each = list(c(.2, .5, .3), c(0, .5, .5)))
+#'
+#' @export
+redesign <- function(design, ..., expand = TRUE) {
+  f <- function(...) {
+    clone_design_edit(design, ...)
+  }
+  design <- expand_design(f, ..., expand = expand)
+  structure(design, code = NULL)
+}
