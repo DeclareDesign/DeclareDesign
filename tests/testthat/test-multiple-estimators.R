@@ -38,21 +38,16 @@ test_that("Two estimators, Two estimands (crossed)", {
   des <-
     declare_population(sleep) +
     # Make a noisier outcome
-    declare_potential_outcomes(extra1 ~ extra + 2 * (Z == 1) + 
-                                 rnorm(length(extra))) +
+    declare_potential_outcomes(extra1 ~ extra + 2 * (Z == 1) + rnorm(length(extra))) +
 
     declare_estimand(ATE = mean(extra1_Z_1) - mean(extra1_Z_0)) +
-    declare_estimand(ATT = mean(extra1_Z_1) - mean(extra1_Z_0), 
-                     subset = group == 2) +
+    declare_estimand(ATT = mean(extra1_Z_1) - mean(extra1_Z_0), subset = group == 2) +
 
     declare_assignment() +
     declare_reveal(outcome_variables = extra1, assignment_variables = Z) +
 
-    declare_estimator(extra1 ~ Z, model = difference_in_means, 
-                      estimand = c("ATE", "ATT"), label = "DIM") +
-    declare_estimator(extra1 ~ Z + group, model = lm_robust, 
-                      clusters = ID, estimand = c("ATE", "ATT"), 
-                      label = "OLS + control")
+    declare_estimator(extra1 ~ Z, model = difference_in_means, estimand = c("ATE", "ATT"), label = "DIM") +
+    declare_estimator(extra1 ~ Z + group, model = lm_robust, clusters = ID, estimand = c("ATE", "ATT"), label = "OLS + control")
 
   diag <- diagnose_design(des, sims = 5, bootstrap_sims = FALSE)
   expect_equal(nrow(diag$diagnosands), 4)

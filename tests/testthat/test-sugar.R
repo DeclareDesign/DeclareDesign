@@ -6,8 +6,7 @@ test_that("multiple PO / reveal", {
 
   multi_po <- rlang:::quos()
   multi_po[paste0("Y", 1:3, "_Z_0")] <- list(rlang::quo(noise))
-  multi_po[paste0("Y", 1:3, "_Z_1")] <- 
-    list(rlang::quo(noise + rnorm(N, mean = 2, sd = 2)))
+  multi_po[paste0("Y", 1:3, "_Z_1")] <- list(rlang::quo(noise + rnorm(N, mean = 2, sd = 2)))
 
   my_potential_outcomes3 <- declare_potential_outcomes(!!!multi_po)
 
@@ -17,14 +16,9 @@ test_that("multiple PO / reveal", {
 
   reveal_multiple <- declare_reveal(outcome_variables = !!my_outcomes)
 
-  design <- my_population + 
-    my_potential_outcomes3 + 
-    my_assignment + 
-    reveal_multiple
+  design <- my_population + my_potential_outcomes3 + my_assignment + reveal_multiple
 
-  expect_equal(grep("^Y\\d$", 
-                    colnames(draw_data(design)), 
-                    value = TRUE), my_outcomes)
+  expect_equal(grep("^Y\\d$", colnames(draw_data(design)), value = TRUE), my_outcomes)
 })
 
 
@@ -40,10 +34,7 @@ test_that("Lots of levels", {
   names(outcomes) <- paste0("Y_Z_", LETTERS)
 
 
-  design <- 
-    declare_population(
-      N = 26000, 
-      preference = sample(LETTERS, N, replace = TRUE)) +
+  design <- declare_population(N = 26000, preference = sample(LETTERS, N, replace = TRUE)) +
     declare_potential_outcomes(!!!outcomes) +
     declare_assignment(conditions = !!LETTERS) +
     declare_reveal()

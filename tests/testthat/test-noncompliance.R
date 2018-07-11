@@ -13,8 +13,7 @@ test_that("Noncompliance", {
 
   my_assignment <- declare_assignment(m = 50)
 
-  CACE <- declare_estimand(
-    CACE = mean(Y_D_1[complier == 1] - Y_D_0[complier == 1]))
+  CACE <- declare_estimand(CACE = mean(Y_D_1[complier == 1] - Y_D_0[complier == 1]))
   ITT_d <- declare_estimand(ITT_d = mean(complier))
 
   cace_estimator <- function(data, alpha = 0.05) {
@@ -42,9 +41,7 @@ test_that("Noncompliance", {
     return_frame[return_frame$variable_names == "D", ]
   }
 
-  cace_hat <- declare_estimator(
-    handler = tidy_estimator(cace_estimator), 
-    estimand = CACE, label = "CACE_hat")
+  cace_hat <- declare_estimator(handler = tidy_estimator(cace_estimator), estimand = CACE, label = "CACE_hat")
 
   design <- my_population +
     POS_Y +
@@ -63,8 +60,7 @@ test_that("Noncompliance", {
   diag <- diagnose_design(design, sims = 2, bootstrap_sims = FALSE)
 
   expect_equal(diag$diagnosands$mean_estimand, 2)
-  expect_equal(diag$diagnosands$estimator_label, "CACE_hat") 
-   # ITT_d is not in output - not estimated
+  expect_equal(diag$diagnosands$estimator_label, "CACE_hat") # ITT_d is not in output - not estimated
 })
 
 test_that("POs correctly assembled for noncompliance case", {
@@ -81,8 +77,7 @@ test_that("POs correctly assembled for noncompliance case", {
 
   df <- pop()
 
-  pos_D <- declare_potential_outcomes(
-    D ~ as.numeric(type == "Always-taker" | type == "Complier" & Z == 1))
+  pos_D <- declare_potential_outcomes(D ~ as.numeric(type == "Always-taker" | type == "Complier" & Z == 1))
 
 
   expect_equal(colnames(pos_D(df)), c("ID", "type", "noise", "D_Z_0", "D_Z_1"))

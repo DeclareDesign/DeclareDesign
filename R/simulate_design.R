@@ -63,9 +63,7 @@ simulate_design <- function(..., sims = 500) {
     SIMPLIFY = FALSE
   )
 
-  simulations_list <- Map(
-    cbind, design_label = names(simulations_list), 
-    simulations_list, stringsAsFactors = FALSE)
+  simulations_list <- Map(cbind, design_label = names(simulations_list), simulations_list, stringsAsFactors = FALSE)
 
   # Cleanup
   simulations_df <- rbind_disjoint(simulations_list)
@@ -82,13 +80,9 @@ simulate_design <- function(..., sims = 500) {
     out
   })
   parameters_df <- rbind_disjoint(parameters_df_list)
-  parameters_df <- data.frame(
-    lapply(parameters_df, type_convert), stringsAsFactors = FALSE)
+  parameters_df <- data.frame(lapply(parameters_df, type_convert), stringsAsFactors = FALSE)
 
-  simulations_df <- simulations_df[, 
-                                   reorder_columns(parameters_df, 
-                                                   simulations_df), 
-                                   drop = FALSE]
+  simulations_df <- simulations_df[, reorder_columns(parameters_df, simulations_df), drop = FALSE]
 
   attr(simulations_df, "parameters") <- parameters_df
 
@@ -98,11 +92,8 @@ simulate_design <- function(..., sims = 500) {
 
 #' @importFrom rlang as_list
 simulate_single_design <- function(design, sims) {
-  if (!is_bare_integerish(sims) || 
-      (length(design) != length(sims) & length(sims) != 1)) {
-    stop(
-      "Please provide sims a scalar or a numeric vector of length the number of steps in designs.", 
-      call. = FALSE)
+  if (!is_bare_integerish(sims) || (length(design) != length(sims) & length(sims) != 1)) {
+    stop("Please provide sims a scalar or a numeric vector of length the number of steps in designs.", call. = FALSE)
   }
 
   if (min(sims) < 1) {
@@ -144,17 +135,14 @@ simulate_single_design <- function(design, sims) {
       return(df)
     }
 
-    df <- cbind(sim_ID = rep(seq_along(subresult), 
-                             vapply(subresult, nrow, 0L)), df)
+    df <- cbind(sim_ID = rep(seq_along(subresult), vapply(subresult, nrow, 0L)), df)
   }
 
   estimates_df <- results2x(results_list, "estimates_df")
   estimands_df <- results2x(results_list, "estimands_df")
 
   if (is_empty(estimates_df) && is_empty(estimands_df)) {
-    stop(
-      "No estimates or estimands were declared, so design cannot be simulated.", 
-      call. = FALSE)
+    stop("No estimates or estimands were declared, so design cannot be simulated.", call. = FALSE)
   } else if (is_empty(estimands_df)) {
     simulations_df <- estimates_df
   } else if (is_empty(estimates_df)) {

@@ -124,8 +124,7 @@ test_that("even more kinds of parameters can be sent, vectors and scalars, etc."
     pop + pos + assgn + mand + mator
   }
 
-  designs <- expand_design(my_designer, N = seq(30, 100, 10), 
-                           ate = seq(0, .5, length.out = 3))
+  designs <- expand_design(my_designer, N = seq(30, 100, 10), ate = seq(0, .5, length.out = 3))
   expect_equal(sapply(designs, attr, "parameters"), structure(list(
     "30", "0", "40", "0", "50", "0", "60", "0", "70",
     "0", "80", "0", "90", "0", "100", "0", "30", "0.25", "40",
@@ -178,11 +177,8 @@ test_that("even more kinds of parameters can be sent, vectors and scalars, etc."
       my_estimand_func = 10
     )
 
-  expect_equal(sapply(design_list, attr, "parameters"), 
-               structure(list("10", "10", "50", "10", "100", "10"), 
-                         .Dim = 2:3, .Dimnames = list(
-                           c("N", "my_estimand_func"),
-                           c("design_1", "design_2", "design_3")
+  expect_equal(sapply(design_list, attr, "parameters"), structure(list("10", "10", "50", "10", "100", "10"), .Dim = 2:3, .Dimnames = list(
+    c("N", "my_estimand_func"), c("design_1", "design_2", "design_3")
   )))
 
   design_list <-
@@ -192,10 +188,7 @@ test_that("even more kinds of parameters can be sent, vectors and scalars, etc."
       my_estimand_func = mean
     )
 
-  expect_equal(sapply(design_list, attr, "parameters"), 
-               structure(list("10", "mean", "50", "mean", "100", "mean"), 
-                         .Dim = 2:3, .Dimnames = list(
-                           c("N", "my_estimand_func"), 
-                           c("design_1", "design_2", "design_3")
+  expect_equal(sapply(design_list, attr, "parameters"), structure(list("10", "mean", "50", "mean", "100", "mean"), .Dim = 2:3, .Dimnames = list(
+    c("N", "my_estimand_func"), c("design_1", "design_2", "design_3")
   )))
 })

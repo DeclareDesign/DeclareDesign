@@ -41,7 +41,6 @@ test_that("test with user-specified text citation", {
 
   design <- set_citation(design, citation = text)
 
-  expect_output(cite <- cite_design(design), 
-                paste0('[1] "', text, '"'), fixed = TRUE)
+  expect_output(cite <- cite_design(design), paste0('[1] "', text, '"'), fixed = TRUE)
   expect_equal(cite, text)
 })

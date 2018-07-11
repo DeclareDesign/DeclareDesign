@@ -5,8 +5,7 @@ N <- 500
 my_population <- declare_population(N = N, noise = rnorm(N))
 
 my_potential_outcomes <-
-  declare_potential_outcomes(
-    Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+  declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
 my_sampling <- declare_sampling(n = 250)
 
@@ -49,13 +48,7 @@ test_that("capitalization of parameter names are retained", {
     my_asgn <- declare_assignment(m = floor(n / 2))
     my_mand <- declare_estimand(mean(Y_Z_1) - mean(Y_Z_0))
     my_estimator <- declare_estimator(Y ~ Z, estimand = my_mand)
-    my_design <- my_pop + 
-      my_pos + 
-      my_mand + 
-      my_smp + 
-      my_asgn + 
-      declare_reveal() +
-      my_estimator
+    my_design <- my_pop + my_pos + my_mand + my_smp + my_asgn + declare_reveal() + my_estimator
     my_design
   }
 
@@ -83,7 +76,5 @@ test_that("capitalization of parameter names are retained", {
 test_that("select", {
   dx <- diagnose_design(design, sims = 10, bootstrap_sims = 5)
   reshape <- reshape_diagnosis(dx, select = "Bias")
-  expect_equal(colnames(reshape), 
-               c("Design Label", "Estimand Label", "Estimator Label", 
-                 "Term", "N Sims", "Bias"))
+  expect_equal(colnames(reshape), c("Design Label", "Estimand Label", "Estimator Label", "Term", "N Sims", "Bias"))
 })

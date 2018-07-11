@@ -75,13 +75,9 @@ summary.diagnosis <- function(object, ...) {
 #' @export
 print.summary.diagnosis <- function(x, ...) {
   n_sims <- unique(x$diagnosands_df$n_sims)
-  cat(paste0("\nResearch design diagnosis", 
-             ifelse(length(n_sims) == 1, 
-                    paste0(" based on ", n_sims, " simulations"), ""), "."))
+  cat(paste0("\nResearch design diagnosis", ifelse(length(n_sims) == 1, paste0(" based on ", n_sims, " simulations"), ""), "."))
   if (x$bootstrap_sims > 0) {
-    cat(
-      " Diagnosand estimates with bootstrapped standard errors in parentheses (", 
-      x$bootstrap_sims, " replicates).", sep = "")
+    cat(" Diagnosand estimates with bootstrapped standard errors in parentheses (", x$bootstrap_sims, " replicates).", sep = "")
   }
   cat("\n\n")
   x <- reshape_diagnosis(x)
@@ -115,8 +111,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
 
   if (is.data.frame(diagnosis$bootstrap_replicates)) {
     diagnosand_se_columns <- paste0("se(", diagnosis$diagnosand_names, ")")
-    group_columns <- setdiff(names(diagnosands_df),
-                             c(diagnosand_columns, diagnosand_se_columns))
+    group_columns <- setdiff(names(diagnosands_df), c(diagnosand_columns, diagnosand_se_columns))
     return_df <- clean_bootstrap_df(
       diagnosis, digits, diagnosand_columns,
       diagnosand_se_columns, group_columns,
@@ -132,13 +127,11 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   # Reorder rows
   sort_by_list <- diagnosis$group_by_set %icn% return_df
 
-  return_df <- return_df[
-    do.call(order, as.list(return_df[, sort_by_list])), , drop = FALSE]
+  return_df <- return_df[do.call(order, as.list(return_df[, sort_by_list])), , drop = FALSE]
 
   # blank cells for SE rows
   levels(return_df$design_label) <- c(levels(return_df$design_label), "")
-  return_df[return_df$statistic == "SE", 
-            c(sort_by_list, parameter_names, "n_sims")] <- ""
+  return_df[return_df$statistic == "SE", c(sort_by_list, parameter_names, "n_sims")] <- ""
   return_df$statistic <- NULL
 
   # Make names nicer
@@ -151,8 +144,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   }
 
   names_to_change <- setdiff(names(return_df), parameter_names)
-  names(return_df)[names(return_df) %in% names_to_change] <- 
-    make_nice_names(names_to_change)
+  names(return_df)[names(return_df) %in% names_to_change] <- make_nice_names(names_to_change)
 
   # Select columns
   if (!is.null(select)) {
@@ -164,9 +156,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
       ))
     }
 
-    return_df <- return_df[, 
-                           c(make_nice_names(c(sort_by_list, "n_sims")), 
-                             select), drop = FALSE]
+    return_df <- return_df[, c(make_nice_names(c(sort_by_list, "n_sims")), select), drop = FALSE]
   }
 
   rownames(return_df) <- NULL
@@ -195,14 +185,11 @@ clean_bootstrap_df <- function(diagnosis, digits, diagnosand_columns,
       clean_values_df
     )
 
-  names(diagnosands_only_df) <- 
-    c(group_columns, "statistic", diagnosand_columns)
+  names(diagnosands_only_df) <- c(group_columns, "statistic", diagnosand_columns)
 
   # Make se only df
   se_only_df <- diagnosands_df[, diagnosand_se_columns, drop = FALSE]
-  se_only_df <- data.frame(
-    lapply(se_only_df, add_parens, digits = digits), 
-    stringsAsFactors = FALSE)
+  se_only_df <- data.frame(lapply(se_only_df, add_parens, digits = digits), stringsAsFactors = FALSE)
   colnames(se_only_df) <- diagnosand_columns
 
   se_only_df <- cbind(
@@ -211,13 +198,10 @@ clean_bootstrap_df <- function(diagnosis, digits, diagnosand_columns,
   )
 
   # Merge
-  return_df <- rbind_disjoint(
-    list(diagnosands_only_df, se_only_df), infill = "")
+  return_df <- rbind_disjoint(list(diagnosands_only_df, se_only_df), infill = "")
 
   # NA bootstrap rows
-  return_df$design_label <- 
-    factor(return_df$design_label, 
-           levels = c(levels(return_df$design_label), ""))
+  return_df$design_label <- factor(return_df$design_label, levels = c(levels(return_df$design_label), ""))
 
   return(return_df)
 }

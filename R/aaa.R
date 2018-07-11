@@ -2,8 +2,7 @@
 # Copies an environment chain
 #' @importFrom rlang env_clone
 env_deep_copy <- function(e) {
-  # Cloning the CheckExEnv causes examples to autofail, 
-  #    it has delayedAssign("F", stop())
+  # Cloning the CheckExEnv causes examples to autofail, it has delayedAssign("F", stop())
   if (environmentName(e) == "CheckExEnv") {
     e
   } else if (identical(e, emptyenv())) {
@@ -68,13 +67,8 @@ rename_dots <- function(handler, dots, addData = TRUE) {
 }
 
 # Returns a new function(data) which calls FUN(data, dots)
-currydata <-
-  function(FUN,
-           dots,
-           addDataArg = TRUE,
-           strictDataParam = TRUE,
-           cloneDots = TRUE) {
-    # heuristic to reuse deep clones
+currydata <- function(FUN, dots, addDataArg = TRUE, strictDataParam = TRUE, cloneDots = TRUE) {
+  # heuristic to reuse deep clones
   if (cloneDots) {
     dots <- dots_env_copy(dots)
   }
@@ -138,15 +132,8 @@ declaration_template <- function(..., handler, label = NULL) {
 }
 
 # data structure for steps
-build_step <-
-  function(curried_fn,
-           handler,
-           dots,
-           label,
-           step_type,
-           causal_type,
-           call) {
-    structure(
+build_step <- function(curried_fn, handler, dots, label, step_type, causal_type, call) {
+  structure(
     curried_fn,
     handler = handler,
     dots = dots,
@@ -159,13 +146,8 @@ build_step <-
 }
 
 # generate declaration steps (eg declare_population) by setting the default handler and metadata
-make_declarations <-
-  function(default_handler,
-           step_type,
-           causal_type = "dgp",
-           default_label,
-           strictDataParam = TRUE) {
-    declaration <- declaration_template
+make_declarations <- function(default_handler, step_type, causal_type = "dgp", default_label, strictDataParam = TRUE) {
+  declaration <- declaration_template
 
   formals(declaration)$handler <- substitute(default_handler)
   if (!missing(default_label)) {
@@ -213,6 +195,4 @@ validate <- function(handler, ret, dots, label) {
 #' @param handler  a tidy-in, tidy-out function
 #' @param label    a string describing the step
 #' @keywords internal
-declare_internal_inherit_params <-
-  make_declarations(function(data, ...)
-    data.frame(BLNK = "MSG"), step_type = "BLNKMSG")
+declare_internal_inherit_params <- make_declarations(function(data, ...) data.frame(BLNK = "MSG"), step_type = "BLNKMSG")

@@ -3,8 +3,7 @@ context("Design summary")
 test_that("Basic design summary", {
   my_population <- declare_population(N = 500, noise = rnorm(N))
 
-  my_potential_outcomes <- declare_potential_outcomes(
-    Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
   my_sampling <- declare_sampling(n = 250)
 
@@ -36,8 +35,7 @@ test_that("Basic design summary", {
 
   s_short <- summary(design, verbose = FALSE)
 
-  expect_failure(
-    expect_output(print(summary(design, verbose = FALSE)), "Formula"))
+  expect_failure(expect_output(print(summary(design, verbose = FALSE)), "Formula"))
 })
 
 
@@ -65,8 +63,7 @@ test_that("Add Quantitites and Alter Variables", {
 })
 
 test_that("str() works", {
-  expect_output(str(declare_population(N = 50)), 
-                "design_step:\\t declare_population[(]N = 50[)] ")
+  expect_output(str(declare_population(N = 50)), "design_step:\\t declare_population[(]N = 50[)] ")
 })
 
 test_that("summary, custom estimator handler, numeric value", {

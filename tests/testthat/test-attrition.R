@@ -19,8 +19,7 @@ test_that("attrition / formula PO", {
 
 
   my_reveal_attrition <- declare_reveal(outcome_variables = "R")
-  my_reveal_outcomes <- declare_reveal(
-    outcome_variables = "Y", attrition_variables = "R")
+  my_reveal_outcomes <- declare_reveal(outcome_variables = "Y", attrition_variables = "R")
 
   my_design <-
     my_population +

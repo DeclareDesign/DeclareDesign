@@ -46,8 +46,7 @@ test_that("manual label", {
 test_that("custom estimand has label", {
   ## custom estimand function
   my_estimand_function <- function(data, label) {
-    with(data, data.frame(estimand_label = label, 
-                          estimand = median(Y_Z_1 - Y_Z_0)))
+    with(data, data.frame(estimand_label = label, estimand = median(Y_Z_1 - Y_Z_0)))
   }
   my_estimand_custom <- declare_estimand(
     handler = my_estimand_function, label = "medianTE"
@@ -114,8 +113,7 @@ test_that("multiple estimand declarations work", {
 })
 
 test_that("duplicated labels fail", {
-  # This could eventually be fixed so that the 
-  #   estimand object names are inherited
+  # This could eventually be fixed so that the estimand object names are inherited
   # default labeling whatsoever
   sate_nolabel <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
   pate_nolabel <- declare_estimand(mean(Y_Z_1 - Y_Z_0))

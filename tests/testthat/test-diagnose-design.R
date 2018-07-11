@@ -7,8 +7,7 @@ test_that("allow design functions to be sent to simulate design and diagnose_des
     my_population <- declare_population(N = N, noise = rnorm(N))
 
     my_potential_outcomes <-
-      declare_potential_outcomes(
-        Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+      declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
     my_sampling <- declare_sampling(n = 250)
 
@@ -40,21 +39,16 @@ test_that("allow design functions to be sent to simulate design and diagnose_des
 
   expect_equal(
     sims_out[, 1:2],
-    structure(list(design_label = 
-                     c("my_design_function", "my_design_function"), 
-                   sim_ID = 1:2), class = "data.frame", 
-              row.names = c(NA, -2L))
+    structure(list(design_label = c("my_design_function", "my_design_function"), sim_ID = 1:2), class = "data.frame", row.names = c(NA, -2L))
   )
 
-  diag_out <- diagnose_design(
-    my_design_function, sims = 2, bootstrap_sims = FALSE)
+  diag_out <- diagnose_design(my_design_function, sims = 2, bootstrap_sims = FALSE)
 
 
   expect_equal(
     diag_out$diagnosands_df[, 1:4],
     structure(list(
-      design_label = 
-        structure(1L, .Label = "my_design_function", class = "factor"),
+      design_label = structure(1L, .Label = "my_design_function", class = "factor"),
       estimand_label = "ATE", estimator_label = "estimator",
       term = "Z"
     ), class = "data.frame", row.names = c(
@@ -68,9 +62,7 @@ test_that("allow design functions to be sent to simulate design and diagnose_des
 test_that("error when you send other objects to diagnose", {
 
   # must send a function or a design object
-  expect_error(
-    diagnose_design(rep(3, 2)), 
-    "Please only send design objects or functions with no arguments.")
+  expect_error(diagnose_design(rep(3, 2)), "Please only send design objects or functions with no arguments.")
 })
 
 
@@ -79,8 +71,7 @@ test_that("default diagnosands work", {
     my_population <- declare_population(N = N, noise = rnorm(N))
 
     my_potential_outcomes <-
-      declare_potential_outcomes(
-        Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+      declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
     my_assignment <- declare_assignment(m = 25)
 
@@ -98,8 +89,7 @@ test_that("default diagnosands work", {
       my_reveal +
       my_estimator
 
-    diagnosands <- declare_diagnosands(
-      med_bias = median(estimate - estimand), keep_defaults = FALSE)
+    diagnosands <- declare_diagnosands(med_bias = median(estimate - estimand), keep_defaults = FALSE)
 
     set_diagnosands(design, diagnosands)
   }
@@ -136,10 +126,8 @@ test_that("default diagnosands work", {
   design_1 <- set_diagnosands(my_designer(N = 100), NULL)
   design_2 <- set_diagnosands(my_designer(N = 200), NULL)
 
-  diagnosand_1 <- declare_diagnosands(
-    my_bias = median(estimate - estimand), keep_defaults = FALSE)
-  diagnosand_2 <- declare_diagnosands(
-    my_power = mean(p.value <= .5), keep_defaults = FALSE)
+  diagnosand_1 <- declare_diagnosands(my_bias = median(estimate - estimand), keep_defaults = FALSE)
+  diagnosand_2 <- declare_diagnosands(my_power = mean(p.value <= .5), keep_defaults = FALSE)
 
   # intentionally out of order to confirm they don't get mixed
   diag <- diagnose_design(
@@ -174,8 +162,7 @@ test_that("default diagnosands work", {
   diag <- diagnose_design(
     design_2 = design_2,
     design_1 = design_1,
-    diagnosands = declare_diagnosands(
-      med_bias = median(estimate - estimand), keep_defaults = FALSE),
+    diagnosands = declare_diagnosands(med_bias = median(estimate - estimand), keep_defaults = FALSE),
     sims = 2
   )
 
@@ -212,8 +199,6 @@ test_that("default diagnosands work", {
   expect_equal(ncol(diag$diagnosands_df), 16)
 
   # // simulation df
-  sims <- set_diagnosands(simulate_design(designs, sims = 5), 
-                          declare_diagnosands(
-                            med_bias = median(estimate - estimand)))
+  sims <- set_diagnosands(simulate_design(designs, sims = 5), declare_diagnosands(med_bias = median(estimate - estimand)))
   diag <- diagnose_design(sims)
 })

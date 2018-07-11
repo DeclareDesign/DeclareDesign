@@ -62,8 +62,7 @@ diagnosand_handler <- function(data, ...,
   }
 
   if (keep_defaults) {
-    options <- c(options, 
-                 defaults_quos[!names(defaults_quos) %in% names(options)])
+    options <- c(options, defaults_quos[!names(defaults_quos) %in% names(options)])
   }
 
   ret <- vector("list", length(options))
@@ -82,8 +81,7 @@ diagnosand_handler <- function(data, ...,
 
 validation_fn(diagnosand_handler) <- function(ret, dots, label) {
   if (sum(c("select", "subtract") %in% names(dots)) > 1) {
-    stop("You may not provide arguments to `select` and `subtract` ",
-         "at the same time.", call. = FALSE)
+    stop("You may not provide arguments to `select` and `subtract` at the same time.", call. = FALSE)
   }
 
   default_diagnosand_names <-
@@ -117,20 +115,12 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
         ), "."
       ), ret)
     }
-    default_diagnosand_names <-
-      default_diagnosand_names[!default_diagnosand_names %in% subtract_set]
+    default_diagnosand_names <- default_diagnosand_names[!default_diagnosand_names %in% subtract_set]
   }
 
-  options <-
-    names(dots)[!names(dots) %in% c("select",
-                                    "subtract",
-                                    "keep_defaults",
-                                    "subset",
-                                    "alpha",
-                                    "label")]
+  options <- names(dots)[!names(dots) %in% c("select", "subtract", "keep_defaults", "subset", "alpha", "label")]
   if (!("keep_defaults" %in% names(dots)) ||
-    ("keep_defaults" %in% names(dots) &&
-     eval_tidy(dots[["keep_defaults"]]) == TRUE)) {
+    ("keep_defaults" %in% names(dots) && eval_tidy(dots[["keep_defaults"]]) == TRUE)) {
     options <- c(options, default_diagnosand_names)
   }
 
@@ -230,8 +220,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #' mean_estimand = mean(estimand)
 #' )
 #'
-declare_diagnosands <-
-  make_declarations(diagnosand_handler, "diagnosand", "diagnosands")
+declare_diagnosands <- make_declarations(diagnosand_handler, "diagnosand", "diagnosands")
 
 default_diagnosands <- function(data, alpha = .05) {
   estimate <- data$estimate %||% NA

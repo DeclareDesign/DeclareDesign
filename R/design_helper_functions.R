@@ -69,17 +69,13 @@ check_sims <- function(design, sims) {
 #' @export
 run_design <- function(design) run_design_internal(design)
 
-run_design_internal <-
-  function(design, ...)
-    UseMethod("run_design_internal", design)
+run_design_internal <- function(design, ...) UseMethod("run_design_internal", design)
 
 next_step <- function(step, current_df, i) {
   tryCatch(
     nxt <- step(current_df),
     error = function(err) {
-      stop(simpleError(sprintf(
-        "Error in step %d (%s):\n\t%s", i, attr(step, "label") %||% "", err
-      )))
+      stop(simpleError(sprintf("Error in step %d (%s):\n\t%s", i, attr(step, "label") %||% "", err)))
     }
   )
   nxt
@@ -89,14 +85,8 @@ run_design_internal.default <- function(design) {
   stop("Please only send design objects or functions with no arguments to run_design.")
 }
 
-run_design_internal.design <-
-  function(design,
-           current_df = NULL,
-           results = NULL,
-           start = 1,
-           end = length(design),
-           ...) {
-    if (!is.list(results)) {
+run_design_internal.design <- function(design, current_df = NULL, results = NULL, start = 1, end = length(design), ...) {
+  if (!is.list(results)) {
     results <- list(
       estimand = vector("list", length(design)),
       estimator = vector("list", length(design))
@@ -149,9 +139,7 @@ run_design_internal.function <- function(design) {
   design()
 }
 
-run_design_internal.execution_st <-
-  function(design, ...)
-    do.call(run_design_internal.design, design)
+run_design_internal.execution_st <- function(design, ...) do.call(run_design_internal.design, design)
 
 # Build an execution strategy object
 #
@@ -160,11 +148,7 @@ run_design_internal.execution_st <-
 # @param results a list of intermediate results
 # @param start index of starting step
 # @param end  index of ending step
-execution_st <- function(design,
-                         current_df = NULL,
-                         results = NULL,
-                         start = 1,
-                         end = length(design)) {
+execution_st <- function(design, current_df = NULL, results = NULL, start = 1, end = length(design)) {
   # An execution state are the arguments needed to run run_design
   structure(
     list(
@@ -189,14 +173,12 @@ draw_data <- function(design) {
 #' @rdname post_design
 #'
 #' @export
-get_estimands <- function(...) 
-  apply_on_design_dots(get_estimands_single_design, ...)
+get_estimands <- function(...) apply_on_design_dots(get_estimands_single_design, ...)
 
 #' @rdname post_design
 #'
 #' @export
-get_estimates <- function(...) 
-  apply_on_design_dots(get_estimates_single_design, ...)
+get_estimates <- function(...) apply_on_design_dots(get_estimates_single_design, ...)
 
 apply_on_design_dots <- function(FUN, ...) {
   designs <- dots_to_list_of_designs(...)
@@ -204,8 +186,7 @@ apply_on_design_dots <- function(FUN, ...) {
   elist <- lapply(designs, FUN)
 
   if (length(designs) > 1) {
-    elist <- Map(
-      cbind, design_label = names(elist), elist, stringsAsFactors = FALSE)
+    elist <- Map(cbind, design_label = names(elist), elist, stringsAsFactors = FALSE)
   }
 
   rbind_disjoint(elist)
@@ -215,10 +196,10 @@ dots_to_list_of_designs <- function(...) {
   dotqs <- enquos(...)
   d1 <- eval_tidy(dotqs[[1]])
 
-  # Two cases:
-  # 1. send one or more design objects created by the + operator
-  # 2. send a single list of design objects e.g. created by expand_design
-  # Approach: unpack designs if a list of designs was sent as a single list
+  ## Two cases:
+  ## 1. send one or more design objects created by the + operator
+  ## 2. send a single list of design objects e.g. created by expand_design
+  ## Approach: unpack designs if a list of designs was sent as a single list object
   if (length(dotqs) == 1 &&
     is.list(d1) &&
     !inherits(d1, "design")) {
@@ -229,8 +210,7 @@ dots_to_list_of_designs <- function(...) {
     designs <- eval_tidy(quo(list(!!!dotqs)))
   }
 
-  # do not allow users to send more than one object 
-  #   if any is not a design object
+  # do not allow users to send more than one object if any is not a design object
   check_design_class(designs)
 
   designs
@@ -298,11 +278,9 @@ print_code <- function(design) {
     # print each step
 
     for (i in seq_along(design)) {
-      # only print steps that are not calls within the design call 
-      #   i.e. mutate(q = 5)
+      # only print steps that are not calls within the design call i.e. mutate(q = 5)
       if (inherits(attributes(design[[i]])$call, "call")) {
-        cat(names(design)[i], "<-", 
-            clean_call(attributes(design[[i]])$call), "\n\n")
+        cat(names(design)[i], "<-", clean_call(attributes(design[[i]])$call), "\n\n")
       }
     }
 
@@ -491,10 +469,7 @@ print.summary.design <- function(x, ...) {
   cat("\nDesign Summary\n\n")
 
   if (!is.null(x$title)) {
-    cat("Study title: ", 
-        x$title, 
-        ifelse(is.null(x$authors), 
-               "\n\n", ""), sep = "")
+    cat("Study title: ", x$title, ifelse(is.null(x$authors), "\n\n", ""), sep = "")
   }
 
   if (!is.null(x$authors)) {
@@ -590,10 +565,7 @@ print.summary.design <- function(x, ...) {
 }
 
 #' @export
-str.design_step <- function(object, ...) 
-  cat("design_step:\t", 
-      paste0(deparse(attr(object, "call"), width.cutoff = 500L), 
-             collapse = ""), "\n")
+str.design_step <- function(object, ...) cat("design_step:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse = ""), "\n")
 
 # A wrapper around conduct design for fan-out execution strategies
 fan_out <- function(design, fan) {
@@ -608,9 +580,7 @@ fan_out <- function(design, fan) {
 
     st <- st [ rep(seq_along(st), each = n) ]
 
-    st <- future_lapply(seq_along(st), 
-                        function(j) run_design(st[[j]]), 
-                        future.seed = NA, future.globals = "st")
+    st <- future_lapply(seq_along(st), function(j) run_design(st[[j]]), future.seed = NA, future.globals = "st")
   }
 
   st

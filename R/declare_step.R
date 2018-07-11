@@ -14,6 +14,4 @@
 #'
 #' design <- my_population + my_assignment + my_step
 #'
-declare_step <-
-  make_declarations(function(data, ...f, ...)
-    ...f(data, ...), "custom")
+declare_step <- make_declarations(function(data, ...f, ...) ...f(data, ...), "custom")

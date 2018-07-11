@@ -55,8 +55,7 @@ sampling_handler <- function(data, ..., sampling_variable = "S") {
   samp <- reveal_nse_helper(sampling_variable)
   samp <- as.symbol(paste0(samp, "_inclusion_prob"))
 
-  S <- as.symbol(".__Sample") 
-  # Matching old code but also eliminating the R CMD check warning that .__Sample is a undef/global variable
+  S <- as.symbol(".__Sample") # Matching old code but also eliminating the R CMD check warning that .__Sample is a undef/global variable
 
   data <- fabricate(data,
     !!S := draw_rs(N = N, !!!options),
@@ -82,37 +81,28 @@ validation_fn(sampling_handler) <- function(ret, dots, label) {
   if (!"declaration" %in% names(dots)) {
     if ("strata" %in% names(dots)) {
       if (class(f_rhs(dots[["strata"]])) == "character") {
-        declare_time_error(
-          "Must provide the bare (unquoted) strata variable name to strata.", 
-          ret)
+        declare_time_error("Must provide the bare (unquoted) strata variable name to strata.", ret)
       }
     }
 
     if ("clusters" %in% names(dots)) {
       if (class(f_rhs(dots[["clusters"]])) == "character") {
-        declare_time_error(
-          "Must provide the bare (unquoted) cluster variable name to clusters.", 
-          ret)
+        declare_time_error("Must provide the bare (unquoted) cluster variable name to clusters.", ret)
       }
     }
-    rs_args <- setdiff(names(dots), 
-                       names(formals(sampling_handler))) 
-    # removes data and sampling_variable
+    rs_args <- setdiff(names(dots), names(formals(sampling_handler))) # removes data and sampling_variable
 
     rs_dots <- dots[rs_args]
 
     if (length(rs_dots) > 0) {
-      declaration <- tryCatch(
-        eval_tidy(quo(declare_rs(!!!rs_dots))), error = function(e) e)
+      declaration <- tryCatch(eval_tidy(quo(declare_rs(!!!rs_dots))), error = function(e) e)
 
       if (inherits(declaration, "rs_declaration")) {
         message("Sampling declaration factored out from execution path.")
         dots[rs_args] <- NULL
         dots$declaration <- declaration
 
-        ret <- build_step(
-          currydata(sampling_handler, dots, 
-                    strictDataParam = attr(ret, "strictDataParam")),
+        ret <- build_step(currydata(sampling_handler, dots, strictDataParam = attr(ret, "strictDataParam")),
           handler = sampling_handler,
           dots = dots,
           label = label,

@@ -124,9 +124,9 @@ construct_design <- function(steps) {
     class = c("design", "dd")
   )
 
-  # for each step in qs, eval, and 
-  #   handle edge cases (dplyr calls, non-declared functions)
+  # for each step in qs, eval, and handle edge cases (dplyr calls, non-declared functions)
   for (i in seq_along(ret)) {
+
 
     # Is it a non-declared function
     if (is.function(ret[[i]]) && !inherits(ret[[i]], "design_step")) {
@@ -135,16 +135,13 @@ construct_design <- function(steps) {
       #  except: if it is a dplyr pipeline (class fseq)
       if (!identical(names(formals(ret[[i]])), "data") &&
         !inherits(ret[[i]], "fseq")) {
-        warning("Undeclared Step ", i, 
-                " function arguments are not exactly 'data'")
+        warning("Undeclared Step ", i, " function arguments are not exactly 'data'")
       }
 
       ret[[i]] <- build_step(
         ret[[i]],
         handler = NULL, dots = list(), label = names(ret)[i],
-        step_type = "undeclared", 
-        causal_type = "dgp", 
-        call = attr(ret[[i]], "call")
+        step_type = "undeclared", causal_type = "dgp", call = attr(ret[[i]], "call")
       )
     }
   }
@@ -159,9 +156,8 @@ construct_design <- function(steps) {
   }
 
   # name new auto-reveal steps
-  names(ret)[sapply(ret, function(x)
-    attr(x, "auto-generated") %||% FALSE)] <- "auto_reveal"
-  
+  names(ret)[sapply(ret, function(x) attr(x, "auto-generated") %||% FALSE)] <- "auto_reveal"
+
   # ensure all names are unique
   unique_nms <- make.unique(names(ret), sep = "_")
 

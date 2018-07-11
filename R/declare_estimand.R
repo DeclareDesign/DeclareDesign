@@ -192,8 +192,7 @@ validation_fn(estimand_handler) <- function(ret, dots, label) {
     return(ret)
   }
 
-  maybeDotLabel <- dotnames[!dotnames %in% 
-                              c("", names(formals(estimand_handler)))]
+  maybeDotLabel <- dotnames[!dotnames %in% c("", names(formals(estimand_handler)))]
   if (any(duplicated(maybeDotLabel))) {
     stop(paste0(
       "Please provide unique names for each estimand. Duplicates include ",

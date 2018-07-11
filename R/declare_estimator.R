@@ -191,8 +191,7 @@ tidy_estimator <- function(estimator_function) {
 
   f <- function(data, ..., estimand = NULL, label) {
     calling_args <-
-      names(match.call(expand.dots = FALSE)) %i% 
-      names(formals(estimator_function))
+      names(match.call(expand.dots = FALSE)) %i% names(formals(estimator_function))
 
     dots <- if ("..." %in% calling_args) {
       quos(...)
@@ -204,8 +203,7 @@ tidy_estimator <- function(estimator_function) {
 
     for (e in calling_args) {
       dots[[e]] <-
-        do.call(enquo, list(as.symbol(e))) 
-      # this *should* retrieve term names as quosure. unclear if works
+        do.call(enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. IDK
     }
 
     ret <- eval_tidy(quo(estimator_function(data, !!!dots)))
@@ -280,18 +278,11 @@ validation_fn(model_handler) <- function(ret, dots, label) {
 
     if (!quo_text(dots$model)
     %in%
-      c("lm", "glm", "lm_robust", 
-        "iv_robust", "difference_in_means", "horvitz_thompson")
+      c("lm", "glm", "lm_robust", "iv_robust", "difference_in_means", "horvitz_thompson")
     &
       !requireNamespace("broom", quietly = TRUE)
     ) {
-      stop("You provided a ", quo_text(dots$model), " model, ",
-           "which DeclareDesign does not directly support. ",
-           "It's possible that the broom package can help. ",
-           "Please install the broom package with install.packages('broom') ",
-           "and try declaring your estimator again. ",
-           "If that fix does not work, ",
-           "you may need to write a custom estimator.")
+      stop("You provided a ", quo_text(dots$model), " model, which DeclareDesign does not directly support. It's possible that the broom package can help. Please install the broom package with install.packages('broom') and try declaring your estimator again. If that fix does not work, you may need to write a custom estimator.")
     }
 
     attr(ret, "extra_summary") <-
@@ -313,8 +304,7 @@ fit2tidy <- function(fit, term = FALSE) {
   } else {
     summ <- coef(summary(fit))
     summ <-
-      summ[, tolower(substr(colnames(summ), 1, 3)) %in% 
-             c("estimate", "std", "pr("), drop = FALSE]
+      summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("estimate", "std", "pr("), drop = FALSE]
     ci <- suppressMessages(as.data.frame(confint(fit)))
     tidy_df <-
       data.frame(
@@ -339,8 +329,7 @@ fit2tidy <- function(fit, term = FALSE) {
     coefs_in_output <- term %in% tidy_df$term
     if (!all(coefs_in_output)) {
       stop(
-        "Not all of the terms declared in your estimator are ", 
-        "present in the model output, including ",
+        "Not all of the terms declared in your estimator are present in the model output, including ",
         paste(term[!coefs_in_output], collapse = ", "),
         ".",
         call. = FALSE

@@ -85,9 +85,7 @@ diagnose_design <- function(...,
     if (is_empty(c("estimator_label", "estimand_label") %icn% simulations_df)) {
       stop("Can't calculate diagnosands on this data.frame, which does not include either an estimator_label or an estimand_label. Did you send a simulations data frame?")
     }
-    diagnosands <- diagnosands %||% 
-      attr(simulations_df, "diagnosands") %||% 
-      default_diagnosands
+    diagnosands <- diagnosands %||% attr(simulations_df, "diagnosands") %||% default_diagnosands
   } else {
     # simulate if needed ------------------------------------------------------
     simulations_df <- simulate_design(!!!dots, sims = sims)
@@ -116,8 +114,7 @@ diagnose_design <- function(...,
 
   # Calculate n_sims --------------------------------------------------------
 
-  n_sims_df <- calculate_sims(
-    simulations_df = simulations_df, group_by_set = group_by_set)
+  n_sims_df <- calculate_sims(simulations_df = simulations_df, group_by_set = group_by_set)
 
   # Bootstrap ---------------------------------------------------------------
 
@@ -134,46 +131,31 @@ diagnose_design <- function(...,
 
   # prep for return ---------------------------------------------------------
 
-  diagnosands_df <- merge(
-    x = diagnosands_df, y = n_sims_df, by = group_by_set, all = TRUE)
+  diagnosands_df <- merge(x = diagnosands_df, y = n_sims_df, by = group_by_set, all = TRUE)
 
   parameters_df <- attr(simulations_df, "parameters")
   diagnosands_df <- merge(diagnosands_df, parameters_df, by = "design_label")
 
   # make design_label a factor
-  diagnosands_df$design_label <- factor(
-    diagnosands_df$design_label, 
-    levels = as.character(parameters_df$design_label))
+  diagnosands_df$design_label <- factor(diagnosands_df$design_label, levels = as.character(parameters_df$design_label))
 
   # Reorder rows
   sort_by_list <- c(group_by_set, "statistic") %icn% diagnosands_df
-  diagnosands_df <- diagnosands_df[
-    do.call(order, as.list(diagnosands_df[sort_by_list])), , drop = FALSE]
+  diagnosands_df <- diagnosands_df[do.call(order, as.list(diagnosands_df[sort_by_list])), , drop = FALSE]
 
   rownames(diagnosands_df) <- NULL
 
   # reorder columns
 
-  diagnosands_df <- diagnosands_df[, 
-                                   reorder_columns(parameters_df, 
-                                                   diagnosands_df), 
-                                   drop = FALSE]
+  diagnosands_df <- diagnosands_df[, reorder_columns(parameters_df, diagnosands_df), drop = FALSE]
 
   # Return frames
-  out <- list(simulations_df = simulations_df, 
-              diagnosands_df = diagnosands_df, 
-              diagnosand_names = diagnosand_names, 
-              group_by_set = group_by_set, parameters_df = parameters_df)
+  out <- list(simulations_df = simulations_df, diagnosands_df = diagnosands_df, diagnosand_names = diagnosand_names, group_by_set = group_by_set, parameters_df = parameters_df)
 
   if (bootstrap_sims != 0) {
     out$bootstrap_replicates <- bootout$diagnosand_replicates
-    out$bootstrap_replicates <- merge(
-      out$bootstrap_replicates, parameters_df, by = "design_label")
-    out$bootstrap_replicates <- 
-      out$bootstrap_replicates[, 
-                               reorder_columns(parameters_df,
-                                               out$bootstrap_replicates),
-                               drop = FALSE]
+    out$bootstrap_replicates <- merge(out$bootstrap_replicates, parameters_df, by = "design_label")
+    out$bootstrap_replicates <- out$bootstrap_replicates[, reorder_columns(parameters_df, out$bootstrap_replicates), drop = FALSE]
   }
   out$bootstrap_sims <- bootstrap_sims
 
@@ -194,9 +176,7 @@ check_design_class <- function(designs) {
 setup_diagnosands <- function(..., diagnosands) {
   designs <- dots_to_list_of_designs(...)
 
-  diagnosands %||% 
-    lapply(designs, function(x) attr(x, "diagnosands") %||% 
-             default_diagnosands)
+  diagnosands %||% lapply(designs, function(x) attr(x, "diagnosands") %||% default_diagnosands)
 }
 
 calculate_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
@@ -215,13 +195,11 @@ calculate_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
     simulations_list <- split(simulations_df, group_by_list, drop = TRUE)
 
     if (is.list(diagnosands)) {
-      diagnosands_df <- mapply(
-        calculate_diagnosands_single_design, simulations_list, diagnosands,
+      diagnosands_df <- mapply(calculate_diagnosands_single_design, simulations_list, diagnosands,
         MoreArgs = list(group_by_set), SIMPLIFY = FALSE
       )
     } else {
-      diagnosands_df <- 
-        mapply(calculate_diagnosands_single_design, simulations_list,
+      diagnosands_df <- mapply(calculate_diagnosands_single_design, simulations_list,
         MoreArgs = list(
           diagnosands = diagnosands,
           group_by_set = group_by_set
@@ -240,9 +218,7 @@ calculate_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
   diagnosands_df
 }
 
-calculate_diagnosands_single_design <- 
-  function(simulations_df, diagnosands, group_by_set) {
-    
+calculate_diagnosands_single_design <- function(simulations_df, diagnosands, group_by_set) {
   group_by_list <- simulations_df[, group_by_set, drop = FALSE]
 
   labels_df <- split(group_by_list, group_by_list, drop = TRUE)
@@ -255,8 +231,7 @@ calculate_diagnosands_single_design <-
   })
 
   # c appropriate and fast here bc labels_df must be a list (drop=FALSE above)
-  diagnosands_df <- as.data.frame(
-    t(mapply(c, labels_df, diagnosands_df)), stringsAsFactors = FALSE)
+  diagnosands_df <- as.data.frame(t(mapply(c, labels_df, diagnosands_df)), stringsAsFactors = FALSE)
 
   diagnosands_df[] <- lapply(diagnosands_df, unlist)
 
@@ -275,21 +250,17 @@ calculate_sims <- function(simulations_df, group_by_set) {
   })
 
   # c appropriate and fast here bc labels_df must be a list (drop=FALSE above)
-  n_sims_df <- as.data.frame(
-    t(mapply(c, labels_df, n_sims_df)), stringsAsFactors = FALSE)
+  n_sims_df <- as.data.frame(t(mapply(c, labels_df, n_sims_df)), stringsAsFactors = FALSE)
   n_sims_df[] <- lapply(n_sims_df, unlist)
 
   n_sims_df
 }
 
 
-bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, 
-                                  diagnosands, diagnosands_df, group_by_set) {
-  
+bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, diagnosands_df, group_by_set) {
   bootstrap_level <- if ("fan_1" %in% names(simulations_df)) "fan_1" else "sim_ID"
 
-  boot_indicies_by_id <- split(seq_len(nrow(simulations_df)), 
-                               simulations_df[, bootstrap_level])
+  boot_indicies_by_id <- split(seq_len(nrow(simulations_df)), simulations_df[, bootstrap_level])
   nsims <- max(simulations_df[, bootstrap_level])
 
   boot_function <- function() {
@@ -326,18 +297,14 @@ bootstrap_diagnosands <- function(bootstrap_sims, simulations_df,
   diagnosands_df <- diagnosands_df[names(labels_df)]
 
   # Calculate standard errors
-  use_vars <- setdiff(names(diagnosand_replicates), 
-                      c(group_by_set, "bootstrap_id"))
-  diagnosands_se_df <- split(diagnosand_replicates[use_vars], 
-                             group_by_list, drop = TRUE)
+  use_vars <- setdiff(names(diagnosand_replicates), c(group_by_set, "bootstrap_id"))
+  diagnosands_se_df <- split(diagnosand_replicates[use_vars], group_by_list, drop = TRUE)
   diagnosands_se_df <- lapply(diagnosands_se_df, lapply, sd)
 
   # Clean up
-  diagnosands_se_df <- 
-    lapply(diagnosands_se_df, setNames, sprintf("se(%s)", diagnosands_names))
+  diagnosands_se_df <- lapply(diagnosands_se_df, setNames, sprintf("se(%s)", diagnosands_names))
 
-  diagnosands_df <- as.data.frame(
-    t(mapply(c, labels_df, diagnosands_df, diagnosands_se_df)),
+  diagnosands_df <- as.data.frame(t(mapply(c, labels_df, diagnosands_df, diagnosands_se_df)),
     stringsAsFactors = FALSE
   )
   diagnosands_df[] <- lapply(diagnosands_df, unlist)

@@ -38,6 +38,7 @@ test_that("names from quos", {
   expect_equal(c("bias", "mean"), blank_fun(select = c(bias, mean)))
 })
 
+
 test_that("clone_dot_edit_env", {
   dot <- quo(test_obj)
   environment(dot) <- NULL

@@ -3,8 +3,7 @@ context("Quick Design")
 test_that("expand_design works", {
   two_arm_trial <- function(N) {
     my_population <- declare_population(N = N, noise = rnorm(N))
-    my_potential_outcomes <- declare_potential_outcomes(
-      Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+    my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
     my_assignment <- declare_assignment(m = N / 2)
     pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
@@ -64,8 +63,7 @@ test_that("vary works", {
   two_arm_trial <- function(N, noise_sd) {
     my_population <-
       declare_population(N = N, noise = rnorm(N, sd = noise_sd))
-    my_potential_outcomes <- declare_potential_outcomes(
-      Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+    my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
     my_assignment <- declare_assignment(m = N / 2)
     pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
@@ -116,8 +114,7 @@ test_that("vary works", {
 test_that("power curve", {
   two_arm_trial <- function(N) {
     my_population <- declare_population(N = N, noise = rnorm(N))
-    my_potential_outcomes <- declare_potential_outcomes(
-      Y_Z_0 = noise, Y_Z_1 = noise + .25)
+    my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + .25)
     my_assignment <- declare_assignment(m = N / 2)
     pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-

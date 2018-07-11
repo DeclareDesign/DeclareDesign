@@ -23,20 +23,13 @@ test_that("Reveal Outcomes", {
 
   my_reveal <- declare_reveal()
 
-  my_design <- my_population + 
-    my_potential_outcomes + 
-    my_estimand + 
-    my_sampling + 
-    my_assignment + 
-    my_reveal + 
-    my_estimator
+  my_design <- my_population + my_potential_outcomes + my_estimand + my_sampling + my_assignment + my_reveal + my_estimator
 
   dat <- draw_data(my_design)
 
 
   expect_true(
-    all(vapply(my_design, 
-               function(step) "design_step" %in% class(step), FALSE)),
+    all(vapply(my_design, function(step) "design_step" %in% class(step), FALSE)),
     "all steps should have appropriate class set"
   )
 })
@@ -44,15 +37,11 @@ test_that("Reveal Outcomes", {
 test_that("Reveal Outcomes NSE for assignment / outcome variables ", {
   my_population <- declare_population(N = 500, noise = 1:N)
 
-  my_potential_outcomes <- declare_potential_outcomes(
-    Y_Z_0 = noise, Y_Z_1 = noise + 1)
+  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + 1)
 
   my_assignment <- declare_assignment(prob = 1)
 
-  design <- my_population + 
-    my_potential_outcomes +
-    my_assignment + 
-    declare_reveal()
+  design <- my_population + my_potential_outcomes + my_assignment + declare_reveal()
 
   df1 <- draw_data(design)
 
@@ -75,24 +64,15 @@ test_that("reveal multiple outcomes works", {
   N <- 25
 
   my_population <- declare_population(N = N, noise = 1:N)
-  my_potential_outcomes1 <- declare_potential_outcomes(
-    formula = Y1 ~ Z * .25, conditions = c(0, 1))
-  my_potential_outcomes2 <- 
-    declare_potential_outcomes(formula = Y2 ~ Z * .5 + 3, 
-                               conditions = c(0, 1))
+  my_potential_outcomes1 <- declare_potential_outcomes(formula = Y1 ~ Z * .25, conditions = c(0, 1))
+  my_potential_outcomes2 <- declare_potential_outcomes(formula = Y2 ~ Z * .5 + 3, conditions = c(0, 1))
   my_assignment <- declare_assignment(prob = 1)
 
-  design <- my_population +
-    my_potential_outcomes1 + 
-    my_potential_outcomes2 + 
-    my_assignment +
+  design <- my_population + my_potential_outcomes1 + my_potential_outcomes2 + my_assignment +
     declare_reveal(outcome_variables = c(Y1, Y2))
   df1 <- draw_data(design)
 
-  design <- my_population + 
-    my_potential_outcomes1 + 
-    my_potential_outcomes2 + 
-    my_assignment +
+  design <- my_population + my_potential_outcomes1 + my_potential_outcomes2 + my_assignment +
     declare_reveal(outcome_variables = c("Y1", "Y2"))
   df2 <- draw_data(design)
 
@@ -110,9 +90,7 @@ test_that("declare_reveal custom handler works", {
     return(data)
   }
 
-  design <- my_population + 
-    my_assignment + 
-    declare_reveal(handler = my_outcome_function)
+  design <- my_population + my_assignment + declare_reveal(handler = my_outcome_function)
   df <- draw_data(design)
 
   expect_true("Y" %in% colnames(df))
@@ -125,8 +103,7 @@ test_that("missing PO stops", {
 })
 
 test_that("Not all Potential outcome columns present", {
-  df <- data.frame(Z = sample(1:3, 100, replace = TRUE), 
-                   Y_Z_0 = 1:100, Y_Z_1 = 1:100)
+  df <- data.frame(Z = sample(1:3, 100, replace = TRUE), Y_Z_0 = 1:100, Y_Z_1 = 1:100)
 
   expect_error(
     declare_reveal()(df),
@@ -162,11 +139,7 @@ test_that("Single outcome, multiple assn", {
     blocks = A + 10 * as.numeric(blocks), assignment_variable = B
   )
 
-  design <- population + 
-    potential_outcomes + 
-    assign_A + 
-    assign_B + 
-    declare_reveal(outcome_variables = Y, assignment_variables = c(A, B))
+  design <- population + potential_outcomes + assign_A + assign_B + declare_reveal(outcome_variables = Y, assignment_variables = c(A, B))
 
   dd <- draw_data(design)
 
@@ -175,8 +148,7 @@ test_that("Single outcome, multiple assn", {
 
 
 test_that("handler rrror on symbols", {
-  expect_error(
-    reveal_outcomes_handler(sleep, outcome_variables = as.symbol("Y")))
+  expect_error(reveal_outcomes_handler(sleep, outcome_variables = as.symbol("Y")))
   expect_error(reveal_outcomes_handler(sleep,
     outcome_variables = "Y",
     assignment_variables = as.symbol("Z")
