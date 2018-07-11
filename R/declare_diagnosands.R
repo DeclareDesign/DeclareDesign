@@ -15,6 +15,7 @@
 #'
 #'
 #' @importFrom rlang eval_tidy quos is_quosure quo_is_call %||%
+#' @importFrom stats na.omit
 #' @rdname declare_diagnosands
 diagnosand_handler <- function(data, ..., 
                                select,
@@ -236,6 +237,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label){
 #'
 declare_diagnosands <- make_declarations(diagnosand_handler, "diagnosand", "diagnosands")
 
+#' @importFrom stats na.omit
 default_diagnosands <- function(data, alpha = .05, na.rm = TRUE){
   
   if(na.rm){
