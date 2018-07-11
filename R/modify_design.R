@@ -1,17 +1,16 @@
 # index of a step (specified by object, label or position)
 find_step <- function(design, step, verb) {
-  
   if (is.numeric(step) && step <= length(design) && step > 0) return(step)
   if (is.character(step)) {
     design <- names(design)
   }
   w <- vapply(design, identical, FALSE, step)
-  
+
   w <- which(w)
   if (length(w) == 0) {
     stop("Could not find step to ", verb, " in design")
   }
-  
+
   w[1]
 }
 
@@ -58,8 +57,8 @@ NULL
 #'
 #' @export
 insert_step <- function(design, new_step, before, after) {
-  if(missing(before)) before <- NULL
-  if(missing(after)) after <- NULL
+  if (missing(before)) before <- NULL
+  if (missing(after)) after <- NULL
   insert_step_(design, new_step, before, after, enexpr(new_step))
 }
 
@@ -72,14 +71,13 @@ insert_step_ <- function(design, new_step, before = NULL, after = NULL, new_step
   } else {
     after <- find_step(design, after, "insert after")
   }
-  
+
   new_step <- wrap_step(new_step, new_step_expr)
-  
+
   i <- seq_along(design) <= after
   steps <- c(design[i], new_step, design[!i], recursive = FALSE)
-  
+
   construct_design(steps)
-  
 }
 
 #' @param step the step to be deleted or replaced
@@ -103,6 +101,6 @@ replace_step <- function(design, step, new_step) {
   new_step <- wrap_step(new_step, enexpr(new_step))
   design[i] <- new_step
   names(design)[i] <- names(new_step)
-  
+
   construct_design(design)
 }

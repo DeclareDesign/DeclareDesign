@@ -35,7 +35,7 @@ Explore your design
 }
 \examples{
 
-design <- 
+design <-
   declare_population(N = 500, noise = rnorm(N)) +
   declare_potential_outcomes(Y ~ noise + Z * rnorm(N, 2, 2)) +
   declare_sampling(n = 250) +

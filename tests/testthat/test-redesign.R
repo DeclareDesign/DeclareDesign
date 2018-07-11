@@ -1,7 +1,6 @@
 context("redesign")
 
-test_that("N not changed",{
-
+test_that("N not changed", {
   N <- 100
   d <- declare_population(N = N) + NULL
   expect_equal(N, 100)
@@ -10,11 +9,11 @@ test_that("N not changed",{
 
   others <- c(50, 100, 200, 100)
   d_alt <- redesign(d, N = others)
-  
-  for(i in seq_along(others)) {
+
+  for (i in seq_along(others)) {
     expect_length(draw_data(d_alt[[i]])$ID, others[i])
   }
-  
+
   # N itself should not be changed
   expect_equal(N, 100)
 })

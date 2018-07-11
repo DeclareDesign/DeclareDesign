@@ -1,5 +1,5 @@
 #' Override environment via shim
-#' 
+#'
 #' @rdname edit
 #' @keywords internal
 #' @examples
@@ -10,7 +10,7 @@
 #' eval_tidy(dot)
 #' eval_tidy(dot2)
 #' }
-clone_dot_edit_env <- function(dot, ..., to_replace=list(...)){
+clone_dot_edit_env <- function(dot, ..., to_replace = list(...)) {
   if (is.null(environment(dot))) {
     return(dot)
   }
@@ -33,12 +33,12 @@ clone_dot_edit_env <- function(dot, ..., to_replace=list(...)){
 #' nrow(pop50())
 #'
 #' }
-clone_step_edit <- function(step, ..., to_replace=list(...)) {
+clone_step_edit <- function(step, ..., to_replace = list(...)) {
   step_attributes <- attributes(step)
 
-  step_attributes$dots[] <- lapply(step_attributes$dots, clone_dot_edit_env, to_replace=to_replace)
+  step_attributes$dots[] <- lapply(step_attributes$dots, clone_dot_edit_env, to_replace = to_replace)
 
-  f <- with(step_attributes, currydata(handler, dots, strictDataParam=!is.null(formals(step)$data), cloneDots=FALSE))
+  f <- with(step_attributes, currydata(handler, dots, strictDataParam = !is.null(formals(step)$data), cloneDots = FALSE))
   attributes(f) <- step_attributes
   f
 }
@@ -57,8 +57,8 @@ clone_step_edit <- function(step, ..., to_replace=list(...)) {
 #' nrow(draw_data(my_design2))
 #'
 #' }
-clone_design_edit <- function(design, ..., to_replace=list(...)){
-  design[] <- lapply(design, clone_step_edit, to_replace=to_replace)
+clone_design_edit <- function(design, ..., to_replace = list(...)) {
+  design[] <- lapply(design, clone_step_edit, to_replace = to_replace)
 
   design
 }

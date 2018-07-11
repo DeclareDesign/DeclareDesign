@@ -4,9 +4,11 @@ test_that("demo runs", {
 
   ## ------------------------------------------------------------------------
   my_population <-
-    declare_population(N = 1000,
-                       income = rnorm(N),
-                       age = sample(18:95, N, replace = T))
+    declare_population(
+      N = 1000,
+      income = rnorm(N),
+      age = sample(18:95, N, replace = T)
+    )
 
   pop <- my_population()
   expect_equal(nrow(pop), 1000)
@@ -15,51 +17,60 @@ test_that("demo runs", {
   ## ------------------------------------------------------------------------
   my_population_nested <- declare_population(
     districts = add_level(N = 25, urban = sample(0:1, N, replace = TRUE)),
-    villages =add_level(N = 10, altitude = rnorm(N)),
-    individuals = add_level(N = sample(100:200, size = 250, replace = TRUE),
-                        income = rnorm(N),
-                        age = sample(18:95, N, replace = TRUE)))
+    villages = add_level(N = 10, altitude = rnorm(N)),
+    individuals = add_level(
+      N = sample(100:200, size = 250, replace = TRUE),
+      income = rnorm(N),
+      age = sample(18:95, N, replace = TRUE)
+    )
+  )
 
 
   ## ------------------------------------------------------------------------
   region_data <- data.frame(capital = c(1, 0, 0, 0, 0))
   pop_level_data <- declare_population(
     regions = add_level(N = 2, gdp = runif(N)),
-    cities = add_level(N = 2, subways = rnorm(N, mean = 5)))
+    cities = add_level(N = 2, subways = rnorm(N, mean = 5))
+  )
 
   head(pop_level_data())
 
   ## ------------------------------------------------------------------------
   country_data <- data.frame(
     cow_code = c(504, 15, 100, 90),
-    polity_iv = c(-9, 7, -1, 3))
+    polity_iv = c(-9, 7, -1, 3)
+  )
   pop_data <- declare_population(data = country_data)
 
   head(pop_data())
 
   ## ------------------------------------------------------------------------
   pop_data_bootstrap <- declare_population(
-    data = country_data, handler = fabricatr::resample_data)
+    data = country_data, handler = fabricatr::resample_data
+  )
 
   head(pop_data_bootstrap())
 
   ## ------------------------------------------------------------------------
   my_potential_outcomes <- declare_potential_outcomes(
-    formula = Y ~ .25 * Z + .01 * age * Z)
+    formula = Y ~ .25 * Z + .01 * age * Z
+  )
   pop_pos <- my_potential_outcomes(pop)
   head(pop_pos)
 
   ## ------------------------------------------------------------------------
   my_potential_outcomes <- declare_potential_outcomes(
     formula = Y ~ .25 * Z + .01 * age * Z,
-    conditions = 1:4)
+    conditions = 1:4
+  )
   head(my_potential_outcomes(pop))
 
   ## ------------------------------------------------------------------------
   my_potential_outcomes <-
     declare_potential_outcomes(
       Y_Z_0 = .05,
-      Y_Z_1 = .30 + .01 * age)
+      Y_Z_1 = .30 + .01 * age
+    )
 
   head(my_potential_outcomes(pop))
 
@@ -87,20 +98,21 @@ test_that("demo runs", {
   ## ------------------------------------------------------------------------
   my_estimator_lm <-
     declare_estimator(Y ~ Z,
-                      model = estimatr::lm_robust,
-                      term = "Z",
-                      estimand = my_estimand)
+      model = estimatr::lm_robust,
+      term = "Z",
+      estimand = my_estimand
+    )
 
   my_estimator_lm(smp)
 
   ## ------------------------------------------------------------------------
-  design <- my_population + 
-    my_potential_outcomes + 
-    my_estimand + 
-    declare_step(dplyr::mutate, big_income = 5*income) + 
-    my_sampling + 
-    my_assignment + 
-    reveal_outcomes + 
+  design <- my_population +
+    my_potential_outcomes +
+    my_estimand +
+    declare_step(dplyr::mutate, big_income = 5 * income) +
+    my_sampling +
+    my_assignment +
+    reveal_outcomes +
     my_estimator_dim
 
   ## ------------------------------------------------------------------------
@@ -117,7 +129,8 @@ test_that("demo runs", {
   }
 
   my_population_custom <- declare_population(
-    handler = my_population_function, N = 100)
+    handler = my_population_function, N = 100
+  )
 
   pop_custom <- my_population_custom()
 
@@ -140,14 +153,17 @@ test_that("demo runs", {
 
   ## ------------------------------------------------------------------------
   my_sampling_function <- function(data) {
-    data$S <- rbinom(n = nrow(data),
-                     size = 1,
-                     prob = 0.1)
+    data$S <- rbinom(
+      n = nrow(data),
+      size = 1,
+      prob = 0.1
+    )
     data[data$S == 1, ]
   }
 
   my_sampling_custom <- declare_sampling(
-    handler = my_sampling_function)
+    handler = my_sampling_function
+  )
 
   smp_custom <- my_sampling_custom(pop_pos)
 
@@ -155,13 +171,16 @@ test_that("demo runs", {
 
   ## ------------------------------------------------------------------------
   my_assignment_function <- function(data) {
-    data$Z <- rbinom(n = nrow(data),
-                     size = 1,
-                     prob = 0.5)
+    data$Z <- rbinom(
+      n = nrow(data),
+      size = 1,
+      prob = 0.5
+    )
     data
   }
   my_assignment_custom <- declare_assignment(
-    handler = my_assignment_function)
+    handler = my_assignment_function
+  )
 
   table(my_assignment_custom(pop_pos)$Z)
 
@@ -170,38 +189,43 @@ test_that("demo runs", {
     with(data, median(Y_Z_1 - Y_Z_0))
   }
   my_estimand_custom <- declare_estimand(
-    handler = my_estimand_function, label = "medianTE")
+    handler = my_estimand_function, label = "medianTE"
+  )
 
   my_estimand_custom(pop_pos)
 
   ## ------------------------------------------------------------------------
-  my_mean <- function(data){
+  my_mean <- function(data) {
     data.frame(estimate = with(data, mean(Y)))
   }
 
   my_estimator_custom <-
-    declare_estimator(handler=tidy_estimator(my_mean),
-                      estimand = my_estimand)
+    declare_estimator(
+      handler = tidy_estimator(my_mean),
+      estimand = my_estimand
+    )
 
   my_estimator_custom(smp)
 
   ## ------------------------------------------------------------------------
-  m_arm_trial <- function(numb){
+  m_arm_trial <- function(numb) {
     my_population <- declare_population(
-      N = numb, income = rnorm(N), age = sample(18:95, N, replace = T))
+      N = numb, income = rnorm(N), age = sample(18:95, N, replace = T)
+    )
 
     my_potential_outcomes <- declare_potential_outcomes(
-      formula = Y ~ .25 * Z + .01 * age * Z)
+      formula = Y ~ .25 * Z + .01 * age * Z
+    )
     my_sampling <- declare_sampling(n = 250)
     my_assignment <- declare_assignment(m = 25)
     my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
     my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
-    my_design <- my_population + 
-      my_potential_outcomes + 
-      my_estimand + 
-      my_sampling + 
-      my_assignment + 
-      reveal_outcomes + 
+    my_design <- my_population +
+      my_potential_outcomes +
+      my_estimand +
+      my_sampling +
+      my_assignment +
+      reveal_outcomes +
       my_estimator_dim
     return(my_design)
   }
@@ -211,20 +235,22 @@ test_that("demo runs", {
 
   ## ------------------------------------------------------------------------
   my_potential_outcomes_continuous <- declare_potential_outcomes(
-    formula = Y ~ .25 * Z + .01 * age * Z, conditions = seq(0, 1, by = .1))
+    formula = Y ~ .25 * Z + .01 * age * Z, conditions = seq(0, 1, by = .1)
+  )
 
   my_assignment_continuous <- declare_assignment(conditions = seq(0, 1, by = .1))
 
-  my_design <- declare_population(my_population()) + 
-    my_potential_outcomes_continuous + 
-    my_assignment_continuous + 
+  my_design <- declare_population(my_population()) +
+    my_potential_outcomes_continuous +
+    my_assignment_continuous +
     reveal_outcomes
-  
+
   head(draw_data(my_design))
 
   ## ------------------------------------------------------------------------
   my_potential_outcomes_attrition <- declare_potential_outcomes(
-    formula = R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
+    formula = R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0))
+  )
 
   my_design <- declare_population(my_population()) +
     my_potential_outcomes +
@@ -237,11 +263,14 @@ test_that("demo runs", {
 
   ## ------------------------------------------------------------------------
   stochastic_population <- declare_population(
-    N = sample(500:1000, 1), income = rnorm(N), age = sample(18:95, N, replace = TRUE))
+    N = sample(500:1000, 1), income = rnorm(N), age = sample(18:95, N, replace = TRUE)
+  )
 
-  c(nrow(stochastic_population()),
+  c(
     nrow(stochastic_population()),
-    nrow(stochastic_population()))
+    nrow(stochastic_population()),
+    nrow(stochastic_population())
+  )
 
   ## ------------------------------------------------------------------------
 
@@ -252,7 +281,8 @@ test_that("demo runs", {
   ## set a variable used in the declaration
   my_N <- 1000
   my_population_custom <- declare_population(
-    handler = my_population_function, N = my_N)
+    handler = my_population_function, N = my_N
+  )
 
   my_potential_outcomes_function <-
     function(data) {
@@ -270,5 +300,4 @@ test_that("demo runs", {
   pop_pos_custom <- my_potential_outcomes_custom(my_population_custom())
 
   head(pop_pos_custom[, c("u", "Y_Z_0", "Y_Z_1")])
-
 })

@@ -6,7 +6,7 @@
 \title{Declare diagnosands}
 \usage{
 diagnosand_handler(data, ..., select, subtract, keep_defaults = TRUE,
-  subset = NULL, alpha = 0.05, label)
+  subset = NULL, alpha = 0.05, na.rm = TRUE, label)
 
 declare_diagnosands(..., handler = diagnosand_handler, label = NULL)
 }
@@ -24,6 +24,8 @@ declare_diagnosands(..., handler = diagnosand_handler, label = NULL)
 \item{subset}{A subset of the simulations data frame within which to calculate diagnosands e.g. \code{subset = p.value < .05}.}
 
 \item{alpha}{Alpha significance level. Defaults to \code{.05}.}
+
+\item{na.rm}{logical. Should simulations with missing estimates be dropped? Defaults to TRUE.}
 
 \item{label}{Label for the set of diagnosands.}
 
@@ -77,7 +79,7 @@ diagnosis <- diagnose_design(design)
 diagnosis
 }
 
-# You can select a set of those diagnosands via the \\code{select} argument e.g., 
+# You can select a set of those diagnosands via the \\code{select} argument e.g.,
 
 my_diagnosands <- declare_diagnosands(select = c(bias, rmse))
 
@@ -87,13 +89,13 @@ my_diagnosands <- declare_diagnosands(subtract = type_s_rate)
 
 # You can add your own diagnosands in addition to or instead of the defaults e.g.,
 
-my_diagnosands <- 
+my_diagnosands <-
   declare_diagnosands(median_bias = median(estimate - estimand))
 
 # or to report only \\code{median_bias}
 
-my_diagnosands <- 
-   declare_diagnosands(median_bias = median(estimate - estimand), 
+my_diagnosands <-
+   declare_diagnosands(median_bias = median(estimate - estimand),
                        keep_defaults = FALSE)
 
 # Below is the code that makes the default diagnsoands.

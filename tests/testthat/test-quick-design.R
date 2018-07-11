@@ -17,14 +17,14 @@ test_that("expand_design works", {
       pate_estimator
     return(my_design)
   }
-  
+
   set.seed(1999)
   direct <- draw_data(two_arm_trial(N = 50))
-  
+
   design <- expand_design(designer = two_arm_trial, N = 50)
   set.seed(1999)
   qd <- draw_data(design)
-  
+
   expect_identical(direct, qd)
 })
 
@@ -32,26 +32,29 @@ rm(list = ls())
 
 test_that("expand_design works some more", {
   two_arm_trial <- function(N) {
-    pop <- declare_population(N = N,
-                              Y = rnorm(N),
-                              Z = rbinom(N, 1, .5))
+    pop <- declare_population(
+      N = N,
+      Y = rnorm(N),
+      Z = rbinom(N, 1, .5)
+    )
     my_estimand <- declare_estimand(mean(Y))
     my_estimator <-
       declare_estimator(Y ~ Z,
-                        model = lm_robust,
-                        term = "Z",
-                        estimand = my_estimand)
+        model = lm_robust,
+        term = "Z",
+        estimand = my_estimand
+      )
     my_design <- pop + my_estimand + my_estimator
     return(my_design)
   }
-  
+
   expect_equal(nrow(draw_data(two_arm_trial(N = 5))), 5)
   expect_equal(nrow(draw_data(two_arm_trial(N = 15))), 15)
-  
+
   a_expand_design <- expand_design(designer = two_arm_trial, N = 50)
-  
+
   df <- draw_data(a_expand_design)
-  
+
   expect_equal(nrow(df), 50)
 })
 
@@ -74,13 +77,15 @@ test_that("vary works", {
       pate_estimator
     return(my_design)
   }
-  
-  design <- expand_design(designer = two_arm_trial,
-                          N = c(100, 200, 300),
-                          noise_sd = 1)
+
+  design <- expand_design(
+    designer = two_arm_trial,
+    N = c(100, 200, 300),
+    noise_sd = 1
+  )
   expect_length(design, 3)
   diagnose_design(design, sims = 2, bootstrap_sims = FALSE)
-  
+
   design <- expand_design(
     designer = two_arm_trial,
     N = c(100, 200, 300),
@@ -88,7 +93,7 @@ test_that("vary works", {
   )
   expect_length(design, 9)
   diagnose_design(design, sims = 2, bootstrap_sims = FALSE)
-  
+
   design <- expand_design(
     designer = two_arm_trial,
     expand = FALSE,
@@ -97,14 +102,13 @@ test_that("vary works", {
   )
   expect_length(design, 3)
   diagnose_design(design, sims = 2, bootstrap_sims = FALSE)
-  
+
   expect_error(expand_design(
     designer = two_arm_trial,
     expand = FALSE,
     N = c(100, 200, 300),
     noise_sd = c(.1, .2)
   ))
-  
 })
 
 test_that("power curve", {
@@ -124,12 +128,12 @@ test_that("power curve", {
       pate_estimator
     return(my_design)
   }
-  
+
   design <-
     expand_design(designer = two_arm_trial, N = c(100, 200, 300, 500, 1000))
-  
+
   expect_length(design, 5)
-  
+
   diagnosis <-
     diagnose_design(design, sims = 2, bootstrap_sims = FALSE)
   #
@@ -139,7 +143,6 @@ test_that("power curve", {
   #     geom_line() +
   #     theme_bw()
   #
-  
 })
 
 test_that("single design can be created by expand_design", {
@@ -151,20 +154,18 @@ test_that("single design can be created by expand_design", {
       design <- pop + NULL
       design
     }
-  
+
   my_design <- expand_design(my_designer)
 
   expect_s3_class(my_design, "design")
-  # 
+  #
   # my_design <- expand_design(my_designer, N = 50)
-  # 
+  #
   # expect_s3_class(my_design, "design")
-  # 
+  #
   # expect_equal(nrow(draw_data(my_design)), 50)
-  # 
+  #
   # my_designs <- expand_design(my_designer, N = c(50, 100))
-  # 
+  #
   # expect_equal(length(my_designs), 2)
-  
 })
-

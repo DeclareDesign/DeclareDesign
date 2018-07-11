@@ -32,8 +32,8 @@ modified_design <- redesign(design, n = 200)
 # returns a list of six modified designs
 design_vary_N <- redesign(design, n = seq(400, 900, 100))
 
-# When redesigning with arguments that are vectors, 
-#   use list() in redesign, with each list item 
+# When redesigning with arguments that are vectors,
+#   use list() in redesign, with each list item
 #   representing a design you wish to create
 
 prob_each <- c(.1, .5, .4)
@@ -45,7 +45,7 @@ design <- population + assignment
 # returns two designs
 
 designs_vary_prob_each <- redesign(
-  design, 
+  design,
   prob_each = list(c(.2, .5, .3), c(0, .5, .5)))
 
 }
