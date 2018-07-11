@@ -4,6 +4,7 @@
 #' @param keep_defaults A flag for whether to report the default diagnosands. Defaults to \code{TRUE}.
 #' @param subset A subset of the simulations data frame within which to calculate diagnosands e.g. \code{subset = p.value < .05}.
 #' @param alpha Alpha significance level. Defaults to \code{.05}.
+#' @param na.rm logical. Should simulations with missing estimates be dropped? Defaults to TRUE.
 #' @param label Label for the set of diagnosands.
 #' @param data a data.frame
 #'
@@ -13,7 +14,7 @@
 #' will contain the step label. This can be used as an additional dimension for use in diagnosis.
 #'
 #'
-#' @importFrom rlang eval_tidy quos  is_quosure quo_is_call %||%
+#' @importFrom rlang eval_tidy quos is_quosure quo_is_call %||%
 #' @rdname declare_diagnosands
 diagnosand_handler <- function(data, ...,
                                select,
@@ -21,6 +22,7 @@ diagnosand_handler <- function(data, ...,
                                keep_defaults = TRUE,
                                subset = NULL,
                                alpha = 0.05,
+                               na.rm = TRUE,
                                label) {
   options <- quos(...)
 
@@ -66,16 +68,34 @@ diagnosand_handler <- function(data, ...,
   }
 
   ret <- vector("list", length(options))
+  
+  if(na.rm){
+    n_row_original <- nrow(data)
+    data <- na.omit(data)
+    n_deleted <- n_row_original - nrow(data)
+    
+    na_ret <- data.frame(diagnosand_label = "n_deleted",
+                         diagnosand = n_deleted,
+                         stringsAsFactors = FALSE)
+  }
+  
   for (i in seq_along(options)) {
     ret[i] <- eval_tidy(options[[i]], data = data)
   }
+  
   ret <- simplify2array(ret)
-
+  
+  ret <- 
   data.frame(
     diagnosand_label = names(options),
     diagnosand = ret,
     stringsAsFactors = FALSE
   )
+  
+  if(na.rm){
+    ret <- rbind_disjoint(list(ret, na_ret))
+  }
+  ret
 }
 
 
@@ -222,7 +242,18 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #'
 declare_diagnosands <- make_declarations(diagnosand_handler, "diagnosand", "diagnosands")
 
-default_diagnosands <- function(data, alpha = .05) {
+default_diagnosands <- function(data, alpha = .05, na.rm = TRUE){
+  
+  if(na.rm){
+    n_row_original <- nrow(data)
+    data <- na.omit(data)
+    n_deleted <- n_row_original - nrow(data)
+    
+    na_ret <- data.frame(diagnosand_label = "n_deleted",
+                         diagnosand = n_deleted,
+                         stringsAsFactors = FALSE)
+  }
+  
   estimate <- data$estimate %||% NA
   estimand <- data$estimand %||% NA
   p.value <- data$p.value %||% NA
@@ -239,7 +270,8 @@ default_diagnosands <- function(data, alpha = .05) {
   mean_se <- mean(std.error)
   type_s_rate <- mean((sign(estimate) != sign(estimand))[p.value < alpha])
   mean_estimand <- mean(estimand)
-
+  
+  ret <- 
   data.frame(
     diagnosand_label = c(
       "bias",
@@ -262,6 +294,13 @@ default_diagnosands <- function(data, alpha = .05) {
       mean_se,
       type_s_rate,
       mean_estimand
-    )
+    ), 
+    stringsAsFactors = FALSE
   )
+  
+  if(na.rm){
+    ret <- rbind_disjoint(list(ret, na_ret))
+  }
+  
+  ret
 }
