@@ -50,7 +50,7 @@ The intent here is to factor out the estimator/estimand labeling so that it can 
 
 \code{estimator_functions} implementations should be tidy (accept and return a data.frame)
 
-\code{model} implementations should at the miminum provide S3 methods for \code{summary} and \code{confint}.
+\code{model} implementations should at a minimum provide S3 methods for \code{summary} and \code{confint}.
 }
 
 \examples{
