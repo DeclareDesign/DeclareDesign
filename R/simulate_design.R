@@ -101,8 +101,7 @@ simulate_single_design <- function(design, sims) {
   if (!is_bare_integerish(sims) || 
       (length(design) != length(sims) & length(sims) != 1)) {
     stop(
-      "Please provide sims a scalar or a numeric vector of ",
-      "length the number of steps in designs.", 
+      "Please provide sims a scalar or a numeric vector of length the number of steps in designs.", 
       call. = FALSE)
   }
 
@@ -154,8 +153,7 @@ simulate_single_design <- function(design, sims) {
 
   if (is_empty(estimates_df) && is_empty(estimands_df)) {
     stop(
-      "No estimates or estimands were declared, ", 
-      "so design cannot be simulated.", 
+      "No estimates or estimands were declared, so design cannot be simulated.", 
       call. = FALSE)
   } else if (is_empty(estimands_df)) {
     simulations_df <- estimates_df
@@ -172,8 +170,7 @@ simulate_single_design <- function(design, sims) {
 
     if (nrow(simulations_df) > max(nrow(estimands_df), nrow(estimates_df))) {
       warning(
-        "Estimators lack estimand/term labels for matching, ",
-        "a many-to-many merge was performed."
+        "Estimators lack estimand/term labels for matching, a many-to-many merge was performed."
       )
     }
   }

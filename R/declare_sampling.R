@@ -56,8 +56,7 @@ sampling_handler <- function(data, ..., sampling_variable = "S") {
   samp <- as.symbol(paste0(samp, "_inclusion_prob"))
 
   S <- as.symbol(".__Sample") 
-  # Matching old code but also eliminating the 
-  #   R CMD check warning that .__Sample is a undef/global variable
+  # Matching old code but also eliminating the R CMD check warning that .__Sample is a undef/global variable
 
   data <- fabricate(data,
     !!S := draw_rs(N = N, !!!options),
@@ -92,8 +91,7 @@ validation_fn(sampling_handler) <- function(ret, dots, label) {
     if ("clusters" %in% names(dots)) {
       if (class(f_rhs(dots[["clusters"]])) == "character") {
         declare_time_error(
-          "Must provide the bare (unquoted) ", 
-          "cluster variable name to clusters.", 
+          "Must provide the bare (unquoted) cluster variable name to clusters.", 
           ret)
       }
     }

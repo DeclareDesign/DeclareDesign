@@ -80,8 +80,7 @@ print.summary.diagnosis <- function(x, ...) {
                     paste0(" based on ", n_sims, " simulations"), ""), "."))
   if (x$bootstrap_sims > 0) {
     cat(
-      " Diagnosand estimates with ",
-      "bootstrapped standard errors in parentheses (", 
+      " Diagnosand estimates with bootstrapped standard errors in parentheses (", 
       x$bootstrap_sims, " replicates).", sep = "")
   }
   cat("\n\n")
