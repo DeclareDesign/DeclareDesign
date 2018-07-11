@@ -6,7 +6,7 @@
 \title{Declare diagnosands}
 \usage{
 diagnosand_handler(data, ..., select, subtract, keep_defaults = TRUE,
-  subset = NULL, alpha = 0.05, na.rm = TRUE, label)
+  subset = NULL, alpha = 0.05, label)
 
 declare_diagnosands(..., handler = diagnosand_handler, label = NULL)
 }
@@ -24,8 +24,6 @@ declare_diagnosands(..., handler = diagnosand_handler, label = NULL)
 \item{subset}{A subset of the simulations data frame within which to calculate diagnosands e.g. \code{subset = p.value < .05}.}
 
 \item{alpha}{Alpha significance level. Defaults to \code{.05}.}
-
-\item{na.rm}{logical. Should simulations with missing estimates be dropped? Defaults to TRUE.}
 
 \item{label}{Label for the set of diagnosands.}
 
