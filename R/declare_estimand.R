@@ -53,10 +53,10 @@
 #' pop <- declare_population(N = 100, X = rnorm(N))
 #' pos <- declare_potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N))
 #' assgn <- declare_assignment(m = 50)
-#' 
-#' design_stub <- pop + 
-#'   pos + 
-#'   assgn + 
+#'
+#' design_stub <- pop +
+#'   pos +
+#'   assgn +
 #'   declare_reveal()
 #'
 #' # Get example data to compute estimands on
@@ -127,9 +127,10 @@
 #' design_cust <- insert_step(design_cust, my_estimator_custom, after = "reveal")
 #'
 #' run_design(design_cust)
-#' 
-declare_estimand <- make_declarations(estimand_handler, "estimand", 
-                                      causal_type = "estimand", default_label = "estimand")
+#'
+declare_estimand <- make_declarations(estimand_handler, "estimand",
+  causal_type = "estimand", default_label = "estimand"
+)
 
 #' @rdname declare_estimand
 #' @export
@@ -179,7 +180,7 @@ estimand_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
   }
 }
 
-validation_fn(estimand_handler) <-  function(ret, dots, label){
+validation_fn(estimand_handler) <- function(ret, dots, label) {
   force(ret)
   # add ... labels at build time
   dotnames <- names(dots)
@@ -187,13 +188,16 @@ validation_fn(estimand_handler) <-  function(ret, dots, label){
   declare_time_error_if_data(ret)
 
   # Don't overwrite label-label with splat label if term names are true
-  if ("term" %in% dotnames && isTRUE(eval_tidy(dots$term))) 
+  if ("term" %in% dotnames && isTRUE(eval_tidy(dots$term))) {
     return(ret)
+  }
 
-  maybeDotLabel <- dotnames[!dotnames %in% c("", names(formals(estimand_handler)) )]
+  maybeDotLabel <- dotnames[!dotnames %in% c("", names(formals(estimand_handler)))]
   if (any(duplicated(maybeDotLabel))) {
-    stop(paste0("Please provide unique names for each estimand. Duplicates include ", 
-                paste(maybeDotLabel[duplicated(maybeDotLabel)], collapse = ", "), "."), call. = FALSE)
+    stop(paste0(
+      "Please provide unique names for each estimand. Duplicates include ",
+      paste(maybeDotLabel[duplicated(maybeDotLabel)], collapse = ", "), "."
+    ), call. = FALSE)
   }
   if (length(maybeDotLabel) == 1) {
     attr(ret, "steplabel") <- attr(ret, "label")

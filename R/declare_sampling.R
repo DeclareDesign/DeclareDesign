@@ -58,30 +58,27 @@ sampling_handler <- function(data, ..., sampling_variable = "S") {
   S <- as.symbol(".__Sample") # Matching old code but also eliminating the R CMD check warning that .__Sample is a undef/global variable
 
   data <- fabricate(data,
-    !!S              :=  draw_rs(N=N, !!!options),
-    !!samp           :=  obtain_inclusion_probabilities(N=N, !!!options),
+    !!S := draw_rs(N = N, !!!options),
+    !!samp := obtain_inclusion_probabilities(N = N, !!!options),
     ID_label = NA
   )
 
   S <- as.character(S)
 
   ## subset to the sampled observations
-  data[ data[[S]] %in% 1, names(data) != S, drop=FALSE]
-
+  data[ data[[S]] %in% 1, names(data) != S, drop = FALSE]
 }
 
-validation_fn(sampling_handler) <- function(ret, dots, label){
-
+validation_fn(sampling_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
 
 
   if ("sampling_variable" %in% names(dots) &&
-      inherits(f_rhs(dots[["sampling_variable"]]), "NULL")) {
+    inherits(f_rhs(dots[["sampling_variable"]]), "NULL")) {
     declare_time_error("Must not provide NULL as sampling_variable.", ret)
   }
 
-  if(! "declaration" %in% names(dots)) {
-
+  if (!"declaration" %in% names(dots)) {
     if ("strata" %in% names(dots)) {
       if (class(f_rhs(dots[["strata"]])) == "character") {
         declare_time_error("Must provide the bare (unquoted) strata variable name to strata.", ret)
@@ -93,26 +90,26 @@ validation_fn(sampling_handler) <- function(ret, dots, label){
         declare_time_error("Must provide the bare (unquoted) cluster variable name to clusters.", ret)
       }
     }
-    rs_args <- setdiff(names(dots), names(formals(sampling_handler))) #removes data and sampling_variable
+    rs_args <- setdiff(names(dots), names(formals(sampling_handler))) # removes data and sampling_variable
 
     rs_dots <- dots[rs_args]
 
-    if(length(rs_dots) > 0) {
-      declaration <- tryCatch(eval_tidy(quo(declare_rs(!!!rs_dots))), error=function(e)e)
+    if (length(rs_dots) > 0) {
+      declaration <- tryCatch(eval_tidy(quo(declare_rs(!!!rs_dots))), error = function(e) e)
 
-      if(inherits(declaration, "rs_declaration")) {
+      if (inherits(declaration, "rs_declaration")) {
         message("Sampling declaration factored out from execution path.")
         dots[rs_args] <- NULL
         dots$declaration <- declaration
 
-        ret <- build_step(currydata(sampling_handler, dots, strictDataParam=attr(ret, "strictDataParam")),
-                          handler=sampling_handler,
-                          dots=dots,
-                          label=label,
-                          step_type=attr(ret, "step_type"),
-                          causal_type=attr(ret,"causal_type"),
-                          call=attr(ret, "call"))
-
+        ret <- build_step(currydata(sampling_handler, dots, strictDataParam = attr(ret, "strictDataParam")),
+          handler = sampling_handler,
+          dots = dots,
+          label = label,
+          step_type = attr(ret, "step_type"),
+          causal_type = attr(ret, "causal_type"),
+          call = attr(ret, "call")
+        )
       }
     }
   }

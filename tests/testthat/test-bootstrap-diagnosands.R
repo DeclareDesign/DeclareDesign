@@ -1,11 +1,12 @@
 context("Bootstrap Diagnosands")
 test_that("test diagnosands", {
-
   my_population <- declare_population(N = 50, noise = rnorm(N))
 
   my_potential_outcomes <-
-    declare_potential_outcomes(Y_Z_0 = noise,
-                               Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+    declare_potential_outcomes(
+      Y_Z_0 = noise,
+      Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)
+    )
 
   my_assignment <- declare_assignment(m = 25)
 
@@ -17,7 +18,7 @@ test_that("test diagnosands", {
   reveal <- declare_reveal()
 
   fixed_data <- my_population()
-  
+
   my_design <- declare_population(data = fixed_data) +
     my_potential_outcomes +
     pate +
@@ -27,11 +28,9 @@ test_that("test diagnosands", {
     pate_estimator2
 
   # default set
-  
-  diagnosis <- diagnose_design(my_design, sims = 2, bootstrap_sims = 2)
 
+  diagnosis <- diagnose_design(my_design, sims = 2, bootstrap_sims = 2)
   expect_equal(dim(diagnosis$diagnosands_df), c(2,25))
 
-  expect_equal(dim(diagnosis$simulations_df), c(4,14))
-
+  expect_equal(dim(diagnosis$simulations_df), c(4, 14))
 })

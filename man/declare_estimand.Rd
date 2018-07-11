@@ -79,9 +79,9 @@ pop <- declare_population(N = 100, X = rnorm(N))
 pos <- declare_potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N))
 assgn <- declare_assignment(m = 50)
 
-design_stub <- pop + 
-  pos + 
-  assgn + 
+design_stub <- pop +
+  pos +
+  assgn +
   declare_reveal()
 
 # Get example data to compute estimands on

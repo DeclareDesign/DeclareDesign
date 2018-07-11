@@ -42,7 +42,7 @@
 #'
 #' df <- my_assignment_custom(sleep)
 #' table(df$Z, df$group)
-#' 
+#'
 declare_assignment <- make_declarations(assignment_handler, "assignment")
 
 
@@ -54,16 +54,15 @@ declare_assignment <- make_declarations(assignment_handler, "assignment")
 #' @rdname declare_assignment
 assignment_handler <-
   function(data, ..., assignment_variable = "Z", append_probabilities_matrix = FALSE) {
-    
     options <- quos(...)
-    
+
     for (assn in assignment_variable) {
       cond_prob <- as.symbol(paste0(assn, "_cond_prob"))
       assn <- as.symbol(assn)
       data <- fabricate(data,
-                        !!assn      := conduct_ra(N = N,!!!options),
-                        !!cond_prob := obtain_condition_probabilities(!!!options, assignment = !!assn),
-                        ID_label = NA
+        !!assn := conduct_ra(N = N, !!!options),
+        !!cond_prob := obtain_condition_probabilities(!!!options, assignment = !!assn),
+        ID_label = NA
       )
       if (append_probabilities_matrix) {
         options$N <- quo(nrow(data))
@@ -77,8 +76,7 @@ assignment_handler <-
     data
   }
 
-validation_fn(assignment_handler) <-   function(ret, dots, label){
-
+validation_fn(assignment_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
 
   dirty <- FALSE
@@ -96,12 +94,12 @@ validation_fn(assignment_handler) <-   function(ret, dots, label){
       }
     }
 
-    ra_args <- setdiff(names(dots), names(formals(assignment_handler))) #removes data and assignment_variable
+    ra_args <- setdiff(names(dots), names(formals(assignment_handler))) # removes data and assignment_variable
 
     ra_dots <- dots[ra_args]
 
     if (length(ra_dots) > 0) {
-      declaration <- tryCatch(eval_tidy(quo(declare_ra(!!!ra_dots))), error = function(e)e)
+      declaration <- tryCatch(eval_tidy(quo(declare_ra(!!!ra_dots))), error = function(e) e)
 
       if (inherits(declaration, "ra_declaration")) {
         # message("Assignment declaration factored out from execution path.")
@@ -121,21 +119,20 @@ validation_fn(assignment_handler) <-   function(ret, dots, label){
     dots$assignment_variable <- assn
 
     dirty <- TRUE
-
   } else {
     assn <- formals(assignment_handler)$assignment_variable
   }
 
   if (dirty) {
     ret <- build_step(currydata(assignment_handler, dots, strictDataParam = attr(ret, "strictDataParam")),
-                      handler = assignment_handler,
-                      dots = dots,
-                      label = label,
-                      step_type = attr(ret, "step_type"),
-                      causal_type = attr(ret, "causal_type"),
-                      call = attr(ret, "call"))
+      handler = assignment_handler,
+      dots = dots,
+      label = label,
+      step_type = attr(ret, "step_type"),
+      causal_type = attr(ret, "causal_type"),
+      call = attr(ret, "call")
+    )
   }
 
   structure(ret, step_meta = list(assignment_variables = assn))
-  
 }

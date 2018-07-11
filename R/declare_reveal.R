@@ -1,6 +1,6 @@
 #' Declare a reveal outcomes step
-#' 
-#' Potential outcomes declarations indicating what outcomes exist as a function of assignment variables. But one more step is required, revealing outcomes after treatment is realized. \code{declare_reveal} declares the set of outcome variable names, for example created by \code{declare_potential_outcomes} and the set of assignment variables \code{declare_assignment}. 
+#'
+#' Potential outcomes declarations indicating what outcomes exist as a function of assignment variables. But one more step is required, revealing outcomes after treatment is realized. \code{declare_reveal} declares the set of outcome variable names, for example created by \code{declare_potential_outcomes} and the set of assignment variables \code{declare_assignment}.
 #'
 #' @inheritParams declare_internal_inherit_params
 #'
@@ -37,24 +37,24 @@ declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal")
 #'
 #' my_reveal <- declare_reveal()
 #'
-#' design <- my_population + 
-#'   my_potential_outcomes + 
-#'   my_assignment + 
+#' design <- my_population +
+#'   my_potential_outcomes +
+#'   my_assignment +
 #'   my_reveal
 #'
 #' design
 #'
-#' # By default, the + operator results in the same design being 
+#' # By default, the + operator results in the same design being
 #' #  created, because it automatically adds a declare_reveal step.
 #'
 #' design <- my_population + my_potential_outcomes + my_assignment
-#'                          
+#'
 #' # Declaring multiple assignment variables can be done easily with !!! syntax.
-#' 
+#'
 #' my_outcomes <- c("Y1", "Y2", "Y3")
-#' 
+#'
 #' my_reveal <- declare_reveal(outcome_variables = !!!my_outcomes)
-#' 
+#'
 reveal_outcomes_handler <- function(data = NULL,
                                     outcome_variables = Y,
                                     assignment_variables = Z,
@@ -66,20 +66,24 @@ reveal_outcomes_handler <- function(data = NULL,
     stop("assignment_variables should already be converted to characters")
   }
   if (!is.null(attrition_variables) &&
-      !is.character(attrition_variables)) {
+    !is.character(attrition_variables)) {
     stop("attrition_variables should already be converted to characters")
   }
 
   for (i in seq_along(outcome_variables)) {
-    data[, outcome_variables[i]] <- switching_equation(data, 
-                                                       outcome_variables[i], 
-                                                       assignment_variables)
+    data[, outcome_variables[i]] <- switching_equation(
+      data,
+      outcome_variables[i],
+      assignment_variables
+    )
   }
 
   for (i in seq_along(attrition_variables)) {
-    response  <- switching_equation(data, 
-                                    attrition_variables[i], 
-                                    assignment_variables)
+    response <- switching_equation(
+      data,
+      attrition_variables[i],
+      assignment_variables
+    )
     data[response == 0, outcome_variables[i]] <- NA
   }
 
@@ -95,35 +99,39 @@ validation_fn(reveal_outcomes_handler) <- function(ret, dots, label) {
   dots <- reveal_nse_helper_dots(dots, "attrition_variables", reveal_outcomes_handler)
 
   ret <- build_step(
-      currydata(
-        reveal_outcomes_handler,
-        dots,
-        strictDataParam = attr(ret, "strictDataParam")
-      ),
-      handler = reveal_outcomes_handler,
-      dots = dots,
-      label = label,
-      step_type = attr(ret, "step_type"),
-      causal_type = attr(ret, "causal_type"),
-      call = attr(ret, "call")
-    )
+    currydata(
+      reveal_outcomes_handler,
+      dots,
+      strictDataParam = attr(ret, "strictDataParam")
+    ),
+    handler = reveal_outcomes_handler,
+    dots = dots,
+    label = label,
+    step_type = attr(ret, "step_type"),
+    causal_type = attr(ret, "causal_type"),
+    call = attr(ret, "call")
+  )
 
   structure(ret,
-            step_meta = dots[c("attrition_variable",
-                               "outcome_variables",
-                               "assignment_variables")])
+    step_meta = dots[c(
+      "attrition_variable",
+      "outcome_variables",
+      "assignment_variables"
+    )]
+  )
 }
 
 switching_equation <- function(data, outcome, assignments) {
   potential_cols <- mapply(paste,
-                           assignments,
-                           data[, assignments, drop = FALSE],
-                           sep = "_",
-                           SIMPLIFY = FALSE)
+    assignments,
+    data[, assignments, drop = FALSE],
+    sep = "_",
+    SIMPLIFY = FALSE
+  )
   potential_cols <- do.call(paste, c(outcome, potential_cols, sep = "_"))
-  
+
   upoc <- unique(potential_cols)
-  
+
   if (!(all(upoc %in% colnames(data)))) {
     stop(
       "Must provide all potential outcomes columns referenced by the assignment variable (",
@@ -135,13 +143,11 @@ switching_equation <- function(data, outcome, assignments) {
       )), collapse = "\n")
     )
   }
-  
+
   data <- data[, upoc, drop = FALSE]
-  
+
   R <- seq_len(nrow(data))
   C <- match(potential_cols, colnames(data))
-  
-  data[cbind(R, C)]
-  
-}
 
+  data[cbind(R, C)]
+}

@@ -1,15 +1,16 @@
 context("Continuous POs")
 test_that("you can do continuous POs", {
-
   my_population <- declare_population(
-    N = 100, income = rnorm(N), age = sample(18:95, N, replace = T))
+    N = 100, income = rnorm(N), age = sample(18:95, N, replace = T)
+  )
 
   conditions <- seq(0, 1, by = .1)
 
   my_potential_outcomes <- declare_potential_outcomes(
-    formula = Y ~ .25 * Z + .01 * age * Z, conditions = conditions)
+    formula = Y ~ .25 * Z + .01 * age * Z, conditions = conditions
+  )
 
-  my_assignment <- declare_assignment(conditions=conditions)
+  my_assignment <- declare_assignment(conditions = conditions)
 
   my_reveal <- declare_reveal()
 
@@ -20,10 +21,10 @@ test_that("you can do continuous POs", {
 
   df <- head(draw_data(my_design))
 
-  expect_length(colnames(df) %i% paste("Y", "Z", conditions, sep="_"), 11)
+  expect_length(colnames(df) %i% paste("Y", "Z", conditions, sep = "_"), 11)
 })
 
-test_that("Hooke's law",{
+test_that("Hooke's law", {
 
   # Length of spring = resting length + stiffness * Force
 
@@ -44,7 +45,7 @@ test_that("Hooke's law",{
     function(resting, stiffness, force) {
       resting + stiffness * force
     }
-  
+
   estimand <- declare_estimand(
     `(Intercept)` = mean(potential_outcome_f(resting, stiffness, 0)),
     stiffness = mean(potential_outcome_f(resting, stiffness, 1) - potential_outcome_f(resting, stiffness, 0)),
@@ -58,16 +59,20 @@ test_that("Hooke's law",{
   # randomly put a combo of those on the spring
   w <- c(0, 5, 10, 25, 50, 100)
 
-  assignment <- declare_assignment(handler = fabricate,
-                                   force = replicate(N, sum(sample(
-                                     w, sample(length(w), 1)
-                                   ))))
-  
+  assignment <- declare_assignment(
+    handler = fabricate,
+    force = replicate(N, sum(sample(
+      w, sample(length(w), 1)
+    )))
+  )
+
   # 1mm of measurment error
-  reveal <- declare_reveal(handler = fabricate,
-                           length = potential_outcome_f(resting, stiffness, force) + 
-                             rnorm(N, sd = .1))
-  
+  reveal <- declare_reveal(
+    handler = fabricate,
+    length = potential_outcome_f(resting, stiffness, force) +
+      rnorm(N, sd = .1)
+  )
+
   estimator <- declare_estimator(length ~ force, model = lm, term = TRUE)
 
   design <- pop + estimand + sampling + assignment + reveal + estimator
@@ -79,5 +84,4 @@ test_that("Hooke's law",{
 
   # No PO columns created in df
   expect_false(any(grep("length_force_", names(df))))
-
 })
