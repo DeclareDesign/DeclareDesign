@@ -18,7 +18,6 @@ Depends:
     randomizr (>= 0.16.1),
     fabricatr (>= 0.4.0),
     estimatr (>= 0.10.0)
-Remotes: DeclareDesign/estimatr
 Imports:
     rlang, methods
 License: MIT + file LICENSE
