@@ -39,13 +39,7 @@ will contain the step label. This can be used as an additional dimension for use
 }
 \examples{
 
-# Simple estimands
-
-my_estimand_ATE <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-
-my_estimand_ATT <- declare_estimand(ATT = mean(Y_Z_1 - Y_Z_0), subset = (Z == 1))
-
-# Set up the rest of a design for use below
+# Set up a design stub for use in examples:
 
 population  <- declare_population(N = 100, X = rnorm(N))
 potentials  <- declare_potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N))
@@ -59,10 +53,17 @@ dat <- draw_data(design_stub)
 # 1. Single estimand
 # ----------
 
-# Use the default estimand setup to
-# declare an average treatment effect estimand
+# Use the default estimand setup to declare an average treatment effect estimand
 
+my_estimand_ATE <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 my_estimand_ATE(dat)
+
+# or a conditional estimand
+
+my_estimand_ATT <- declare_estimand(ATT = mean(Y_Z_1 - Y_Z_0), subset = (Z == 1))
+my_estimand_ATT (dat)
+
+# Add estimands to a design along with estimators that reference them:
 
 my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand_ATE, label = "estimator")
 
@@ -77,6 +78,7 @@ get_estimands(design_def)
 # You can also specify multiple estimands for a single estimator 
 
 # With multiple estimands, you can use one estimator for both...
+
 my_estimator_two <- declare_estimator(Y ~ Z, estimand = c(my_estimand_ATE, my_estimand_ATT))
 
 design_two <- design_stub + my_estimand_ATE + my_estimand_ATT + my_estimator_two
