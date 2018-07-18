@@ -1,8 +1,8 @@
 #' Redesign
 #'
-#' \code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters internally. (Advanced).
+#' \code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters in a step's environment (Advanced).
 #'
-#' Importantly, \code{redesign} will edit any symbol in your design, but if the symbol you attempt to change does not exist no changes will be made and no error or warning will be issued. 
+#' Warning: \code{redesign} will edit any symbol in your design, but if the symbol you attempt to change does not exist in a step's environment no changes will be made and no error or warning will be issued. 
 #' 
 #' Please note that \code{redesign} functionality is experimental and may be changed in future versions.  
 #'
@@ -24,8 +24,8 @@
 #' design_vary_N <- redesign(design, n = seq(400, 900, 100))
 #'
 #' # When redesigning with arguments that are vectors,
-#' #   use list() in redesign, with each list item
-#' #   representing a design you wish to create
+#' # use list() in redesign, with each list item
+#' # representing a design you wish to create
 #'
 #' prob_each <- c(.1, .5, .4)
 #'
@@ -39,6 +39,29 @@
 #'   design,
 #'   prob_each = list(c(.2, .5, .3), c(0, .5, .5)))
 #'
+#'
+#' # To illustrate what does and does not get edited by redesign, 
+#' # consider the following three designs. 
+#' # In the first two, argument X is called from the step's environment; 
+#' # in the third it is not, Using redesign will alter the role of X in 
+#' # the first two designs but not the third one.
+#'
+#'X <- 3
+#'f <- function(b, X) b*X
+#'g <- function(b) b*X
+#'
+#'design1 <- declare_population(N = 1, A = X)       + NULL
+#'design2 <- declare_population(N = 1, A = f(2, X)) + NULL
+#'design3 <- declare_population(N = 1, A = g(2))    + NULL
+#'
+#'draw_data(design1)
+#'draw_data(design2)
+#'draw_data(design3)
+#'
+#'draw_data(redesign(design1, X=0))
+#'draw_data(redesign(design2, X=0))
+#'draw_data(redesign(design3, X=0))
+
 #' @export
 redesign <- function(design, ..., expand = TRUE) {
   f <- function(...) {

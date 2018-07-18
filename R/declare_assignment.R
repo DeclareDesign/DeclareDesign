@@ -7,7 +7,7 @@
 #'
 #' @details
 #'
-#' declare_assignment can work with any assignment_function that takes data and returns data. The default handler is conduct_ra from the randomizr package. This allows quick declaration of many assignment schemes that involve simple or complete random assignment with blocks and clusters.
+#' \code{declare_assignment} can work with any assignment_function that takes data and returns data. The default handler is \code{conduct_ra} from the \code{randomizr} package. This allows quick declaration of many assignment schemes that involve simple or complete random assignment with blocks and clusters.
 #' The arguments to \code{\link{conduct_ra}} can include N, block_var, clust_var, m, m_each, prob, prob_each, block_m, block_m_each, block_prob, block_prob_each, num_arms, and conditions.
 #' The arguments you need to specify are different for different designs. For details see the help files for \code{\link{complete_ra}}, \code{\link{block_ra}}, \code{\link{cluster_ra}}, or \code{\link{block_and_cluster_ra}}.
 #'
