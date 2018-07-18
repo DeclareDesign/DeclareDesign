@@ -145,7 +145,8 @@ run_design(design_cust)
 # 5. Batch estimands and estimators
 # ----------
 
-# You can declare multiple estimands with distinct labels in one go and link them manually to estimators:
+# You can declare multiple estimands with distinct labels in one go and link them manually to estimators.
+# In this case you can add a \\code{term} argument to the custom estimators to identify them.
 
 f1 <- function(data) {
   data.frame(estimand_label = c("control", "ate"),
@@ -155,7 +156,8 @@ f1 <- function(data) {
 estimands <- declare_estimand(handler = f1)
 
 f2 <- function(data) data.frame(estimate = with(data,
-                            c(mean(Y[Z == 0]), mean(Y[Z == 1]) - mean(Y[Z == 0]))))
+                            c(mean(Y[Z == 0]), mean(Y[Z == 1]) - mean(Y[Z == 0]))),
+                            term = 1:2)
 
 estimators <- declare_estimator(handler = tidy_estimator(f2), 
                             estimand = c("control", "ate"), label = "custom")
