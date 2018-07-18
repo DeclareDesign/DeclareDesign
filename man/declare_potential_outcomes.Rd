@@ -25,9 +25,9 @@ potential_outcomes.NULL(formula = stop("Not provided"), ..., data,
 
 \item{formula}{a formula to calculate potential outcomes as functions of assignment variables}
 
-\item{conditions}{see \code{\link{expand_conditions}}}
+\item{conditions}{see \code{\link{expand_conditions}}. Provide values (e.g. \code{conditions = 1;4}) for a single assignment variable. If multiple assignment variables, provide named list (e.g. \code{conditions = list(Z1 = 0:1, Z2 = 0:1)}). Defaults to 0:1 if no conditions provided.}
 
-\item{assignment_variables}{The name of the assignment variable}
+\item{assignment_variables}{The name of the assignment variable. Generally not required as names are taken from \code{conditions}}
 
 \item{data}{a data.frame}
 
@@ -40,15 +40,18 @@ a function that returns a data.frame
 Potential Outcomes
 }
 \details{
-A `declare_potential_outcomes` declaration returns a function. That function takes data and returns data with potential outcomes columns appended. These columns describe the outcomes that each unit would express if that unit were in the corresponding treatment condition.
+A `declare_potential_outcomes` declaration returns a function. The function takes data and returns data with potential outcomes columns appended. These columns describe the outcomes that each unit would express if that unit were in the corresponding treatment condition.
 
-The potential outcomes function can sometimes be a stumbling block for users, as some are uncomfortable asserting anything in particular about the very causal process that they are conducting a study to learn about! We recommend trying to imagine what your preferred theory would predict, what an alternative theory would predict, and what your study would reveal if there were no differences in potential outcomes for any unit (i.e., all treatment effects are zero).
+Declaring a potential outcomes function requires postulating a particular causal process. One can then assess how designs fare under the postulated process. 
+Multiple processes can be considered in a single design or across design. For instance one could declare two processes that rival theories would predict.
+
+Potential outcomes can be declared as separate variables or by using a formula. See examples below.
 }
 \examples{
 
 # Default handler
 
-# By default, there are two ways of declaring potential outcomes:
+# There are two ways of declaring potential outcomes:
 # as separate variables or using a formula:
 
 # As separate variables

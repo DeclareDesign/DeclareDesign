@@ -7,10 +7,11 @@
 #'
 #' @details
 #'
-#' While declare_assignment can work with any assignment_function that takes data and returns data, most random assignment procedures can be easily implemented with randomizr.
-#' The arguments to \code{\link{conduct_ra}} can include N, block_var, clust_var, m, m_each, prob, prob_each, block_m, block_m_each = NULL, block_prob, block_prob_each, num_arms, and conditions.
-#' The arguments you need to specify are different for different designs. Check the help files for \code{\link{complete_ra}}, \code{\link{block_ra}}, \code{\link{cluster_ra}}, or \code{\link{block_and_cluster_ra}} for details on how to execute many common designs.
+#' declare_assignment can work with any assignment_function that takes data and returns data. The default handler is conduct_ra from the randomizr package. This allows quick declaration of many assignment schemes that involve simple or complete random assignment with blocks and clusters.
+#' The arguments to \code{\link{conduct_ra}} can include N, block_var, clust_var, m, m_each, prob, prob_each, block_m, block_m_each, block_prob, block_prob_each, num_arms, and conditions.
+#' The arguments you need to specify are different for different designs. For details see the help files for \code{\link{complete_ra}}, \code{\link{block_ra}}, \code{\link{cluster_ra}}, or \code{\link{block_and_cluster_ra}}.
 #'
+#' By default 
 #' Custom assignment handlers should augment the data frame with an appropriate column for the assignments.
 #'
 #' @importFrom rlang quos quo lang_modify eval_tidy !!!
@@ -24,32 +25,44 @@
 #' my_assignment <- declare_assignment(m = 50)
 #' my_assignment <- declare_assignment(block_prob = 1/3, blocks = female)
 #' my_assignment <- declare_assignment(block_prob = 1/4, clusters = classrooms)
-#'
+#' 
 #' my_assignment <- declare_assignment(
 #'   block_prob = 1/4,
 #'   clusters = classrooms,
 #'   assignment_variable = "X1"
 #' )
-#'
+#'  
+#'  # Factorial assignment. Approach 1: We use complete random assignment to assign T1 and then use T1 as a block to assign T2. 
+#'  design <- declare_population(N = 4) + 
+#'    declare_assignment(assignment_variable = "T1") + 
+#'    declare_assignment(blocks = T1, assignment_variable = "T2")
+#'    draw_data(design)
+#'    
+#'  # Factorial assignment. Approach 2: We assign to four conditions and then split into separate factors. 
+#'  design <- declare_population(N = 4) + 
+#'    declare_assignment(conditions = 1:4) + 
+#'    declare_step(fabricate, T1 = as.numeric(Z %in% 2:3), T2 = as.numeric(Z %in% 3:4))
+#'    draw_data(design)
+#'    
 #' # Custom random assignment functions
 #'
-#' my_assignment_function <- function(data) {
-#'    data$Z <- ifelse(data$extra <= median(data$extra), 1, 0)
-#'    data
-#' }
-#'
-#' my_assignment_custom <- declare_assignment(handler = my_assignment_function)
-#'
-#' df <- my_assignment_custom(sleep)
-#' table(df$Z, df$group)
-#'
+#' custom_assignment <- function(data, assignment_variable = "X") {
+#'  data[, assignment_variable] <- rbinom(n = nrow(data),
+#'                                        size = 1,
+#'                                        prob = 0.5)
+#'  data
+#'  }
+#'  
+#'  declare_population(N = 6) + 
+#'    declare_assignment(handler = custom_assignment, assignment_variable = "X")
+#'    
 declare_assignment <- make_declarations(assignment_handler, "assignment")
 
 
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo f_rhs
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
-#' @param assignment_variable name for assignment variable
-#' @param append_probabilities_matrix Should the condition probabilities matrix be appended to the data? Defaults to FALSE
+#' @param assignment_variable Name for assignment variable (quoted). Defaults to "Z". Argument to be used with default handler. 
+#' @param append_probabilities_matrix Should the condition probabilities matrix be appended to the data? Defaults to FALSE.  Argument to be used with default handler.
 #' @param data a data.frame
 #' @rdname declare_assignment
 assignment_handler <-
