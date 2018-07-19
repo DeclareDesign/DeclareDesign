@@ -1,13 +1,13 @@
 #' Declare the size and features of the population
 #'
 #' @inheritParams declare_internal_inherit_params
-#' @return a function that returns a data.frame
+#' @return A function that returns a data.frame.
 #' @export
 #' @importFrom fabricatr fabricate
 #'
 #' @examples
 #'
-#' # Default handler is fabricate
+#' # Default handler is fabricatr::fabricate
 #'
 #' # Declare a single-level population with no covariates
 #' my_population <- declare_population(N = 100)
@@ -24,7 +24,6 @@
 #' my_population()
 #'
 #' # Declare a two-level hierarchical population
-#' # containing cities within regions
 #' # containing cities within regions and a
 #' # pollution variable defined at the city level
 #'
@@ -34,8 +33,7 @@
 #' )
 #' my_population()
 #'
-#'
-#' # Custom population functions
+#' # Declare a population using a custom function
 #'
 #' my_population_function <- function(N) {
 #'   data.frame(u = rnorm(N))

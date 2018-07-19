@@ -6,10 +6,10 @@
 #' 
 #' Please note that \code{redesign} functionality is experimental and may be changed in future versions.  
 #'
-#' @param design a design
-#' @param ... arguments to redesign e.g., n = 100
-#' @param expand boolean - if true, form the crossproduct of the ..., otherwise recycle them
-#'
+#' @param design An object of class design.
+#' @param ... Arguments to redesign e.g., \code{n = 100.} If redesigning multiple arguments, they must be specified as a named list.
+#' @param expand If TRUE, redesign using the crossproduct of \code{...}, otherwise recycle them.
+#' @return A design, or, in the case of multiple values being passed onto \code{...}, a `by`-list of designs.
 #' @examples
 #'
 #' n <- 500
@@ -41,10 +41,10 @@
 #'
 #'
 #' # To illustrate what does and does not get edited by redesign, 
-#' # consider the following three designs. 
-#' # In the first two, argument X is called from the step's environment; 
-#' # in the third it is not, Using redesign will alter the role of X in 
-#' # the first two designs but not the third one.
+#' # consider the following three designs. In the first two, argument
+#' # X is called from the step's environment; in the third it is not.
+#' # Using redesign will alter the role of X in the first two designs
+#' # but not the third one.
 #'
 #'X <- 3
 #'f <- function(b, X) b*X

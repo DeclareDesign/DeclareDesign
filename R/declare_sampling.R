@@ -2,7 +2,7 @@
 #'
 #' @inheritParams declare_internal_inherit_params
 #'
-#' @return a function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
+#' @return A function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
 #' @export
 #' @details
 #'\code{declare_sampling} can work with any sampling_function that takes data and returns data. The default handler is \code{draw_rs} from the \code{randomizr} package. This allows quick declaration of many sampling schemes that involve strata and clusters.
@@ -18,19 +18,14 @@
 #'
 #' @examples
 #'
-#' ########################################################
-#' # Default handler
-#'
-#' # Simple random sampling using randomizr
-#' # use any arguments you would use in draw_rs.
-#'
+#' # Default handler is `draw_rs` from `randomizr` package
+#' 
+#' # Simple random sampling
 #' my_sampling <- declare_sampling(n = 50)
 #'
 #' # Stratified random sampling
 #' my_stratified_sampling <- declare_sampling(strata = female)
 #'
-#'
-#' ########################################################
 #' # Custom random sampling functions
 #'
 #' my_sampling_function <- function(data, n=nrow(data)) {
@@ -42,8 +37,8 @@
 #' my_sampling_custom(sleep)
 declare_sampling <- make_declarations(sampling_handler, "sampling")
 
-#' @param sampling_variable The prefix for the sampling inclusion probability variable
-#' @param data a data.frame
+#' @param sampling_variable The prefix for the sampling inclusion probability variable.
+#' @param data A data.frame.
 #' @importFrom rlang quos !!! lang_modify eval_tidy quo
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
 #' @rdname declare_sampling

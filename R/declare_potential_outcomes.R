@@ -1,4 +1,4 @@
-#' Potential Outcomes
+#' Declare potential outcomes
 #'
 #' @inheritParams declare_internal_inherit_params
 #'
@@ -8,7 +8,7 @@
 #'
 #' @details
 #'
-#' A `declare_potential_outcomes` declaration returns a function. The function takes data and returns data with potential outcomes columns appended. These columns describe the outcomes that each unit would express if that unit were in the corresponding treatment condition.
+#' A `declare_potential_outcomes` declaration returns a function. The function takes and returns a data.frame with potential outcomes columns appended. These columns describe the outcomes that each unit would express if that unit were in the corresponding treatment condition.
 #'
 #' Declaring a potential outcomes function requires postulating a particular causal process. One can then assess how designs fare under the postulated process. 
 #' Multiple processes can be considered in a single design or across design. For instance one could declare two processes that rival theories would predict.
@@ -17,10 +17,9 @@
 #'
 #' @examples
 #'
-#' # Default handler
+#' # Declare potential outcomes using default handler
 #'
 #' # There are two ways of declaring potential outcomes:
-#' # as separate variables or using a formula:
 #'
 #' # As separate variables
 #'
@@ -30,27 +29,26 @@
 #' )
 #'
 #' # Using a formula
-#'  my_potential_outcomes <- declare_potential_outcomes(Y ~ .05 + .25 * Z + .01 * age * Z)
+#'  my_potential_outcomes <- declare_potential_outcomes(
+#'    Y ~ .05 + .25 * Z + .01 * age * Z)
 #'
-#'  # conditions defines the "range" of the potential outcomes function
+#' # `conditions` defines the "range" of the potential outcomes function
 #'  my_potential_outcomes <- declare_potential_outcomes(
 #'    formula = Y ~ .05 + .25 * Z + .01 * age * Z,
 #'    conditions = 1:4
 #'  )
 #'
-#'  # Multiple assignment variables can be specified in conditions.
-#'  # A 2x2 factorial potential outcome:
+#' # Multiple assignment variables can be specified in `conditions`. For example,
+#' # in a 2x2 factorial potential outcome:
 #'
 #'  my_potential_outcomes <- declare_potential_outcomes(
 #'    formula = Y ~ .05 + .25 * Z1 + .01 * age * Z2,
 #'    conditions = list(Z1 = 0:1, Z2 = 0:1)
 #'  )
 #'
-#' ########################################################
-#' # Custom handler
+#' # You can also declare potential outcomes using a custom handler
 #'
 #' my_po_function <- function(data) {
-#'
 #'   data$Y_treated   <- rexp(nrow(data), .2)
 #'   data$Y_untreated <- rexp(nrow(data), .4)
 #'   data
@@ -106,9 +104,9 @@ validation_fn(potential_outcomes_handler) <- function(ret, dots, label) {
   ret
 }
 
-#' @param formula a formula to calculate potential outcomes as functions of assignment variables
-#' @param conditions see \code{\link{expand_conditions}}. Provide values (e.g. \code{conditions = 1;4}) for a single assignment variable. If multiple assignment variables, provide named list (e.g. \code{conditions = list(Z1 = 0:1, Z2 = 0:1)}). Defaults to 0:1 if no conditions provided.
-#' @param assignment_variables The name of the assignment variable. Generally not required as names are taken from \code{conditions}
+#' @param formula a formula to calculate potential outcomes as functions of assignment variables.
+#' @param conditions see \code{\link{expand_conditions}}. Provide values (e.g. \code{conditions = 1:4}) for a single assignment variable. If multiple assignment variables, provide named list (e.g. \code{conditions = list(Z1 = 0:1, Z2 = 0:1)}). Defaults to 0:1 if no conditions provided.
+#' @param assignment_variables The name of the assignment variable. Generally not required as names are taken from \code{conditions}.
 #' @param level a character specifying a level of hierarchy for fabricate to calculate at
 #' @param data a data.frame
 #' @importFrom fabricatr fabricate
