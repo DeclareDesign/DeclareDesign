@@ -22,12 +22,15 @@
 #' # Default Handler
 #' # Delegates to conduct_ra
 #'
+#' # Declare assignment of m units to treatment
 #' my_assignment <- declare_assignment(m = 50)
-#' my_assignment <- declare_assignment(block_prob = 1/3, blocks = female)
-#' my_assignment <- declare_assignment(block_prob = 1/4, clusters = classrooms)
 #' 
+#' # Declare assignment specifying assignment probability for each block
+#' my_assignment <- declare_assignment(block_prob = c(1/3, 2/3), blocks = female)
+#' 
+#' # Declare assignment of clusters with probability 1/4
 #' my_assignment <- declare_assignment(
-#'   block_prob = 1/4,
+#'   prob = 1/4,
 #'   clusters = classrooms,
 #'   assignment_variable = "X1"
 #' )

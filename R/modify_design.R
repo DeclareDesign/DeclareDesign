@@ -88,7 +88,7 @@ insert_step_ <- function(design, new_step, before = NULL, after = NULL, new_step
   construct_design(steps)
 }
 
-#' @param step the step to be deleted or replaced
+#' @param step The quoted label of the step to be deleted or replaced.
 #'
 #' @export
 #' @rdname modify_design

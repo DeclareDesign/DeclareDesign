@@ -25,13 +25,15 @@
 #'
 #' # Declare a two-level hierarchical population
 #' # containing cities within regions
+#' # containing cities within regions and a
+#' # pollution variable defined at the city level
 #'
-#' pop <- declare_population(
-#'   regions = level(N = 5),
-#'   cities = level(N = 10, pollution = rnorm(N, mean = 5))
+#' my_population <- declare_population(
+#'   regions = add_level(N = 5),
+#'   cities = add_level(N = 10, pollution = rnorm(N, mean = 5))
 #' )
+#' my_population()
 #'
-#' head(my_population())
 #'
 #' # Custom population functions
 #'
