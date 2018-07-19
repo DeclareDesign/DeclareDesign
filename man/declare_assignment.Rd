@@ -17,54 +17,57 @@ assignment_handler(data, ..., assignment_variable = "Z",
 
 \item{label}{a string describing the step}
 
-\item{data}{a data.frame}
+\item{data}{A data.frame.}
 
 \item{assignment_variable}{Name for assignment variable (quoted). Defaults to "Z". Argument to be used with default handler.}
 
 \item{append_probabilities_matrix}{Should the condition probabilities matrix be appended to the data? Defaults to FALSE.  Argument to be used with default handler.}
 }
 \value{
-a function that takes a data.frame as an argument and returns a data.frame with additional columns appended including an assignment variable and (optionally) probabilities of assignment.
+A function that takes a data.frame as an argument and returns a data.frame with additional columns appended including an assignment variable and (optionally) probabilities of assignment.
 }
 \description{
 Declare assignment procedure
 }
 \details{
 \code{declare_assignment} can work with any assignment_function that takes data and returns data. The default handler is \code{conduct_ra} from the \code{randomizr} package. This allows quick declaration of many assignment schemes that involve simple or complete random assignment with blocks and clusters.
-The arguments to \code{\link{conduct_ra}} can include N, block_var, clust_var, m, m_each, prob, prob_each, block_m, block_m_each, block_prob, block_prob_each, num_arms, and conditions.
+The arguments to \code{\link{conduct_ra}} can include \code{N}, \code{block_var}, \code{clust_var}, \code{m}, \code{m_each}, \code{prob}, \code{prob_each}, \code{block_m}, \code{block_m_each}, \code{block_prob}, \code{block_prob_each}, \code{num_arms}, and \code{conditions}.
 The arguments you need to specify are different for different designs. For details see the help files for \code{\link{complete_ra}}, \code{\link{block_ra}}, \code{\link{cluster_ra}}, or \code{\link{block_and_cluster_ra}}.
 
-By default 
-Custom assignment handlers should augment the data frame with an appropriate column for the assignments.
+By default, \code{declare_assignment} declares a simple random assignment with probability 0.5.
+
+Custom assignment handlers should augment the data frame with an appropriate column for the assignment(s).
 }
 \examples{
 
-# Default Handler
-# Delegates to conduct_ra
+# Default handler delegates to conduct_ra
 
+# Declare assignment of m units to treatment
 my_assignment <- declare_assignment(m = 50)
-my_assignment <- declare_assignment(block_prob = 1/3, blocks = female)
-my_assignment <- declare_assignment(block_prob = 1/4, clusters = classrooms)
 
+# Declare assignment specifying assignment probability for each block
+my_assignment <- declare_assignment(block_prob = c(1/3, 2/3), blocks = female)
+
+# Declare assignment of clusters with probability 1/4
 my_assignment <- declare_assignment(
-  block_prob = 1/4,
+  prob = 1/4,
   clusters = classrooms,
   assignment_variable = "X1"
 )
  
- # Factorial assignment. Approach 1: We use complete random assignment to assign T1 and then use T1 as a block to assign T2. 
+# Declare factorial assignment (Approach 1): Use complete random assignment to assign T1 and then use T1 as a block to assign T2. 
  design <- declare_population(N = 4) + 
    declare_assignment(assignment_variable = "T1") + 
    declare_assignment(blocks = T1, assignment_variable = "T2")
    draw_data(design)
    
- # Factorial assignment. Approach 2: We assign to four conditions and then split into separate factors. 
+# Declare factorial assignment (Approach 2): Assign to four conditions and then split into separate factors. 
  design <- declare_population(N = 4) + 
    declare_assignment(conditions = 1:4) + 
    declare_step(fabricate, T1 = as.numeric(Z \%in\% 2:3), T2 = as.numeric(Z \%in\% 3:4))
    draw_data(design)
    
-# Custom random assignment functions
+# Declare assignment using custom handler
 
 custom_assignment <- function(data, assignment_variable = "X") {
  data[, assignment_variable] <- rbinom(n = nrow(data),

@@ -14,14 +14,14 @@ declare_population(..., handler = fabricate, label = NULL)
 \item{label}{a string describing the step}
 }
 \value{
-a function that returns a data.frame
+A function that returns a data.frame.
 }
 \description{
 Declare the size and features of the population
 }
 \examples{
 
-# Default handler is fabricate
+# Default handler is fabricatr::fabricate
 
 # Declare a single-level population with no covariates
 my_population <- declare_population(N = 100)
@@ -38,16 +38,16 @@ my_population <- declare_population(
 my_population()
 
 # Declare a two-level hierarchical population
-# containing cities within regions
+# containing cities within regions and a
+# pollution variable defined at the city level
 
-pop <- declare_population(
-  regions = level(N = 5),
-  cities = level(N = 10, pollution = rnorm(N, mean = 5))
+my_population <- declare_population(
+  regions = add_level(N = 5),
+  cities = add_level(N = 10, pollution = rnorm(N, mean = 5))
 )
+my_population()
 
-head(my_population())
-
-# Custom population functions
+# Declare a population using a custom function
 
 my_population_function <- function(N) {
   data.frame(u = rnorm(N))

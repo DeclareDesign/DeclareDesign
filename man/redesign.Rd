@@ -7,11 +7,14 @@
 redesign(design, ..., expand = TRUE)
 }
 \arguments{
-\item{design}{a design}
+\item{design}{An object of class design.}
 
-\item{...}{arguments to redesign e.g., n = 100}
+\item{...}{Arguments to redesign e.g., \code{n = 100.} If redesigning multiple arguments, they must be specified as a named list.}
 
-\item{expand}{boolean - if true, form the crossproduct of the ..., otherwise recycle them}
+\item{expand}{If TRUE, redesign using the crossproduct of \code{...}, otherwise recycle them.}
+}
+\value{
+A design, or, in the case of multiple values being passed onto \code{...}, a `by`-list of designs.
 }
 \description{
 \code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters in a step's environment (Advanced).
@@ -52,10 +55,10 @@ designs_vary_prob_each <- redesign(
 
 
 # To illustrate what does and does not get edited by redesign, 
-# consider the following three designs. 
-# In the first two, argument X is called from the step's environment; 
-# in the third it is not, Using redesign will alter the role of X in 
-# the first two designs but not the third one.
+# consider the following three designs. In the first two, argument
+# X is called from the step's environment; in the third it is not.
+# Using redesign will alter the role of X in the first two designs
+# but not the third one.
 
 X <- 3
 f <- function(b, X) b*X

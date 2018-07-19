@@ -4,7 +4,7 @@
 \alias{declare_potential_outcomes}
 \alias{potential_outcomes.formula}
 \alias{potential_outcomes.NULL}
-\title{Potential Outcomes}
+\title{Declare potential outcomes}
 \usage{
 declare_potential_outcomes(..., handler = potential_outcomes_handler,
   label = NULL)
@@ -23,11 +23,11 @@ potential_outcomes.NULL(formula = stop("Not provided"), ..., data,
 
 \item{label}{a string describing the step}
 
-\item{formula}{a formula to calculate potential outcomes as functions of assignment variables}
+\item{formula}{a formula to calculate potential outcomes as functions of assignment variables.}
 
-\item{conditions}{see \code{\link{expand_conditions}}. Provide values (e.g. \code{conditions = 1;4}) for a single assignment variable. If multiple assignment variables, provide named list (e.g. \code{conditions = list(Z1 = 0:1, Z2 = 0:1)}). Defaults to 0:1 if no conditions provided.}
+\item{conditions}{see \code{\link{expand_conditions}}. Provide values (e.g. \code{conditions = 1:4}) for a single assignment variable. If multiple assignment variables, provide named list (e.g. \code{conditions = list(Z1 = 0:1, Z2 = 0:1)}). Defaults to 0:1 if no conditions provided.}
 
-\item{assignment_variables}{The name of the assignment variable. Generally not required as names are taken from \code{conditions}}
+\item{assignment_variables}{The name of the assignment variable. Generally not required as names are taken from \code{conditions}.}
 
 \item{data}{a data.frame}
 
@@ -37,10 +37,10 @@ potential_outcomes.NULL(formula = stop("Not provided"), ..., data,
 a function that returns a data.frame
 }
 \description{
-Potential Outcomes
+Declare potential outcomes
 }
 \details{
-A `declare_potential_outcomes` declaration returns a function. The function takes data and returns data with potential outcomes columns appended. These columns describe the outcomes that each unit would express if that unit were in the corresponding treatment condition.
+A `declare_potential_outcomes` declaration returns a function. The function takes and returns a data.frame with potential outcomes columns appended. These columns describe the outcomes that each unit would express if that unit were in the corresponding treatment condition.
 
 Declaring a potential outcomes function requires postulating a particular causal process. One can then assess how designs fare under the postulated process. 
 Multiple processes can be considered in a single design or across design. For instance one could declare two processes that rival theories would predict.
@@ -49,10 +49,9 @@ Potential outcomes can be declared as separate variables or by using a formula. 
 }
 \examples{
 
-# Default handler
+# Declare potential outcomes using default handler
 
 # There are two ways of declaring potential outcomes:
-# as separate variables or using a formula:
 
 # As separate variables
 
@@ -62,27 +61,26 @@ my_potential_outcomes <- declare_potential_outcomes(
 )
 
 # Using a formula
- my_potential_outcomes <- declare_potential_outcomes(Y ~ .05 + .25 * Z + .01 * age * Z)
+ my_potential_outcomes <- declare_potential_outcomes(
+   Y ~ .05 + .25 * Z + .01 * age * Z)
 
- # conditions defines the "range" of the potential outcomes function
+# `conditions` defines the "range" of the potential outcomes function
  my_potential_outcomes <- declare_potential_outcomes(
    formula = Y ~ .05 + .25 * Z + .01 * age * Z,
    conditions = 1:4
  )
 
- # Multiple assignment variables can be specified in conditions.
- # A 2x2 factorial potential outcome:
+# Multiple assignment variables can be specified in `conditions`. For example,
+# in a 2x2 factorial potential outcome:
 
  my_potential_outcomes <- declare_potential_outcomes(
    formula = Y ~ .05 + .25 * Z1 + .01 * age * Z2,
    conditions = list(Z1 = 0:1, Z2 = 0:1)
  )
 
-########################################################
-# Custom handler
+# You can also declare potential outcomes using a custom handler
 
 my_po_function <- function(data) {
-
   data$Y_treated   <- rexp(nrow(data), .2)
   data$Y_untreated <- rexp(nrow(data), .4)
   data

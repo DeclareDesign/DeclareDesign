@@ -16,12 +16,12 @@ sampling_handler(data, ..., sampling_variable = "S")
 
 \item{label}{a string describing the step}
 
-\item{data}{a data.frame}
+\item{data}{A data.frame.}
 
-\item{sampling_variable}{The prefix for the sampling inclusion probability variable}
+\item{sampling_variable}{The prefix for the sampling inclusion probability variable.}
 }
 \value{
-a function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
+A function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
 }
 \description{
 Declare sampling procedure
@@ -38,19 +38,14 @@ For details see the help files for \code{\link{complete_rs}}, \code{\link{strata
 }
 \examples{
 
-########################################################
-# Default handler
+# Default handler is `draw_rs` from `randomizr` package
 
-# Simple random sampling using randomizr
-# use any arguments you would use in draw_rs.
-
+# Simple random sampling
 my_sampling <- declare_sampling(n = 50)
 
 # Stratified random sampling
 my_stratified_sampling <- declare_sampling(strata = female)
 
-
-########################################################
 # Custom random sampling functions
 
 my_sampling_function <- function(data, n=nrow(data)) {

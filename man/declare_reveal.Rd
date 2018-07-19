@@ -17,25 +17,25 @@ reveal_outcomes_handler(data = NULL, outcome_variables = Y,
 
 \item{label}{a string describing the step}
 
-\item{data}{A data.frame containing columns of potential outcomes and an assignment variable}
+\item{data}{A data.frame containing columns for assignment and potential outcomes.}
 
-\item{outcome_variables}{The outcome prefix(es) of the potential outcomes}
+\item{outcome_variables}{The outcome prefix(es) of the potential outcomes.}
 
-\item{assignment_variables}{The bare (unquote) name(s) of the assignment variable}
+\item{assignment_variables}{Unquoted name(s) of the assignment variable(s).}
 
-\item{attrition_variables}{The bare (unquote) name of the attrition variable}
+\item{attrition_variables}{Unquoted name of the attrition variable.}
 }
 \description{
 Potential outcomes declarations indicate what outcomes would obtain for different possible values of assignment variables. 
 To reveal actual outcomes we combine assignments with potential outcomes. \code{declare_reveal} provides information on how this
 revelation should be implemented, identifying the relevant assignment variables (for example created by \code{declare_assignment}) and outcome variables. 
-(for example created by \code{declare_potential_outcomes}). Revelation steps are usefully included after declaration of all assignments of conditions required to determine the realized outcome.
+Revelation steps are usefully included after declaration of all assignments of conditions required to determine the realized outcome.
 If a revelation is not declared DeclareDesign will try to guess appropriate revelations though explicit revelation is recommended.
 }
 \details{
 \code{declare_reveal} declares how outcomes should be realized.  
 A "revelation" uses the random assignment to pluck out the correct potential outcomes (Gerber and Green 2012, Chapter 2).
-If you create a simple design (with assignment variable Z, outcome variable Y) with the + operator but omit a reveal declaration, DeclareDesign will attempt to insert a revelation  step automatically.
+If you create a simple design (with assignment variable Z and outcome variable Y) with the + operator but omit a reveal declaration, DeclareDesign will attempt to insert a revelation  step automatically.
 If you have multiple outcomes to reveal or different names for the outcome or assignment variables, use \code{declare_reveal} to customize which outcomes are revealed.
 Revelation requires that every named outcome variable is a function of every named assignment variable within a step. Thus if multiple outcome variables depend on different assignment variables, multiple revelations are needed.
 }
@@ -75,7 +75,9 @@ reveal_1     <- declare_reveal(outcome_variables = c("Y1", "Y2"), assignment_var
 reveal_2     <- declare_reveal(outcome_variables = "Y3", assignment_variables = c("X", "Z"))
 
 # Note here that the reveal cannot be done in one step, e.g. by using
-# declare_reveal(outcome_variables = c("Y1", "Y2", "Y3"), assignment_variables = c("X","Z"))
-# The reason is that  in each revelation all outcome variables should be a function of all assignment variables.
+# declare_reveal(outcome_variables = c("Y1", "Y2", "Y3"),
+#   assignment_variables = c("X","Z"))
+# The reason is that in each revelation all outcome variables should be a
+# function of all assignment variables.
 
 }

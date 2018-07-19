@@ -15,16 +15,15 @@ declare_step(..., handler = function(data, ...f, ...) ...f(data, ...),
 \item{label}{a string describing the step}
 }
 \value{
-a function that returns a data.frame
+A function that returns a data.frame.
 }
 \description{
 With declare_step, you can include any function that takes data as one of its arguments and returns data in a design declaration. The first argument is always a "handler", which is the name of the data-in, data-out function.
-For handy data manipulations use \code{declare_step(fabricate, ...)}
+For handy data manipulations use \code{declare_step(fabricate, ...)}.
 }
 \examples{
 
-N <- 5
-population <- declare_population(N = N, noise = rnorm(N))
+population <- declare_population(N = 5, noise = rnorm(N))
 manipulate <- declare_step(fabricate, noise_squared = noise^2, zero = 0)
 
 design <- population + manipulate
