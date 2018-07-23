@@ -179,7 +179,6 @@ test_that("Overriding join conditions", {
   skip_if_not_installed("dplyr")
 
   require(dplyr)
-  require(reshape2)
 
   alpha <- .05
 
@@ -196,7 +195,7 @@ test_that("Overriding join conditions", {
         num_significant = mean(num_significant),
         all_significant = mean(all_significant)
       ) %>%
-      melt(id.vars = NULL, variable.name = "estimand_label", value.name = "estimand")
+      reshape2::melt(id.vars = NULL, variable.name = "estimand_label", value.name = "estimand")
   })
 
   attr(custom, "group_by") <- c("estimand_label", "estimator_label")

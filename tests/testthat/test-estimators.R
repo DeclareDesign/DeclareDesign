@@ -276,7 +276,7 @@ test_that("model_handler runs directly", {
                            conf.low = -0.203874032287599, conf.high = 3.3638740322876), row.names = c(NA, 
                                                                                                       -1L), class = c("tbl_df", "tbl", "data.frame"))
 
-  result <- DeclareDesign:::model_handler(sleep, extra ~ group, model = lm, term = "group2")
+  result <- model_handler(sleep, extra ~ group, model = lm, term = "group2")
   expect_equivalent(as.data.frame(result), as.data.frame(lm_out))
 })
 

@@ -176,7 +176,7 @@ declare_estimator <-
 declare_estimators <- declare_estimator
 
 #' @details
-#' \code{tidy_estimator} takes an untidy estimation function, and returns a tidy handler which accepts standard labelling options.
+#' \code{tidy_estimator} takes an untidy estimation function, and returns a tidy handler which accepts standard labeling options.
 #'
 #' The intent here is to factor out the estimator/estimand labeling so that it can be reused by other model handlers.
 #'

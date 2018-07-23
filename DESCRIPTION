@@ -35,5 +35,13 @@ Suggests:
     data.table,
     ggplot2,
     future.apply,
-    broom
+    broom,
+    MASS,
+    Matching,
+    betareg,
+    biglm,
+    gam,
+    lfe, 
+    sf,
+    reshape2
 VignetteBuilder: knitr
