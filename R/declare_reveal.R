@@ -72,6 +72,22 @@ declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal")
 #' #   assignment_variables = c("X","Z"))
 #' # The reason is that in each revelation all outcome variables should be a
 #' # function of all assignment variables.
+#' 
+#' # declare_reveal can also be used to declare outcomes that include attrition
+#' 
+#' population <- declare_population(N = 100, age = sample(18:95, N, replace = TRUE))
+#' 
+#' potential_outcomes_Y <- declare_potential_outcomes(Y ~ .25 * Z + .01 * age * Z)
+#' 
+#' assignment <- declare_assignment(m = 25)
+#' 
+#' potential_outcomes_attrition <- declare_potential_outcomes(R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
+#' 
+#' reveal_attrition <- declare_reveal(outcome_variables = "R")
+#' reveal_outcomes <- declare_reveal(outcome_variables = "Y", attrition_variables = "R")
+#' 
+#' my_design <- population + potential_outcomes_Y + potential_outcomes_attrition + 
+#'   my_assignment + reveal_attrition + reveal_outcomes
 #'
 reveal_outcomes_handler <- function(data = NULL,
                                     outcome_variables = Y,
