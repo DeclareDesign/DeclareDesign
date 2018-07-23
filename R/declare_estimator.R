@@ -1,13 +1,13 @@
 #' Declare estimator
 #'
-#' @description Declares an estimator which generates estimates and associated statistics
+#' @description Declares an estimator which generates estimates and associated statistics.
 #'
 #' @inheritParams declare_internal_inherit_params
 #'
 #' @export
 #' @importFrom estimatr difference_in_means
 #'
-#' @return a function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimator and associated statistics.
+#' @return A function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimator and associated statistics.
 #'
 #' @section Custom Estimators:
 #'
@@ -17,19 +17,21 @@
 #'
 #' @examples
 #'
-#' # Default handler
-#'
+#' # Declare estimand
 #' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-#'
-#' # By default, uses first non-intercept term as estimate
-#' # Default method is the `difference_in_means` estimator from `estimatr`
-#'
+#' 
+#' # Declare estimator using the default handler using `difference_in_means`
+#' # estimator from `estimatr` package. Returns the first non-intercept term
+#' # as estimate
+#' 
 #' my_estimator_dim <- declare_estimator(Y ~ Z, estimand = "ATE", label = "DIM")
 #'
-#' # lm from base R
-#' my_estimator_lm <- declare_estimator(Y ~ Z, estimand = "ATE", model = lm, label = "LM")
+#' # Use lm function from base R
+#' my_estimator_lm <- declare_estimator(Y ~ Z, estimand = "ATE",
+#'   model = lm, label = "LM")
 #
-#' # Use lm_robust (linear regression with robust standard errors) from `estimatr` package
+#' # Use lm_robust (linear regression with robust standard errors) from
+#' # `estimatr` package
 #'
 #' my_estimator_lm_rob <- declare_estimator(
 #'   Y ~ Z,
@@ -38,7 +40,7 @@
 #'   label = "LM_Robust"
 #' )
 #'
-#' # Set `term`` if estimate of interest is not the first non-intercept variable
+#' # Set `term` if estimate of interest is not the first non-intercept variable
 #' my_estimator_lm_rob_x <- declare_estimator(
 #'   Y ~ X + Z,
 #'   estimand = my_estimand,
@@ -63,7 +65,7 @@
 #'   term = "Z"
 #' )
 #'
-#' # Custom handlers
+#' # Declare estimator using a custom handler
 #'
 #' # Define your own estimator and use the `tidy_estimator` function for labeling
 #' # Must have `data` argument that is a data.frame
@@ -76,7 +78,7 @@
 #'   estimand = my_estimand
 #' )
 #'
-#' # Use a custom estimator function with custom labelling
+#' # Customize labelling
 #'
 #' my_estimator_function <- function(data){
 #'   data.frame(
@@ -115,17 +117,12 @@
 #' # ----------
 #'
 #' design <- replace_step(design_def, my_estimator_dim, my_estimator_lm_rob)
-#'
 #' get_estimates(design)
-#'
 #'
 #' design <- replace_step(design_def, my_estimator_dim, my_estimator_lm)
-#'
 #' get_estimates(design)
 #'
-#'
 #' design <- replace_step(design_def, my_estimator_dim, my_estimator_glm)
-#'
 #' get_estimates(design)
 #'
 #' # ----------
@@ -149,15 +146,18 @@
 #'
 #' get_estimates(design)
 #'
-#' my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand), keep_defaults = FALSE)
+#' my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand),
+#'   keep_defaults = FALSE)
 #'
-#' diagnose_design(design, diagnosands = my_diagnosand, sims = 5, bootstrap_sims = FALSE)
+#' diagnose_design(design, diagnosands = my_diagnosand, sims = 5,
+#'   bootstrap_sims = FALSE)
 #'
 #' # ----------
 #' # 4. Multiple estimators per estimand
 #' # ----------
 #'
-#' design_two <- insert_step(design_def,  my_estimator_lm,  after=my_estimator_dim)
+#' design_two <- insert_step(design_def,  my_estimator_lm,
+#'   after = my_estimator_dim)
 #'
 #' get_estimates(design_two)
 #'
@@ -175,6 +175,7 @@ declare_estimator <-
 #' @export
 declare_estimators <- declare_estimator
 
+#' @details
 #' \code{tidy_estimator} takes an untidy estimation function, and returns a tidy handler which accepts standard labelling options.
 #'
 #' The intent here is to factor out the estimator/estimand labeling so that it can be reused by other model handlers.

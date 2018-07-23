@@ -16,39 +16,36 @@ sampling_handler(data, ..., sampling_variable = "S")
 
 \item{label}{a string describing the step}
 
-\item{data}{a data.frame}
+\item{data}{A data.frame.}
 
-\item{sampling_variable}{The prefix for the sampling inclusion probability variable}
+\item{sampling_variable}{The prefix for the sampling inclusion probability variable.}
 }
 \value{
-a function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
+A function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
 }
 \description{
 Declare sampling procedure
 }
 \details{
-While declare_sampling can work with any sampling_function that takes data and returns data, most random sampling procedures can be easily implemented with randomizr.
+\code{declare_sampling} can work with any sampling_function that takes data and returns data. The default handler is \code{draw_rs} from the \code{randomizr} package. This allows quick declaration of many sampling schemes that involve strata and clusters.
+
 The arguments to \code{\link{draw_rs}} can include N, strata_var, clust_var, n, prob, strata_n, and strata_prob.
 The arguments you need to specify are different for different designs.
 
-Check the help files for \code{\link{complete_rs}}, \code{\link{strata_rs}}, \code{\link{cluster_rs}}, or \code{\link{strata_and_cluster_rs}}
-for details on how to execute many common designs.
+Note that \code{declare_sampling} works similarly to \code{declare_assignment} a key difference being that \code{declare_sampling} functions subset data to sampled units rather than simply appending an indicator for membership of a sample (assignment). If you need to sample but keep the dataset use \code{declare_assignment} and define further steps (such as estimation) with respect to subsets defined by the assignment.
+
+For details see the help files for \code{\link{complete_rs}}, \code{\link{strata_rs}}, \code{\link{cluster_rs}}, or \code{\link{strata_and_cluster_rs}}
 }
 \examples{
 
-########################################################
-# Default handler
+# Default handler is `draw_rs` from `randomizr` package
 
-# Simple random sampling using randomizr
-# use any arguments you would use in draw_rs.
-
+# Simple random sampling
 my_sampling <- declare_sampling(n = 50)
 
 # Stratified random sampling
 my_stratified_sampling <- declare_sampling(strata = female)
 
-
-########################################################
 # Custom random sampling functions
 
 my_sampling_function <- function(data, n=nrow(data)) {

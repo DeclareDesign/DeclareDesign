@@ -6,8 +6,8 @@
 \alias{DeclareDesign-package}
 \title{DeclareDesign package}
 \description{
-The four main types of functions are to declare a step, combine steps into designs,
-and manipulate designs and designers (functions that return designs).
+The four main types of functions are to declare a step, to combine steps into designs,
+and to manipulate designs and designers (functions that return designs).
 }
 \section{Design Steps}{
 

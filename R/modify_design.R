@@ -19,9 +19,9 @@ find_step <- function(design, step, verb) {
 #'
 #' Insert, delete and replace steps in an (already declared) design object.
 #'
-#' @param design a design object, usually created using the + operator, \code{\link{expand_design}}, or the design library.
+#' @param design A design object, usually created using the + operator, \code{\link{expand_design}}, or the design library.
 #'
-#' @return A new design object
+#' @return A new design object.
 #'
 #' @importFrom rlang lang_name quos quo_expr quo_is_missing
 #' @name modify_design
@@ -43,11 +43,11 @@ find_step <- function(design, step, verb) {
 #'  design
 NULL
 
-#' @param before the step before which to add steps
-#' @param after same
-#' @param new_step the new step - either a function or a partial call
+#' @param before The step before which to add steps.
+#' @param after The step after which to add steps.
+#' @param new_step The new step; Either a function or a partial call.
 #'
-#' @details see \code{\link{modify_design}} for details.
+#' @details See \code{\link{modify_design}} for details.
 #' @rdname modify_design
 #' @examples
 #'
@@ -88,7 +88,7 @@ insert_step_ <- function(design, new_step, before = NULL, after = NULL, new_step
   construct_design(steps)
 }
 
-#' @param step the step to be deleted or replaced
+#' @param step The quoted label of the step to be deleted or replaced.
 #'
 #' @export
 #' @rdname modify_design
