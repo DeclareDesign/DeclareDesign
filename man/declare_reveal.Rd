@@ -88,7 +88,8 @@ potential_outcomes_Y <- declare_potential_outcomes(Y ~ .25 * Z + .01 * age * Z)
 
 assignment <- declare_assignment(m = 25)
 
-potential_outcomes_attrition <- declare_potential_outcomes(R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
+potential_outcomes_attrition <- 
+  declare_potential_outcomes(R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
 
 reveal_attrition <- declare_reveal(outcome_variables = "R")
 reveal_outcomes <- declare_reveal(outcome_variables = "Y", attrition_variables = "R")

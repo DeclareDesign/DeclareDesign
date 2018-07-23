@@ -271,14 +271,13 @@ test_that("tidy_estimator, handler does not take data", {
 })
 
 test_that("model_handler runs directly", {
-  lm_out <- structure(list(
-    term = "group2", estimate = 1.58, std.error = 0.849091017238762,
-    statistic = 1.86081346748685, p.value = 0.0791867142159382,
-    conf.low = -0.203874032287599, conf.high = 3.3638740322876
-  ), row.names = 2L, class = "data.frame")
+  lm_out <- structure(list(term = "group2", estimate = 1.58, std.error = 0.849091017238762, 
+                           statistic = 1.86081346748685, p.value = 0.0791867142159382, 
+                           conf.low = -0.203874032287599, conf.high = 3.3638740322876), row.names = c(NA, 
+                                                                                                      -1L), class = c("tbl_df", "tbl", "data.frame"))
 
-  result <- model_handler(sleep, extra ~ group, model = lm, term = "group2")
-  expect_equal(result, lm_out)
+  result <- DeclareDesign:::model_handler(sleep, extra ~ group, model = lm, term = "group2")
+  expect_equivalent(as.data.frame(result), as.data.frame(lm_out))
 })
 
 

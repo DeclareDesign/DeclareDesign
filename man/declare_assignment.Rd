@@ -55,13 +55,15 @@ my_assignment <- declare_assignment(
   assignment_variable = "X1"
 )
  
-# Declare factorial assignment (Approach 1): Use complete random assignment to assign T1 and then use T1 as a block to assign T2. 
+# Declare factorial assignment (Approach 1): 
+#   Use complete random assignment to assign T1 and then use T1 as a block to assign T2. 
  design <- declare_population(N = 4) + 
    declare_assignment(assignment_variable = "T1") + 
    declare_assignment(blocks = T1, assignment_variable = "T2")
    draw_data(design)
    
-# Declare factorial assignment (Approach 2): Assign to four conditions and then split into separate factors. 
+# Declare factorial assignment (Approach 2): 
+#   Assign to four conditions and then split into separate factors. 
  design <- declare_population(N = 4) + 
    declare_assignment(conditions = 1:4) + 
    declare_step(fabricate, T1 = as.numeric(Z \%in\% 2:3), T2 = as.numeric(Z \%in\% 3:4))

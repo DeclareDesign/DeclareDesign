@@ -46,11 +46,11 @@ my_population  <- declare_population(N = 100, X = rnorm(N))
 my_potential_outcomes  <- declare_potential_outcomes(
   Y ~ (.25 + X) * Z + rnorm(N))
 my_assignment  <- declare_assignment(m = 50)
-design_stub <- my_population +  my_potential_outcomes + my_assignment + 
+design_stub <- my_population + my_potential_outcomes + my_assignment + 
   declare_reveal()
 
 # Get example data to compute estimands on
-dat <- draw_data(design)
+dat <- draw_data(design_stub)
 
 # ----------
 # 1. Single estimand

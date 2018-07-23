@@ -81,7 +81,8 @@ declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal")
 #' 
 #' assignment <- declare_assignment(m = 25)
 #' 
-#' potential_outcomes_attrition <- declare_potential_outcomes(R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
+#' potential_outcomes_attrition <- 
+#'   declare_potential_outcomes(R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
 #' 
 #' reveal_attrition <- declare_reveal(outcome_variables = "R")
 #' reveal_outcomes <- declare_reveal(outcome_variables = "Y", attrition_variables = "R")

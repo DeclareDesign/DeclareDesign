@@ -30,7 +30,7 @@ test_that("test default term Z, lm", {
       model = lm_robust,
       term = "Z"
     )
-  expect_equal(
+  expect_equivalent(
     estimator_lm(dat),
     estimator_lm_robust(dat)[, 1:8]
   )
