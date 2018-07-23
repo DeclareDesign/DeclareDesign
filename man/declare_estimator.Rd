@@ -118,7 +118,7 @@ my_estimator_custom <- declare_estimator(
   estimand = my_estimand
 )
 
-# Customize labelling
+# Customize labeling
 
 my_estimator_function <- function(data){
   data.frame(
