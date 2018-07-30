@@ -4,8 +4,8 @@
 \alias{diagnose_design}
 \title{Diagnose the design}
 \usage{
-diagnose_design(..., diagnosands = NULL, sims = 500, bootstrap_sims = 100,
-  add_grouping_variables = NULL)
+diagnose_design(..., diagnosands = NULL, sims = 500,
+  bootstrap_sims = 100, add_grouping_variables = NULL)
 }
 \arguments{
 \item{...}{A design or set of designs typically created using the + operator, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.}

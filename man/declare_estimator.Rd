@@ -8,9 +8,11 @@
 \alias{estimator_handler}
 \title{Declare estimator}
 \usage{
-declare_estimator(..., handler = estimator_handler, label = "estimator")
+declare_estimator(..., handler = estimator_handler,
+  label = "estimator")
 
-declare_estimators(..., handler = estimator_handler, label = "estimator")
+declare_estimators(..., handler = estimator_handler,
+  label = "estimator")
 
 tidy_estimator(estimator_function)
 

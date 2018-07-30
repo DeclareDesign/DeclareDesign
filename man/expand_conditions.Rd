@@ -4,8 +4,8 @@
 \alias{expand_conditions}
 \title{Expand assignment conditions}
 \usage{
-expand_conditions(formula, conditions = c(0, 1), assignment_variables = "Z",
-  data, level = NULL, label = NULL)
+expand_conditions(formula, conditions = c(0, 1),
+  assignment_variables = "Z", data, level = NULL, label = NULL)
 }
 \arguments{
 \item{conditions}{the conditions}
