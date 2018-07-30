@@ -11,15 +11,21 @@ set.seed(42)
 options(digits=2)
 ```
 
+[![CRAN Status](https://www.r-pkg.org/badges/version/DeclareDesign)](https://cran.r-project.org/package=DeclareDesign)
 [![Travis-CI Build Status](https://travis-ci.org/DeclareDesign/DeclareDesign.svg?branch=master)](https://travis-ci.org/DeclareDesign/DeclareDesign)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/DeclareDesign/DeclareDesign?branch=master&svg=true)](https://ci.appveyor.com/project/DeclareDesign/DeclareDesign)
 [![Coverage Status](https://coveralls.io/repos/github/DeclareDesign/DeclareDesign/badge.svg?branch=master)](https://coveralls.io/github/DeclareDesign/DeclareDesign?branch=master)
-
 
 ## Overview
 DeclareDesign is a system for describing research designs in code and simulating them in order to understand their properties. Because DeclareDesign employs a consistent grammar of designs, you can focus on the intellectually challenging part -- designing good research studies -- without having to code up simulations from scratch.
 
 ## Installation
+
+To install the latest stable release of **DeclareDesign**, please ensure that you are running version 3.3 or later of R and run the following code:
+
+```{r, eval=F}
+install.packages("DeclareDesign")
+```
 
 To install the latest development release of all of the packages, please ensure that you are running version 3.4 or later of R and run the following code:
 
