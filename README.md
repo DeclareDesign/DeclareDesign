@@ -1,4 +1,4 @@
-DeclareDesign: Declare and diagnose research designs
+DeclareDesign: Declare and Diagnose Research Designs
 ================
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -11,8 +11,6 @@ Status](https://travis-ci.org/DeclareDesign/DeclareDesign.svg?branch=master)](ht
 Status](https://ci.appveyor.com/api/projects/status/github/DeclareDesign/DeclareDesign?branch=master&svg=true)](https://ci.appveyor.com/project/DeclareDesign/DeclareDesign)
 [![Coverage
 Status](https://coveralls.io/repos/github/DeclareDesign/DeclareDesign/badge.svg?branch=master)](https://coveralls.io/github/DeclareDesign/DeclareDesign?branch=master)
-
-## Overview
 
 DeclareDesign is a system for describing research designs in code and
 simulating them in order to understand their properties. Because
@@ -97,9 +95,7 @@ of which is useful in its own right.
 
 ## Package structure
 
-Each of these `declare_*()` functions returns a *function*. The function
-`declare_design()` can take any of these six functions, plus any R
-function that takes data and returns data.
+Each of these `declare_*()` functions returns a *function*.
 
 1.  `declare_population()` (describes dimensions and distributions over
     the variables in the population)
@@ -113,7 +109,10 @@ function that takes data and returns data.
 6.  `declare_estimator()` (takes data produced by sampling and
     assignment and returns estimates)
 
-Once you have declared your design, there are six core
+To *declare a design*, connect the components of your design with the +
+operator.
+
+Once you have declared your design, there are four core
 post-design-declaration commands used to modify or diagnose your design:
 
 1.  `diagnose_design()` (takes a design, returns simulations and
