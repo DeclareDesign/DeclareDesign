@@ -55,9 +55,9 @@ diagnosis
 
 The core DeclareDesign package relies on three companion packages, each of which is useful in its own right.
 
-1. [randomizr](https://declaredesign.org/R/randomizr/): Easy to use tools for common forms of random assignment and sampling.
-2. [fabricatr](https://declaredesign.org/R/fabricatr/): Imagine your data before you collect it.
-3. [estimatr](https://declaredesign.org/R/estimatr/): Fast estimators for social scientists.
+1. [randomizr](https://declaredesign.org/r/randomizr/): Easy to use tools for common forms of random assignment and sampling.
+2. [fabricatr](https://declaredesign.org/r/fabricatr/): Imagine your data before you collect it.
+3. [estimatr](https://declaredesign.org/r/estimatr/): Fast estimators for social scientists.
 
 ## Learning DeclareDesign
 
@@ -69,7 +69,7 @@ The core DeclareDesign package relies on three companion packages, each of which
 
 ## Package structure
 
-Each of these `declare_*()` functions returns a *function*. 
+Each of these `declare_*()` functions returns a *function*.
 
 1. `declare_population()` (describes dimensions and distributions over the variables in the population)
 2. `declare_potential_outcomes()` (takes population or sample and adds potential outcomes produced by interventions)
@@ -92,7 +92,7 @@ A few other features:
 1. A designer is a function that takes parameters (e.g., `N`) and returns a design. `expand_design()` is a function of a designer and parameters that returns a design.
 2. You can change the features of the design to be diagnosed with `declare_diagnosands()`.
 3. `declare_reveal()` implements a general switching equation, which allows you to reveal outcomes from potential outcomes and a treatment assignment.
-4. You can provide custom functions to any `declare_*` step, as described in the [custom functions vignette](/R/DeclareDesign/articles/custom_functions.html).
+4. You can provide custom functions to any `declare_*` step, as described in the [custom functions vignette](/r/DeclareDesign/articles/custom_functions.html).
 
 ---
 
