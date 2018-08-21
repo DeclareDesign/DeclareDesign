@@ -221,14 +221,10 @@ calculate_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
 calculate_diagnosands_single_design <- function(simulations_df, diagnosands, group_by_set) {
   group_by_list <- simulations_df[, group_by_set, drop = FALSE]
   
-  not_all_na_columns <- apply(group_by_list, 2, function(x) ! all(is.na(x)))
-  
-  group_by_list <- group_by_list[, not_all_na_columns, drop = FALSE]
-
-  labels_df <- split(group_by_list, group_by_list, drop = TRUE)
+  labels_df <- split(group_by_list, lapply(group_by_list, addNA), drop = TRUE)
   labels_df <- lapply(labels_df, head, n = 1)
 
-  diagnosands_df <- split(simulations_df, group_by_list, drop = TRUE)
+  diagnosands_df <- split(simulations_df, lapply(group_by_list, addNA), drop = TRUE)
   diagnosands_df <- lapply(diagnosands_df, FUN = function(x) {
     dg <- diagnosands(x)
     setNames(dg[[2]], dg[[1]])
@@ -244,11 +240,11 @@ calculate_diagnosands_single_design <- function(simulations_df, diagnosands, gro
 
 calculate_sims <- function(simulations_df, group_by_set) {
   group_by_list <- simulations_df[, group_by_set, drop = FALSE]
-
-  labels_df <- split(group_by_list, group_by_list, drop = TRUE)
+  
+  labels_df <- split(group_by_list, lapply(group_by_list, addNA), drop = TRUE)
   labels_df <- lapply(labels_df, head, n = 1)
 
-  n_sims_df <- split(simulations_df, group_by_list, drop = TRUE)
+  n_sims_df <- split(simulations_df, lapply(group_by_list, addNA), drop = TRUE)
   n_sims_df <- lapply(n_sims_df, FUN = function(x) {
     data.frame(n_sims = nrow(x))
   })
