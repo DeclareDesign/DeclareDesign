@@ -8,12 +8,12 @@ matrix:
     - os: linux
       r: release
       before_install:
-      - sudo apt-get install -y libudunits2-dev
+      - sudo apt-get install -y libudunits2-dev libgdal-dev libproj-dev
 
     - os: linux
       r: 3.4
       before_install:
-      - sudo apt-get install -y libudunits2-dev
+      - sudo apt-get install -y libudunits2-dev libgdal-dev libproj-dev
       r_github_packages:
       - jyypma/nloptr
       after_success:
@@ -22,7 +22,7 @@ matrix:
     - os: linux
       r: devel
       before_install:
-      - sudo apt-get install -y libudunits2-dev
+      - sudo apt-get install -y libudunits2-dev libgdal-dev libproj-dev
       after_success:
       - echo skipping source packaging on linux/devel
 
