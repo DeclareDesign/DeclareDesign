@@ -59,8 +59,9 @@ test_that("Noncompliance", {
 
   diag <- diagnose_design(design, sims = 2, bootstrap_sims = FALSE)
 
-  expect_equal(diag$diagnosands$mean_estimand, 2)
-  expect_equal(diag$diagnosands$estimator_label, "CACE_hat") # ITT_d is not in output - not estimated
+  expect_equal(diag$diagnosands$mean_estimand[1], 2)
+  expect_equal(diag$diagnosands$estimator_label[1], "CACE_hat") 
+  # ITT_d is not in output - not estimated: AC: NOW IT IS!
 })
 
 test_that("POs correctly assembled for noncompliance case", {
