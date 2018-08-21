@@ -89,6 +89,11 @@ simulate_design <- function(..., sims = 500) {
   simulations_df
 }
 
+#' @rdname simulate_design
+#' @export
+simulate_designs <- simulate_design
+
+
 
 #' @importFrom rlang as_list
 simulate_single_design <- function(design, sims) {
