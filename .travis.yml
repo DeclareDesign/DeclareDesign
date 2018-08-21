@@ -2,18 +2,16 @@ language: r
 sudo: false
 cache: packages
 warnings_are_errors: false
+before_install:
+- sudo apt-get install -y libudunits2-dev gdal-bin
 
 matrix:
   include:
     - os: linux
       r: release
-      before_install:
-      - sudo apt-get install -y libudunits2-dev gdal-bin
 
     - os: linux
       r: 3.4
-      before_install:
-      - sudo apt-get install -y libudunits2-dev gdal-bin
       r_github_packages:
       - jyypma/nloptr
       after_success:
@@ -21,8 +19,6 @@ matrix:
 
     - os: linux
       r: devel
-      before_install:
-      - sudo apt-get install -y libudunits2-dev gdal-bin
       after_success:
       - echo skipping source packaging on linux/devel
 
