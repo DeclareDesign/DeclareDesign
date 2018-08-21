@@ -7,9 +7,13 @@ matrix:
   include:
     - os: linux
       r: release
+      before_install:
+      - sudo apt-get install -y libudunits2-dev
 
     - os: linux
       r: 3.4
+      before_install:
+      - sudo apt-get install -y libudunits2-dev
       r_github_packages:
       - jyypma/nloptr
       after_success:
@@ -17,9 +21,10 @@ matrix:
 
     - os: linux
       r: devel
+      before_install:
+      - sudo apt-get install -y libudunits2-dev
       after_success:
       - echo skipping source packaging on linux/devel
-
 
     - os: osx
       r: release
