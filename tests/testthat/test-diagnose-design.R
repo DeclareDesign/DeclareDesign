@@ -209,3 +209,35 @@ test_that("with and without term",{
   
 })
 
+
+test_that("more term",{
+  population  <-
+    declare_population(N = 100,
+                       Z = rep(0:1, 50),
+                       Y = rnorm(N))
+  
+  estimands_regression <- declare_estimand(
+    `(Intercept)` = 0,
+    `Z` = 1,
+    term = TRUE,
+    label = "Regression_Estimands"
+  )
+  
+  estimators_regression <- declare_estimator(Y ~ Z,
+                                             estimand = estimands_regression,
+                                             model = lm_robust,
+                                             term = TRUE)
+  
+  estimand_2  <- declare_estimand(ATE = 2,   label = "2")
+  estimator_2 <-
+    declare_estimator(Y ~ Z, estimand = estimand_2, label = "dim")
+  
+  design <-
+    population + estimands_regression + estimators_regression + estimand_2 + estimator_2
+  
+  sims_df <- simulate_design(design, sims = 1)
+  
+  expect_equal(nrow(sims_df), 3)
+  
+})
+
