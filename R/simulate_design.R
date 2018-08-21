@@ -152,56 +152,52 @@ simulate_single_design <- function(design, sims) {
     simulations_df <- estimates_df
   } else if (is_empty(estimates_df)) {
     simulations_df <- estimands_df
-  } else {
+  } else if (all(estimands_df$estimand_label %in% estimates_df$estimand_label) &
+             all(estimates_df$estimand_label %in% estimands_df$estimand_label)){
     
-    if(all(estimands_df$estimand_label %in% estimates_df$estimand_label) &
-       all(estimates_df$estimand_label %in% estimands_df$estimand_label)){
-      
-      
-      estimands_df_split <- split(x = estimands_df, f = estimands_df$estimand_label)
-      estimates_df_split <- split(x = estimates_df, f = estimates_df$estimand_label)
-      
-      non_missing_columns <- function(dat){
-        nonmissing <- apply(dat, 2, FUN = function(x) all(!is.na(x)))
-        return(dat[,nonmissing,drop = FALSE])
-      }
-      
-      
-      estimands_df_split <- lapply(estimands_df_split, non_missing_columns)
-      estimates_df_split <- lapply(estimates_df_split, non_missing_columns)
-      
-      by_split <- lapply(X = seq_along(estimands_df_split), 
-                         FUN = function(x){
-                           colnames(estimands_df_split[[x]]) %icn% estimates_df_split[[x]]
-                         })
-      
-      simulations_df_split <- 
-        mapply(FUN = merge,
-               x = estimands_df_split,
-               y = estimates_df_split,
-               by = by_split,
-               MoreArgs = list(all = TRUE, sort = FALSE),
-               SIMPLIFY = FALSE
-        )
-      
-      simulations_df <- rbind_disjoint(simulations_df_split)
-    } else {
-      
-      simulations_df <- merge(
-        estimands_df,
-        estimates_df,
-        by = colnames(estimands_df) %icn% estimates_df,
-        all = TRUE,
-        sort = FALSE
-      )
-      
-      if (nrow(simulations_df) > max(nrow(estimands_df), nrow(estimates_df))) {
-        warning(
-          "Estimators lack estimand/term labels for matching, a many-to-many merge was performed."
-        )
-      }
+    
+    estimands_df_split <- split(x = estimands_df, f = estimands_df$estimand_label)
+    estimates_df_split <- split(x = estimates_df, f = estimates_df$estimand_label)
+    
+    non_missing_columns <- function(dat){
+      nonmissing <- apply(dat, 2, FUN = function(x) all(!is.na(x)))
+      return(dat[,nonmissing,drop = FALSE])
     }
     
+    
+    estimands_df_split <- lapply(estimands_df_split, non_missing_columns)
+    estimates_df_split <- lapply(estimates_df_split, non_missing_columns)
+    
+    by_split <- lapply(X = seq_along(estimands_df_split), 
+                       FUN = function(x){
+                         colnames(estimands_df_split[[x]]) %icn% estimates_df_split[[x]]
+                       })
+    
+    simulations_df_split <- 
+      mapply(FUN = merge,
+             x = estimands_df_split,
+             y = estimates_df_split,
+             by = by_split,
+             MoreArgs = list(all = TRUE, sort = FALSE),
+             SIMPLIFY = FALSE
+      )
+    
+    simulations_df <- rbind_disjoint(simulations_df_split)
+  } else {
+    
+    simulations_df <- merge(
+      estimands_df,
+      estimates_df,
+      by = colnames(estimands_df) %icn% estimates_df,
+      all = TRUE,
+      sort = FALSE
+    )
+    
+    if (nrow(simulations_df) > max(nrow(estimands_df), nrow(estimates_df))) {
+      warning(
+        "Estimators lack estimand/term labels for matching, a many-to-many merge was performed."
+      )
+    }
   }
   
   if (exists("fan_id")) {

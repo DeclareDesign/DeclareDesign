@@ -239,5 +239,23 @@ test_that("more term",{
   
   expect_equal(nrow(sims_df), 3)
   
+  expect_equal(sims_df[, 1:6],
+               structure(
+                 list(
+                   design_label = c("design", "design", "design"),
+                   sim_ID = c(1L, 1L, 1L),
+                   estimand_label = c("ATE", "Regression_Estimands",
+                                      "Regression_Estimands"),
+                   estimand = c(2, 0, 1),
+                   estimator_label = c("dim",
+                                       "estimator", "estimator"),
+                   term = c("Z", "(Intercept)", "Z")
+                 ),
+                 class = "data.frame",
+                 row.names = c(NA,-3L)
+               ))
+  
+  
+  
 })
 
