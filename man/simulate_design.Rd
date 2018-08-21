@@ -2,9 +2,12 @@
 % Please edit documentation in R/simulate_design.R
 \name{simulate_design}
 \alias{simulate_design}
+\alias{simulate_designs}
 \title{Simulate a design}
 \usage{
 simulate_design(..., sims = 500)
+
+simulate_designs(..., sims = 500)
 }
 \arguments{
 \item{...}{A design created using the + operator, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.}

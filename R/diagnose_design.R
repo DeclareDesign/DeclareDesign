@@ -162,6 +162,10 @@ diagnose_design <- function(...,
   structure(out, class = "diagnosis")
 }
 
+#' @rdname diagnose_design
+#' @export
+diagnose_designs <- diagnose_design
+
 reorder_columns <- function(a, b, n1 = colnames(a), n2 = colnames(b))
   c(n1, setdiff(n2, n1))
 
