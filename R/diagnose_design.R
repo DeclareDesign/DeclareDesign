@@ -220,7 +220,10 @@ calculate_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
 
 calculate_diagnosands_single_design <- function(simulations_df, diagnosands, group_by_set) {
   group_by_list <- simulations_df[, group_by_set, drop = FALSE]
-  group_by_list[is.na(group_by_list)] <- "NA"
+  
+  not_all_na_columns <- apply(group_by_list, 2, function(x) ! all(is.na(x)))
+  
+  group_by_list <- group_by_list[, not_all_na_columns, drop = FALSE]
 
   labels_df <- split(group_by_list, group_by_list, drop = TRUE)
   labels_df <- lapply(labels_df, head, n = 1)
