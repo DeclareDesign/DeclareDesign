@@ -2,9 +2,13 @@
 % Please edit documentation in R/diagnose_design.R
 \name{diagnose_design}
 \alias{diagnose_design}
+\alias{diagnose_designs}
 \title{Diagnose the design}
 \usage{
 diagnose_design(..., diagnosands = NULL, sims = 500,
+  bootstrap_sims = 100, add_grouping_variables = NULL)
+
+diagnose_designs(..., diagnosands = NULL, sims = 500,
   bootstrap_sims = 100, add_grouping_variables = NULL)
 }
 \arguments{
