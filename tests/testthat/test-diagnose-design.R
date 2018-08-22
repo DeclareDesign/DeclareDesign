@@ -198,3 +198,64 @@ test_that("default diagnosands work", {
   diag <- diagnose_design(sims, sims = 5, bootstrap_sims = FALSE)
 })
 
+
+test_that("with and without term",{
+  skip_if_not_installed("DesignLibrary")
+  design_1 <- DesignLibrary::simple_factorial_designer(N = 500, outcome_means = c(0,0,1,2), w_A = 0, w_B = 0)
+  design_2 <- DesignLibrary::multi_arm_designer(N = 500, m_arms = 3, means = c(0, 0, 1))
+  dx <- diagnose_design(design_1, design_2, sims = 3, bootstrap_sims = FALSE)
+
+  expect_true(all(c("design_1", "design_2") %in% dx$diagnosands_df$design_label))
+  
+})
+
+
+test_that("more term",{
+  population  <-
+    declare_population(N = 100,
+                       Z = rep(0:1, 50),
+                       Y = rnorm(N))
+  
+  estimands_regression <- declare_estimand(
+    `(Intercept)` = 0,
+    `Z` = 1,
+    term = TRUE,
+    label = "Regression_Estimands"
+  )
+  
+  estimators_regression <- declare_estimator(Y ~ Z,
+                                             estimand = estimands_regression,
+                                             model = lm_robust,
+                                             term = TRUE)
+  
+  estimand_2  <- declare_estimand(ATE = 2,   label = "2")
+  estimator_2 <-
+    declare_estimator(Y ~ Z, estimand = estimand_2, label = "dim")
+  
+  design <-
+    population + estimands_regression + estimators_regression + estimand_2 + estimator_2
+  
+  sims_df <- simulate_design(design, sims = 1)
+  
+  expect_equal(nrow(sims_df), 3)
+  
+  expect_equal(sims_df[, 1:6],
+               structure(
+                 list(
+                   design_label = c("design", "design", "design"),
+                   sim_ID = c(1L, 1L, 1L),
+                   estimand_label = c("ATE", "Regression_Estimands",
+                                      "Regression_Estimands"),
+                   estimand = c(2, 0, 1),
+                   estimator_label = c("dim",
+                                       "estimator", "estimator"),
+                   term = c("Z", "(Intercept)", "Z")
+                 ),
+                 class = "data.frame",
+                 row.names = c(NA,-3L)
+               ))
+  
+  
+  
+})
+
