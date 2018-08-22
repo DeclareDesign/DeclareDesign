@@ -186,7 +186,7 @@ setup_diagnosands <- function(..., diagnosands) {
 calculate_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
   if ("design_label" %in% group_by_set) {
     group_by_list <- simulations_df[, "design_label", drop = FALSE]
-    labels_df <- split(group_by_list, group_by_list, drop = TRUE)
+    labels_df <- split(group_by_list, lapply(group_by_list, addNA), drop = TRUE)
     labels_df <- lapply(labels_df, head, n = 1)
 
     # ensure diagnosand functions are in the same order as designs
@@ -196,7 +196,7 @@ calculate_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
       diagnosands <- diagnosands[names(labels_df)]
     }
 
-    simulations_list <- split(simulations_df, group_by_list, drop = TRUE)
+    simulations_list <- split(simulations_df, lapply(group_by_list, addNA), drop = TRUE)
 
     if (is.list(diagnosands)) {
       diagnosands_df <- mapply(calculate_diagnosands_single_design, simulations_list, diagnosands,
@@ -290,19 +290,19 @@ bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, d
 
   # Prep for se calculation
   group_by_list <- diagnosand_replicates[, group_by_set, drop = FALSE]
-  labels_df <- split(group_by_list, group_by_list, drop = TRUE)
+  labels_df <- split(group_by_list, lapply(group_by_list, addNA), drop = TRUE)
   labels_df <- lapply(labels_df, head, n = 1)
 
   diagnosands_df_group <- diagnosands_df[, group_by_set, drop = FALSE]
   diagnosands_df[group_by_set] <- NULL
   diagnosands_names <- colnames(diagnosands_df)
 
-  diagnosands_df <- split(diagnosands_df, diagnosands_df_group, drop = TRUE)
+  diagnosands_df <- split(diagnosands_df, lapply(diagnosands_df_group, addNA), drop = TRUE)
   diagnosands_df <- diagnosands_df[names(labels_df)]
 
   # Calculate standard errors
   use_vars <- setdiff(names(diagnosand_replicates), c(group_by_set, "bootstrap_id"))
-  diagnosands_se_df <- split(diagnosand_replicates[use_vars], group_by_list, drop = TRUE)
+  diagnosands_se_df <- split(diagnosand_replicates[use_vars], lapply(group_by_list, addNA), drop = TRUE)
   diagnosands_se_df <- lapply(diagnosands_se_df, lapply, sd)
 
   # Clean up
