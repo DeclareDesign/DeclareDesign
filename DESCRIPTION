@@ -20,9 +20,6 @@ Depends:
     estimatr (>= 0.10.0)
 Imports:
     rlang, methods
-Remotes:
-    DeclareDesign/fabricatr
-    DeclareDesign/DesignLibrary
 License: MIT + file LICENSE
 URL: https://declaredesign.org, https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues
@@ -47,5 +44,5 @@ Suggests:
     lfe, 
     sf,
     reshape2,
-    DesignLibrary
+    DesignLibrary (>= 0.1.0.9000)
 VignetteBuilder: knitr
