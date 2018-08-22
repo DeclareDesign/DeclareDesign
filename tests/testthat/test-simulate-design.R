@@ -75,3 +75,16 @@ test_that("no estimates estimands declared", {
 
   expect_error(simulate_design(my_design_noestmand, sims = 2), "No estimates or estimands were declared, so design cannot be simulated.")
 })
+
+
+test_that("fan out IDs are correct", {
+  
+  skip_if_not_installed("DesignLibrary")
+  
+  sims <- c(30, 1, 2, 1, 1, 2)
+  design <- DesignLibrary::simple_two_arm_designer(rho = 0)
+  
+  simz <- simulate_design(design, sims = sims)
+  
+  expect_equivalent(apply(simz[,c(15:19)], 2, max), c(30, 30, 60, 60, 120))
+})

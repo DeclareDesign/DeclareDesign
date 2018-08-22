@@ -2,8 +2,12 @@ language: r
 sudo: false
 cache: packages
 warnings_are_errors: false
-before_install:
-- sudo apt-get install -y libudunits2-dev gdal-bin
+addons:
+  apt:
+    packages:
+      - libudunits2-dev
+      - libproj-dev
+      - libgdal-dev
 
 matrix:
   include:

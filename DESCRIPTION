@@ -16,10 +16,13 @@ Description: Researchers can characterize and learn about the properties of
 Depends:
     R (>= 3.4.0),
     randomizr (>= 0.16.1),
-    fabricatr (>= 0.4.0),
+    fabricatr (>= 0.5.0),
     estimatr (>= 0.10.0)
 Imports:
     rlang, methods
+Remotes:
+    DeclareDesign/fabricatr
+    DeclareDesign/DesignLibrary
 License: MIT + file LICENSE
 URL: https://declaredesign.org, https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues
