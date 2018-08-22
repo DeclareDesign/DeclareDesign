@@ -138,22 +138,9 @@ run_design_internal.design <- function(design, current_df = NULL, results = NULL
 #' @export
 get_estimates_data <- function(design, data, start = 1, end = length(design)) {
 
-  design_stub <- design[start:end]
-  
-  estimators <- sapply(
-    design_stub, function(x) attr(x, "causal_type") == "estimator")
-  
-  estimators <- design_stub[estimators]
+  estimators <- Filter(function(x) attr(x, "causal_type") == "estimator", design[start:end])
+  run_design_internal(estimators, data)$estimates_df
                        
-  results_list <- list()
-  for (i in seq_along(estimators)) {
-    results_list[[i]] <- estimators[[i]](data)
-  }
-  
-  results <- rbind_disjoint(results_list)
-  
-  return(results)
-
 }
 
 

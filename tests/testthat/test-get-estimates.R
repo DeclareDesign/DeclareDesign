@@ -1,34 +1,42 @@
 
 test_that("get_estimates_data works", {
+  
+  set.seed(25)
+  
   N <- 500
   
-  my_population <- declare_population(N = N, noise = rnorm(N))
+  my_population <- declare_population(data = sleep)
   
-  my_potential_outcomes <-
-    declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
-  
-  my_sampling <- declare_sampling(n = 250)
-  
-  my_assignment <- declare_assignment(m = 25)
-  
-  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-  
-  my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-  
-  my_reveal <- declare_reveal()
+  my_estimator <- declare_estimator(extra ~ group)
   
   design <- my_population +
-    my_potential_outcomes +
-    my_sampling +
-    my_estimand +
-    declare_step(dplyr::mutate, q = 5) +
-    my_assignment +
-    my_reveal +
     my_estimator + 
-    declare_estimator(Y ~ Z, model = lm_robust, label = "est2")
+    declare_estimator(extra ~ group, model = lm_robust, label = "est2")
   
-  get_estimates_data(design, data = draw_data(design))
+  expect_equal(get_estimates(design),
+               structure(list(estimator_label = c("estimator", "est2"), term = c("group2", 
+                                                                                 "group2"), estimate = c(1.58, 1.58), std.error = c(0.849091017238762, 
+                                                                                                                                    0.849091017238762), statistic = c(1.86081346748685, 1.86081346748685
+                                                                                                                                    ), p.value = c(0.0793941401873581, 0.0791867142159381), conf.low = c(-0.205483230711711, 
+                                                                                                                                                                                                         -0.203874032287598), conf.high = c(3.36548323071171, 3.3638740322876
+                                                                                                                                                                                                         ), df = c(17.7764735161785, 18), outcome = c("extra", "extra"
+                                                                                                                                                                                                         )), row.names = c(NA, -2L), class = "data.frame"))
   
-  get_estimates_data(design, data = draw_data(design), start = 9)
+  expect_equal(get_estimates_data(design, data = draw_data(design)),
+               structure(list(estimator_label = c("estimator", "est2"), term = c("group2", 
+                                                                                 "group2"), estimate = c(1.58, 1.58), std.error = c(0.849091017238762, 
+                                                                                                                                    0.849091017238762), statistic = c(1.86081346748685, 1.86081346748685
+                                                                                                                                    ), p.value = c(0.0793941401873581, 0.0791867142159381), conf.low = c(-0.205483230711711, 
+                                                                                                                                                                                                         -0.203874032287598), conf.high = c(3.36548323071171, 3.3638740322876
+                                                                                                                                                                                                         ), df = c(17.7764735161785, 18), outcome = c("extra", "extra"
+                                                                                                                                                                                                         )), row.names = c(NA, -2L), class = "data.frame"))
   
+  expect_equal(get_estimates_data(design, data = draw_data(design), start = 3),
+               structure(list(estimator_label = "est2", term = "group2", estimate = 1.58, 
+                              std.error = 0.849091017238762, statistic = 1.86081346748685, 
+                              p.value = 0.0791867142159381, conf.low = -0.203874032287598, 
+                              conf.high = 3.3638740322876, df = 18, outcome = "extra"), row.names = c(NA, 
+                                                                                                      -1L), class = "data.frame"))
+               
 })
+  
