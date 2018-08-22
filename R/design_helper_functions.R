@@ -130,6 +130,28 @@ run_design_internal.design <- function(design, current_df = NULL, results = NULL
   }
 }
 
+#' @export
+get_estimates_data <- function(design, data, start = 1, end = length(design)) {
+
+  design_stub <- design[start:end]
+  
+  estimators <- sapply(design_stub, 
+                       function(x) attr(x, "causal_type") == "estimator")
+  
+  estimators <- design_stub[estimators]
+                       
+  results_list <- list()
+  for (i in seq_along(estimators)) {
+    results_list[[i]] <- estimators[[i]](data)
+  }
+  
+  results <- rbind_disjoint(results_list)
+  
+  return(results)
+
+}
+
+
 # for when the user sends a function that runs a design itself
 #   to run_design (or simulate_design / diagnose_design above it)
 run_design_internal.function <- function(design) {
