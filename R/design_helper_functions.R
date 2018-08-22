@@ -130,13 +130,18 @@ run_design_internal.design <- function(design, current_df = NULL, results = NULL
   }
 }
 
+#' @param data A data.frame object with sufficient information to run estimators. 
+#' @param start (Defaults to 1) a scalar indicating which step in the design to begin getting estimates from. By default all estimators are calculated, from step 1 to the last step of the design.
+#' @param end (Defaults to \code{length(design)}) a scalar indicating which step in the design to finish getting estimates from. 
+#'
+#' @rdname post_design
 #' @export
 get_estimates_data <- function(design, data, start = 1, end = length(design)) {
 
   design_stub <- design[start:end]
   
-  estimators <- sapply(design_stub, 
-                       function(x) attr(x, "causal_type") == "estimator")
+  estimators <- sapply(
+    design_stub, function(x) attr(x, "causal_type") == "estimator")
   
   estimators <- design_stub[estimators]
                        
