@@ -122,3 +122,38 @@ test_that("fanout warnings", {
 
   expect_warning(diagnose_design(D, sims = strategy))
 })
+
+
+test_that("correct fan out", {
+  f1 <- local({
+    i <- 0
+    function() {
+      i <<- i + 1
+      i
+    }
+  })
+  f2 <- local({
+    i <- 0
+    function() {
+      i <<- i + 1
+      i
+    }
+  })
+  f3 <- local({
+    i <- 0
+    function() {
+      i <<- i + 1
+      i
+    }
+  })
+  e1 <- declare_estimand(a = f1())
+  e2 <- declare_estimand(b = f2())
+  e3 <- declare_estimand(c = f3())
+  
+  out <-
+    simulate_design(declare_population(sleep) + e1 + e2 + e3, sims = c(30, 1, 5, 2))
+  
+  expect_equivalent(apply(out[,c(5:8)], 2, max), c(30, 30, 150, 300))
+  
+})
+
