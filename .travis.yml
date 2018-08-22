@@ -13,16 +13,24 @@ matrix:
   include:
     - os: linux
       r: release
+      r_github_packages:
+      - DeclareDesign/DesignLibrary
+      - DeclareDesign/fabricatr
 
     - os: linux
       r: 3.4
       r_github_packages:
       - jyypma/nloptr
+      - DeclareDesign/DesignLibrary
+      - DeclareDesign/fabricatr
       after_success:
       - echo skipping source packaging on linux/oldrel
 
     - os: linux
       r: devel
+      r_github_packages:
+      - DeclareDesign/DesignLibrary
+      - DeclareDesign/fabricatr
       after_success:
       - echo skipping source packaging on linux/devel
 
@@ -33,6 +41,8 @@ matrix:
       - HenrikBengtsson/future.apply
       - DeclareDesign/DDtools
       - ropensci/git2r
+      - DeclareDesign/DesignLibrary
+      - DeclareDesign/fabricatr
 
     - os: osx
       r: 3.4
@@ -40,6 +50,8 @@ matrix:
       - HenrikBengtsson/future.apply
       - DeclareDesign/DDtools
       - ropensci/git2r
+      - DeclareDesign/DesignLibrary
+      - DeclareDesign/fabricatr
       if: branch = master
 
 
