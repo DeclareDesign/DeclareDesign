@@ -123,36 +123,37 @@ test_that("fanout warnings", {
   expect_warning(diagnose_design(D, sims = strategy))
 })
 
-test_that("correct fan out", {
-f1 <- local({i <- 0; function(){i<<- i+1; i} })
-f2 <- local({i <- 0; function(){i<<- i+1; i} })
-f3 <- local({i <- 0; function(){i<<- i+1; i} })
-e1 <- declare_estimand(a=f1())
-e2 <- declare_estimand(b=f2())
-e3 <- declare_estimand(c=f3())
-out <-
-  simulate_design(declare_population(sleep) + e1 + e2 + e3, sims = c(1, 1, 5, 2))
 
-expect_equal(out,
-             structure(list(design_label = c("design_1", "design_1", "design_1", 
-                                             "design_1", "design_1", "design_1", "design_1", "design_1", "design_1", 
-                                             "design_1", "design_1", "design_1", "design_1", "design_1", "design_1", 
-                                             "design_1", "design_1", "design_1", "design_1", "design_1", "design_1", 
-                                             "design_1", "design_1", "design_1", "design_1", "design_1", "design_1", 
-                                             "design_1", "design_1", "design_1"), sim_ID = c(1L, 1L, 1L, 2L, 
-                                                                                             2L, 2L, 3L, 3L, 3L, 4L, 4L, 4L, 5L, 5L, 5L, 6L, 6L, 6L, 7L, 7L, 
-                                                                                             7L, 8L, 8L, 8L, 9L, 9L, 9L, 10L, 10L, 10L), estimand_label = c("a", 
-                                                                                                                                                            "b", "c", "a", "b", "c", "a", "b", "c", "a", "b", "c", "a", "b", 
-                                                                                                                                                            "c", "a", "b", "c", "a", "b", "c", "a", "b", "c", "a", "b", "c", 
-                                                                                                                                                            "a", "b", "c"), estimand = c(2, 6, 11, 2, 6, 12, 2, 7, 13, 2, 
-                                                                                                                                                                                         7, 14, 2, 8, 15, 2, 8, 16, 2, 9, 17, 2, 9, 18, 2, 10, 19, 2, 
-                                                                                                                                                                                         10, 20), fan_1 = c(1L, 1L, 1L, 2L, 2L, 2L, 1L, 1L, 1L, 2L, 2L, 
-                                                                                                                                                                                                            2L, 1L, 1L, 1L, 2L, 2L, 2L, 1L, 1L, 1L, 2L, 2L, 2L, 1L, 1L, 1L, 
-                                                                                                                                                                                                            2L, 2L, 2L), fan_2 = c(1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 
-                                                                                                                                                                                                                                   2L, 2L, 3L, 3L, 3L, 3L, 3L, 3L, 4L, 4L, 4L, 4L, 4L, 4L, 5L, 5L, 
-                                                                                                                                                                                                                                   5L, 5L, 5L, 5L), fan_3 = c(1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
-                                                                                                                                                                                                                                                              1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
-                                                                                                                                                                                                                                                              1L, 1L, 1L, 1L, 1L)), class = "data.frame", row.names = c(NA, 
-                                                                                                                                                                                                                                                                                                                        -30L), parameters = structure(list(design_label = structure(1L, .Label = "design_1", class = "factor")), class = "data.frame", row.names = c(NA, 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                     -1L))))
+test_that("correct fan out", {
+  f1 <- local({
+    i <- 0
+    function() {
+      i <<- i + 1
+      i
+    }
+  })
+  f2 <- local({
+    i <- 0
+    function() {
+      i <<- i + 1
+      i
+    }
+  })
+  f3 <- local({
+    i <- 0
+    function() {
+      i <<- i + 1
+      i
+    }
+  })
+  e1 <- declare_estimand(a = f1())
+  e2 <- declare_estimand(b = f2())
+  e3 <- declare_estimand(c = f3())
+  
+  out <-
+    simulate_design(declare_population(sleep) + e1 + e2 + e3, sims = c(30, 1, 5, 2))
+  
+  expect_equivalent(apply(out[,c(5:8)], 2, max), c(30, 30, 150, 300))
+  
 })
+

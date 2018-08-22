@@ -81,16 +81,10 @@ test_that("fan out IDs are correct", {
   
   skip_if_not_installed("DesignLibrary")
   
-  sims <- c(3, 1, 2, 1, 1, 2)
+  sims <- c(30, 1, 2, 1, 1, 2)
   design <- DesignLibrary::simple_two_arm_designer(rho = 0)
   
-  expect_equal(simulate_design(design, sims = sims)[, c(15:19)],
-               structure(list(fan_1 = c(1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L, 1L, 
-                                        2L, 1L, 2L), fan_2 = c(1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
-                                                               1L, 1L), fan_3 = c(1L, 1L, 2L, 2L, 1L, 1L, 2L, 2L, 1L, 1L, 2L, 
-                                                                                  2L), fan_4 = c(1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L
-                                                                                  ), fan_5 = c(1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 3L, 3L, 3L, 3L)), class = "data.frame", row.names = c(NA, 
-                                                                                                                                                                                     -12L)))
-               
+  simz <- simulate_design(design, sims = sims)
   
+  expect_equivalent(apply(simz[,c(15:19)], 2, max), c(30, 30, 60, 60, 120))
 })
