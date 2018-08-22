@@ -12,6 +12,14 @@
 #'
 #' @examples
 #'
+#' # in conjunction with DesignLibrary
+#' 
+#' library(DesignLibrary)
+#' 
+#' designs <- expand_design(multi_arm_designer, means = list(c(3,2,4), c(1,4,1)))
+#'
+#' # with a custom designer function
+#' 
 #' designer <- function(N) {
 #'   pop <- declare_population(N = N, noise = rnorm(N))
 #'   pos <- declare_potential_outcomes(Y ~ 0.20 * Z + noise)

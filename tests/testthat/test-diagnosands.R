@@ -149,7 +149,6 @@ test_that("diagnosis, unlinked estimator", {
   d <- declare_population(sleep) +
     declare_estimand(foo = 2, bar = 3) +
     declare_estimator(extra ~ group, model = lm, term = TRUE)
-
   expect_warning(diagnose_design(d, sims = 5, bootstrap_sims = FALSE), "Estimators lack estimand/term labels for matching, a many-to-many merge was performed.")
 })
 
