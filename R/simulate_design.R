@@ -125,12 +125,14 @@ simulate_single_design <- function(design, sims) {
   } else {
     sims <- check_sims(design, sims)
     results_list <- fan_out(design, sims)
-    fan_id <- setNames(
-      lapply(rev(sims$n), seq),
-      paste0("fan_", seq_len(nrow(sims)))
-    )
-    fan_id <- expand.grid(fan_id)
-    fan_id$sim_ID <- seq_len(nrow(fan_id))
+    # fan_id <- setNames(
+    #   lapply(rev(sims$n), seq),
+    #   paste0("fan_", rev(seq_len(nrow(sims))))
+    # )
+    # fan_id <- expand.grid(rev(fan_id))
+    s <- setNames(sims$n, paste0("fan_", seq(nrow(sims))))
+    fan_id <- do.call(cbind.data.frame, lapply(cumprod(s), seq_len))
+    fan_id$sim_ID <- fan_id[[ncol(fan_id)]]
   }
   
   results2x <- function(results_list, what) {
