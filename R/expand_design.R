@@ -16,7 +16,7 @@
 #' 
 #' library(DesignLibrary)
 #' 
-#' designs <- expand_design(multi_arm_designer, means = list(c(3,2,4), c(1,4,1)))
+#' designs <- expand_design(multi_arm_designer, outcome_means = list(c(3,2,4), c(1,4,1)))
 #'
 #' # with a custom designer function
 #' 
