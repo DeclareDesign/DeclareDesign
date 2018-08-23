@@ -139,7 +139,7 @@ run_design_internal.design <- function(design, current_df = NULL, results = NULL
 get_estimates_data <- function(design, data, start = 1, end = length(design)) {
 
   estimators <- Filter(function(x) attr(x, "causal_type") == "estimator", design[start:end])
-  run_design_internal(estimators, data)$estimates_df
+  run_design_internal.design(estimators, current_df = data)$estimates_df
                        
 }
 
