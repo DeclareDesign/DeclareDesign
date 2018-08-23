@@ -20,3 +20,4 @@ paper.pdf
 ^vignettes/.*\.RDS$
 ^DeclareDesign_.*\.tar\.gz$
 ^cran-comments\.md$
+vignettes
