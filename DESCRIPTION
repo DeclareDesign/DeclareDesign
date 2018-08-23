@@ -19,7 +19,7 @@ Depends:
     fabricatr (>= 0.5.0),
     estimatr (>= 0.10.0)
 Imports:
-    rlang, methods
+    rlang
 License: MIT + file LICENSE
 URL: https://declaredesign.org, https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues
