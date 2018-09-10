@@ -44,7 +44,10 @@
 #'
 #' @details
 #'
-#' Different steps of a design may each be simulated different a number of times, as specified by sims. In this case simulations are grouped into "fans", eg "fan_1" indicates all the simulations that have the same draw from the first level of the design. For efficiency there are generally fewer fans than design steps where all contiguous steps with 1 sim specified are combined into a single fan.
+#' Different steps of a design may each be simulated different a number of times, as specified by sims. In this case simulations are grouped into "fans". The nested 
+#' structure of simulations is recorded in the dataset using a set of variables named "step_x_draw." For example if sims = c(2,1,1,3) is passed to simulate_design, then there
+#' will be two distinct draws of step 1, indicated in variable "step_1_draw" (with values 1 and 2) and there will be three draws for step 4 within each of the step 1 draws, recorded in "step_4_draw" (with values 1 to 6).
+#'    
 simulate_design <- function(..., sims = 500) {
   designs <- dots_to_list_of_designs(...)
   
@@ -128,17 +131,12 @@ simulate_single_design <- function(design, sims) {
   } else {
     sims <- check_sims(design, sims)
     results_list <- fan_out(design, sims)
-    # fan_id <- setNames(
-    #   lapply(rev(sims$n), seq),
-    #   paste0("fan_", rev(seq_len(nrow(sims))))
-    # )
-    # fan_id <- expand.grid(rev(fan_id))
-    s <- setNames(sims$n, paste0("step_", sims$end, "_draw"))
-    fan_id <- do.call(cbind.data.frame, lapply(
+    sims2    <- rbind(sims[1,], sims[-1,][sims[-1,]$n!=1,]) # preserve first row; drop all others with n = 1
+    sims2[1,1] <- 1                                         # step_1_draw always ends at 1
+    s        <- setNames(sims2$n, paste0("step_", sims2$end, "_draw"))
+    fan_id   <- do.call(cbind.data.frame, lapply(
       cumprod(s), function(j)  rep(1:j, each = prod(s)/j)))
-    
-    fan_id <- fan_id[, paste0("step_", sims$end[sims$n != 1], "_draw"), drop = FALSE]
-    fan_id$sim_ID <- fan_id[[ncol(fan_id)]]
+    fan_id$sim_ID <- 1:prod(s)
     }
   
   results2x <- function(results_list, what) {
