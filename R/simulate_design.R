@@ -114,6 +114,9 @@ simulate_single_design <- function(design, sims) {
     )
   }
   
+  # escape hatch for all ones
+  if(prod(sims) == 1) sims <- 1
+  
   # If sims is set correctly, fan out
   
   if (length(sims) == 1 && is.null(names(sims))) {
@@ -130,10 +133,13 @@ simulate_single_design <- function(design, sims) {
     #   paste0("fan_", rev(seq_len(nrow(sims))))
     # )
     # fan_id <- expand.grid(rev(fan_id))
-    s <- setNames(sims$n, paste0("fan_", seq(nrow(sims))))
-    fan_id <- do.call(cbind.data.frame, lapply(cumprod(s), seq_len))
+    s <- setNames(sims$n, paste0("step_", sims$end, "_draw"))
+    fan_id <- do.call(cbind.data.frame, lapply(
+      cumprod(s), function(j)  rep(1:j, each = prod(s)/j)))
+    
+    fan_id <- fan_id[, paste0("step_", sims$end[sims$n != 1], "_draw"), drop = FALSE]
     fan_id$sim_ID <- fan_id[[ncol(fan_id)]]
-  }
+    }
   
   results2x <- function(results_list, what) {
     subresult <- lapply(results_list, `[[`, what)

@@ -84,7 +84,7 @@ test_that("fan out IDs are correct", {
   sims <- c(30, 1, 2, 1, 1, 2)
   design <- DesignLibrary::simple_two_arm_designer(rho = 0)
   
-  simz <- simulate_design(design, sims = sims)
+  sx <- simulate_design(design, sims = sims)
   
-  expect_equivalent(apply(simz[,c(15:19)], 2, max), c(30, 30, 60, 60, 120))
+  expect_equivalent(apply(sx[,c(15, 16, 17)], 2, max), c(30, 60, 120))
 })
