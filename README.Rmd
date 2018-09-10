@@ -65,7 +65,7 @@ The core DeclareDesign package relies on three companion packages, each of which
 
 2. You can also browse a [library](https://declaredesign.org/library/) of already declared designs. The library includes canonical designs that you can download, modify, and deploy.
 
-3. A fuller description of the philosophy underlying the software is described in this [working paper](https://declaredesign.org/paper.pdf).
+3. A fuller description of the philosophy underlying the software is described in this [working paper](https://paper.declaredesign.org/paper.pdf).
 
 ## Package structure
 
