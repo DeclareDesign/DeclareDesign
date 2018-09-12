@@ -94,7 +94,7 @@ of which is useful in its own right.
 
 3.  A fuller description of the philosophy underlying the software is
     described in this [working
-    paper](https://paper.declaredesign.org/paper.pdf).
+    paper](https://declaredesign.org/declare.pdf).
 
 ## Package structure
 
