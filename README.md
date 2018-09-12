@@ -69,15 +69,17 @@ diagnosis
 
 ## Companion software
 
-The core DeclareDesign package relies on three companion packages, each
+The core DeclareDesign package relies on four companion packages, each
 of which is useful in its own right.
 
-1.  [randomizr](https://declaredesign.org/R/randomizr/): Easy to use
+1.  [randomizr](https://declaredesign.org/r/randomizr/): Easy to use
     tools for common forms of random assignment and sampling.
-2.  [fabricatr](https://declaredesign.org/R/fabricatr/): Imagine your
+2.  [fabricatr](https://declaredesign.org/r/fabricatr/): Imagine your
     data before you collect it.
-3.  [estimatr](https://declaredesign.org/R/estimatr/): Fast estimators
+3.  [estimatr](https://declaredesign.org/r/estimatr/): Fast estimators
     for social scientists.
+4.  [DesignLibrary](https://declaredesign.org/library): Templates to
+    quickly adopt and adapt common research designs.
 
 ## Learning DeclareDesign
 
@@ -86,12 +88,13 @@ of which is useful in its own right.
     main functionality of the software.
 
 2.  You can also browse a [library](https://declaredesign.org/library/)
-    of already declared designs. The library includes canonical designs
-    that you can download, modify, and deploy.
+    of already declared designs, which relies on the `DesignLibrary`
+    package. The library includes canonical designs that you can
+    download, modify, and deploy.
 
 3.  A fuller description of the philosophy underlying the software is
     described in this [working
-    paper](https://declaredesign.org/paper.pdf).
+    paper](https://paper.declaredesign.org/paper.pdf).
 
 ## Package structure
 
@@ -135,7 +138,7 @@ A few other features:
     treatment assignment.
 4.  You can provide custom functions to any `declare_*` step, as
     described in the [custom functions
-    vignette](/R/DeclareDesign/articles/custom_functions.html).
+    vignette](/r/declaredesign/articles/custom_functions.html).
 
 -----
 
