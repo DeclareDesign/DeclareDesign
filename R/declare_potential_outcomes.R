@@ -8,7 +8,7 @@
 #'
 #' @details
 #'
-#' A `declare_potential_outcomes` declaration returns a function. The function takes and returns a data.frame with potential outcomes columns appended. These columns describe the outcomes that each unit would express if that unit were in the corresponding treatment condition.
+#' A \code{declare_potential_outcomes} declaration returns a function. The function takes and returns a data.frame with potential outcomes columns appended. These columns describe the outcomes that each unit would express if that unit were in the corresponding treatment condition.
 #'
 #' Declaring a potential outcomes function requires postulating a particular causal process. One can then assess how designs fare under the postulated process. 
 #' Multiple processes can be considered in a single design or across design. For instance one could declare two processes that rival theories would predict.
