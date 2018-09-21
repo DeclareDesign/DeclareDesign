@@ -47,25 +47,22 @@ check_sims <- function(design, sims) {
 
   # Compress sequences of ones into one partial execution
   
-  ret2 <- ret * 0
-  ret2[1,] <- ret[1,]
-  j <- 1
-  if(n > 1) for(i in 2:n){
-    k <- ret[i, "n"]
-    if(k > 1) {
-      j <- j + 1
-      ret2[j,] <- c(i,k) 
-      
-    } else if(ret[i, "n"] == 1) {
-      ret2[j, "end"] <- i
-      
-    } else stop("")
-    
+  if(n > 1) {
+    j <- 1
+    for(i in 2:n){
+      k <- ret[i, "n"]
+      if(k > 1) {
+        #keeper
+        j <- j + 1
+        ret[j,] <- c(i,k) 
+      } else if(k == 1) {
+        ret[j, "end"] <- i
+      } else stop("sims was misspecified")
+    }
+    ret <- ret[1:j, , drop=FALSE]
   }
-  ret2 <- ret2[1:j, , drop=FALSE]
-
   
-  ret2
+  ret
 }
 
 #' Execute a design
