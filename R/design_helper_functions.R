@@ -57,7 +57,7 @@ check_sims <- function(design, sims) {
         ret[j,] <- c(i,k) 
       } else if(k == 1) {
         ret[j, "end"] <- i
-      } else stop("sims was misspecified")
+      }
     }
     ret <- ret[1:j, , drop=FALSE]
   }
