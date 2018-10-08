@@ -108,7 +108,7 @@ simulate_single_design <- function(design, sims) {
     stop("Sims should be >= 1", call. = FALSE)
   }
   
-  if (length(sims) > 1 && sims[1] < 30) {
+  if (sims[1] < 30) {
     warning(
       "We recommend you choose a higher number of simulations than ",
       sims[1],
