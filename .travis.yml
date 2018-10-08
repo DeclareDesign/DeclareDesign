@@ -4,6 +4,8 @@ cache: packages
 warnings_are_errors: false
 addons:
   apt:
+    sources:
+      - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
     packages:
       - libudunits2-dev
       - libproj-dev

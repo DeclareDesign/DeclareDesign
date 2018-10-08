@@ -108,7 +108,7 @@ simulate_single_design <- function(design, sims) {
     stop("Sims should be >= 1", call. = FALSE)
   }
   
-  if (length(sims) > 1 && sims[1] < 30) {
+  if (sims[1] < 30) {
     warning(
       "We recommend you choose a higher number of simulations than ",
       sims[1],
@@ -131,13 +131,10 @@ simulate_single_design <- function(design, sims) {
   } else {
     sims <- check_sims(design, sims)
     results_list <- fan_out(design, sims)
-    sims2    <- rbind(sims[1,], sims[-1,][sims[-1,]$n!=1,]) # preserve first row; drop all others with n = 1
-    sims2[1,1] <- 1                                         # step_1_draw always ends at 1
-    s        <- setNames(sims2$n, paste0("step_", sims2$end, "_draw"))
-    fan_id   <- do.call(cbind.data.frame, lapply(
-      cumprod(s), function(j)  rep(1:j, each = prod(s)/j)))
-    fan_id$sim_ID <- 1:prod(s)
-    }
+    
+    
+    
+  }
   
   results2x <- function(results_list, what) {
     subresult <- lapply(results_list, `[[`, what)
@@ -204,10 +201,6 @@ simulate_single_design <- function(design, sims) {
         "Estimators lack estimand/term labels for matching, a many-to-many merge was performed."
       )
     }
-  }
-  
-  if (exists("fan_id")) {
-    simulations_df <- merge(simulations_df, fan_id, by = "sim_ID")
   }
   
   if (!is_empty(attr(design, "parameters"))) {
