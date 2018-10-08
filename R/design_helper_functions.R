@@ -18,8 +18,8 @@
 #'
 #' df <- draw_data(design)
 #'
-#' estimates <- get_estimates(design)
-#' estimands <- get_estimands(design)
+#' estimates <- draw_estimates(design)
+#' estimands <- draw_estimands(design)
 #'
 #' @name post_design
 NULL
@@ -144,7 +144,11 @@ run_design_internal.design <- function(design, current_df = NULL, results = NULL
 #'
 #' @rdname post_design
 #' @export
-get_estimates_data <- function(design, data, start = 1, end = length(design)) {
+get_estimates <- function(design, data = NULL, start = 1, end = length(design)) {
+  
+  if(is.null(data)){
+    stop("Please provide a data frame to the data argument. If you would like to get estimates from simulated data, use draw_estimates to draw data and get estimates in one step.")
+  }
 
   estimators <- Filter(function(x) attr(x, "causal_type") == "estimator", design[start:end])
   run_design_internal.design(estimators, current_df = data)$estimates_df
@@ -193,12 +197,12 @@ draw_data <- function(design) {
 #' @rdname post_design
 #'
 #' @export
-get_estimands <- function(...) apply_on_design_dots(get_estimands_single_design, ...)
+draw_estimands <- function(...) apply_on_design_dots(draw_estimands_single_design, ...)
 
 #' @rdname post_design
 #'
 #' @export
-get_estimates <- function(...) apply_on_design_dots(get_estimates_single_design, ...)
+draw_estimates <- function(...) apply_on_design_dots(draw_estimates_single_design, ...)
 
 apply_on_design_dots <- function(FUN, ...) {
   designs <- dots_to_list_of_designs(...)
@@ -237,12 +241,12 @@ dots_to_list_of_designs <- function(...) {
 }
 
 
-get_estimates_single_design <- function(design) {
+draw_estimates_single_design <- function(design) {
   results <- list("estimator" = vector("list", length(design)))
   run_design_internal(design, results = results)$estimates_df
 }
 
-get_estimands_single_design <- function(design) {
+draw_estimands_single_design <- function(design) {
   results <- list("estimand" = vector("list", length(design)))
   run_design_internal(design, results = results)$estimands_df
 }

@@ -1,6 +1,6 @@
 context("post estimation")
 
-test_that("multiple design get_estimates", {
+test_that("multiple design draw_estimates", {
   my_designer <- function(N = 50) {
     my_population <- declare_population(N = N, noise = rnorm(N))
 
@@ -50,19 +50,19 @@ test_that("multiple design get_estimates", {
 
   my_designs <- expand_design(my_designer, N = c(50, 100))
 
-  get_estimands(design_1)
+  draw_estimands(design_1)
 
-  get_estimands(design_2)
+  draw_estimands(design_2)
 
-  get_estimands(design_1, design_2)
+  draw_estimands(design_1, design_2)
 
-  get_estimands(my_designs)
+  draw_estimands(my_designs)
 
-  get_estimates(design_1)
+  draw_estimates(design_1)
 
-  get_estimates(design_2)
+  draw_estimates(design_2)
 
-  expect_equal(get_estimates(design_1, design_2)$design_label, c("design_1", "design_2"))
+  expect_equal(draw_estimates(design_1, design_2)$design_label, c("design_1", "design_2"))
 
-  get_estimates(my_designs)
+  draw_estimates(my_designs)
 })
