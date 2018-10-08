@@ -1,12 +1,13 @@
 
 #' Deprecated functions
 #'
+#' \code{declare_design}, instead use the \code{+} operator to create a design, i.e. \code{pop + smp + assgn}.
+#'
 #' @param ... options sent to the old version of \code{declare_design}.
 #'
-#' @name DeclareDesign-deprecated
-#'
-#' \code{declare_design}, instead use the \code{+} operator to create a design, i.e. \code{pop + smp + assgn}.
 #' @export
+#'
+#' @name deprecated
 #'
 declare_design <- function(...) {
   qs <- quos(...)
