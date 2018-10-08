@@ -38,11 +38,7 @@ test_that("test diagnosands", {
 
 
 test_that("Bootstrap ses close", {
-  skip_on_cran() 
-  
-  skip_on_travis()
-  
-  skip_on_appveyor()
+  skip("Skipped bootstrap SE test for speed")
   
   pop <- declare_population(N = 100, S100 = rnorm(N, sd = 100), S10000 = rnorm(N, sd = 10000))
   estimand <- declare_estimand(S100 = mean(S100), S10000 = mean(S10000))
