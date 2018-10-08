@@ -75,7 +75,7 @@ test_that("regression from estimatr works as an estimator", {
     reveal_outcomes +
     pate_estimator
 
-  estimate <- get_estimates(my_design)
+  estimate <- draw_estimates(my_design)
   expect_equal(estimate$estimator_label, "pate_hat")
   expect_equal(estimate$term, "noise")
   expect_equal(estimate$estimand_label, "pate")
@@ -121,7 +121,7 @@ test_that("multiple estimator declarations work", {
     estimator_1 +
     estimator_2
 
-  e <- get_estimates(design)
+  e <- draw_estimates(design)
 
   expect_equal(e$estimator_label, c("estimator_1", "estimator_2"))
 })
@@ -152,7 +152,7 @@ test_that("multiple estimator declarations work", {
     estimator_3 +
     estimator_4
 
-  e <- get_estimates(design)
+  e <- draw_estimates(design)
 
   expect_equal(e$estimator_label, c("estimator_3", "estimator_4"))
 })
@@ -327,7 +327,7 @@ test_that("estimators have different columns", {
     estimator_d_i_m +
     estimator_m
 
-  result <- get_estimates(matching)
+  result <- draw_estimates(matching)
 
   expect_length(result, 11)
   expect_equal(nrow(result), 2)

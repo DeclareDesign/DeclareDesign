@@ -2,14 +2,14 @@
 % Please edit documentation in R/deprecated.R
 \name{deprecated}
 \alias{deprecated}
-\alias{declare_design}
+\alias{get_estimands}
 \title{Deprecated functions}
 \usage{
-declare_design(...)
+get_estimands(...)
 }
 \arguments{
-\item{...}{options sent to the old version of \code{declare_design}.}
+\item{...}{options sent to the old version of \code{get_estimands}.}
 }
 \description{
-\code{declare_design}, instead use the \code{+} operator to create a design, i.e. \code{pop + smp + assgn}.
+The function \code{get_estimands} has been replaced with \code{draw_estimands}.
 }

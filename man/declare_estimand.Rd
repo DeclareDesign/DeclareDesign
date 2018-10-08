@@ -74,7 +74,7 @@ my_estimator <- declare_estimator(Y ~ Z,
 
 design_one <- design_stub + my_estimand_ATE + my_estimator
 
-get_estimands(design_one)
+draw_estimands(design_one)
 
 # ----------
 # 2. Multiple estimands
@@ -90,7 +90,7 @@ my_estimator_two <- declare_estimator(Y ~ Z,
 design_two <- design_stub + my_estimand_ATE + 
   my_estimand_ATT + my_estimator_two
 
-get_estimands(design_two)
+draw_estimands(design_two)
 
 # ----------
 # 3. Paired estimands / estimators from a single model

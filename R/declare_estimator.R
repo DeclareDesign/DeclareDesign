@@ -106,7 +106,7 @@
 #'   declare_reveal() +
 #'   my_estimator_dim
 #'
-#' get_estimates(design_def)
+#' draw_estimates(design_def)
 #'
 #' # Can also use declared estimator on a data.frame
 #' dat <- draw_data(design_def)
@@ -117,13 +117,13 @@
 #' # ----------
 #'
 #' design <- replace_step(design_def, my_estimator_dim, my_estimator_lm_rob)
-#' get_estimates(design)
+#' draw_estimates(design)
 #'
 #' design <- replace_step(design_def, my_estimator_dim, my_estimator_lm)
-#' get_estimates(design)
+#' draw_estimates(design)
 #'
 #' design <- replace_step(design_def, my_estimator_dim, my_estimator_glm)
-#' get_estimates(design)
+#' draw_estimates(design)
 #'
 #' # ----------
 #' # 3. Using custom estimators
@@ -131,7 +131,7 @@
 #'
 #' design <- replace_step(design_def, my_estimator_dim, my_estimator_custom)
 #'
-#' get_estimates(design)
+#' draw_estimates(design)
 #'
 #' # The names in your custom estimator return should match with
 #' # your diagnosands when diagnosing a design
@@ -144,7 +144,7 @@
 #'
 #' design <- replace_step(design_def, my_estimator_dim, my_estimator_median)
 #'
-#' get_estimates(design)
+#' draw_estimates(design)
 #'
 #' my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand),
 #'   keep_defaults = FALSE)
@@ -159,7 +159,7 @@
 #' design_two <- insert_step(design_def,  my_estimator_lm,
 #'   after = my_estimator_dim)
 #'
-#' get_estimates(design_two)
+#' draw_estimates(design_two)
 #'
 #' diagnose_design(design_two, sims = 5, bootstrap_sims = FALSE)
 #'

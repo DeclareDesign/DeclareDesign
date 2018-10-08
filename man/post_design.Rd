@@ -2,21 +2,21 @@
 % Please edit documentation in R/design_helper_functions.R
 \name{post_design}
 \alias{post_design}
-\alias{get_estimates_data}
-\alias{draw_data}
-\alias{get_estimands}
 \alias{get_estimates}
+\alias{draw_data}
+\alias{draw_estimands}
+\alias{draw_estimates}
 \alias{print.design}
 \alias{summary.design}
 \title{Explore your design}
 \usage{
-get_estimates_data(design, data, start = 1, end = length(design))
+get_estimates(design, data = NULL, start = 1, end = length(design))
 
 draw_data(design)
 
-get_estimands(...)
+draw_estimands(...)
 
-get_estimates(...)
+draw_estimates(...)
 
 \method{print}{design}(x, verbose = TRUE, ...)
 
@@ -58,8 +58,8 @@ design
 
 df <- draw_data(design)
 
-estimates <- get_estimates(design)
-estimands <- get_estimands(design)
+estimates <- draw_estimates(design)
+estimands <- draw_estimands(design)
 
 
 my_population <- declare_population(N = 500, noise = rnorm(N))
