@@ -31,6 +31,22 @@ test_that("Simulate Design works", {
 })
 
 
+
+test_that("Simulate Design works x2", {
+
+  f1 <- local({i <- 0; function(){i<<- i+1; i} })
+  f2 <- local({i <- 0; function(){i<<- i+1; i} })
+  f3 <- local({i <- 0; function(){i<<- i+1; i} })
+  e1 <- declare_estimand(a=f1())
+  e2 <- declare_estimand(b=f2())
+  e3 <- declare_estimand(c=f3())
+  out <- expect_warning(simulate_design(declare_population(sleep) + e1 + e2 + e3, sims=c(1,1,5,2)))
+  expect_equal(out$estimand, 
+                    as.vector(t(out[(1:10)*3, c("step_1_draw", "step_3_draw", "step_4_draw")])))
+})
+
+
+
 my_designer <- function(N, tau) {
   pop <- declare_population(N = N)
   pos <-
