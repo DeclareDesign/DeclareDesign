@@ -46,21 +46,23 @@ check_sims <- function(design, sims) {
   }
 
   # Compress sequences of ones into one partial execution
-  include <- rep(TRUE, n)
-  last_1 <- FALSE
-  for (i in n:1) {
-    if (!last_1) {
-      include[i] <- TRUE
-    } else if (ret[i, "n"] == 1 && last_1) include[i] <- FALSE
-
-    last_1 <- ret[i, "n"] == 1
+  
+  if(n > 1) {
+    j <- 1
+    for(i in 2:n){
+      k <- ret[i, "n"]
+      if(k > 1) {
+        #keeper
+        j <- j + 1
+        ret[j,] <- c(i,k) 
+      } else if(k == 1) {
+        ret[j, "end"] <- i
+      }
+    }
+    ret <- ret[1:j, , drop=FALSE]
   }
-
-  ret[include, , drop = FALSE]
   
-  # instead of the above, just return rows that vary
-  # ret[ret$n != 1, , drop = FALSE]
-  
+  ret
 }
 
 #' Execute a design
@@ -122,14 +124,16 @@ run_design_internal.design <- function(design, current_df = NULL, results = NULL
     if ("current_df" %in% names(results)) {
       results[["current_df"]] <- current_df
     }
-    results
+    append(results, list(...))
+    
   } else {
     execution_st(
       design = design,
       current_df = current_df,
       results = results,
       start = i + 1,
-      end = length(design)
+      end = length(design),
+      ...
     )
   }
 }
@@ -163,7 +167,7 @@ run_design_internal.execution_st <- function(design, ...) do.call(run_design_int
 # @param results a list of intermediate results
 # @param start index of starting step
 # @param end  index of ending step
-execution_st <- function(design, current_df = NULL, results = NULL, start = 1, end = length(design)) {
+execution_st <- function(design, current_df = NULL, results = NULL, start = 1, end = length(design), ...) {
   # An execution state are the arguments needed to run run_design
   structure(
     list(
@@ -171,7 +175,8 @@ execution_st <- function(design, current_df = NULL, results = NULL, start = 1, e
       current_df = current_df,
       results = results,
       start = start,
-      end = end
+      end = end,
+      ...
     ),
     class = "execution_st"
   )
@@ -570,9 +575,18 @@ print.summary.design <- function(x, ...) {
 #' @export
 str.design_step <- function(object, ...) cat("design_step:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse = ""), "\n")
 
+
+make_fan_counter <- function(fan) {
+  k <- nrow(fan)
+  ret <- matrix(0, 1, k)
+  colnames(ret) <- sprintf("step_%d_draw", c(1, fan$end+1)[1:k])
+  
+  ret
+}
+
 # A wrapper around conduct design for fan-out execution strategies
 fan_out <- function(design, fan) {
-  st <- list(execution_st(design))
+  st <- list(execution_st(design, fan=make_fan_counter(fan)))
 
   for (i in seq_len(nrow(fan))) {
     end <- fan[i, "end"]
@@ -583,8 +597,19 @@ fan_out <- function(design, fan) {
 
     st <- st [ rep(seq_along(st), each = n) ]
 
+    for (j in seq_along(st))
+      st[[j]]$fan[i] <- j
+    
+    
     st <- future_lapply(seq_along(st), function(j) run_design(st[[j]]), future.seed = NA, future.globals = "st")
   }
+  
+  st <- lapply(st, function(x){
+    fan <- x$fan
+    x$fan <- NULL
+    lapply(x, function(x, z=nrow(x)) if(z > 0) cbind(x,fan) else x)
+  })
+  
 
   st
 }
