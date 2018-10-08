@@ -12,7 +12,10 @@ test_that("Fanout does something", {
   out <- DeclareDesign:::fan_out(D, fan_strategy)
 
   estimands_out <- do.call(rbind, lapply(out, `[[`, "estimands_df"))
-  expect_equal(nrow(unique(estimands_out)), 1)
+  expect_equal(length(unique(estimands_out$estimand)), 1)
+  expect_equal(estimands_out$step_1_draw, rep(1,100))
+  expect_equal(estimands_out$step_3_draw, 1:100)
+  
 })
 
 test_that("fanout should not be exposed to users", {
@@ -88,13 +91,11 @@ test_that("sims expansion is correct", {
 
   sims <- 2
   expanded <- check_sims(design, sims)
-
-  # compressed final two steps
-  expect_equal(expanded$n, c(2, 1))
+  expect_equal(expanded$n, 2)
 
   sims <- c(a = 2)
   expanded <- check_sims(design, sims)
-  expect_equal(expanded$n, c(1, 2, 1))
+  expect_equal(expanded$n, c(1, 2))
 })
 
 
@@ -154,6 +155,7 @@ test_that("correct fan out", {
     simulate_design(declare_population(sleep) + e1 + e2 + e3, sims = c(30, 1, 5, 2))
   
   expect_equivalent(apply(out[,c(5:7)], 2, max), c(30, 150, 300))
+  expect_equivalent(tapply(out$estimand, INDEX = out$estimand_label, max), c(30, 150, 300))
   
 })
 
