@@ -71,7 +71,7 @@ test_that("Diagnosing a fanout", {
 
   expect_equivalent(tapply(dx$simulations$estimate, rep_id[dx$simulations$sim_ID, 3], var), c(0, 0, 0, 0, 0))
 
-  expect_length(paste0("fan_", 1:3) %icn% dx$simulations, 3)
+  expect_length(c("step_3_draw", "step_4_draw") %icn% dx$simulations, 2)
 })
 
 test_that("sims expansion is correct", {
@@ -153,7 +153,19 @@ test_that("correct fan out", {
   out <-
     simulate_design(declare_population(sleep) + e1 + e2 + e3, sims = c(30, 1, 5, 2))
   
-  expect_equivalent(apply(out[,c(5:8)], 2, max), c(30, 30, 150, 300))
+  expect_equivalent(apply(out[,c(5:7)], 2, max), c(30, 150, 300))
   
 })
+
+
+test_that("MH sim ids", {
+  skip_if_not_installed("DesignLibrary")
+  design <- DesignLibrary::simple_two_arm_designer()
+  sx <- simulate_design(design, sims = c(2, 1, 1, 1, 1, 2))
+  expect_equal(sx$step_1_draw, c(1L, 1L, 2L, 2L))
+  expect_equal(sx$step_6_draw, c(1L, 2L, 3L, 4L))
+  expect_equal(sx$estimate[1], sx$estimate[2])
+  expect_equal(sx$estimate[3], sx$estimate[4])
+})
+
 

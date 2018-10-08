@@ -57,6 +57,10 @@ check_sims <- function(design, sims) {
   }
 
   ret[include, , drop = FALSE]
+  
+  # instead of the above, just return rows that vary
+  # ret[ret$n != 1, , drop = FALSE]
+  
 }
 
 #' Execute a design
