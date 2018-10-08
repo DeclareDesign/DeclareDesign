@@ -120,8 +120,8 @@ test_that("demo runs", {
   head(dat)
 
   ## ------------------------------------------------------------------------
-  get_estimates(design)
-  get_estimands(design)
+  draw_estimates(design)
+  draw_estimands(design)
 
   ## ------------------------------------------------------------------------
   my_population_function <- function(N) {

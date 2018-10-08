@@ -1,8 +1,8 @@
 
 
-context("get_estimates_data")
+context("get_estimates")
 
-test_that("get_estimates_data works", {
+test_that("get_estimates works", {
   
   set.seed(25)
   
@@ -16,7 +16,7 @@ test_that("get_estimates_data works", {
     my_estimator + 
     declare_estimator(extra ~ group, model = lm_robust, label = "est2")
   
-  expect_equal(get_estimates(design),
+  expect_equal(draw_estimates(design),
                structure(list(estimator_label = c("estimator", "est2"), term = c("group2", 
                                                                                  "group2"), estimate = c(1.58, 1.58), std.error = c(0.849091017238762, 
                                                                                                                                     0.849091017238762), statistic = c(1.86081346748685, 1.86081346748685
@@ -25,7 +25,7 @@ test_that("get_estimates_data works", {
                                                                                                                                                                                                          ), df = c(17.7764735161785, 18), outcome = c("extra", "extra"
                                                                                                                                                                                                          )), row.names = c(NA, -2L), class = "data.frame"))
   
-  expect_equal(get_estimates_data(design, data = draw_data(design)),
+  expect_equal(get_estimates(design, data = draw_data(design)),
                structure(list(estimator_label = c("estimator", "est2"), term = c("group2", 
                                                                                  "group2"), estimate = c(1.58, 1.58), std.error = c(0.849091017238762, 
                                                                                                                                     0.849091017238762), statistic = c(1.86081346748685, 1.86081346748685
@@ -34,7 +34,7 @@ test_that("get_estimates_data works", {
                                                                                                                                                                                                          ), df = c(17.7764735161785, 18), outcome = c("extra", "extra"
                                                                                                                                                                                                          )), row.names = c(NA, -2L), class = "data.frame"))
   
-  expect_equal(get_estimates_data(design, data = draw_data(design), start = 3),
+  expect_equal(get_estimates(design, data = draw_data(design), start = 3),
                structure(list(estimator_label = "est2", term = "group2", estimate = 1.58, 
                               std.error = 0.849091017238762, statistic = 1.86081346748685, 
                               p.value = 0.0791867142159381, conf.low = -0.203874032287598, 
