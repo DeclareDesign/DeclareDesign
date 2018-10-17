@@ -48,91 +48,53 @@
 expand_design <- function(designer, ..., expand = TRUE, prefix = "design") {
   dots_quos <- quos(...)
 
-  if (length(dots_quos) > 0) {
-    args_list <- expand_args(..., expand = expand)
-    args_names <- expand_args_names(!!!dots_quos, expand = expand)
-    # args_names <- rbind_disjoint(lapply(args_list, data.frame))
+  if (length(dots_quos) == 0) return(designer())
+    
+  T <- function(zx,ix) do.call(mapply, 
+                               append(mapply(`[`, zx, ix, SIMPLIFY = FALSE), 
+                                      list(FUN=list, SIMPLIFY=FALSE), 
+                                      after = 0)
+                               )
+  
 
-    designs <- lapply(args_list, function(x) do.call(designer, args = x))
-
-    for (i in seq_along(designs)) {
-      attr(designs[[i]], "parameters") <- setNames(args_names[i, , drop = FALSE], names(args_names))
-    }
-
-    if (length(designs) == 1) {
-      designs <- designs[[1]]
-    } else {
-      names(designs) <- paste0(prefix, "_", seq_len(length(designs)))
-    }
-  } else {
-    designs <- designer()
+  args <- list(...)
+  args <- lapply(args, function(x) if(is.function(x)) list(x) else x)
+  
+  ix <- lapply(args, seq_along)
+  ix <- if(expand) expand.grid(ix) else {
+    lapply(ix, rep_len, Reduce(max, ix, init=0))
   }
 
-  return(designs)
+  
+  designs <- lapply(T(args, ix), do.call, what=designer)
+
+  args_names <- lapply(dots_quos, expand_args_names)
+  
+  designs <- mapply(structure, 
+                    designs, 
+                    parameters=T(args_names, ix), 
+                    SIMPLIFY = FALSE)
+  
+
+  if (length(designs) == 1) {
+    designs <- designs[[1]]
+  } else {
+    names(designs) <- paste0(prefix, "_", seq_along(designs))
+  }
+
+  designs
 }
 
 
-expand_args <- function(..., expand = TRUE) {
-  dots <- list(...)
-
-  if (expand) {
-    lens <- lapply(dots, function(x) seq_len(length(x)))
-    args_positions <- do.call(expand.grid, args = list(lens, stringsAsFactors = TRUE))
-    args_list <- vector("list", nrow(args_positions))
-    for (i in seq_len(nrow(args_positions))) {
-      current_list_row <- vector("list", ncol(args_positions))
-      names(current_list_row) <- names(dots)
-      for (j in seq_len(ncol(args_positions))) {
-        if (length(dots[[j]]) > 1) {
-          current_list_row[[j]] <- dots[[j]][[args_positions[i, j]]]
-        } else {
-          current_list_row[[j]] <- dots[[j]]
-        }
-      }
-      args_list[[i]] <- current_list_row
-    }
-  } else {
-    args_list <- vector("list", length(dots[[1]]))
-    for (i in seq_along(args_list)) {
-      current_list_row <- vector("list", length(dots))
-      names(current_list_row) <- names(dots)
-      for (j in seq_along(dots)) {
-        if (length(dots[[j]]) > 1) {
-          current_list_row[[j]] <- dots[[j]][j]
-        } else {
-          current_list_row[[j]] <- dots[[j]]
-        }
-      }
-      args_list[[i]] <- current_list_row
-    }
-  }
-  args_list
-}
 
 #' @importFrom rlang quo_squash is_call call_args
-expand_args_names <- function(..., expand = TRUE) {
-  dots_quos <- quos(...)
-
-  dots_names <- lapply(dots_quos, function(x) {
-    x_expr <- quo_squash(x)
-    is_list_c <- expr_text(as.list(x_expr)[[1]]) %in% c("c", "list")
-    if (!is_list_c) {
-      x_is_call <- is_call(x_expr)
-      if (x_is_call) {
-        as.character(eval_tidy(x))
-      } else {
-        as.character(x_expr)
-      }
-    } else {
-      as.character(call_args(x_expr))
-    }
-  })
-  if (expand) {
-    ret <- expand.grid(dots_names, stringsAsFactors = FALSE)
-  } else {
-    ret <- data.frame(dots_names, stringsAsFactors = FALSE)
-  }
-  ret
+expand_args_names <- function(x) {
+  x_expr <- quo_squash(x)
+  is_list_c <- expr_text(as.list(x_expr)[[1]]) %in% c("c", "list")
+  x <- if (is_list_c) call_args(x_expr) 
+       else if (is_call(x_expr)) eval_tidy(x) 
+       else x_expr
+  as.character(x)
 }
 
 
