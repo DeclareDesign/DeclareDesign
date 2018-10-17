@@ -61,9 +61,7 @@ expand_design <- function(designer, ..., expand = TRUE, prefix = "design") {
   args <- lapply(args, function(x) if(is.function(x)) list(x) else x)
   
   ix <- lapply(args, seq_along)
-  ix <- if(expand) expand.grid(ix) else {
-    lapply(ix, rep_len, Reduce(max, ix, init=0))
-  }
+  ix <- if(expand) expand.grid(ix) else data.frame(ix)
 
   
   designs <- lapply(T(args, ix), do.call, what=designer)
