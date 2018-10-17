@@ -1,20 +1,46 @@
 #' compare_designs
 #' 
-#' Compare designs
+#' Compare designs. For best results, use a consistent syntax style across designs 
+#' (e.g., do not switch between '=' and '<-' for assignment or 
+#' include optional parentheses on some designs but not others). 
 #' 
 #' @param ... A design or set of designs typically created using the + operator, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}. 
-#' @return A data frame comparing key features (design steps).
+#' @param display c("highlights", "all", "none"), where highlights is the default. 
+#' @param sort_comparisons Logical: order rows by Jaccard similarity to the first design?
+#' @return Invisibly returns list containing requested data frames (overview and/or highlights).
 #' @examples
-#' # compare_designs(a, b, c)
+#' d1 <- declare_population(N = 100) +
+#' declare_assignment(m = 50) +
+#' declare_potential_outcomes(Y ~ rbinom(n = N, size = 1, prob = 0.5 + .1*Z)) +
+#' declare_estimand(ATE = 0.3) +
+#' declare_estimator(Y ~ Z)
+#'d2 <- declare_population(N = 100) +
+#'  declare_assignment(m = 50) +
+#'  declare_potential_outcomes(Y ~ rpois(n = N, lambda = 0.5 + .1*Z)) +
+#'  declare_estimand(ATE = 0.3) +
+#'  declare_estimator(glm(Y ~ Z, family = poisson))
 #'
-compare_designs <- function(..., display=TRUE){
+#'d3 <- declare_population(N = 200) +
+#'  declare_assignment(m = 100) +
+#'  declare_potential_outcomes(Y ~ rpois(n = N, lambda = 0.5 + .1*Z)) +
+#'  declare_estimand(ATE = 0.3) +
+#'  declare_estimator(glm(Y ~ Z, family = poisson))
+#'
+#'compare_designs(d1, d2, d3)
+#'compare_designs(d1, d2, d3, , display = "all")
+#'my_comparison <- compare_designs(d1, d2, d3)
+#'  
+compare_designs <- function(..., display = c("highlights", "all", "none"),
+                            sort_comparisons = TRUE){
+  
+  display <- match.arg(display, c("highlights", "all", "none"))
   
   clean_call <- function(call) {
     paste(sapply(deparse(call), trimws), collapse = " ")
   }
   
   designs <- list(...)
-  if (unlist(unique(lapply(args, class)))[1] != "design") 
+  if (unlist(unique(lapply(designs, class)))[1] != "design") 
     stop("All objects must be designs (i.e., DeclareDesign objects).")
   design_names <- as.character(as.list(substitute(list(...)))[-1L])
   N_designs <- length(designs)
@@ -58,6 +84,51 @@ compare_designs <- function(..., display=TRUE){
     
   }
   
-  if(display) print(overview[ , which(unlist(lapply(overview, length)) > 0)])
-  return(overview)
+  # ex. if declare_population is used by at least 1 design, retained in overview
+  feature_used <- function(feature) as.logical(sum(nchar(feature)))
+
+  overview <- overview[ , unlist(lapply(overview, feature_used))]
+  
+  all_tokens <- lapply(overview, strsplit, "[[:punct:]]")
+  
+  jaccard <- function(feature_tokens){ # https://rbshaffer.github.io/_includes/evaluation-measures-textual.pdf
+    
+    clean <- function(tokens){
+      tokens <- tokens[tokens != ""]
+      tokens <- tokens[tokens != " "]
+      trimws(tokens)
+    }
+    
+    x <- clean(feature_tokens[[1]])
+    
+    sim <- c(1)
+    for(i in 2:length(feature_tokens)){
+      y <- clean(feature_tokens[[i]])
+      sim[i] <- mean(x %in% y)
+    }
+    return(sim)
+  }
+  
+  similarity <- lapply(all_tokens, jaccard)
+  similarity <- t(do.call(rbind, similarity))
+  rownames(similarity) <- design_names
+  highlights <- overview[similarity != 1]
+  
+  if(sort_comparisons)
+    overview <- overview[rank(rowMeans(similarity), ties.method = "first"), ]
+
+    if(display == "all") {
+      cat("\n\nOverview\n\n")
+      print(overview)
+      cat("\n\n")
+    }else{
+      if(display == "highlights"){
+        cat("\n\nHighlights\n\n")
+        print(highlights)
+        cat("\n\n")
+      }
+    }
+  
+  out <- list(overview = overview, highlights = highlights, similarity = similarity)
+  return(invisible(out))
 }
