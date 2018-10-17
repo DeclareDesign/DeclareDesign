@@ -108,7 +108,8 @@ simulate_single_design <- function(design, sims) {
     stop("Sims should be >= 1", call. = FALSE)
   }
   
-  if (sims[1] < 30) {
+  # See also ?testthat::is_testing
+  if (sims[1] < 30 && !identical(Sys.getenv("TESTTHAT"), "true")) {
     warning(
       "We recommend you choose a higher number of simulations than ",
       sims[1],
