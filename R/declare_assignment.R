@@ -74,21 +74,23 @@ assignment_handler <-
   function(data, ..., assignment_variable = "Z", append_probabilities_matrix = FALSE) {
     options <- quos(...)
 
+    decl <- eval_tidy(quo(declare_ra(N = !!nrow(data), !!!options)), data)    
+    
     for (assn in assignment_variable) {
       cond_prob <- as.symbol(paste0(assn, "_cond_prob"))
       assn <- as.symbol(assn)
+      if(append_probabilities_matrix) {
+        # Creates Z.prob_1 cols
+        data <- fabricate(data, !!assn := !!decl$probabilities_matrix, ID_label = NA)
+        # change to underscore
+        names(data) <- sub(paste0("(?<=",assn,")[.]"), "_", names(data), perl = TRUE)
+      }
+        
       data <- fabricate(data,
-        !!assn := conduct_ra(N = N, !!!options),
-        !!cond_prob := obtain_condition_probabilities(!!!options, assignment = !!assn),
+        !!assn := conduct_ra(!!decl),
+        !!cond_prob := obtain_condition_probabilities(!!decl, assignment = !!assn),
         ID_label = NA
       )
-      if (append_probabilities_matrix) {
-        options$N <- quo(nrow(data))
-        ra_dec <- eval_tidy(quo(declare_ra(!!!options)))
-        probabilities_matrix <- ra_dec$probabilities_matrix
-        colnames(probabilities_matrix) <- paste0(assn, "_", colnames(probabilities_matrix))
-        data <- data.frame(data, probabilities_matrix)
-      }
     }
 
     data

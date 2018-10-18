@@ -142,3 +142,21 @@ test_that("can append probabilities matrix", {
 
   expect_true("Z_prob_0" %in% colnames(dat))
 })
+
+
+test_that("can append probabiliies matrix with blocks from data", {
+  
+  design <- 
+    declare_population(block = add_level(N = 3,
+                                         tau = c(3, 1, 0)),
+                       indiv = add_level(N = 50,
+                                         e = rnorm(N, 0, 5))) +
+    declare_assignment(blocks = block, block_prob = c(.5, .7, .9), 
+                       append_probabilities_matrix = TRUE) 
+
+  df <- draw_data(design)
+
+  expect_named(df, c("block", "tau", "indiv", "e", "Z_prob_0", "Z_prob_1", "Z", 
+                     "Z_cond_prob"))
+  
+})
