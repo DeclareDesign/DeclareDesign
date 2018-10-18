@@ -96,6 +96,15 @@ describe_variable_impl.factor <- function(x, num_unique) {
   )
 }
 
+describe_variable_impl.POSIXct <- function(x, num_unique) {
+  data.frame(
+    as.list(as.character(summary(x))),
+    N_unique = num_unique,
+    check.names = FALSE
+  )
+}
+
+
 describe_variable_impl.character <- function(x, num_unique) {
   data.frame(
     N_missing = sum(is.na(x)),

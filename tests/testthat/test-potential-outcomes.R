@@ -250,7 +250,7 @@ test_that("Reveal step injected (default names)", {
 
   pop <- declare_population(N = N, foo = rnorm(N))
   po <- declare_potential_outcomes(Y ~ Z + foo)
-  assn <- declare_assignment(N = N, m = N / 2)
+  assn <- declare_assignment(m = N / 2)
   d <- pop + po + assn
   # expect_warning(d <- pop +  po + assn, "inject a `declare_reveal")
   expect_true("Y" %in% colnames(draw_data(d)))
@@ -277,7 +277,6 @@ test_that("Reveal step injected (default names)", {
   # Fix it
   assn <-
     declare_assignment(
-      N = N,
       prob_each = c(1, 1, 1) / 3,
       conditions = 1:3,
       assignment_variable = "T"
@@ -297,7 +296,7 @@ test_that("Reveal step injected after another injected reveal step", {
   pop <- declare_population(N = N, foo = rnorm(N))
   po <- declare_potential_outcomes(Y ~ draw_binary(plogis(Z + foo)))
   po2 <- declare_potential_outcomes(Q ~ Y + foo, conditions = list(Y = 0:1))
-  assn <- declare_assignment(N = N, m = N / 2)
+  assn <- declare_assignment(m = N / 2)
 
   d <- pop + po + po2 + assn
   # expect_warning(d <- pop + po + po2 + assn, "inject a `declare_reveal[(]Q, Y")
