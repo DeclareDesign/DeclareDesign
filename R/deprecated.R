@@ -1,4 +1,3 @@
-
 #' Deprecated functions
 #'
 #' The function \code{get_estimands} has been replaced with \code{draw_estimands}.
