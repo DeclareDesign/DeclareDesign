@@ -36,17 +36,21 @@ test_that("randomizr works through declare_assignment", {
 
 
 test_that("test assignment and probability functions", {
+  
+  # here we want at least one of each ideo st there aren't random failures in assn 9
+  draw_ideo <- function(N) {
+    x <- c("Liberal", "Moderate", "Conservative")
+    x <- c(x, sample(x, size=N-3, prob=c(.2,.3,.5), replace=TRUE))
+    sample(x)
+  }
+  
   population <- declare_population(
     villages = add_level(
       N = 100, elevation = rnorm(N),
       high_elevation = as.numeric(elevation > 0)
     ),
-    individuals = add_level(
-      N = 10, noise = rnorm(N),
-      ideo_3 = sample(c("Liberal", "Moderate", "Conservative"),
-        size = N, prob = c(.2, .3, .5), replace = TRUE
-      )
-    )
+    individuals = add_level(N = 10, noise = rnorm(N)),
+    individuals = modify_level(ideo_3 = draw_ideo(N), by = "villages")
   )
 
   sampling <- declare_sampling(n = 10, clusters = villages)
@@ -109,9 +113,6 @@ test_that("test assignment and probability functions", {
     blocks = high_elevation, prob_each = c(.1, .3, .6)
   ) %>% expect_assignment()
 
-  # Draw Data
-
-  smp_draw %>% head()
 })
 
 test_that("more than 1 assignment", {
@@ -134,7 +135,7 @@ test_that("declare_assignment expected failures via validation fn", {
 })
 
 
-test_that("can append probabiliies matrix", {
+test_that("can append probabilities matrix", {
   pop <- declare_population(N = 10)
   assignment <- declare_assignment(m = 5, append_probabilities_matrix = TRUE)
   dat <- draw_data(pop + assignment)
