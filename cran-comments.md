@@ -9,11 +9,11 @@ We are submitting a small update, `DeclareDesign 0.12.0`. Thank you for your tim
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
+0 errors | 0 warnings | 0 notes
 
 ## Reverse dependencies
 
-There are no issues with any revdeps.
+There is an issue in the `DesignLibrary` package, also maintained by us, and we are preparing a patch to address them in the coming days.
 
 ---
   

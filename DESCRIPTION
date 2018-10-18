@@ -44,5 +44,5 @@ Suggests:
     lfe, 
     sf,
     reshape2,
-    DesignLibrary (>= 0.1.0.9000)
+    DesignLibrary
 VignetteBuilder: knitr
