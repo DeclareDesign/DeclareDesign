@@ -91,6 +91,13 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
   
   all_tokens <- lapply(overview, strsplit, "[[:punct:]]")
   
+  equality_comparisons <- matrix(nrow = N_designs, ncol=ncol(overview), 
+                                 dimnames=dimnames(overview), FALSE)
+  
+  for(i in 1:nrow(overview)){
+    equality_comparisons[i, ] <- (overview[1, ] == overview[i, ])
+  }
+  
   jaccard <- function(feature_tokens){ # https://rbshaffer.github.io/_includes/evaluation-measures-textual.pdf
     
     clean <- function(tokens){
@@ -112,12 +119,19 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
   similarity <- lapply(all_tokens, jaccard)
   similarity <- t(do.call(rbind, similarity))
   rownames(similarity) <- design_names
+  similarity <- .05*equality_comparisons + 0.95*similarity
+  
   highlights <- overview[similarity != 1]
   
   if(sort_comparisons)
     overview <- overview[rank(rowMeans(similarity), ties.method = "first"), ]
 
     if(display == "all") {
+      
+      cat("\n\nTests for Equality\n\n")
+      print(equality_comparisons)
+      cat("\n\n")
+      
       cat("\n\nOverview\n\n")
       print(overview)
       cat("\n\n")
@@ -129,6 +143,6 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
       }
     }
   
-  out <- list(overview = overview, highlights = highlights, similarity = similarity)
+  out <- list(overview = overview, highlights = highlights, similarity = similarity, equality_comparisons = equality_comparisons)
   return(invisible(out))
 }
