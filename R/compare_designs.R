@@ -119,7 +119,11 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
   similarity <- lapply(all_tokens, jaccard)
   similarity <- t(do.call(rbind, similarity))
   rownames(similarity) <- design_names
-  similarity <- .05*equality_comparisons + 0.95*similarity
+  
+  identical_attributes <- function(a, b){identical(attributes(a), attributes(b))}
+  identical_attr_to_design1 <- unlist(lapply(designs, identical_attributes, designs[[1]]))
+  
+  similarity <- 0.05*identical_attr_to_design1 + .05*equality_comparisons + 0.9*similarity
   
   highlights <- overview[similarity != 1]
   
@@ -138,7 +142,7 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
     }else{
       if(display == "highlights"){
         cat("\n\nHighlights\n\n")
-        print(highlights)
+        if(length(highlights) == 0) "No design differences to highlight.\n" else print(highlights)
         cat("\n\n")
       }
     }
