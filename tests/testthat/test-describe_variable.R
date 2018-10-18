@@ -56,5 +56,5 @@ test_that("Describle Variable", {
   # Different ways of bringing data into DD
   pop1 <- declare_population(data = test)
   dsgn <- pop1 + NULL 
-  expect_output(print(dsgn), "2018-01-30 18:00:00")
+  expect_output(print(dsgn), "2018-01-30")
 })
