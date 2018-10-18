@@ -156,9 +156,11 @@
 #'                             
 #' design      <- design_stub + estimands + estimators
 #' 
-#' diagnose_design(design, sims = 20,
+#' \dontrun{
+#' diagnose_design(design, sims = 20, bootstrap_sims = FALSE,
 #'                 diagnosands = declare_diagnosands(
 #'                 select = c(mean_estimate, mean_estimand)))
+#' }
 declare_estimand <- make_declarations(estimand_handler, "estimand",
                                       causal_type = "estimand", 
                                       default_label = "estimand"
