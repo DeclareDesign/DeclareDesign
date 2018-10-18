@@ -82,8 +82,7 @@ assignment_handler <-
       if(append_probabilities_matrix) {
         # Creates Z.prob_1 cols
         data <- fabricate(data, !!assn := !!decl$probabilities_matrix, ID_label = NA)
-        # change to underscore, ugh 
-        # TODO change tests to take period instead
+        # change to underscore
         names(data) <- sub(paste0("(?<=",assn,")[.]"), "_", names(data), perl = TRUE)
       }
         
