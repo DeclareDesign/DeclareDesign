@@ -45,4 +45,3 @@ Suggests:
     sf,
     reshape2,
     DesignLibrary
-VignetteBuilder: knitr
