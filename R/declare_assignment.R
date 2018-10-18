@@ -74,7 +74,7 @@ assignment_handler <-
   function(data, ..., assignment_variable = "Z", append_probabilities_matrix = FALSE) {
     options <- quos(...)
 
-    decl <- eval_tidy(quo(declare_ra(N=!!nrow(data), !!!options)), data)    
+    decl <- eval_tidy(quo(declare_ra(N = !!nrow(data), !!!options)), data)    
     
     for (assn in assignment_variable) {
       cond_prob <- as.symbol(paste0(assn, "_cond_prob"))
