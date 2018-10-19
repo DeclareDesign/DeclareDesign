@@ -149,8 +149,10 @@
 #' my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand),
 #'   keep_defaults = FALSE)
 #'
+#' \dontrun{
 #' diagnose_design(design, diagnosands = my_diagnosand, sims = 5,
 #'   bootstrap_sims = FALSE)
+#' }
 #'
 #' # ----------
 #' # 4. Multiple estimators per estimand
@@ -161,8 +163,9 @@
 #'
 #' draw_estimates(design_two)
 #'
+#' \dontrun{
 #' diagnose_design(design_two, sims = 5, bootstrap_sims = FALSE)
-#'
+#' }
 declare_estimator <-
   make_declarations(
     estimator_handler,
