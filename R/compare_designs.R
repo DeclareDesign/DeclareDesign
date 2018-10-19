@@ -148,8 +148,10 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
           cat("No differences between designs to highlight.\n" )
         }else{
           cat("\n\nHighlights\n\n")
-          if(sum(identical_steps)) print(highlights) 
-          cat("\n\n")
+          if(mean(identical_steps) != 1) {
+            print(highlights)
+            cat("\n\n")
+          }
         }
       }
     }
