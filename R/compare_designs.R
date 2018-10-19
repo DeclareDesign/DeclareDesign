@@ -120,6 +120,8 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
   similarity <- t(do.call(rbind, similarity))
   rownames(similarity) <- design_names
   
+  identical_steps <- unique(similarity) == 1 
+  
   identical_attributes <- function(a, b){identical(attributes(a), attributes(b))}
   identical_attr_to_design1 <- unlist(lapply(designs, identical_attributes, designs[[1]]))
   
@@ -139,14 +141,40 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
       cat("\n\nOverview\n\n")
       print(overview)
       cat("\n\n")
+
     }else{
       if(display == "highlights"){
-        cat("\n\nHighlights\n\n")
-        if(length(highlights) == 0) "No design differences to highlight.\n" else print(highlights)
-        cat("\n\n")
+        if(length(highlights) == 0){
+          cat("No differences between designs to highlight.\n" )
+        }else{
+          cat("\n\nHighlights\n\n")
+          if(sum(identical_steps)) print(highlights) 
+          cat("\n\n")
+        }
       }
     }
   
+  if(sum(identical_attr_to_design1)){
+    
+    reference_code <- attributes(designs[[1]])[["code"]]
+    code_differences <- list()
+    
+    for(d in which(!identical_attr_to_design1)){
+      
+      code_diffs <- setdiff(attributes(designs[[d]])[["code"]], 
+                            reference_code)
+      elements <- match(code_diffs, attributes(designs[[d]])[["code"]])
+      
+      tmp <- rbind(reference_code[elements], code_diffs)
+      colnames(tmp) <- c(design_names[1], design_names[d])
+      code_differences[[design_names[d]]] <- tmp
+      
+      if(display != "none") print(code_differences[[design_names[d]]])
+    } # end for loop 
+  }
+  
   out <- list(overview = overview, highlights = highlights, similarity = similarity, equality_comparisons = equality_comparisons)
+  if(exists("code_differences"))
+    out[["code_differences"]] <- code_differences
   return(invisible(out))
 }
