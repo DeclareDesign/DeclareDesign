@@ -145,10 +145,11 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
     }else{
       if(display == "highlights"){
         if(length(highlights) == 0){
-          cat("No differences between designs to highlight.\n" )
+          cat("No differences between designs to highlight.\n\n" )
         }else{
           cat("\n\nHighlights\n\n")
           if(mean(identical_steps) != 1) {
+            cat("\tDifferences detected between steps:\n")
             print(highlights)
             cat("\n\n")
           }
@@ -171,7 +172,10 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
       colnames(tmp) <- c(design_names[1], design_names[d])
       code_differences[[design_names[d]]] <- tmp
       
-      if(display != "none") print(code_differences[[design_names[d]]])
+      if(display != "none") {
+        cat("\tDifferences detected in code stored as design attributes:\n\n")
+        print(code_differences[[design_names[d]]])
+      }
     } # end for loop 
   }
   
