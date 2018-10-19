@@ -2,6 +2,8 @@
 
 We are submitting a small update, `DeclareDesign 0.12.0`. Thank you for your time reviewing the submission.
 
+We have addressed the notes and errors in the CRAN checks.
+
 ## Test environments
 * local OS X install, R 3.5.1
 * ubuntu 12.04 (on travis-ci), R 3.5.1
