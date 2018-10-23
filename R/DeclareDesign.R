@@ -94,11 +94,21 @@ DDcompletor <- function(CompletionEnv){
         
       } else if (CompletionEnv$fguess == "declare_estimator") {
         
-        # if handler is model, pick up model's formals
+        h <- eval(formals(FUN)$handler, environment(FUN))
         
-        # if handler is estimator, pick up estimator's formals
+        handler_name <- quo_text(formals(FUN)$handler)
         
-        # else get handler's formals
+        if(handler_name %in% c("model_handler", "estimator_handler")) {
+          
+          model_args <- names(formals(eval(formals(h)$model)))
+          
+          h <- union(union(names(formals(FUN)), names(formals(h))), model_args)
+          
+        } else {
+          
+          h <- union(names(formals(FUN)), names(formals(h)))
+          
+        }
         
       }
       
