@@ -98,7 +98,7 @@ print.summary.diagnosis <- function(x, ...) {
 #'
 #' @examples
 #' # library(DesignLibrary)
-#' # diagnosis <- diagnose_design(simple_two_arm_designer(), sims = 3)
+#' # diagnosis <- diagnose_design(two_arm_designer(), sims = 3)
 #' # reshape_diagnosis(diagnosis)
 #' # reshape_diagnosis(diagnosis, select = c("Bias", "Power"))
 reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
