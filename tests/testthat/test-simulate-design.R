@@ -98,7 +98,7 @@ test_that("fan out IDs are correct", {
   skip_if_not_installed("DesignLibrary")
   
   sims <- c(30, 1, 2, 1, 1, 2)
-  design <- DesignLibrary::simple_two_arm_designer(rho = 0)
+  design <- DesignLibrary::two_arm_designer(rho = 0)
   
   sx <- simulate_design(design, sims = sims)
   

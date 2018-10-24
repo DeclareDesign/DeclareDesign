@@ -168,7 +168,7 @@ test_that("correct fan out", {
 
 test_that("MH sim ids", {
   skip_if_not_installed("DesignLibrary")
-  design <- DesignLibrary::simple_two_arm_designer()
+  design <- DesignLibrary::two_arm_designer()
   
   Sys.setenv(TESTTHAT='m')
   sx <- expect_warning(simulate_design(design, sims = c(2, 1, 1, 1, 1, 2)))
