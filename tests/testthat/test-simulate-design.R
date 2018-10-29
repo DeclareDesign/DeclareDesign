@@ -104,3 +104,23 @@ test_that("fan out IDs are correct", {
   
   expect_equivalent(vapply(sx[c("step_1_draw", "step_3_draw", "step_6_draw")], max, 0), c(30, 60, 120))
 })
+
+
+test_that("designs with some estimators that don't have p.values return the p.values for the estimators that do have them", {
+  my_custom_estimator <- function(data) return(data.frame(estimate = 5))
+  
+  des <- declare_population(N = 100) +
+    declare_potential_outcomes(Y ~ .25 * Z + rnorm(N)) +
+    declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment() +
+    declare_reveal(Y, Z) +
+    declare_estimator(Y ~ Z, estimand = "ATE", label = "blah") +
+    declare_estimator(handler = tidy_estimator(my_custom_estimator), estimand = "ATE")
+  
+  expect_equivalent(names(simulate_design(des, sims = 1)), c("design_label", "sim_ID", "estimand_label", "estimand", "estimator_label", 
+                                                        "term", "estimate", "std.error", "statistic", "p.value", "conf.low", 
+                                                        "conf.high", "df", "outcome"))
+  
+  expect_equal(nrow(get_diagnosands(diagnose_design(des, sims = 2, diagnosands = declare_diagnosands(select = power)))), 2)
+  
+})
