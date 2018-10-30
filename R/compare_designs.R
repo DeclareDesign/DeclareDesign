@@ -29,7 +29,26 @@
 #'compare_designs(d1, d2, d3)
 #'compare_designs(d1, d2, d3, , display = "all")
 #'my_comparison <- compare_designs(d1, d2, d3)
-#'  
+#'
+#'# Do not change what helper functions do mid-comparison.
+#'# For example, don't:
+#'g <- function(X) 2*X
+#'d1 <- declare_population(N = 2, X = 1:2, Y = g(X)) + NULL
+#'g <- function(X) 3*X
+#'d2 <- declare_population(N = 2, X = 1:2, Y = g(X)) + NULL
+#'compare_designs(d1, d2)
+#'# > compare_designs(d1, d2)
+# No differences between designs to highlight.
+#'# The above misses the key difference. Instead, do:
+#'g1 <- function(X) 2*X
+#'d1 <- declare_population(N = 2, X = 1:2, Y = g1(X)) + NULL
+#'g2 <- function(X) 3*X
+#'d2 <- declare_population(N = 2, X = 1:2, Y = g2(X)) + NULL
+#'compare_designs(d1, d2)
+#'# Highlights
+#'# Differences detected between steps:
+#'# [1] "declare_population(N = 2, X = 1:2, Y = g2(X))"
+#'   
 compare_designs <- function(..., display = c("highlights", "all", "none"),
                             sort_comparisons = TRUE){
   
@@ -44,6 +63,7 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
     stop("All objects must be designs (i.e., DeclareDesign objects).")
   design_names <- as.character(as.list(substitute(list(...)))[-1L])
   N_designs <- length(designs)
+  #browser()
   
   overview <- data.frame(assignment = vector("character", N_designs), 
                          stringsAsFactors = FALSE)
@@ -55,6 +75,7 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
   overview$reveal <- ""
   overview$ra <- ""
   overview$call <- ""
+ # browser()
   
   rownames(overview) <- design_names
   

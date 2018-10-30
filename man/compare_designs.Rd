@@ -43,5 +43,23 @@ d3 <- declare_population(N = 200) +
 compare_designs(d1, d2, d3)
 compare_designs(d1, d2, d3, , display = "all")
 my_comparison <- compare_designs(d1, d2, d3)
- 
+
+# Do not change what helper functions do mid-comparison.
+# For example, don't:
+g <- function(X) 2*X
+d1 <- declare_population(N = 2, X = 1:2, Y = g(X)) + NULL
+g <- function(X) 3*X
+d2 <- declare_population(N = 2, X = 1:2, Y = g(X)) + NULL
+compare_designs(d1, d2)
+# > compare_designs(d1, d2)
+# The above misses the key difference. Instead, do:
+g1 <- function(X) 2*X
+d1 <- declare_population(N = 2, X = 1:2, Y = g1(X)) + NULL
+g2 <- function(X) 3*X
+d2 <- declare_population(N = 2, X = 1:2, Y = g2(X)) + NULL
+compare_designs(d1, d2)
+# Highlights
+# Differences detected between steps:
+# [1] "declare_population(N = 2, X = 1:2, Y = g2(X))"
+  
 }
