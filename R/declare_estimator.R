@@ -303,17 +303,15 @@ generics::tidy
 
 #' @export
 
-tidy_default <- function(x, ...) {
+tidy_default <- function(x, conf.int = TRUE) {
   # TODO: error checking -- are column names named as we expect
-  
-  options <- list(...)
   
   val <- try({
     summ <- coef(summary(x))
     # summ <-
     # summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
     
-    if(!is.null(options$conf.int) && options$conf.int == TRUE) {
+    if(conf.int == TRUE) {
       ci <- suppressMessages(as.data.frame(confint(x)))
       tidy_df <-
         data.frame(
@@ -367,9 +365,8 @@ fit2tidy <- function(fit, term = FALSE) {
   if (hasMethod("tidy", class(fit))) {
     tidy_df <- tidy(fit, conf.int = TRUE)
   } else {
-    tidy_df <- tidy_default(fit, conf.int=TRUE)  
+    tidy_df <- tidy_default(fit, conf.int = TRUE)  
   }
-    
     
   if (is.character(term)) {
     coefs_in_output <- term %in% tidy_df$term
