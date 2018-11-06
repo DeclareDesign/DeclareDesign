@@ -169,21 +169,24 @@ dat <-
 
 pop <- declare_population(dat)
 
-model_function <- function(data){
-  return(structure(list(est = 1), class = "my_modelr"))
-}
+
 
 test_that("custom tidy method", {
+  model_function <- function(data){
+    return(structure(list(est = 1), class = "my_modelr"))
+  }
+  
   des <- pop + declare_estimator(model = model_function)
   
   expect_error(draw_estimates(des), "The default tidy method")
-})
 
-tidy.my_modelr <- function(fit, conf.int = TRUE){
-  return(data.frame(term = "my-term", est = 1))
-}
-
-test_that("custom tidy method", {
+  tidy.my_modelr <- function(fit, conf.int = TRUE){
+    return(data.frame(term = "my-term", est = 1))
+  }
+  
+  # this is an ugly hack per https://github.com/r-lib/testthat/issues/720
+  assign("tidy.my_modelr", tidy.my_modelr, envir = .GlobalEnv)
+  
   des <- pop + declare_estimator(model = model_function)
   
   expect_equal(draw_estimates(des), structure(list(estimator_label = "estimator", term = structure(1L, .Label = "my-term", class = "factor"), 
@@ -229,7 +232,7 @@ test_that("biglm", {
 test_that("gam", {
   skip_if_not_installed(c("gam", "broom"))
   des <- pop + declare_estimator(Y ~ Z, model = gam::gam)
-  expect_equal(ncol(draw_estimates(des)), 7)
+  expect_warning(expect_equal(ncol(draw_estimates(des)), 7))
 })
 
 test_that("lfe", {
