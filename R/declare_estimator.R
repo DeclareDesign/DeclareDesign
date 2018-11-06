@@ -302,7 +302,8 @@ estimator_handler <- tidy_estimator(model_handler)
 generics::tidy
 
 #' @export
-tidy.default <- function(x, ...) {
+
+tidy_default <- function(x, ...) {
   # TODO: error checking -- are column names named as we expect
   
   options <- list(...)
@@ -363,8 +364,13 @@ tidy.default <- function(x, ...) {
 # called by model_handler, resets columns names !!!
 fit2tidy <- function(fit, term = FALSE) {
   
-  tidy_df <- tidy(fit, conf.int = TRUE)
-
+  if (hasMethod("tidy", class(fit))) {
+    tidy_df <- tidy(fit, conf.int = TRUE)
+  } else {
+    tidy_df <- tidy_default(fit, conf.int=TRUE)  
+  }
+    
+    
   if (is.character(term)) {
     coefs_in_output <- term %in% tidy_df$term
     if (!all(coefs_in_output)) {
