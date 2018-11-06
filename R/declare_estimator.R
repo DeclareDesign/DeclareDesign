@@ -186,12 +186,10 @@ declare_estimators <- declare_estimator
 #' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.
 #' @rdname declare_estimator
 #' @export
-#' @importFrom rlang UQ
 tidy_estimator <- function(estimator_function) {
   if (!("data" %in% names(formals(estimator_function)))) {
     stop("Must provide a `estimator_function` function with a data argument.")
   }
-
 
   f <- function(data, ..., estimand = NULL, label) {
     calling_args <-
@@ -304,17 +302,18 @@ estimator_handler <- tidy_estimator(model_handler)
 generics::tidy
 
 #' @export
-tidy.default <- function(fit, conf.int = TRUE, ...) {
+tidy.default <- function(x, ...) {
   # TODO: error checking -- are column names named as we expect
-  # TODO: do stop() if it breaks
+  
+  options <- list(...)
   
   val <- try({
-    summ <- coef(summary(fit))
+    summ <- coef(summary(x))
     # summ <-
     # summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
     
-    if(conf.int == TRUE) {
-      ci <- suppressMessages(as.data.frame(confint(fit)))
+    if(!is.null(options$conf.int) && options$conf.int == TRUE) {
+      ci <- suppressMessages(as.data.frame(confint(x)))
       tidy_df <-
         data.frame(
           term = rownames(summ),
@@ -355,7 +354,7 @@ tidy.default <- function(fit, conf.int = TRUE, ...) {
   }, silent = TRUE)
   
   if(class(val) == "try-error"){
-    stop("The default tidy method for the model fit of class ", class(fit), " failed. You may try installing and loading the broom package, or you can write your own tidy.", class(fit), " method.", call. = FALSE)
+    stop("The default tidy method for the model fit of class ", class(x), " failed. You may try installing and loading the broom package, or you can write your own tidy.", class(x), " method.", call. = FALSE)
   }
     
   tidy_df
