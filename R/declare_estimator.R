@@ -299,35 +299,72 @@ validation_fn(model_handler) <- function(ret, dots, label) {
 #' @rdname declare_estimator
 estimator_handler <- tidy_estimator(model_handler)
 
+#' @importFrom generics tidy
+#' @export
+generics::tidy
+
+#' @export
+tidy.default <- function(fit, conf.int = TRUE, ...) {
+  # TODO: error checking -- are column names named as we expect
+  # TODO: do stop() if it breaks
+  
+  val <- try({
+    summ <- coef(summary(fit))
+    # summ <-
+    # summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
+    
+    if(conf.int == TRUE) {
+      ci <- suppressMessages(as.data.frame(confint(fit)))
+      tidy_df <-
+        data.frame(
+          term = rownames(summ),
+          summ,
+          ci,
+          stringsAsFactors = FALSE,
+          row.names = NULL
+        )
+      colnames(tidy_df) <-
+        c(
+          "term",
+          "estimate",
+          "std.error",
+          "statistic",
+          "p.value",
+          "conf.low",
+          "conf.high"
+        )
+    } else {
+      tidy_df <-
+        data.frame(
+          term = rownames(summ),
+          summ,
+          ci,
+          stringsAsFactors = FALSE,
+          row.names = NULL
+        )
+      colnames(tidy_df) <-
+        c(
+          "term",
+          "estimate",
+          "std.error",
+          "statistic",
+          "p.value"
+        )
+    }
+    
+  }, silent = TRUE)
+  
+  if(class(val) == "try-error"){
+    stop("The default tidy method for the model fit of class ", class(fit), " failed. You may try installing and loading the broom package, or you can write your own tidy.", class(fit), " method.", call. = FALSE)
+  }
+    
+  tidy_df
+}
+
 # called by model_handler, resets columns names !!!
 fit2tidy <- function(fit, term = FALSE) {
-  if (requireNamespace("broom", quietly = TRUE)) {
-
-    # broom if possible
-    tidy_df <- broom::tidy(fit, conf.int = TRUE)
-  } else {
-    summ <- coef(summary(fit))
-    summ <-
-      summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("estimate", "std", "pr("), drop = FALSE]
-    ci <- suppressMessages(as.data.frame(confint(fit)))
-    tidy_df <-
-      data.frame(
-        term = rownames(summ),
-        summ,
-        ci,
-        stringsAsFactors = FALSE,
-        row.names = NULL
-      )
-    colnames(tidy_df) <-
-      c(
-        "term",
-        "estimate",
-        "std.error",
-        "p.value",
-        "conf.low",
-        "conf.high"
-      )
-  }
+  
+  tidy_df <- tidy(fit, conf.int = TRUE)
 
   if (is.character(term)) {
     coefs_in_output <- term %in% tidy_df$term

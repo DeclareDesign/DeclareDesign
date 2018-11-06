@@ -169,9 +169,33 @@ dat <-
 
 pop <- declare_population(dat)
 
+model_function <- function(data){
+  return(structure(list(est = 1), class = "my_modelr"))
+}
+
+test_that("custom tidy method", {
+  des <- pop + declare_estimator(model = model_function)
+  
+  expect_error(draw_estimates(des), "The default tidy method")
+})
+
+tidy.my_modelr <- function(fit, conf.int = TRUE){
+  return(data.frame(term = "my-term", est = 1))
+}
+
+test_that("custom tidy method", {
+  des <- pop + declare_estimator(model = model_function)
+  
+  expect_equal(draw_estimates(des), structure(list(estimator_label = "estimator", term = structure(1L, .Label = "my-term", class = "factor"), 
+                                                   est = 1), row.names = c(NA, -1L), class = "data.frame"))
+  
+})
+
+library(broom)
 
 test_that("AER", {
   skip_if_not_installed(c("AER", "broom"))
+  library(broom)
   des <- pop + declare_estimator(Y ~ D | Z, model = AER::ivreg)
   expect_equal(ncol(draw_estimates(des)), 8)
 })
@@ -220,3 +244,4 @@ test_that("polr", {
   des <- pop + declare_estimator(Y_fac ~ Z, model = MASS::polr)
   suppressWarnings(expect_error(draw_estimates(des)))
 })
+
