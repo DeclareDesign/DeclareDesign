@@ -357,7 +357,7 @@ tidy_default <- function(x, conf.int = TRUE) {
   tidy_df
 }
 
-
+#' @importFrom utils getS3method
 hasS3Method <- function(f, obj) {
   for(i in class(obj)) {
     get_function <- try(getS3method(f, i), silent = TRUE)
