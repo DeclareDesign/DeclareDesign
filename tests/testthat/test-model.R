@@ -221,20 +221,31 @@ test_that("glm", {
 test_that("betareg", {
   skip_if_not_installed(c("betareg", "broom"))
   des <- pop + declare_estimator(D2 ~ Z, model = betareg::betareg)
-  expect_equal(ncol(draw_estimates(des)), 9)
+  if(packageVersion("broom") <= "0.5.0") {
+    expect_error(draw_estimates(des))
+  } else {
+    expect_equal(ncol(draw_estimates(des)), 9)
+  }
 })
-
 
 test_that("biglm", {
   skip_if_not_installed(c("biglm", "broom"))
   des <- pop + declare_estimator(Y ~ Z, model = biglm::biglm)
-  expect_equal(ncol(draw_estimates(des)), 7)
+  if(packageVersion("broom") <= "0.5.0") {
+    expect_error(draw_estimates(des))
+  } else {
+    expect_equal(ncol(draw_estimates(des)), 7)
+  }
 })
 
 test_that("gam", {
   skip_if_not_installed(c("gam", "broom"))
   des <- pop + declare_estimator(Y ~ Z, model = gam::gam)
-  expect_warning(expect_equal(ncol(draw_estimates(des)), 7))
+  if(packageVersion("broom") <= "0.5.0") {
+    expect_error(draw_estimates(des))
+  } else {
+    expect_warning(expect_equal(ncol(draw_estimates(des)), 7))
+  }
 })
 
 test_that("lfe", {
