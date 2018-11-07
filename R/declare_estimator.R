@@ -301,8 +301,6 @@ estimator_handler <- tidy_estimator(model_handler)
 #' @export
 generics::tidy
 
-#' @export
-
 tidy_default <- function(x, conf.int = TRUE) {
   # TODO: error checking -- are column names named as we expect
   
@@ -359,10 +357,19 @@ tidy_default <- function(x, conf.int = TRUE) {
   tidy_df
 }
 
+
+hasS3Method <- function(f, obj) {
+  for(i in class(obj)) {
+    get_function <- try(getS3method(f, i), silent = TRUE)
+    if(class(get_function) != "try-error" && is.function(get_function)) return(TRUE)
+  }
+  FALSE
+}
+
 # called by model_handler, resets columns names !!!
 fit2tidy <- function(fit, term = FALSE) {
   
-  if (hasMethod("tidy", class(fit))) {
+  if (hasS3Method("tidy", fit)) {
     tidy_df <- tidy(fit, conf.int = TRUE)
   } else {
     tidy_df <- tidy_default(fit, conf.int = TRUE)  

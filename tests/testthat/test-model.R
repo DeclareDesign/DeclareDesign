@@ -1,4 +1,6 @@
 context("model estimator")
+library(DeclareDesign)
+library(testthat)
 
 my_population <- declare_population(N = 500, noise = rnorm(N))
 my_potential_outcomes <-
