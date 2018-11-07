@@ -186,12 +186,10 @@ declare_estimators <- declare_estimator
 #' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.
 #' @rdname declare_estimator
 #' @export
-#' @importFrom rlang UQ
 tidy_estimator <- function(estimator_function) {
   if (!("data" %in% names(formals(estimator_function)))) {
     stop("Must provide a `estimator_function` function with a data argument.")
   }
-
 
   f <- function(data, ..., estimand = NULL, label) {
     calling_args <-
@@ -299,36 +297,84 @@ validation_fn(model_handler) <- function(ret, dots, label) {
 #' @rdname declare_estimator
 estimator_handler <- tidy_estimator(model_handler)
 
+#' @importFrom generics tidy
+#' @export
+generics::tidy
+
+tidy_default <- function(x, conf.int = TRUE) {
+  # TODO: error checking -- are column names named as we expect
+  
+  val <- try({
+    summ <- coef(summary(x))
+    # summ <-
+    # summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
+    
+    if(conf.int == TRUE) {
+      ci <- suppressMessages(as.data.frame(confint(x)))
+      tidy_df <-
+        data.frame(
+          term = rownames(summ),
+          summ,
+          ci,
+          stringsAsFactors = FALSE,
+          row.names = NULL
+        )
+      colnames(tidy_df) <-
+        c(
+          "term",
+          "estimate",
+          "std.error",
+          "statistic",
+          "p.value",
+          "conf.low",
+          "conf.high"
+        )
+    } else {
+      tidy_df <-
+        data.frame(
+          term = rownames(summ),
+          summ,
+          ci,
+          stringsAsFactors = FALSE,
+          row.names = NULL
+        )
+      colnames(tidy_df) <-
+        c(
+          "term",
+          "estimate",
+          "std.error",
+          "statistic",
+          "p.value"
+        )
+    }
+    
+  }, silent = TRUE)
+  
+  if(class(val) == "try-error"){
+    stop("The default tidy method for the model fit of class ", class(x), " failed. You may try installing and loading the broom package, or you can write your own tidy.", class(x), " method.", call. = FALSE)
+  }
+    
+  tidy_df
+}
+
+#' @importFrom utils getS3method
+hasS3Method <- function(f, obj) {
+  for(i in class(obj)) {
+    get_function <- try(getS3method(f, i), silent = TRUE)
+    if(class(get_function) != "try-error" && is.function(get_function)) return(TRUE)
+  }
+  FALSE
+}
+
 # called by model_handler, resets columns names !!!
 fit2tidy <- function(fit, term = FALSE) {
-  if (requireNamespace("broom", quietly = TRUE)) {
-
-    # broom if possible
-    tidy_df <- broom::tidy(fit, conf.int = TRUE)
+  
+  if (hasS3Method("tidy", fit)) {
+    tidy_df <- tidy(fit, conf.int = TRUE)
   } else {
-    summ <- coef(summary(fit))
-    summ <-
-      summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("estimate", "std", "pr("), drop = FALSE]
-    ci <- suppressMessages(as.data.frame(confint(fit)))
-    tidy_df <-
-      data.frame(
-        term = rownames(summ),
-        summ,
-        ci,
-        stringsAsFactors = FALSE,
-        row.names = NULL
-      )
-    colnames(tidy_df) <-
-      c(
-        "term",
-        "estimate",
-        "std.error",
-        "p.value",
-        "conf.low",
-        "conf.high"
-      )
+    tidy_df <- tidy_default(fit, conf.int = TRUE)  
   }
-
+    
   if (is.character(term)) {
     coefs_in_output <- term %in% tidy_df$term
     if (!all(coefs_in_output)) {
