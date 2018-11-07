@@ -166,18 +166,4 @@ test_that("correct fan out", {
 })
 
 
-test_that("MH sim ids", {
-  skip_if_not_installed("DesignLibrary")
-  design <- DesignLibrary::two_arm_designer()
-  
-  Sys.setenv(TESTTHAT='m')
-  sx <- expect_warning(simulate_design(design, sims = c(2, 1, 1, 1, 1, 2)))
-  Sys.setenv(TESTTHAT='true')
-  
-  expect_equal(sx$step_1_draw, c(1L, 1L, 2L, 2L))
-  expect_equal(sx$step_6_draw, c(1L, 2L, 3L, 4L))
-  expect_equal(sx$estimate[1], sx$estimate[2])
-  expect_equal(sx$estimate[3], sx$estimate[4])
-})
-
 
