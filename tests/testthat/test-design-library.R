@@ -35,6 +35,7 @@ test_that("MH sim ids", {
 test_that("fan out IDs are correct", {
   
   skip_if_not_installed("DesignLibrary")
+  skip_on_cran()
   
   sims <- c(30, 1, 2, 1, 1, 2)
   design <- DesignLibrary::two_arm_designer(rho = 0)
