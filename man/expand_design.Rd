@@ -23,6 +23,8 @@ if set of designs is size one, the design, otherwise a `by`-list of designs. Des
 }
 \examples{
 
+\dontrun{
+
 # in conjunction with DesignLibrary
 
 library(DesignLibrary)
@@ -43,15 +45,12 @@ designer <- function(N) {
 # returns list of eight designs
 designs <- expand_design(designer, N = seq(30, 100, 10))
 
-\dontrun{
  # diagnose a list of designs created by expand_design or redesign
  diagnosis <- diagnose_design(designs, sims = 50)
-}
 
 # returns a single design
 large_design <- expand_design(designer, N = 200)
 
-\dontrun{
  diagnose_large_design <- diagnose_design(large_design, sims = 50)
 }
 
