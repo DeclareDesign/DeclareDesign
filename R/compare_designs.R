@@ -54,17 +54,49 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
   
   display <- match.arg(display, c("highlights", "all", "none"))
   
-  clean_call <- function(call) {
-    paste(sapply(deparse(call), trimws), collapse = " ")
-  }
-  
   designs <- list(...)
   if (unlist(unique(lapply(designs, class)))[1] != "design") 
     stop("All objects must be designs (i.e., DeclareDesign objects).")
   design_names <- as.character(as.list(substitute(list(...)))[-1L])
+  reference_design <- design_names[1]
   N_designs <- length(designs)
-  #browser()
+  if(display != "none") cat("Overview of", 
+                            N_designs, 
+                            "designs.\n----------------------------\n\n")
   
+  steps_per_design <- lapply(designs, length)
+  names(steps_per_design) <- design_names
+  steps_per_design <- do.call(rbind, steps_per_design)
+  colnames(steps_per_design) <- "Steps per Design"
+  if(display != "none"){
+    if(difference(steps_per_design)){
+      print(t(steps_per_design))
+      cat("\n\n")
+    }else{
+      cat("Each design has", unique(steps_per_design),"steps. Comparisons below are made to", reference_design, ".\n\n")
+    }
+    
+  }
+  
+  overview_nchar <- lapply(designs, nchar) 
+  names(overview_nchar) <- design_names
+  if(length(unique(lapply(designs, length))) == 1){
+    overview_nchar <- do.call(rbind, overview_nchar)
+  }
+  
+  if(display != "none"){
+    if(sum(unlist(lapply(overview_nchar, difference)))){
+      cat("Number of characters for each design (by step in the code):\n\n")
+      print(overview_nchar)
+    }else{
+      if(display == "all"){
+        cat("Each design has same number of characters (by step in the code):\n\n")
+        print(overview_nchar[1,])
+      }
+    }
+    
+  }
+
   overview <- data.frame(assignment = vector("character", N_designs), 
                          stringsAsFactors = FALSE)
   overview$population <- ""
@@ -75,8 +107,7 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
   overview$reveal <- ""
   overview$ra <- ""
   overview$call <- ""
- # browser()
-  
+
   rownames(overview) <- design_names
   
   for(d in 1:N_designs){  # adapted from DeclareDesign::print_code
@@ -105,37 +136,17 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
     
   }
   
-  # ex. if declare_population is used by at least 1 design, retained in overview
-  feature_used <- function(feature) as.logical(sum(nchar(feature)))
-
   overview <- overview[ , unlist(lapply(overview, feature_used))]
   
   all_tokens <- lapply(overview, strsplit, "[[:punct:]]")
   
-  equality_comparisons <- matrix(nrow = N_designs, ncol=ncol(overview), 
-                                 dimnames=dimnames(overview), FALSE)
+  equality_comparisons <- matrix(nrow = N_designs, ncol = ncol(overview), 
+                                 dimnames = dimnames(overview), FALSE)
   
   for(i in 1:nrow(overview)){
     equality_comparisons[i, ] <- (overview[1, ] == overview[i, ])
   }
-  
-  jaccard <- function(feature_tokens){ # https://rbshaffer.github.io/_includes/evaluation-measures-textual.pdf
-    
-    clean <- function(tokens){
-      tokens <- tokens[tokens != ""]
-      tokens <- tokens[tokens != " "]
-      trimws(tokens)
-    }
-    
-    x <- clean(feature_tokens[[1]])
-    
-    sim <- c(1)
-    for(i in 2:length(feature_tokens)){
-      y <- clean(feature_tokens[[i]])
-      sim[i] <- mean(x %in% y)
-    }
-    return(sim)
-  }
+
   
   similarity <- lapply(all_tokens, jaccard)
   similarity <- t(do.call(rbind, similarity))
@@ -143,7 +154,6 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
   
   identical_steps <- unique(similarity) == 1 
   
-  identical_attributes <- function(a, b){identical(attributes(a), attributes(b))}
   identical_attr_to_design1 <- unlist(lapply(designs, identical_attributes, designs[[1]]))
   
   similarity <- 0.05*identical_attr_to_design1 + .05*equality_comparisons + 0.9*similarity
@@ -159,18 +169,28 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
       print(equality_comparisons)
       cat("\n\n")
       
-      cat("\n\nOverview\n\n")
-      print(overview)
-      cat("\n\n")
+      cat("\n\nCode Overview\n\n")
+      for(i in 1:ncol(overview)){
+        cat(colnames(overview)[i], 
+            "\n------------------------------\n")
+        cat(overview[,i], sep = "\n")
+        cat("\n\n")
+      }
+      cat("\n\n\n")
 
     }else{
       if(display == "highlights"){
+        
+        cat("\n\nTests for Equality\n\n")
+        print(equality_comparisons[ , colMeans(equality_comparisons) < 1])
+        cat("\n\n")
+        
         if(length(highlights) == 0){
           cat("No differences between designs to highlight.\n\n" )
         }else{
           cat("\n\nHighlights\n\n")
           if(mean(identical_steps) != 1) {
-            cat("\tDifferences detected between steps:\n")
+            cat("\tDifferences detected from", reference_design, ":\n")
             print(highlights)
             cat("\n\n")
           }
@@ -200,8 +220,41 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
     } # end for loop 
   }
   
-  out <- list(overview = overview, highlights = highlights, similarity = similarity, equality_comparisons = equality_comparisons)
+  out <- list(overview = overview, reference_design = reference_design, 
+              highlights = highlights, similarity = similarity, 
+              equality_comparisons = equality_comparisons)
   if(exists("code_differences"))
     out[["code_differences"]] <- code_differences
+  class(out) <- "design_comparison"
   return(invisible(out))
 }
+
+## compare_design() helper functions
+
+clean_call <- function(call) paste(sapply(deparse(call), trimws), collapse = " ")
+# ex. if declare_population is used by at least 1 design, retained in overview
+feature_used <- function(feature) as.logical(sum(nchar(feature)))
+
+identical_attributes <- function(a, b) identical(attributes(a), attributes(b))
+
+difference <- function(x) length(unique(x)) > 1
+
+jaccard <- function(feature_tokens){ # https://rbshaffer.github.io/_includes/evaluation-measures-textual.pdf
+  
+  clean <- function(tokens){
+    tokens <- tokens[tokens != ""]
+    tokens <- tokens[tokens != " "]
+    trimws(tokens)
+  }
+  
+  x <- clean(feature_tokens[[1]])
+  
+  sim <- c(1)
+  for(i in 2:length(feature_tokens)){
+    y <- clean(feature_tokens[[i]])
+    sim[i] <- mean(x %in% y)
+  }
+  return(sim)
+}
+
+
