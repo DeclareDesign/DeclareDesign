@@ -48,7 +48,7 @@
 #'# Highlights
 #'# Differences detected between steps:
 #'# [1] "declare_population(N = 2, X = 1:2, Y = g2(X))"
-#'   
+#'@export   
 compare_designs <- function(..., display = c("highlights", "all", "none"),
                             sort_comparisons = TRUE){
   

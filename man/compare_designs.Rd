@@ -61,5 +61,4 @@ compare_designs(d1, d2)
 # Highlights
 # Differences detected between steps:
 # [1] "declare_population(N = 2, X = 1:2, Y = g2(X))"
-  
 }
