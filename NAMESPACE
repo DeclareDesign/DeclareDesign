@@ -2,6 +2,7 @@
 
 S3method("+",dd)
 S3method(print,design)
+S3method(print,design_comparison)
 S3method(print,design_step)
 S3method(print,diagnosis)
 S3method(print,summary.design)

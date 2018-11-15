@@ -60,23 +60,11 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
   design_names <- as.character(as.list(substitute(list(...)))[-1L])
   reference_design <- design_names[1]
   N_designs <- length(designs)
-  if(display != "none") cat("Overview of", 
-                            N_designs, 
-                            "designs.\n----------------------------\n\n")
   
   steps_per_design <- lapply(designs, length)
   names(steps_per_design) <- design_names
   steps_per_design <- do.call(rbind, steps_per_design)
   colnames(steps_per_design) <- "Steps per Design"
-  if(display != "none"){
-    if(difference(steps_per_design)){
-      print(t(steps_per_design))
-      cat("\n\n")
-    }else{
-      cat("Each design has", unique(steps_per_design),"steps. Comparisons below are made to", reference_design, ".\n\n")
-    }
-    
-  }
   
   overview_nchar <- lapply(designs, nchar) 
   names(overview_nchar) <- design_names
@@ -94,7 +82,6 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
         print(overview_nchar[1,])
       }
     }
-    
   }
 
   overview <- data.frame(assignment = vector("character", N_designs), 
@@ -162,41 +149,6 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
   
   if(sort_comparisons)
     overview <- overview[rank(rowMeans(similarity), ties.method = "first"), ]
-
-    if(display == "all") {
-      
-      cat("\n\nTests for Equality\n\n")
-      print(equality_comparisons)
-      cat("\n\n")
-      
-      cat("\n\nCode Overview\n\n")
-      for(i in 1:ncol(overview)){
-        cat(colnames(overview)[i], 
-            "\n------------------------------\n")
-        cat(overview[,i], sep = "\n")
-        cat("\n\n")
-      }
-      cat("\n\n\n")
-
-    }else{
-      if(display == "highlights"){
-        
-        cat("\n\nTests for Equality\n\n")
-        print(equality_comparisons[ , colMeans(equality_comparisons) < 1])
-        cat("\n\n")
-        
-        if(length(highlights) == 0){
-          cat("No differences between designs to highlight.\n\n" )
-        }else{
-          cat("\n\nHighlights\n\n")
-          if(mean(identical_steps) != 1) {
-            cat("\tDifferences detected from", reference_design, ":\n")
-            print(highlights)
-            cat("\n\n")
-          }
-        }
-      }
-    }
   
   if(sum(identical_attr_to_design1)){
     
@@ -213,21 +165,31 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
       colnames(tmp) <- c(design_names[1], design_names[d])
       code_differences[[design_names[d]]] <- tmp
       
-      if(display != "none") {
-        cat("\tDifferences detected in code stored as design attributes:\n\n")
-        print(code_differences[[design_names[d]]])
-      }
+     # if(display != "none") {
+    #    cat("\tDifferences detected in code stored as design attributes:\n\n")
+    #    print(code_differences[[design_names[d]]])
+    #  }
     } # end for loop 
   }
   
-  out <- list(overview = overview, reference_design = reference_design, 
+  out <- list(design_names = design_names,
+              overview = overview, reference_design = reference_design, 
               highlights = highlights, similarity = similarity, 
-              equality_comparisons = equality_comparisons)
+              equality_comparisons = equality_comparisons, 
+              N_designs = N_designs, steps_per_design = steps_per_design,
+              identical_steps = identical_steps, 
+              code_differences = code_differences
+              )
+  
   if(exists("code_differences"))
     out[["code_differences"]] <- code_differences
+
   class(out) <- "design_comparison"
+  if(display != "none")
+    print(out, display = display)
   return(invisible(out))
 }
+
 
 ## compare_design() helper functions
 
@@ -256,5 +218,4 @@ jaccard <- function(feature_tokens){ # https://rbshaffer.github.io/_includes/eva
   }
   return(sim)
 }
-
 
