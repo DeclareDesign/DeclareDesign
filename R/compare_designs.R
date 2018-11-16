@@ -7,6 +7,7 @@
 #' @param ... A design or set of designs typically created using the + operator, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}. 
 #' @param display c("highlights", "all", "none"), where highlights is the default. 
 #' @param sort_comparisons Logical: order rows by Jaccard similarity to the first design?
+#' @param Rmd_file_prefix Optional. If provided, creates Rmd template based on display type. E.g., "my_comparison".
 #' @return Invisibly returns list containing requested data frames (overview and/or highlights).
 #' @examples
 #' d1 <- declare_population(N = 100) +
@@ -29,6 +30,7 @@
 #'compare_designs(d1, d2, d3)
 #'compare_designs(d1, d2, d3, , display = "all")
 #'my_comparison <- compare_designs(d1, d2, d3)
+#'my_comparison <- compare_designs(d1, d2, d3, Rmd_file_prefix = "my_report")
 #'
 #'# Do not change what helper functions do mid-comparison.
 #'# For example, don't:
@@ -50,7 +52,7 @@
 #'# [1] "declare_population(N = 2, X = 1:2, Y = g2(X))"
 #'@export   
 compare_designs <- function(..., display = c("highlights", "all", "none"),
-                            sort_comparisons = TRUE){
+                            sort_comparisons = TRUE, Rmd_file_prefix = NULL){
   
   display <- match.arg(display, c("highlights", "all", "none"))
   
@@ -186,7 +188,7 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
 
   class(out) <- "design_comparison"
   if(display != "none")
-    print(out, display = display)
+    print(out, display = display, Rmd_file_prefix = Rmd_file_prefix)
   return(invisible(out))
 }
 
