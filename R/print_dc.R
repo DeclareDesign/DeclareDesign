@@ -37,6 +37,9 @@ print_dc <- function(dc, display, file_name = NULL, to_Rmd = FALSE){
     body <- capture.output(print_dc(dc, display, to_Rmd = TRUE))
     writeLines(c(header, body), file_name)
     
+    cat("DeclareDesign RMarkdown comparison template created. The file is called ", 
+        file_name, ".", sep="")
+    
   }else{
     
     if(display != "none"){
