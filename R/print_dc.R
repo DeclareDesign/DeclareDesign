@@ -20,8 +20,7 @@ print.design_comparison <- function(design_comparison,
              display = match.arg(display, c("highlights", "all", "none")), 
              file_name = paste0(Rmd_file_prefix, ".Rmd"))
   }
-  
-}
+  }
 
 # internal version of print.design_copy
 print_dc <- function(dc, display, file_name = NULL, to_Rmd = FALSE){
@@ -30,12 +29,17 @@ print_dc <- function(dc, display, file_name = NULL, to_Rmd = FALSE){
   
   if(Rmd){
     
+    ########################## YAML ##############################################
     header <- c("---", 
                 "title: DeclareDesign Comparisons", 
-                "output: html_document", 
+                "output:",
+                "      html_document:", 
+                "           toc: true",
+                "           number_sections: true",
                 "---")
     body <- capture.output(print_dc(dc, display, to_Rmd = TRUE))
     writeLines(c(header, body), file_name)
+
     
     cat("DeclareDesign RMarkdown comparison template created. The file is called ", 
         file_name, ".", sep="")
@@ -43,72 +47,76 @@ print_dc <- function(dc, display, file_name = NULL, to_Rmd = FALSE){
   }else{
     
     if(display != "none"){
+    ########################## INTRO TEXT #########################################
       
-      md("Overview of", dc$N_designs, "designs", N_hashtags = 1) # top of outline
+      md("Overview of comparisons of ", dc$N_designs, "designs", N_hashtags = 1) # top of outline
       
       # md() is markdown-friendly wrapper for cat()
       
+      ############## HOW MANY STEPS? ###############################################
+
       if(difference(dc$steps_per_design)){
         
-        md("Designs included in comparison: ", 
-           paste(dc$design_names, collapse = ", "), ".", sep="")
-        print_md(t(dc$steps_per_design), to_Rmd = to_Rmd)
-        
-      }else{
-        
-        md("Designs included in comparison: ", paste(dc$design_names, collapse = ", "),
-           ".\nEach design has ", unique(dc$steps_per_design), " steps. ", 
-           sep="", trail_breaks = 1)
-        
-      }
-      md("Design steps compared: ", paste(colnames(dc$similarity), collapse = ", "), 
-         ".\nComparisons below are made to ", dc$reference_design, ".", 
-         lead_breaks = 0, sep="")
-      
-    } 
-    
-    if(display == "all") {
-      
-      md("Tests for Equality", N_hashtags = 2)
-      print_md(dc$equality_comparisons, to_Rmd = to_Rmd)
-      
-      md("Code Overview", N_hashtags = 2)
-      
-      for(i in 1:ncol(dc$overview)){
-        md(colnames(dc$overview)[i], N_hashtags = 3, trail_breaks = 1)
-        if(to_Rmd) cat("```\n")
-        md(paste("\n\n", dc$design_names, ": ", dc$overview[,i], sep=""), 
-           lead_breaks = 0)
-        if(to_Rmd) cat("```\n")
-      }
-      
-    }else{
-      if(display == "highlights"){
-        
-        md("Tests for Equality", N_hashtags = 2)
-        print_md(dc$equality_comparisons[-which(rownames(dc$equality_comparisons) == dc$reference_design), 
-                                      colMeans(dc$equality_comparisons) < 1], 
-                 to_Rmd = to_Rmd)
-        
-        if(length(dc$highlights) == 0){
-          md("No differences between designs to highlight.")
+          md("This report compares the following designs: ", 
+             paste(dc$design_names, collapse = ", "), ".", sep="")
+          md("Number of steps per design:")
+          print_md(kable(t(dc$steps_per_design)), to_Rmd = to_Rmd)
+          
         }else{
-          md("Design Steps which differ from that of", dc$reference_design, N_hashtags = 2)
-          if(mean(dc$identical_steps) != 1) {
-            if(to_Rmd) cat("```\n")
-            for(i in 1:length(dc$highlights))
-              md(dc$highlights[i], trail_breaks = 1, lead_breaks = 0)
-            if(to_Rmd) cat("```\n")
-          }
-          if(length(dc$code_differences)){
-            md("Differences detected in code stored as design attributes", N_hashtags = 2)
-            print_md(dc$code_differences, to_Rmd = to_Rmd)
-          }
+          
+          md("This report compares the following designs:", paste(dc$design_names, collapse = ", "),
+             ".\nEach design has ", unique(dc$steps_per_design), " steps. ", 
+             sep="", trail_breaks = 1)
+         }
+
+      md("When relevant, comparisons are made relative to ", dc$reference_design, ".", lead_breaks = 0, sep="")
+      
+      ########### WHICH STEPS COMPARED? #############################################
+
+      md("Steps compared", N_hashtags = 2)
+      md("Design steps compared: ", paste(colnames(dc$similarity), collapse = ", ")) 
+
+      ########### CORE CODE DIFFERENCES #############################################
+      
+      md("Steps with differences in code", N_hashtags = 2)
+      md("Summary of steps that exhibit some code differences across designs:")
+      if(sum(matrix_difference(dc$code_differences))){ 
+        print_md(rownames(dc$code_differences), to_Rmd = to_Rmd)
+        md("Specifically:")
+        print_md(kable(dc$code_differences), to_Rmd = to_Rmd)
+        } else { print("Designs have same code")}
+    
+      ########### DETAIL STARTS HERE ############################################### 
+      if(display == "all") {
+      
+        md("Detail", N_hashtags = 1)      
+
+        # Data structure
+        md("Differences in Data structure", N_hashtags = 2)
+        
+        if(sum(matrix_difference(dc$data_shape))){ 
+          print_md(kable(dc$data_shape), to_Rmd = to_Rmd)
+        } else { print("Designs have same dimension")}
+        
+        
+        # Step Type Equality
+        md("Tests for Equality Across Step Types", N_hashtags = 2)
+        print_md(dc$equality_comparisons, to_Rmd = to_Rmd)
+        
+        # Code comparison
+        md("Code Overview", N_hashtags = 2)
+        
+        for(i in 1:ncol(dc$overview)){
+          md(colnames(dc$overview)[i], N_hashtags = 3, trail_breaks = 1)
+          if(to_Rmd) cat("```\n")
+          md(paste("\n\n", dc$design_names, ": ", dc$overview[,i], sep=""), 
+             lead_breaks = 0)
+          if(to_Rmd) cat("```\n")
         }
-      }
-    }
-  }
-}
+        
+
+        }
+}}}
 
 # convenient markdown-style outlining of output
 md <- function(a, b = NULL, c = NULL, d = NULL, e = NULL, f = NULL, g = NULL,

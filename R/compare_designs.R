@@ -63,41 +63,44 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
   reference_design <- design_names[1]
   N_designs <- length(designs)
   
+  # data shape
+  data_shape <- t(sapply(designs, function(j) dim(draw_data(j))))
+  rownames(data_shape) <- design_names
+  colnames(data_shape) <- c("rows", "cols")
+  attr(data_shape, "description") <- "Dimensionality of drawn data"
+  attr(data_shape, "differences")  <- sum(matrix_difference(t(data_shape)))>0
+  attr(data_shape, "highlight")   <- TRUE
+  
+  # Steps per design
   steps_per_design <- lapply(designs, length)
   names(steps_per_design) <- design_names
   steps_per_design <- do.call(rbind, steps_per_design)
   colnames(steps_per_design) <- "Steps per Design"
+  attr(steps_per_design, "description") <- "Number of steps, for each design"
+  attr(steps_per_design, "differences")  <- difference(steps_per_design)
+  attr(steps_per_design, "highlight")   <- TRUE
   
-  overview_nchar <- lapply(designs, nchar) 
-  names(overview_nchar) <- design_names
-  if(length(unique(lapply(designs, length))) == 1){
-    overview_nchar <- do.call(rbind, overview_nchar)
-  }
-  
-  if(display != "none"){
-    if(sum(unlist(lapply(overview_nchar, difference)))){
-      cat("Number of characters for each design (by step in the code):\n\n")
-      print(overview_nchar)
-    }else{
-      if(display == "all"){
-        cat("Each design has same number of characters (by step in the code):\n\n")
-        print(overview_nchar[1,])
-      }
-    }
-  }
+  # Characters per step
+  get_nchar <- function(design) data.frame(t(nchar(lapply(design, attr, "call"))))
+  overview_nchar <- lapply(designs, get_nchar) 
+  overview_nchar <- rbind_disjoint(overview_nchar)
+  row.names(overview_nchar) <- design_names
+  attr(overview_nchar, "description") <- "Number of characters per step, for each design"
+  attr(overview_nchar, "differences")  <- sum(matrix_difference(overview_nchar))>0
+  attr(overview_nchar, "highlight")   <- FALSE
 
-  overview <- data.frame(assignment = vector("character", N_designs), 
+  # Overview
+  overview <- data.frame(assignment = rep("", N_designs), 
+                         population = "", 
+                         potential_outcomes = "",
+                         diagnosands = "",
+                         estimates = "",
+                         estimators = "",
+                         reveal = "",
+                         ra = "",
+                         call = "",
                          stringsAsFactors = FALSE)
-  overview$population <- ""
-  overview$potential_outcomes <- ""
-  overview$diagnosands <- ""
-  overview$estimates <- ""
-  overview$estimators <- ""
-  overview$reveal <- ""
-  overview$ra <- ""
-  overview$call <- ""
-
-  rownames(overview) <- design_names
+  row.names(overview) <- design_names
   
   for(d in 1:N_designs){  # adapted from DeclareDesign::print_code
     
@@ -129,6 +132,7 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
   
   all_tokens <- lapply(overview, strsplit, "[[:punct:]]")
   
+  # Equality comparison
   equality_comparisons <- matrix(nrow = N_designs, ncol = ncol(overview), 
                                  dimnames = dimnames(overview), FALSE)
   
@@ -136,56 +140,62 @@ compare_designs <- function(..., display = c("highlights", "all", "none"),
     equality_comparisons[i, ] <- (overview[1, ] == overview[i, ])
   }
 
-  
+  # Similarity
   similarity <- lapply(all_tokens, jaccard)
   similarity <- t(do.call(rbind, similarity))
   rownames(similarity) <- design_names
   
+  # Identical Steps
   identical_steps <- unique(similarity) == 1 
-  
   identical_attr_to_design1 <- unlist(lapply(designs, identical_attributes, designs[[1]]))
   
   similarity <- 0.05*identical_attr_to_design1 + .05*equality_comparisons + 0.9*similarity
   
   highlights <- overview[similarity != 1]
-  
+
+  # overview housekeeping  
   if(sort_comparisons)
     overview <- overview[rank(rowMeans(similarity), ties.method = "first"), ]
+
   
-  if(sum(identical_attr_to_design1)){
-    
-    reference_code <- attributes(designs[[1]])[["code"]]
-    code_differences <- list()
-    
-    for(d in which(!identical_attr_to_design1)){
-      
-      code_diffs <- setdiff(attributes(designs[[d]])[["code"]], 
-                            reference_code)
-      elements <- match(code_diffs, attributes(designs[[d]])[["code"]])
-      
-      tmp <- rbind(reference_code[elements], code_diffs)
-      colnames(tmp) <- c(design_names[1], design_names[d])
-      code_differences[[design_names[d]]] <- tmp
-      
-     # if(display != "none") {
-    #    cat("\tDifferences detected in code stored as design attributes:\n\n")
-    #    print(code_differences[[design_names[d]]])
-    #  }
-    } # end for loop 
-  }
+  # Code comparison
+  get_d_code <- function(d) {
+    d_code <- data.frame(t(paste(lapply(d, attr, "call"))))
+    names(d_code) <- names(d)
+    d_code}
+  
+  all_code  <- rbind_disjoint(lapply(designs, get_d_code))
+  code_different <- apply(all_code, 2, difference)
+  if(any(code_different)) {
+    code_differences <- t(all_code[, code_different])    
+    colnames(code_differences) <- design_names
+    } else {
+    code_differences < "No code differences"}
+
+  
+  # Bringing it all together
   
   out <- list(design_names = design_names,
-              overview = overview, reference_design = reference_design, 
-              highlights = highlights, similarity = similarity, 
+              character_comparisons = overview_nchar,
+              overview = overview, 
+              reference_design = reference_design, 
+              highlights = highlights, 
+              similarity = similarity, 
               equality_comparisons = equality_comparisons, 
               N_designs = N_designs, steps_per_design = steps_per_design,
               identical_steps = identical_steps, 
-              code_differences = code_differences
+              code_differences = code_differences,
+              data_shape = data_shape
               )
   
-  if(exists("code_differences"))
-    out[["code_differences"]] <- code_differences
-
+  # Report approach (to be folded into print method)
+  for(j in out) {
+    if(!is.null(attr(j, "highlight"))) {
+    if(attr(j, "highlight") | display =="all"){
+    print(paste0("Comparison: ", attr(j, "description"), ". Differences? ", attr(j, "difference")))
+  }}}
+  
+  ## Return
   class(out) <- "design_comparison"
   if(display != "none")
     print(out, display = display, Rmd_file_prefix = Rmd_file_prefix)
@@ -202,6 +212,7 @@ feature_used <- function(feature) as.logical(sum(nchar(feature)))
 identical_attributes <- function(a, b) identical(attributes(a), attributes(b))
 
 difference <- function(x) length(unique(x)) > 1
+matrix_difference <- function(x) apply(x, 2, difference)
 
 jaccard <- function(feature_tokens){ # https://rbshaffer.github.io/_includes/evaluation-measures-textual.pdf
   
