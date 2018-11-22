@@ -60,8 +60,11 @@ test_that("Diagnosing a fanout", {
 
   strategy <- c(1, 1, 5, 20)
 
+  Sys.setenv(TESTTHAT='m')
   dx <- expect_warning(diagnose_design(D, sims = strategy))
-
+  Sys.setenv(TESTTHAT='true')
+  
+  
   # estimands don't vary overall
   expect_equal(
     dx$diagnosands[1, "se(mean_estimand)"], 0
@@ -121,7 +124,10 @@ test_that("fanout warnings", {
 
   strategy <- c(1, 1, 1, 1)
 
+  Sys.setenv(TESTTHAT='m')
   expect_warning(diagnose_design(D, sims = strategy))
+  Sys.setenv(TESTTHAT='true')
+  
 })
 
 
@@ -159,15 +165,5 @@ test_that("correct fan out", {
   
 })
 
-
-test_that("MH sim ids", {
-  skip_if_not_installed("DesignLibrary")
-  design <- DesignLibrary::simple_two_arm_designer()
-  sx <- expect_warning(simulate_design(design, sims = c(2, 1, 1, 1, 1, 2)))
-  expect_equal(sx$step_1_draw, c(1L, 1L, 2L, 2L))
-  expect_equal(sx$step_6_draw, c(1L, 2L, 3L, 4L))
-  expect_equal(sx$estimate[1], sx$estimate[2])
-  expect_equal(sx$estimate[3], sx$estimate[4])
-})
 
 

@@ -193,6 +193,7 @@ test_that("even more kinds of parameters can be sent, vectors and scalars, etc."
   )))
 })
 
+
 test_that("edge case with expand but one arg works", {
   
   my_designer <- function(N = 100,
@@ -207,4 +208,29 @@ test_that("edge case with expand but one arg works", {
                     designer = my_designer, N = 5), 2)
   expect_length(expand_design(
     designer = my_designer, N = 5, expand = FALSE), 2)
+})
+
+test_that("expand with vector arguments", {
+  
+  my_designer <- function(N=10, z = list(1,5,9)) {
+    my_pop <- declare_population(top=add_level(N = length(z), z=unlist(z)), 
+                                 bottom=add_level(N=z, Y = rnorm(N)))
+    my_estimand <- declare_estimand(mand = max(table(top)))
+    my_design <- my_pop + my_estimand
+    my_design
+  }
+  
+  expect_equal(
+    draw_estimands(expand_design(my_designer, z=list(2)))$estimand, 2)
+  
+  
+  zx <- list(1:4, 2:10, 9:1, list(4,9,2))
+  
+  dsns <- expand_design(my_designer, z=zx)
+  
+  expect_equivalent(
+    unlist(sapply(dsns, draw_estimands)[2,]),
+    sapply(zx, function(x)max(unlist(x)))
+  )
+  
 })

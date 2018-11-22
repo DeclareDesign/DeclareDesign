@@ -1,4 +1,3 @@
-
 #' Explore your design diagnosis
 #'
 #' @param diagnosis A design diagnosis created by \code{\link{diagnose_design}}.
@@ -99,7 +98,7 @@ print.summary.diagnosis <- function(x, ...) {
 #'
 #' @examples
 #' # library(DesignLibrary)
-#' # diagnosis <- diagnose_design(simple_two_arm_designer(), sims = 3)
+#' # diagnosis <- diagnose_design(two_arm_designer(), sims = 3)
 #' # reshape_diagnosis(diagnosis)
 #' # reshape_diagnosis(diagnosis, select = c("Bias", "Power"))
 reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
@@ -133,7 +132,9 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   return_df <- return_df[do.call(order, as.list(return_df[, sort_by_list])), , drop = FALSE]
 
   # blank cells for SE rows
-  levels(return_df$design_label) <- c(levels(return_df$design_label), "")
+  for(i in c(parameter_names, "design_label")) {
+    levels(return_df[[i]]) <- c(levels(return_df[[i]]), "")
+  }
   return_df[return_df$statistic == "SE", c(sort_by_list, parameter_names, "n_sims")] <- ""
   return_df$statistic <- NULL
 

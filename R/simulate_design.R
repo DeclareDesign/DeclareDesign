@@ -108,7 +108,8 @@ simulate_single_design <- function(design, sims) {
     stop("Sims should be >= 1", call. = FALSE)
   }
   
-  if (sims[1] < 30) {
+  # See also ?testthat::is_testing
+  if (sims[1] < 30 && !identical(Sys.getenv("TESTTHAT"), "true")) {
     warning(
       "We recommend you choose a higher number of simulations than ",
       sims[1],
@@ -163,7 +164,7 @@ simulate_single_design <- function(design, sims) {
     estimates_df_split <- split(x = estimates_df, f = estimates_df$estimand_label)
     
     non_missing_columns <- function(dat){
-      nonmissing <- apply(dat, 2, FUN = function(x) all(!is.na(x)))
+      nonmissing <- apply(dat, 2, FUN = function(x) any(!is.na(x)))
       return(dat[,nonmissing,drop = FALSE])
     }
     

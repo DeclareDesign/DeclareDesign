@@ -1,4 +1,6 @@
 context("model estimator")
+library(DeclareDesign)
+library(testthat)
 
 my_population <- declare_population(N = 500, noise = rnorm(N))
 my_potential_outcomes <-
@@ -170,8 +172,35 @@ dat <-
 pop <- declare_population(dat)
 
 
+
+test_that("custom tidy method", {
+  model_function <- function(data){
+    return(structure(list(est = 1), class = "my_modelr"))
+  }
+  
+  des <- pop + declare_estimator(model = model_function)
+  
+  expect_error(draw_estimates(des), "The default tidy method")
+
+  tidy.my_modelr <- function(fit, conf.int = TRUE){
+    return(data.frame(term = "my-term", est = 1))
+  }
+  
+  # this is an ugly hack per https://github.com/r-lib/testthat/issues/720
+  assign("tidy.my_modelr", tidy.my_modelr, envir = .GlobalEnv)
+  
+  des <- pop + declare_estimator(model = model_function)
+  
+  expect_equal(draw_estimates(des), structure(list(estimator_label = "estimator", term = structure(1L, .Label = "my-term", class = "factor"), 
+                                                   est = 1), row.names = c(NA, -1L), class = "data.frame"))
+  
+})
+
+library(broom)
+
 test_that("AER", {
   skip_if_not_installed(c("AER", "broom"))
+  library(broom)
   des <- pop + declare_estimator(Y ~ D | Z, model = AER::ivreg)
   expect_equal(ncol(draw_estimates(des)), 8)
 })
@@ -192,20 +221,31 @@ test_that("glm", {
 test_that("betareg", {
   skip_if_not_installed(c("betareg", "broom"))
   des <- pop + declare_estimator(D2 ~ Z, model = betareg::betareg)
-  expect_equal(ncol(draw_estimates(des)), 9)
+  if(packageVersion("broom") <= "0.5.0") {
+    expect_error(draw_estimates(des))
+  } else {
+    expect_equal(ncol(draw_estimates(des)), 9)
+  }
 })
-
 
 test_that("biglm", {
   skip_if_not_installed(c("biglm", "broom"))
   des <- pop + declare_estimator(Y ~ Z, model = biglm::biglm)
-  expect_equal(ncol(draw_estimates(des)), 7)
+  if(packageVersion("broom") <= "0.5.0") {
+    expect_error(draw_estimates(des))
+  } else {
+    expect_equal(ncol(draw_estimates(des)), 7)
+  }
 })
 
 test_that("gam", {
   skip_if_not_installed(c("gam", "broom"))
   des <- pop + declare_estimator(Y ~ Z, model = gam::gam)
-  expect_equal(ncol(draw_estimates(des)), 7)
+  if(packageVersion("broom") <= "0.5.0") {
+    expect_error(draw_estimates(des))
+  } else {
+    expect_warning(expect_equal(ncol(draw_estimates(des)), 7))
+  }
 })
 
 test_that("lfe", {
@@ -220,3 +260,4 @@ test_that("polr", {
   des <- pop + declare_estimator(Y_fac ~ Z, model = MASS::polr)
   suppressWarnings(expect_error(draw_estimates(des)))
 })
+

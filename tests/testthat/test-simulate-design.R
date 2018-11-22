@@ -40,7 +40,7 @@ test_that("Simulate Design works x2", {
   e1 <- declare_estimand(a=f1())
   e2 <- declare_estimand(b=f2())
   e3 <- declare_estimand(c=f3())
-  out <- expect_warning(simulate_design(declare_population(sleep) + e1 + e2 + e3, sims=c(1,1,5,2)))
+  out <- simulate_design(declare_population(sleep) + e1 + e2 + e3, sims=c(1,1,5,2))
   expect_equal(out$estimand, 
                     as.vector(t(out[(1:10)*3, c("step_1_draw", "step_3_draw", "step_4_draw")])))
 })
@@ -98,9 +98,29 @@ test_that("fan out IDs are correct", {
   skip_if_not_installed("DesignLibrary")
   
   sims <- c(30, 1, 2, 1, 1, 2)
-  design <- DesignLibrary::simple_two_arm_designer(rho = 0)
+  design <- DesignLibrary::two_arm_designer(rho = 0)
   
   sx <- simulate_design(design, sims = sims)
   
   expect_equivalent(vapply(sx[c("step_1_draw", "step_3_draw", "step_6_draw")], max, 0), c(30, 60, 120))
+})
+
+
+test_that("designs with some estimators that don't have p.values return the p.values for the estimators that do have them", {
+  my_custom_estimator <- function(data) return(data.frame(estimate = 5))
+  
+  des <- declare_population(N = 100) +
+    declare_potential_outcomes(Y ~ .25 * Z + rnorm(N)) +
+    declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment() +
+    declare_reveal(Y, Z) +
+    declare_estimator(Y ~ Z, estimand = "ATE", label = "blah") +
+    declare_estimator(handler = tidy_estimator(my_custom_estimator), estimand = "ATE")
+  
+  expect_equivalent(names(simulate_design(des, sims = 1)), c("design_label", "sim_ID", "estimand_label", "estimand", "estimator_label", 
+                                                        "term", "estimate", "std.error", "statistic", "p.value", "conf.low", 
+                                                        "conf.high", "df", "outcome"))
+  
+  expect_equal(nrow(get_diagnosands(diagnose_design(des, sims = 2, diagnosands = declare_diagnosands(select = power)))), 2)
+  
 })
