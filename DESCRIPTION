@@ -1,6 +1,6 @@
 Package: DeclareDesign
 Title: Declare and Diagnose Research Designs
-Version: 0.12.0
+Version: 0.13.0
 Authors@R: c(person("Graeme", "Blair", email = "graeme.blair@ucla.edu", role = c("aut", "cre")),
              person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = c("aut")),
              person("Alexander", "Coppock", email = "acoppock@gmail.com", role = c("aut")),
