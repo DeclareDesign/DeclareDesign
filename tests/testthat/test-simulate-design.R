@@ -93,19 +93,6 @@ test_that("no estimates estimands declared", {
 })
 
 
-test_that("fan out IDs are correct", {
-  
-  skip_if_not_installed("DesignLibrary")
-  
-  sims <- c(30, 1, 2, 1, 1, 2)
-  design <- DesignLibrary::two_arm_designer(rho = 0)
-  
-  sx <- simulate_design(design, sims = sims)
-  
-  expect_equivalent(vapply(sx[c("step_1_draw", "step_3_draw", "step_6_draw")], max, 0), c(30, 60, 120))
-})
-
-
 test_that("designs with some estimators that don't have p.values return the p.values for the estimators that do have them", {
   my_custom_estimator <- function(data) return(data.frame(estimate = 5))
   
