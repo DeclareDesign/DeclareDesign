@@ -9,7 +9,7 @@
 #'
 #' @details
 #'
-#' If term is TRUE, the names of ... will be returned in a `term` column, and `estimand_label`
+#' If term is TRUE, the names of ... will be returned in a \code{term} column, and \code{estimand_label}
 #' will contain the step label. This can be used as an additional dimension for use in diagnosis.
 #'
 #'
