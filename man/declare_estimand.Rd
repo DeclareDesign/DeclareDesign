@@ -32,10 +32,10 @@ a function that accepts a data.frame as an argument and returns a data.frame con
 Declares estimands. Estimands are the subjects of inquiry and can be estimated by an estimator.
 }
 \details{
-For the default diagnosands, the return value of the handler should have `estimand_label` and `estimand` columns.
+For the default diagnosands, the return value of the handler should have \code{estimand_label} and \code{estimand} columns.
 
-If term is TRUE, the names of ... will be returned in a `term` column,
-and `estimand_label` will contain the step label. This can be used as
+If term is TRUE, the names of ... will be returned in a \code{term} column,
+and \code{estimand_label} will contain the step label. This can be used as
 an additional dimension for use in diagnosis.
 }
 \examples{
