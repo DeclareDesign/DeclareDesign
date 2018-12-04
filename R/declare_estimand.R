@@ -8,7 +8,7 @@
 #'
 #' @details
 #'
-#' For the default diagnosands, the return value of the handler should have `estimand_label` and `estimand` columns.
+#' For the default diagnosands, the return value of the handler should have \code{estimand_label} and \code{estimand} columns.
 #'
 #' @export
 #'
@@ -175,8 +175,8 @@ declare_estimands <- declare_estimand
 #' @param data a data.frame
 #' @details
 #'
-#' If term is TRUE, the names of ... will be returned in a `term` column,
-#' and `estimand_label` will contain the step label. This can be used as
+#' If term is TRUE, the names of ... will be returned in a \code{term} column,
+#' and \code{estimand_label} will contain the step label. This can be used as
 #' an additional dimension for use in diagnosis.
 #'
 #'
