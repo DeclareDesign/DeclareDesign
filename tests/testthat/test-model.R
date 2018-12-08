@@ -243,9 +243,13 @@ test_that("gam", {
   des <- pop + declare_estimator(Y ~ Z, model = gam::gam)
   if(packageVersion("broom") <= "0.5.0") {
     expect_error(draw_estimates(des))
-  } else {
+  } else if(packageVersion("gam") < "1.16") {
     expect_warning(expect_equal(ncol(draw_estimates(des)), 7))
+  } else {
+    expect_equal(ncol(draw_estimates(des)), 7)
   }
+  
+  
 })
 
 test_that("lfe", {
