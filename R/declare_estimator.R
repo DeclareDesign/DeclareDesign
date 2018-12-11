@@ -280,7 +280,7 @@ validation_fn(model_handler) <- function(ret, dots, label) {
 
     if (!quo_text(dots$model)
     %in%
-      c("lm", "glm", "lm_robust", "iv_robust", "difference_in_means", "horvitz_thompson")
+      c("lm", "glm", "lm_robust", "iv_robust", "difference_in_means", "horvitz_thompson", "lm_lin")
     &
       !requireNamespace("broom", quietly = TRUE)
     ) {
