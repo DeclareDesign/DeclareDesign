@@ -1,0 +1,587 @@
+---
+title: "Postestimation"
+output: 
+  html_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction 
+
+"Postestimation" is a phrase from [Stata](https://www.stata.com/manuals13/u20.pdf) referring to
+statistical diagnostics and tests that may be carried out *after* a model is "fit", "trained", or "estimated"[1].
+They encompass a grab-bag including (but not limited to):
+
+  * Contrasts and ANOVA-style joint estimates
+  * Information Criteria
+  * Specification tests
+  * Point estimates, std errors for (non)linear combinations of coefficients
+  * Multiple Comparison corrections
+
+Because each of these is coupled to the particular model used, these require customizing DeclareDesign steps. `tidy_estimator` is used for hygiene, although it's features for labelling and matching estimands aren't actually used in the examples below
+
+### Base Design
+
+The following is a simplified design containing only the population, sampling, and estimation steps with both factors and numeric predictors: 
+
+```{r}
+require(DeclareDesign)
+require(dplyr)
+
+GROUPS <- 25
+NOISE  <- 100 - 3
+
+base_design <- {
+    declare_population(N=10000, 
+                        g=gl(GROUPS, N/GROUPS), 
+                        Z1=rlnorm(N), 
+                        Z2=rlnorm(N,1), 
+                        Y=ifelse(g %in% 2:4, 3, 0) + .8*Z1 + 3.2 * Z2 + rnorm(N), 
+                        X=matrix(rnorm(N*NOISE), N, NOISE)) +
+    declare_sampling(n=2000) + 
+    declare_step(select, -ID, -S_inclusion_prob)+
+    declare_estimator(Y~., model=lm, term=TRUE)
+}                    
+
+
+```
+
+Note the `term=TRUE` to keep all coefficients.
+
+The linear model is below. Note that each group in `g` is tested against g1.
+
+```{r}
+head(draw_estimates(base_design))
+```
+
+### AIC / BIC
+
+In plain R
+
+```{r}
+df <- draw_data(base_design)
+
+m <- lm(Y~., df)
+
+AIC(m)
+BIC(m)
+
+```
+
+In DD, we must wrap that in a function which returns a tidy data.frame.
+
+```{r}
+AIC_handler <- function(data) {
+  
+  m <- lm(Y~., data)
+  
+  data.frame(term=c("AIC", "BIC"), estimate=c(AIC(m),BIC(m)), stringsAsFactors = FALSE)
+
+}
+
+AIC_step <- declare_estimator(handler = tidy_estimator(AIC_handler))
+
+AIC_design <- replace_step(base_design, 4, AIC_step)
+
+draw_estimates(AIC_design)
+```
+
+### ANOVA
+
+In plain R
+
+```{r}
+require(lsr)
+
+df <- draw_data(base_design)
+
+m <- lm(Y~., df)
+
+a <- anova(m)
+
+
+head(tidy(a))
+
+### And effect sizes:
+head(lsr::etaSquared(m))
+
+```
+
+
+
+In DD
+
+```{r}
+
+anova_handler <- function(data) {
+  
+  m <- lm(Y~., data)
+  
+  a <- anova(m)
+  
+  a <- tidy(a)
+  
+  a$estimate <- c(lsr::etaSquared(m)[,"eta.sq"], NA) # a contains a row for "Residuals" which have no effect size
+  a$std.error <- NA
+
+  # We could just return `a` now, or can return both the anova for 'g' and coffecients for Z1/2 w/o refitting model
+  
+  m <- tidy(m)
+  # t-tests have 1 df in numerator when converted to f
+  m$statistic <- m$statistic^2
+  m$df <- 1 
+  
+  a <- a[names(m)]  
+  
+  rbind(
+    filter(m, grepl("Z", term)),
+    filter(a, grepl("g", term))
+  )
+  
+}
+
+anova_step <- declare_estimator(handler = tidy_estimator(anova_handler), estimand = c("Z1", "Z2", "g"))
+
+anova_design <- replace_step(base_design, 4, anova_step)
+
+draw_estimates(anova_design)
+
+```
+
+
+Warning: `g` effect size is a different type of statistic than Z1/Z2, take care when interpretting, although in this case we have converted the t-tests to F-tests for cleanliness.
+
+
+### Tukeys Honest Significant Differences test
+
+This tests all pairwise differences of levels of a factor in one shot. In our example, groups 2-4 are different from all other groups,
+but equal to themselves. This should be more conservative than ANOVA.
+
+```{r}
+df <- draw_data(base_design)
+
+m <- lm(Y~., df)
+a <- aov(m)
+
+suppressWarnings(THSD <- TukeyHSD(a, "g"))
+
+tidy(THSD)
+```
+
+
+
+
+```{r}
+
+hsd_handler <- function(data) {
+  
+  m <- lm(Y~., data)
+  
+  a <- aov(m)
+  
+  suppressWarnings(THSD <- TukeyHSD(a, "g"))
+  
+  tidy(THSD)
+  
+}
+
+hsd_step <- declare_estimator(handler = tidy_estimator(hsd_handler))
+
+hsd_design <- replace_step(base_design, 4, hsd_step)
+
+draw_estimates(hsd_design)
+
+```
+
+### P value adjustments for multiple testing
+
+Say we needed to adjust the p-values of Xs to account for how many are in play. In base R:
+
+```{r}
+df <- draw_data(base_design)
+
+m <- lm(Y~., df)
+
+# False discovery rate
+s <- summary(m)
+s$coefficients[, 4] <- p.adjust(s$coefficients[, 4], method = "fdr")
+s
+
+
+# Bonferroni
+s <- summary(m)
+s$coefficients[, 4] <- p.adjust(s$coefficients[, 4], method = "bonferroni")
+s
+
+
+```
+
+In DeclareDesign, since both FDR and Bonferroni adjustments are options on the same function, we can parameterize our handler and add a second step. Note that this has the down side of fitting the model twice.
+
+```{r}
+fdr_handler <- function(data, method="fdr") {
+  
+  m <- lm(Y~., data)
+  
+  t <- tidy(m)
+  
+  t$p.value <- p.adjust(t$p.value, method)  
+
+  t
+}
+
+fdr_step <- declare_estimator(handler = tidy_estimator(fdr_handler), label="fdr")
+bon_step <- declare_estimator(method="bonferroni", handler = tidy_estimator(fdr_handler), label="bon")
+
+
+fdr_design <- replace_step(base_design, 4, fdr_step) + bon_step
+
+est <- draw_estimates(fdr_design)
+
+# side-by-side comparison
+reshape(est[c('term','estimator_label', 'p.value')], idvar = "term", timevar = "estimator_label", direction = "wide")
+```
+
+
+### Contrasts
+
+"Contrasts" colloquially refers to testing levels of factors against each other. In out example, we might want to test g2-4 against all others. See also <https://stats.idre.ucla.edu/r/faq/how-can-i-test-contrasts-in-r/>
+
+```{r}
+
+require(multcomp)
+
+df <- draw_data(base_design)
+
+m <- lm(Y~., df)
+
+K <- matrix(0,1,length(coef(m)), dimnames = list(c(), names(coef(m))))
+K[2:4] <- 1/3
+K[5:25] <- -1/21
+
+summary(glht(m, K))
+
+
+
+```
+
+We can use standard R scoping rules, such that the contrast matrix need not be rebuilt between simulations:
+
+```{r}
+
+
+K <- matrix(0,1,length(coef(m)), dimnames = list(c(), names(coef(m))))
+K[2:4] <- 1/3
+K[5:25] <- -1/21
+
+contrast_handler <- function(data) {
+
+  m <- lm(Y~., data)
+  
+  tidy(summary(glht(m, K)))
+
+}
+
+
+contrast_step <- declare_estimator(handler = tidy_estimator(contrast_handler))
+
+
+contrast_design <- replace_step(base_design, 4, contrast_step)
+
+draw_estimates(contrast_design)
+
+
+```
+
+
+### Linear combinations
+
+"Linear combinations" colloquially refers to testing combinations of continuous predictors. In our case we might want to test the 
+hypothesis `\beta_Z2 - \beta_Z1 = 0`
+
+
+```{r}
+
+require(car)
+
+df <- draw_data(base_design)
+
+m <- lm(Y~., df)
+
+
+linearHypothesis(m, "Z2-Z1=0")
+
+```
+
+
+```{r}
+
+lcomb_handler <- function(data) {
+
+  m <- lm(Y~., data)
+  
+  tidy(linearHypothesis(m, "Z2-Z1=0")[2,]) #Don't need first row
+
+}
+
+
+lcomb_step <- declare_estimator(handler = tidy_estimator(lcomb_handler))
+
+
+lcomb_design <- replace_step(base_design, 4, lcomb_step)
+
+draw_estimates(lcomb_design)
+
+
+```
+
+### Non Linear combinations
+
+Other packages allow more sophisticated testing. One I use often is relative effect, which is tested with Fieller's method.
+
+```{r}
+require(mratios)
+
+df <- draw_data(base_design)
+
+m <- lm(Y~., df)
+
+Num <- Den <- matrix(0,1,length(coef(m)), dimnames = list(c(), names(coef(m))))
+Num[,"Z2"] <- 1
+Num[,"Z1"] <- -1
+Den[,"Z1"] <- 1
+
+
+gsci.ratio(coef(m), vcov(m), Num, Den)
+
+```
+
+```{r}
+
+Num <- Den <- matrix(0,1,length(coef(m)), dimnames = list(c(), names(coef(m))))
+Num[,"Z2"] <- 1
+Num[,"Z1"] <- -1
+Den[,"Z1"] <- 1
+
+
+ratio_handler <- function(data) {
+  m <- lm(Y~., data)
+  
+  
+  
+  r <- gsci.ratio(coef(m), vcov(m), Num, Den, m$df.residual)
+  
+  data.frame(
+    term="B_Z2 / B_Z1 - 1", 
+    estimate=r$estimate, 
+    conf.lower=r$conf.int[1], 
+    conf.upper=r$conf.int[2], 
+    df=r$df, 
+    stringsAsFactors = FALSE
+  )
+}
+
+
+ratio_step <- declare_estimator(handler = tidy_estimator(ratio_handler))
+
+
+ratio_design <- replace_step(base_design, 4, ratio_step)
+
+draw_estimates(ratio_design)
+
+
+```
+
+### Likelyhood ratio testing
+
+These are usually used to compare nested models:
+
+
+```{r}
+require(lmtest)
+df <- draw_data(base_design)
+
+m <- lm(Y~., df)
+m_simple <- lm(Y~g+Z1+Z2, df)
+
+lrtest(m, m_simple)
+
+```
+
+
+```{r}
+
+lrtest_handler <- function(data) {
+  m <- lm(Y~., df)
+  m_simple <- lm(Y~g+Z1+Z2, df)
+  
+  suppressWarnings(tidy(lrtest(m, m_simple)[2,]))
+}
+
+
+lrtest_step <- declare_estimator(handler = tidy_estimator(lrtest_handler))
+
+
+lrtest_design <- replace_step(base_design, 4, lrtest_step)
+
+draw_estimates(lrtest_design)
+
+
+```
+
+### Shapiro test for Normality of residuals
+
+```{r}
+df <- draw_data(base_design)
+
+m <- lm(Y~., df)
+
+shapiro.test(residuals(m))
+
+```
+
+```{r}
+
+shapiro_handler <- function(data) {
+  m <- lm(Y~., df)
+  
+  tidy(shapiro.test(residuals(m)))
+}
+
+shapiro_step <- declare_estimator(handler = tidy_estimator(shapiro_handler))
+
+
+shapiro_design <- replace_step(base_design, 4, shapiro_step)
+
+draw_estimates(shapiro_design)
+
+
+
+```
+
+### Diagnostics with a held-out data set
+
+```{r}
+df <- draw_data(base_design)
+holdout <- draw_data(base_design)
+m <- lm(Y~., df)
+
+MAPE <- function(yhat, y) median(abs((y - yhat)/y))
+
+MAPE(predict(m, newdata=holdout), holdout$Y)
+```
+
+The holdout is scoped outside the handler-
+
+```{r}
+
+holdout_handler <- function(data) {
+  m <- lm(Y~., data)
+  
+  data.frame(MAPE=MAPE(predict(m, newdata=holdout), holdout$Y))
+}
+
+holdout_step <- declare_estimator(handler = tidy_estimator(holdout_handler))
+
+
+holdout_design <- replace_step(base_design, 4, holdout_step)
+
+draw_estimates(holdout_design)
+
+
+
+```
+
+
+### Hausman test for panel models
+
+from `?plm::phtest`
+
+```{r}
+
+require(plm)
+data("Gasoline", package = "plm")
+form <- lgaspcar ~ lincomep + lrpmg + lcarpcap
+wi <- plm(form, data = Gasoline, model = "within")
+re <- plm(form, data = Gasoline, model = "random")
+phtest(wi, re)
+
+```
+
+
+```{r}
+
+phtest_handler <- function(data){
+	wi <- plm(form, data = data, model = "within")
+	re <- plm(form, data = data, model = "random")
+	with(phtest(wi, re),
+     data.frame(
+        method="Hausman Test", 
+        statistic,
+        p.value,
+        stringsAsFactors = FALSE
+      )
+ )
+
+
+}
+
+
+phtest_handler(Gasoline)
+
+```
+
+### Forecasting
+
+
+```{r}
+
+my_ts <- cumsum(rnorm(100,2, 1:100))
+plot(my_ts)
+```
+
+```{r}
+require(forecast)
+m <- auto.arima(my_ts)
+fc <- forecast(m)
+plot(fc)
+```
+
+
+```{r}
+
+ts_pop <- declare_population(N=100, Y=cumsum(rnorm(N,2, 1:N)))
+
+forecast_handler <- function(data) {
+  
+  m <- auto.arima(data$Y)
+  
+  fc <- forecast(m, level=95)
+  
+  fcdf <- as.data.frame(fc)
+  
+  with(fcdf,
+    data.frame(
+      t=rownames(fcdf), 
+      estimate=`Point Forecast`, 
+      conf.lower=`Lo 95`, 
+      conf.upper=`Hi 95`,
+      method=fc$method,
+      stringsAsFactors = FALSE
+    )
+  )
+  
+}
+
+forecast_design <- ts_pop + declare_estimator(handler = tidy_estimator(forecast_handler))
+
+draw_estimates(forecast_design)
+
+```
+
+## Footnotes
+
+[1]: I haven't found many non-Stata uses of the phrase. Stata by design has a suite of "estimation commands", so the phrase only makes sense in their workflow. SAS generally does contrasts within the corresponding modeling PROC. R is balkanized and anything goes.
