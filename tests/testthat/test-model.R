@@ -180,7 +180,7 @@ test_that("custom tidy method", {
   
   des <- pop + declare_estimator(model = model_function)
   
-  expect_error(draw_estimates(des), "The default tidy method")
+  expect_error(draw_estimates(des), "We were unable to tidy the output")
 
   tidy.my_modelr <- function(fit, conf.int = TRUE){
     return(data.frame(term = "my-term", est = 1))
@@ -264,4 +264,6 @@ test_that("polr", {
   des <- pop + declare_estimator(Y_fac ~ Z, model = MASS::polr)
   suppressWarnings(expect_error(draw_estimates(des)))
 })
+
+
 

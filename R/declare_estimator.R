@@ -273,18 +273,9 @@ validation_fn(model_handler) <- function(ret, dots, label) {
     model <- eval_tidy(dots$model)
     if (!is.function(model) || !"data" %in% names(formals(model))) {
       declare_time_error(
-        "Must provide a function for `model` which takes a `data` argument.",
+        "Must provide a function for `model` that takes a `data` argument.",
         ret
       )
-    }
-
-    if (!quo_text(dots$model)
-    %in%
-      c("lm", "glm", "lm_robust", "iv_robust", "difference_in_means", "horvitz_thompson")
-    &
-      !requireNamespace("broom", quietly = TRUE)
-    ) {
-      stop("You provided a ", quo_text(dots$model), " model, which DeclareDesign does not directly support. It's possible that the broom package can help. Please install the broom package with install.packages('broom') and try declaring your estimator again. If that fix does not work, you may need to write a custom estimator.")
     }
 
     attr(ret, "extra_summary") <-
@@ -369,10 +360,18 @@ hasS3Method <- function(f, obj) {
 # called by model_handler, resets columns names !!!
 fit2tidy <- function(fit, term = FALSE) {
   
+  # browser()
   if (hasS3Method("tidy", fit)) {
     tidy_df <- tidy(fit, conf.int = TRUE)
   } else {
-    tidy_df <- tidy_default(fit, conf.int = TRUE)  
+    tidy_df <- try(tidy_default(fit, conf.int = TRUE), silent = TRUE)
+    
+    if(class(tidy_df) == "try-error"){
+      stop("We were unable to tidy the output of the function provided to 'model'. 
+           It is possible that the broom package has a tidier for that object type. 
+           If not, you can use a custom estimator to 'estimator_function'.
+           See examples in ?declare_estimator")
+    }
   }
     
   if (is.character(term)) {
