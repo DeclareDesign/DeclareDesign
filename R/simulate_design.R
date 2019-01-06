@@ -83,7 +83,9 @@ simulate_design <- function(..., sims = 500) {
     out
   })
   parameters_df <- rbind_disjoint(parameters_df_list)
-  parameters_df <- data.frame(lapply(parameters_df, type_convert), stringsAsFactors = FALSE)
+  parameters_df <- data.frame(lapply(parameters_df, type.convert), stringsAsFactors = FALSE)
+  
+  simulations_df <- merge(simulations_df, parameters_df, by = "design_label", sort = FALSE, all = TRUE)
   
   simulations_df <- simulations_df[, reorder_columns(parameters_df, simulations_df), drop = FALSE]
   
@@ -204,16 +206,17 @@ simulate_single_design <- function(design, sims) {
     }
   }
   
-  if (!is_empty(attr(design, "parameters"))) {
-    simulations_df <-
-      data.frame(
-        simulations_df[, 1, drop = FALSE],
-        as_list(attr(design, "parameters")),
-        simulations_df[, -1, drop = FALSE], 
-        stringsAsFactors = FALSE
-      )
-  }
-  simulations_df <- data.frame(lapply(simulations_df, type_convert), stringsAsFactors = FALSE)
+  # removed for now
+  # if (!is_empty(attr(design, "parameters"))) {
+  #   simulations_df <-
+  #     data.frame(
+  #       simulations_df[, 1, drop = FALSE],
+  #       as_list(attr(design, "parameters")),
+  #       simulations_df[, -1, drop = FALSE], 
+  #       stringsAsFactors = FALSE
+  #     )
+  # }
+  # simulations_df <- data.frame(lapply(simulations_df, type_convert), stringsAsFactors = FALSE)
   simulations_df
 }
 
