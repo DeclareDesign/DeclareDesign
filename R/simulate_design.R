@@ -249,6 +249,7 @@ infer_names <- function(x, type = "design") {
 
 # TODO: remove this when 3.6 comes out
 # for version 3.4 compatibility
+#' @importFrom utils compareVersion
 type_convert <- function(x) {
   if(compareVersion("3.5", paste(R.Version()$major, R.Version()$minor, sep = ".")) == -1){
     if (inherits(x, "character") || inherits(x, "factor")) type.convert(x, as.is = TRUE) else x
