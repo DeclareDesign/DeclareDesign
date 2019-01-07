@@ -249,7 +249,7 @@ test_that("more term",{
 })
 
 test_that("diagnose_design does not reclass the variable N", {
-  
+  skip_if(compareVersion("3.5", paste(R.Version()$major, R.Version()$minor, sep = ".")) == 1)
   # works for redesign
   design <-
     declare_population(N = 5, noise = rnorm(N)) +
