@@ -1,3 +1,9 @@
+# DeclareDesign 0.14.0
+
+* Improved generics interoperability
+* Bug fixes
+
+
 # DeclareDesign 0.12.0
 
 * Add ability to use `get_estimates` with data, useful for example for getting estimates after data is collected for a study. To draw estimates or estimands from simulated data, now use renamed `draw_estimates` and `draw_estimands` functions.
