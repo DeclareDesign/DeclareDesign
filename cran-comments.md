@@ -1,8 +1,8 @@
 ## Submission
 
-We are resubmitting a small update, `DeclareDesign 0.12.0`, after minor errors were found during the CRAN checks in the submission processs. Thank you for your time reviewing the submission.
+We are resubmitting a small update, `DeclareDesign 0.14.0`, principally to address errors at https://cran.rstudio.com//web/checks/check_results_DeclareDesign.html.
 
-We have addressed the notes and errors in the CRAN checks.
+Thank you for your time reviewing the submission.
 
 ## Test environments
 * local OS X install (release)
@@ -16,7 +16,7 @@ We have addressed the notes and errors in the CRAN checks.
 
 ## Reverse dependencies
 
-There is an issue in the `DesignLibrary` package, also maintained by us, and we are preparing a patch to address it as soon as this is on CRAN.
+We see no problems with our reverse depends.
 
 ---
   
