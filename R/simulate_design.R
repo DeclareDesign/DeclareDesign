@@ -248,5 +248,5 @@ infer_names <- function(x, type = "design") {
 }
 
 type_convert <- function(x) {
-  if (inherits(x, "character") || inherits(x, "factor")) type.convert(x, as.is = TRUE) else x
+  if (inherits(x, "character")) type.convert(x, as.is = TRUE) else x
 }
