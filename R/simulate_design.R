@@ -83,7 +83,7 @@ simulate_design <- function(..., sims = 500) {
     out
   })
   parameters_df <- rbind_disjoint(parameters_df_list)
-  parameters_df <- data.frame(lapply(parameters_df, type_convert_chr_fac), stringsAsFactors = FALSE)
+  parameters_df <- data.frame(lapply(parameters_df, type_convert), stringsAsFactors = FALSE)
   
   simulations_df <- merge(simulations_df, parameters_df, by = "design_label", sort = FALSE, all = TRUE)
   
@@ -249,11 +249,15 @@ infer_names <- function(x, type = "design") {
 
 # for version 3.4 compatibility
 type_convert <- function(x) {
-  if (inherits(x, "character")) type.convert(x, as.is = TRUE) else x
+  if(compareVersion("3.5", paste(R.Version()$major, R.Version()$minor, sep = ".")) == -1){
+    if (inherits(x, "character") || inherits(x, "factor")) type.convert(x, as.is = TRUE) else x
+  } else {
+    if (inherits(x, "character")) type.convert(x, as.is = TRUE) else x
+  }
 }
 
 # TODO: simplify these when 3.6 comes out
 # for version 3.5 when we need to convert factors
-type_convert_chr_fac <- function(x) {
-  if (inherits(x, "character") || inherits(x, "factor")) type.convert(x, as.is = TRUE) else x
-}
+# type_convert_chr_fac <- function(x) {
+#   if (inherits(x, "character") || inherits(x, "factor")) type.convert(x, as.is = TRUE) else x
+# }
