@@ -248,3 +248,29 @@ test_that("more term",{
   
 })
 
+test_that("diagnose_design does not reclass the variable N", {
+  skip_if(compareVersion("3.5", paste(R.Version()$major, R.Version()$minor, sep = ".")) == 1)
+  # works for redesign
+  design <-
+    declare_population(N = 5, noise = rnorm(N)) +
+       declare_estimand(mean_noise = mean(noise))
+  
+  designs <- redesign(design, N = 5:10) 
+  dx <- diagnose_design(designs, sims = 50, bootstrap_sims = FALSE)
+  
+  expect_equal(class(dx$simulations_df$N), "integer") 
+  expect_equal(class(dx$diagnosands_df$N), "integer")
+  
+  # works for expand_design
+  designer <- function(N = 5) {
+    declare_population(N = N, noise = rnorm(N)) +
+    declare_estimand(mean_noise = mean(noise))
+  }
+  
+  designs <- expand_design(designer, N = 5:10) 
+  dx <- diagnose_design(designs, sims = 50, bootstrap_sims = FALSE)
+  
+  expect_equal(class(dx$simulations_df$N), "integer") 
+  expect_equal(class(dx$diagnosands_df$N), "integer")
+  
+})

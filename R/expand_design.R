@@ -49,27 +49,26 @@ expand_design <- function(designer, ..., expand = TRUE, prefix = "design") {
 
   if (length(dots_quos) == 0) return(designer())
     
-  T <- function(zx,ix) do.call(mapply, 
+  # transpose
+  transp <- function(zx,ix) do.call(mapply, 
                                append(mapply(`[`, zx, ix, SIMPLIFY = FALSE), 
-                                      list(FUN=list, SIMPLIFY=FALSE), 
+                                      list(FUN = list, SIMPLIFY = FALSE), 
                                       after = 0)
                                )
-  
 
   args <- list(...)
   args <- lapply(args, function(x) if(is.function(x)) list(x) else x)
   
   ix <- lapply(args, seq_along)
   ix <- if(expand) expand.grid(ix) else data.frame(ix)
-
   
-  designs <- lapply(T(args, ix), do.call, what=designer)
+  designs <- lapply(transp(args, ix), do.call, what = designer)
 
   args_names <- lapply(dots_quos, expand_args_names)
   
   designs <- mapply(structure, 
                     designs, 
-                    parameters=T(args_names, ix), 
+                    parameters = transp(args_names, ix), 
                     SIMPLIFY = FALSE)
   
 

@@ -85,6 +85,8 @@ simulate_design <- function(..., sims = 500) {
   parameters_df <- rbind_disjoint(parameters_df_list)
   parameters_df <- data.frame(lapply(parameters_df, type_convert), stringsAsFactors = FALSE)
   
+  simulations_df <- merge(simulations_df, parameters_df, by = "design_label", sort = FALSE, all = TRUE)
+  
   simulations_df <- simulations_df[, reorder_columns(parameters_df, simulations_df), drop = FALSE]
   
   attr(simulations_df, "parameters") <- parameters_df
@@ -204,16 +206,17 @@ simulate_single_design <- function(design, sims) {
     }
   }
   
-  if (!is_empty(attr(design, "parameters"))) {
-    simulations_df <-
-      data.frame(
-        simulations_df[, 1, drop = FALSE],
-        as_list(attr(design, "parameters")),
-        simulations_df[, -1, drop = FALSE], 
-        stringsAsFactors = FALSE
-      )
-  }
-  simulations_df <- data.frame(lapply(simulations_df, type_convert), stringsAsFactors = FALSE)
+  # removed for now
+  # if (!is_empty(attr(design, "parameters"))) {
+  #   simulations_df <-
+  #     data.frame(
+  #       simulations_df[, 1, drop = FALSE],
+  #       as_list(attr(design, "parameters")),
+  #       simulations_df[, -1, drop = FALSE], 
+  #       stringsAsFactors = FALSE
+  #     )
+  # }
+  # simulations_df <- data.frame(lapply(simulations_df, type_convert), stringsAsFactors = FALSE)
   simulations_df
 }
 
@@ -244,6 +247,13 @@ infer_names <- function(x, type = "design") {
   inferred_names
 }
 
+# TODO: remove this when 3.6 comes out
+# for version 3.4 compatibility
+#' @importFrom utils compareVersion
 type_convert <- function(x) {
-  if (inherits(x, "character")) type.convert(x, as.is = TRUE) else x
+  if(compareVersion("3.5", paste(R.Version()$major, R.Version()$minor, sep = ".")) == -1){
+    if (inherits(x, "character") || inherits(x, "factor")) type.convert(x, as.is = TRUE) else x
+  } else {
+    if (inherits(x, "character")) type.convert(x, as.is = TRUE) else x
+  }
 }
