@@ -83,7 +83,7 @@ simulate_design <- function(..., sims = 500) {
     out
   })
   parameters_df <- rbind_disjoint(parameters_df_list)
-  parameters_df <- data.frame(lapply(parameters_df, type.convert), stringsAsFactors = FALSE)
+  parameters_df <- data.frame(lapply(parameters_df, type_convert), stringsAsFactors = FALSE)
   
   simulations_df <- merge(simulations_df, parameters_df, by = "design_label", sort = FALSE, all = TRUE)
   
@@ -248,5 +248,5 @@ infer_names <- function(x, type = "design") {
 }
 
 type_convert <- function(x) {
-  if (inherits(x, "character")) type.convert(x, as.is = TRUE) else x
+  if (inherits(x, "character") || inherits(x, "factor")) type.convert(x, as.is = TRUE) else x
 }
