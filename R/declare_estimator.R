@@ -106,7 +106,7 @@
 #'   declare_reveal() +
 #'   my_estimator_dim
 #'
-#' get_estimates(design_def)
+#' draw_estimates(design_def)
 #'
 #' # Can also use declared estimator on a data.frame
 #' dat <- draw_data(design_def)
@@ -117,13 +117,13 @@
 #' # ----------
 #'
 #' design <- replace_step(design_def, my_estimator_dim, my_estimator_lm_rob)
-#' get_estimates(design)
+#' draw_estimates(design)
 #'
 #' design <- replace_step(design_def, my_estimator_dim, my_estimator_lm)
-#' get_estimates(design)
+#' draw_estimates(design)
 #'
 #' design <- replace_step(design_def, my_estimator_dim, my_estimator_glm)
-#' get_estimates(design)
+#' draw_estimates(design)
 #'
 #' # ----------
 #' # 3. Using custom estimators
@@ -131,7 +131,7 @@
 #'
 #' design <- replace_step(design_def, my_estimator_dim, my_estimator_custom)
 #'
-#' get_estimates(design)
+#' draw_estimates(design)
 #'
 #' # The names in your custom estimator return should match with
 #' # your diagnosands when diagnosing a design
@@ -144,13 +144,15 @@
 #'
 #' design <- replace_step(design_def, my_estimator_dim, my_estimator_median)
 #'
-#' get_estimates(design)
+#' draw_estimates(design)
 #'
 #' my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand),
 #'   keep_defaults = FALSE)
 #'
+#' \dontrun{
 #' diagnose_design(design, diagnosands = my_diagnosand, sims = 5,
 #'   bootstrap_sims = FALSE)
+#' }
 #'
 #' # ----------
 #' # 4. Multiple estimators per estimand
@@ -159,10 +161,11 @@
 #' design_two <- insert_step(design_def,  my_estimator_lm,
 #'   after = my_estimator_dim)
 #'
-#' get_estimates(design_two)
+#' draw_estimates(design_two)
 #'
+#' \dontrun{
 #' diagnose_design(design_two, sims = 5, bootstrap_sims = FALSE)
-#'
+#' }
 declare_estimator <-
   make_declarations(
     estimator_handler,
@@ -183,12 +186,10 @@ declare_estimators <- declare_estimator
 #' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.
 #' @rdname declare_estimator
 #' @export
-#' @importFrom rlang UQ
 tidy_estimator <- function(estimator_function) {
   if (!("data" %in% names(formals(estimator_function)))) {
     stop("Must provide a `estimator_function` function with a data argument.")
   }
-
 
   f <- function(data, ..., estimand = NULL, label) {
     calling_args <-
@@ -272,18 +273,9 @@ validation_fn(model_handler) <- function(ret, dots, label) {
     model <- eval_tidy(dots$model)
     if (!is.function(model) || !"data" %in% names(formals(model))) {
       declare_time_error(
-        "Must provide a function for `model` which takes a `data` argument.",
+        "Must provide a function for `model` that takes a `data` argument.",
         ret
       )
-    }
-
-    if (!quo_text(dots$model)
-    %in%
-      c("lm", "glm", "lm_robust", "iv_robust", "difference_in_means", "horvitz_thompson")
-    &
-      !requireNamespace("broom", quietly = TRUE)
-    ) {
-      stop("You provided a ", quo_text(dots$model), " model, which DeclareDesign does not directly support. It's possible that the broom package can help. Please install the broom package with install.packages('broom') and try declaring your estimator again. If that fix does not work, you may need to write a custom estimator.")
     }
 
     attr(ret, "extra_summary") <-
@@ -296,36 +288,92 @@ validation_fn(model_handler) <- function(ret, dots, label) {
 #' @rdname declare_estimator
 estimator_handler <- tidy_estimator(model_handler)
 
+#' @importFrom generics tidy
+#' @export
+generics::tidy
+
+tidy_default <- function(x, conf.int = TRUE) {
+  # TODO: error checking -- are column names named as we expect
+  
+  val <- try({
+    summ <- coef(summary(x))
+    # summ <-
+    # summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
+    
+    if(conf.int == TRUE) {
+      ci <- suppressMessages(as.data.frame(confint(x)))
+      tidy_df <-
+        data.frame(
+          term = rownames(summ),
+          summ,
+          ci,
+          stringsAsFactors = FALSE,
+          row.names = NULL
+        )
+      colnames(tidy_df) <-
+        c(
+          "term",
+          "estimate",
+          "std.error",
+          "statistic",
+          "p.value",
+          "conf.low",
+          "conf.high"
+        )
+    } else {
+      tidy_df <-
+        data.frame(
+          term = rownames(summ),
+          summ,
+          ci,
+          stringsAsFactors = FALSE,
+          row.names = NULL
+        )
+      colnames(tidy_df) <-
+        c(
+          "term",
+          "estimate",
+          "std.error",
+          "statistic",
+          "p.value"
+        )
+    }
+    
+  }, silent = TRUE)
+  
+  if(class(val) == "try-error"){
+    stop("The default tidy method for the model fit of class ", class(x), " failed. You may try installing and loading the broom package, or you can write your own tidy.", class(x), " method.", call. = FALSE)
+  }
+    
+  tidy_df
+}
+
+#' @importFrom utils getS3method
+hasS3Method <- function(f, obj) {
+  for(i in class(obj)) {
+    get_function <- try(getS3method(f, i), silent = TRUE)
+    if(class(get_function) != "try-error" && is.function(get_function)) return(TRUE)
+  }
+  FALSE
+}
+
 # called by model_handler, resets columns names !!!
 fit2tidy <- function(fit, term = FALSE) {
-  if (requireNamespace("broom", quietly = TRUE)) {
-
-    # broom if possible
-    tidy_df <- broom::tidy(fit, conf.int = TRUE)
+  
+  # browser()
+  if (hasS3Method("tidy", fit)) {
+    tidy_df <- tidy(fit, conf.int = TRUE)
   } else {
-    summ <- coef(summary(fit))
-    summ <-
-      summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("estimate", "std", "pr("), drop = FALSE]
-    ci <- suppressMessages(as.data.frame(confint(fit)))
-    tidy_df <-
-      data.frame(
-        term = rownames(summ),
-        summ,
-        ci,
-        stringsAsFactors = FALSE,
-        row.names = NULL
-      )
-    colnames(tidy_df) <-
-      c(
-        "term",
-        "estimate",
-        "std.error",
-        "p.value",
-        "conf.low",
-        "conf.high"
-      )
+    tidy_df <- try(tidy_default(fit, conf.int = TRUE), silent = TRUE)
+    
+    if(class(tidy_df) == "try-error"){
+      stop("We were unable to tidy the output of the function provided to 'model'. 
+           It is possible that the broom package has a tidier for that object type. 
+           If not, you can use a custom estimator to 'estimator_function'.
+           See examples in ?declare_estimator")
+    }
   }
-
+    
   if (is.character(term)) {
     coefs_in_output <- term %in% tidy_df$term
     if (!all(coefs_in_output)) {

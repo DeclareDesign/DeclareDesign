@@ -1,25 +1,24 @@
 
 #' Deprecated functions
 #'
-#' @param ... options sent to the old version of \code{declare_design}.
+#' The function \code{get_estimands} has been replaced with \code{draw_estimands}.
 #'
-#' @name DeclareDesign-deprecated
-#' @section For \code{declare_design}:
-#' \code{declare_design}, instead use the \code{+} operator to create a design, i.e. \code{pop + smp + assgn}.
+#' @param ... options sent to the old version of \code{get_estimands}.
+#'
 #' @export
 #'
-declare_design <- function(...) {
+#' @name deprecated
+get_estimands <- function(...) {
   qs <- quos(...)
-
+  
   .Deprecated(
-    new = "+",
-    old = "declare_design",
+    new = "draw_estimands",
+    old = "get_estimands",
     msg = paste0(
-      "\nDeclareDesign no longer includes the declare_design() function from development versions. ",
-      "Please use the + operator to create designs. For your design, you can try:\n\n",
-      paste(sapply(qs, quo_text), collapse = " + ")
+      "\nThe get_estimands function has been renamed draw_estimands, to make clear ",
+      "that the estimands are draws from a simulation. Please replace your code with draw_estimands."
     )
   )
-
+  
   cat()
 }

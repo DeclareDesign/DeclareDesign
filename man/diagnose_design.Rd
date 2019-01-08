@@ -2,9 +2,13 @@
 % Please edit documentation in R/diagnose_design.R
 \name{diagnose_design}
 \alias{diagnose_design}
+\alias{diagnose_designs}
 \title{Diagnose the design}
 \usage{
 diagnose_design(..., diagnosands = NULL, sims = 500,
+  bootstrap_sims = 100, add_grouping_variables = NULL)
+
+diagnose_designs(..., diagnosands = NULL, sims = 500,
   bootstrap_sims = 100, add_grouping_variables = NULL)
 }
 \arguments{
@@ -29,7 +33,7 @@ If the diagnosand function contains a \code{group_by} attribute, it will be used
 
 If \code{sims} is named, or longer than one element, a fan-out strategy is created and used instead.
 
-If the \code{future} package is installed, you can set  \code{\link[future]{plan}} to run multiple simulations at once.
+If the packages \code{future} and \code{future.apply} are installed, you can set \code{\link[future]{plan}} to run multiple simulations in parallel.
 }
 \examples{
 my_population <- declare_population(N = 500, noise = rnorm(N))

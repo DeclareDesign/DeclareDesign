@@ -198,3 +198,79 @@ test_that("default diagnosands work", {
   diag <- diagnose_design(sims, sims = 5, bootstrap_sims = FALSE)
 })
 
+
+test_that("more term",{
+  population  <-
+    declare_population(N = 100,
+                       Z = rep(0:1, 50),
+                       Y = rnorm(N))
+  
+  estimands_regression <- declare_estimand(
+    `(Intercept)` = 0,
+    `Z` = 1,
+    term = TRUE,
+    label = "Regression_Estimands"
+  )
+  
+  estimators_regression <- declare_estimator(Y ~ Z,
+                                             estimand = estimands_regression,
+                                             model = lm_robust,
+                                             term = TRUE)
+  
+  estimand_2  <- declare_estimand(ATE = 2,   label = "2")
+  estimator_2 <-
+    declare_estimator(Y ~ Z, estimand = estimand_2, label = "dim")
+  
+  design <-
+    population + estimands_regression + estimators_regression + estimand_2 + estimator_2
+  
+  sims_df <- simulate_design(design, sims = 1)
+  
+  expect_equal(nrow(sims_df), 3)
+  
+  expect_equal(sims_df[, 1:6],
+               structure(
+                 list(
+                   design_label = c("design", "design", "design"),
+                   sim_ID = c(1L, 1L, 1L),
+                   estimand_label = c("ATE", "Regression_Estimands",
+                                      "Regression_Estimands"),
+                   estimand = c(2, 0, 1),
+                   estimator_label = c("dim",
+                                       "estimator", "estimator"),
+                   term = c("Z", "(Intercept)", "Z")
+                 ),
+                 class = "data.frame",
+                 row.names = c(NA,-3L)
+               ))
+  
+  
+  
+})
+
+test_that("diagnose_design does not reclass the variable N", {
+  skip_if(compareVersion("3.5", paste(R.Version()$major, R.Version()$minor, sep = ".")) == 1)
+  # works for redesign
+  design <-
+    declare_population(N = 5, noise = rnorm(N)) +
+       declare_estimand(mean_noise = mean(noise))
+  
+  designs <- redesign(design, N = 5:10) 
+  dx <- diagnose_design(designs, sims = 50, bootstrap_sims = FALSE)
+  
+  expect_equal(class(dx$simulations_df$N), "integer") 
+  expect_equal(class(dx$diagnosands_df$N), "integer")
+  
+  # works for expand_design
+  designer <- function(N = 5) {
+    declare_population(N = N, noise = rnorm(N)) +
+    declare_estimand(mean_noise = mean(noise))
+  }
+  
+  designs <- expand_design(designer, N = 5:10) 
+  dx <- diagnose_design(designs, sims = 50, bootstrap_sims = FALSE)
+  
+  expect_equal(class(dx$simulations_df$N), "integer") 
+  expect_equal(class(dx$diagnosands_df$N), "integer")
+  
+})

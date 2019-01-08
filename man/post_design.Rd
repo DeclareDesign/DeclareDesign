@@ -2,18 +2,21 @@
 % Please edit documentation in R/design_helper_functions.R
 \name{post_design}
 \alias{post_design}
-\alias{draw_data}
-\alias{get_estimands}
 \alias{get_estimates}
+\alias{draw_data}
+\alias{draw_estimands}
+\alias{draw_estimates}
 \alias{print.design}
 \alias{summary.design}
 \title{Explore your design}
 \usage{
+get_estimates(design, data = NULL, start = 1, end = length(design))
+
 draw_data(design)
 
-get_estimands(...)
+draw_estimands(...)
 
-get_estimates(...)
+draw_estimates(...)
 
 \method{print}{design}(x, verbose = TRUE, ...)
 
@@ -21,6 +24,12 @@ get_estimates(...)
 }
 \arguments{
 \item{design}{A design object, typically created using the + operator}
+
+\item{data}{A data.frame object with sufficient information to run estimators.}
+
+\item{start}{(Defaults to 1) a scalar indicating which step in the design to begin getting estimates from. By default all estimators are calculated, from step 1 to the last step of the design.}
+
+\item{end}{(Defaults to \code{length(design)}) a scalar indicating which step in the design to finish getting estimates from.}
 
 \item{...}{optional arguments to be sent to summary function}
 
@@ -49,8 +58,8 @@ design
 
 df <- draw_data(design)
 
-estimates <- get_estimates(design)
-estimands <- get_estimands(design)
+estimates <- draw_estimates(design)
+estimands <- draw_estimands(design)
 
 
 my_population <- declare_population(N = 500, noise = rnorm(N))

@@ -12,7 +12,10 @@ test_that("Fanout does something", {
   out <- DeclareDesign:::fan_out(D, fan_strategy)
 
   estimands_out <- do.call(rbind, lapply(out, `[[`, "estimands_df"))
-  expect_equal(nrow(unique(estimands_out)), 1)
+  expect_equal(length(unique(estimands_out$estimand)), 1)
+  expect_equal(estimands_out$step_1_draw, rep(1,100))
+  expect_equal(estimands_out$step_3_draw, 1:100)
+  
 })
 
 test_that("fanout should not be exposed to users", {
@@ -57,8 +60,11 @@ test_that("Diagnosing a fanout", {
 
   strategy <- c(1, 1, 5, 20)
 
+  Sys.setenv(TESTTHAT='m')
   dx <- expect_warning(diagnose_design(D, sims = strategy))
-
+  Sys.setenv(TESTTHAT='true')
+  
+  
   # estimands don't vary overall
   expect_equal(
     dx$diagnosands[1, "se(mean_estimand)"], 0
@@ -71,7 +77,7 @@ test_that("Diagnosing a fanout", {
 
   expect_equivalent(tapply(dx$simulations$estimate, rep_id[dx$simulations$sim_ID, 3], var), c(0, 0, 0, 0, 0))
 
-  expect_length(paste0("fan_", 1:3) %icn% dx$simulations, 3)
+  expect_length(c("step_3_draw", "step_4_draw") %icn% dx$simulations, 2)
 })
 
 test_that("sims expansion is correct", {
@@ -88,13 +94,11 @@ test_that("sims expansion is correct", {
 
   sims <- 2
   expanded <- check_sims(design, sims)
-
-  # compressed final two steps
-  expect_equal(expanded$n, c(2, 1))
+  expect_equal(expanded$n, 2)
 
   sims <- c(a = 2)
   expanded <- check_sims(design, sims)
-  expect_equal(expanded$n, c(1, 2, 1))
+  expect_equal(expanded$n, c(1, 2))
 })
 
 
@@ -120,5 +124,46 @@ test_that("fanout warnings", {
 
   strategy <- c(1, 1, 1, 1)
 
+  Sys.setenv(TESTTHAT='m')
   expect_warning(diagnose_design(D, sims = strategy))
+  Sys.setenv(TESTTHAT='true')
+  
 })
+
+
+test_that("correct fan out", {
+  f1 <- local({
+    i <- 0
+    function() {
+      i <<- i + 1
+      i
+    }
+  })
+  f2 <- local({
+    i <- 0
+    function() {
+      i <<- i + 1
+      i
+    }
+  })
+  f3 <- local({
+    i <- 0
+    function() {
+      i <<- i + 1
+      i
+    }
+  })
+  e1 <- declare_estimand(a = f1())
+  e2 <- declare_estimand(b = f2())
+  e3 <- declare_estimand(c = f3())
+  
+  out <-
+    simulate_design(declare_population(sleep) + e1 + e2 + e3, sims = c(30, 1, 5, 2))
+  
+  expect_equivalent(apply(out[,c(5:7)], 2, max), c(30, 150, 300))
+  expect_equivalent(tapply(out$estimand, INDEX = out$estimand_label, max), c(30, 150, 300))
+  
+})
+
+
+

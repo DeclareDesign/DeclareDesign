@@ -70,5 +70,5 @@ test_that("More multiple estimands", {
 
 
   des <- pop + pos + pate + smp + sate + assgn + my_reveal + mator_both
-  expect_equal(get_estimates(des)$estimand_label, c("pate", "sate"))
+  expect_equal(draw_estimates(des)$estimand_label, c("pate", "sate"))
 })

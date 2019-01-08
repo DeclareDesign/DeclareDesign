@@ -18,8 +18,8 @@
 #'
 #' df <- draw_data(design)
 #'
-#' estimates <- get_estimates(design)
-#' estimands <- get_estimands(design)
+#' estimates <- draw_estimates(design)
+#' estimands <- draw_estimands(design)
 #'
 #' @name post_design
 NULL
@@ -46,17 +46,23 @@ check_sims <- function(design, sims) {
   }
 
   # Compress sequences of ones into one partial execution
-  include <- rep(TRUE, n)
-  last_1 <- FALSE
-  for (i in n:1) {
-    if (!last_1) {
-      include[i] <- TRUE
-    } else if (ret[i, "n"] == 1 && last_1) include[i] <- FALSE
-
-    last_1 <- ret[i, "n"] == 1
+  
+  if(n > 1) {
+    j <- 1
+    for(i in 2:n){
+      k <- ret[i, "n"]
+      if(k > 1) {
+        #keeper
+        j <- j + 1
+        ret[j,] <- c(i,k) 
+      } else if(k == 1) {
+        ret[j, "end"] <- i
+      }
+    }
+    ret <- ret[1:j, , drop=FALSE]
   }
-
-  ret[include, , drop = FALSE]
+  
+  ret
 }
 
 #' Execute a design
@@ -118,17 +124,37 @@ run_design_internal.design <- function(design, current_df = NULL, results = NULL
     if ("current_df" %in% names(results)) {
       results[["current_df"]] <- current_df
     }
-    results
+    append(results, list(...))
+    
   } else {
     execution_st(
       design = design,
       current_df = current_df,
       results = results,
       start = i + 1,
-      end = length(design)
+      end = length(design),
+      ...
     )
   }
 }
+
+#' @param data A data.frame object with sufficient information to run estimators. 
+#' @param start (Defaults to 1) a scalar indicating which step in the design to begin getting estimates from. By default all estimators are calculated, from step 1 to the last step of the design.
+#' @param end (Defaults to \code{length(design)}) a scalar indicating which step in the design to finish getting estimates from. 
+#'
+#' @rdname post_design
+#' @export
+get_estimates <- function(design, data = NULL, start = 1, end = length(design)) {
+  
+  if(is.null(data)){
+    stop("Please provide a data frame to the data argument. If you would like to get estimates from simulated data, use draw_estimates to draw data and get estimates in one step.")
+  }
+
+  estimators <- Filter(function(x) attr(x, "causal_type") == "estimator", design[start:end])
+  run_design_internal.design(estimators, current_df = data)$estimates_df
+                       
+}
+
 
 # for when the user sends a function that runs a design itself
 #   to run_design (or simulate_design / diagnose_design above it)
@@ -145,7 +171,7 @@ run_design_internal.execution_st <- function(design, ...) do.call(run_design_int
 # @param results a list of intermediate results
 # @param start index of starting step
 # @param end  index of ending step
-execution_st <- function(design, current_df = NULL, results = NULL, start = 1, end = length(design)) {
+execution_st <- function(design, current_df = NULL, results = NULL, start = 1, end = length(design), ...) {
   # An execution state are the arguments needed to run run_design
   structure(
     list(
@@ -153,7 +179,8 @@ execution_st <- function(design, current_df = NULL, results = NULL, start = 1, e
       current_df = current_df,
       results = results,
       start = start,
-      end = end
+      end = end,
+      ...
     ),
     class = "execution_st"
   )
@@ -170,12 +197,12 @@ draw_data <- function(design) {
 #' @rdname post_design
 #'
 #' @export
-get_estimands <- function(...) apply_on_design_dots(get_estimands_single_design, ...)
+draw_estimands <- function(...) apply_on_design_dots(draw_estimands_single_design, ...)
 
 #' @rdname post_design
 #'
 #' @export
-get_estimates <- function(...) apply_on_design_dots(get_estimates_single_design, ...)
+draw_estimates <- function(...) apply_on_design_dots(draw_estimates_single_design, ...)
 
 apply_on_design_dots <- function(FUN, ...) {
   designs <- dots_to_list_of_designs(...)
@@ -214,12 +241,12 @@ dots_to_list_of_designs <- function(...) {
 }
 
 
-get_estimates_single_design <- function(design) {
+draw_estimates_single_design <- function(design) {
   results <- list("estimator" = vector("list", length(design)))
   run_design_internal(design, results = results)$estimates_df
 }
 
-get_estimands_single_design <- function(design) {
+draw_estimands_single_design <- function(design) {
   results <- list("estimand" = vector("list", length(design)))
   run_design_internal(design, results = results)$estimands_df
 }
@@ -552,9 +579,18 @@ print.summary.design <- function(x, ...) {
 #' @export
 str.design_step <- function(object, ...) cat("design_step:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse = ""), "\n")
 
+
+make_fan_counter <- function(fan) {
+  k <- nrow(fan)
+  ret <- matrix(0, 1, k)
+  colnames(ret) <- sprintf("step_%d_draw", c(1, fan$end+1)[1:k])
+  
+  ret
+}
+
 # A wrapper around conduct design for fan-out execution strategies
 fan_out <- function(design, fan) {
-  st <- list(execution_st(design))
+  st <- list(execution_st(design, fan=make_fan_counter(fan)))
 
   for (i in seq_len(nrow(fan))) {
     end <- fan[i, "end"]
@@ -565,8 +601,19 @@ fan_out <- function(design, fan) {
 
     st <- st [ rep(seq_along(st), each = n) ]
 
+    for (j in seq_along(st))
+      st[[j]]$fan[i] <- j
+    
+    
     st <- future_lapply(seq_along(st), function(j) run_design(st[[j]]), future.seed = NA, future.globals = "st")
   }
+  
+  st <- lapply(st, function(x){
+    fan <- x$fan
+    x$fan <- NULL
+    lapply(x, function(x, z=nrow(x)) if(z > 0) cbind(x,fan) else x)
+  })
+  
 
   st
 }

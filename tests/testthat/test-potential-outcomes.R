@@ -143,10 +143,11 @@ test_that("POs at a higher level", {
 })
 
 
-test_that("error if you try to draw POs at a level using a variable that doesn't exist at that level", {
+test_that("draw POs at a level using a variable from another level (now allowed)", {
+  set.seed(50)
   my_population <- declare_population(
-    villages = add_level(N = 3, elevation = rnorm(N)),
-    citizens = add_level(N = 4, income = runif(N))
+    villages = add_level(N = 2, elevation = runif(N)),
+    citizens = add_level(N = 2, income = runif(N))
   )
 
   pop <- my_population()
@@ -157,7 +158,14 @@ test_that("error if you try to draw POs at a level using a variable that doesn't
       level = villages
     )
 
-  expect_error(my_potential_outcomes_formula(pop))
+  expect_equivalent(my_potential_outcomes_formula(pop),
+                    structure(list(villages = c("1", "1", "2", "2"), elevation = c(0.708727096440271, 
+                                                                                   0.708727096440271, 0.437659863382578, 0.437659863382578), citizens = c("1", 
+                                                                                                                                                          "2", "3", "4"), income = c(0.200004896614701, 0.767065986292437, 
+                                                                                                                                                                                     0.513161889044568, 0.0447038763668388), Y_vil_Z_0 = c(5.90873199305497, 
+                                                                                                                                                                                                                                           6.47579308273271, 5.95082175242715, 5.48236373974942), Y_vil_Z_1 = c(5.90873199305497, 
+                                                                                                                                                                                                                                                                                                                6.47579308273271, 5.95082175242715, 5.48236373974942)), class = "data.frame", row.names = c(NA, 
+                                                                                                                                                                                                                                                                                                                                                                                                            4L), outcome_variable = "Y_vil", assignment_variables = "Z"))
 })
 
 
@@ -242,7 +250,7 @@ test_that("Reveal step injected (default names)", {
 
   pop <- declare_population(N = N, foo = rnorm(N))
   po <- declare_potential_outcomes(Y ~ Z + foo)
-  assn <- declare_assignment(N = N, m = N / 2)
+  assn <- declare_assignment(m = N / 2)
   d <- pop + po + assn
   # expect_warning(d <- pop +  po + assn, "inject a `declare_reveal")
   expect_true("Y" %in% colnames(draw_data(d)))
@@ -269,7 +277,6 @@ test_that("Reveal step injected (default names)", {
   # Fix it
   assn <-
     declare_assignment(
-      N = N,
       prob_each = c(1, 1, 1) / 3,
       conditions = 1:3,
       assignment_variable = "T"
@@ -289,7 +296,7 @@ test_that("Reveal step injected after another injected reveal step", {
   pop <- declare_population(N = N, foo = rnorm(N))
   po <- declare_potential_outcomes(Y ~ draw_binary(plogis(Z + foo)))
   po2 <- declare_potential_outcomes(Q ~ Y + foo, conditions = list(Y = 0:1))
-  assn <- declare_assignment(N = N, m = N / 2)
+  assn <- declare_assignment(m = N / 2)
 
   d <- pop + po + po2 + assn
   # expect_warning(d <- pop + po + po2 + assn, "inject a `declare_reveal[(]Q, Y")

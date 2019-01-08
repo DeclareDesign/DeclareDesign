@@ -1,3 +1,4 @@
+^CRAN-RELEASE$
 ^\.travis\.yml$
 README.md
 README.Rmd
@@ -20,3 +21,4 @@ paper.pdf
 ^vignettes/.*\.RDS$
 ^DeclareDesign_.*\.tar\.gz$
 ^cran-comments\.md$
+vignettes

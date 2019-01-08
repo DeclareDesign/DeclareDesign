@@ -52,9 +52,11 @@ sampling_handler <- function(data, ..., sampling_variable = "S") {
 
   S <- as.symbol(".__Sample") # Matching old code but also eliminating the R CMD check warning that .__Sample is a undef/global variable
 
+  decl <- eval_tidy(quo(declare_rs(N=!!nrow(data), !!!options)), data)
+  
   data <- fabricate(data,
-    !!S := draw_rs(N = N, !!!options),
-    !!samp := obtain_inclusion_probabilities(N = N, !!!options),
+    !!S := draw_rs(!!decl),
+    !!samp := obtain_inclusion_probabilities(!!decl),
     ID_label = NA
   )
 

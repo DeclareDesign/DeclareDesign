@@ -53,19 +53,20 @@ diagnosis
 
 ## Companion software
 
-The core DeclareDesign package relies on three companion packages, each of which is useful in its own right.
+The core DeclareDesign package relies on four companion packages, each of which is useful in its own right.
 
 1. [randomizr](https://declaredesign.org/r/randomizr/): Easy to use tools for common forms of random assignment and sampling.
 2. [fabricatr](https://declaredesign.org/r/fabricatr/): Imagine your data before you collect it.
 3. [estimatr](https://declaredesign.org/r/estimatr/): Fast estimators for social scientists.
+4. [DesignLibrary](https://declaredesign.org/library): Templates to quickly adopt and adapt common research designs.
 
 ## Learning DeclareDesign
 
 1. To get started, have a look at this vignette on [the idea behind DeclareDesign](https://declaredesign.org/idea/), which covers the main functionality of the software.
 
-2. You can also browse a [library](https://declaredesign.org/library/) of already declared designs. The library includes canonical designs that you can download, modify, and deploy.
+2. You can also browse a [library](https://declaredesign.org/library/) of already declared designs, which relies on the `DesignLibrary` package. The library includes canonical designs that you can download, modify, and deploy.
 
-3. A fuller description of the philosophy underlying the software is described in this [working paper](https://declaredesign.org/paper.pdf).
+3. A fuller description of the philosophy underlying the software is described in this [working paper](https://declaredesign.org/declare.pdf).
 
 ## Package structure
 
@@ -84,8 +85,8 @@ Once you have declared your design, there are four core post-design-declaration 
 
 1. `diagnose_design()` (takes a design, returns simulations and diagnosis)
 2. `draw_data()` (takes a design and returns a single draw of the data)
-3. `get_estimates()` (takes a design a returns a single simulation of estimates)
-4. `get_estimands()` (takes a design a returns a single simulation of estimands)
+3. `draw_estimates()` (takes a design a returns a single simulation of estimates)
+4. `draw_estimands()` (takes a design a returns a single simulation of estimands)
 
 A few other features:
 

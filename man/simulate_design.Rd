@@ -2,9 +2,12 @@
 % Please edit documentation in R/simulate_design.R
 \name{simulate_design}
 \alias{simulate_design}
+\alias{simulate_designs}
 \title{Simulate a design}
 \usage{
 simulate_design(..., sims = 500)
+
+simulate_designs(..., sims = 500)
 }
 \arguments{
 \item{...}{A design created using the + operator, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.}
@@ -15,7 +18,9 @@ simulate_design(..., sims = 500)
 Runs many simulations of a design and returns a simulations data.frame.
 }
 \details{
-Different steps of a design may each be simulated different a number of times, as specified by sims. In this case simulations are grouped into "fans", eg "fan_1" indicates all the simulations that have the same draw from the first level of the design. For efficiency there are generally fewer fans than design steps where all contiguous steps with 1 sim specified are combined into a single fan.
+Different steps of a design may each be simulated different a number of times, as specified by sims. In this case simulations are grouped into "fans". The nested 
+structure of simulations is recorded in the dataset using a set of variables named "step_x_draw." For example if sims = c(2,1,1,3) is passed to simulate_design, then there
+will be two distinct draws of step 1, indicated in variable "step_1_draw" (with values 1 and 2) and there will be three draws for step 4 within each of the step 1 draws, recorded in "step_4_draw" (with values 1 to 6).
 }
 \examples{
 my_population <- declare_population(N = 500, noise = rnorm(N))

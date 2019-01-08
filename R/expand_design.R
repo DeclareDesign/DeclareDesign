@@ -11,7 +11,17 @@
 #' @return if set of designs is size one, the design, otherwise a `by`-list of designs. Designs are given a parameters attribute with the values of parameters assigned by expand_design.
 #'
 #' @examples
+#' 
+#' \dontrun{
 #'
+#' # in conjunction with DesignLibrary
+#' 
+#' library(DesignLibrary)
+#' 
+#' designs <- expand_design(multi_arm_designer, outcome_means = list(c(3,2,4), c(1,4,1)))
+#'
+#' # with a custom designer function
+#' 
 #' designer <- function(N) {
 #'   pop <- declare_population(N = N, noise = rnorm(N))
 #'   pos <- declare_potential_outcomes(Y ~ 0.20 * Z + noise)
@@ -24,15 +34,12 @@
 #' # returns list of eight designs
 #' designs <- expand_design(designer, N = seq(30, 100, 10))
 #'
-#' \dontrun{
 #'  # diagnose a list of designs created by expand_design or redesign
 #'  diagnosis <- diagnose_design(designs, sims = 50)
-#' }
 #'
 #' # returns a single design
 #' large_design <- expand_design(designer, N = 200)
 #'
-#' \dontrun{
 #'  diagnose_large_design <- diagnose_design(large_design, sims = 50)
 #' }
 #'
@@ -40,91 +47,50 @@
 expand_design <- function(designer, ..., expand = TRUE, prefix = "design") {
   dots_quos <- quos(...)
 
-  if (length(dots_quos) > 0) {
-    args_list <- expand_args(..., expand = expand)
-    args_names <- expand_args_names(!!!dots_quos, expand = expand)
-    # args_names <- rbind_disjoint(lapply(args_list, data.frame))
+  if (length(dots_quos) == 0) return(designer())
+    
+  # transpose
+  transp <- function(zx,ix) do.call(mapply, 
+                               append(mapply(`[`, zx, ix, SIMPLIFY = FALSE), 
+                                      list(FUN = list, SIMPLIFY = FALSE), 
+                                      after = 0)
+                               )
 
-    designs <- lapply(args_list, function(x) do.call(designer, args = x))
+  args <- list(...)
+  args <- lapply(args, function(x) if(is.function(x)) list(x) else x)
+  
+  ix <- lapply(args, seq_along)
+  ix <- if(expand) expand.grid(ix) else data.frame(ix)
+  
+  designs <- lapply(transp(args, ix), do.call, what = designer)
 
-    for (i in seq_along(designs)) {
-      attr(designs[[i]], "parameters") <- setNames(args_names[i, , drop = FALSE], names(args_names))
-    }
+  args_names <- lapply(dots_quos, expand_args_names)
+  
+  designs <- mapply(structure, 
+                    designs, 
+                    parameters = transp(args_names, ix), 
+                    SIMPLIFY = FALSE)
+  
 
-    if (length(designs) == 1) {
-      designs <- designs[[1]]
-    } else {
-      names(designs) <- paste0(prefix, "_", seq_len(length(designs)))
-    }
+  if (length(designs) == 1) {
+    designs <- designs[[1]]
   } else {
-    designs <- designer()
+    names(designs) <- paste0(prefix, "_", seq_along(designs))
   }
 
-  return(designs)
+  designs
 }
 
 
-expand_args <- function(..., expand = TRUE) {
-  dots <- list(...)
-
-  if (expand) {
-    lens <- lapply(dots, function(x) seq_len(length(x)))
-    args_positions <- do.call(expand.grid, args = list(lens, stringsAsFactors = TRUE))
-    args_list <- vector("list", nrow(args_positions))
-    for (i in seq_len(nrow(args_positions))) {
-      current_list_row <- vector("list", ncol(args_positions))
-      names(current_list_row) <- names(dots)
-      for (j in seq_len(ncol(args_positions))) {
-        if (length(dots[[j]]) > 1) {
-          current_list_row[[j]] <- dots[[j]][[args_positions[i, j]]]
-        } else {
-          current_list_row[[j]] <- dots[[j]]
-        }
-      }
-      args_list[[i]] <- current_list_row
-    }
-  } else {
-    args_list <- vector("list", length(dots[[1]]))
-    for (i in seq_along(args_list)) {
-      current_list_row <- vector("list", length(dots))
-      names(current_list_row) <- names(dots)
-      for (j in seq_along(dots)) {
-        if (length(dots[[j]]) > 1) {
-          current_list_row[[j]] <- dots[[j]][j]
-        } else {
-          current_list_row[[j]] <- dots[[j]]
-        }
-      }
-      args_list[[i]] <- current_list_row
-    }
-  }
-  args_list
-}
 
 #' @importFrom rlang quo_squash is_call call_args
-expand_args_names <- function(..., expand = TRUE) {
-  dots_quos <- quos(...)
-
-  dots_names <- lapply(dots_quos, function(x) {
-    x_expr <- quo_squash(x)
-    is_list_c <- expr_text(as.list(x_expr)[[1]]) %in% c("c", "list")
-    if (!is_list_c) {
-      x_is_call <- is_call(x_expr)
-      if (x_is_call) {
-        as.character(eval_tidy(x))
-      } else {
-        as.character(x_expr)
-      }
-    } else {
-      as.character(call_args(x_expr))
-    }
-  })
-  if (expand) {
-    ret <- expand.grid(dots_names, stringsAsFactors = FALSE)
-  } else {
-    ret <- data.frame(dots_names, stringsAsFactors = FALSE)
-  }
-  ret
+expand_args_names <- function(x) {
+  x_expr <- quo_squash(x)
+  is_list_c <- expr_text(as.list(x_expr)[[1]]) %in% c("c", "list")
+  x <- if (is_list_c) call_args(x_expr) 
+       else if (is_call(x_expr)) eval_tidy(x) 
+       else x_expr
+  as.character(x)
 }
 
 

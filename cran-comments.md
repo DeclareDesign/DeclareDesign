@@ -1,17 +1,22 @@
+## Submission
+
+We are resubmitting a small update, `DeclareDesign 0.14.0`, principally to address errors at https://cran.rstudio.com//web/checks/check_results_DeclareDesign.html.
+
+Thank you for your time reviewing the submission.
+
 ## Test environments
-* local OS X install, R 3.5.1
-* ubuntu 12.04 (on travis-ci), R 3.5.1
-* win-builder (devel and release)
+* local OS X install (release)
+* ubuntu 12.04 on travis-ci (devel, release, oldrel)
+* OS X on travis-ci (release, oldrel)
+* win-builder (devel, release, oldrel)
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
-
-* This is a new release.
+0 errors | 0 warnings | 0 notes
 
 ## Reverse dependencies
 
-This is a new release, so there are no reverse dependencies.
+We see no problems with our reverse depends.
 
 ---
   

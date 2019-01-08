@@ -23,6 +23,16 @@ if set of designs is size one, the design, otherwise a `by`-list of designs. Des
 }
 \examples{
 
+\dontrun{
+
+# in conjunction with DesignLibrary
+
+library(DesignLibrary)
+
+designs <- expand_design(multi_arm_designer, outcome_means = list(c(3,2,4), c(1,4,1)))
+
+# with a custom designer function
+
 designer <- function(N) {
   pop <- declare_population(N = N, noise = rnorm(N))
   pos <- declare_potential_outcomes(Y ~ 0.20 * Z + noise)
@@ -35,15 +45,12 @@ designer <- function(N) {
 # returns list of eight designs
 designs <- expand_design(designer, N = seq(30, 100, 10))
 
-\dontrun{
  # diagnose a list of designs created by expand_design or redesign
  diagnosis <- diagnose_design(designs, sims = 50)
-}
 
 # returns a single design
 large_design <- expand_design(designer, N = 200)
 
-\dontrun{
  diagnose_large_design <- diagnose_design(large_design, sims = 50)
 }
 
