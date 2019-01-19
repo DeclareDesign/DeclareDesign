@@ -1,8 +1,12 @@
-#' @param data A data.frame object with sufficient information to conduct data generation from the start step to the end step.
-#' @param start (Defaults to 1) a scalar indicating which step in the design to begin drawing data from. By default all data steps are drawn, from step 1 to the last step of the design.
-#' @param end (Defaults to \code{length(design)}) a scalar indicating which step in the design to finish drawing data by.
+#' Get data, estimates, estimands, assignment vectors, or samples from a design given data
+#'  
+#' @param design A design object, typically created using the + operator
+#' @param data A data.frame object with sufficient information to get the data, estimates, estimands, an assignment vector, or a sample.
+#' @param start (Defaults to 1) a scalar indicating which step in the design to begin with. By default all data steps are drawn, from step 1 to the last step of the design.
+#' @param end (Defaults to \code{length(design)}) a scalar indicating which step in the design to finish with.
 #'
-#' @rdname post_design
+#' @name get_functions
+#' 
 #' @export
 get_data <- function(design, data = NULL, start = 1, end = length(design)) {
   
@@ -24,11 +28,7 @@ get_data <- function(design, data = NULL, start = 1, end = length(design)) {
   
 }
 
-#' @param data A data.frame object with sufficient information to run estimators. 
-#' @param start (Defaults to 1) a scalar indicating which step in the design to begin getting estimates from. By default all estimators are calculated, from step 1 to the last step of the design.
-#' @param end (Defaults to \code{length(design)}) a scalar indicating which step in the design to finish getting estimates from. 
-#'
-#' @rdname post_design
+#' @rdname get_functions
 #' @export
 get_estimates <- function(design, data = NULL, start = 1, end = length(design)) {
   
@@ -41,11 +41,7 @@ get_estimates <- function(design, data = NULL, start = 1, end = length(design)) 
   
 }
 
-#' @param data A data.frame object with sufficient information to draw assignment vectors. 
-#' @param start (Defaults to 1) a scalar indicating which step in the design to begin drawing assignment vectors. By default all assignment vectors are drawn, from step 1 to the last step of the design.
-#' @param end (Defaults to \code{length(design)}) a scalar indicating which step in the design to finish drawing assignment vectors. 
-#'
-#' @rdname post_design
+#' @rdname get_functions
 #' @export
 get_assignment <- function(design, data = NULL, start = 1, end = length(design)) {
   
@@ -66,11 +62,8 @@ get_assignment <- function(design, data = NULL, start = 1, end = length(design))
   
 }
 
-#' @param data A data.frame object with sufficient information to run sampling steps. 
-#' @param start (Defaults to 1) a scalar indicating which step in the design to begin sampling. By default all sampling steps are run, from step 1 to the last step of the design.
-#' @param end (Defaults to \code{length(design)}) a scalar indicating which step in the design to finish sampling. 
-#'
-#' @rdname post_design
+#' @rdname get_functions
+#' 
 #' @export
 get_sample <- function(design, data = NULL, start = 1, end = length(design)) {
   

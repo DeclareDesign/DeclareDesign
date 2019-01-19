@@ -1,4 +1,4 @@
-#'  Draw data, estimates, and estimands from a design
+#' Draw data, estimates, and estimands from a design
 #'  
 #' @param design A design object, typically created using the + operator
 #' @param end (Defaults to \code{length(design)}) a scalar indicating which step in the design to finish drawing data by.
