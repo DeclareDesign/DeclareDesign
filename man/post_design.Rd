@@ -6,7 +6,7 @@
 \alias{get_data}
 \alias{get_estimates}
 \alias{get_assignment}
-\alias{get_sampling}
+\alias{get_sample}
 \title{Explore your design}
 \usage{
 print_code(design)
@@ -17,7 +17,7 @@ get_estimates(design, data = NULL, start = 1, end = length(design))
 
 get_assignment(design, data = NULL, start = 1, end = length(design))
 
-get_sampling(design, data = NULL, start = 1, end = length(design))
+get_sample(design, data = NULL, start = 1, end = length(design))
 }
 \arguments{
 \item{design}{A design object, typically created using the + operator}

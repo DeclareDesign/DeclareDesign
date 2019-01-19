@@ -70,7 +70,7 @@ get_assignment <- function(design, data = NULL, start = 1, end = length(design))
 #'
 #' @rdname post_design
 #' @export
-get_sampling <- function(design, data = NULL, start = 1, end = length(design)) {
+get_sample <- function(design, data = NULL, start = 1, end = length(design)) {
   
   if(is.null(data)){
     stop("Please provide a data frame to the data argument.")

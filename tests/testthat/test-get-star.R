@@ -23,7 +23,7 @@ test_that("get_ works", {
   expect_true(all(c("Z", "Z_cond_prob") %in% colnames(dat_with_Z)))
   
   
-  dat_sampled <- get_sampling(design, dat[c(1:75, 1:75), ])
+  dat_sampled <- get_sample(design, dat[c(1:75, 1:75), ])
   expect_equal(nrow(dat_2), 75)
   
   
