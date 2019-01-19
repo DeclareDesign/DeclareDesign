@@ -18,7 +18,9 @@ get_data <- function(design, data = NULL, start = 1, end = length(design)) {
     stop("Please provide an end step as a number between 1 and the total number of steps in the design.")
   }
   
-  run_design_internal.design(design[start:end], current_df = data, results = list(current_df = 0))$current_df
+  design_subset <- Filter(function(x) attr(x, "causal_type") == "dgp", design[start:end])
+  
+  run_design_internal.design(design_subset, current_df = data, results = list(current_df = 0))$current_df
   
 }
 
