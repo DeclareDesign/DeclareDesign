@@ -226,7 +226,6 @@ cite_design <- function(design, ...) {
 #' @export
 print.design_step <- function(x, ...) {
   print(attr(x, "call"))
-  # invisible(summary(x))
 }
 
 #' Print code to recreate a design
