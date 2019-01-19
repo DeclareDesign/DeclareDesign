@@ -24,7 +24,7 @@ test_that("get_ works", {
   
   
   dat_sampled <- get_sample(design, dat[c(1:75, 1:75), ])
-  expect_equal(nrow(dat_2), 75)
+  expect_equal(nrow(dat_sampled), 75)
   
   
   
