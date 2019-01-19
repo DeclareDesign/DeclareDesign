@@ -28,3 +28,24 @@ get_sample(design, data = NULL, start = 1, end = length(design))
 \description{
 Get data, estimates, estimands, assignment vectors, or samples from a design given data
 }
+\examples{
+
+design <- declare_population(N = 100, u = rnorm(N)) +
+  declare_potential_outcomes(Y ~ Z + u) +
+  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_sampling(n = 75) +
+  declare_assignment(m = 50) +
+  declare_reveal(Y, Z) +
+  declare_estimator(Y ~ Z, estimand = "ATE")
+
+dat <- draw_data(design)
+
+get_data(design, data = dat, start = 2)
+
+get_estimates(design, data = dat)
+
+get_assignment(design, data = dat)
+
+get_sampling(design, data = dat)
+
+}

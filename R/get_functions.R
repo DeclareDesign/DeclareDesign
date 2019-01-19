@@ -5,6 +5,26 @@
 #' @param start (Defaults to 1) a scalar indicating which step in the design to begin with. By default all data steps are drawn, from step 1 to the last step of the design.
 #' @param end (Defaults to \code{length(design)}) a scalar indicating which step in the design to finish with.
 #'
+#' @examples
+#' 
+#' design <- declare_population(N = 100, u = rnorm(N)) +
+#'   declare_potential_outcomes(Y ~ Z + u) +
+#'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_sampling(n = 75) +
+#'   declare_assignment(m = 50) +
+#'   declare_reveal(Y, Z) +
+#'   declare_estimator(Y ~ Z, estimand = "ATE")
+#' 
+#' dat <- draw_data(design)
+#' 
+#' get_data(design, data = dat, start = 2)
+#' 
+#' get_estimates(design, data = dat)
+#' 
+#' get_assignment(design, data = dat)
+#' 
+#' get_sampling(design, data = dat)
+#'
 #' @name get_functions
 #' 
 #' @export
