@@ -138,24 +138,6 @@ run_design_internal.design <- function(design, current_df = NULL, results = NULL
   }
 }
 
-#' @param data A data.frame object with sufficient information to run estimators. 
-#' @param start (Defaults to 1) a scalar indicating which step in the design to begin getting estimates from. By default all estimators are calculated, from step 1 to the last step of the design.
-#' @param end (Defaults to \code{length(design)}) a scalar indicating which step in the design to finish getting estimates from. 
-#'
-#' @rdname post_design
-#' @export
-get_estimates <- function(design, data = NULL, start = 1, end = length(design)) {
-  
-  if(is.null(data)){
-    stop("Please provide a data frame to the data argument. If you would like to get estimates from simulated data, use draw_estimates to draw data and get estimates in one step.")
-  }
-
-  estimators <- Filter(function(x) attr(x, "causal_type") == "estimator", design[start:end])
-  run_design_internal.design(estimators, current_df = data)$estimates_df
-                       
-}
-
-
 # for when the user sends a function that runs a design itself
 #   to run_design (or simulate_design / diagnose_design above it)
 run_design_internal.function <- function(design) {
@@ -186,23 +168,6 @@ execution_st <- function(design, current_df = NULL, results = NULL, start = 1, e
   )
 }
 
-
-#' @rdname post_design
-#'
-#' @export
-draw_data <- function(design) {
-  run_design_internal(design, results = list(current_df = 0))$current_df
-}
-
-#' @rdname post_design
-#'
-#' @export
-draw_estimands <- function(...) apply_on_design_dots(draw_estimands_single_design, ...)
-
-#' @rdname post_design
-#'
-#' @export
-draw_estimates <- function(...) apply_on_design_dots(draw_estimates_single_design, ...)
 
 apply_on_design_dots <- function(FUN, ...) {
   designs <- dots_to_list_of_designs(...)
@@ -241,15 +206,6 @@ dots_to_list_of_designs <- function(...) {
 }
 
 
-draw_estimates_single_design <- function(design) {
-  results <- list("estimator" = vector("list", length(design)))
-  run_design_internal(design, results = results)$estimates_df
-}
-
-draw_estimands_single_design <- function(design) {
-  results <- list("estimand" = vector("list", length(design)))
-  run_design_internal(design, results = results)$estimands_df
-}
 
 #' Obtain the preferred citation for a design
 #'
