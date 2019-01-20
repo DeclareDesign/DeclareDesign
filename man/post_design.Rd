@@ -9,8 +9,6 @@ print_code(design)
 }
 \arguments{
 \item{design}{A design object, typically created using the + operator}
-
-\item{design}{A design object, typically created using the + operator}
 }
 \description{
 Explore your design

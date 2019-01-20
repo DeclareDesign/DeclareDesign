@@ -46,6 +46,6 @@ get_estimates(design, data = dat)
 
 get_assignment(design, data = dat)
 
-get_sampling(design, data = dat)
+get_sample(design, data = dat)
 
 }

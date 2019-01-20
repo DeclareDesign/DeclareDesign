@@ -208,8 +208,6 @@ dots_to_list_of_designs <- function(...) {
 
 #' Print code to recreate a design
 #'
-#' @param design A design object, typically created using the + operator
-#'
 #' @examples
 #'
 #' my_population <- declare_population(N = 100)
