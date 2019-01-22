@@ -30,17 +30,7 @@
 #' @export
 get_data <- function(design, data = NULL, start = 1, end = length(design)) {
   
-  if(is.null(data)){
-    stop("Please provide a data frame to the data argument.")
-  }
-  
-  if(start < 1 || start > length(design)){
-    stop("Please provide a starting step as a number between 1 and the total number of steps in the design.")
-  }
-  
-  if(end < 1 || end > length(design)){
-    stop("Please provide an end step as a number between 1 and the total number of steps in the design.")
-  }
+  check_get_draw_function_inputs(design, data, start, end, "get_data")
   
   design_subset <- Filter(function(x) attr(x, "causal_type") == "dgp", design[start:end])
   
@@ -52,11 +42,10 @@ get_data <- function(design, data = NULL, start = 1, end = length(design)) {
 #' @export
 get_estimates <- function(design, data = NULL, start = 1, end = length(design)) {
   
-  if(is.null(data)){
-    stop("Please provide a data frame to the data argument. If you would like to get estimates from simulated data, use draw_estimates to draw data and get estimates in one step.")
-  }
+  check_get_draw_function_inputs(design, data, start, end, "get_estimates")
   
   estimators <- Filter(function(x) attr(x, "causal_type") == "estimator", design[start:end])
+  
   run_design_internal.design(estimators, current_df = data)$estimates_df
   
 }
@@ -65,19 +54,10 @@ get_estimates <- function(design, data = NULL, start = 1, end = length(design)) 
 #' @export
 get_assignment <- function(design, data = NULL, start = 1, end = length(design)) {
   
-  if(is.null(data)){
-    stop("Please provide a data frame to the data argument.")
-  }
-  
-  if(start < 1 || start > length(design)){
-    stop("Please provide a starting step as a number between 1 and the total number of steps in the design.")
-  }
-  
-  if(end < 1 || end > length(design)){
-    stop("Please provide an end step as a number between 1 and the total number of steps in the design.")
-  }
+  check_get_draw_function_inputs(design, data, start, end, "get_assignment")
   
   assignments <- Filter(function(x) attr(x, "step_type") == "assignment", design[start:end])
+  
   run_design_internal.design(assignments, current_df = data, results = list(current_df = 0))$current_df
   
 }
@@ -87,19 +67,33 @@ get_assignment <- function(design, data = NULL, start = 1, end = length(design))
 #' @export
 get_sample <- function(design, data = NULL, start = 1, end = length(design)) {
   
-  if(is.null(data)){
-    stop("Please provide a data frame to the data argument.")
-  }
+  check_get_draw_function_inputs(design, data, start, end, "get_sample")
+
+  samplings <- Filter(function(x) attr(x, "step_type") == "sampling", design[start:end])
   
-  if(start < 1 || start > length(design)){
-    stop("Please provide a starting step as a number between 1 and the total number of steps in the design.")
+  run_design_internal.design(samplings, current_df = data, results = list(current_df = 0))$current_df
+  
+}
+
+check_get_draw_function_inputs <- function(design, data = NULL, start, end, type) {
+  
+  if(type != "draw_data") {
+    if(is.null(data)){
+      data_msg <- "Please provide a data frame to the data argument."
+      if(type == "get_estimates") {
+        data_msg <- paste(data_msg, "If you would like to get estimates from simulated data, use draw_estimates to draw data and get estimates in one step.", collapse = " ")
+      }
+      stop(data_msg)
+    }
+    
+    if(start < 1 || start > length(design)){
+      stop("Please provide a starting step as a number between 1 and the total number of steps in the design.")
+    }
   }
   
   if(end < 1 || end > length(design)){
     stop("Please provide an end step as a number between 1 and the total number of steps in the design.")
   }
-
-  samplings <- Filter(function(x) attr(x, "step_type") == "sampling", design[start:end])
-  run_design_internal.design(samplings, current_df = data, results = list(current_df = 0))$current_df
   
 }
+

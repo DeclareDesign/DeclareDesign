@@ -5,7 +5,6 @@
 #' @export
 print.design <- function(x, verbose = TRUE, ...) {
   print(summary(x, verbose = verbose, ... = ...))
-  # invisible(summary(x))
 }
 
 #' @param object a design object created using the + operator

@@ -25,11 +25,11 @@
 #'
 #' @export
 draw_data <- function(design, end = length(design)) {
-  if(end < 1 || end > length(design)){
-    stop("Please provide an end step as a number between 1 and the total number of steps in the design.")
-  }
+
+  check_get_draw_function_inputs(design = design, end = end, type = "draw_data")
   
   run_design_internal.design(design[1:end], results = list(current_df = 0))$current_df
+  
 }
 
 #' @param ... A design or set of designs typically created using the + operator
@@ -42,7 +42,6 @@ draw_estimands <- function(...) apply_on_design_dots(draw_estimands_single_desig
 #'
 #' @export
 draw_estimates <- function(...) apply_on_design_dots(draw_estimates_single_design, ...)
-
 
 draw_estimates_single_design <- function(design) {
   results <- list("estimator" = vector("list", length(design)))
