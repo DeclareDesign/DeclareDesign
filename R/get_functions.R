@@ -30,7 +30,7 @@
 #' @export
 get_data <- function(design, data = NULL, start = 1, end = length(design)) {
   get_function_internal(
-    design, data, start, end, function(x) attr(x, "causal_type") %in% "dgp", "get_data")
+    design, data, start, end, function(x) attr(x, "causal_type") %in% "dgp")
 }
 
 #' @rdname get_functions
@@ -42,14 +42,14 @@ get_estimates <- function(design, data = NULL, start = 1, end = length(design)) 
   }
   
   get_function_internal(
-    design, data, start, end, function(x) attr(x, "causal_type") %in% "estimator", "get_estimates", "estimates_df")
+    design, data, start, end, function(x) attr(x, "causal_type") %in% "estimator", NULL, "estimates_df")
 }
 
 #' @rdname get_functions
 #' @export
 get_assignment <- function(design, data = NULL, start = 1, end = length(design)) {
   get_function_internal(
-    design, data, start, end, function(x) attr(x, "step_type") %in% "assignment", "get_assignment")
+    design, data, start, end, function(x) attr(x, "step_type") %in% "assignment")
 }
 
 #' @rdname get_functions
@@ -57,10 +57,10 @@ get_assignment <- function(design, data = NULL, start = 1, end = length(design))
 #' @export
 get_sample <- function(design, data = NULL, start = 1, end = length(design)) {
   get_function_internal(
-    design, data, start, end, function(x) attr(x, "step_type") %in% "sampling", "get_sample")
+    design, data, start, end, function(x) attr(x, "step_type") %in% "sampling")
 }
 
-get_function_internal <- function(design, data = NULL, start, end, pred, type, what = "current_df") {
+get_function_internal <- function(design, data = NULL, start, end, pred, results = list(current_df = 0), what = "current_df") {
   
   if(data %in% -9){
     # Special NULL for draw_data
@@ -79,14 +79,7 @@ get_function_internal <- function(design, data = NULL, start, end, pred, type, w
   
   design_subset <- Filter(pred, design[start:end])
   
-  # empty results_df sent, except if it's get_estimates
-  results_df <- list(current_df = 0)
-  
-  if(type == "get_estimates") {
-    results_df <- NULL
-  }
-  
-  run_design_internal.design(design_subset, current_df = data, results = results_df)[[what]]
+  run_design_internal.design(design_subset, current_df = data, results = results)[[what]]
   
 }
 
