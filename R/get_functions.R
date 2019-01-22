@@ -62,14 +62,15 @@ get_sample <- function(design, data = NULL, start = 1, end = length(design)) {
 
 get_function_internal <- function(design, data = NULL, start, end, pred, type, what = "current_df") {
   
-  if(type != "draw_data") {
-    if(is.null(data)){
-      stop("Please provide a data frame to the data argument.")
-    }
-    
-    if(start < 1 || start > length(design)){
-      stop("Please provide a starting step as a number between 1 and the total number of steps in the design.")
-    }
+  if(data %in% -9){
+    # Special NULL for draw_data
+    data <- NULL
+  } else if (!is.data.frame(data)) {
+    stop("Please provide a data .frame to the data argument")
+  }
+  
+  if(start < 1 || start > length(design)){
+    stop("Please provide a starting step as a number between 1 and the total number of steps in the design.")
   }
   
   if(end < 1 || end > length(design)){
@@ -78,6 +79,7 @@ get_function_internal <- function(design, data = NULL, start, end, pred, type, w
   
   design_subset <- Filter(pred, design[start:end])
   
+  # empty results_df sent, except if it's get_estimates
   results_df <- list(current_df = 0)
   
   if(type == "get_estimates") {
