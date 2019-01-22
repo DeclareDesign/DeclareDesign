@@ -29,53 +29,38 @@
 #' 
 #' @export
 get_data <- function(design, data = NULL, start = 1, end = length(design)) {
-  
-  check_get_draw_function_inputs(design, data, start, end, "get_data")
-  
-  design_subset <- Filter(function(x) attr(x, "causal_type") == "dgp", design[start:end])
-  
-  run_design_internal.design(design_subset, current_df = data, results = list(current_df = 0))$current_df
-  
+  get_function_internal(
+    design, data, start, end, function(x) attr(x, "causal_type") %in% "dgp")
 }
 
 #' @rdname get_functions
 #' @export
 get_estimates <- function(design, data = NULL, start = 1, end = length(design)) {
-  
-  check_get_draw_function_inputs(design, data, start, end, "get_estimates")
-  
-  estimators <- Filter(function(x) attr(x, "causal_type") == "estimator", design[start:end])
-  
-  run_design_internal.design(estimators, current_df = data)$estimates_df
-  
+  get_function_internal(
+    design, data, start, end, function(x) attr(x, "causal_type") %in% "estimator")
 }
 
 #' @rdname get_functions
 #' @export
 get_assignment <- function(design, data = NULL, start = 1, end = length(design)) {
-  
-  check_get_draw_function_inputs(design, data, start, end, "get_assignment")
-  
-  assignments <- Filter(function(x) attr(x, "step_type") == "assignment", design[start:end])
-  
-  run_design_internal.design(assignments, current_df = data, results = list(current_df = 0))$current_df
-  
+  get_function_internal(
+    design, data, start, end, function(x) attr(x, "step_type") %in% "assignment")
 }
 
 #' @rdname get_functions
 #' 
 #' @export
 get_sample <- function(design, data = NULL, start = 1, end = length(design)) {
-  
-  check_get_draw_function_inputs(design, data, start, end, "get_sample")
-
-  samplings <- Filter(function(x) attr(x, "step_type") == "sampling", design[start:end])
-  
-  run_design_internal.design(samplings, current_df = data, results = list(current_df = 0))$current_df
-  
+  get_function_internal(
+    design, data, start, end, function(x) attr(x, "step_type") %in% "sampling")
 }
 
-check_get_draw_function_inputs <- function(design, data = NULL, start, end, type) {
+get_function_internal <- function(design, data = NULL, start, end, pred) {
+  
+  pred_str <- substitute(pred)
+  
+  type <- ifelse(pred_str == 'function(x) attr(x, "causal_type") == "estimator"', "get_estimates",
+                 ifelse(pred_str == "function(x) TRUE", "draw_data", "other"))
   
   if(type != "draw_data") {
     if(is.null(data)){
@@ -93,6 +78,16 @@ check_get_draw_function_inputs <- function(design, data = NULL, start, end, type
   
   if(end < 1 || end > length(design)){
     stop("Please provide an end step as a number between 1 and the total number of steps in the design.")
+  }
+  
+  design_subset <- Filter(pred, design[start:end])
+  
+  results_df <- list(current_df = 0)
+  
+  if(type == "get_estimates") {
+    return(run_design_internal.design(design_subset, current_df = data)$estimates_df)
+  } else {
+    return(run_design_internal.design(design_subset, current_df = data, results = list(current_df = 0))$current_df)
   }
   
 }

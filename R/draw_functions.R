@@ -25,11 +25,7 @@
 #'
 #' @export
 draw_data <- function(design, end = length(design)) {
-
-  check_get_draw_function_inputs(design = design, end = end, type = "draw_data")
-  
-  run_design_internal.design(design[1:end], results = list(current_df = 0))$current_df
-  
+  get_function_internal(design, data = NULL, start = 1, end = end, function(x) TRUE)
 }
 
 #' @param ... A design or set of designs typically created using the + operator
