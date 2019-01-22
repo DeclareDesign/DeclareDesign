@@ -30,21 +30,26 @@
 #' @export
 get_data <- function(design, data = NULL, start = 1, end = length(design)) {
   get_function_internal(
-    design, data, start, end, function(x) attr(x, "causal_type") %in% "dgp")
+    design, data, start, end, function(x) attr(x, "causal_type") %in% "dgp", "get_data")
 }
 
 #' @rdname get_functions
 #' @export
 get_estimates <- function(design, data = NULL, start = 1, end = length(design)) {
+  
+  if(is.null(data)){
+    stop("Please provide a data frame to the data argument. If you would like to get estimates from simulated data, use draw_estimates to draw data and get estimates in one step.")
+  }
+  
   get_function_internal(
-    design, data, start, end, function(x) attr(x, "causal_type") %in% "estimator")
+    design, data, start, end, function(x) attr(x, "causal_type") %in% "estimator", "get_estimates", "estimates_df")
 }
 
 #' @rdname get_functions
 #' @export
 get_assignment <- function(design, data = NULL, start = 1, end = length(design)) {
   get_function_internal(
-    design, data, start, end, function(x) attr(x, "step_type") %in% "assignment")
+    design, data, start, end, function(x) attr(x, "step_type") %in% "assignment", "get_assignment")
 }
 
 #' @rdname get_functions
@@ -52,23 +57,14 @@ get_assignment <- function(design, data = NULL, start = 1, end = length(design))
 #' @export
 get_sample <- function(design, data = NULL, start = 1, end = length(design)) {
   get_function_internal(
-    design, data, start, end, function(x) attr(x, "step_type") %in% "sampling")
+    design, data, start, end, function(x) attr(x, "step_type") %in% "sampling", "get_sample")
 }
 
-get_function_internal <- function(design, data = NULL, start, end, pred) {
-  
-  pred_str <- substitute(pred)
-  
-  type <- ifelse(pred_str == 'function(x) attr(x, "causal_type") == "estimator"', "get_estimates",
-                 ifelse(pred_str == "function(x) TRUE", "draw_data", "other"))
+get_function_internal <- function(design, data = NULL, start, end, pred, type, what = "current_df") {
   
   if(type != "draw_data") {
     if(is.null(data)){
-      data_msg <- "Please provide a data frame to the data argument."
-      if(type == "get_estimates") {
-        data_msg <- paste(data_msg, "If you would like to get estimates from simulated data, use draw_estimates to draw data and get estimates in one step.", collapse = " ")
-      }
-      stop(data_msg)
+      stop("Please provide a data frame to the data argument.")
     }
     
     if(start < 1 || start > length(design)){
@@ -85,10 +81,10 @@ get_function_internal <- function(design, data = NULL, start, end, pred) {
   results_df <- list(current_df = 0)
   
   if(type == "get_estimates") {
-    return(run_design_internal.design(design_subset, current_df = data)$estimates_df)
-  } else {
-    return(run_design_internal.design(design_subset, current_df = data, results = list(current_df = 0))$current_df)
+    results_df <- NULL
   }
+  
+  run_design_internal.design(design_subset, current_df = data, results = results_df)[[what]]
   
 }
 
