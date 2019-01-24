@@ -18,14 +18,11 @@ dat$Z <- NULL
 dat$Z_cond_prob <- NULL
 
 test_that("get_ works", {
-  dat_with_Z <- get_assignment(design, dat)
+  dat_with_Z <- draw_assignment(design, dat)
   
   expect_true(all(c("Z", "Z_cond_prob") %in% colnames(dat_with_Z)))
   
-  
-  dat_sampled <- get_sample(design, dat[c(1:75, 1:75), ])
+  dat_sampled <- draw_sample(design, dat[c(1:75, 1:75), ])
   expect_equal(nrow(dat_sampled), 75)
-  
-  
   
 })

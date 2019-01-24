@@ -37,10 +37,12 @@ design <- declare_population(N = 100, u = rnorm(N)) +
 
 dat <- draw_data(design)
 
+draw_data(design, data = dat, start = 2)
+
 get_estimates(design, data = dat)
 
-get_assignment(design, data = dat)
+draw_assignment(design, data = dat)
 
-get_sample(design, data = dat)
+draw_sample(design, data = dat)
 
 }
