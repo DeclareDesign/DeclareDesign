@@ -24,8 +24,16 @@
 #' draw_estimates(design)
 #'
 #' @export
-draw_data <- function(design, end = length(design)) {
-  get_function_internal(design, data = -9, start = 1, end = end, function(x) TRUE)
+# draw_data <- function(design, end = length(design)) {
+#   get_function_internal(design, data = -9, start = 1, end = end, function(x) TRUE)
+# }
+draw_data <- function(design, data = NULL, start = 1, end = length(design)) {
+  data_internal <- data
+  if(is.null(data_internal)) {
+    data_internal <- -9
+  }
+  get_function_internal(
+    design, data_internal, start, end, function(x) attr(x, "causal_type") %in% "dgp")
 }
 
 #' @param ... A design or set of designs typically created using the + operator

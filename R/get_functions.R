@@ -1,4 +1,4 @@
-#' Get data, estimates, estimands, assignment vectors, or samples from a design given data
+#' Get estimates, estimands, assignment vectors, or samples from a design given data
 #'  
 #' @param design A design object, typically created using the + operator
 #' @param data A data.frame object with sufficient information to get the data, estimates, estimands, an assignment vector, or a sample.
@@ -17,21 +17,15 @@
 #' 
 #' dat <- draw_data(design)
 #' 
-#' get_data(design, data = dat, start = 2)
+#' draw_data(design, data = dat, start = 2)
 #' 
 #' get_estimates(design, data = dat)
 #' 
-#' get_assignment(design, data = dat)
+#' draw_assignment(design, data = dat)
 #' 
-#' get_sample(design, data = dat)
+#' draw_sample(design, data = dat)
 #'
 #' @name get_functions
-#' 
-#' @export
-get_data <- function(design, data = NULL, start = 1, end = length(design)) {
-  get_function_internal(
-    design, data, start, end, function(x) attr(x, "causal_type") %in% "dgp")
-}
 
 #' @rdname get_functions
 #' @export
@@ -47,7 +41,7 @@ get_estimates <- function(design, data = NULL, start = 1, end = length(design)) 
 
 #' @rdname get_functions
 #' @export
-get_assignment <- function(design, data = NULL, start = 1, end = length(design)) {
+draw_assignment <- function(design, data = NULL, start = 1, end = length(design)) {
   get_function_internal(
     design, data, start, end, function(x) attr(x, "step_type") %in% "assignment")
 }
@@ -55,7 +49,7 @@ get_assignment <- function(design, data = NULL, start = 1, end = length(design))
 #' @rdname get_functions
 #' 
 #' @export
-get_sample <- function(design, data = NULL, start = 1, end = length(design)) {
+draw_sample <- function(design, data = NULL, start = 1, end = length(design)) {
   get_function_internal(
     design, data, start, end, function(x) attr(x, "step_type") %in% "sampling")
 }

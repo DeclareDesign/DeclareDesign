@@ -7,7 +7,7 @@
 \alias{draw_estimates}
 \title{Draw data, estimates, and estimands from a design}
 \usage{
-draw_data(design, end = length(design))
+draw_data(design, data = NULL, start = 1, end = length(design))
 
 draw_estimands(...)
 

@@ -2,19 +2,16 @@
 % Please edit documentation in R/get_functions.R
 \name{get_functions}
 \alias{get_functions}
-\alias{get_data}
 \alias{get_estimates}
-\alias{get_assignment}
-\alias{get_sample}
-\title{Get data, estimates, estimands, assignment vectors, or samples from a design given data}
+\alias{draw_assignment}
+\alias{draw_sample}
+\title{Get estimates, estimands, assignment vectors, or samples from a design given data}
 \usage{
-get_data(design, data = NULL, start = 1, end = length(design))
-
 get_estimates(design, data = NULL, start = 1, end = length(design))
 
-get_assignment(design, data = NULL, start = 1, end = length(design))
+draw_assignment(design, data = NULL, start = 1, end = length(design))
 
-get_sample(design, data = NULL, start = 1, end = length(design))
+draw_sample(design, data = NULL, start = 1, end = length(design))
 }
 \arguments{
 \item{design}{A design object, typically created using the + operator}
@@ -26,7 +23,7 @@ get_sample(design, data = NULL, start = 1, end = length(design))
 \item{end}{(Defaults to \code{length(design)}) a scalar indicating which step in the design to finish with.}
 }
 \description{
-Get data, estimates, estimands, assignment vectors, or samples from a design given data
+Get estimates, estimands, assignment vectors, or samples from a design given data
 }
 \examples{
 
@@ -39,8 +36,6 @@ design <- declare_population(N = 100, u = rnorm(N)) +
   declare_estimator(Y ~ Z, estimand = "ATE")
 
 dat <- draw_data(design)
-
-get_data(design, data = dat, start = 2)
 
 get_estimates(design, data = dat)
 
