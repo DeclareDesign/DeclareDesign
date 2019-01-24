@@ -16,6 +16,10 @@ draw_estimates(...)
 \arguments{
 \item{design}{A design object, typically created using the + operator}
 
+\item{data}{A data.frame object with sufficient information to get the data, estimates, estimands, an assignment vector, or a sample.}
+
+\item{start}{(Defaults to 1) a scalar indicating which step in the design to begin with. By default all data steps are drawn, from step 1 to the last step of the design.}
+
 \item{end}{(Defaults to \code{length(design)}) a scalar indicating which step in the design to finish drawing data by.}
 
 \item{...}{A design or set of designs typically created using the + operator}
