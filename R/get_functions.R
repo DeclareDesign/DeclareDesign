@@ -56,11 +56,11 @@ draw_sample <- function(design, data = NULL, start = 1, end = length(design)) {
 
 get_function_internal <- function(design, data = NULL, start, end, pred, results = list(current_df = 0), what = "current_df") {
   
-  if(data %in% -9){
+  if(identical(data, -9)){
     # Special NULL for draw_data
     data <- NULL
   } else if (!is.data.frame(data)) {
-    stop("Please provide a data .frame to the data argument")
+    stop("Please provide a data.frame to the data argument")
   }
   
   if(start < 1 || start > length(design)){
