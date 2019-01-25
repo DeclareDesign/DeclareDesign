@@ -2,45 +2,18 @@
 % Please edit documentation in R/design_helper_functions.R
 \name{post_design}
 \alias{post_design}
-\alias{get_estimates}
-\alias{draw_data}
-\alias{draw_estimands}
-\alias{draw_estimates}
-\alias{print.design}
-\alias{summary.design}
+\alias{print_code}
 \title{Explore your design}
 \usage{
-get_estimates(design, data = NULL, start = 1, end = length(design))
-
-draw_data(design)
-
-draw_estimands(...)
-
-draw_estimates(...)
-
-\method{print}{design}(x, verbose = TRUE, ...)
-
-\method{summary}{design}(object, verbose = TRUE, ...)
+print_code(design)
 }
 \arguments{
 \item{design}{A design object, typically created using the + operator}
-
-\item{data}{A data.frame object with sufficient information to run estimators.}
-
-\item{start}{(Defaults to 1) a scalar indicating which step in the design to begin getting estimates from. By default all estimators are calculated, from step 1 to the last step of the design.}
-
-\item{end}{(Defaults to \code{length(design)}) a scalar indicating which step in the design to finish getting estimates from.}
-
-\item{...}{optional arguments to be sent to summary function}
-
-\item{x}{a design object, typically created using the + operator}
-
-\item{verbose}{an indicator for printing a long summary of the design, defaults to \code{TRUE}}
-
-\item{object}{a design object created using the + operator}
 }
 \description{
 Explore your design
+
+Print code to recreate a design
 }
 \examples{
 
@@ -62,32 +35,12 @@ estimates <- draw_estimates(design)
 estimands <- draw_estimands(design)
 
 
-my_population <- declare_population(N = 500, noise = rnorm(N))
+my_population <- declare_population(N = 100)
 
-my_potential_outcomes <- declare_potential_outcomes(
-  Y_Z_0 = noise, Y_Z_1 = noise +
-  rnorm(N, mean = 2, sd = 2))
+my_assignment <- declare_assignment(m = 50)
 
-my_sampling <- declare_sampling(n = 250)
+my_design <- my_population + my_assignment
 
-my_assignment <- declare_assignment(m = 25)
+print_code(my_design)
 
-my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-
-my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-
-my_mutate <- declare_step(dplyr::mutate, noise_sq = noise ^ 2)
-
-my_reveal <- declare_reveal()
-
-design <- my_population +
-  my_potential_outcomes +
-  my_sampling +
-  my_estimand +
-  my_mutate +
-  my_assignment +
-  my_reveal +
-  my_estimator
-
-summary(design)
 }
