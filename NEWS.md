@@ -1,8 +1,14 @@
+# DeclareDesign 0.16.0
+
+* Add `draw_assignment` function to draw an assignment vector(s) given data
+* Add `draw_sample` function to draw a sample or multiple sequential samples from data
+* Rewrite `draw_data` to optionally take a data argument. `draw_data` now can be used to draw data for the full design, or for subsets of it. `start` and `end` flags are added to select which portions of the design to run
+* Bug fixes
+
 # DeclareDesign 0.14.0
 
 * Improved generics interoperability
 * Bug fixes
-
 
 # DeclareDesign 0.12.0
 
