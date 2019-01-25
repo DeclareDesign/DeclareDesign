@@ -141,7 +141,8 @@ simulate_single_design <- function(design, sims) {
   
   results2x <- function(results_list, what) {
     subresult <- lapply(results_list, `[[`, what)
-    df <- do.call(rbind.data.frame, subresult)
+    # df <- do.call(rbind.data.frame, subresult)
+    df <- rbind_disjoint(subresult)
     if (nrow(df) == 0) {
       return(df)
     }
