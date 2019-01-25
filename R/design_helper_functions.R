@@ -183,6 +183,11 @@ apply_on_design_dots <- function(FUN, ...) {
 
 dots_to_list_of_designs <- function(...) {
   dotqs <- enquos(...)
+  
+  if (length(dotqs) == 0){
+    stop("Please provide at least one design.", call. = FALSE)
+  }
+  
   d1 <- eval_tidy(dotqs[[1]])
 
   ## Two cases:
