@@ -1,6 +1,7 @@
 ## Submission
 
-We are resubmitting a small update, `DeclareDesign 0.14.0`, principally to address errors at https://cran.rstudio.com//web/checks/check_results_DeclareDesign.html.
+We are resubmitting a small update, `DeclareDesign 0.16.0`, with bug fixes
+and the addition of three small new features.
 
 Thank you for your time reviewing the submission.
 
