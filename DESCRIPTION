@@ -16,8 +16,8 @@ Description: Researchers can characterize and learn about the properties of
 Depends:
     R (>= 3.4.0),
     randomizr (>= 0.16.1),
-    fabricatr (>= 0.5.0),
-    estimatr (>= 0.10.0)
+    fabricatr (>= 0.6.0),
+    estimatr (>= 0.14.0)
 Imports:
     rlang, generics
 License: MIT + file LICENSE
