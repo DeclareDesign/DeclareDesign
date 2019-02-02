@@ -210,49 +210,6 @@ dots_to_list_of_designs <- function(...) {
   designs
 }
 
-
-#' Print code to recreate a design
-#'
-#' @examples
-#'
-#' my_population <- declare_population(N = 100)
-#'
-#' my_assignment <- declare_assignment(m = 50)
-#'
-#' my_design <- my_population + my_assignment
-#'
-#' print_code(my_design)
-#'
-#' @rdname post_design
-#'
-#' @export
-print_code <- function(design) {
-  
-  # if there is not a code attribute, construct code via the calls for each step
-  #   and the call for the declare step
-  
-  if (is.null(attributes(design)$code)) {
-    clean_call <- function(call) {
-      paste(sapply(deparse(call), trimws), collapse = " ")
-    }
-    
-    # print each step
-    
-    for (i in seq_along(design)) {
-      # only print steps that are not calls within the design call i.e. mutate(q = 5)
-      if (inherits(attributes(design[[i]])$call, "call")) {
-        cat(names(design)[i], "<-", clean_call(attributes(design[[i]])$call), "\n\n")
-      }
-    }
-    
-    # print the design declaration
-    
-    cat("my_design <-", clean_call(attributes(design)$call), "\n\n")
-  } else {
-    print(attributes(design)$code)
-  }
-}
-
 #' Obtain the preferred citation for a design
 #'
 #' @param design a design object created using the + operator

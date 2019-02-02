@@ -2,18 +2,12 @@
 % Please edit documentation in R/design_helper_functions.R
 \name{post_design}
 \alias{post_design}
-\alias{print_code}
 \title{Explore your design}
-\usage{
-print_code(design)
-}
 \arguments{
 \item{design}{A design object, typically created using the + operator}
 }
 \description{
 Explore your design
-
-Print code to recreate a design
 }
 \examples{
 
@@ -33,14 +27,5 @@ df <- draw_data(design)
 
 estimates <- draw_estimates(design)
 estimands <- draw_estimands(design)
-
-
-my_population <- declare_population(N = 100)
-
-my_assignment <- declare_assignment(m = 50)
-
-my_design <- my_population + my_assignment
-
-print_code(my_design)
 
 }
