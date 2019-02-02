@@ -4,10 +4,10 @@
 \alias{set_diagnosands}
 \title{Set the diagnosands for a design}
 \usage{
-set_diagnosands(design, diagnosands = default_diagnosands)
+set_diagnosands(x, diagnosands = default_diagnosands)
 }
 \arguments{
-\item{design}{A design typically created using the + operator}
+\item{x}{A design typically created using the + operator, or a simulations data.frame created by \code{simulate_design}.}
 
 \item{diagnosands}{A set of diagnosands created by \code{\link{declare_diagnosands}}}
 }
@@ -33,6 +33,13 @@ design <- set_diagnosands(design, diagnosands)
 
 \dontrun{
 diagnose_design(design)
+
+simulations_df <- simulate_design(design)
+
+simulations_df <- set_diagnosands(simulations_df, design)
+
+diagnose_design(simulations_df)
+
 }
 
 }
