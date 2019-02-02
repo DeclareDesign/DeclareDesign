@@ -30,6 +30,7 @@
 #   get_function_internal(design, data = -9, start = 1, end = end, function(x) TRUE)
 # }
 draw_data <- function(design, data = NULL, start = 1, end = length(design)) {
+  check_design_class_single(design)
   data_internal <- data
   if(is.null(data_internal)) {
     data_internal <- -9
@@ -50,11 +51,18 @@ draw_estimands <- function(...) apply_on_design_dots(draw_estimands_single_desig
 draw_estimates <- function(...) apply_on_design_dots(draw_estimates_single_design, ...)
 
 draw_estimates_single_design <- function(design) {
+  check_design_class_single(design)
   results <- list("estimator" = vector("list", length(design)))
   run_design_internal(design, results = results)$estimates_df
 }
 
 draw_estimands_single_design <- function(design) {
+  check_design_class_single(design)
   results <- list("estimand" = vector("list", length(design)))
   run_design_internal(design, results = results)$estimands_df
+}
+
+check_design_class_single <- function(design) {
+  if(!inherits(design, "design"))
+    stop("Please send a single design object to the design argument, typically created using the + operator.", call. = FALSE)
 }

@@ -30,6 +30,7 @@
 #' @rdname get_functions
 #' @export
 get_estimates <- function(design, data = NULL, start = 1, end = length(design)) {
+  check_design_class_single(design)
   
   if(is.null(data)){
     stop("Please provide a data frame to the data argument. If you would like to get estimates from simulated data, use draw_estimates to draw data and get estimates in one step.")
@@ -42,6 +43,7 @@ get_estimates <- function(design, data = NULL, start = 1, end = length(design)) 
 #' @rdname get_functions
 #' @export
 draw_assignment <- function(design, data = NULL, start = 1, end = length(design)) {
+  check_design_class_single(design)
   get_function_internal(
     design, data, start, end, function(x) attr(x, "step_type") %in% "assignment")
 }
@@ -50,11 +52,14 @@ draw_assignment <- function(design, data = NULL, start = 1, end = length(design)
 #' 
 #' @export
 draw_sample <- function(design, data = NULL, start = 1, end = length(design)) {
+  check_design_class_single(design)
   get_function_internal(
     design, data, start, end, function(x) attr(x, "step_type") %in% "sampling")
 }
 
 get_function_internal <- function(design, data = NULL, start, end, pred, results = list(current_df = 0), what = "current_df") {
+  
+  check_design_class_single(design)
   
   if(identical(data, -9)){
     # Special NULL for draw_data
