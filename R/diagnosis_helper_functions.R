@@ -135,6 +135,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   for(i in c(parameter_names, "design_label")) {
     levels(return_df[[i]]) <- c(levels(return_df[[i]]), "")
   }
+  return_df$estimator_label <- as.character(return_df$estimator_label)
   return_df[return_df$statistic == "SE", c(sort_by_list, parameter_names, "n_sims")] <- ""
   return_df$statistic <- NULL
 
