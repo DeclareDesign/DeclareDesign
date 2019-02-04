@@ -50,11 +50,14 @@ draw_estimands <- function(...) apply_on_design_dots(draw_estimands_single_desig
 draw_estimates <- function(...) apply_on_design_dots(draw_estimates_single_design, ...)
 
 draw_estimates_single_design <- function(design) {
-  results <- list("estimator" = vector("list", length(design)))
-  run_design_internal(design, results = results)$estimates_df
+  get_function_internal(  
+    design, -9, 1, length(design), function(x) TRUE, 
+    list("estimator" = vector("list", length(design))), "estimates_df")
 }
 
 draw_estimands_single_design <- function(design) {
-  results <- list("estimand" = vector("list", length(design)))
-  run_design_internal(design, results = results)$estimands_df
+  get_function_internal(
+    design, -9, 1, length(design), function(x) TRUE, 
+    list("estimand" = vector("list", length(design))), "estimands_df")
 }
+

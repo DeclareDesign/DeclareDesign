@@ -17,6 +17,12 @@ dat <- draw_data(design)
 dat$Z <- NULL
 dat$Z_cond_prob <- NULL
 
+test_that("error when send list of designs to draw_data", {
+  
+  expect_error(draw_data(list(design, design)), "Please send a single design object to the design argument, typically created using the \\+ operator.")
+  
+})
+
 test_that("get_ works", {
   dat_with_Z <- draw_assignment(design, dat)
   
