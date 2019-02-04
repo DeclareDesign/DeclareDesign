@@ -4,14 +4,19 @@
 \alias{compare_design_code}
 \title{Compare the code of two designs}
 \usage{
-compare_design_code(...)
+compare_design_code(design1, design2, format = "ansi8",
+  mode = "sidebyside")
 }
 \arguments{
-\item{...}{Options sent to \code{diffobj::diffObj}}
-
 \item{design1}{A design object, typically created using the + operator}
 
 \item{design2}{A design object, typically created using the + operator}
+
+\item{format}{Format (in console or HTML) options from \code{diffobj::diffChr}}
+
+\item{mode}{Mode options from \code{diffobj::diffChr}}
+
+\item{...}{Options sent to \code{diffobj::diffChr}}
 }
 \value{
 A Diff object that can be compared using the diffobj package

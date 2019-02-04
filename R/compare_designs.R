@@ -2,21 +2,24 @@
 #'
 #' @param design1 A design object, typically created using the + operator
 #' @param design2 A design object, typically created using the + operator
-#' @param ... Options sent to \code{diffobj::diffObj}
+#' @param format Format (in console or HTML) options from \code{diffobj::diffChr}
+#' @param mode Mode options from \code{diffobj::diffChr}
+#' @param ... Options sent to \code{diffobj::diffChr}
 #'
 #' @return A Diff object that can be compared using the diffobj package
 #' @export
 #'
 #' @examples
 #' @importFrom diffobj diffObj
-compare_design_code <- function(...) {
+compare_design_code <- function(design1, design2, format = "ansi8", mode = "sidebyside") {
   
-  designs <- dots_to_list_of_designs(...)
+  # design_1_name <- expr_text(enexpr(design1))
+  # design_2_name <- expr_text(enexpr(design2))
   
-  design1 <- unname(sapply(get_design_code(designs[[1]]), toString))
-  design2 <- unname(sapply(get_design_code(designs[[2]]), toString))
+  design1 <- get_design_code(design1)
+  design2 <- get_design_code(design2)
   
-  structure(diffObj(design1, design2), class = "Diff", package = "diffobj")
+  structure(diffChr(design1, design2, format = format, mode = mode), class = "Diff", package = "diffobj")
   
 }
 
@@ -25,6 +28,6 @@ clean_call <- function(call) {
 }
 
 get_design_code <- function(design){
-  lapply(design, function(x) clean_call(attributes(x)$call))
+  sapply(design, function(x) clean_call(attributes(x)$call))
 }
 
