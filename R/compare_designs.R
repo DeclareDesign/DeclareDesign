@@ -10,7 +10,7 @@
 #' @export
 #'
 #' @examples
-#' @importFrom diffobj diffObj
+#' @importFrom diffobj diffChr
 compare_design_code <- function(design1, design2, format = "ansi8", mode = "sidebyside") {
   
   # design_1_name <- expr_text(enexpr(design1))
