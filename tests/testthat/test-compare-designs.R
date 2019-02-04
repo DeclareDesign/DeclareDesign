@@ -95,20 +95,10 @@ my_design_4 <- my_population +
   reveal +
   sate_estimator
 
-test_that("compare code works", {
-  
-  
-  # debugonce(compare_design_code)
+test_that("compare works", {
   a <- compare_design_code(my_design_3, my_design_4)
-  a
-  
-  
+  b <- compare_design_summary(my_design_3, my_design_4)
+  b <- compare_design_data(my_design_3, my_design_4)
 })
 
-test_that("compare diagnosis works", {
-  
-  # a <- compare_diagnosis(my_design_3, my_design_4)
-  # a
-  
-})
 
