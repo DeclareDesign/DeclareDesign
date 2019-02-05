@@ -166,8 +166,7 @@
 #' \dontrun{
 #' diagnose_design(design_two, sims = 5, bootstrap_sims = FALSE)
 #' }
-declare_estimator <-
-  make_declarations(
+declare_estimator <- make_declarations(
     estimator_handler,
     step_type = "estimator",
     causal_type = "estimator",
@@ -204,8 +203,8 @@ tidy_estimator <- function(estimator_function) {
     calling_args <- setdiff(calling_args, c("", "data", "..."))
 
     for (e in calling_args) {
-      dots[[e]] <-
-        do.call(enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. IDK
+      # this *should* retrieve term names as quosure. IDK
+      dots[[e]] <- do.call(enquo, list(as.symbol(e))) 
     }
 
     ret <- eval_tidy(quo(estimator_function(data, !!!dots)))
@@ -218,8 +217,7 @@ tidy_estimator <- function(estimator_function) {
 
     estimand_label <- get_estimand_label(estimand)
     if (length(estimand_label) > 0) {
-      ret <-
-        cbind(
+      ret <- cbind(
           ret,
           estimand_label = estimand_label,
           row.names = NULL,
@@ -246,11 +244,7 @@ tidy_estimator <- function(estimator_function) {
 #' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
 #' @param term Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.
 #' @rdname declare_estimator
-model_handler <-
-  function(data,
-             ...,
-             model = estimatr::difference_in_means,
-             term = FALSE) {
+model_handler <- function(data, ..., model = estimatr::difference_in_means, term = FALSE) {
     coefficient_names <-
       enquo(term) # forces evaluation of quosure
     coefficient_names <- reveal_nse_helper(coefficient_names)
@@ -302,16 +296,14 @@ tidy_default <- function(x, conf.int = TRUE) {
     
     if(conf.int == TRUE) {
       ci <- suppressMessages(as.data.frame(confint(x)))
-      tidy_df <-
-        data.frame(
+      tidy_df <- data.frame(
           term = rownames(summ),
           summ,
           ci,
           stringsAsFactors = FALSE,
           row.names = NULL
         )
-      colnames(tidy_df) <-
-        c(
+      colnames(tidy_df) <- c(
           "term",
           "estimate",
           "std.error",
@@ -321,16 +313,14 @@ tidy_default <- function(x, conf.int = TRUE) {
           "conf.high"
         )
     } else {
-      tidy_df <-
-        data.frame(
+      tidy_df <- data.frame(
           term = rownames(summ),
           summ,
           ci,
           stringsAsFactors = FALSE,
           row.names = NULL
         )
-      colnames(tidy_df) <-
-        c(
+      colnames(tidy_df) <- c(
           "term",
           "estimate",
           "std.error",
@@ -341,7 +331,7 @@ tidy_default <- function(x, conf.int = TRUE) {
     
   }, silent = TRUE)
   
-  if(class(val) == "try-error"){
+  if (class(val) == "try-error") {
     stop("The default tidy method for the model fit of class ", class(x), " failed. You may try installing and loading the broom package, or you can write your own tidy.", class(x), " method.", call. = FALSE)
   }
     
@@ -386,8 +376,7 @@ fit2tidy <- function(fit, term = FALSE) {
     }
     tidy_df <- tidy_df[tidy_df$term %in% term, , drop = FALSE]
   } else if (is.logical(term) && !term) {
-    tidy_df <-
-      tidy_df[which.max(tidy_df$term != "(Intercept)"), , drop = FALSE]
+    tidy_df <- tidy_df[which.max(tidy_df$term != "(Intercept)"), , drop = FALSE]
   }
 
   tidy_df
@@ -406,4 +395,18 @@ get_estimand_label <- function(estimand) {
     NULL = NULL,
     warning("Did not match class of `estimand`")
   )
+}
+
+best_effort_model_handler <- function(data, ..., 
+                                      model = estimatr::difference_in_means, term = FALSE, 
+                                      estimand = NULL, label) {
+  tryCatch(
+    estimator_handler(data, ..., model = model, term = term, estimand = estimand, label=label),
+    error=function(e) structure(list(estimator_label = NA_character_, term = NA_character_, 
+                                     estimate = NA_real_, std.error = NA_real_, statistic = NA_real_, 
+                                     p.value = NA_real_, conf.low = NA_real_, conf.high = NA_real_, 
+                                     df = NA_real_, outcome = NA_character_), 
+                                row.names = 1L, class = "data.frame")
+  )
+  
 }
