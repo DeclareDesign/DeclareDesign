@@ -76,10 +76,17 @@ currydata <- function(FUN, dots, addDataArg = TRUE, strictDataParam = TRUE, clon
   quoNoData <- quo((FUN)(!!!dots))
 
   if (addDataArg && !"data" %in% names(dots) && !".data" %in% names(dots)) {
-    dots <- append(dots, list(data = quote(data)), after = FALSE)
+    # To make handlers quasi-compatible with hadley naming of functions
+    # eg .data and not data
+    hadley_naming <- ".data" %in% names(formals(FUN))
+
+    data_arg <- list(data = quote(data))
+    if(hadley_naming) names(data_arg) <- ".data"
+    dots <- append(dots, data_arg, after = FALSE)
   }
 
   quo <- quo((FUN)(!!!dots))
+
 
   if (isTRUE(strictDataParam)) {
     function(data) eval_tidy(quo, data = list(data = data))

@@ -54,7 +54,17 @@ draw_sample <- function(design, data = NULL, start = 1, end = length(design)) {
     design, data, start, end, function(x) attr(x, "step_type") %in% "sampling")
 }
 
+
+# utilities 
+
+check_design_class_single <- function(design) {
+  if(!inherits(design, "design"))
+    stop("Please send a single design object to the design argument, typically created using the + operator.", call. = FALSE)
+}
+
 get_function_internal <- function(design, data = NULL, start, end, pred, results = list(current_df = 0), what = "current_df") {
+  
+  check_design_class_single(design)
   
   if(identical(data, -9)){
     # Special NULL for draw_data

@@ -64,6 +64,8 @@
 
 #' @export
 redesign <- function(design, ..., expand = TRUE) {
+  check_design_class_single(design)
+  
   f <- function(...) {
     clone_design_edit(design, ...)
   }

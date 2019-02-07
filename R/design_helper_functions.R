@@ -228,6 +228,8 @@ dots_to_list_of_designs <- function(...) {
 #' @export
 print_code <- function(design) {
   
+  check_design_class_single(design)
+  
   # if there is not a code attribute, construct code via the calls for each step
   #   and the call for the declare step
   
@@ -261,6 +263,9 @@ print_code <- function(design) {
 #'
 #' @export
 cite_design <- function(design, ...) {
+  
+  check_design_class_single(design)
+  
   citation <- attr(design, "citation")
   if (class(citation) == "bibentry") {
     print(citation, style = "bibtex", ... = ...)
