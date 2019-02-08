@@ -184,5 +184,5 @@ switching_equation <- function(data, outcome, assignments) {
   R <- seq_len(nrow(data))
   C <- match(potential_cols, colnames(data))
 
-  data[cbind(R, C)]
+  as.data.frame(data)[cbind(R, C)]
 }
