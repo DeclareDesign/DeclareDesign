@@ -32,6 +32,8 @@ set_citation <-
              year = NULL,
              description = "Unpublished research design declaration",
              citation = NULL) {
+    check_design_class_single(design)
+    
     if (!is.null(citation)) {
       cite <- citation
     } else {
