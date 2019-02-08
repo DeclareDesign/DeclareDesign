@@ -5,13 +5,18 @@ compare_diagnoses <- function(design_or_diagnosis1,
                               design_or_diagnosis2, 
                               sims = 500,
                               bootstrap_sims = 100, 
+                              diagnosands = NULL,
+                              add_grouping_variables = 
                               match_estimator = FALSE, ...){
   # Send warning when bootrap = 0 or FAL
   if(bootstrap_sims== 0) stop("Please choose a higher number of bootstrap simulations")
   
   
   if(class(design_or_diagnosis1) == "design" ){
-    diagnosis1 = diagnose_design(diagnosis1, sims = sims, bootstrap_sims = bootstrap_sims)}
+    diagnosis1 = diagnose_design(diagnosis1, 
+                                 sims = sims, 
+                                 bootstrap_sims = bootstrap_sims
+                                 )}
   else if(class(design_or_diagnosis1) == "diagnosis") {
     diagnosis1 <- design_or_diagnosis1}
   else{ 
@@ -29,9 +34,9 @@ compare_diagnoses <- function(design_or_diagnosis1,
 
 
 
-compare_diagnoses_internal <- function(diagnosis1, diagnosis2, match_estimator, bootstrap_sims, add_grouping_variables ) {
+compare_diagnoses_internal <- function(diagnosis1, diagnosis2, match_estimator, ) {
   
-  # Housekeep
+  # Housekeeping
   if(class(diagnosis1) != "diagnosis" | class(diagnosis2) != "diagnosis" ) 
     stop("Can't compare designs without diagnoses ")
   if(is.null(diagnosis1$bootstrap_replicates ) | is.null(diagnosis2$bootstrap_replicates )) 
@@ -98,7 +103,6 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, match_estimator, 
   outnames <- gsub("s1", paste0(diagnosis1$parameters_df, "_se"),  outnames) 
   outnames <- gsub("s2", paste0(diagnosis2$parameters_df, "_se"),  outnames)     
   colnames(out) <- outnames
-  out <- as.data.frame(out)
   class(out) <- "diagnoses_comparison"
   out
 }
