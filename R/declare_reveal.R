@@ -179,7 +179,6 @@ switching_equation <- function(data, outcome, assignments) {
     )
   }
 
-  browser()
   data <- data[, upoc, drop = FALSE]
 
   R <- seq_len(nrow(data))
