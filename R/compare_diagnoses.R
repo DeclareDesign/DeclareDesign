@@ -1,5 +1,17 @@
-
-
+#' Compare Designs
+#'
+#' Generates diagnosands from a design or simulations of a design.
+#'
+#' @param design_or_diagnosis1A A design or a diagnosand
+#' @param design_or_diagnosis2 A design or a diagnosand
+#' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
+#' @param add_grouping_variables Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_label", "estimand_label", "estimator_label", "term")
+#' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}
+#' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.
+#' @param ... to
+#' @return a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
+#'
+#'
 #' @export
 compare_diagnoses <- function(design_or_diagnosis1,
                               design_or_diagnosis2, 
@@ -13,32 +25,31 @@ compare_diagnoses <- function(design_or_diagnosis1,
   
   
   if(class(design_or_diagnosis1) == "design" ){
-    diagnosis1 = diagnose_design(diagnosis1, 
+    diagnosis1 = diagnose_design(design_or_diagnosis1, 
                                  sims = sims, 
                                  bootstrap_sims = bootstrap_sims
-    )}
-  
-  else if(class(design_or_diagnosis1) == "diagnosis") {
-    diagnosis1 <- design_or_diagnosis1}
-  
-  else{ 
+    )} else if(class(design_or_diagnosis1) == "diagnosis") {
+    diagnosis1 <- design_or_diagnosis1} else{ 
     stop("design_or_diagnosis1 must be either a design or a diagnosis")}
   
   
   if(class(design_or_diagnosis2) == "design" ){
-    diagnosis2 = diagnose_design(diagnosis2, sims = sims, bootstrap_sims = bootstrap_sims)}
+    diagnosis2 = diagnose_design(design_or_diagnosis2, 
+                                 sims = sims, 
+                                 bootstrap_sims = bootstrap_sims
+    )} else if(class(design_or_diagnosis2) == "diagnosis") {
+      diagnosis2 <- design_or_diagnosis2} else{ 
+        stop("design_or_diagnosis2 must be either a design or a diagnosis")}
   
-  else if(class(design_or_diagnosis2) == "diagnosis") {
-    diagnosis2 <- design_or_diagnosis2}
   
-  else {
-    stop("design_or_diagnosis2 must be either a design or a diagnosis")}
-  compare_diagnoses_internal(diagnosis1, diagnosis2, match_estimator) 
-  
+  out <- compare_diagnoses_internal(diagnosis1, diagnosis2, match_estimator )
+  #class(out) <- "comparison"
+  out
 }
 
 
 
+#' @export
 compare_diagnoses_internal <- function(diagnosis1, diagnosis2, match_estimator ) {
   
   # Housekeeping
@@ -108,10 +119,34 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, match_estimator )
   outnames <- gsub("s1", paste0(diagnosis1$parameters_df, "_se"),  outnames) 
   outnames <- gsub("s2", paste0(diagnosis2$parameters_df, "_se"),  outnames)     
   colnames(out) <- outnames
-  class(out) <- "diagnoses_comparison"
   out
 }
 
+
+
+
+#' @export
+print.comparison <- function(x, verbose = FALSE, ...) {
+  print(summary(x, verbose = verbose, ... = ...))
+}
+
+
+#' @export
+summary.comparison <- function(object, verbose = FALSE, ...) {
+  if(verbose){ 
+    x <- do.call(data.frame, object)
+    return(subset(x,  divergence == 1))}
+  
+  object
+}
+
+
+#' @export
+print.summary.comparison <- function(x, ...){
+  
+ print(x)
+  
+}
 
 
 
