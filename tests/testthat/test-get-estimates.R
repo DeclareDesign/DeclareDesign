@@ -43,3 +43,35 @@ test_that("get_estimates works", {
                
 })
   
+
+test_that("warning for wrong class estimator label", {
+  
+  my_population <- declare_population(data = sleep)
+  
+  custom_func <- function(data){
+    data.frame(
+      est = 5, estimator_label = "test"
+    )
+  }
+  
+  my_estimator <- declare_estimator(handler = custom_func)
+  
+  design <- my_population + my_estimator 
+  
+  expect_warning(draw_estimates(design), "The estimator label should be a character")
+  
+  custom_func <- function(data){
+    data.frame(
+      est = 5, estimand_label = "test"
+    )
+  }
+  
+  my_estimand <- declare_estimand(handler = custom_func)
+  
+  design <- my_population + my_estimand 
+  
+  expect_warning(draw_estimands(design), "The estimand label should be a character")
+  
+})
+
+
