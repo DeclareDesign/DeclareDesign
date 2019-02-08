@@ -43,7 +43,7 @@ test_that("tibble more", {
   
   design <- population + potential_outcomes + assignment + declare_step(handler = my_func)
   
-  expect_s3_class(draw_data(design), "tibble")
+  expect_s3_class(draw_data(design), "tbl_df")
   
 })
 
