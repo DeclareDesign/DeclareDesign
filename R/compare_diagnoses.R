@@ -43,7 +43,7 @@ compare_diagnoses <- function(design_or_diagnosis1,
   
   
   out <- compare_diagnoses_internal(diagnosis1, diagnosis2, match_estimator )
-  #class(out) <- "comparison"
+  class(out) <- "comparison"
   out
 }
 
@@ -126,26 +126,30 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, match_estimator )
 
 
 #' @export
-print.comparison <- function(x, verbose = FALSE, ...) {
-  print(summary(x, verbose = verbose, ... = ...))
+print.comparison <- function(x, ...) {
+  print(summary(x))
+  invisible(summary(x))
 }
 
 
 #' @export
-summary.comparison <- function(object, verbose = FALSE, ...) {
-  if(verbose){ 
-    x <- do.call(data.frame, object)
-    return(subset(x,  divergence == 1))}
+summary.comparison <- function(x,  ...) {
+
+    x <- do.call(data.frame, x)
+    x <- subset(x,  divergence == 1)
+    
+  structure(x, class = c("summary.comparison", "data.frame"))
   
-  object
 }
 
 
 #' @export
 print.summary.comparison <- function(x, ...){
-  
- print(x)
-  
+  x <- do.call(data.frame, x)
+  class(x) <- "data.frame"
+  print(x, row.names = FALSE)
+ 
+  invisible(x)
 }
 
 
