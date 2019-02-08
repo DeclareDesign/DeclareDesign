@@ -1,12 +1,12 @@
 
 
-
+#' @export
 compare_diagnoses <- function(design_or_diagnosis1,
                               design_or_diagnosis2, 
                               sims = 500,
                               bootstrap_sims = 100, 
                               diagnosands = NULL,
-                              add_grouping_variables = 
+                              add_grouping_variables = NULL ,
                               match_estimator = FALSE, ...){
   # Send warning when bootrap = 0 or FAL
   if(bootstrap_sims== 0) stop("Please choose a higher number of bootstrap simulations")
@@ -16,16 +16,21 @@ compare_diagnoses <- function(design_or_diagnosis1,
     diagnosis1 = diagnose_design(diagnosis1, 
                                  sims = sims, 
                                  bootstrap_sims = bootstrap_sims
-                                 )}
+    )}
+  
   else if(class(design_or_diagnosis1) == "diagnosis") {
     diagnosis1 <- design_or_diagnosis1}
+  
   else{ 
     stop("design_or_diagnosis1 must be either a design or a diagnosis")}
   
+  
   if(class(design_or_diagnosis2) == "design" ){
     diagnosis2 = diagnose_design(diagnosis2, sims = sims, bootstrap_sims = bootstrap_sims)}
+  
   else if(class(design_or_diagnosis2) == "diagnosis") {
     diagnosis2 <- design_or_diagnosis2}
+  
   else {
     stop("design_or_diagnosis2 must be either a design or a diagnosis")}
   compare_diagnoses_internal(diagnosis1, diagnosis2, match_estimator) 
@@ -34,7 +39,7 @@ compare_diagnoses <- function(design_or_diagnosis1,
 
 
 
-compare_diagnoses_internal <- function(diagnosis1, diagnosis2, match_estimator, ) {
+compare_diagnoses_internal <- function(diagnosis1, diagnosis2, match_estimator ) {
   
   # Housekeeping
   if(class(diagnosis1) != "diagnosis" | class(diagnosis2) != "diagnosis" ) 
