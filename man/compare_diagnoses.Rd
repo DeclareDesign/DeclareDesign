@@ -5,10 +5,11 @@
 \title{Compare Designs}
 \usage{
 compare_diagnoses(design_or_diagnosis1, design_or_diagnosis2, sims = 500,
-  bootstrap_sims = 100, diagnosands = NULL,
-  add_grouping_variables = NULL, match_estimator = FALSE, ...)
+  bootstrap_sims = 100, merge_by_estimator = FALSE)
 }
 \arguments{
+\item{design_or_diagnosis1}{A design or a diagnosand}
+
 \item{design_or_diagnosis2}{A design or a diagnosand}
 
 \item{sims}{The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}}
@@ -18,14 +19,12 @@ compare_diagnoses(design_or_diagnosis1, design_or_diagnosis2, sims = 500,
 \item{diagnosands}{A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).}
 
 \item{add_grouping_variables}{Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_label", "estimand_label", "estimator_label", "term")}
-
-\item{...}{to}
-
-\item{design_or_diagnosis1A}{A design or a diagnosand}
 }
 \value{
 a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
+
+# Example w set diagnosands
 }
 \description{
-Generates diagnosands from a design or simulations of a design.
+Diagnose and compare designs.
 }
