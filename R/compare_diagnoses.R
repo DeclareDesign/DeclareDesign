@@ -136,17 +136,12 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   filter_mean    <- gsub("_[[:digit:]]+$","", colnames(comparison_df)) %in%  diagnosands
   diagnosands_mean <- comparison_df[,  filter_mean]
   c_names <- colnames(comparison_df)
-  design_labels <-  c_names[grepl("^design_label", c_names)]
-  estimand_labels <-  c_names[grepl("^estimand_label", c_names)]
-  estimator_labels <-  c_names[grepl("^estimator_label", c_names)]
-  term_labels <- c_names[grepl("^term", c_names)]
-  sims_labels <- c_names[grepl("^n_sims", c_names)]
-  sims_df <- comparison_df[, sims_labels]
-  comparison_df <- cbind(comparison_df[, design_labels],
-                         comparison_df[, estimand_labels], 
-                         comparison_df[, term_labels],
-                         comparison_df[,  estimator_labels])
  
+
+  sims_df <- comparison_df[, grepl("^n_sims", c_names)]
+  comparison_df <- data.frame(comparison_df[, "estimand_label" %in% c_names], 
+                         comparison_df[,grepl("^term", c_names)],
+                         comparison_df[,  grepl("^estimator_label", c_names)])
   
   #prepare output: 
   m <- ncol(diagnosands_mean)
