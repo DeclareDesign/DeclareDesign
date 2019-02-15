@@ -1,4 +1,4 @@
-#' Compare Designs
+#' Compare Diagnoses
 #'
 #' Diagnose and compare designs.
 #'
