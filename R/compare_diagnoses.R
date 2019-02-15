@@ -25,7 +25,8 @@ compare_diagnoses <- function(design_or_diagnosis1,
   
  # Diagnose designs design_or_diagnoses are design object
   if( "design" %in% class(design_or_diagnosis1)  ){
-    diagnosis1 = diagnose_design(design_or_diagnosis1, 
+    design_1 <- design_or_diagnosis1
+    diagnosis1 = diagnose_design(design_1 , 
                                  sims = sims, 
                                  bootstrap_sims = bootstrap_sims)
 
@@ -36,7 +37,8 @@ compare_diagnoses <- function(design_or_diagnosis1,
   
   
   if( "design" %in% class(design_or_diagnosis2)  ){
-    diagnosis2 = diagnose_design(design_or_diagnosis2, 
+    design_2 <- design_or_diagnosis2
+    diagnosis2 = diagnose_design(design_2,
                                  sims = sims, bootstrap_sims = 0)
     } else if(class(design_or_diagnosis2) == "diagnosis"){
       diagnosis2 <- design_or_diagnosis2
@@ -106,14 +108,18 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   # just in case diagnosis2 doesn't  include bootrstrap_replicates
   filter_se      <- grepl("^se",  c_names)
   diagnosands_se <-  comparison_df[, filter_se]
-  diagnosands_se1 <-  diagnosands_se[,  grepl("_1$",  colnames(diagnosands_se))]
-  diagnosands_se2 <-  diagnosands_se[,  grepl("_2$",  colnames(diagnosands_se))]
-  if(length(diagnosands_se2) == 0) diagnosands_se2 <- rep(NA, length(diagnosands_se1))
+  if(diagnosis2$bootstrap_sims == 0){
+  diagnosands_se1 <- diagnosands_se; diagnosands_se2 <- matrix(data = rep(NA, length(diagnosands_se)))
+  } else { 
+    diagnosands_se1 <-  diagnosands_se[,  grepl("_1$",  colnames(diagnosands_se))]
+    diagnosands_se2 <-  diagnosands_se[,  grepl("_2$",  colnames(diagnosands_se))]}
+  
+  
   comparison_df  <- comparison_df[, dropcols]
   
   # Compute bootstrap confindence interval
   bootstrap_df  <- diagnosis1$bootstrap_replicates
-  group_by_list <- bootstrap_df[,  group_by_set, drop = FALSE]
+  group_by_list <- bootstrap_df[,  group_by_set1, drop = FALSE]
   labels_df <- split(group_by_list, lapply(group_by_list, addNA), drop = TRUE)
   labels_df <- lapply(labels_df, head, n = 1)
   bootstrap_df <- split(bootstrap_df , lapply(group_by_list, addNA), drop = TRUE)
@@ -140,8 +146,9 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   # split columns by diagnosands
   filter_mean    <- gsub("_[[:digit:]]+$","", colnames(comparison_df)) %in%  diagnosands
   diagnosands_mean <- comparison_df[,  filter_mean]
-  filter_sims <-  grepl("^n_sims", c_names)
-  sims_df <- comparison_df[filter_sims]
+  filter_sims <-  grepl("^n_sims", colnames(comparison_df))
+  sims_df <- comparison_df[,filter_sims]
+  filter_se      <- grepl("^se",  colnames(comparison_df))
   comparison_df <-  comparison_df[!filter_mean &   !filter_se & !filter_sims]
   
   
@@ -159,23 +166,27 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
             se_2 =  diagnosands_se2[pair,],
             l =  lower.bound[pair, diagnosands],
             u =  upper.bound[pair, diagnosands])),
-           sims_df[pair, ]
-         )
+           sims_df[pair, ],
+         stringsAsFactors = FALSE)
           
     })))
   
   c_names <- colnames(out)
-  comparison_df <-  data.frame(apply(out, 2, function(x) gsub("design_or_diagnosis", "design_", x) ))
-
+  design_labels <- grepl("^design_label",c_names)
+  #out[,design_labels] <- sapply(out[,design_labels], function(x) gsub("design_or_diagnosis", "design_", x) )
+  comparison_df <-  rapply(object = out , f = round, classes = "numeric", how = "replace", digits = 2) 
+  
+  
   if("estimand_label" %in% c_names & ! "estimand_label" %in% merge_by_set)
     c_names[c_names == "estimand_label"] <- paste0("estimand_label", suffix[c( "estimand_label" %in% group_by_set1, "estimand_label" %in% group_by_set2)])
   if("estimator_label" %in% c_names & ! "estimator_label" %in% merge_by_set)
     c_names[c_names == "estimator_label"] <- paste0("estimator_label", suffix[c( "estimator_label" %in% group_by_set1, "estimator_label" %in% group_by_set2)])
   if("term" %in% c_names & !"term" %in% merge_by_set)
     c_names[c_names == "term"] <- paste0("term", suffix[c("term" %in% group_by_set1, "term" %in% group_by_set2)])
-    
+  comparison_df <- setNames( comparison_df,  c_names)
   
-    invisible(list(compared.diagnoses_df = setNames( comparison_df,  c_names),
+  if( all(is.na(comparison_df$se_2))) comparison_df$se_2 <- NULL
+    invisible(list(compared.diagnoses_df =comparison_df ,
             diagnosis1 = diagnosis1,
             diagnosis2 = diagnosis2))
 }
@@ -196,7 +207,7 @@ summary.compared.diagnoses <- function(x,  ...) {
   sx <- subset(x,  x$in_interval == 0)
 
   if(nrow(sx) >0) x <- sx
-  x<- mutate_if(x, is.numeric, round, digits =2)
+
   structure(x, class = c("summary.compared_diagnoses", "data.frame"))
   
 }
@@ -205,6 +216,7 @@ summary.compared.diagnoses <- function(x,  ...) {
 
 #' @export
 print.summary.compared.diagnoses <- function(x, ...){
+  print("\n\n")
   print(x, row.names = FALSE)
   invisible(x)
 }
