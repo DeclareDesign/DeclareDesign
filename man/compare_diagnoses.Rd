@@ -2,28 +2,24 @@
 % Please edit documentation in R/compare_diagnoses.R
 \name{compare_diagnoses}
 \alias{compare_diagnoses}
-\title{Compare Designs}
+\title{Compare Diagnoses}
 \usage{
 compare_diagnoses(design_or_diagnosis1, design_or_diagnosis2, sims = 500,
   bootstrap_sims = 100, merge_by_estimator = FALSE)
 }
 \arguments{
-\item{design_or_diagnosis1}{A design or a diagnosand}
+\item{design_or_diagnosis1}{A design or a diagnosand.}
 
-\item{design_or_diagnosis2}{A design or a diagnosand}
+\item{design_or_diagnosis2}{A design or a diagnosand.}
 
-\item{sims}{The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}}
+\item{sims}{The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.}
 
-\item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.}
+\item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping. Used only for \code{design_or_diagnosis1}.}
 
-\item{diagnosands}{A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).}
-
-\item{add_grouping_variables}{Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_label", "estimand_label", "estimator_label", "term")}
+\item{merge_by_estimator}{A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{FALSE}}
 }
 \value{
-a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
-
-# Example w set diagnosands
+A list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
 }
 \description{
 Diagnose and compare designs.
