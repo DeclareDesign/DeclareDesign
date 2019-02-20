@@ -31,6 +31,7 @@ compare_diagnoses <- function(design_or_diagnosis1,
                                  bootstrap_sims = bootstrap_sims)
 
     } else if(class(design_or_diagnosis1) == "diagnosis") {
+      if(design_or_diagnosis1$bootstrap_sims<= 0) stop("design_or_diagnosis1 must have a higher number of bootstrap simulations")
     diagnosis1 <- design_or_diagnosis1} else{ 
     stop("design_or_diagnosis1 must be either a design or a diagnosis")}
   
@@ -39,7 +40,7 @@ compare_diagnoses <- function(design_or_diagnosis1,
   if( "design" %in% class(design_or_diagnosis2)  ){
     design_2 <- design_or_diagnosis2
     diagnosis2 = diagnose_design(design_2,
-                                 sims = sims, bootstrap_sims = 0)
+                                 sims = sims, bootstrap_sims = bootstrap_sims)
     } else if(class(design_or_diagnosis2) == "diagnosis"){
       diagnosis2 <- design_or_diagnosis2
       } else{ 
@@ -99,7 +100,7 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
 
    
   comparison_df <-  merge(diagnosis1$diagnosands_df  , diagnosis2$diagnosands_df, 
-                          by = merge_by_set, suffixes = c("_1", "_2"))
+                          by = merge_by_set, suffixes = c("_1", "_2"), stringsAsFactors = FALSE)
   
   c_names <- colnames(comparison_df)
   suffix <- c("_1", "_2")
@@ -157,7 +158,6 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   comparison_df    <- comparison_df[!filter_mean &   !filter_se & !filter_sims]
   
   # Suppres warnings on rownames 
-  
   out <- suppressWarnings( do.call(rbind, lapply(1:nrow(diagnosands_mean), function(pair){
    data.frame(comparison_df[pair, ], 
               diagnosand = diagnosands,
@@ -206,23 +206,75 @@ print.compared.diagnoses <- function(object, ...) {
 
 
 #' @export
-summary.compared.diagnoses <- function(x,  ...) {
-  x<-  x$compared.diagnoses_df
-  sx <- subset(x,  x$in_interval == 0)
-
-  if(nrow(sx) >0) x <- sx
+summary.compared.diagnoses <- function(x, ...) {
+  
+ 
+ 
 
   structure(x, class = c("summary.compared_diagnoses", "data.frame"))
   
+ 
 }
 
 
 
 #' @export
-print.summary.compared.diagnoses <- function(x, ...){
-  print("\n\n")
-  print(x, row.names = FALSE)
-  invisible(x)
+print.summary.compared_diagnoses <- function(x, ...){
+  
+  bootstrap_rep1 <- x$diagnosis1$bootstrap_sims
+  bootstrap_rep2 <- x$diagnosis2$bootstrap_sims
+  n_sims1 <- nrow(comparison$diagnosis1$simulations_df)
+  n_sims2 <- nrow(comparison$diagnosis2$simulations_df)
+  if(n_sims1 == n_sims2 )
+    cat(paste0("\n Comparison of research design diagnosis based on ", n_sims1, " simulations."))
+  else 
+    cat(paste0("\n Comparison of research design diagnosis based on ", n_sims1, " simulations from `design_1`` and ", n_sims2, " from `design_2`."))
+ 
+  if(bootstrap_rep1  ==bootstrap_rep2)
+    cat(paste0("\nDiagnosand estimates with bootstrapped standard errors in parentheses (", bootstrap_rep1,")."  ))
+  else 
+    cat(paste0("\n  Diagnosand estimates with bootstrapped standard errors in parentheses (design_1 = ", bootstrap_rep1,", design_1 = ", bootstrap_rep2, ")."  ))
+ 
+  cat("\n\n" , sep = "")
+  x  <- x[["compared.diagnoses_df"]]
+  sx <- subset(x,  x[,"in_interval"] == 0)
+  cols <- base::startsWith(colnames(x), "design_label")
+  design_labels <-  sx[1, cols]
+  sx <- sx[, !cols]
+  se_1 <- paste0("(",sx$se_1, ")")
+  se_2 <- paste0("(",sx$se_2, ")")
+  sx$in_interval <- NULL
+  sx$se_1 <- NULL
+  sx$se_2 <- NULL
+  mand  <- startsWith(colnames(x), "estimand")
+  term  <- startsWith(colnames(x), "term")
+  mator <- startsWith(colnames(x), "estimator")
+  n_labels <- sum(mand, mator, term)
+  r <- nrow(sx)
+  k <- ncol(sx)
+  diagnosand_se <- paste0("se(", sx$diagnosand, ")")
+  sx <- sx[, 1:(k-4)]
+  k <- ncol(sx)
+  
+  se_rows <- data.frame(
+        replicate(n_labels + 1, rep("", r)),
+        se_1,
+        se_2, stringsAsFactors = FALSE)  
+  
+  
+  out <- data.frame(rbind(sx, sx), stringsAsFactors = FALSE)
+  colnames(out)[startsWith(colnames(out), "mean")] <- c("design_1", "design_2")
+  
+  
+  out[(1:m) %% 2 != 0,] <- sx
+  out[(1:m) %% 2 == 0, ]  <- se_rows
+
+
+  print(out, row.names = FALSE)
+  
+  
+  cat("\n Only showing diagnosands that are statistically different from each other")
+  invisible(out)
 }
 
 
