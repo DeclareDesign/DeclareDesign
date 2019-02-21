@@ -8,9 +8,9 @@ compare_diagnoses(design_or_diagnosis1, design_or_diagnosis2, sims = 500,
   bootstrap_sims = 100, merge_by_estimator = FALSE)
 }
 \arguments{
-\item{design_or_diagnosis1}{A design or a diagnosand.}
+\item{design_or_diagnosis1}{A design or a diagnosis.}
 
-\item{design_or_diagnosis2}{A design or a diagnosand.}
+\item{design_or_diagnosis2}{A design or a diagnosis.}
 
 \item{sims}{The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.}
 
@@ -19,8 +19,35 @@ compare_diagnoses(design_or_diagnosis1, design_or_diagnosis2, sims = 500,
 \item{merge_by_estimator}{A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{FALSE}}
 }
 \value{
-A list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
+A list with a data frame of compared diagnoses and both diagnoses.
 }
 \description{
 Diagnose and compare designs.
+}
+\details{
+\code{compare_diagnoses()} runs a many-to-many merge matching by \code{estimand_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition.
+
+Any diagnosand that is not included in both designs will be dropped from the merge.
+
+The data frame of compared diagnoses has a column, \code{in_interval}, that indicates if two given diagnosands diverge statistically. 
+Two given diagnosands are statistically divergen if a diagnosand from \code{design_or_diagnosis2} is not contained in the 95% bootstrap confidence interval of their equivalent from \code{design_or_diagnosis1}, and \code{in_interval} would equal zero for that given comparison.
+
+ @examples
+ design_a <- declare_population(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +
+declare_potential_outcomes(
+  Y_Z_0 = u, 
+  Y_Z_1 = u + rnorm(N, mean = 2, sd = 2)) +
+declare_assignment() + 
+
+declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0), label = "ATE") +
+
+declare_reveal() +
+
+declare_estimator(Y ~ Z, estimand = "ATE", label = "est1")
+
+design_b <- replace_step(design_a, step = "assignment", declare_assignment(prob = 0.3) )
+
+compare_diagnoses(design_a, design_b)
+ 
+ @export
 }

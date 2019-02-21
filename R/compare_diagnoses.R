@@ -2,15 +2,41 @@
 #'
 #' Diagnose and compare designs.
 #'
-#' @param design_or_diagnosis1 A design or a diagnosand.
-#' @param design_or_diagnosis2 A design or a diagnosand.
+#' @param design_or_diagnosis1 A design or a diagnosis.
+#' @param design_or_diagnosis2 A design or a diagnosis.
 #' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.
 #' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping. Used only for \code{design_or_diagnosis1}.
 #' @param merge_by_estimator A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{FALSE}
-#' @return A list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
+#' @return A list with a data frame of compared diagnoses and both diagnoses.
 #'
+#' @details
+#' 
+#' \code{compare_diagnoses()} runs a many-to-many merge matching by \code{estimand_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition.
+#' 
+#' Any diagnosand that is not included in both designs will be dropped from the merge.
+#' 
+#' The data frame of compared diagnoses has a column, \code{in_interval}, that indicates if two given diagnosands diverge statistically. 
+#' Two given diagnosands are statistically divergen if a diagnosand from \code{design_or_diagnosis2} is not contained in the 95% bootstrap confidence interval of their equivalent from \code{design_or_diagnosis1}, and \code{in_interval} would equal zero for that given comparison.
 #'
-#' @export
+#'  @examples
+#'  design_a <- declare_population(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +
+
+#' declare_potential_outcomes(
+#'   Y_Z_0 = u, 
+#'   Y_Z_1 = u + rnorm(N, mean = 2, sd = 2)) +
+#' declare_assignment() + 
+#'
+#' declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0), label = "ATE") +
+#' 
+#' declare_reveal() +
+#' 
+#' declare_estimator(Y ~ Z, estimand = "ATE", label = "est1")
+#' 
+#' design_b <- replace_step(design_a, step = "assignment", declare_assignment(prob = 0.3) )
+#' 
+#' compare_diagnoses(design_a, design_b)
+#'  
+#'  @export
 compare_diagnoses <- function(design_or_diagnosis1,
                               design_or_diagnosis2, 
                               sims = 500,
@@ -48,7 +74,7 @@ compare_diagnoses <- function(design_or_diagnosis1,
   
   
   out <- compare_diagnoses_internal(diagnosis1, diagnosis2, merge_by_estimator )
-  class(out) <- "compared.diagnoses"
+  
   out
 }
 
@@ -101,7 +127,12 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
    
   comparison_df <-  merge(diagnosis1$diagnosands_df  , diagnosis2$diagnosands_df, 
                           by = merge_by_set, suffixes = c("_1", "_2"), stringsAsFactors = FALSE)
-  
+  if(nrow(comparison_df) == 0 ){
+    warning("Can't merge diagnosands data frames. Diagnoses don't have labels in common")
+   return(NULL)
+    
+  }
+    
   c_names <- colnames(comparison_df)
   suffix <- c("_1", "_2")
   
@@ -161,17 +192,20 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   out <- suppressWarnings( do.call(rbind, lapply(1:nrow(diagnosands_mean), function(pair){
    data.frame(comparison_df[pair, ], 
               diagnosand = diagnosands,
-              t(mapply(function(mean_1, mean_2, se_1, se_2, l, u) 
-                c(mean_1 = mean_1, mean_2 = mean_2, se_1 = se_1, se_2 = se_2, 
-                  in_interval =  mean_2 >= l & mean_2 <= u, conf.low_1 = l, conf.upper_1 = u), 
+              t(mapply(function(mean_1, mean_2, se_1, se_2, l, u, n1 , n2) 
+                c(mean_1 = mean_1, mean_2 = mean_2, se_1 = se_1, se_2 = se_2,
+                  n_sims1 = n1, n_sims2 = n2, conf.low_1 = l, conf.upper_1 =  u, 
+                  in_interval =  mean_2 >= l & mean_2 <= u), 
                   #args
                   mean_1 = diagnosands_mean[pair, 1:length(diagnosands)],
                   mean_2 = diagnosands_mean[pair, (length(diagnosands)+1):ncol(diagnosands_mean)],
                   se_1 = diagnosands_se1[pair,],
                   se_2 =  diagnosands_se2[pair,],
                   l =  lower.bound[pair, diagnosands],
-                  u =  upper.bound[pair, diagnosands])),
-                 sims_df[pair, ],
+                  u =  upper.bound[pair, diagnosands],
+                  n1 = sims_df[pair, 1],
+                  n2 = sims_df[pair, 2])),
+                
                stringsAsFactors = FALSE)})))
   
   c_names <- colnames(out)
@@ -190,9 +224,13 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   comparison_df <- setNames( comparison_df,  c_names)
   
   if( all(is.na(comparison_df$se_2))) comparison_df$se_2 <- NULL
-    invisible(list(compared.diagnoses_df =comparison_df ,
-            diagnosis1 = diagnosis1,
-            diagnosis2 = diagnosis2))
+  out <- list(compared.diagnoses_df =comparison_df ,
+              diagnosis1 = diagnosis1,
+              diagnosis2 = diagnosis2)
+  
+  class(out) <- "compared.diagnoses"
+  
+  invisible(out)
 }
 
 
@@ -222,20 +260,19 @@ print.summary.compared_diagnoses <- function(x, ...){
   n_sims2 <- nrow(comparison$diagnosis2$simulations_df)
   
   if(n_sims1 == n_sims2 )
-    cat(paste0("\n Comparison of research design diagnosis based on ", n_sims1, " simulations."))
+    cat(paste0("\n Comparison of research designs diagnoses based on ", n_sims1, " simulations."))
   else 
-    cat(paste0("\n Comparison of research design diagnosis based on ", n_sims1, " simulations from `design_1`` and ", n_sims2, " from `design_2`."))
+    cat(paste0("\n Comparison of research designs diagnoses based on ", n_sims1, " simulations from `design_1`` and ", n_sims2, " from `design_2`."))
  
   if(bootstrap_rep1  ==bootstrap_rep2)
     cat(paste0("\nDiagnosand estimates with bootstrapped standard errors in parentheses (", bootstrap_rep1,")."  ))
   else 
     cat(paste0("\n  Diagnosand estimates with bootstrapped standard errors in parentheses (design_1 = ", bootstrap_rep1,", design_1 = ", bootstrap_rep2, ")."  ))
  
-  
+  design_labels <-  c(x$diagnosis1$parameters_df, x$diagnosis2$parameters_df)
   x  <- x[["compared.diagnoses_df"]]
   sx <- subset(x,  x[,"in_interval"] == 0)
   cols <- base::startsWith(colnames(x), "design_label")
-  design_labels <-  sx[1, cols]
   sx <- sx[, !cols]
   se_1 <- paste0("(",sx$se_1, ")")
   se_2 <- paste0("(",sx$se_2, ")")
@@ -251,23 +288,24 @@ print.summary.compared_diagnoses <- function(x, ...){
   diagnosand_se <- paste0("se(", sx$diagnosand, ")")
   sx <- sx[, 1:(k-4)]
   k <- ncol(sx)
- 
+  label_cols <- matrix(replicate(n_labels + 1, rep("", r)), ncol =  n_labels + 1)
+  
   se_rows <- data.frame(
-        replicate(n_labels + 1, rep("", r)),
+        label_cols,
         se_1,
         se_2, stringsAsFactors = FALSE)  
   
   
   out <- data.frame(rbind(sx, sx), stringsAsFactors = FALSE)
-  colnames(out)[startsWith(colnames(out), "mean")] <- c("design_1", "design_2")
+  colnames(out)[startsWith(colnames(out), "mean")] <- design_labels
+  m <- nrow(out)
   
-  
-  out[(1:r) %% 2 != 0,]  <- sx
-  out[(1:r) %% 2 == 0, ] <- se_rows
+  out[(1:m) %% 2 != 0,]  <- sx
+  out[(1:m) %% 2 == 0, ] <- se_rows
 
-
+  cat("\n\n")
   print(out, row.names = FALSE)
-  cat("\n\n Displaying diagnosands that statistically diverge between `design_1` and `design_2`.")
+  cat(paste0("\n\n Displaying diagnosands that statistically diverge between ", design_labels[1], " and ", design_labels[2],  " See help file for details" ))
   invisible(out)
 }
 
