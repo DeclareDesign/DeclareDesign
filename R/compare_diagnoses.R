@@ -14,7 +14,7 @@
 #' The function \code{compare_diagnoses()} runs a many-to-many merge matching by \code{estimand_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
 #' 
 #' The data frame of compared diagnoses has a column, \code{in_interval}, that indicates if two given diagnosands diverge statistically. 
-#' Two given diagnosands are statistically divergen if a diagnosand from \code{comparison_design} is not contained in the 95% bootstrap confidence interval of their equivalent from \code{base_design}, and \code{in_interval} would equal zero for that given comparison.
+#' i.e. if a diagnosand from \code{comparison_design} is not contained in the 95\\% bootstrap confidence interval of their equivalent diagnosand from \code{base_design}. The column \code{in_interval} equals zero for divergent diangnosands and one otherwise..
 #'
 #' @examples
 #' design_a <- declare_population(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +
@@ -49,8 +49,8 @@ compare_diagnoses <- function(base_design,
   if( "design" %in% class(base_design)  ){
    
      
-    design_1 <- base_design
-    diagnosis1 = diagnose_design(design_1, 
+  
+    diagnosis1 = diagnose_design(base_design, 
                                  sims = sims, 
                                  bootstrap_sims = bootstrap_sims)
 
@@ -62,8 +62,8 @@ compare_diagnoses <- function(base_design,
   
   
   if( "design" %in% class(comparison_design)  ){
-    design_2 <- comparison_design
-    diagnosis2 = diagnose_design(design_2,
+  
+    diagnosis2 = diagnose_design(comparison_design,
                                  sims = sims, bootstrap_sims = bootstrap_sims)
     } else if(class(comparison_design) == "diagnosis"){
       diagnosis2 <- comparison_design
@@ -267,7 +267,7 @@ print.summary.compared_diagnoses <- function(x, ...){
   else 
     cat(paste0("\n  Diagnosand estimates with bootstrapped standard errors in parentheses (design_1 = ", bootstrap_rep1,", design_1 = ", bootstrap_rep2, ")."  ))
  
-  design_labels <-  c(x$diagnosis1$parameters_df, x$diagnosis2$parameters_df)
+
   x  <- x[["compared.diagnoses_df"]]
   sx <- subset(x,  x[,"in_interval"] == 0)
   cols <- base::startsWith(colnames(x), "design_label")
@@ -295,7 +295,7 @@ print.summary.compared_diagnoses <- function(x, ...){
   
   
   out <- data.frame(rbind(sx, sx), stringsAsFactors = FALSE)
-  colnames(out)[startsWith(colnames(out), "mean")] <- design_labels
+  colnames(out)[startsWith(colnames(out), "mean")] <- c("base", "comparison")
   m <- nrow(out)
   
   out[(1:m) %% 2 != 0,]  <- sx
@@ -303,7 +303,7 @@ print.summary.compared_diagnoses <- function(x, ...){
 
   cat("\n\n")
   print(out, row.names = FALSE)
-  cat(paste0("\n\n Displaying diagnosands that statistically diverge between ", design_labels[1], " and ", design_labels[2],  " See help file for details" ))
+  cat(paste0("\n\n Displaying diagnosands that statistically diverge between base and comparison designs. See help file for details" ))
   invisible(out)
 }
 

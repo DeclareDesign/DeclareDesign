@@ -5,7 +5,7 @@
 \title{Compare Diagnoses}
 \usage{
 compare_diagnoses(base_design, comparison_design, sims = 500,
-  bootstrap_sims = 100, merge_by_estimator = FALSE)
+  bootstrap_sims = 500, merge_by_estimator = FALSE)
 }
 \arguments{
 \item{base_design}{A design or a diagnosis.}
@@ -28,10 +28,10 @@ Diagnose and compare designs.
 The function \code{compare_diagnoses()} runs a many-to-many merge matching by \code{estimand_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
 
 The data frame of compared diagnoses has a column, \code{in_interval}, that indicates if two given diagnosands diverge statistically. 
-Two given diagnosands are statistically divergen if a diagnosand from \code{comparison_design} is not contained in the 95% bootstrap confidence interval of their equivalent from \code{base_design}, and \code{in_interval} would equal zero for that given comparison.
+i.e. if a diagnosand from \code{comparison_design} is not contained in the 95\\% bootstrap confidence interval of their equivalent diagnosand from \code{base_design}. The column \code{in_interval} equals zero for divergent diangnosands and one otherwise..
 }
 \examples{
- design_a <- declare_population(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +
+design_a <- declare_population(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +
 declare_potential_outcomes(
   Y_Z_0 = u, 
   Y_Z_1 = u + rnorm(N, mean = 2, sd = 2)) +
