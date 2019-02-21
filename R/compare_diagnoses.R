@@ -14,7 +14,7 @@
 #' The function \code{compare_diagnoses()} runs a many-to-many merge matching by \code{estimand_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
 #' 
 #' The data frame of compared diagnoses has a column, \code{in_interval}, that indicates if two given diagnosands diverge statistically. 
-#' i.e. if a diagnosand from \code{comparison_design} is not contained in the 95\\% bootstrap confidence interval of their equivalent diagnosand from \code{base_design}. The column \code{in_interval} equals zero for divergent diangnosands and one otherwise..
+#' i.e. if a diagnosand from \code{comparison_design} is not contained in the 95\% bootstrap confidence interval of their equivalent diagnosand from \code{base_design}. The column \code{in_interval} equals zero for divergent diangnosands and one otherwise..
 #'
 #' @examples
 #' design_a <- declare_population(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +
