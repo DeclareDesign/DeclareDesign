@@ -11,14 +11,12 @@
 #'
 #' @details
 #' 
-#' \code{compare_diagnoses()} runs a many-to-many merge matching by \code{estimand_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition.
-#' 
-#' Any diagnosand that is not included in both designs will be dropped from the merge.
+#' The function \code{compare_diagnoses()} runs a many-to-many merge matching by \code{estimand_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
 #' 
 #' The data frame of compared diagnoses has a column, \code{in_interval}, that indicates if two given diagnosands diverge statistically. 
 #' Two given diagnosands are statistically divergen if a diagnosand from \code{design_or_diagnosis2} is not contained in the 95% bootstrap confidence interval of their equivalent from \code{design_or_diagnosis1}, and \code{in_interval} would equal zero for that given comparison.
 #'
-#'  @examples
+#' @examples
 #'  design_a <- declare_population(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +
 
 #' declare_potential_outcomes(
@@ -36,7 +34,7 @@
 #' 
 #' compare_diagnoses(design_a, design_b)
 #'  
-#'  @export
+#' @export
 compare_diagnoses <- function(design_or_diagnosis1,
                               design_or_diagnosis2, 
                               sims = 500,
