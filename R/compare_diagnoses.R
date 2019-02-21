@@ -207,13 +207,8 @@ print.compared.diagnoses <- function(object, ...) {
 
 #' @export
 summary.compared.diagnoses <- function(x, ...) {
-  
- 
- 
-
   structure(x, class = c("summary.compared_diagnoses", "data.frame"))
   
- 
 }
 
 
@@ -225,6 +220,7 @@ print.summary.compared_diagnoses <- function(x, ...){
   bootstrap_rep2 <- x$diagnosis2$bootstrap_sims
   n_sims1 <- nrow(comparison$diagnosis1$simulations_df)
   n_sims2 <- nrow(comparison$diagnosis2$simulations_df)
+  
   if(n_sims1 == n_sims2 )
     cat(paste0("\n Comparison of research design diagnosis based on ", n_sims1, " simulations."))
   else 
@@ -235,7 +231,7 @@ print.summary.compared_diagnoses <- function(x, ...){
   else 
     cat(paste0("\n  Diagnosand estimates with bootstrapped standard errors in parentheses (design_1 = ", bootstrap_rep1,", design_1 = ", bootstrap_rep2, ")."  ))
  
-  cat("\n\n" , sep = "")
+  
   x  <- x[["compared.diagnoses_df"]]
   sx <- subset(x,  x[,"in_interval"] == 0)
   cols <- base::startsWith(colnames(x), "design_label")
@@ -266,14 +262,12 @@ print.summary.compared_diagnoses <- function(x, ...){
   colnames(out)[startsWith(colnames(out), "mean")] <- c("design_1", "design_2")
   
   
-  out[(1:m) %% 2 != 0,] <- sx
-  out[(1:m) %% 2 == 0, ]  <- se_rows
+  out[(1:m) %% 2 != 0,]  <- sx
+  out[(1:m) %% 2 == 0, ] <- se_rows
 
 
   print(out, row.names = FALSE)
-  
-  
-  cat("\n Only showing diagnosands that are statistically different from each other")
+  cat("\n\n Displaying diagnosands that statistically diverge between `design_1` and `design_2`.")
   invisible(out)
 }
 
