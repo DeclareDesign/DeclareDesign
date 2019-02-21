@@ -4,19 +4,19 @@
 \alias{compare_diagnoses}
 \title{Compare Diagnoses}
 \usage{
-compare_diagnoses(design_or_diagnosis1, design_or_diagnosis2, sims = 500,
+compare_diagnoses(base_design, comparison_design, sims = 500,
   bootstrap_sims = 100, merge_by_estimator = FALSE)
 }
 \arguments{
-\item{design_or_diagnosis1}{A design or a diagnosis.}
+\item{base_design}{A design or a diagnosis.}
 
-\item{design_or_diagnosis2}{A design or a diagnosis.}
+\item{comparison_design}{A design or a diagnosis.}
 
 \item{sims}{The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.}
 
-\item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping. Used only for \code{design_or_diagnosis1}.}
+\item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping. Used for both designs.}
 
-\item{merge_by_estimator}{A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{FALSE}}
+\item{merge_by_estimator}{A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}}
 }
 \value{
 A list with a data frame of compared diagnoses and both diagnoses.
@@ -28,7 +28,7 @@ Diagnose and compare designs.
 The function \code{compare_diagnoses()} runs a many-to-many merge matching by \code{estimand_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
 
 The data frame of compared diagnoses has a column, \code{in_interval}, that indicates if two given diagnosands diverge statistically. 
-Two given diagnosands are statistically divergen if a diagnosand from \code{design_or_diagnosis2} is not contained in the 95% bootstrap confidence interval of their equivalent from \code{design_or_diagnosis1}, and \code{in_interval} would equal zero for that given comparison.
+Two given diagnosands are statistically divergen if a diagnosand from \code{comparison_design} is not contained in the 95% bootstrap confidence interval of their equivalent from \code{base_design}, and \code{in_interval} would equal zero for that given comparison.
 }
 \examples{
  design_a <- declare_population(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +
