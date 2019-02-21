@@ -251,7 +251,7 @@ print.summary.compared_diagnoses <- function(x, ...){
   diagnosand_se <- paste0("se(", sx$diagnosand, ")")
   sx <- sx[, 1:(k-4)]
   k <- ncol(sx)
-  
+ 
   se_rows <- data.frame(
         replicate(n_labels + 1, rep("", r)),
         se_1,
@@ -262,8 +262,8 @@ print.summary.compared_diagnoses <- function(x, ...){
   colnames(out)[startsWith(colnames(out), "mean")] <- c("design_1", "design_2")
   
   
-  out[(1:m) %% 2 != 0,]  <- sx
-  out[(1:m) %% 2 == 0, ] <- se_rows
+  out[(1:r) %% 2 != 0,]  <- sx
+  out[(1:r) %% 2 == 0, ] <- se_rows
 
 
   print(out, row.names = FALSE)
