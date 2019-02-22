@@ -272,8 +272,8 @@ print.summary.compared_diagnoses <- function(x, ...){
   sx <- subset(x,  x[,"in_interval"] == 0)
   cols <- base::startsWith(colnames(x), "design_label")
   sx <- sx[, !cols]
-  se_1 <- paste0("(",sx$se_1, ")")
-  se_2 <- paste0("(",sx$se_2, ")")
+  se_1 <- paste0("(",format_num(sx$se_1, 2), ")")
+  se_2 <- paste0("(",format_num(sx$se_2, 2), ")")
   sx$in_interval <- NULL
   sx$se_1 <- NULL
   sx$se_2 <- NULL
@@ -295,10 +295,12 @@ print.summary.compared_diagnoses <- function(x, ...){
   
   
   out <- data.frame(rbind(sx, sx), stringsAsFactors = FALSE)
-  colnames(out)[startsWith(colnames(out), "mean")] <- c("base", "comparison")
+  diagnosands_cols <- startsWith(colnames(out), "mean")
+  colnames(out)[diagnosands_cols] <- c("base", "comparison")
   m <- nrow(out)
+  diagnosands_m <- sapply(sx[,diagnosands_cols], format_num, digits=2)
   
-  out[(1:m) %% 2 != 0,]  <- sx
+  out[(1:m) %% 2 != 0, diagnosands_cols ]  <- diagnosands_m
   out[(1:m) %% 2 == 0, ] <- se_rows
 
   cat("\n\n")
