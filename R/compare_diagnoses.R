@@ -39,7 +39,7 @@ compare_diagnoses <- function(base_design,
                               comparison_design, 
                               sims = 500,
                               bootstrap_sims = 500, 
-                              merge_by_estimator = FALSE){
+                              merge_by_estimator = TRUE){
   
   
   if(bootstrap_sims <= 0) stop("Please choose a higher number of bootstrap simulations")
