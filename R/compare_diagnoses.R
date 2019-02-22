@@ -208,8 +208,8 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   
   c_names <- colnames(out)
   
- # comparison_df <-  rapply(object = out , f = round, classes = "numeric", how = "replace", digits = 2) 
-  comparison_df <- out
+  comparison_df <-  rapply(object = out , f = round, classes = "numeric", how = "replace", digits = 2) 
+  
   
   # Prepare output
   # Add "_1" or "_2" to labels as needed.
