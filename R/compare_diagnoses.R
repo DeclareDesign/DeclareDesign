@@ -168,7 +168,7 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   upper.bound <- lapply(bootstrap_df,FUN = function(x) {
      d <- x[, diagnosands]
      set <- head(x[,group_by_set], 1)
-     q <- sapply(d, function(d) quantile(d, 0.99, na.rm = TRUE))
+     q <- sapply(d, function(d) quantile(d, 0.95, na.rm = TRUE))
      q <- setNames(q, diagnosands)
      q <- cbind(set, t(q))
    })
@@ -208,8 +208,8 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   
   c_names <- colnames(out)
   
-  comparison_df <-  rapply(object = out , f = round, classes = "numeric", how = "replace", digits = 2) 
-  
+  #comparison_df <-  rapply(object = out , f = round, classes = "numeric", how = "replace", digits = 2) 
+  comparison_df <- out
   
   # Prepare output
   # Add "_1" or "_2" to labels as needed.
@@ -257,55 +257,67 @@ print.summary.compared_diagnoses <- function(x, ...){
   n_sims1 <- nrow(comparison$diagnosis1$simulations_df)
   n_sims2 <- nrow(comparison$diagnosis2$simulations_df)
   
+  x  <- x[["compared.diagnoses_df"]]
+  sx <- subset(x,  x[,"in_interval"] == 0)
+  if(nrow(sx) == 0) {
+    warning("No divergences found") 
+    return(x)}
   if(n_sims1 == n_sims2 )
     cat(paste0("\n Comparison of research designs diagnoses based on ", n_sims1, " simulations."))
   else 
     cat(paste0("\n Comparison of research designs diagnoses based on ", n_sims1, " simulations from `design_1`` and ", n_sims2, " from `design_2`."))
- 
+  
+
+  
+
   if(bootstrap_rep1  ==bootstrap_rep2)
     cat(paste0("\nDiagnosand estimates with bootstrapped standard errors in parentheses (", bootstrap_rep1,")."  ))
   else 
     cat(paste0("\n  Diagnosand estimates with bootstrapped standard errors in parentheses (design_1 = ", bootstrap_rep1,", design_1 = ", bootstrap_rep2, ")."  ))
  
 
-  x  <- x[["compared.diagnoses_df"]]
-  sx <- subset(x,  x[,"in_interval"] == 0)
-  cols <- base::startsWith(colnames(x), "design_label")
-  sx <- sx[, !cols]
+
+ 
   se_1 <- paste0("(",format_num(sx$se_1, 2), ")")
   se_2 <- paste0("(",format_num(sx$se_2, 2), ")")
-  sx$in_interval <- NULL
-  sx$se_1 <- NULL
-  sx$se_2 <- NULL
-  mand  <- startsWith(colnames(x), "estimand")
-  term  <- startsWith(colnames(x), "term")
-  mator <- startsWith(colnames(x), "estimator")
+  sx <- sx[ ,!colnames(sx) %in% c("in_interval", "se_1", "se_2")]
+
+  mand  <- startsWith(colnames(sx), "estimand")
+  term  <- startsWith(colnames(sx), "term")
+  mator <- startsWith(colnames(sx), "estimator")
   n_labels <- sum(mand, mator, term)
   r <- nrow(sx)
   k <- ncol(sx)
   diagnosand_se <- paste0("se(", sx$diagnosand, ")")
   sx <- sx[, 1:(k-4)]
   k <- ncol(sx)
-  label_cols <- matrix(replicate(n_labels + 1, rep("", r)), ncol =  n_labels + 1)
+  label_cols <- matrix(replicate(n_labels + 1 , rep("", r)), ncol =  n_labels + 1 )
+  designs <- startsWith(colnames(sx), "design")
   
   se_rows <- data.frame(
         label_cols,
         se_1,
         se_2, stringsAsFactors = FALSE)  
   
-  
   out <- data.frame(rbind(sx, sx), stringsAsFactors = FALSE)
   diagnosands_cols <- startsWith(colnames(out), "mean")
   colnames(out)[diagnosands_cols] <- c("base", "comparison")
   m <- nrow(out)
+  odd  <- (1:m) %% 2 != 0
+  even <- (1:m) %% 2 == 0
   diagnosands_m <- sapply(sx[,diagnosands_cols], format_num, digits=2)
   
-  out[(1:m) %% 2 != 0, diagnosands_cols ]  <- diagnosands_m
-  out[(1:m) %% 2 == 0, ] <- se_rows
-
+  out[odd, diagnosands_cols ]  <- diagnosands_m
+  out[even, !designs] <- se_rows
+  out[odd, "diagnosand"] <- sx$diagnosand
+  out[,  designs] <- 
+    sapply(out[, designs] , function(x) factor(x, levels = c(levels(x), " ")))
+  out[even,  designs] <-  " "
+    
+    
   cat("\n\n")
   print(out, row.names = FALSE)
-  cat(paste0("\n\n Displaying diagnosands that statistically diverge between base and comparison designs. See help file for details" ))
+  cat(paste0("\n\n Displaying diagnosands that statistically diverge between base and comparison designs. See help file for details." ))
   invisible(out)
 }
 
