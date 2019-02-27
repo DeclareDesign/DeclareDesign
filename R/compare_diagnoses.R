@@ -254,13 +254,14 @@ print.summary.compared_diagnoses <- function(x, ...){
   
   bootstrap_rep1 <- x$diagnosis1$bootstrap_sims
   bootstrap_rep2 <- x$diagnosis2$bootstrap_sims
-  n_sims1 <- nrow(comparison$diagnosis1$simulations_df)
-  n_sims2 <- nrow(comparison$diagnosis2$simulations_df)
+  n_sims1 <- nrow(x$diagnosis1$simulations_df)
+  n_sims2 <- nrow(x$diagnosis2$simulations_df)
   
   x  <- x[["compared.diagnoses_df"]]
   sx <- subset(x,  x[,"in_interval"] == 0)
   if(nrow(sx) == 0) {
     warning("No divergences found") 
+    print(x)
     return(x)}
   if(n_sims1 == n_sims2 )
     cat(paste0("\n Comparison of research designs diagnoses based on ", n_sims1, " simulations."))
