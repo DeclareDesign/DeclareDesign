@@ -4,8 +4,8 @@
 #'
 #' @param base_design A design or a diagnosis.
 #' @param comparison_design A design or a diagnosis.
-#' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.
-#' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping. Used for both designs.
+#' @param sims The number of simulations, defaulting to 1000. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.
+#' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for both designs.
 #' @param merge_by_estimator A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}
 #' @return A list with a data frame of compared diagnoses and both diagnoses.
 #'
@@ -37,12 +37,12 @@
 #' @export
 compare_diagnoses <- function(base_design,
                               comparison_design, 
-                              sims = 500,
-                              bootstrap_sims = 500, 
+                              sims = 1000,
+                              bootstrap_sims = 1000, 
                               merge_by_estimator = TRUE){
   
   
-  if(bootstrap_sims <= 0) stop("Please choose a higher number of bootstrap simulations")
+  if(bootstrap_sims <= 99) stop("Please choose a higher number of bootstrap simulations")
   
   
  # Diagnose designs design_or_diagnoses are design object
@@ -55,7 +55,7 @@ compare_diagnoses <- function(base_design,
                                  bootstrap_sims = bootstrap_sims)
 
     } else if(class(base_design) == "diagnosis") {
-      if(base_design$bootstrap_sims<= 0) stop("base_design must have a higher number of bootstrap simulations")
+      if(base_design$bootstrap_sims<= 99) stop("base_design must have a higher number of bootstrap simulations")
     diagnosis1 <- base_design} else{ 
     stop("base_design must be either a design or a diagnosis")}
   
@@ -64,7 +64,7 @@ compare_diagnoses <- function(base_design,
   if( "design" %in% class(comparison_design)  ){
   
     diagnosis2 = diagnose_design(comparison_design,
-                                 sims = sims, bootstrap_sims = bootstrap_sims)
+                                 sims = sims, bootstrap_sims = 100)
     } else if(class(comparison_design) == "diagnosis"){
       diagnosis2 <- comparison_design
       } else{ 
@@ -150,17 +150,17 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   
   comparison_df  <- comparison_df[, dropcols]
   
-  # Compute bootstrap confindence interval
+  # Compute bootstrap confidence interval
   bootstrap_df  <- diagnosis1$bootstrap_replicates
   group_by_list <- bootstrap_df[,  group_by_set1, drop = FALSE]
-  labels_df <- split(group_by_list, lapply(group_by_list, addNA), drop = TRUE)
-  labels_df <- lapply(labels_df, head, n = 1)
-  bootstrap_df <- split(bootstrap_df , lapply(group_by_list, addNA), drop = TRUE)
-  group_by_set <- diagnosis1$group_by_set
-  lower.bound <- lapply(bootstrap_df,FUN = function(x) {
+  labels_df     <- split(group_by_list, lapply(group_by_list, addNA), drop = TRUE)
+  labels_df     <- lapply(labels_df, head, n = 1)
+  bootstrap_df  <- split(bootstrap_df , lapply(group_by_list, addNA), drop = TRUE)
+  group_by_set  <- diagnosis1$group_by_set
+  lower.bound   <- lapply(bootstrap_df,FUN = function(x) {
     d <- x[, diagnosands]
     set <- head(x[,group_by_set], 1)
-    q <- sapply(d, function(d) quantile(d, c(lower = 0.05), na.rm = TRUE))
+    q <- sapply(d, function(d) quantile(d, c(lower = 0.025), na.rm = TRUE))
     q <- setNames(q, diagnosands)
     q <- cbind(set, t(q))
   })
@@ -168,7 +168,7 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   upper.bound <- lapply(bootstrap_df,FUN = function(x) {
      d <- x[, diagnosands]
      set <- head(x[,group_by_set], 1)
-     q <- sapply(d, function(d) quantile(d, 0.95, na.rm = TRUE))
+     q <- sapply(d, function(d) quantile(d, 0.975, na.rm = TRUE))
      q <- setNames(q, diagnosands)
      q <- cbind(set, t(q))
    })
@@ -178,7 +178,7 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   upper.bound <- rbind_disjoint(upper.bound)
   
   
-  # split columns by diagnosands
+  # Split columns by diagnosands
   filter_mean      <- gsub("_[[:digit:]]+$","", colnames(comparison_df)) %in%  diagnosands
   diagnosands_mean <- comparison_df[,  filter_mean]
   filter_sims      <- grepl("^n_sims", colnames(comparison_df))
@@ -186,14 +186,14 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   filter_se        <- grepl("^se",  colnames(comparison_df))
   comparison_df    <- comparison_df[!filter_mean &   !filter_se & !filter_sims]
   
-  # Suppres warnings on rownames 
+  # Suppress warnings on rownames 
   out <- suppressWarnings( do.call(rbind, lapply(1:nrow(diagnosands_mean), function(pair){
    data.frame(comparison_df[pair, ], 
               diagnosand = diagnosands,
               t(mapply(function(mean_1, mean_2, se_1, se_2, l, u, n1 , n2) 
                 c(mean_1 = mean_1, mean_2 = mean_2, se_1 = se_1, se_2 = se_2,
                   n_sims1 = n1, n_sims2 = n2, conf.low_1 = l, conf.upper_1 =  u, 
-                  in_interval =  mean_2 >= l & mean_2 <= u), 
+                  in_interval =  ((mean_2 >= l) & (mean_2 <= u))), 
                   #args
                   mean_1 = diagnosands_mean[pair, 1:length(diagnosands)],
                   mean_2 = diagnosands_mean[pair, (length(diagnosands)+1):ncol(diagnosands_mean)],
@@ -260,8 +260,8 @@ print.summary.compared_diagnoses <- function(x, ...){
   x  <- x[["compared.diagnoses_df"]]
   sx <- subset(x,  x[,"in_interval"] == 0)
   if(nrow(sx) == 0) {
-    warning("No divergences found") 
-    print(x)
+    print("No divergences found.") 
+    #print(x)
     return(x)}
   if(n_sims1 == n_sims2 )
     cat(paste0("\n Comparison of research designs diagnoses based on ", n_sims1, " simulations."))
@@ -271,17 +271,14 @@ print.summary.compared_diagnoses <- function(x, ...){
 
   
 
-  if(bootstrap_rep1  ==bootstrap_rep2)
+  if(bootstrap_rep1 == bootstrap_rep2)
     cat(paste0("\nDiagnosand estimates with bootstrapped standard errors in parentheses (", bootstrap_rep1,")."  ))
   else 
-    cat(paste0("\n  Diagnosand estimates with bootstrapped standard errors in parentheses (design_1 = ", bootstrap_rep1,", design_1 = ", bootstrap_rep2, ")."  ))
- 
-
-
+    cat(paste0("\nDiagnosand estimates with bootstrapped standard errors in parentheses (design_1 = ", bootstrap_rep1,", design_1 = ", bootstrap_rep2, ")."  ))
  
   se_1 <- paste0("(",format_num(sx$se_1, 2), ")")
   se_2 <- paste0("(",format_num(sx$se_2, 2), ")")
-  sx <- sx[ ,!colnames(sx) %in% c("in_interval", "se_1", "se_2")]
+  sx   <- sx[ ,!colnames(sx) %in% c("in_interval", "se_1", "se_2")]
 
   mand  <- startsWith(colnames(sx), "estimand")
   term  <- startsWith(colnames(sx), "term")
