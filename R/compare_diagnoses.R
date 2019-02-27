@@ -7,7 +7,8 @@
 #' @param sims The number of simulations, defaulting to 1000. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.
 #' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for both designs.
 #' @param merge_by_estimator A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}
-#' @return A list with a data frame of compared diagnoses and both diagnoses.
+#' @param alpha The confidence level, 0.01 by default.
+#'  @return A list with a data frame of compared diagnoses and both diagnoses.
 #'
 #' @details
 #' 
@@ -39,39 +40,41 @@ compare_diagnoses <- function(base_design,
                               comparison_design, 
                               sims = 1000,
                               bootstrap_sims = 1000, 
+                              alpha = 0.01,
                               merge_by_estimator = TRUE){
   
   
   if(bootstrap_sims <= 99) stop("Please choose a higher number of bootstrap simulations")
   
   
- # Diagnose designs design_or_diagnoses are design object
+ # Diagnose designs if base/comparison are of class "design"
+  
   if( "design" %in% class(base_design)  ){
    
-     
-  
-    diagnosis1 = diagnose_design(base_design, 
-                                 sims = sims, 
-                                 bootstrap_sims = bootstrap_sims)
+    diagnosis1 <- diagnose_design(base_design, 
+                                  sims = sims, 
+                                  bootstrap_sims = bootstrap_sims)
 
     } else if(class(base_design) == "diagnosis") {
-      if(base_design$bootstrap_sims<= 99) stop("base_design must have a higher number of bootstrap simulations")
+      if(base_design$bootstrap_sims<= 99)
+        stop("base_design must have a higher number of bootstrap simulations")
     diagnosis1 <- base_design} else{ 
     stop("base_design must be either a design or a diagnosis")}
   
-  
-  
+
   if( "design" %in% class(comparison_design)  ){
-  
-    diagnosis2 = diagnose_design(comparison_design,
-                                 sims = sims, bootstrap_sims = 100)
+    
+    diagnosis2 <- diagnose_design(comparison_design,
+                                  sims = sims, 
+                                  bootstrap_sims = 100)
+    
     } else if(class(comparison_design) == "diagnosis"){
       diagnosis2 <- comparison_design
       } else{ 
         stop("comparison_design must be either a design or a diagnosis")}
   
   
-  out <- compare_diagnoses_internal(diagnosis1, diagnosis2, merge_by_estimator )
+  out <- compare_diagnoses_internal(diagnosis1, diagnosis2, merge_by_estimator, alpha )
   
   out
 }
@@ -81,7 +84,7 @@ compare_diagnoses <- function(base_design,
 
 
 #' @export
-compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimator ) {
+compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimator, alpha ) {
   
   # 1.Housekeeping
   if(is.null(diagnosis1$bootstrap_replicates ) )
@@ -151,6 +154,7 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   comparison_df  <- comparison_df[, dropcols]
   
   # Compute bootstrap confidence interval
+ 
   bootstrap_df  <- diagnosis1$bootstrap_replicates
   group_by_list <- bootstrap_df[,  group_by_set1, drop = FALSE]
   labels_df     <- split(group_by_list, lapply(group_by_list, addNA), drop = TRUE)
@@ -160,7 +164,7 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   lower.bound   <- lapply(bootstrap_df,FUN = function(x) {
     d <- x[, diagnosands]
     set <- head(x[,group_by_set], 1)
-    q <- sapply(d, function(d) quantile(d, c(lower = 0.025), na.rm = TRUE))
+    q <- sapply(d, function(d) quantile(d, c(lower = 0.5*alpha), na.rm = TRUE))
     q <- setNames(q, diagnosands)
     q <- cbind(set, t(q))
   })
@@ -168,7 +172,7 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   upper.bound <- lapply(bootstrap_df,FUN = function(x) {
      d <- x[, diagnosands]
      set <- head(x[,group_by_set], 1)
-     q <- sapply(d, function(d) quantile(d, 0.975, na.rm = TRUE))
+     q <- sapply(d, function(d) quantile(d, 1-0.5*alpha, na.rm = TRUE))
      q <- setNames(q, diagnosands)
      q <- cbind(set, t(q))
    })

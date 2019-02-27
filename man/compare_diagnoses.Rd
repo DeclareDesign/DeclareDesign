@@ -4,22 +4,22 @@
 \alias{compare_diagnoses}
 \title{Compare Diagnoses}
 \usage{
-compare_diagnoses(base_design, comparison_design, sims = 500,
-  bootstrap_sims = 500, merge_by_estimator = FALSE)
+compare_diagnoses(base_design, comparison_design, sims = 1000,
+  bootstrap_sims = 1000, alpha = 0.01, merge_by_estimator = TRUE)
 }
 \arguments{
 \item{base_design}{A design or a diagnosis.}
 
 \item{comparison_design}{A design or a diagnosis.}
 
-\item{sims}{The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.}
+\item{sims}{The number of simulations, defaulting to 1000. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.}
 
-\item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping. Used for both designs.}
+\item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for both designs.}
+
+\item{alpha}{The confidence level, 0.01 by default.
+@return A list with a data frame of compared diagnoses and both diagnoses.}
 
 \item{merge_by_estimator}{A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}}
-}
-\value{
-A list with a data frame of compared diagnoses and both diagnoses.
 }
 \description{
 Diagnose and compare designs.
