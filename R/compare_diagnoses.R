@@ -84,7 +84,7 @@ compare_diagnoses <- function(base_design,
 
 
 #' @export
-compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimator, alpha ) {
+compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimator, alpha) {
   
   # 1.Housekeeping
   if(is.null(diagnosis1$bootstrap_replicates ))
@@ -223,10 +223,13 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   comparison_df <- setNames( comparison_df,  c_names)
   
   if( all(is.na(comparison_df$se_2))) comparison_df$se_2 <- NULL
+
+  attr(comparison_df, "alpha") <- alpha
+  
   out <- list(compared.diagnoses_df =comparison_df ,
               diagnosis1 = diagnosis1,
               diagnosis2 = diagnosis2)
-  
+
   class(out) <- "compared.diagnoses"
   
   invisible(out)
@@ -260,16 +263,17 @@ print.summary.compared_diagnoses <- function(x, ...){
   x  <- x[["compared.diagnoses_df"]]
   sx <- subset(x,  x[,"in_interval"] == 0)
   
+  atext <- paste0("(alpha level = ", attr(x, "alpha"), ")")
   
   if(nrow(sx) == 0) {
-    print("No divergences found.") 
+    print(paste("No divergences found ", atext)) 
     return(x)}
   
   
   if(n_sims1 == n_sims2 )
-    cat(paste0("\n Comparison of research designs diagnoses based on ", n_sims1, " simulations."))
+    cat(paste0("\n Comparison of research designs diagnoses based on ", n_sims1, " simulations", atext))
   else 
-    cat(paste0("\n Comparison of research designs diagnoses based on ", n_sims1, " simulations from `base_design` and ", n_sims2, " from `comparison_design`."))
+    cat(paste0("\n Comparison of research designs diagnoses based on ", n_sims1, " simulations from `base_design` and ", n_sims2, " from `comparison_design`", atext))
   if(bootstrap_rep1 == bootstrap_rep2)
     cat(paste0("\nDiagnosand estimates with bootstrapped standard errors in parentheses (", bootstrap_rep1,")."  ))
   else 
