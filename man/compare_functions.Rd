@@ -2,6 +2,7 @@
 % Please edit documentation in R/compare_designs.R
 \name{compare_functions}
 \alias{compare_functions}
+\alias{compare_designs}
 \alias{compare_design_code}
 \alias{compare_design_summary}
 \alias{compare_design_data}
@@ -9,6 +10,9 @@
 \alias{compare_design_estimands}
 \title{Compare two designs}
 \usage{
+compare_designs(design1, design2, format = "ansi8",
+  mode = "sidebyside")
+
 compare_design_code(design1, design2, format = "ansi8",
   mode = "sidebyside")
 
@@ -22,7 +26,7 @@ compare_design_estimates(design1, design2, format = "ansi256",
   mode = "sidebyside")
 
 compare_design_estimands(design1, design2, format = "ansi256",
-  mode = "sidebyside")
+  mode = "sidebyside", pager = "off")
 }
 \arguments{
 \item{design1}{A design object, typically created using the + operator}

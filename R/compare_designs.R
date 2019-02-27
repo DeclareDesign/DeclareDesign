@@ -32,6 +32,29 @@
 #' 
 #' @name compare_functions
 
+#' @rdname compare_functions
+#' @export
+compare_designs <- function(design1, design2, format = "ansi8", mode = "sidebyside") {
+  
+  cat("Research design comparison\n\n")
+  
+  print_console_header("Compare design code")
+  
+  print(compare_design_code(design1, design2, format = format, mode = mode))
+  
+  print_console_header("Compare draw_data(design)")
+  
+  print(compare_design_data(design1, design2, format = format, mode = mode))
+  
+  print_console_header("Compare draw_estimands(design)")
+  
+  print(compare_design_estimands(design1, design2, format = format, mode = mode))
+  
+  print_console_header("Compare draw_estimates(design)")
+  
+  print(compare_design_estimates(design1, design2, format = format, mode = mode))
+  
+}
 
 #' @rdname compare_functions
 #' @importFrom diffobj diffChr
@@ -40,7 +63,7 @@ compare_design_code <- function(design1, design2, format = "ansi8", mode = "side
   
   design1 <- get_design_code(design1)
   design2 <- get_design_code(design2)
-  
+   
   structure(
     diffChr(
       design1,
@@ -55,15 +78,6 @@ compare_design_code <- function(design1, design2, format = "ansi8", mode = "side
   )
   
 }
-
-clean_call <- function(call) {
-  paste(sapply(deparse(call), trimws), collapse = " ")
-}
-
-get_design_code <- function(design){
-  sapply(design, function(x) clean_call(attributes(x)$call))
-}
-
 
 #' @rdname compare_functions
 #' @importFrom diffobj diffChr
@@ -89,8 +103,6 @@ compare_design_summary <- function(design1, design2, format = "ansi256", mode = 
     package = "diffobj"
   )
 }
-
-
 
 #' @rdname compare_functions
 #' @importFrom diffobj diffObj
@@ -145,7 +157,7 @@ compare_design_estimates <- function(design1, design2, format = "ansi256", mode 
 #' @rdname compare_functions
 #' @importFrom diffobj diffObj
 #' @export
-compare_design_estimands <- function(design1, design2, format = "ansi256", mode = "sidebyside") {
+compare_design_estimands <- function(design1, design2, format = "ansi256", mode = "sidebyside", pager = "off") {
   
   seed <- .Random.seed
   set.seed(seed)
@@ -153,7 +165,7 @@ compare_design_estimands <- function(design1, design2, format = "ansi256", mode 
   set.seed(seed)
   design2 <- draw_estimands(design2)
   
-  structure(
+  # structure(
     diffObj(
       design1,
       design2,
@@ -161,8 +173,22 @@ compare_design_estimands <- function(design1, design2, format = "ansi256", mode 
       mode = mode,
       pager = "off",
       context = -1L
-    ),
-    class = "Diff",
-    package = "diffobj"
-  )
+    )
+  #   class = "Diff",
+  #   package = "diffobj"
+  # )
+}
+
+
+clean_call <- function(call) {
+  paste(sapply(deparse(call), trimws), collapse = " ")
+}
+
+get_design_code <- function(design){
+  sapply(design, function(x) clean_call(attributes(x)$call))
+}
+
+print_console_header <- function(text) {
+  width <- options()$width
+  cat("\n\n#", text, paste(rep("-", width - nchar(text) - 2), collapse = ""), "\n\n")
 }
