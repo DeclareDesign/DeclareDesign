@@ -3,7 +3,6 @@
 \name{compare_functions}
 \alias{compare_functions}
 \alias{compare_designs}
-\alias{print.design_comparison}
 \alias{compare_design_code}
 \alias{compare_design_summaries}
 \alias{compare_design_data}
@@ -13,8 +12,6 @@
 \usage{
 compare_designs(design1, design2, format = "ansi8",
   mode = "sidebyside", pager = "off", context = -1L)
-
-\method{print}{design_comparison}(x, ...)
 
 compare_design_code(design1, design2, format = "ansi8",
   mode = "sidebyside", pager = "off", context = -1L)
@@ -43,10 +40,6 @@ compare_design_estimands(design1, design2, format = "ansi256",
 \item{pager}{Pager option from \code{diffobj::diffChr}}
 
 \item{context}{Context option from \code{diffobj::diffChr}}
-
-\item{x}{A design comparison object created by \code{compare_designs}}
-
-\item{...}{Options for printing design comparison object}
 }
 \description{
 Compare two designs

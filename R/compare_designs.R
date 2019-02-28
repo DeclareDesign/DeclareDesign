@@ -6,8 +6,6 @@
 #' @param mode Mode options from \code{diffobj::diffChr}
 #' @param pager Pager option from \code{diffobj::diffChr}
 #' @param context Context option from \code{diffobj::diffChr}
-#' @param x A design comparison object created by \code{compare_designs}
-#' @param ... Options for printing design comparison object
 #'
 #' @examples
 #' 
@@ -36,46 +34,48 @@
 #' 
 #' @name compare_functions
 
+
 #' @rdname compare_functions
 #' @export
 compare_designs <- function(design1, design2, format = "ansi8", mode = "sidebyside", pager = "off", context = -1L) {
   
-  code_comparison <- compare_design_code(design1, design2, format = format, mode = mode, pager = pager, context = context)
+  compare_functions <-
+    list(code_comparison = compare_design_code,
+         data_comparison = compare_design_data, 
+         estimands_comparison = compare_design_estimands,
+         estimates_comparison = compare_design_estimates)
   
-  data_comparison <- compare_design_data(design1, design2, format = format, mode = mode, pager = pager, context = context)
+  vals <-
+    lapply(compare_functions, function(fun)
+      fun(
+        design1,
+        design2,
+        format = format,
+        mode = mode,
+        pager = pager,
+        context = context
+      )
+    )
   
-  estimands_comparison <- compare_design_estimands(design1, design2, format = format, mode = mode, pager = pager, context = context)
+  class(vals) <- "design_comparison"
   
-  estimates_comparison <- compare_design_estimates(design1, design2, format = format, mode = mode, pager = pager, context = context)
-  
-  structure(
-    list(code_comparison = code_comparison, data_comparison = data_comparison, 
-         estimands_comparison = estimands_comparison, estimates_comparison = estimates_comparison),
-    class = "design_comparison"
-  )
-  
+  vals
 }
 
-#' @rdname compare_functions
 #' @export
 print.design_comparison <- function(x, ...) {
   cat("Research design comparison\n\n")
   
-  print_console_header("Compare design code")
+  labels <- c("code_comparison" = "design code", 
+              "data_comparison" = "draw_data(design)",
+              "estimands_comparison" = "draw_estimands(design)",
+              "estimates_comparison" = "draw_estimates(design)")
   
-  print(x$code_comparison)
+  for(n in names(labels)) {
+    print_console_header(paste("Compare", labels[n]))
+    print(x[[n]])
+  }
   
-  print_console_header("Compare draw_data(design)")
-  
-  print(x$data_comparison)
-  
-  print_console_header("Compare draw_estimands(design)")
-  
-  print(x$estimands_comparison)
-  
-  print_console_header("Compare draw_estimates(design)")
-  
-  print(x$estimates_comparison)
 }
 
 
@@ -85,30 +85,6 @@ print.design_comparison <- function(x, ...) {
 compare_design_code <- function(design1, design2, format = "ansi8", mode = "sidebyside", pager = "off", context = -1L) {
   
   compare_design_internal(get_design_code, diffChr, design1, design2, format, mode, pager, context)
-  
-}
-
-compare_design_internal <- function(FUN, DIFFFUN, design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L){
-  check_design_class_single(design1)
-  check_design_class_single(design2)
-  
-  seed <- .Random.seed
-  design1 <- FUN(design1)
-  set.seed(seed)
-  design2 <- FUN(design2)
-  
-  structure(
-    DIFFFUN(
-      design1,
-      design2,
-      format = format,
-      mode = mode,
-      pager = pager,
-      context = context
-    ),
-    class = "Diff",
-    package = "diffobj"
-  )
   
 }
 
@@ -148,12 +124,36 @@ compare_design_estimands <- function(design1, design2, format = "ansi256", mode 
   
 }
 
+compare_design_internal <- function(FUN, DIFFFUN, design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L){
+  check_design_class_single(design1)
+  check_design_class_single(design2)
+  
+  seed <- .Random.seed
+  design1 <- FUN(design1)
+  set.seed(seed)
+  design2 <- FUN(design2)
+  
+  structure(
+    DIFFFUN(
+      design1,
+      design2,
+      format = format,
+      mode = mode,
+      pager = pager,
+      context = context
+    ),
+    class = "Diff",
+    package = "diffobj"
+  )
+  
+}
+
 clean_call <- function(call) {
   paste(sapply(deparse(call), trimws), collapse = " ")
 }
 
 get_design_code <- function(design){
-  sapply(design, function(x) clean_call(attributes(x)$call))
+  sapply(design, function(x) clean_call(attr(x, "call")))
 }
 
 print_console_header <- function(text) {
