@@ -85,132 +85,130 @@ compare_diagnoses <- function(base_design,
 
 #' @export
 compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimator, alpha) {
-  
   # 1.Housekeeping
-  if(is.null(diagnosis1$bootstrap_replicates ))
+  if (is.null(diagnosis1$bootstrap_replicates))
     stop("Can't compare diagnoses witouth bootstrap replicates")
   
-  if(length(diagnosis1$parameters_d[, "design_label"])  + length(diagnosis2$parameters_d[, "design_label"])> 2) 
+  if (length(diagnosis1$parameters_d[, "design_label"]) + length(diagnosis2$parameters_d[, "design_label"]) > 2) 
     stop("Please only send design or diagnosis objects with one unique design_label.")
-
   
-  diagnosands  <- base::intersect(diagnosis1$diagnosand_names, 
-                                  diagnosis2$diagnosand_names)
   
-  # merge_by_set, used to merge diagnosands_df, must at least contain estimand_label
-  # at its largest possible cardinality, merge_by_set contains c("estimand_label", "term", " "estimator_label") 
-  # if group_by_set is different in both designs, merge_by_set contains labels the intersection from both.
-  # NOTE: Need to test how comparison is done when only on diagnosis has term or estimator_label
+  diagnosands <- base::intersect(diagnosis1$diagnosand_names, diagnosis2$diagnosand_names)
+  
+  # merge_by_set, used to merge diagnosands_df, must at least contain estimand_label at its
+  # largest possible cardinality, merge_by_set contains c('estimand_label', 'term', '
+  # 'estimator_label') if group_by_set is different in both designs, merge_by_set contains
+  # labels the intersection from both.  NOTE: Need to test how comparison is done when only
+  # on diagnosis has term or estimator_label
   
   group_by_set1 <- diagnosis1$group_by_set
   group_by_set2 <- diagnosis2$group_by_set
   
-  mand  <-  "estimand_label"  %in% group_by_set1 & "estimand_label"  %in% group_by_set2
-  mator <-  "estimator_label" %in% group_by_set1 & "estimator_label" %in% group_by_set2
-  if( mand + mator < 1) 
-    stop(paste0("diagnosands_df must contain at least estimand_label or estimator_label in common" ))
-  
+  estimand_in_set  <- "estimand_label"  %in% group_by_set1 & "estimand_label" %in% group_by_set2
+  estimator_in_set <- "estimator_label" %in% group_by_set1 & "estimator_label" %in% group_by_set2
   merge_by_set <- NULL
-
-  if(mand) merge_by_set <- c("estimand_label")
-  if(merge_by_estimator){
-    if(!mator)
+  if (estimand_in_set + estimator_in_set < 1) {
+    stop(paste0("diagnosands_df must contain at least estimand_label or estimator_label in common"))
+  }
+  
+  if (estimand_in_set) {
+    merge_by_set <- c("estimand_label")
+  }
+  if (merge_by_estimator) {
+    if (!estimator_in_set) 
       warning("Estimator label not used in columns for merging.
-              At least one of the designs doesn't contain estimator_label.")
-    else
-   merge_by_set <- c(merge_by_set, "estimator_label")
+              At least one of the designs doesn't contain estimator_label.") else {
+                merge_by_set <- c(merge_by_set, "estimator_label")
+  }
   }
   
-  if("term" %in% group_by_set1 & "term" %in% group_by_set2) 
+  if ("term" %in% group_by_set1 & "term" %in% group_by_set2) {
     merge_by_set <- c(merge_by_set, "term")
-
-   
-  comparison_df <-  merge(diagnosis1$diagnosands_df  , diagnosis2$diagnosands_df, 
-                          by = merge_by_set, suffixes = c("_1", "_2"), stringsAsFactors = FALSE)
-  
-  if(nrow(comparison_df) == 0 ){
-    warning("Can't merge diagnosands data frames. Diagnoses don't have labels in common")
-   return(list(diagnosis1 = diagnosis1 , diagnosis2 = diagnosis2))
   }
-    
-  c_names  <- colnames(comparison_df)
-  suffix   <- c("_1", "_2")
-  dropcols <- grepl("[[:digit:]]+$", c_names ) |   c_names  %in% c("design_label", "estimand_label", "estimator_label", "term") 
   
-  # Grab standard.error columns before droping cols that are not present in both diagnosands_df
-  # just in case diagnosis2 doesn't  include bootrstrap_replicates
-  filter_se      <- grepl("^se",  c_names)
-  diagnosands_se <-  comparison_df[, filter_se]
-  if(diagnosis2$bootstrap_sims == 0){
-  diagnosands_se1 <- diagnosands_se; diagnosands_se2 <- matrix(data = rep(NA, length(diagnosands_se)))
-  } else { 
-    diagnosands_se1 <-  diagnosands_se[,  grepl("_1$",  colnames(diagnosands_se))]
-    diagnosands_se2 <-  diagnosands_se[,  grepl("_2$",  colnames(diagnosands_se))]}
+  comparison_df <- merge(diagnosis1$diagnosands_df, diagnosis2$diagnosands_df, by = merge_by_set, 
+                         suffixes = c("_1", "_2"), stringsAsFactors = FALSE)
+  
+  if (nrow(comparison_df) == 0) {
+    warning("Can't merge diagnosands data frames. Diagnoses don't have labels in common")
+    return(list(diagnosis1 = diagnosis1, diagnosis2 = diagnosis2))
+  }
+  
+  c_names <- colnames(comparison_df)
+  filter_se <- grepl("^se", c_names)
+  suffix <- c("_1", "_2") 
+  keepcols <- grepl("[[:digit:]]+$", c_names)  |  grepl("label+$", c_names)| grepl("term", c_names) | filter_se
+  comparison_df <- comparison_df[, keepcols]
+  c_names <- colnames(comparison_df)             
   
   
-  comparison_df  <- comparison_df[, dropcols]
+  diagnosands_se <- comparison_df[, filter_se]
+  if (diagnosis2$bootstrap_sims == 0) {
+    diagnosands_se1 <- diagnosands_se
+    diagnosands_se2 <- matrix(data = rep(NA, length(diagnosands_se)))
+  } else {
+    diagnosands_se1 <- diagnosands_se[, endsWith(colnames(diagnosands_se), "_1")]
+    diagnosands_se2 <- diagnosands_se[, endsWith(colnames(diagnosands_se), "_2")]
+  }
+  
   
   # Compute bootstrap confidence interval
- 
-  bootstrap_df  <- diagnosis1$bootstrap_replicates
-  group_by_list <- bootstrap_df[,  group_by_set1, drop = FALSE]
-  labels_df     <- split(group_by_list, lapply(group_by_list, addNA), drop = TRUE)
-  labels_df     <- lapply(labels_df, head, n = 1)
-  bootstrap_df  <- split(bootstrap_df , lapply(group_by_list, addNA), drop = TRUE)
-  group_by_set  <- diagnosis1$group_by_set
-  lower.bound   <- lapply(bootstrap_df,FUN = function(x) {
+  
+  bootstrap_df <- diagnosis1$bootstrap_replicates
+  group_by_list <- bootstrap_df[, group_by_set1, drop = FALSE]
+  labels_df <- split(group_by_list, lapply(group_by_list, addNA), drop = TRUE)
+  labels_df <- lapply(labels_df, head, n = 1)
+  bootstrap_df <- split(bootstrap_df, lapply(group_by_list, addNA), drop = TRUE)
+  group_by_set <- diagnosis1$group_by_set
+  
+  lower.bound <- lapply(bootstrap_df, FUN = function(x) {
     d <- x[, diagnosands]
-    set <- head(x[,group_by_set], 1)
-    q <- sapply(d, function(d) quantile(d, c(lower = 0.5*alpha), na.rm = TRUE))
+    set <- head(x[, group_by_set], 1)
+    q <- sapply(d, function(d) quantile(d, c(lower = 0.5 * alpha), na.rm = TRUE))
     q <- setNames(q, diagnosands)
     q <- cbind(set, t(q))
   })
-
-  upper.bound <- lapply(bootstrap_df,FUN = function(x) {
-     d <- x[, diagnosands]
-     set <- head(x[,group_by_set], 1)
-     q <- sapply(d, function(d) quantile(d, 1-0.5*alpha, na.rm = TRUE))
-     q <- setNames(q, diagnosands)
-     q <- cbind(set, t(q))
-   })
   
+  upper.bound <- lapply(bootstrap_df, FUN = function(x) {
+    d <- x[, diagnosands]
+    set <- head(x[, group_by_set], 1)
+    q <- sapply(d, function(d) quantile(d, 1 - 0.5 * alpha, na.rm = TRUE))
+    q <- setNames(q, diagnosands)
+    q <- cbind(set, t(q))
+  })
   
   lower.bound <- rbind_disjoint(lower.bound)
   upper.bound <- rbind_disjoint(upper.bound)
   
-  
   # Split columns by diagnosands
-  filter_mean      <- gsub("_[[:digit:]]+$","", colnames(comparison_df)) %in%  diagnosands
-  diagnosands_mean <- comparison_df[,  filter_mean]
-  filter_sims      <- grepl("^n_sims", colnames(comparison_df))
-  sims_df          <- comparison_df[,filter_sims]
-  filter_se        <- grepl("^se",  colnames(comparison_df))
-  comparison_df    <- comparison_df[!filter_mean &   !filter_se & !filter_sims]
+  filter_mean <- gsub("_[[:digit:]]+$", "", colnames(comparison_df)) %in% diagnosands
+  diagnosands_mean <- comparison_df[, filter_mean]
+  filter_sims <- grepl("^n_sims", colnames(comparison_df))
+  sims_df <- comparison_df[, filter_sims]
+  filter_se <- grepl("^se", colnames(comparison_df))
+  identifiers_df <- comparison_df[!filter_mean & !filter_se & !filter_sims]
   
   # Suppress warnings on rownames 
-  out <- suppressWarnings( do.call(rbind, lapply(1:nrow(diagnosands_mean), function(pair){
-   data.frame(comparison_df[pair, ], 
-              diagnosand = diagnosands,
-              t(mapply(function(mean_1, mean_2, se_1, se_2, l, u, n1 , n2) 
-                c(mean_1 = mean_1, mean_2 = mean_2, se_1 = se_1, se_2 = se_2,
-                  n_sims1 = n1, n_sims2 = n2, conf.low_1 = l, conf.upper_1 =  u, 
-                  in_interval =  ((mean_2 >= l) & (mean_2 <= u))), 
-                  #args
-                  mean_1 = diagnosands_mean[pair, 1:length(diagnosands)],
-                  mean_2 = diagnosands_mean[pair, (length(diagnosands)+1):ncol(diagnosands_mean)],
-                  se_1 = diagnosands_se1[pair,],
-                  se_2 =  diagnosands_se2[pair,],
-                  l =  lower.bound[pair, diagnosands],
-                  u =  upper.bound[pair, diagnosands],
-                  n1 = sims_df[pair, 1],
-                  n2 = sims_df[pair, 2])),
-                
-               stringsAsFactors = FALSE)})))
+  comparison_df <- suppressWarnings(do.call(rbind, lapply(1:nrow(diagnosands_mean), function(pair){
+    data.frame(identifiers_df[pair, ], diagnosand = diagnosands,
+               t(mapply(
+                 function(mean_1, mean_2, se_1, se_2, l, u, n1, n2){
+                   c(mean_1 = mean_1, mean_2 = mean_2, se_1 = se_1, se_2 = se_2, 
+                     n_sims1 = n1, n_sims2 = n2, conf.low_1 = l, conf.upper_1 = u, 
+                     in_interval = ((mean_2 >= l) & (mean_2 <= u)))
+                 },
+                 mean_1 = diagnosands_mean[pair, 1:length(diagnosands)], 
+                 mean_2 = diagnosands_mean[pair, (length(diagnosands) + 1):ncol(diagnosands_mean)], 
+                 se_1 = diagnosands_se1[pair, ],
+                 se_2 = diagnosands_se2[pair,], 
+                 l = lower.bound[pair, diagnosands], 
+                 u = upper.bound[pair, diagnosands],
+                 n1 = sims_df[pair, 1],
+                 n2 = sims_df[pair, 2])), 
+               stringsAsFactors = FALSE)
+  })))
   
-  c_names <- colnames(out)
-  
-  #comparison_df <-  rapply(object = out , f = round, classes = "numeric", how = "replace", digits = 2) 
-  comparison_df <- out
+  c_names <- colnames(comparison_df)
   
   # Prepare output
   # Add "_1" or "_2" to labels as needed.
@@ -220,22 +218,21 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
     c_names[c_names == "estimator_label"] <- paste0("estimator_label", suffix[c( "estimator_label" %in% group_by_set1, "estimator_label" %in% group_by_set2)])
   if("term" %in% c_names & !"term" %in% merge_by_set)
     c_names[c_names == "term"] <- paste0("term", suffix[c("term" %in% group_by_set1, "term" %in% group_by_set2)])
-  comparison_df <- setNames( comparison_df,  c_names)
+  comparison_df <- setNames(comparison_df,  c_names)
   
-  if( all(is.na(comparison_df$se_2))) comparison_df$se_2 <- NULL
-
-  attr(comparison_df, "alpha") <- alpha
+  if (all(is.na(comparison_df$se_2))) comparison_df$se_2 <- NULL
   
-  out <- list(compared.diagnoses_df =comparison_df ,
-              diagnosis1 = diagnosis1,
-              diagnosis2 = diagnosis2)
-
+  
+  
+  out <- list(compared.diagnoses_df = comparison_df, 
+              diagnosis1 = diagnosis1, diagnosis2 = diagnosis2)
+  
+  attr(out, "alpha") <- alpha
+  
   class(out) <- "compared.diagnoses"
   
   invisible(out)
-}
-
-
+  }
 
 
 #' @export
@@ -260,85 +257,70 @@ print.summary.compared_diagnoses <- function(x, ...){
   bootstrap_rep2 <- x$diagnosis2$bootstrap_sims
   n_sims1 <- nrow(x$diagnosis1$simulations_df)
   n_sims2 <- nrow(x$diagnosis2$simulations_df)
-  x  <- x[["compared.diagnoses_df"]]
-  sx <- subset(x,  x[,"in_interval"] == 0)
+  compared.diagnoses_df <- x[["compared.diagnoses_df"]]
+  compared.diagnoses_df <- subset(compared.diagnoses_df, compared.diagnoses_df[, "in_interval"] == 0)
+  alpha <- attr(x, "alpha")
+  atext <- paste0("(confidence level = ", alpha, ")")
   
-  atext <- paste0("(alpha level = ", attr(x, "alpha"), ")")
+  if (nrow(compared.diagnoses_df) == 0) {
+    print(paste("No visible differences between objects (at a confidence level =", atext,")"))
+    return(x)
+  }
   
-  if(nrow(sx) == 0) {
-    print(paste("No divergences found ", atext)) 
-    return(x)}
   
-  
-  if(n_sims1 == n_sims2 )
+  if (n_sims1 == n_sims2) {
     cat(paste0("\n Comparison of research designs diagnoses based on ", n_sims1, " simulations", atext))
-  else 
-    cat(paste0("\n Comparison of research designs diagnoses based on ", n_sims1, " simulations from `base_design` and ", n_sims2, " from `comparison_design`", atext))
-  if(bootstrap_rep1 == bootstrap_rep2)
-    cat(paste0("\nDiagnosand estimates with bootstrapped standard errors in parentheses (", bootstrap_rep1,")."  ))
-  else 
-    cat(paste0("\nDiagnosand estimates with bootstrapped standard errors in parentheses (base_design = ", bootstrap_rep1,", omparison_design = ", bootstrap_rep2, ")."  ))
- 
+  } else {
+    cat(paste0("\n Comparison of research designs diagnoses based on ", n_sims1, " simulations from `base_design` and ", 
+               n_sims2, " from `comparison_design`", atext))
+  }
+  if (bootstrap_rep1 == bootstrap_rep2) {
+    cat(paste0("\nDiagnosand estimates with bootstrapped standard errors in parentheses (", bootstrap_rep1, 
+               ")."))
+  } else {
+    cat(paste0("\nDiagnosand estimates with bootstrapped standard errors in parentheses (base_design = ", bootstrap_rep1, 
+               ", comparison_design = ", bootstrap_rep2, ")."))
+  }
   
   
-  se_1 <- paste0("(",format_num(sx$se_1, 2), ")")
+  column_names <- colnames(compared.diagnoses_df)
+  identifiers <- column_names %in% c("estimand_label", "term") | grepl("^estimator_label", column_names)
+  identifiers_columns <- column_names[identifiers]
   
-  se_2 <- ifelse(bootstrap_rep2 !=0,
-                 paste0("(",format_num(sx$se_2, 2), ")"),
-                 rep("-", length(sx$se_1)))
-  
- # if(bootstrap_rep2 !=0) se_2 <- paste0("(",format_num(sx$se_2, 2), ")")
-  # else se_2 <- rep(length(sx$se_1), "-")
-  
-
-  sx   <- sx[ ,!colnames(sx) %in% c("in_interval", "se_1", "se_2", "n_sims1", "n_sims2", "conf.low_1", "conf.upper_1")]
-
-  
-  # Prep vars to shape data frame
-  mand  <- startsWith(colnames(sx), "estimand")
-  term  <- startsWith(colnames(sx), "term")
-  mator <- startsWith(colnames(sx), "estimator")
-  n_labels <- sum(mand, mator, term)
-  
-  r <- nrow(sx)
-  k <- ncol(sx)
-  
-  label_cols <- matrix(replicate(n_labels + 1 , rep("", r)), 
-                       ncol =  n_labels + 1 )
-  
-  se_rows <- data.frame(label_cols,
-                        se_1,
-                        se_2,
-                        stringsAsFactors = FALSE)  
-  
-  # create a data frame double the size of diagnosands_df
-  # odd rows correspond to diagnosands' means
-  # even rows to se(diagnosands)
-  designs <- startsWith(colnames(sx), "design")
-  out <- data.frame(rbind(sx, sx), stringsAsFactors = FALSE)
-  diagnosands_cols <- startsWith(colnames(out), "mean")
-  colnames(out)[diagnosands_cols] <- c("base", "comparison")
-  m <- nrow(out)
-  odd  <- (1:m) %% 2 != 0
-  even <- (1:m) %% 2 == 0
-  diagnosands_m <- sapply(sx[,diagnosands_cols], format_num, digits=2)
+  # Make diagnosand only df
+  clean_comparison_df <- compared.diagnoses_df[, c(identifiers_columns, "diagnosand", "mean_1", "mean_2"), drop = FALSE]
   
   
-  out[odd, diagnosands_cols ]  <- diagnosands_m
-  out[even, !designs] <- se_rows
-  out[odd, "diagnosand"] <- sx$diagnosand
+  clean_values_df <- data.frame(lapply(clean_comparison_df[, c("mean_1", "mean_2"), drop = FALSE], format_num, 
+                                       digits = 2), stringsAsFactors = FALSE)
   
-  # Force new factor 
-
-  out[,  designs] <- sapply(out[, designs] ,
-                            function(x) factor(x, levels = c(levels(x), " ")))
-  out[even,  designs] <-  " "
+  diagnosands_only_df <- cbind(clean_comparison_df[, c(identifiers_columns, "diagnosand"), drop = FALSE], clean_values_df)
+  
+  colnames(diagnosands_only_df)[colnames(diagnosands_only_df) %in% c("mean_1", "mean_2")] <- c("base", "comparison")
+  # Make se only df
+  se_only_df <- compared.diagnoses_df[, grepl("^se", colnames(compared.diagnoses_df)), drop = FALSE]
+  
+  
+  se_only_df <- data.frame(lapply(se_only_df, function(se) {
+    paste0("(", format_num(se, digits = 2), ")")
     
-    
+  }), stringsAsFactors = FALSE)
+  
+  se_only_df <- cbind(clean_comparison_df[, c(identifiers_columns, "diagnosand"), drop = FALSE], se_only_df)
+  colnames(se_only_df) <- colnames(diagnosands_only_df)
+  
+  # Merge
+  return_df <- rbind_disjoint(list(diagnosands_only_df, se_only_df), infill = "")
+  
+  return_df <- return_df[do.call(order, as.list(return_df[, c(identifiers_columns, "diagnosand")])), , drop = FALSE]
+  r <- nrow(return_df)
+  return_df[(1:r)%%2 == 0, c(identifiers_columns, "diagnosand")] <- ""
+  
+  
   cat("\n\n")
-  print(out, row.names = FALSE)
-  cat(paste0("\n\n Displaying diagnosands that statistically diverge between base and comparison designs. See help file for details." ))
-  invisible(out)
+  print(return_df, row.names = FALSE)
+  cat(paste0("\n\n Displaying diagnosands of the comparison design that lie outside the ", (1-alpha)*100 ,"% bootstrap confidence interval of their counterparts in the base_design."))
+  invisible(return_df)
 }
 
 
