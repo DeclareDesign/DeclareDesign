@@ -5,7 +5,8 @@
 #' @param base_design A design or a diagnosis.
 #' @param comparison_design A design or a diagnosis.
 #' @param sims The number of simulations, defaulting to 1000. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.
-#' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for both designs.
+#' @param bootstrap_sims_base Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for base_design.
+#' @param bootstrap_sims_comparison Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for comparison_designs.
 #' @param merge_by_estimator A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}
 #' @param alpha The confidence level, 0.01 by default.
 #'  @return A list with a data frame of compared diagnoses and both diagnoses.
@@ -39,7 +40,8 @@
 compare_diagnoses <- function(base_design,
                               comparison_design, 
                               sims = 1000,
-                              bootstrap_sims = 1000, 
+                              bootstrap_sims_base = 1000, 
+                              bootstrap_sims_comparison = 100,
                               alpha = 0.01,
                               merge_by_estimator = TRUE){
   
@@ -53,7 +55,7 @@ compare_diagnoses <- function(base_design,
    
     diagnosis1 <- diagnose_design(base_design, 
                                   sims = sims, 
-                                  bootstrap_sims = bootstrap_sims)
+                                  bootstrap_sims =  bootstrap_sims_base)
 
     } else if(class(base_design) == "diagnosis") {
       if(base_design$bootstrap_sims<= 99) stop("base_design must have a higher number of bootstrap simulations")
@@ -64,7 +66,7 @@ compare_diagnoses <- function(base_design,
     
     diagnosis2 <- diagnose_design(comparison_design,
                                   sims = sims, 
-                                  bootstrap_sims = 100)
+                                  bootstrap_sims = bootstrap_sims_comparison)
     
     } else if(class(comparison_design) == "diagnosis")
       diagnosis2 <- comparison_design else stop("comparison_design must be either a design or a diagnosis")
