@@ -6,6 +6,7 @@
 #' @param mode Mode options from \code{diffobj::diffChr}
 #' @param pager Pager option from \code{diffobj::diffChr}
 #' @param context Context option from \code{diffobj::diffChr} which sets the number of lines around differences that are printed. By default, all lines of the two objects are shown. To show only the lines that are different, set \code{context = 0}; to get one line around differences for context, set to 1.
+#' @param rmd Set to \code{TRUE} use in Rmarkdown HTML output. NB: will not work with LaTeX, Word, or other .Rmd outputs.
 #'
 #' @examples
 #' 

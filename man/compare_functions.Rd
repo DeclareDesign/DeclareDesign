@@ -40,6 +40,8 @@ compare_design_estimands(design1, design2, format = "ansi256",
 \item{pager}{Pager option from \code{diffobj::diffChr}}
 
 \item{context}{Context option from \code{diffobj::diffChr} which sets the number of lines around differences that are printed. By default, all lines of the two objects are shown. To show only the lines that are different, set \code{context = 0}; to get one line around differences for context, set to 1.}
+
+\item{rmd}{Set to \code{TRUE} use in Rmarkdown HTML output. NB: will not work with LaTeX, Word, or other .Rmd outputs.}
 }
 \description{
 Compare two designs
