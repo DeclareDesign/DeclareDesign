@@ -56,10 +56,8 @@ compare_diagnoses <- function(base_design,
                                   bootstrap_sims = bootstrap_sims)
 
     } else if(class(base_design) == "diagnosis") {
-      if(base_design$bootstrap_sims<= 99)
-        stop("base_design must have a higher number of bootstrap simulations")
-    diagnosis1 <- base_design} else{ 
-    stop("base_design must be either a design or a diagnosis")}
+      if(base_design$bootstrap_sims<= 99) stop("base_design must have a higher number of bootstrap simulations")
+    diagnosis1 <- base_design} else stop("base_design must be either a design or a diagnosis")
   
 
   if( "design" %in% class(comparison_design)  ){
@@ -68,10 +66,8 @@ compare_diagnoses <- function(base_design,
                                   sims = sims, 
                                   bootstrap_sims = 100)
     
-    } else if(class(comparison_design) == "diagnosis"){
-      diagnosis2 <- comparison_design
-      } else{ 
-        stop("comparison_design must be either a design or a diagnosis")}
+    } else if(class(comparison_design) == "diagnosis")
+      diagnosis2 <- comparison_design else stop("comparison_design must be either a design or a diagnosis")
   
   
   out <- compare_diagnoses_internal(diagnosis1, diagnosis2, merge_by_estimator, alpha )
@@ -86,11 +82,9 @@ compare_diagnoses <- function(base_design,
 #' @export
 compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimator, alpha) {
   # 1.Housekeeping
-  if (is.null(diagnosis1$bootstrap_replicates))
-    stop("Can't compare diagnoses witouth bootstrap replicates")
+  if (is.null(diagnosis1$bootstrap_replicates)) stop("Can't compare diagnoses witouth bootstrap replicates")
   
-  if (length(diagnosis1$parameters_d[, "design_label"]) + length(diagnosis2$parameters_d[, "design_label"]) > 2) 
-    stop("Please only send design or diagnosis objects with one unique design_label.")
+  if (length(diagnosis1$parameters_d[, "design_label"]) + length(diagnosis2$parameters_d[, "design_label"]) > 2) stop("Please only send design or diagnosis objects with one unique design_label.")
   
   
   diagnosands <- base::intersect(diagnosis1$diagnosand_names, diagnosis2$diagnosand_names)
@@ -107,13 +101,11 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   estimand_in_set  <- "estimand_label"  %in% group_by_set1 & "estimand_label" %in% group_by_set2
   estimator_in_set <- "estimator_label" %in% group_by_set1 & "estimator_label" %in% group_by_set2
   merge_by_set <- NULL
-  if (estimand_in_set + estimator_in_set < 1) {
-    stop(paste0("diagnosands_df must contain at least estimand_label or estimator_label in common"))
-  }
+  if (estimand_in_set + estimator_in_set < 1) stop(paste0("diagnosands_df must contain at least estimand_label or estimator_label in common"))
   
-  if (estimand_in_set) {
-    merge_by_set <- c("estimand_label")
-  }
+  
+  if (estimand_in_set) merge_by_set <- c("estimand_label")
+
   if (merge_by_estimator) {
     if (!estimator_in_set) 
       warning("Estimator label not used in columns for merging.
@@ -122,9 +114,9 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   }
   }
   
-  if ("term" %in% group_by_set1 & "term" %in% group_by_set2) {
-    merge_by_set <- c(merge_by_set, "term")
-  }
+  
+  if ("term" %in% group_by_set1 & "term" %in% group_by_set2) merge_by_set <- c(merge_by_set, "term")
+  
   
   comparison_df <- merge(diagnosis1$diagnosands_df, diagnosis2$diagnosands_df, by = merge_by_set, 
                          suffixes = c("_1", "_2"), stringsAsFactors = FALSE)
