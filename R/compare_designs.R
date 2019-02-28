@@ -5,7 +5,7 @@
 #' @param format Format (in console or HTML) options from \code{diffobj::diffChr}
 #' @param mode Mode options from \code{diffobj::diffChr}
 #' @param pager Pager option from \code{diffobj::diffChr}
-#' @param context Context option from \code{diffobj::diffChr}
+#' @param context Context option from \code{diffobj::diffChr} which sets the number of lines around differences that are printed. By default, all lines of the two objects are shown. To show only the lines that are different, set \code{context = 0}; to get one line around differences for context, set to 1.
 #'
 #' @examples
 #' 
@@ -153,7 +153,11 @@ clean_call <- function(call) {
 }
 
 get_design_code <- function(design){
-  sapply(design, function(x) clean_call(attr(x, "call")))
+  if (is.null(attributes(design)$code)) {
+    sapply(design, function(x) clean_call(attr(x, "call")))
+  } else {
+    attributes(design)$code
+  }
 }
 
 print_console_header <- function(text) {
