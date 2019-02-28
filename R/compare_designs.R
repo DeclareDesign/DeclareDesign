@@ -4,7 +4,10 @@
 #' @param design2 A design object, typically created using the + operator
 #' @param format Format (in console or HTML) options from \code{diffobj::diffChr}
 #' @param mode Mode options from \code{diffobj::diffChr}
-#' @param ... Options sent to \code{diffobj::diffChr}
+#' @param pager Pager option from \code{diffobj::diffChr}
+#' @param context Context option from \code{diffobj::diffChr}
+#' @param x A design comparison object created by \code{compare_designs}
+#' @param ... Options for printing design comparison object
 #'
 #' @examples
 #' 

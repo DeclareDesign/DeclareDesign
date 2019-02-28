@@ -40,7 +40,13 @@ compare_design_estimands(design1, design2, format = "ansi256",
 
 \item{mode}{Mode options from \code{diffobj::diffChr}}
 
-\item{...}{Options sent to \code{diffobj::diffChr}}
+\item{pager}{Pager option from \code{diffobj::diffChr}}
+
+\item{context}{Context option from \code{diffobj::diffChr}}
+
+\item{x}{A design comparison object created by \code{compare_designs}}
+
+\item{...}{Options for printing design comparison object}
 }
 \description{
 Compare two designs

@@ -235,7 +235,22 @@ print_code <- function(design) {
   #   and the call for the declare step
   
   if (is.null(attributes(design)$code)) {
-    get_design_code(design)
+    clean_call <- function(call) {
+      paste(sapply(deparse(call), trimws), collapse = " ")
+    }
+    
+    # print each step
+    
+    for (i in seq_along(design)) {
+      # only print steps that are not calls within the design call i.e. mutate(q = 5)
+      if (inherits(attributes(design[[i]])$call, "call")) {
+        cat(names(design)[i], "<-", clean_call(attributes(design[[i]])$call), "\n\n")
+      }
+    }
+    
+    # print the design declaration
+    
+    cat("my_design <-", clean_call(attributes(design)$call), "\n\n")
   } else {
     print(attributes(design)$code)
   }
