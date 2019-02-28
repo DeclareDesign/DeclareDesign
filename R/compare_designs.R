@@ -84,11 +84,21 @@ print.design_comparison <- function(x, ...) {
 #' @export
 compare_design_code <- function(design1, design2, format = "ansi8", mode = "sidebyside", pager = "off", context = -1L) {
   
-  design1 <- get_design_code(design1)
-  design2 <- get_design_code(design2)
-   
+  compare_design_internal(get_design_code, diffChr, design1, design2, format, mode, pager, context)
+  
+}
+
+compare_design_internal <- function(FUN, DIFFFUN, design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L){
+  check_design_class_single(design1)
+  check_design_class_single(design2)
+  
+  seed <- .Random.seed
+  design1 <- FUN(design1)
+  set.seed(seed)
+  design2 <- FUN(design2)
+  
   structure(
-    diffChr(
+    DIFFFUN(
       design1,
       design2,
       format = format,
@@ -107,24 +117,8 @@ compare_design_code <- function(design1, design2, format = "ansi8", mode = "side
 #' @export
 compare_design_summaries <- function(design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L) {
   
-  seed <- .Random.seed
-  set.seed(seed)
-  design1 <- capture.output(summary(design1))
-  set.seed(seed)
-  design2 <- capture.output(summary(design2))
+  compare_design_internal(function(x) capture.output(summary(x)), diffChr, design1, design2, format, mode, pager, context)
   
-  structure(
-    diffChr(
-      design1,
-      design2,
-      format = format,
-      mode = mode,
-      pager = pager,
-      context = context
-    ),
-    class = "Diff",
-    package = "diffobj"
-  )
 }
 
 #' @rdname compare_functions
@@ -132,24 +126,8 @@ compare_design_summaries <- function(design1, design2, format = "ansi256", mode 
 #' @export
 compare_design_data <- function(design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L) {
   
-  seed <- .Random.seed
-  set.seed(seed)
-  design1 <- draw_data(design1)
-  set.seed(seed)
-  design2 <- draw_data(design2)
+  compare_design_internal(draw_data, diffObj, design1, design2, format, mode, pager, context)
   
-  structure(
-    diffObj(
-      design1,
-      design2,
-      format = format,
-      mode = mode,
-      pager = pager,
-      context = context
-    ),
-    class = "Diff",
-    package = "diffobj"
-  )
 }
 
 #' @rdname compare_functions
@@ -157,24 +135,8 @@ compare_design_data <- function(design1, design2, format = "ansi256", mode = "si
 #' @export
 compare_design_estimates <- function(design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L) {
   
-  seed <- .Random.seed
-  set.seed(seed)
-  design1 <- draw_estimates(design1)
-  set.seed(seed)
-  design2 <- draw_estimates(design2)
+  compare_design_internal(draw_estimates, diffObj, design1, design2, format, mode, pager, context)
   
-  structure(
-    diffObj(
-      design1,
-      design2,
-      format = format,
-      mode = mode,
-      pager = pager,
-      context = context
-    ),
-    class = "Diff",
-    package = "diffobj"
-  )
 }
 
 #' @rdname compare_functions
@@ -182,24 +144,8 @@ compare_design_estimates <- function(design1, design2, format = "ansi256", mode 
 #' @export
 compare_design_estimands <- function(design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L) {
   
-  seed <- .Random.seed
-  set.seed(seed)
-  design1 <- draw_estimands(design1)
-  set.seed(seed)
-  design2 <- draw_estimands(design2)
+  compare_design_internal(draw_estimands, diffObj, design1, design2, format, mode, pager, context)
   
-  structure(
-    diffObj(
-      design1,
-      design2,
-      format = format,
-      mode = mode,
-      pager = pager,
-      context = context
-    ),
-    class = "Diff",
-    package = "diffobj"
-  )
 }
 
 clean_call <- function(call) {
