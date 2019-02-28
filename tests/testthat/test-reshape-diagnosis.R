@@ -78,3 +78,26 @@ test_that("select", {
   reshape <- reshape_diagnosis(dx, select = "Bias")
   expect_equal(colnames(reshape), c("Design Label", "Estimand Label", "Estimator Label", "Term", "N Sims", "Bias"))
 })
+
+
+test_that("designs with factors in diagnosands_df do not produce warnings", {
+  
+  my_estimator <- function(data) {
+    data.frame(estimate = c("answer1", "answer2"))
+  }
+
+  design <- design <- my_population +
+    declare_estimator(handler = tidy_estimator(my_estimator), label = "my_label")
+
+  diagnose_design(design, sims = 2, diagnosands = declare_diagnosands(first = first(estimate), keep_defaults = FALSE))
+  
+  my_estimator <- function(data) {
+    data.frame(estimate = c("answer1", "answer2"), estimator_label = "my_label")
+  }
+  
+  design <- design <- my_population +
+    declare_estimator(handler = my_estimator)
+  
+  expect_silent(reshape_diagnosis(diagnose_design(design, sims = 2, diagnosands = declare_diagnosands(first = first(estimate), keep_defaults = FALSE))))
+  
+})

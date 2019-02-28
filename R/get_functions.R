@@ -54,7 +54,17 @@ draw_sample <- function(design, data = NULL, start = 1, end = length(design)) {
     design, data, start, end, function(x) attr(x, "step_type") %in% "sampling")
 }
 
+
+# utilities 
+
+check_design_class_single <- function(design) {
+  if(!inherits(design, "design"))
+    stop("Please send a single design object to the design argument, typically created using the + operator.", call. = FALSE)
+}
+
 get_function_internal <- function(design, data = NULL, start, end, pred, results = list(current_df = 0), what = "current_df") {
+  
+  check_design_class_single(design)
   
   if(identical(data, -9)){
     # Special NULL for draw_data
@@ -73,7 +83,20 @@ get_function_internal <- function(design, data = NULL, start, end, pred, results
   
   design_subset <- Filter(pred, design[start:end])
   
-  run_design_internal.design(design_subset, current_df = data, results = results)[[what]]
+  ret <- run_design_internal.design(design_subset, current_df = data, results = results)[[what]]
   
-}
+  if(what == "estimates_df" && !is.null(ret$estimator_label) && typeof(ret$estimator_label) != "character"){
+    warning("The estimator label should be a character, but it is a ", 
+            class(ret$estimator_label), 
+            ". Try using handler = tidy_estimator(your_estimator_function)", call. = FALSE)
+  }
+  
+  if(what == "estimands_df" && !is.null(ret$estimand_label) && typeof(ret$estimand_label) != "character"){
+    warning("The estimand label should be a character, but it is a ", 
+            class(ret$estimand_label), 
+            ". You may need stringsAsFactors = FALSE in your estimand function.", call. = FALSE)
+  }
+  
+  ret
 
+}

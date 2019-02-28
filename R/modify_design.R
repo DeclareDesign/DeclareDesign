@@ -65,12 +65,16 @@ NULL
 #'
 #' @export
 insert_step <- function(design, new_step, before, after) {
+  check_design_class_single(design)
+  
   if (missing(before)) before <- NULL
   if (missing(after)) after <- NULL
   insert_step_(design, new_step, before, after, enexpr(new_step))
 }
 
 insert_step_ <- function(design, new_step, before = NULL, after = NULL, new_step_expr) {
+  check_design_class_single(design)
+  
   if (is.null(after)) {
     if (is.null(before)) {
       stop("Must provide either before or after to add_step()")
@@ -96,6 +100,8 @@ insert_step_ <- function(design, new_step, before = NULL, after = NULL, new_step
 #'
 #'  delete_step(design, my_assignment)
 delete_step <- function(design, step) {
+  check_design_class_single(design)
+  
   i <- find_step(design, step, "delete")
   construct_design(design[-i])
 }
@@ -105,6 +111,8 @@ delete_step <- function(design, step) {
 #' @examples
 #'  replace_step(design, my_assignment, declare_step(dplyr::mutate, words = "income"))
 replace_step <- function(design, step, new_step) {
+  check_design_class_single(design)
+  
   i <- find_step(design, step, "replace")
   new_step <- wrap_step(new_step, enexpr(new_step))
   design[i] <- new_step

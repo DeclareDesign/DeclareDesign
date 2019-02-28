@@ -20,6 +20,8 @@
 #'
 #' estimates <- draw_estimates(design)
 #' estimands <- draw_estimands(design)
+#' 
+#' print_code(design)
 #'
 #' @name post_design
 NULL
@@ -210,6 +212,35 @@ dots_to_list_of_designs <- function(...) {
   designs
 }
 
+#' Print code to recreate a design
+#'
+#' @examples
+#'
+#' my_population <- declare_population(N = 100)
+#'
+#' my_assignment <- declare_assignment(m = 50)
+#'
+#' my_design <- my_population + my_assignment
+#'
+#' print_code(my_design)
+#'
+#' @rdname post_design
+#'
+#' @export
+print_code <- function(design) {
+  
+  check_design_class_single(design)
+  
+  # if there is not a code attribute, construct code via the calls for each step
+  #   and the call for the declare step
+  
+  if (is.null(attributes(design)$code)) {
+    get_design_code(design)
+  } else {
+    print(attributes(design)$code)
+  }
+}
+
 #' Obtain the preferred citation for a design
 #'
 #' @param design a design object created using the + operator
@@ -218,6 +249,9 @@ dots_to_list_of_designs <- function(...) {
 #'
 #' @export
 cite_design <- function(design, ...) {
+  
+  check_design_class_single(design)
+  
   citation <- attr(design, "citation")
   if (class(citation) == "bibentry") {
     print(citation, style = "bibtex", ... = ...)
