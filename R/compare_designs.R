@@ -37,7 +37,7 @@
 
 #' @rdname compare_functions
 #' @export
-compare_designs <- function(design1, design2, format = "ansi8", mode = "sidebyside", pager = "off", context = -1L) {
+compare_designs <- function(design1, design2, format = "ansi8", mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE) {
   
   compare_functions <-
     list(code_comparison = compare_design_code,
@@ -53,7 +53,8 @@ compare_designs <- function(design1, design2, format = "ansi8", mode = "sidebysi
         format = format,
         mode = mode,
         pager = pager,
-        context = context
+        context = context, 
+        rmd = rmd
       )
     )
   
@@ -82,49 +83,49 @@ print.design_comparison <- function(x, ...) {
 #' @rdname compare_functions
 #' @importFrom diffobj diffChr
 #' @export
-compare_design_code <- function(design1, design2, format = "ansi8", mode = "sidebyside", pager = "off", context = -1L) {
+compare_design_code <- function(design1, design2, format = "ansi8", mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE) {
   
-  compare_design_internal(get_design_code, diffChr, design1, design2, format, mode, pager, context)
+  compare_design_internal(get_design_code, diffChr, design1, design2, format, mode, pager, context, rmd)
   
 }
 
 #' @rdname compare_functions
 #' @importFrom diffobj diffChr
 #' @export
-compare_design_summaries <- function(design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L) {
+compare_design_summaries <- function(design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE) {
   
-  compare_design_internal(function(x) capture.output(summary(x)), diffChr, design1, design2, format, mode, pager, context)
-  
-}
-
-#' @rdname compare_functions
-#' @importFrom diffobj diffObj
-#' @export
-compare_design_data <- function(design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L) {
-  
-  compare_design_internal(draw_data, diffObj, design1, design2, format, mode, pager, context)
+  compare_design_internal(function(x) capture.output(summary(x)), diffChr, design1, design2, format, mode, pager, context, rmd)
   
 }
 
 #' @rdname compare_functions
 #' @importFrom diffobj diffObj
 #' @export
-compare_design_estimates <- function(design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L) {
+compare_design_data <- function(design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE) {
   
-  compare_design_internal(draw_estimates, diffObj, design1, design2, format, mode, pager, context)
+  compare_design_internal(draw_data, diffObj, design1, design2, format, mode, pager, context, rmd)
   
 }
 
 #' @rdname compare_functions
 #' @importFrom diffobj diffObj
 #' @export
-compare_design_estimands <- function(design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L) {
+compare_design_estimates <- function(design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE) {
   
-  compare_design_internal(draw_estimands, diffObj, design1, design2, format, mode, pager, context)
+  compare_design_internal(draw_estimates, diffObj, design1, design2, format, mode, pager, context, rmd)
   
 }
 
-compare_design_internal <- function(FUN, DIFFFUN, design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L){
+#' @rdname compare_functions
+#' @importFrom diffobj diffObj
+#' @export
+compare_design_estimands <- function(design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE) {
+  
+  compare_design_internal(draw_estimands, diffObj, design1, design2, format, mode, pager, context, rmd)
+  
+}
+
+compare_design_internal <- function(FUN, DIFFFUN, design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE){
   check_design_class_single(design1)
   check_design_class_single(design2)
   
@@ -133,18 +134,32 @@ compare_design_internal <- function(FUN, DIFFFUN, design1, design2, format = "an
   set.seed(seed)
   design2 <- FUN(design2)
   
-  structure(
+  if(rmd == TRUE) {
+    format <- "html"
+    style <- list(html.output = "diff.w.style")
+  } else {
+    style <- "auto"
+  }
+  
+  diff_output <- structure(
     DIFFFUN(
       design1,
       design2,
       format = format,
       mode = mode,
       pager = pager,
-      context = context
+      context = context,
+      style = style
     ),
     class = "Diff",
     package = "diffobj"
   )
+  
+  if(rmd == TRUE) {
+    cat(as.character(diff_output))
+  } else {
+    diff_output
+  }
   
 }
 
