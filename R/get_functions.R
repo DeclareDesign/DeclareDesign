@@ -83,7 +83,20 @@ get_function_internal <- function(design, data = NULL, start, end, pred, results
   
   design_subset <- Filter(pred, design[start:end])
   
-  run_design_internal.design(design_subset, current_df = data, results = results)[[what]]
+  ret <- run_design_internal.design(design_subset, current_df = data, results = results)[[what]]
   
-}
+  if(what == "estimates_df" && !is.null(ret$estimator_label) && typeof(ret$estimator_label) != "character"){
+    warning("The estimator label should be a character, but it is a ", 
+            class(ret$estimator_label), 
+            ". Try using handler = tidy_estimator(your_estimator_function)", call. = FALSE)
+  }
+  
+  if(what == "estimands_df" && !is.null(ret$estimand_label) && typeof(ret$estimand_label) != "character"){
+    warning("The estimand label should be a character, but it is a ", 
+            class(ret$estimand_label), 
+            ". You may need stringsAsFactors = FALSE in your estimand function.", call. = FALSE)
+  }
+  
+  ret
 
+}

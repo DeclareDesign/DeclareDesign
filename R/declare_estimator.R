@@ -297,8 +297,6 @@ tidy_default <- function(x, conf.int = TRUE) {
   
   val <- try({
     summ <- coef(summary(x))
-    # summ <-
-    # summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("est", "std", "pr("), drop = FALSE]
     
     if(conf.int == TRUE) {
       ci <- suppressMessages(as.data.frame(confint(x)))
