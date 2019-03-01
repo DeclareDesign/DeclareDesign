@@ -46,7 +46,7 @@ compare_diagnoses <- function(base_design,
                               merge_by_estimator = TRUE){
   
   
-  if(bootstrap_sims <= 99) stop("Please choose a higher number of bootstrap simulations")
+  if(bootstrap_sims_base <= 99) stop("Please choose a higher number of bootstrap simulations")
   
   
  # Diagnose designs if base/comparison are of class "design"
