@@ -80,7 +80,17 @@ compare_diagnoses <- function(base_design,
 
 
 
-
+#' Internal method to compare diagnoses
+#'
+#' @param diagnosis1 A diagnosis.
+#' @param diagnosis2 A diagnosis.
+#' @param merge_by_estimator A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}
+#' @param alpha The confidence level, 0.01 by default.
+#' @return A list with a data frame of compared diagnoses and both diagnoses.
+#'
+#' @details
+#'  
+#' @export
 #' @export
 compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimator, alpha) {
   # 1.Housekeeping
