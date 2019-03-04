@@ -34,6 +34,8 @@ df <- draw_data(design)
 estimates <- draw_estimates(design)
 estimands <- draw_estimands(design)
 
+print_code(design)
+
 
 my_population <- declare_population(N = 100)
 
