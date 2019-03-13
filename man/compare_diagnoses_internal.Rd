@@ -22,6 +22,4 @@ A list with a data frame of compared diagnoses and both diagnoses.
 \description{
 Internal method to compare diagnoses
 }
-\details{
-
-}
+\keyword{internal}

@@ -19,10 +19,12 @@ compare_diagnoses(base_design, comparison_design, sims = 1000,
 
 \item{bootstrap_sims_comparison}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for comparison_designs.}
 
-\item{alpha}{The confidence level, 0.01 by default.
-@return A list with a data frame of compared diagnoses and both diagnoses.}
+\item{alpha}{The confidence level, 0.01 by default.}
 
 \item{merge_by_estimator}{A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}}
+}
+\value{
+A list with a data frame of compared diagnoses and both diagnoses.
 }
 \description{
 Diagnose and compare designs.
@@ -35,6 +37,7 @@ i.e. if a diagnosand from \code{comparison_design} is not contained in the 95\% 
 }
 \examples{
 design_a <- declare_population(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +
+
 declare_potential_outcomes(
   Y_Z_0 = u, 
   Y_Z_1 = u + rnorm(N, mean = 2, sd = 2)) +
