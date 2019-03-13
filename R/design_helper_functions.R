@@ -20,6 +20,8 @@
 #'
 #' estimates <- draw_estimates(design)
 #' estimands <- draw_estimands(design)
+#' 
+#' print_code(design)
 #'
 #' @name post_design
 NULL
@@ -209,7 +211,6 @@ dots_to_list_of_designs <- function(...) {
 
   designs
 }
-
 
 #' Print code to recreate a design
 #'
