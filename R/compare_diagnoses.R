@@ -98,11 +98,6 @@ compare_diagnoses <- function(base_design,
 
 compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimator, alpha) {
   
-  
-  if (is.null(diagnosis1$bootstrap_replicates)){
-    stop("Can't compare diagnoses witouth bootstrap replicates")
-  }
-  
   np1 <- length(diagnosis1$parameters_df[, "design_label"])
   np2 <- length(diagnosis2$parameters_df[, "design_label"])
   
@@ -135,7 +130,7 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   
   if (merge_by_estimator) {
     if (!estimator_in_set){
-      warning("Estimator label not used in columns for merging.
+      warning("Estimator label not used for merging.
               At least one of the designs doesn't contain estimator_label.")
     } else {
       merge_by_set <- c(merge_by_set, "estimator_label")
