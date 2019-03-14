@@ -261,29 +261,31 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, merge_by_estimato
   comparison_df <- setNames(comparison_df,  c_names)
   
   # if user passes diagnosis2 without bootstrap sims se_2 delete column
-  if (all(is.na(comparison_df$se_2))) comparison_df$se_2 <- NULL
+  if (all(is.na(comparison_df$se_2))){
+    comparison_df$se_2 <- NULL
+  }
 
-  return_list <- list(compared.diagnoses_df = comparison_df, 
+  return_list <- list(compared_diagnoses_df = comparison_df, 
                       diagnosis1 = diagnosis1, 
                       diagnosis2 = diagnosis2)
   
   attr(return_list, "alpha") <- alpha
   
-  class(return_list) <- "compared.diagnoses"
+  class(return_list) <- "compared_diagnoses"
   
   return_list
   }
 
 
 #' @export
-print.compared.diagnoses <- function(object, ...) {
+print.compared_diagnoses <- function(object, ...) {
   print(summary(object))
   invisible(object)
 }
 
 
 #' @export
-summary.compared.diagnoses <- function(x, ...) {
+summary.compared_diagnoses <- function(x, ...) {
   structure(x, class = c("summary.compared_diagnoses", "data.frame"))
   
 }
@@ -297,12 +299,12 @@ print.summary.compared_diagnoses <- function(x, ...){
   bootstrap_rep2 <- x$diagnosis2$bootstrap_sims
   n_sims1 <- nrow(x$diagnosis1$simulations_df)
   n_sims2 <- nrow(x$diagnosis2$simulations_df)
-  compared.diagnoses_df <- x[["compared.diagnoses_df"]]
-  compared.diagnoses_df <- subset(compared.diagnoses_df, compared.diagnoses_df[, "in_interval"] == 0)
+  compared_diagnoses_df <- x[["compared_diagnoses_df"]]
+  compared_diagnoses_df <- subset(compared_diagnoses_df, compared_diagnoses_df[, "in_interval"] == 0)
   alpha <- attr(x, "alpha")
   atext <- paste0("(confidence level = ", alpha, ")")
   
-  if (nrow(compared.diagnoses_df) == 0) {
+  if (nrow(compared_diagnoses_df) == 0) {
     print(paste("No visible differences between objects (at a confidence level =", atext,")"))
     return(x)
   }
@@ -323,12 +325,12 @@ print.summary.compared_diagnoses <- function(x, ...){
   }
   
   
-  column_names <- colnames(compared.diagnoses_df)
+  column_names <- colnames(compared_diagnoses_df)
   identifiers <- column_names %in% c("estimand_label", "term") | grepl("^estimator_label", column_names)
   identifiers_columns <- column_names[identifiers]
   
   # Make diagnosand only df
-  clean_comparison_df <- compared.diagnoses_df[, c(identifiers_columns, "diagnosand", "mean_1", "mean_2"), drop = FALSE]
+  clean_comparison_df <- compared_diagnoses_df[, c(identifiers_columns, "diagnosand", "mean_1", "mean_2"), drop = FALSE]
   
   
   clean_values_df <- data.frame(lapply(clean_comparison_df[, c("mean_1", "mean_2"), drop = FALSE], format_num, 
@@ -338,7 +340,7 @@ print.summary.compared_diagnoses <- function(x, ...){
   
   colnames(diagnosands_only_df)[colnames(diagnosands_only_df) %in% c("mean_1", "mean_2")] <- c("base", "comparison")
   # Make se only df
-  se_only_df <- compared.diagnoses_df[, grepl("^se", colnames(compared.diagnoses_df)), drop = FALSE]
+  se_only_df <- compared_diagnoses_df[, grepl("^se", colnames(compared_diagnoses_df)), drop = FALSE]
   
   
   se_only_df <- data.frame(lapply(se_only_df, function(se) {
