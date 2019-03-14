@@ -15,7 +15,7 @@ compare_diagnoses(base_design, comparison_design, sims = 1000,
 
 \item{sims}{The number of simulations, defaulting to 1000. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.}
 
-\item{bootstrap_sims_base}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for base_design.}
+\item{bootstrap_sims_base}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for base_design. Must be greater or equal to 100.}
 
 \item{bootstrap_sims_comparison}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for comparison_designs.}
 
@@ -51,6 +51,6 @@ declare_estimator(Y ~ Z, estimand = "ATE", label = "est1")
 
 design_b <- replace_step(design_a, step = "assignment", declare_assignment(prob = 0.3) )
 
-compare_diagnoses(design_a, design_b)
+comparison <- compare_diagnoses(design_a, design_b, sims = 40)
  
 }

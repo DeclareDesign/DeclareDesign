@@ -34,7 +34,7 @@
 #' 
 #' design_b <- replace_step(design_a, step = "assignment", declare_assignment(prob = 0.3) )
 #' 
-#' compare_diagnoses(design_a, design_b)
+#' comparison <- compare_diagnoses(design_a, design_b, sims = 40)
 #'  
 #' @export
 compare_diagnoses <- function(base_design,
@@ -310,8 +310,12 @@ print.summary.compared_diagnoses <- function(x, ...){
   n_sims2 <- nrow(x$diagnosis_2$simulations_df)
   compared_diagnoses_df <- x[["compared_diagnoses_df"]]
   compared_diagnoses_df <- subset(compared_diagnoses_df, compared_diagnoses_df[, "in_interval"] == 0)
+  compared_diagnoses_df$mean_diff <-NULL
+  compared_diagnoses_df$se_2 <- NULL
+  compared_diagnoses_df$se_diff <- NULL
   alpha <- attr(x, "alpha")
   atext <- paste0("(confidence level = ", alpha, ")")
+  
   
   if (nrow(compared_diagnoses_df) == 0) {
     print(paste("No visible differences between objects (at a confidence level =", atext,")"))
