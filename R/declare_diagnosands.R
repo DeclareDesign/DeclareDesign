@@ -192,20 +192,53 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #'
 #' my_diagnosands <- declare_diagnosands(select = c(bias, rmse))
 #'
+#' \dontrun{
+#' diagnosis <- diagnose_design(design, diagnosands = my_diagnosands)
+#' diagnosis
+#' }
+#' \dontrun{
+#' design <- set_diagnosands(design, diagnosands = my_diagnosands)
+#' diagnose_design(design)
+#' }
+#'
 #' # Alternatively, you can report all of the default diagnosands and subtract a subset of them e.g.,
 #'
 #' my_diagnosands <- declare_diagnosands(subtract = type_s_rate)
+#' \dontrun{
+#' diagnosis <- diagnose_design(design, diagnosands = my_diagnosands)
+#' diagnosis
+#' }
+#' \dontrun{
+#' design <- set_diagnosands(design, diagnosands = my_diagnosands)
+#' diagnose_design(design)
+#' }
 #'
 #' # You can add your own diagnosands in addition to or instead of the defaults e.g.,
 #'
 #' my_diagnosands <-
 #'   declare_diagnosands(median_bias = median(estimate - estimand))
+#' \dontrun{
+#' diagnosis <- diagnose_design(design, diagnosands = my_diagnosands)
+#' diagnosis
+#' }
+#' \dontrun{
+#' design <- set_diagnosands(design, diagnosands = my_diagnosands)
+#' diagnose_design(design)
+#' }
 #'
 #' # or to report only \code{median_bias}
 #'
 #' my_diagnosands <-
 #'    declare_diagnosands(median_bias = median(estimate - estimand),
 #'                        keep_defaults = FALSE)
+#' \dontrun{
+#' diagnosis <- diagnose_design(design, diagnosands = my_diagnosands)
+#' diagnosis
+#' }
+#' \dontrun{
+#' design <- set_diagnosands(design, diagnosands = my_diagnosands)
+#' diagnose_design(design)
+#' }
 #'
 #' # Below is the code that makes the default diagnosands.
 #' # You can use these as a model when writing your own diagnosands.
