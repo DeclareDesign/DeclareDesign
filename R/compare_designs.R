@@ -103,7 +103,6 @@ compare_design_summaries <- compare_partial(function(x) capture.output(summary(x
 compare_design_data <- compare_partial(draw_data, "diffObj")
 
 #' @rdname compare_functions
-#' @importFrom diffobj diffObj
 #' @export
 compare_design_estimates <- compare_partial(draw_estimates, "diffObj")
 
@@ -166,4 +165,5 @@ print_console_header <- function(text) {
   width <- options()$width
   cat("\n\n#", text, paste(rep("-", width - nchar(text) - 2), collapse = ""), "\n\n")
 }
+
 
