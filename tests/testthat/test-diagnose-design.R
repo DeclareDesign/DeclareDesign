@@ -274,3 +274,28 @@ test_that("diagnose_design does not reclass the variable N", {
   expect_equal(class(dx$diagnosands_df$N), "integer")
   
 })
+
+
+test_that("diagnose_design works when simulations_df lacking parameters attr", {
+
+  design <- declare_population(N = 100, X = rnorm(N), Y = rnorm(N, X)) +
+    declare_estimand(true_effect = 1) +
+    declare_estimator(Y ~ X, model=lm_robust, estimand = "true_effect", label = "Y on X") 
+  
+  simulations <-  simulate_design(design, sims = 20) 
+  
+  simulations_no_attr <- simulations
+  attributes(simulations_no_attr)["parameters"] <- NULL
+  
+  d1 <- diagnose_design(simulations, bootstrap_sims = FALSE)
+  d2 <- diagnose_design(simulations_no_attr, bootstrap_sims = FALSE)
+  
+  # strip params from d1
+  # These are expected differences
+  attributes(d1$simulations_df)["parameters"] <- NULL
+  d1$simulations_df$design_label <- as.character(d1$simulations_df$design_label)
+  d1$diagnosands_df$design_label <- as.character(d1$diagnosands_df$design_label)
+  d1["parameters_df"] <- list(NULL)
+    
+  expect_identical(d1,d2)
+})
