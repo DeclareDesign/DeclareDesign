@@ -1,7 +1,7 @@
 ## Submission
 
-We are resubmitting a small update, `DeclareDesign 0.16.0`, with bug fixes
-and the addition of three small new features.
+We are resubmitting a small update, `DeclareDesign 0.18.0`, with bug fixes
+and the addition of a small new feature.
 
 Thank you for your time reviewing the submission.
 
