@@ -27,7 +27,7 @@ declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal")
 #'
 #' 
 #'
-#' @importFrom rlang enexpr lang_args expr_text
+#' @importFrom rlang enexpr expr_text
 #'
 #' @export
 #' @rdname declare_reveal

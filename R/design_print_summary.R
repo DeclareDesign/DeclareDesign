@@ -45,7 +45,7 @@ print.design <- function(x, verbose = TRUE, ...) {
 #' summary(design)
 #' @rdname post_design
 #' @export
-#' @importFrom rlang is_lang
+#' @importFrom rlang is_call call_args
 summary.design <- function(object, verbose = TRUE, ...) {
   design <- object
   
@@ -55,8 +55,8 @@ summary.design <- function(object, verbose = TRUE, ...) {
   get_formula_from_step <- function(step) {
     call <- attr(step, "call")
     type <- attr(step, "step_type")
-    if (is_lang(call) && is.character(type) && type != "wrapped") {
-      formulae <- Filter(is_formula, lang_args(call))
+    if (is_call(call) && is.character(type) && type != "wrapped") {
+      formulae <- Filter(is_formula, call_args(call))
       if (length(formulae) == 1) {
         return(formulae[[1]])
       }

@@ -48,3 +48,4 @@ test_that("test with user-specified text citation", {
   
   expect_output(print(design), "Citation:")
 })
+

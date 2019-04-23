@@ -36,7 +36,7 @@ test_that("get_ works", {
 
 test_that("no sampling does not produce error from draw_sample", {
   
-  design <- population + potential_outcomes + estimand + reveal_Y + estimator
+  design <- population + potential_outcomes + estimand
   
   dat <- draw_data(design)
   

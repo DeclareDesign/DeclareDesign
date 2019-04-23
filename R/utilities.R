@@ -181,13 +181,14 @@ get_modified_variables <- function(last_df = NULL, current_df) {
 # string literals, or functions of either
 # eg Y:Z => c("Y","Z")
 
+#' @importFrom rlang quo_squash
 reveal_nse_helper <- function(X) {
   if (is.character(X) || is.logical(X)) {
     X
   } else if (is.name(X)) {
     as.character(X)
   } else if (is_quosure(X)) {
-    reveal_nse_helper(quo_expr(X))
+    reveal_nse_helper(quo_squash(X))
   } else if (is.call(X)) {
     unlist(lapply(X[-1], reveal_nse_helper))
   }

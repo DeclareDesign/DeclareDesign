@@ -38,7 +38,7 @@ test_that("tibble more", {
   reveal_Y <- declare_reveal(Y,Z)
   
   my_func <- function(data){
-    data %>% as_tibble
+    data %>% (tibble::as_tibble)
   }
   
   design <- population + potential_outcomes + assignment + declare_step(handler = my_func)
@@ -79,3 +79,4 @@ test_that("sf", {
 
   expect_identical(dim(df), 5:6)
 })
+

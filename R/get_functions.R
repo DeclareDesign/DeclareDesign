@@ -36,7 +36,7 @@ get_estimates <- function(design, data = NULL, start = 1, end = length(design)) 
   }
   
   get_function_internal(
-    design, data, start, end, function(x) attr(x, "causal_type") %in% "estimator", NULL, "estimates_df", "get_estimates")
+    design, data, start, end, function(x) attr(x, "causal_type") %in% "estimator", NULL, "estimates_df", step_type = "estimator")
 }
 
 #' @rdname get_functions
