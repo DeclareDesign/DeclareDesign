@@ -23,7 +23,7 @@
 #'
 #' @name declare_design
 #'
-#' @importFrom rlang quos quo_expr eval_tidy quo_text lang_args is_formula is_symbol
+#' @importFrom rlang quos eval_tidy quo_text is_formula is_symbol
 #' @importFrom utils bibentry
 #' @export
 #'
