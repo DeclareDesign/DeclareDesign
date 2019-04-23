@@ -13,7 +13,7 @@
 compare_designs(design1, design2, format = "ansi8",
   mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE)
 
-compare_design_code(design1, design2, format = "ansi8",
+compare_design_code(design1, design2, format = "ansi256",
   mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE)
 
 compare_design_summaries(design1, design2, format = "ansi256",
