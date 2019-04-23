@@ -60,8 +60,8 @@ compare_diagnoses <- function(base_design,
                                   sims = sims, 
                                   bootstrap_sims =  bootstrap_sims_base)
   } else {
-    if(class(base_design) == "diagnosis"){
-      if(base_design$bootstrap_sims<= 99) 
+    if(inherits(base_design, "diagnosis")){
+      if(base_design$bootstrap_sims <= 99) 
        stop("base_design must have at least 100 bootstrap simulations")
       diagnosis_1 <- base_design
     } else {
@@ -94,6 +94,8 @@ compare_diagnoses <- function(base_design,
 #' @param merge_by_estimator A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}
 #' @param alpha The confidence level, 0.01 by default.
 #' @return A list with a data frame of compared diagnoses and both diagnoses.
+#' 
+#' @importFrom stats quantile
 #' @keywords internal
 
 compare_diagnoses_internal <- function(diagnosis_1, diagnosis_2, merge_by_estimator, alpha) {
@@ -104,6 +106,7 @@ compare_diagnoses_internal <- function(diagnosis_1, diagnosis_2, merge_by_estima
   if(np1 + np2  > 2){
     stop("Please only send design or diagnosis objects with one unique design_label.")
   }
+  
   diagnosands <- intersect(diagnosis_1$diagnosand_names, diagnosis_2$diagnosand_names)
   
   # merge_by_set, used to merge diagnosands_df, must at least contain estimand_label at its
@@ -194,7 +197,7 @@ compare_diagnoses_internal <- function(diagnosis_1, diagnosis_2, merge_by_estima
     q <- cbind(set, t(q))
   }
   
-  lower.bound <- lapply(bootstrap_df, compute_bound, bound =  0.5 * alpha )
+  lower.bound <- lapply(bootstrap_df, compute_bound, bound = 0.5 * alpha )
   upper.bound <- lapply(bootstrap_df, compute_bound, bound = 1 - 0.5 * alpha)
   lower.bound <- rbind_disjoint(lower.bound)
   upper.bound <- rbind_disjoint(upper.bound)
@@ -287,19 +290,17 @@ compare_diagnoses_internal <- function(diagnosis_1, diagnosis_2, merge_by_estima
 
 
 #' @export
-print.compared_diagnoses <- function(object, ...) {
-  print(summary(object))
-  invisible(object)
+print.compared_diagnoses <- function(x, ...) {
+  print(summary(x))
+  invisible(x)
 }
 
 
 #' @export
-summary.compared_diagnoses <- function(x, ...) {
-  structure(x, class = c("summary.compared_diagnoses", "data.frame"))
+summary.compared_diagnoses <- function(object, ...) {
+  structure(object, class = c("summary.compared_diagnoses", "data.frame"))
   
 }
-
-
 
 #' @export
 print.summary.compared_diagnoses <- function(x, ...){
