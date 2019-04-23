@@ -198,7 +198,8 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #' }
 #' \dontrun{
 #' design <- set_diagnosands(design, diagnosands = my_diagnosands)
-#' diagnose_design(design)
+#' diagnosis <- diagnose_design(design)
+#' diagnosis
 #' }
 #'
 #' # Alternatively, you can report all of the default diagnosands and subtract a subset of them e.g.,
@@ -210,7 +211,8 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #' }
 #' \dontrun{
 #' design <- set_diagnosands(design, diagnosands = my_diagnosands)
-#' diagnose_design(design)
+#' diagnosis <- diagnose_design(design)
+#' diagnosis
 #' }
 #'
 #' # You can add your own diagnosands in addition to or instead of the defaults e.g.,
@@ -223,7 +225,8 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #' }
 #' \dontrun{
 #' design <- set_diagnosands(design, diagnosands = my_diagnosands)
-#' diagnose_design(design)
+#' diagnosis <- diagnose_design(design)
+#' diagnosis
 #' }
 #'
 #' # or to report only \code{median_bias}
@@ -237,7 +240,8 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #' }
 #' \dontrun{
 #' design <- set_diagnosands(design, diagnosands = my_diagnosands)
-#' diagnose_design(design)
+#' diagnosis <- diagnose_design(design)
+#' diagnosis
 #' }
 #'
 #' # Below is the code that makes the default diagnosands.
