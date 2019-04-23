@@ -15,7 +15,7 @@ diagnosis_b <- diagnose_design(design_b, sims = 40, bootstrap_sims = 0)
 
 test_that("compare_diagnoses works with design objects", {
   set.seed(2000)
-  comparison <- compare_diagnoses(design_a, design_b, sims = 40)
+  comparison <- compare_diagnoses(design_a, design_b, sims = 40, bootstrap_sims1 = 100, bootstrap_sims2 = 100)
  
   expect_is(comparison, "compared_diagnoses")
 })

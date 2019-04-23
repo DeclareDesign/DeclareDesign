@@ -4,17 +4,17 @@
 \alias{compare_diagnoses_internal}
 \title{Internal method to compare diagnoses}
 \usage{
-compare_diagnoses_internal(diagnosis_1, diagnosis_2, merge_by_estimator,
+compare_diagnoses_internal(diagnosis1, diagnosis2, merge_by_estimator,
   alpha)
 }
 \arguments{
-\item{diagnosis_1}{A diagnosis.}
+\item{diagnosis1}{A diagnosis.}
 
-\item{diagnosis_2}{A diagnosis.}
+\item{diagnosis2}{A diagnosis.}
 
 \item{merge_by_estimator}{A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}}
 
-\item{alpha}{The confidence level, 0.01 by default.}
+\item{alpha}{The confidence level, 0.05 by default.}
 }
 \value{
 A list with a data frame of compared diagnoses and both diagnoses.

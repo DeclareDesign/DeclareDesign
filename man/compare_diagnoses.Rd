@@ -4,22 +4,21 @@
 \alias{compare_diagnoses}
 \title{Compare Diagnoses}
 \usage{
-compare_diagnoses(base_design, comparison_design, sims = 1000,
-  bootstrap_sims_base = 1000, bootstrap_sims_comparison = 100,
-  alpha = 0.01, merge_by_estimator = TRUE)
+compare_diagnoses(design1, design2, sims = 500, bootstrap_sims1 = 100,
+  bootstrap_sims2 = 100, alpha = 0.05, merge_by_estimator = TRUE)
 }
 \arguments{
-\item{base_design}{A design or a diagnosis.}
+\item{design1}{A design or a diagnosis.}
 
-\item{comparison_design}{A design or a diagnosis.}
+\item{design2}{A design or a diagnosis.}
 
 \item{sims}{The number of simulations, defaulting to 1000. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.}
 
-\item{bootstrap_sims_base}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for base_design. Must be greater or equal to 100.}
+\item{bootstrap_sims1}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for design1. Must be greater or equal to 100.}
 
-\item{bootstrap_sims_comparison}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for comparison_designs.}
+\item{bootstrap_sims2}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for design2s.}
 
-\item{alpha}{The confidence level, 0.01 by default.}
+\item{alpha}{The confidence level, 0.05 by default.}
 
 \item{merge_by_estimator}{A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}}
 }
@@ -33,7 +32,7 @@ Diagnose and compare designs.
 The function \code{compare_diagnoses()} runs a many-to-many merge matching by \code{estimand_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
 
 The data frame of compared diagnoses has a column, \code{in_interval}, that indicates if two given diagnosands diverge statistically. 
-i.e. if a diagnosand from \code{comparison_design} is not contained in the 95\% bootstrap confidence interval of their equivalent diagnosand from \code{base_design}. The column \code{in_interval} equals zero for divergent diangnosands and one otherwise..
+i.e. if a diagnosand from \code{design2} is not contained in the 95\% bootstrap confidence interval of their equivalent diagnosand from \code{design1}. The column \code{in_interval} equals zero for divergent diangnosands and one otherwise..
 }
 \examples{
 design_a <- declare_population(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +
