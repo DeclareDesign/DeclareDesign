@@ -303,8 +303,13 @@ print.summary.compared_diagnoses <- function(x, ...){
   n_sims2 <- nrow(x$diagnosis2$simulations_df)
   compared_diagnoses_df <- x[["compared_diagnoses_df"]]
   compared_diagnoses_df <- subset(compared_diagnoses_df, compared_diagnoses_df[, "in_interval"] == 0)
+  # compared_diagnoses_df$se_2 <- NULL
+  mean_diff <- compared_diagnoses_df$mean_diff 
+  se_diff <- ifelse(is.null(compared_diagnoses_df$se_diff), 
+                    rep("-", nrow(compared_diagnoses_df)), 
+                    paste0("(", format_num(compared_diagnoses_df$se_diff, digits = 2), ")"))
+
   compared_diagnoses_df$mean_diff <-NULL
-  compared_diagnoses_df$se_2 <- NULL
   compared_diagnoses_df$se_diff <- NULL
   alpha <- attr(x, "alpha")
   atext <- paste0("(confidence level = ", alpha, ")")
@@ -344,21 +349,23 @@ print.summary.compared_diagnoses <- function(x, ...){
   
   diagnosands_only_df <- cbind(clean_comparison_df[, c(identifiers_columns, "diagnosand"), drop = FALSE], clean_values_df)
   
-  colnames(diagnosands_only_df)[colnames(diagnosands_only_df) %in% c("mean_1", "mean_2")] <- c("base", "comparison")
+  colnames(diagnosands_only_df)[colnames(diagnosands_only_df) %in% c("mean_1", "mean_2")] <- c("design1", "design2")
+  diagnosands_only_df <- cbind( diagnosands_only_df, difference = format_num(mean_diff, digits = 2), stringsAsFactors = FALSE)
   # Make se only df
   se_only_df <- compared_diagnoses_df[, grepl("^se", colnames(compared_diagnoses_df)), drop = FALSE]
-  
+
   
   se_only_df <- data.frame(lapply(se_only_df, function(se) {
     paste0("(", format_num(se, digits = 2), ")")
     
   }), stringsAsFactors = FALSE)
   
-  # Add se_2 colum
-  se_only_df <- cbind(clean_comparison_df[, c(identifiers_columns, "diagnosand"), drop = FALSE], se_only_df)
   if(!"se_2" %in% colnames(se_only_df)){
     se_only_df$se_2 <- "-"
   }
+  se_only_df <- cbind(se_only_df, se_diff)
+  se_only_df <- cbind(clean_comparison_df[, c(identifiers_columns, "diagnosand"), drop = FALSE], se_only_df)
+
   
   colnames(se_only_df) <- colnames(diagnosands_only_df)
   
@@ -371,7 +378,7 @@ print.summary.compared_diagnoses <- function(x, ...){
   
   cat("\n\n")
   print(return_df, row.names = FALSE)
-  cat(paste0("\n\n Displaying diagnosands of the comparison design that lie outside the ", (1-alpha)*100 ,"% bootstrap confidence interval of their counterparts in the base_design."))
+  cat(paste0("\n\n Displaying diagnosands of design2 that lie outside the ", (1-alpha)*100 ,"% bootstrap confidence interval of their counterparts in design1."))
   invisible(return_df)
 }
 

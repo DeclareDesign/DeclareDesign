@@ -77,10 +77,7 @@ test_that("compare_diagnoses errors when it should", {
   expect_error(compare_diagnoses(diagnoses, diagnosis_a)) 
   design_c <- designer(N = 30)
   diagnosis_c <- diagnose_design(design_c, sims = 40)
-  not_a_comparison <- suppressWarnings(compare_diagnoses(diagnosis_a, diagnosis_c))
-  expect_warning(compare_diagnoses(diagnosis_a, diagnosis_c)) 
-  expect_is(not_a_comparison, "list")
-  
+  expect_error(compare_diagnoses(diagnosis_a, diagnosis_c)) 
   design_d <- delete_step(design_c, "estimator")
   expect_warning(compare_diagnoses(design_c, design_d, sims = 40)) 
 })
