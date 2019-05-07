@@ -171,7 +171,7 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, sims,  bootstrap_
       se2 <- comp[,paste0("se(",diagnosand, ")_2")]
       diff <- d2[, diagnosand] - d1[, diagnosand] 
       mu <- mean(diff) 
-      p.value <- ifelse(sign(mu) == -1, mean(diff > 0),  mean(diff < 0))
+      p.value <- ifelse(sign(mu) == -1, mean(diff >= 0),  mean(diff <= 0))
       
       # Combine
      out<- data.frame(diagnosand =diagnosand,
