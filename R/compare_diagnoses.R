@@ -118,6 +118,7 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, sims,  bootstrap_
     stop("Can't merge diagnosands data frames. Diagnoses don't have labels in common")
   }
   
+  # Drop cols without matching pair
   c_names <- colnames(comparison_df)
   filter_se <- grepl("^se", c_names)
   suffix <- c("_1", "_2") 
