@@ -152,12 +152,11 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, sims,  bootstrap_
                                    df1 = bootstrap_df1, 
                                    df2= bootstrap_df2,
                                    comparison = comparison_list,
-                                   diagnosands_list = diagnosands, 
-                                   group_by_set = merge_by_set) {
+                                   diagnosands_list = diagnosands) {
     # Estimated diagnosands and se(diagnosands) from each design
     d1 <- df1[[label]]
     d2 <- df2[[label]]
-    comp <- comparison_list[[label]]
+    comp <- comparison[[label]]
     c_names <- colnames(comp)
     set <-   grepl("^estimand_label", c_names)| grepl("^estimator_label", c_names)| grepl("^term", c_names) 
     select_cols <- c_names[grepl("^design_label", c_names)]
