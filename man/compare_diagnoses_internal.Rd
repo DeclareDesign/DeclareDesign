@@ -5,14 +5,20 @@
 \title{Internal method to compare diagnoses}
 \usage{
 compare_diagnoses_internal(diagnosis1, diagnosis2, sims, bootstrap_sims,
-  merge_by_estimator)
+  merge_by_estimator, level)
 }
 \arguments{
 \item{diagnosis1}{A diagnosis.}
 
 \item{diagnosis2}{A diagnosis.}
 
+\item{sims}{The number of simulations, defaulting to 1000. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.}
+
+\item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for both designs. Must be greater or equal to 100.}
+
 \item{merge_by_estimator}{A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}}
+
+\item{level}{the confidence level for the bootstrap confidence interval of the difference in diagnosands.}
 }
 \value{
 A list with a data frame of compared diagnoses and both diagnoses.

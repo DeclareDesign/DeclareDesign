@@ -5,7 +5,7 @@
 \title{Compare Diagnoses}
 \usage{
 compare_diagnoses(design1, design2, sims = 500, bootstrap_sims = 100,
-  merge_by_estimator = TRUE)
+  merge_by_estimator = TRUE, level = 0.95)
 }
 \arguments{
 \item{design1}{A design or a diagnosis.}
@@ -17,6 +17,8 @@ compare_diagnoses(design1, design2, sims = 500, bootstrap_sims = 100,
 \item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for both designs. Must be greater or equal to 100.}
 
 \item{merge_by_estimator}{A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}}
+
+\item{level}{the confidence level for the bootstrap confidence interval of the difference in diagnosands.}
 }
 \value{
 A list with a data frame of compared diagnoses and both diagnoses.

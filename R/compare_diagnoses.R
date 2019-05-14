@@ -7,8 +7,9 @@
 #' @param sims The number of simulations, defaulting to 1000. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.
 #' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for both designs. Must be greater or equal to 100.
 #' @param merge_by_estimator A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}
+#' @param level the confidence level for the bootstrap confidence interval of the difference in diagnosands.
 #' @return A list with a data frame of compared diagnoses and both diagnoses.
-#'
+#' @importFrom stats quantile
 #' @details
 #' 
 #' The function \code{compare_diagnoses()} runs a many-to-many merge matching by \code{estimand_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
@@ -39,7 +40,8 @@ compare_diagnoses <- function(design1,
                               design2, 
                               sims = 500,
                               bootstrap_sims = 100,
-                              merge_by_estimator = TRUE){
+                              merge_by_estimator = TRUE, 
+                              level = 0.95){
   
   
 
@@ -47,6 +49,7 @@ compare_diagnoses <- function(design1,
   if(bootstrap_sims <= 99){
     stop("diagnoses must have at least 100 bootstrap simulations")
   }
+
 
    diagnosis1 <- diagnose_design(design1, 
                                   sims = sims, 
@@ -56,7 +59,7 @@ compare_diagnoses <- function(design1,
                                   sims = sims, 
                                   bootstrap_sims = bootstrap_sims)
 
-  compare_diagnoses_internal(diagnosis1, diagnosis2, sims, bootstrap_sims, merge_by_estimator)
+  compare_diagnoses_internal(diagnosis1, diagnosis2, sims, bootstrap_sims, merge_by_estimator, level)
   
 }
 
@@ -64,12 +67,15 @@ compare_diagnoses <- function(design1,
 #'
 #' @param diagnosis1 A diagnosis.
 #' @param diagnosis2 A diagnosis.
+#' @param sims The number of simulations, defaulting to 1000. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.
+#' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for both designs. Must be greater or equal to 100.
 #' @param merge_by_estimator A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}
+#' @param level the confidence level for the bootstrap confidence interval of the difference in diagnosands.
 #' @return A list with a data frame of compared diagnoses and both diagnoses.
 #' 
 #' 
 #' @keywords internal
-compare_diagnoses_internal <- function(diagnosis1, diagnosis2, sims,  bootstrap_sims, merge_by_estimator){
+compare_diagnoses_internal <- function(diagnosis1, diagnosis2, sims,  bootstrap_sims, merge_by_estimator, level){
   
   diagnosands <- intersect(diagnosis1$diagnosand_names, diagnosis2$diagnosand_names)
   
@@ -141,7 +147,7 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, sims,  bootstrap_
   bootstrap_df1 <- split_bootrstrap(diagnosis1)
   bootstrap_df2 <- split_bootrstrap(diagnosis2)
   
-  # Function to create list with output.
+  # Function to create  output.
   # For each combination of estimand_label, estimator_label and term in comparison_list
   # take the mean and the se of each estimated diagnosand "d" from comparison_list
   # and unite with 
@@ -170,9 +176,10 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, sims,  bootstrap_
       se1 <- comp[,paste0("se(",diagnosand, ")_1")]
       se2 <- comp[,paste0("se(",diagnosand, ")_2")]
       diff <- d2[, diagnosand] - d1[, diagnosand] 
-      mu <- mean(diff) 
-      p.value <- ifelse(sign(mu) == -1, mean(diff >= 0),  mean(diff <= 0))
-      
+      mu <- mean(diff, na.rm = TRUE) 
+      conf.low  <- quantile(diff, (1 - level)/2, na.rm = TRUE)
+      conf.high <- quantile(diff, level + (1 - level)/2 , na.rm = TRUE)
+
       # Combine
      out<- data.frame(diagnosand =diagnosand,
                  mean_1 = diagnosand1,
@@ -181,7 +188,8 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, sims,  bootstrap_
                  se_1 = se1,
                  se_2 = se2,
                  se_difference = sd(diff),
-                 p.value = p.value,
+                 conf.low  = conf.low,
+                 conf.high = conf.high,
                  sims = sims, 
                  bootstrap_sims = bootstrap_sims,
                 stringsAsFactors = FALSE)
@@ -199,7 +207,9 @@ compare_diagnoses_internal <- function(diagnosis1, diagnosis2, sims,  bootstrap_
                       diagnosis1 = diagnosis1, 
                       diagnosis2 = diagnosis2)
   
+  attr(return_list, "level") <-  level
   class(return_list) <- "compared_diagnoses"
+  
   
   return_list
   
@@ -220,26 +230,29 @@ summary.compared_diagnoses <- function(object, ...) {
 }
 
 #' @export
-print.summary.compared_diagnoses <- function(x, ...){
+print.summary.compared_diagnoses <- function(x, conf.int = FALSE, ...){
   
   bootstrap_sims <- x$diagnosis1$bootstrap_sims
   sims <- nrow(x$diagnosis1$simulations_df)
   compared_diagnoses_df <- x[["compared_diagnoses_df"]]
-
+  level <- attr(x, "level")
   column_names <- colnames(compared_diagnoses_df)
   identifiers <- column_names %in% c("estimand_label", "term") | grepl("^estimator_label", column_names)
   identifiers_columns <- column_names[identifiers]
-  p.value <- compared_diagnoses_df$p.value
-  stars <- ifelse(p.value < 0.01 ,"***",
-                  ifelse(p.value < 0.05 & p.value>=0.01, "**",
-                         ifelse(p.value < 0.1 & p.value>=0.05, "*", "")))
+  conf.low  <- compared_diagnoses_df$conf.low
+  conf.high <- compared_diagnoses_df$conf.high
+  flag <- rep("", length(conf.low))
+  flag[conf.low  > 0 |  conf.high < 0] <- "*"
+  
  
+  
   # Make diagnosand only df
   clean_comparison_df <- compared_diagnoses_df[, c(identifiers_columns, "diagnosand", "mean_1", "mean_2", "mean_difference"), drop = FALSE]
   
   clean_values_df <- data.frame(lapply(clean_comparison_df[, c("mean_1", "mean_2", "mean_difference"), drop = FALSE], format_num, 
                                        digits = 2), stringsAsFactors = FALSE)
-  clean_values_df$mean_difference <- paste0(clean_values_df$mean_difference, stars)
+  clean_values_df$mean_difference <- paste0(clean_values_df$mean_difference, flag)
+  
   diagnosands_only_df <- cbind(clean_comparison_df[, c(identifiers_columns, "diagnosand"), drop = FALSE], clean_values_df)
   
   colnames(diagnosands_only_df)[colnames(diagnosands_only_df) %in% c("mean_1", "mean_2", "mean_difference")] <- c("design1", "design2", "difference")
@@ -271,7 +284,7 @@ print.summary.compared_diagnoses <- function(x, ...){
  
   cat("\n\n")
   print(return_df, row.names = FALSE)
- cat("\nNote: *p < 0.10, ** p < 0.05, *** p < 0.01")
+ cat(paste0("\nNote: * indicates whether the ", (level)*100 ,"% bootstrap confidence interval of the difference in diagnosands does not contain zero "))
   invisible(return_df)
 }
 
