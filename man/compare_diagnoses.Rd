@@ -5,7 +5,7 @@
 \title{Compare Diagnoses}
 \usage{
 compare_diagnoses(design1, design2, sims = 500, bootstrap_sims = 100,
-  merge_by_estimator = TRUE, level = 0.95)
+  merge_by_estimator = TRUE, alpha = 0.05)
 }
 \arguments{
 \item{design1}{A design or a diagnosis.}
@@ -18,7 +18,7 @@ compare_diagnoses(design1, design2, sims = 500, bootstrap_sims = 100,
 
 \item{merge_by_estimator}{A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}}
 
-\item{level}{the confidence level for the bootstrap confidence interval of the difference in diagnosands.}
+\item{alpha}{The significance level, 0.05 by default.}
 }
 \value{
 A list with a data frame of compared diagnoses and both diagnoses.
@@ -28,9 +28,6 @@ Diagnose and compare designs.
 }
 \details{
 The function \code{compare_diagnoses()} runs a many-to-many merge matching by \code{estimand_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
-
-The data frame of compared diagnoses has a column, \code{in_interval}, that indicates if two given diagnosands diverge statistically. 
-i.e. if a diagnosand from \code{design2} is not contained in the 95\% bootstrap confidence interval of their equivalent diagnosand from \code{design1}. The column \code{in_interval} equals zero for divergent diangnosands and one otherwise..
 }
 \examples{
 design_a <- declare_population(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +

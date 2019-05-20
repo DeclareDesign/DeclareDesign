@@ -5,7 +5,7 @@
 \title{Internal method to compare diagnoses}
 \usage{
 compare_diagnoses_internal(diagnosis1, diagnosis2, sims, bootstrap_sims,
-  merge_by_estimator, level)
+  merge_by_estimator, alpha)
 }
 \arguments{
 \item{diagnosis1}{A diagnosis.}
@@ -16,9 +16,9 @@ compare_diagnoses_internal(diagnosis1, diagnosis2, sims, bootstrap_sims,
 
 \item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for both designs. Must be greater or equal to 100.}
 
-\item{merge_by_estimator}{A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}}
+\item{merge_by_estimator}{A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}.}
 
-\item{level}{the confidence level for the bootstrap confidence interval of the difference in diagnosands.}
+\item{alpha}{The significance level, 0.05 by default.}
 }
 \value{
 A list with a data frame of compared diagnoses and both diagnoses.
