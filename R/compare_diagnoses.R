@@ -46,7 +46,9 @@ compare_diagnoses <- function(design1,
   if(bootstrap_sims <= 99){
     stop("diagnoses must have at least 100 bootstrap simulations")
   }
-
+  if(!inherits(design1, "design")  | !inherits(design2, "design") ){
+    stop("design1 and design2 must be of class design")
+  }
 
     diagnosis1 <- diagnose_design(design1, 
                                   sims = sims, 
