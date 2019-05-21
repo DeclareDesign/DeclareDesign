@@ -66,7 +66,5 @@ test_that("compare_diagnoses errors when it should", {
 
 
 test_that("compare_diagnoses prints", {
- 
-  print <- capture.output(DeclareDesign:::print.compared_diagnoses(comparison))
-  expect_is(print, "character")
+  expect_output(DeclareDesign:::print.compared_diagnoses(comparison))
 })
