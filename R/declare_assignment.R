@@ -15,7 +15,7 @@
 #' 
 #' Custom assignment handlers should augment the data frame with an appropriate column for the assignment(s).
 #'
-#' @importFrom rlang quos quo lang_modify eval_tidy !!!
+#' @importFrom rlang quos quo call_modify eval_tidy !!!
 #' @importFrom randomizr declare_ra
 #'
 #' @examples
@@ -64,7 +64,7 @@
 declare_assignment <- make_declarations(assignment_handler, "assignment")
 
 
-#' @importFrom rlang quos !!! lang_modify eval_tidy quo f_rhs
+#' @importFrom rlang quos !!! call_modify eval_tidy quo f_rhs
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
 #' @param assignment_variable Name for assignment variable (quoted). Defaults to "Z". Argument to be used with default handler. 
 #' @param append_probabilities_matrix Should the condition probabilities matrix be appended to the data? Defaults to FALSE.  Argument to be used with default handler.
