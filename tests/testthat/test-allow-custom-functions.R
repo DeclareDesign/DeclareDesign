@@ -44,3 +44,4 @@ test_that("dplyr functions can be handlers", {
 
   expect_equal(df$Y, rep(4,5))
 })
+
