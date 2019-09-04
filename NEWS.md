@@ -1,3 +1,8 @@
+# DeclareDesign 0.18.0
+
+* Add `compare_designs` functions to compare the code and output of designs side-by-side. 
+* Bug fixes
+
 # DeclareDesign 0.16.0
 
 * Add `draw_assignment` function to draw an assignment vector(s) given data
