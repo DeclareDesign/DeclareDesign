@@ -32,3 +32,17 @@ test_that("get_ works", {
   expect_equal(nrow(dat_sampled), 75)
   
 })
+
+
+test_that("no sampling does not produce error from draw_sample", {
+  
+  design <- population + potential_outcomes + estimand
+  
+  dat <- draw_data(design)
+  
+  expect_error(draw_sample(design, data = dat), "does not include any sampling steps")
+  
+  expect_error(draw_assignment(design, data = dat), "does not include any assignment steps")
+  
+})
+
