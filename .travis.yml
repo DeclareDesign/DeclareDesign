@@ -13,6 +13,9 @@ addons:
 
 r_packages:
   - devtools
+  
+r_github_packages:
+  - DeclareDesign/DDtools
 
 matrix:
   include:
@@ -32,15 +35,10 @@ matrix:
     - os: osx
       r: release
       if: branch = master
-      r_github_packages:
-      - DeclareDesign/DDtools
 
     - os: osx
       r: oldrel
-      r_github_packages:
-      - DeclareDesign/DDtools
       if: branch = master
-
 
 env:
   global:
