@@ -15,7 +15,6 @@
 #' 
 #' Custom assignment handlers should augment the data frame with an appropriate column for the assignment(s).
 #'
-#' @importFrom rlang quos quo lang_modify eval_tidy !!!
 #' @importFrom randomizr declare_ra
 #'
 #' @examples
