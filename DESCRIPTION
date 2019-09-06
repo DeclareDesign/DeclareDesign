@@ -1,6 +1,6 @@
 Package: DeclareDesign
 Title: Declare and Diagnose Research Designs
-Version: 0.18.0
+Version: 0.19.0
 Authors@R: c(person("Graeme", "Blair", email = "graeme.blair@ucla.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9164-2102")),
              person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = c("aut"), comment = c(ORCID = "0000-0002-8639-3188")),
              person("Alexander", "Coppock", email = "acoppock@gmail.com", role = c("aut"), comment = c(ORCID = "0000-0002-5733-2386")),
@@ -14,7 +14,7 @@ Description: Researchers can characterize and learn about the properties of
     to implementation and without access to results. It can also make it
     easier for designs to be shared, replicated, and critiqued.
 Depends:
-    R (>= 3.4.0),
+    R (>= 3.5.0),
     randomizr (>= 0.16.1),
     fabricatr (>= 0.6.0),
     estimatr (>= 0.14.0)
