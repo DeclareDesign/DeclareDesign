@@ -10,8 +10,8 @@
 \alias{compare_design_estimands}
 \title{Compare two designs}
 \usage{
-compare_designs(design1, design2, format = "ansi8",
-  mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE)
+compare_designs(design1, design2, format = "ansi8", pager = "off",
+  context = -1L, rmd = FALSE)
 
 compare_design_code(design1, design2, format = "ansi256",
   mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE)
@@ -23,7 +23,7 @@ compare_design_data(design1, design2, format = "ansi256",
   mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE)
 
 compare_design_estimates(design1, design2, format = "ansi256",
-  mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE)
+  mode = "auto", pager = "off", context = -1L, rmd = FALSE)
 
 compare_design_estimands(design1, design2, format = "ansi256",
   mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE)
@@ -35,13 +35,13 @@ compare_design_estimands(design1, design2, format = "ansi256",
 
 \item{format}{Format (in console or HTML) options from \code{diffobj::diffChr}}
 
-\item{mode}{Mode options from \code{diffobj::diffChr}}
-
 \item{pager}{Pager option from \code{diffobj::diffChr}}
 
 \item{context}{Context option from \code{diffobj::diffChr} which sets the number of lines around differences that are printed. By default, all lines of the two objects are shown. To show only the lines that are different, set \code{context = 0}; to get one line around differences for context, set to 1.}
 
 \item{rmd}{Set to \code{TRUE} use in Rmarkdown HTML output. NB: will not work with LaTeX, Word, or other .Rmd outputs.}
+
+\item{mode}{Mode options from \code{diffobj::diffChr}}
 }
 \description{
 Compare two designs
