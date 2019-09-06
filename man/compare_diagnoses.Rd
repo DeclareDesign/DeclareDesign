@@ -12,39 +12,35 @@ compare_diagnoses(design1, design2, sims = 500, bootstrap_sims = 100,
 
 \item{design2}{A design or a diagnosis.}
 
-\item{sims}{The number of simulations, defaulting to 1000. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.}
+\item{sims}{The number of simulations, defaulting to 1000. \code{sims} may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.}
 
-\item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for both designs. Must be greater or equal to 100.}
+\item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to \code{FALSE} to turn off bootstrapping. Used for both designs. Must be greater or equal to 100.}
 
-\item{merge_by_estimator}{A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}}
+\item{merge_by_estimator}{A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}.}
 
 \item{alpha}{The significance level, 0.05 by default.}
 }
 \value{
-A list with a data frame of compared diagnoses and both diagnoses.
+A list with a \code{data.frame} of compared diagnoses and both diagnoses.
 }
 \description{
 Diagnose and compare designs.
 }
 \details{
-The function \code{compare_diagnoses()} runs a many-to-many merge matching by \code{estimand_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
+The function \code{compare_diagnoses} runs a many-to-many merge matching by \code{estimand_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
 }
 \examples{
-design_a <- declare_population(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +
-
+design_a <- declare_population(N = 100, u = rnorm(N)) +
 declare_potential_outcomes(
-  Y_Z_0 = u, 
+  Y_Z_0 = u,
   Y_Z_1 = u + rnorm(N, mean = 2, sd = 2)) +
-declare_assignment() + 
-
-declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0), label = "ATE") +
-
+declare_assignment(prob = 0.5) +
+declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
 declare_reveal() +
-
-declare_estimator(Y ~ Z, estimand = "ATE", label = "est1")
+declare_estimator(Y ~ Z, estimand = "ATE")
 
 design_b <- replace_step(design_a, step = "assignment", declare_assignment(prob = 0.3) )
 
 comparison <- compare_diagnoses(design_a, design_b, sims = 40)
- 
+
 }

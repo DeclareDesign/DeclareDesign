@@ -11,7 +11,7 @@ design_a <-
 design_b <- redesign(design_a, prob_assgn = 0.1)
 set.seed(2000)
 
-comparison <- compare_diagnoses(design_a, design_b)
+comparison <- compare_diagnoses(design_a, design_b, sims = 20)
 
 test_that("compare_diagnoses works", {
   set.seed(2000)
