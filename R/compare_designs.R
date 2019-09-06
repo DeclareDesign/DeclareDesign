@@ -1,8 +1,51 @@
-compare_partial <- function(FUN, DIFFFUN){
-  function(design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE){
-    stopifnot(requireNamespace("diffobj"))
-    DIFFFUN <- get(DIFFFUN, getNamespace("diffobj"))
-    compare_design_internal(FUN, DIFFFUN, design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE)
+compare_partial <- function(FUN, DIFFFUN, is_data = FALSE){
+  if(is_data){
+    
+    function(design1,
+             design2,
+             format = "ansi256",
+             mode = "auto",
+             pager = "off",
+             context = -1L,
+             rmd = FALSE) {
+      stopifnot(requireNamespace("diffobj"))
+      DIFFFUN <- get(DIFFFUN, getNamespace("diffobj"))
+      compare_design_internal(
+        FUN,
+        DIFFFUN,
+        design1,
+        design2,
+        format = format,
+        mode = mode,
+        pager = pager,
+        context = context,
+        rmd = rmd
+      )
+    }
+    
+  } else{
+    
+    function(design1,
+             design2,
+             format = "ansi256",
+             mode = "sidebyside",
+             pager = "off",
+             context = -1L,
+             rmd = FALSE) {
+      stopifnot(requireNamespace("diffobj"))
+      DIFFFUN <- get(DIFFFUN, getNamespace("diffobj"))
+      compare_design_internal(
+        FUN,
+        DIFFFUN,
+        design1,
+        design2,
+        format = format,
+        mode = mode,
+        pager = pager,
+        context = context,
+        rmd = rmd
+      )
+    }
   }
 }
 
@@ -47,7 +90,7 @@ compare_partial <- function(FUN, DIFFFUN){
 
 #' @rdname compare_functions
 #' @export
-compare_designs <- function(design1, design2, format = "ansi8", mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE) {
+compare_designs <- function(design1, design2, format = "ansi8", pager = "off", context = -1L, rmd = FALSE) {
   
   compare_functions <-
     list(code_comparison = compare_design_code,
@@ -61,7 +104,6 @@ compare_designs <- function(design1, design2, format = "ansi8", mode = "sidebysi
         design1,
         design2,
         format = format,
-        mode = mode,
         pager = pager,
         context = context, 
         rmd = rmd
@@ -104,11 +146,11 @@ compare_design_data <- compare_partial(draw_data, "diffObj")
 
 #' @rdname compare_functions
 #' @export
-compare_design_estimates <- compare_partial(draw_estimates, "diffObj")
+compare_design_estimates <- compare_partial(draw_estimates, "diffObj", is_data = TRUE)
 
 #' @rdname compare_functions
 #' @export
-compare_design_estimands <- compare_partial(draw_estimands, "diffObj")
+compare_design_estimands <- compare_partial(draw_estimands, "diffObj", is_data = FALSE)
 
 
 compare_design_internal <- function(FUN, DIFFFUN, design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE){
@@ -126,7 +168,7 @@ compare_design_internal <- function(FUN, DIFFFUN, design1, design2, format = "an
   } else {
     style <- "auto"
   }
-  
+
   diff_output <- structure(
     DIFFFUN(
       design1,
