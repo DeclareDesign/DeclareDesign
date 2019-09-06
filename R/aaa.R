@@ -107,7 +107,7 @@ currydata <- function(FUN, dots, addDataArg = TRUE, strictDataParam = TRUE, clon
 declaration_template <- function(..., handler, label = NULL) {
   # message("Declared")
 
-  dots <- quos(..., label = !!label)
+  dots <- as.list(quos(..., label = !!label))
   this <- attributes(sys.function())
 
   if (!"label" %in% names(formals(handler))) {
