@@ -1,13 +1,14 @@
 context("Compare Diagnoses")
 
+prob_assgn <- 0.5
 design_a <-
   declare_population(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +
   declare_potential_outcomes(Y_Z_0 = u, Y_Z_1 = u + rnorm(N, .5)) +
-  declare_assignment() + 
+  declare_assignment(prob = prob_assgn) + 
   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0), label = "ATE") +
   declare_reveal() +
   declare_estimator(Y ~ Z, estimand = "ATE", label = "est1")
-design_b <- redesign(design_a, prob = 0.1)
+design_b <- redesign(design_a, prob_assgn = 0.1)
 set.seed(2000)
 
 comparison <- compare_diagnoses(design_a, design_b)

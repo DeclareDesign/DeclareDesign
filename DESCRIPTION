@@ -34,6 +34,7 @@ Suggests:
     diffobj,
     dplyr,
     data.table,
+    tibble,
     ggplot2,
     future.apply,
     broom,

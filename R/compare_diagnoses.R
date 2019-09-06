@@ -325,11 +325,12 @@ print.summary.compared_diagnoses <- function(x, conf.int = FALSE, ...){
   return_df[(1:r)%%2 == 0, c(identifiers_columns, "diagnosand")] <- ""
   
   # Print and return
-  cat(paste0("\n Comparison of research designs diagnoses based on ", sims, " simulations"))
+  cat(paste0("\nComparison of research designs diagnoses based on ", sims, " simulations."))
   
-  cat(paste0("\nDiagnosand estimates with bootstrapped standard errors in parentheses (", bootstrap_sims, 
-             ")."))
- 
+  cat(paste0(" Diagnosand estimates with bootstrapped standard errors in parentheses (", bootstrap_sims, 
+             " replicates)."))
+  
+  
   cat("\n\n")
   print(return_df, row.names = FALSE)
  cat(paste0("\nNote: * indicates whether the ", (1-alpha)*100 ,"% bootstrap confidence interval of the difference in diagnosands excludes zero "))
