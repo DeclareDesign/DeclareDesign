@@ -180,14 +180,14 @@ declare_estimands <- declare_estimand
 #' an additional dimension for use in diagnosis.
 #'
 #'
-#' @importFrom rlang eval_tidy quos  is_quosure
+#' @importFrom rlang eval_tidy quos is_quosure quo_get_expr
 #' @rdname declare_estimand
 estimand_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
   options <- quos(...)
   if (names(options)[1] == "") names(options)[1] <- label
   
   subset <- substitute(subset)
-  if (is_quosure(subset)) subset <- subset[[2]]
+  if (is_quosure(subset)) subset <- quo_get_expr(subset)
   idx <- eval_tidy(subset, data = data)
   if (!is.null(idx)) {
     data <- data[idx, , drop = FALSE]
