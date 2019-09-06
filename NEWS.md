@@ -1,3 +1,9 @@
+# DeclareDesign 0.20.0
+
+* Add `compare_diagnoses` function to compare two designs on the basis of their design diagnoses. 
+* Compatibility with `rlang` 0.4.0
+* Bug fixes
+
 # DeclareDesign 0.18.0
 
 * Add `compare_designs` functions to compare the code and output of designs side-by-side. 
