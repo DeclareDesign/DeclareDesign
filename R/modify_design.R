@@ -23,7 +23,7 @@ find_step <- function(design, step, verb) {
 #'
 #' @return A new design object.
 #'
-#' @importFrom rlang lang_name quos quo_expr quo_is_missing
+#' @importFrom rlang call_name quos quo_expr quo_is_missing
 #' @name modify_design
 #' @rdname modify_design
 #'

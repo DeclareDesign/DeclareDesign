@@ -13,7 +13,7 @@
 #'Note that \code{declare_sampling} works similarly to \code{declare_assignment} a key difference being that \code{declare_sampling} functions subset data to sampled units rather than simply appending an indicator for membership of a sample (assignment). If you need to sample but keep the dataset use \code{declare_assignment} and define further steps (such as estimation) with respect to subsets defined by the assignment.
 #'
 #'For details see the help files for \code{\link{complete_rs}}, \code{\link{strata_rs}}, \code{\link{cluster_rs}}, or \code{\link{strata_and_cluster_rs}}
-#' @importFrom rlang quos quo lang_modify eval_tidy !!!
+#' @importFrom rlang quos quo call_modify eval_tidy !!!
 #' @importFrom randomizr declare_rs
 #'
 #' @examples
@@ -39,7 +39,7 @@ declare_sampling <- make_declarations(sampling_handler, "sampling")
 
 #' @param sampling_variable The prefix for the sampling inclusion probability variable.
 #' @param data A data.frame.
-#' @importFrom rlang quos !!! lang_modify eval_tidy quo
+#' @importFrom rlang quos !!! call_modify eval_tidy quo
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
 #' @rdname declare_sampling
 sampling_handler <- function(data, ..., sampling_variable = "S") {
