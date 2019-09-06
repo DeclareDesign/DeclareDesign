@@ -39,7 +39,7 @@ compare_diagnoses <- function(design1,
                               merge_by_estimator = TRUE,
                               alpha = 0.05) {
   if (bootstrap_sims <= 99) {
-    stop("diagnoses must have at least 100 bootstrap simulations")
+    stop("Diagnoses must have at least 100 bootstrap simulations.")
   }
   
   if (!inherits(design1, "design") | !inherits(design2, "design")) {
@@ -63,18 +63,6 @@ compare_diagnoses <- function(design1,
   
 }
 
-#' Internal method to compare diagnoses
-#'
-#' @param diagnosis1 A diagnosis.
-#' @param diagnosis2 A diagnosis.
-#' @param sims The number of simulations, defaulting to 1000. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.
-#' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to FALSE to turn off bootstrapping. Used for both designs. Must be greater or equal to 100.
-#' @param merge_by_estimator A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}.
-#' @param alpha The significance level, 0.05 by default.
-#' @return A list with a data frame of compared diagnoses and both diagnoses.
-#'
-#' @keywords internal
-#' 
 compare_diagnoses_internal <-
   function(diagnosis1,
            diagnosis2,
@@ -83,8 +71,7 @@ compare_diagnoses_internal <-
            merge_by_estimator,
            alpha) {
     
-    diagnosands <-
-      intersect(diagnosis1$diagnosand_names, diagnosis2$diagnosand_names)
+    diagnosands <- intersect(diagnosis1$diagnosand_names, diagnosis2$diagnosand_names)
     
     # Get merge_set 
     # merge_by_set, used to merge diagnosands_df, must at least contain estimand_label
@@ -115,8 +102,7 @@ compare_diagnoses_internal <-
     if (merge_by_estimator) {
       if (!estimator_in_set) {
         warning(
-          "Estimator label not used for merging.
-              At least one of the designs doesn't contain estimator_label."
+          "Estimator label not used for merging. At least one of the designs doesn't contain estimator_label."
         )
       } else {
         merge_by_set <- c(merge_by_set, "estimator_label")
@@ -145,7 +131,7 @@ compare_diagnoses_internal <-
     )
     
     if (nrow(comparison_df) == 0) {
-      stop("Can't merge diagnosands data frames. Diagnoses don't have labels in common")
+      stop("Can't merge the two diagnoses, because they do not have labels in common.")
     }
     
     # Drop cols without matching pair
@@ -153,9 +139,9 @@ compare_diagnoses_internal <-
     filter_se <- grepl("^se", c_names)
     suffix <- c("_1", "_2")
     keepcols <-
-      grepl("[[:digit:]]+$", c_names)  |
+      grepl("[[:digit:]]+$", c_names) |
       grepl("label+$", c_names) | grepl("term", c_names) | filter_se
-    comparison_df <- comparison_df[, keepcols]
+    comparison_df <- comparison_df[, keepcols, drop = FALSE]
     
     # Divide comparison_df into groups defined by set= c(estimand_label, estimator_label, term)
     c_names <- colnames(comparison_df)
@@ -167,14 +153,14 @@ compare_diagnoses_internal <-
       split(comparison_df, lapply(set, addNA), drop = TRUE)
     
     # Function to split bootstrap into groups defined by merge by set
-    split_bootrstrap <- function(diagnosis, set) {
+    split_bootstrap <- function(diagnosis, set) {
       bootstrap_df <- diagnosis$bootstrap_replicates
       group_by_list <- bootstrap_df[, set, drop = FALSE]
       split(bootstrap_df, lapply(group_by_list, addNA), drop = TRUE)
     }
     
-    bootstrap_df1 <- split_bootrstrap(diagnosis1, group_by_set)
-    bootstrap_df2 <- split_bootrstrap(diagnosis2, group_by_set)
+    bootstrap_df1 <- split_bootstrap(diagnosis1, group_by_set)
+    bootstrap_df2 <- split_bootstrap(diagnosis2, group_by_set)
     
     # Function to create output.
     # For each combination of estimand_label, estimator_label and term in comparison_list
@@ -200,7 +186,7 @@ compare_diagnoses_internal <-
         grepl("^estimator_label", c_names) | grepl("^term", c_names)
       select_cols <- c_names[grepl("^design_label", c_names)]
       select_cols <- c(select_cols, c_names[set])
-      identifiers <- comp[,   select_cols]
+      identifiers <- comp[, select_cols, drop = FALSE]
       
       # Compute difference stats
       difference <-
@@ -219,7 +205,7 @@ compare_diagnoses_internal <-
             diagnosand = diagnosand,
             mean_1 = diagnosand1,
             mean_2 = diagnosand2,
-            mean_difference = mu ,
+            mean_difference = mu,
             se_1 = se1,
             se_2 = se2,
             se_difference = sd(diff),
@@ -231,6 +217,7 @@ compare_diagnoses_internal <-
           )
           
         }))
+      
       suppressWarnings(cbind(identifiers, difference))
       
     }
@@ -242,12 +229,12 @@ compare_diagnoses_internal <-
                        label2 = comparison_labels,
                        comparison_label = comparison_labels)
       
-    } else{
+    } else {
       
-      # Bit needed to do many-to-many comparisons of estimators keeping e.g estimand_label and term fixed (assigned to c_labels)
+      # Bit needed to do many-to-many comparisons of estimators keeping e.g., estimand_label and term fixed (assigned to c_labels)
       # extract labels that were used for merging
-      # find the levels in the splitted bootstraps_df that start with each of those labels
-      # combine all posible levels that share the same e.g estimand_label and term  (assigned to c_labels)
+      # find the levels in the split bootstraps_df that start with each of those labels
+      # combine all possible levels that share the same e.g estimand_label and term  (assigned to c_labels)
       k <- length(merge_by_set)
       c_labels <- unique(lapply(comparison_labels, function(x) {
         x <- unlist(strsplit(x, "." , fixed = TRUE))
@@ -266,6 +253,7 @@ compare_diagnoses_internal <-
           stringsAsFactors = FALSE
         )
       })
+      
       c_labels <- rbind_disjoint(c_labels, infill = "")
       
     }
@@ -287,12 +275,12 @@ compare_diagnoses_internal <-
     return_df <- rbind_disjoint(return_df, infill = "")
     
     return_list <- list(
-      compared_diagnoses_df =  return_df,
+      compared_diagnoses_df = return_df,
       diagnosis1 = diagnosis1,
       diagnosis2 = diagnosis2
     )
     
-    attr(return_list, "alpha") <-  alpha
+    attr(return_list, "alpha") <- alpha
     class(return_list) <- "compared_diagnoses"
     
     return_list
