@@ -21,7 +21,7 @@ without having to code up simulations from scratch.
 ## Installation
 
 To install the latest stable release of **DeclareDesign**, please ensure
-that you are running version 3.3 or later of R and run the following
+that you are running version 3.5 or later of R and run the following
 code:
 
 ``` r
@@ -29,7 +29,7 @@ install.packages("DeclareDesign")
 ```
 
 To install the latest development release of all of the packages, please
-ensure that you are running version 3.4 or later of R and run the
+ensure that you are running version 3.5 or later of R and run the
 following code:
 
 ``` r
