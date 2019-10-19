@@ -302,5 +302,5 @@ test_that("diagnose_design works when simulations_df lacking parameters attr", {
 
 
 test_that("diagnose_design stops when a zero-row simulations_df is sent", {
-  diagnose_design(data.frame(estimator_label = rep(1, 0)))
+  expect_error(diagnose_design(data.frame(estimator_label = rep(1, 0))), "which has no rows")
 })
