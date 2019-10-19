@@ -86,7 +86,7 @@ diagnose_design <- function(...,
       stop("Can't calculate diagnosands on this data.frame, which does not include either an estimator_label or an estimand_label. Did you send a simulations data frame?")
     }
     if (nrow(simulations_df) == 0) {
-      stop("Can't calculate diagnosands on this data.frame, which has no rows.")
+      stop("Can't calculate diagnosands on this data.frame, which has zero rows.")
     }
     diagnosands <- diagnosands %||% attr(simulations_df, "diagnosands") %||% default_diagnosands
   } else {
