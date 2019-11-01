@@ -42,7 +42,7 @@ declare_sampling <- make_declarations(sampling_handler, "sampling")
 #' @importFrom rlang quos !!! call_modify eval_tidy quo
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
 #' @rdname declare_sampling
-sampling_handler <- function(data, ..., sampling_variable = "S") {
+sampling_handler <- function(data, ..., sampling_variable = "S", keep = 1) {
   ## draw sample
 
   options <- quos(...)
@@ -63,7 +63,7 @@ sampling_handler <- function(data, ..., sampling_variable = "S") {
   S <- as.character(S)
 
   ## subset to the sampled observations
-  data[ data[[S]] %in% 1, names(data) != S, drop = FALSE]
+  data[ data[[S]] %in% keep,(length(keep) > 1)) | names(data) != S, drop = FALSE]
 }
 
 validation_fn(sampling_handler) <- function(ret, dots, label) {
