@@ -38,6 +38,7 @@
 declare_sampling <- make_declarations(sampling_handler, "sampling")
 
 #' @param sampling_variable The prefix for the sampling inclusion probability variable.
+#' @param keep The set of sampling outcomes to retain. Use 0:1 to keep the entire population.
 #' @param data A data.frame.
 #' @importFrom rlang quos !!! call_modify eval_tidy quo
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities

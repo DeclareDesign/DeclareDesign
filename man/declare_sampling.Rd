@@ -7,7 +7,7 @@
 \usage{
 declare_sampling(..., handler = sampling_handler, label = NULL)
 
-sampling_handler(data, ..., sampling_variable = "S")
+sampling_handler(data, ..., sampling_variable = "S", keep = 1)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -19,6 +19,8 @@ sampling_handler(data, ..., sampling_variable = "S")
 \item{data}{A data.frame.}
 
 \item{sampling_variable}{The prefix for the sampling inclusion probability variable.}
+
+\item{keep}{The set of sampling outcomes to retain. Use 0:1 to keep the entire population.}
 }
 \value{
 A function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
