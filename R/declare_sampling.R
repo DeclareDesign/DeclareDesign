@@ -63,7 +63,7 @@ sampling_handler <- function(data, ..., sampling_variable = "S", keep = 1) {
   S <- as.character(S)
 
   ## subset to the sampled observations
-  data[ data[[S]] %in% keep,(length(keep) > 1)) | names(data) != S, drop = FALSE]
+  data[ data[[S]] %in% keep,(length(keep) > 1) | names(data) != S, drop = FALSE]
 }
 
 validation_fn(sampling_handler) <- function(ret, dots, label) {
