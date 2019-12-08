@@ -49,15 +49,15 @@ sampling_handler <- function(data, ..., sampling_variable = "S", keep = 1) {
   options <- quos(...)
 
   samp <- reveal_nse_helper(sampling_variable)
-  samp <- as.symbol(paste0(samp, "_inclusion_prob"))
+  samp_inclusion_prob <- as.symbol(paste0(samp, "_inclusion_prob"))
 
-  S <- as.symbol(".__Sample") # Matching old code but also eliminating the R CMD check warning that .__Sample is a undef/global variable
+  S <- as.symbol(samp) # Matching old code but also eliminating the R CMD check warning that .__Sample is a undef/global variable
 
   decl <- eval_tidy(quo(declare_rs(N=!!nrow(data), !!!options)), data)
   
   data <- fabricate(data,
-    !!S := draw_rs(!!decl),
-    !!samp := obtain_inclusion_probabilities(!!decl),
+    !!samp := draw_rs(!!decl),
+    !!samp_inclusion_prob := obtain_inclusion_probabilities(!!decl),
     ID_label = NA
   )
 

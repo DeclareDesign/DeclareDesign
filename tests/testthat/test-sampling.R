@@ -115,14 +115,14 @@ test_that("Keep options on declare_sampling", {
 
   design1 <- declare_population(N = N, noise = 1:N) + declare_sampling(n = n)
   design2 <- declare_population(N = N, noise = 1:N) + declare_sampling(n = n, keep=0)
-  design3 <- declare_population(N = N, noise = 1:N) + declare_sampling(n = n, keep=0:1)
+  design3 <- declare_population(N = N, noise = 1:N) + declare_sampling(n = n, keep=0:1, sampling_variable="TestName")
   
   
   expect_equal(nrow(draw_data(design1)), n)
   expect_equal(nrow(draw_data(design2)), N-n)
 
   expect_equal(
-    table(draw_data(design3)$.__Sample),
+    table(draw_data(design3)$TestName),
     structure(c(`0` = N-n, `1` = n), .Dim = 2L, .Dimnames = structure(list(
       c("0", "1")), .Names = ""), class = "table")
   )
