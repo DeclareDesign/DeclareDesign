@@ -4,8 +4,14 @@
 \alias{compare_diagnoses}
 \title{Compare Diagnoses}
 \usage{
-compare_diagnoses(design1, design2, sims = 500, bootstrap_sims = 100,
-  merge_by_estimator = TRUE, alpha = 0.05)
+compare_diagnoses(
+  design1,
+  design2,
+  sims = 500,
+  bootstrap_sims = 100,
+  merge_by_estimator = TRUE,
+  alpha = 0.05
+)
 }
 \arguments{
 \item{design1}{A design or a diagnosis.}

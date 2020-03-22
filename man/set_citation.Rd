@@ -4,9 +4,14 @@
 \alias{set_citation}
 \title{Set the citation of a design}
 \usage{
-set_citation(design, title = NULL, author = NULL, year = NULL,
+set_citation(
+  design,
+  title = NULL,
+  author = NULL,
+  year = NULL,
   description = "Unpublished research design declaration",
-  citation = NULL)
+  citation = NULL
+)
 }
 \arguments{
 \item{design}{A design typically created using the + operator}
