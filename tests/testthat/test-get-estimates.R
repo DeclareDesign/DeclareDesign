@@ -50,7 +50,7 @@ test_that("warning for wrong class estimator label", {
   
   custom_func <- function(data){
     data.frame(
-      est = 5, estimator_label = "test"
+      est = 5, estimator_label = "test", stringsAsFactors = TRUE
     )
   }
   
@@ -62,7 +62,7 @@ test_that("warning for wrong class estimator label", {
   
   custom_func <- function(data){
     data.frame(
-      est = 5, estimand_label = "test"
+      est = 5, estimand_label = "test", stringsAsFactors = TRUE
     )
   }
   
