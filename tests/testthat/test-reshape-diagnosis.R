@@ -83,7 +83,7 @@ test_that("select", {
 test_that("designs with factors in diagnosands_df do not produce warnings", {
   
   my_estimator <- function(data) {
-    data.frame(estimate = c("answer1", "answer2"))
+    data.frame(estimate = c("answer1", "answer2"), stringsAsFactors = TRUE)
   }
 
   design <- design <- my_population +
@@ -92,7 +92,7 @@ test_that("designs with factors in diagnosands_df do not produce warnings", {
   diagnose_design(design, sims = 2, diagnosands = declare_diagnosands(first = first(estimate), keep_defaults = FALSE))
   
   my_estimator <- function(data) {
-    data.frame(estimate = c("answer1", "answer2"), estimator_label = "my_label")
+    data.frame(estimate = c("answer1", "answer2"), estimator_label = "my_label", stringsAsFactors = TRUE)
   }
   
   design <- design <- my_population +

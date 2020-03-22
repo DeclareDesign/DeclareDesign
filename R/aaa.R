@@ -203,4 +203,4 @@ validate <- function(handler, ret, dots, label) {
 #' @param handler  a tidy-in, tidy-out function
 #' @param label    a string describing the step
 #' @keywords internal
-declare_internal_inherit_params <- make_declarations(function(data, ...) data.frame(BLNK = "MSG"), step_type = "BLNKMSG")
+declare_internal_inherit_params <- make_declarations(function(data, ...) data.frame(BLNK = "MSG", stringsAsFactors = TRUE), step_type = "BLNKMSG")
