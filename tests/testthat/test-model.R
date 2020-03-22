@@ -183,7 +183,7 @@ test_that("custom tidy method", {
   expect_error(draw_estimates(des), "We were unable to tidy the output")
 
   tidy.my_modelr <- function(fit, conf.int = TRUE){
-    return(data.frame(term = "my-term", est = 1))
+    return(data.frame(term = "my-term", est = 1, stringsAsFactors = TRUE))
   }
   
   # this is an ugly hack per https://github.com/r-lib/testthat/issues/720

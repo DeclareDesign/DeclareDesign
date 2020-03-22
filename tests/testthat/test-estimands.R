@@ -46,7 +46,7 @@ test_that("manual label", {
 test_that("custom estimand has label", {
   ## custom estimand function
   my_estimand_function <- function(data, label) {
-    with(data, data.frame(estimand_label = label, estimand = median(Y_Z_1 - Y_Z_0)))
+    with(data, data.frame(estimand_label = label, estimand = median(Y_Z_1 - Y_Z_0), stringsAsFactors = TRUE))
   }
   my_estimand_custom <- declare_estimand(
     handler = my_estimand_function, label = "medianTE"
