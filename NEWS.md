@@ -1,3 +1,8 @@
+# DeclareDesign 0.22.0
+
+* Fix ability to set `sampling_variable` in `declare_sampling`. 
+* Add ability to retain nonsampled data after sampling via `drop_nonsampled` flag in `declare_sampling`.
+
 # DeclareDesign 0.20.0
 
 * Add `compare_diagnoses` function to compare two designs on the basis of their design diagnoses. 
