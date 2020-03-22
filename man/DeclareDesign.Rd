@@ -3,7 +3,6 @@
 \docType{package}
 \name{DeclareDesign}
 \alias{DeclareDesign}
-\alias{DeclareDesign-package}
 \title{DeclareDesign package}
 \description{
 The four main types of functions are to declare a step, to combine steps into designs,
