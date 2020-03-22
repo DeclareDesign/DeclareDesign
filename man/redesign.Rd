@@ -20,7 +20,7 @@ A design, or, in the case of multiple values being passed onto \code{...}, a `by
 \code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters in a step's environment (Advanced).
 }
 \details{
-Warning: \code{redesign} will edit any symbol in your design, but if the symbol you attempt to change does not exist in a step's environment no changes will be made and no error or warning will be issued.
+Warning: \code{redesign} will edit any symbol in your design, but if the symbol you attempt to change does not exist in a step's environment no changes will be made and no error or warning will be issued. 
 
 Please note that \code{redesign} functionality is experimental and may be changed in future versions.
 }

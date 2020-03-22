@@ -8,19 +8,22 @@
 \alias{estimator_handler}
 \title{Declare estimator}
 \usage{
-declare_estimator(..., handler = estimator_handler,
-  label = "estimator")
+declare_estimator(..., handler = estimator_handler, label = "estimator")
 
-declare_estimators(..., handler = estimator_handler,
-  label = "estimator")
+declare_estimators(..., handler = estimator_handler, label = "estimator")
 
 tidy_estimator(estimator_function)
 
-model_handler(data, ..., model = estimatr::difference_in_means,
-  term = FALSE)
+model_handler(data, ..., model = estimatr::difference_in_means, term = FALSE)
 
-estimator_handler(data, ..., model = estimatr::difference_in_means,
-  term = FALSE, estimand = NULL, label)
+estimator_handler(
+  data,
+  ...,
+  model = estimatr::difference_in_means,
+  term = FALSE,
+  estimand = NULL,
+  label
+)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}

@@ -162,7 +162,7 @@ run_design(design_custom)
 
 # You can declare a group of estimands with distinct labels
 # in one go and link them manually to a group of estimators.
-# In this case you can add a \\code{term} argument to the 
+# In this case you can add a \code{term} argument to the 
 # custom estimators to identify them.
 
 f1 <- function(data) {

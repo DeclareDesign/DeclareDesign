@@ -5,8 +5,16 @@
 \alias{declare_diagnosands}
 \title{Declare diagnosands}
 \usage{
-diagnosand_handler(data, ..., select, subtract, keep_defaults = TRUE,
-  subset = NULL, alpha = 0.05, label)
+diagnosand_handler(
+  data,
+  ...,
+  select,
+  subtract,
+  keep_defaults = TRUE,
+  subset = NULL,
+  alpha = 0.05,
+  label
+)
 
 declare_diagnosands(..., handler = diagnosand_handler, label = NULL)
 }
@@ -77,7 +85,7 @@ diagnosis <- diagnose_design(design)
 diagnosis
 }
 
-# You can select a set of those diagnosands via the \\code{select} argument e.g.,
+# You can select a set of those diagnosands via the \code{select} argument e.g.,
 
 my_diagnosands <- declare_diagnosands(select = c(bias, rmse))
 
@@ -118,7 +126,7 @@ diagnosis <- diagnose_design(design)
 diagnosis
 }
 
-# or to report only \\code{median_bias}
+# or to report only \code{median_bias}
 
 my_diagnosands <-
    declare_diagnosands(median_bias = median(estimate - estimand),

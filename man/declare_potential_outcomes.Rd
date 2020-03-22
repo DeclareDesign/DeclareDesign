@@ -6,15 +6,27 @@
 \alias{potential_outcomes.NULL}
 \title{Declare potential outcomes}
 \usage{
-declare_potential_outcomes(..., handler = potential_outcomes_handler,
-  label = NULL)
+declare_potential_outcomes(
+  ...,
+  handler = potential_outcomes_handler,
+  label = NULL
+)
 
-potential_outcomes.formula(formula, conditions = c(0, 1),
-  assignment_variables = "Z", data, level = NULL,
-  label = outcome_variable)
+potential_outcomes.formula(
+  formula,
+  conditions = c(0, 1),
+  assignment_variables = "Z",
+  data,
+  level = NULL,
+  label = outcome_variable
+)
 
-potential_outcomes.NULL(formula = stop("Not provided"), ..., data,
-  level = NULL)
+potential_outcomes.NULL(
+  formula = stop("Not provided"),
+  ...,
+  data,
+  level = NULL
+)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}

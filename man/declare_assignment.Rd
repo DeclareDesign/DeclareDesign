@@ -7,8 +7,12 @@
 \usage{
 declare_assignment(..., handler = assignment_handler, label = NULL)
 
-assignment_handler(data, ..., assignment_variable = "Z",
-  append_probabilities_matrix = FALSE)
+assignment_handler(
+  data,
+  ...,
+  assignment_variable = "Z",
+  append_probabilities_matrix = FALSE
+)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}

@@ -7,8 +7,13 @@
 \usage{
 declare_reveal(..., handler = reveal_outcomes_handler, label = NULL)
 
-reveal_outcomes_handler(data = NULL, outcome_variables = Y,
-  assignment_variables = Z, attrition_variables = NULL, ...)
+reveal_outcomes_handler(
+  data = NULL,
+  outcome_variables = Y,
+  assignment_variables = Z,
+  attrition_variables = NULL,
+  ...
+)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
