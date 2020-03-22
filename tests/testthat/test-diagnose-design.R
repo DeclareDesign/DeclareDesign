@@ -299,3 +299,8 @@ test_that("diagnose_design works when simulations_df lacking parameters attr", {
     
   expect_identical(d1,d2)
 })
+
+
+test_that("diagnose_design stops when a zero-row simulations_df is sent", {
+  expect_error(diagnose_design(data.frame(estimator_label = rep(1, 0))), "which has zero rows")
+})
