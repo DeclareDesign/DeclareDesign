@@ -1,8 +1,6 @@
 ## Submission
 
-We are resubmitting a small update, `DeclareDesign 0.20.0`, with bug fixes and the addition of a small new feature. 
-
-We also address an email Kurt raised regarding R's handling of zero-column data frames (which errors in R-devel).
+We are resubmitting a small update, `DeclareDesign 0.22.0`, with test changes due to the R 4.0.0 changes to stringsAsFactor per email from Kurt as well as a minor feature addition.
 
 Thank you for your time reviewing the submission.
 
