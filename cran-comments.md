@@ -1,6 +1,6 @@
 ## Submission
 
-We are resubmitting a small update, `DeclareDesign 0.22.0`, with bug fixes and test changes due to the R 4.0.0 changes to stringsAsFactor.
+We are resubmitting a small update, `DeclareDesign 0.22.0`, with test changes due to the R 4.0.0 changes to stringsAsFactor per email from Kurt as well as a minor feature addition.
 
 Thank you for your time reviewing the submission.
 
