@@ -38,32 +38,35 @@
 declare_sampling <- make_declarations(sampling_handler, "sampling")
 
 #' @param sampling_variable The prefix for the sampling inclusion probability variable.
+#' @param drop_nonsampled Logical indicating whether to drop units that are not sampled. Default is \code{TRUE}.
 #' @param data A data.frame.
 #' @importFrom rlang quos !!! call_modify eval_tidy quo
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
 #' @rdname declare_sampling
-sampling_handler <- function(data, ..., sampling_variable = "S") {
+sampling_handler <- function(data, ..., sampling_variable = "S", drop_nonsampled = TRUE) {
   ## draw sample
 
   options <- quos(...)
 
   samp <- reveal_nse_helper(sampling_variable)
-  samp <- as.symbol(paste0(samp, "_inclusion_prob"))
+  samp_inclusion_prob <- as.symbol(paste0(samp, "_inclusion_prob"))
 
-  S <- as.symbol(".__Sample") # Matching old code but also eliminating the R CMD check warning that .__Sample is a undef/global variable
-
-  decl <- eval_tidy(quo(declare_rs(N=!!nrow(data), !!!options)), data)
+  decl <- eval_tidy(quo(declare_rs(N = !!nrow(data), !!!options)), data)
   
   data <- fabricate(data,
-    !!S := draw_rs(!!decl),
-    !!samp := obtain_inclusion_probabilities(!!decl),
+    !!samp := draw_rs(!!decl),
+    !!samp_inclusion_prob := obtain_inclusion_probabilities(!!decl),
     ID_label = NA
   )
-
-  S <- as.character(S)
+  
+  S <- as.character(as.symbol(samp))
 
   ## subset to the sampled observations
-  data[ data[[S]] %in% 1, names(data) != S, drop = FALSE]
+  if(drop_nonsampled == TRUE) {
+    data[ data[[S]] %in% 1, names(data) != S, drop = FALSE]
+  } else {
+    data
+  }
 }
 
 validation_fn(sampling_handler) <- function(ret, dots, label) {

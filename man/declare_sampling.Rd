@@ -7,7 +7,7 @@
 \usage{
 declare_sampling(..., handler = sampling_handler, label = NULL)
 
-sampling_handler(data, ..., sampling_variable = "S")
+sampling_handler(data, ..., sampling_variable = "S", drop_nonsampled = TRUE)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -19,6 +19,8 @@ sampling_handler(data, ..., sampling_variable = "S")
 \item{data}{A data.frame.}
 
 \item{sampling_variable}{The prefix for the sampling inclusion probability variable.}
+
+\item{drop_nonsampled}{Logical indicating whether to drop units that are not sampled. Default is \code{TRUE}.}
 }
 \value{
 A function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
