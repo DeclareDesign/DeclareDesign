@@ -249,7 +249,7 @@ tidy_estimator <- function(fn) {
 #' @param model_summary A model-in data-out function to extract coefficient estimates or model summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} model summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the model object sent to \code{model}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the model object, it fails.
 #' @param term Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.
 #' @rdname declare_estimator
-#' @importFrom rlang is_formula call_modify call_args_names expr_interp as_function expr quo eval_bare eval_tidy is_character is_function empty_env
+#' @importFrom rlang eval_tidy
 model_handler <-
   function(data,
              ...,
@@ -266,32 +266,9 @@ model_handler <-
 
     results <- eval_tidy(quo(model(!!!args, data = data)))
     
-    # following copied from dplyr:::as_inlined_function and dplyr:::as_fun_list
+    model_summary_fn <- interpret_model_summary(model_summary)
     
-    if(is_formula(model_summary)) {
-      
-      f <- expr_interp(model_summary)
-      # TODO: unsure of what env should be here!
-      fn <- as_function(f, env = parent.frame())
-      body(fn) <- expr({
-        pairlist(...)
-        `_quo` <- quo(!!body(fn))
-        eval_bare(`_quo`, parent.frame())
-      })
-      
-      results <- eval_tidy(fn(results))
-      
-    } else {
-      
-      if (is_character(model_summary)) {
-        model_summary <- get(model_summary, envir = parent.frame(), mode = "function")
-      } else if (!is_function(model_summary)) {
-        stop("Please provide one sided formula, a function, or a function name to model_summary.")
-      }
-      
-      results <- model_summary(results)
-      
-    }
+    results <- eval_tidy(model_summary_fn(results))
     
     if("term" %in% colnames(results)) {
       if (is.character(coefficient_names)) {
@@ -313,6 +290,29 @@ model_handler <-
     results
     
   }
+
+#' @importFrom rlang is_formula expr_interp as_function expr quo eval_bare is_character is_function
+interpret_model_summary <- function(model_summary) {
+  # parts copied from dplyr:::as_inlined_function and dplyr:::as_fun_list
+  
+  if(is_formula(model_summary)) {
+    f <- expr_interp(model_summary)
+    # TODO: unsure of what env should be here!
+    fn <- as_function(f, env = parent.frame())
+    body(fn) <- expr({
+      # pairlist(...)
+      `_quo` <- quo(!!body(fn))
+      eval_bare(`_quo`, parent.frame())
+    })
+    return(fn)
+  } else if (is_character(model_summary)) {
+    return(get(model_summary, envir = parent.frame(), mode = "function"))
+  } else if (is_function(model_summary)) {
+    return(model_summary)
+  } else {
+    stop("Please provide one sided formula, a function, or a function name to model_summary.")
+  }
+}
 
 validation_fn(model_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
