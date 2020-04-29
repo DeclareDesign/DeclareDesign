@@ -11,12 +11,9 @@
 #'
 #' @examples
 #' 
-#' fit <- lm_robust(mpg ~ hp + disp + cyl, data = mtcars)
+#' fit <- lm(mpg ~ hp + disp + cyl, data = mtcars)
 #' 
-#' tidy_filter(fit)
-#' tidy_filter(fit, term = TRUE)
-#' tidy_filter(fit, term = "hp")
-#' tidy_filter(fit, term = c("hp", "cyl"))
+#' tidy_try(fit)
 #' 
 tidy_try <- function(fit, term = FALSE) {
   
