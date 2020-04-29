@@ -1,3 +1,7 @@
+# DeclareDesign 0.23.0
+
+* Add `declare_test` to enable hypothesis testing where no estimand is targeted.
+
 # DeclareDesign 0.22.0
 
 * Fix ability to set `sampling_variable` in `declare_sampling`. 

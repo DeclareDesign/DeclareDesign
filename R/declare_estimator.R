@@ -183,17 +183,17 @@ declare_estimators <- declare_estimator
 #'
 #' The intent here is to factor out the estimator/estimand labeling so that it can be reused by other model handlers.
 #'
-#' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.
+#' @param fn A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.
 #' @rdname declare_estimator
 #' @export
-tidy_estimator <- function(estimator_function) {
-  if (!("data" %in% names(formals(estimator_function)))) {
+tidy_estimator <- function(fn) {
+  if (!("data" %in% names(formals(fn)))) {
     stop("Must provide a `estimator_function` function with a data argument.")
   }
 
   f <- function(data, ..., estimand = NULL, label) {
     calling_args <-
-      names(match.call(expand.dots = FALSE)) %i% names(formals(estimator_function))
+      names(match.call(expand.dots = FALSE)) %i% names(formals(fn))
 
     dots <- if ("..." %in% calling_args) {
       quos(...)
@@ -208,7 +208,7 @@ tidy_estimator <- function(estimator_function) {
         do.call(enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. IDK
     }
 
-    ret <- eval_tidy(quo(estimator_function(data, !!!dots)))
+    ret <- eval_tidy(quo(fn(data, !!!dots)))
 
     ret <- data.frame(
       estimator_label = label,
@@ -229,7 +229,7 @@ tidy_estimator <- function(estimator_function) {
     ret
   }
 
-  formals(f) <- formals(estimator_function)
+  formals(f) <- formals(fn)
   if (!"estimand" %in% names(formals(f))) {
     formals(f)["estimand"] <- list(NULL)
   }
@@ -237,7 +237,7 @@ tidy_estimator <- function(estimator_function) {
     formals(f)$label <- alist(a = )$a
   }
 
-  attributes(f) <- attributes(estimator_function)
+  attributes(f) <- attributes(fn)
 
   f
 }
