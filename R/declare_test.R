@@ -1,6 +1,6 @@
 #' Declare test
 #'
-#' @description Declares an test which generates a test statistic and associated inferential statistics
+#' @description Declares an test which generates a test statistic and associated inferential statistics. Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific estimand in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an estimand.
 #'
 #' @inheritParams declare_internal_inherit_params
 #'
@@ -22,8 +22,9 @@
 #' 
 #' # Thanks to Jake Bowers for this example
 #' 
+#' library(coin) 
+#' 
 #' our_ttest <- function(data) {
-#'   require(coin)
 #'   res <- coin::oneway_test(
 #'     outcome ~ factor(Xclus),
 #'     data = data,
