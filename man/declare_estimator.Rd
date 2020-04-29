@@ -12,7 +12,7 @@ declare_estimator(..., handler = estimator_handler, label = "estimator")
 
 declare_estimators(..., handler = estimator_handler, label = "estimator")
 
-tidy_estimator(estimator_function)
+tidy_estimator(fn)
 
 model_handler(data, ..., model = estimatr::difference_in_means, term = FALSE)
 
@@ -32,7 +32,7 @@ estimator_handler(
 
 \item{label}{a string describing the step}
 
-\item{estimator_function}{A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.}
+\item{fn}{A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.}
 
 \item{data}{a data.frame}
 

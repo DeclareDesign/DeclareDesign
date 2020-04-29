@@ -46,4 +46,5 @@ Suggests:
     lfe, 
     sf,
     reshape2,
-    DesignLibrary
+    DesignLibrary,
+    coin
