@@ -18,12 +18,12 @@
 #' tidy_filter(fit, term = "hp")
 #' tidy_filter(fit, term = c("hp", "cyl"))
 #' 
-tidy_filter <- function(fit, term = FALSE) {
+tidy_try <- function(fit, term = FALSE) {
   
   if (hasS3Method("tidy", fit)) {
     tidy_df <- tidy(fit, conf.int = TRUE)
   } else {
-    tidy_df <- try(tidy_try(fit, conf.int = TRUE), silent = TRUE)
+    tidy_df <- try(tidy_try_internal(fit, conf.int = TRUE), silent = TRUE)
     
     if(inherits(tidy_df, "try-error")){
       stop("We were unable to tidy the output of the function provided to 'model'. 
@@ -32,26 +32,10 @@ tidy_filter <- function(fit, term = FALSE) {
            See examples in ?declare_estimator")
     }
   }
-  
-  if (is.character(term)) {
-    coefs_in_output <- term %in% tidy_df$term
-    if (!all(coefs_in_output)) {
-      stop(
-        "Not all of the terms declared in your estimator are present in the model output, including ",
-        paste(term[!coefs_in_output], collapse = ", "),
-        ".",
-        call. = FALSE
-      )
-    }
-    tidy_df <- tidy_df[tidy_df$term %in% term, , drop = FALSE]
-  } else if (is.logical(term) && !term) {
-    tidy_df <- tidy_df[which.max(tidy_df$term != "(Intercept)"), , drop = FALSE]
-  }
-  
   tidy_df
 }
 
-tidy_try <- function(x, conf.int = TRUE) {
+tidy_try_internal <- function(x, conf.int = TRUE) {
   # TODO: error checking -- are column names named as we expect
   
   val <- try({

@@ -246,7 +246,7 @@ tidy_estimator <- function(fn) {
 
 #' @param data a data.frame
 #' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
-#' @param post_estimation A model-in data-out function to extract coefficient estimates or model summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} post-estimation function \code{\link{tidy_filter}} is used, which tidies data and optionally filters to relevant coefficients.
+#' @param model_summary A model-in data-out function to extract coefficient estimates or model summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} model summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the model object sent to \code{model}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the model object, it fails.
 #' @param term Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.
 #' @rdname declare_estimator
 #' @importFrom rlang is_formula call_modify call_args_names expr_interp as_function expr quo eval_bare eval_tidy is_character is_function empty_env
@@ -254,7 +254,7 @@ model_handler <-
   function(data,
              ...,
              model = estimatr::difference_in_means,
-             post_estimation = tidy_filter,
+             model_summary = tidy_try,
              term = FALSE) {
     coefficient_names <-
       enquo(term) # forces evaluation of quosure
@@ -268,15 +268,9 @@ model_handler <-
     
     # following copied from dplyr:::as_inlined_function and dplyr:::as_fun_list
     
-    if(is_formula(post_estimation)) {
+    if(is_formula(model_summary)) {
       
-      # if you have used our built-in tidy filter function, replace term with that provided to model_handler 
-      # this is a temporary solution for backward compatibility, it will be removed in future versions
-      if(call_name(post_estimation) == "tidy_filter" && !"term" %in% call_args_names(post_estimation)){
-        post_estimation <- call_modify(.call = post_estimation, term = coefficient_names)
-      }
-      
-      f <- expr_interp(post_estimation)
+      f <- expr_interp(model_summary)
       # TODO: unsure of what env should be here!
       fn <- as_function(f, env = parent.frame())
       body(fn) <- expr({
@@ -289,18 +283,31 @@ model_handler <-
       
     } else {
       
-      if (is_character(post_estimation)) {
-        post_estimation <- get(post_estimation, envir = parent.frame(), mode = "function")
-      } else if (!is_function(post_estimation)) {
-        stop("Please provide one sided formula, a function, or a function name to post_estimation.")
+      if (is_character(model_summary)) {
+        model_summary <- get(model_summary, envir = parent.frame(), mode = "function")
+      } else if (!is_function(model_summary)) {
+        stop("Please provide one sided formula, a function, or a function name to model_summary.")
       }
       
-      if("term" %in% names(formals(post_estimation))) {
-        results <- post_estimation(results, term = coefficient_names)
-      } else {
-        results <- post_estimation(results)
-      }
+      results <- model_summary(results)
       
+    }
+    
+    if("term" %in% colnames(results)) {
+      if (is.character(coefficient_names)) {
+        coefs_in_output <- coefficient_names %in% results$term
+        if (!all(coefs_in_output)) {
+          stop(
+            "Not all of the terms declared in your estimator are present in the model output, including ",
+            paste(coefficient_names[!coefs_in_output], collapse = ", "),
+            ".",
+            call. = FALSE
+          )
+        }
+        results <- results[results$term %in% coefficient_names, , drop = FALSE]
+      } else if (is.logical(coefficient_names) && !coefficient_names) {
+        results <- results[which.max(results$term != "(Intercept)"), , drop = FALSE]
+      }
     }
     
     results

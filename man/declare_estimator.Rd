@@ -18,7 +18,7 @@ model_handler(
   data,
   ...,
   model = estimatr::difference_in_means,
-  post_estimation = tidy_filter,
+  model_summary = tidy_try,
   term = FALSE
 )
 
@@ -26,7 +26,7 @@ estimator_handler(
   data,
   ...,
   model = estimatr::difference_in_means,
-  post_estimation = tidy_filter,
+  model_summary = tidy_try,
   term = FALSE,
   estimand = NULL,
   label
@@ -45,7 +45,7 @@ estimator_handler(
 
 \item{model}{A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.}
 
-\item{post_estimation}{A model-in data-out function to extract coefficient estimates or model summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} post-estimation function \code{\link{tidy_filter}} is used, which tidies data and optionally filters to relevant coefficients.}
+\item{model_summary}{A model-in data-out function to extract coefficient estimates or model summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} model summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the model object sent to \code{model}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the model object, it fails.}
 
 \item{term}{Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.}
 
