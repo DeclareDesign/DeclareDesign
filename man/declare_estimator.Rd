@@ -14,12 +14,19 @@ declare_estimators(..., handler = estimator_handler, label = "estimator")
 
 tidy_estimator(estimator_function)
 
-model_handler(data, ..., model = estimatr::difference_in_means, term = FALSE)
+model_handler(
+  data,
+  ...,
+  model = estimatr::difference_in_means,
+  post_estimation = tidy_filter,
+  term = FALSE
+)
 
 estimator_handler(
   data,
   ...,
   model = estimatr::difference_in_means,
+  post_estimation = tidy_filter,
   term = FALSE,
   estimand = NULL,
   label
