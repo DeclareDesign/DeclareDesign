@@ -1,7 +1,7 @@
 #' Tidy Model Results and Filter to Relevant Coefficients
 #'
-#' @param fit 
-#' @param term 
+#' @param fit A model fit, as returned by a modeling function like lm, glm, or estimatr::lm_robust.
+#' @param term A character vector of the terms that represent quantities of interest, i.e., "Z". If FALSE, return the first non-intercept term; if TRUE return all terms.
 #'
 #' @return
 #' @export

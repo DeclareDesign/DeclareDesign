@@ -7,9 +7,9 @@
 tidy_filter(fit, term = FALSE)
 }
 \arguments{
-\item{fit}{}
+\item{fit}{A model fit, as returned by a modeling function like lm, glm, or estimatr::lm_robust.}
 
-\item{term}{}
+\item{term}{A character vector of the terms that represent quantities of interest, i.e., "Z". If FALSE, return the first non-intercept term; if TRUE return all terms.}
 }
 \value{
 
