@@ -1,6 +1,7 @@
 # DeclareDesign 0.23.0
 
-* Add `declare_test` to enable hypothesis testing where no estimand is targeted.
+* Add `model_summary` option to `declare_estimator`, to enable specifying a model and then a separate post-estimation function to extract coefficient estimates (e.g., estimate of a treatment effect) or model summary statistics (e.g., R^2 or the result of an F-test from a regression).
+* Add `declare_test` to enable hypothesis testing where no estimand is targeted. For example, `declare_test` could be used for a K-S test of distributional equality and `declare_estimator` for a difference-in-means estimate of an average treatment effect.
 
 # DeclareDesign 0.22.0
 
