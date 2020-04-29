@@ -1,12 +1,23 @@
 #' Tidy Model Results and Filter to Relevant Coefficients
+#' 
+#' Tidy function that returns a tidy data.frame of model results and allows filtering to relevant coefficients. The function will attempt to tidy model objects even when they do not have a tidy method available. For best results, first load the broom package via \code{library(broom)}.
 #'
 #' @param fit A model fit, as returned by a modeling function like lm, glm, or estimatr::lm_robust.
 #' @param term A character vector of the terms that represent quantities of interest, i.e., "Z". If FALSE, return the first non-intercept term; if TRUE return all terms.
 #'
-#' @return
+#' @return A data.frame with coefficient estimates and associated statistics.
+#' 
 #' @export
 #'
 #' @examples
+#' 
+#' fit <- lm_robust(mpg ~ hp + disp + cyl, data = mtcars)
+#' 
+#' tidy_filter(fit)
+#' tidy_filter(fit, term = TRUE)
+#' tidy_filter(fit, term = "hp")
+#' tidy_filter(fit, term = c("hp", "cyl"))
+#' 
 tidy_filter <- function(fit, term = FALSE) {
   
   if (hasS3Method("tidy", fit)) {

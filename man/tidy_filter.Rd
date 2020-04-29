@@ -12,8 +12,18 @@ tidy_filter(fit, term = FALSE)
 \item{term}{A character vector of the terms that represent quantities of interest, i.e., "Z". If FALSE, return the first non-intercept term; if TRUE return all terms.}
 }
 \value{
-
+A data.frame with coefficient estimates and associated statistics.
 }
 \description{
-Tidy Model Results and Filter to Relevant Coefficients
+Tidy function that returns a tidy data.frame of model results and allows filtering to relevant coefficients. The function will attempt to tidy model objects even when they do not have a tidy method available. For best results, first load the broom package via \code{library(broom)}.
+}
+\examples{
+
+fit <- lm_robust(mpg ~ hp + disp + cyl, data = mtcars)
+
+tidy_filter(fit)
+tidy_filter(fit, term = TRUE)
+tidy_filter(fit, term = "hp")
+tidy_filter(fit, term = c("hp", "cyl"))
+
 }

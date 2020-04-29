@@ -45,6 +45,8 @@ estimator_handler(
 
 \item{model}{A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.}
 
+\item{post_estimation}{A model-in data-out function to extract coefficient estimates or model summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} post-estimation function \code{\link{tidy_filter}} is used, which tidies data and optionally filters to relevant coefficients.}
+
 \item{term}{Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.}
 
 \item{estimand}{a declare_estimand step object, or a character label, or a list of either}
