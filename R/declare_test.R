@@ -17,7 +17,7 @@
 #' balance_test_design <-
 #'   declare_population(N = 100, cov1 = rnorm(N), cov2 = rnorm(N), cov3 = rnorm(N)) +
 #'   declare_assignment(prob = 0.2) +
-#'   declare_test(Z ~ cov1 + cov2 + cov3, model = lm_robust, post_estimation = glance)
+#'   declare_test(Z ~ cov1 + cov2 + cov3, model = lm_robust, model_summary = glance)
 #'
 #' diagnosis <- diagnose_design(
 #'   design = balance_test_design,
