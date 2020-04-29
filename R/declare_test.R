@@ -1,6 +1,8 @@
 #' Declare test
 #'
-#' @description Declares an test which generates a test statistic and associated inferential statistics. Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific estimand in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an estimand.
+#' @description Declares an test which generates a test statistic and associated inferential statistics. 
+#' 
+#' Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific estimand in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an estimand. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
 #'
 #' @inheritParams declare_internal_inherit_params
 #'

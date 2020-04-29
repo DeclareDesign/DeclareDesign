@@ -56,6 +56,8 @@ A function that accepts a data.frame as an argument and returns a data.frame con
 }
 \description{
 Declares an estimator which generates estimates and associated statistics.
+
+Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific estimand in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an estimand. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
 }
 \details{
 \code{tidy_estimator} takes an untidy estimation function, and returns a tidy handler which accepts standard labeling options.
