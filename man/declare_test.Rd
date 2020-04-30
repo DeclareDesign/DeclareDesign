@@ -2,12 +2,20 @@
 % Please edit documentation in R/declare_test.R
 \name{declare_test}
 \alias{declare_test}
-\alias{tidy_test}
+\alias{test_handler}
 \title{Declare test}
 \usage{
-declare_test(..., handler = estimator_handler, label = "estimator")
+declare_test(..., handler = test_handler, label = "test")
 
-tidy_test(fn)
+test_handler(
+  data,
+  ...,
+  model = estimatr::difference_in_means,
+  model_summary = tidy_try,
+  term = FALSE,
+  estimand = NULL,
+  label
+)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -15,8 +23,6 @@ tidy_test(fn)
 \item{handler}{a tidy-in, tidy-out function}
 
 \item{label}{a string describing the step}
-
-\item{fn}{A function that takes a data.frame as an argument and returns a data.frame with the test statistic (and other inferential statistics) and a label.}
 }
 \value{
 A function that accepts a data.frame as an argument and returns a data.frame containing the value of the test statistic and other inferential statistics.
@@ -26,22 +32,24 @@ Declares an test which generates a test statistic and associated inferential sta
 
 Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific estimand in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an estimand. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
 }
-\details{
-\code{tidy_test} takes an untidy test function, and returns a tidy handler which accepts standard labeling options.
-}
 \examples{
 
 # Balance test F test
 
 balance_test_design <-
-  declare_population(N = 100, cov1 = rnorm(N), cov2 = rnorm(N), cov3 = rnorm(N)) +
+  declare_population(
+    N = 100, 
+    cov1 = rnorm(N), cov2 = rnorm(N), cov3 = rnorm(N)) +
   declare_assignment(prob = 0.2) +
   declare_test(Z ~ cov1 + cov2 + cov3, model = lm_robust, model_summary = glance)
-
+  
+\dontrun{
 diagnosis <- diagnose_design(
   design = balance_test_design,
-  diagnosands = declare_diagnosands(false_positive_rate = mean(p.value <= 0.05), keep_defaults = FALSE)
+  diagnosands = declare_diagnosands(
+  false_positive_rate = mean(p.value <= 0.05), keep_defaults = FALSE)
 )
+}
 
 # K-S test of distributional equality
 
@@ -57,10 +65,12 @@ distributional_equality_design <-
   declare_reveal(Y, Z) + 
   declare_test(handler = tidy_test(ks_test), label = "ks-test")
   
+\dontrun{
 diagnosis <- diagnose_design(
   design = distributional_equality_design,
   diagnosands = declare_diagnosands(select = power)
 ) 
+}
 
 # Thanks to Jake Bowers for this example
 
@@ -76,12 +86,18 @@ our_ttest <- function(data) {
 }
 
 ttest_design <- 
-  declare_population(N = 100, Xclus = rbinom(n = N, size = 1, prob = 0.2), outcome = 3 + rnorm(N)) +
+  declare_population(
+    N = 100, 
+    Xclus = rbinom(n = N, size = 1, prob = 0.2), 
+    outcome = 3 + rnorm(N)) +
   declare_test(handler = tidy_test(our_ttest), label = "t-test")
   
+\dontrun{
 diagnosis <- diagnose_design(
   design = ttest_design,
-  diagnosands = declare_diagnosands(false_positive_rate = mean(p.value <= 0.05), keep_defaults = FALSE)
+  diagnosands = declare_diagnosands(
+    false_positive_rate = mean(p.value <= 0.05), keep_defaults = FALSE)
 )
+}
 
 }

@@ -78,13 +78,15 @@
 #' )
 #' }
 #' 
-declare_test <- declare_estimator
+declare_test <- 
+  make_declarations(
+    test_handler,
+    step_type = "estimator",
+    causal_type = "estimator",
+    default_label = "test"
+  )
+
 declare_tests <- declare_test
 
-#' @details
-#' \code{tidy_test} takes an untidy test function, and returns a tidy handler which accepts standard labeling options.
-#'
-#' @param fn A function that takes a data.frame as an argument and returns a data.frame with the test statistic (and other inferential statistics) and a label.
 #' @rdname declare_test
-#' @export
-tidy_test <- tidy_estimator
+test_handler <- tidy_estimator(model_handler)
