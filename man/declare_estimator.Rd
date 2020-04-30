@@ -5,12 +5,19 @@
 \alias{declare_estimators}
 \alias{tidy_estimator}
 \alias{model_handler}
-\alias{estimator_handler}
 \title{Declare estimator}
 \usage{
-declare_estimator(..., handler = estimator_handler, label = "estimator")
+declare_estimator(
+  ...,
+  handler = tidy_estimator(model_handler),
+  label = "estimator"
+)
 
-declare_estimators(..., handler = estimator_handler, label = "estimator")
+declare_estimators(
+  ...,
+  handler = tidy_estimator(model_handler),
+  label = "estimator"
+)
 
 tidy_estimator(fn)
 
@@ -21,16 +28,6 @@ model_handler(
   model_summary = tidy_try,
   term = FALSE
 )
-
-estimator_handler(
-  data,
-  ...,
-  model = estimatr::difference_in_means,
-  model_summary = tidy_try,
-  term = FALSE,
-  estimand = NULL,
-  label
-)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -39,7 +36,7 @@ estimator_handler(
 
 \item{label}{a string describing the step}
 
-\item{fn}{A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.}
+\item{fn}{A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval), and a term column for labeling coefficient estimates.}
 
 \item{data}{a data.frame}
 
@@ -60,18 +57,28 @@ Declares an estimator which generates estimates and associated statistics.
 Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific estimand in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an estimand. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
 }
 \details{
-\code{tidy_estimator} takes an untidy estimation function, and returns a tidy handler which accepts standard labeling options.
+\code{declare_estimator} is designed to handle two main ways of generating parameter estimates from data.
 
-The intent here is to factor out the estimator/estimand labeling so that it can be reused by other model handlers.
+The first is through \code{tidy_estimator(model_handler)}, which is the default value of the \code{handler} argument. Users can use standard modeling functions like lm, glm, or iv_robust. The models are summarized using the function passed to the \code{model_summary} argument. This will usually be a "tidier" like \code{broom::tidy}. The default \code{model_summary} function is \code{tidy_try}, which applies a tidy method if available, and if not, tries to make one on the fly.
+
+An example of this approach is:
+
+\code{declare_estimator(Y ~ Z + X, model = lm_robust, model_summary = tidy, term = "Z", estimand = "ATE")}
+
+The second approach is using a custom data-in, data-out function, usually first passed to \code{tidy_estimator}. The reason to pass the custom function to \code{tidy_estimator} first is to enable clean labeling and linking to estimands.
+
+An example of this approach is:
+
+\code{
+my_fun <- function(data){ with(data, median(Y[Z == 1]) - median(Y[Z == 0])) }
 }
-\section{Custom Estimators}{
 
-
-\code{estimator_functions} implementations should be tidy (accept and return a data.frame)
-
-\code{model} implementations should at a minimum provide S3 methods for \code{summary} and \code{confint}.
+\code{
+declare_estimator(handler = tidy_estimator(my_fun), estimand = "ATE")
 }
 
+\code{tidy_estimator} takes a data-in-data out function to \code{fn}, and returns a data-in-data-out function that first runs the provided estimation function \code{fn} and then appends a label for the estimator and, if an estimand is provided, a label for the estimand.
+}
 \examples{
 
 # Declare estimand
