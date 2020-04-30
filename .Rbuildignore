@@ -22,3 +22,4 @@ paper.pdf
 ^DeclareDesign_.*\.tar\.gz$
 ^cran-comments\.md$
 vignettes
+^\.github$
