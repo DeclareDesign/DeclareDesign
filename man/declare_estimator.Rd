@@ -14,12 +14,19 @@ declare_estimators(..., handler = estimator_handler, label = "estimator")
 
 tidy_estimator(fn)
 
-model_handler(data, ..., model = estimatr::difference_in_means, term = FALSE)
+model_handler(
+  data,
+  ...,
+  model = estimatr::difference_in_means,
+  model_summary = tidy_try,
+  term = FALSE
+)
 
 estimator_handler(
   data,
   ...,
   model = estimatr::difference_in_means,
+  model_summary = tidy_try,
   term = FALSE,
   estimand = NULL,
   label
@@ -38,6 +45,8 @@ estimator_handler(
 
 \item{model}{A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.}
 
+\item{model_summary}{A model-in data-out function to extract coefficient estimates or model summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} model summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the model object sent to \code{model}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the model object, it fails.}
+
 \item{term}{Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.}
 
 \item{estimand}{a declare_estimand step object, or a character label, or a list of either}
@@ -47,6 +56,8 @@ A function that accepts a data.frame as an argument and returns a data.frame con
 }
 \description{
 Declares an estimator which generates estimates and associated statistics.
+
+Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific estimand in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an estimand. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
 }
 \details{
 \code{tidy_estimator} takes an untidy estimation function, and returns a tidy handler which accepts standard labeling options.

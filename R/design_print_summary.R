@@ -1,7 +1,7 @@
 
 
 #' @param x a design object, typically created using the + operator
-#' @rdname declare_design
+#' @rdname post_design
 #' @export
 print.design <- function(x, verbose = TRUE, ...) {
   print(summary(x, verbose = verbose, ... = ...))
@@ -10,8 +10,6 @@ print.design <- function(x, verbose = TRUE, ...) {
 #' @param object a design object created using the + operator
 #' @param verbose an indicator for printing a long summary of the design, defaults to \code{TRUE}
 #' @param ... optional arguments to be sent to summary function
-#'
-#' @rdname declare_design
 #'
 #' @examples
 #'

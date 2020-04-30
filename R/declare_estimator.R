@@ -1,6 +1,8 @@
 #' Declare estimator
 #'
 #' @description Declares an estimator which generates estimates and associated statistics.
+#' 
+#' Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific estimand in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an estimand. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
 #'
 #' @inheritParams declare_internal_inherit_params
 #'
@@ -244,12 +246,15 @@ tidy_estimator <- function(fn) {
 
 #' @param data a data.frame
 #' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
+#' @param model_summary A model-in data-out function to extract coefficient estimates or model summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} model summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the model object sent to \code{model}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the model object, it fails.
 #' @param term Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.
 #' @rdname declare_estimator
+#' @importFrom rlang eval_tidy
 model_handler <-
   function(data,
              ...,
              model = estimatr::difference_in_means,
+             model_summary = tidy_try,
              term = FALSE) {
     coefficient_names <-
       enquo(term) # forces evaluation of quosure
@@ -260,11 +265,54 @@ model_handler <-
     # todo special case weights offsets for glm etc?
 
     results <- eval_tidy(quo(model(!!!args, data = data)))
-
-    results <- fit2tidy(results, coefficient_names)
-
+    
+    model_summary_fn <- interpret_model_summary(model_summary)
+    
+    results <- eval_tidy(model_summary_fn(results))
+    
+    if("term" %in% colnames(results)) {
+      if (is.character(coefficient_names)) {
+        coefs_in_output <- coefficient_names %in% results$term
+        if (!all(coefs_in_output)) {
+          stop(
+            "Not all of the terms declared in your estimator are present in the model output, including ",
+            paste(coefficient_names[!coefs_in_output], collapse = ", "),
+            ".",
+            call. = FALSE
+          )
+        }
+        results <- results[results$term %in% coefficient_names, , drop = FALSE]
+      } else if (is.logical(coefficient_names) && !coefficient_names) {
+        results <- results[which.max(results$term != "(Intercept)"), , drop = FALSE]
+      }
+    }
+    
     results
+    
   }
+
+#' @importFrom rlang is_formula expr_interp as_function expr quo eval_bare is_character is_function
+interpret_model_summary <- function(model_summary) {
+  # parts copied from dplyr:::as_inlined_function and dplyr:::as_fun_list
+  
+  if(is_formula(model_summary)) {
+    f <- expr_interp(model_summary)
+    # TODO: unsure of what env should be here!
+    fn <- as_function(f, env = parent.frame())
+    body(fn) <- expr({
+      # pairlist(...)
+      `_quo` <- quo(!!body(fn))
+      eval_bare(`_quo`, parent.frame())
+    })
+    return(fn)
+  } else if (is_character(model_summary)) {
+    return(get(model_summary, envir = parent.frame(), mode = "function"))
+  } else if (is_function(model_summary)) {
+    return(model_summary)
+  } else {
+    stop("Please provide one sided formula, a function, or a function name to model_summary.")
+  }
+}
 
 validation_fn(model_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
@@ -287,109 +335,6 @@ validation_fn(model_handler) <- function(ret, dots, label) {
 #' @param estimand a declare_estimand step object, or a character label, or a list of either
 #' @rdname declare_estimator
 estimator_handler <- tidy_estimator(model_handler)
-
-#' @importFrom generics tidy
-#' @export
-generics::tidy
-
-tidy_default <- function(x, conf.int = TRUE) {
-  # TODO: error checking -- are column names named as we expect
-  
-  val <- try({
-    summ <- coef(summary(x))
-    
-    if(conf.int == TRUE) {
-      ci <- suppressMessages(as.data.frame(confint(x)))
-      tidy_df <-
-        data.frame(
-          term = rownames(summ),
-          summ,
-          ci,
-          stringsAsFactors = FALSE,
-          row.names = NULL
-        )
-      colnames(tidy_df) <-
-        c(
-          "term",
-          "estimate",
-          "std.error",
-          "statistic",
-          "p.value",
-          "conf.low",
-          "conf.high"
-        )
-    } else {
-      tidy_df <-
-        data.frame(
-          term = rownames(summ),
-          summ,
-          ci,
-          stringsAsFactors = FALSE,
-          row.names = NULL
-        )
-      colnames(tidy_df) <-
-        c(
-          "term",
-          "estimate",
-          "std.error",
-          "statistic",
-          "p.value"
-        )
-    }
-    
-  }, silent = TRUE)
-  
-  if(class(val) == "try-error"){
-    stop("The default tidy method for the model fit of class ", class(x), " failed. You may try installing and loading the broom package, or you can write your own tidy.", class(x), " method.", call. = FALSE)
-  }
-    
-  tidy_df
-}
-
-#' @importFrom utils getS3method
-hasS3Method <- function(f, obj) {
-  for(i in class(obj)) {
-    get_function <- try(getS3method(f, i), silent = TRUE)
-    if(class(get_function) != "try-error" && is.function(get_function)) return(TRUE)
-  }
-  FALSE
-}
-
-# called by model_handler, resets columns names !!!
-fit2tidy <- function(fit, term = FALSE) {
-  
-  # browser()
-  if (hasS3Method("tidy", fit)) {
-    tidy_df <- tidy(fit, conf.int = TRUE)
-  } else {
-    tidy_df <- try(tidy_default(fit, conf.int = TRUE), silent = TRUE)
-    
-    if(class(tidy_df) == "try-error"){
-      stop("We were unable to tidy the output of the function provided to 'model'. 
-           It is possible that the broom package has a tidier for that object type. 
-           If not, you can use a custom estimator to 'estimator_function'.
-           See examples in ?declare_estimator")
-    }
-  }
-    
-  if (is.character(term)) {
-    coefs_in_output <- term %in% tidy_df$term
-    if (!all(coefs_in_output)) {
-      stop(
-        "Not all of the terms declared in your estimator are present in the model output, including ",
-        paste(term[!coefs_in_output], collapse = ", "),
-        ".",
-        call. = FALSE
-      )
-    }
-    tidy_df <- tidy_df[tidy_df$term %in% term, , drop = FALSE]
-  } else if (is.logical(term) && !term) {
-    tidy_df <-
-      tidy_df[which.max(tidy_df$term != "(Intercept)"), , drop = FALSE]
-  }
-
-  tidy_df
-}
 
 # helper methods for estimand=my_estimand arguments to estimator_handler
 #
