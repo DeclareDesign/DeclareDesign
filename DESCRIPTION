@@ -14,7 +14,7 @@ Description: Researchers can characterize and learn about the properties of
     to implementation and without access to results. It can also make it
     easier for designs to be shared, replicated, and critiqued.
 Depends:
-    R (>= 3.3.0),
+    R (>= 3.5.0),
     randomizr (>= 0.20.0),
     fabricatr (>= 0.10.0),
     estimatr (>= 0.20.0)
