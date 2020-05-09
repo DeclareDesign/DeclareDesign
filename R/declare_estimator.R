@@ -12,13 +12,13 @@
 #' 
 #' \code{declare_estimator} is designed to handle two main ways of generating parameter estimates from data.
 #' 
-#' The first is through \code{tidy_estimator(model_handler)}, which is the default value of the \code{handler} argument. Users can use standard modeling functions like lm, glm, or iv_robust. The models are summarized using the function passed to the \code{model_summary} argument. This will usually be a "tidier" like \code{broom::tidy}. The default \code{model_summary} function is \code{tidy_try}, which applies a tidy method if available, and if not, tries to make one on the fly.
+#' The first is through \code{label_estimator(model_handler)}, which is the default value of the \code{handler} argument. Users can use standard modeling functions like lm, glm, or iv_robust. The models are summarized using the function passed to the \code{model_summary} argument. This will usually be a "tidier" like \code{broom::tidy}. The default \code{model_summary} function is \code{tidy_try}, which applies a tidy method if available, and if not, tries to make one on the fly.
 #' 
 #' An example of this approach is:
 #' 
 #' \code{declare_estimator(Y ~ Z + X, model = lm_robust, model_summary = tidy, term = "Z", estimand = "ATE")}
 #' 
-#' The second approach is using a custom data-in, data-out function, usually first passed to \code{tidy_estimator}. The reason to pass the custom function to \code{tidy_estimator} first is to enable clean labeling and linking to estimands.
+#' The second approach is using a custom data-in, data-out function, usually first passed to \code{label_estimator}. The reason to pass the custom function to \code{label_estimator} first is to enable clean labeling and linking to estimands.
 #' 
 #' An example of this approach is:
 #' 
@@ -27,7 +27,7 @@
 #' }
 #' 
 #' \code{
-#' declare_estimator(handler = tidy_estimator(my_fun), estimand = "ATE")
+#' declare_estimator(handler = label_estimator(my_fun), estimand = "ATE")
 #' }
 #' 
 #' @export
@@ -87,14 +87,14 @@
 #'
 #' # Declare estimator using a custom handler
 #'
-#' # Define your own estimator and use the `tidy_estimator` function for labeling
+#' # Define your own estimator and use the `label_estimator` function for labeling
 #' # Must have `data` argument that is a data.frame
 #' my_estimator_function <- function(data){
 #'   data.frame(estimate = with(data, mean(Y)))
 #' }
 #'
 #' my_estimator_custom <- declare_estimator(
-#'   handler = tidy_estimator(my_estimator_function),
+#'   handler = label_estimator(my_estimator_function),
 #'   estimand = my_estimand
 #' )
 #'
@@ -158,7 +158,7 @@
 #' my_median <- function(data) data.frame(med = median(data$Y))
 #'
 #' my_estimator_median <- declare_estimator(
-#'   handler = tidy_estimator(my_median),
+#'   handler = label_estimator(my_median),
 #'   estimand = my_estimand
 #' )
 #'
@@ -188,7 +188,7 @@
 #' }
 declare_estimator <-
   make_declarations(
-    tidy_estimator(model_handler),
+    label_estimator(model_handler),
     step_type = "estimator",
     causal_type = "estimator",
     default_label = "estimator"
@@ -199,13 +199,13 @@ declare_estimator <-
 declare_estimators <- declare_estimator
 
 #' @details
-#' \code{tidy_estimator} takes a data-in-data out function to \code{fn}, and returns a data-in-data-out function that first runs the provided estimation function \code{fn} and then appends a label for the estimator and, if an estimand is provided, a label for the estimand.
+#' \code{label_estimator} takes a data-in-data out function to \code{fn}, and returns a data-in-data-out function that first runs the provided estimation function \code{fn} and then appends a label for the estimator and, if an estimand is provided, a label for the estimand.
 #' 
 #' @param fn A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval), and a term column for labeling coefficient estimates.
 #' 
 #' @rdname declare_estimator
 #' @export
-tidy_estimator <- function(fn) {
+label_estimator <- function(fn) {
   if (!("data" %in% names(formals(fn)))) {
     stop("Must provide a `estimator_function` function with a data argument.")
   }
@@ -261,6 +261,18 @@ tidy_estimator <- function(fn) {
   f
 }
 
+#' @rdname ourPkg-deprecated
+#' @section \code{tidy_estimator}:
+#' For \code{tidy_estimator}, use \code{\link{label_estimator}}.
+#'
+#' @importFrom lifecycle deprecate_soft
+#'
+#' @export
+tidy_estimator <- function(estimator_function) {
+  deprecate_soft("1.0.0", "tidy_estimator()", "label_estimator()")
+  label_estimator(fn = estimator_function)
+}
+
 #' @param data a data.frame
 #' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
 #' @param model_summary A model-in data-out function to extract coefficient estimates or model summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} model summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the model object sent to \code{model}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the model object, it fails.
@@ -308,6 +320,7 @@ model_handler <-
     
   }
 
+# this is an internal function that is a helper to allow users to provide the model_summary arg in a variety of formats
 #' @importFrom rlang is_formula expr_interp as_function expr quo eval_bare is_character is_function
 interpret_model_summary <- function(model_summary) {
   # parts copied from dplyr:::as_inlined_function and dplyr:::as_fun_list

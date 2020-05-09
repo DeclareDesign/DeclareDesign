@@ -43,7 +43,7 @@
 #'   declare_potential_outcomes(Y_Z_1 = rnorm(N), Y_Z_0 = rnorm(N, sd = 1.5)) + 
 #'   declare_assignment(prob = 0.5) + 
 #'   declare_reveal(Y, Z) + 
-#'   declare_test(handler = tidy_test(ks_test), label = "ks-test")
+#'   declare_test(handler = label_test(ks_test), label = "ks-test")
 #'   
 #' \dontrun{
 #' diagnosis <- diagnose_design(
@@ -70,7 +70,7 @@
 #'     N = 100, 
 #'     Xclus = rbinom(n = N, size = 1, prob = 0.2), 
 #'     outcome = 3 + rnorm(N)) +
-#'   declare_test(handler = tidy_test(our_ttest), label = "t-test")
+#'   declare_test(handler = label_test(our_ttest), label = "t-test")
 #'   
 #' \dontrun{
 #' diagnosis <- diagnose_design(
@@ -84,7 +84,7 @@
 #' 
 declare_test <- 
   make_declarations(
-    tidy_test(model_handler),
+    label_test(model_handler),
     step_type = "estimator",
     causal_type = "estimator",
     default_label = "test"
@@ -93,17 +93,18 @@ declare_test <-
 declare_tests <- declare_test
 
 #' @details
-#' \code{tidy_test} takes a data-in-data out function to \code{fn}, and returns a data-in-data-out function that first runs the provided test function \code{fn} and then appends a label for the test.
+#' \code{label_test} takes a data-in-data out function to \code{fn}, and returns a data-in-data-out function that first runs the provided test function \code{fn} and then appends a label for the test.
 #'
 #' @param fn A function that takes a data.frame as an argument and returns a data.frame with test statistics as columns.
 #' @rdname declare_test
 #' @export
-tidy_test <- function(fn) {
+label_test <- function(fn) {
   if (!("data" %in% names(formals(fn)))) {
     stop("Must provide a `test_function` function with a data argument.")
   }
   
   f <- function(data, ..., estimand = NULL, label) {
+    
     calling_args <-
       names(match.call(expand.dots = FALSE)) %i% names(formals(fn))
     
