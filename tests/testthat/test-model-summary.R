@@ -108,7 +108,7 @@ test_that("glance works", {
                    p.value = c(0.079186714215938, 0.079186714215938,
                                0.079186714215938),
                    df.residual = c(18, 18, 18),
-                   N = c(20L, 20L,
+                   nobs = c(20L, 20L,
                          20L),
                    se_type = c("HC2", "HC2", "HC2")
                  ),
