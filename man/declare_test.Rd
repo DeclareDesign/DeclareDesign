@@ -2,12 +2,12 @@
 % Please edit documentation in R/declare_test.R
 \name{declare_test}
 \alias{declare_test}
-\alias{tidy_test}
+\alias{label_test}
 \title{Declare test}
 \usage{
-declare_test(..., handler = estimator_handler, label = "estimator")
+declare_test(..., handler = label_test(model_handler), label = "test")
 
-tidy_test(fn)
+label_test(fn)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -16,7 +16,7 @@ tidy_test(fn)
 
 \item{label}{a string describing the step}
 
-\item{fn}{A function that takes a data.frame as an argument and returns a data.frame with the test statistic (and other inferential statistics) and a label.}
+\item{fn}{A function that takes a data.frame as an argument and returns a data.frame with test statistics as columns.}
 }
 \value{
 A function that accepts a data.frame as an argument and returns a data.frame containing the value of the test statistic and other inferential statistics.
@@ -25,9 +25,11 @@ A function that accepts a data.frame as an argument and returns a data.frame con
 Declares an test which generates a test statistic and associated inferential statistics. 
 
 Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific estimand in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an estimand. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
+
+See \code{\link{declare_estimator}} help for an explanation of how to use \code{model_handler}, which is used identically in both \code{declare_estimator} and \code{declare_test}. The main difference between \code{declare_estimator} and \code{declare_test} is that \code{declare_test} does not link with an explicit estimand.
 }
 \details{
-\code{tidy_test} takes an untidy test function, and returns a tidy handler which accepts standard labeling options.
+\code{label_test} takes a data-in-data out function to \code{fn}, and returns a data-in-data-out function that first runs the provided test function \code{fn} and then appends a label for the test.
 }
 \examples{
 
@@ -60,7 +62,7 @@ distributional_equality_design <-
   declare_potential_outcomes(Y_Z_1 = rnorm(N), Y_Z_0 = rnorm(N, sd = 1.5)) + 
   declare_assignment(prob = 0.5) + 
   declare_reveal(Y, Z) + 
-  declare_test(handler = tidy_test(ks_test), label = "ks-test")
+  declare_test(handler = label_test(ks_test), label = "ks-test")
   
 \dontrun{
 diagnosis <- diagnose_design(
@@ -87,7 +89,8 @@ ttest_design <-
     N = 100, 
     Xclus = rbinom(n = N, size = 1, prob = 0.2), 
     outcome = 3 + rnorm(N)) +
-  declare_test(handler = tidy_test(our_ttest), label = "t-test")
+  declare_test(handler = label_test(our_ttest), label = "t-test")
+
   
 \dontrun{
 diagnosis <- diagnose_design(
@@ -97,4 +100,7 @@ diagnosis <- diagnose_design(
 )
 }
 
+}
+\seealso{
+See \code{\link{declare_estimator}} for documentation of the \code{model_handler} function.
 }
