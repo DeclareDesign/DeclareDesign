@@ -45,8 +45,6 @@ model_handler(
 \item{model_summary}{A model-in data-out function to extract coefficient estimates or model summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} model summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the model object sent to \code{model}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the model object, it fails.}
 
 \item{term}{Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.}
-
-\item{estimand}{a declare_estimand step object, or a character label, or a list of either}
 }
 \value{
 A function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimator and associated statistics.
@@ -58,6 +56,8 @@ Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}
 }
 \details{
 \code{declare_estimator} is designed to handle two main ways of generating parameter estimates from data.
+
+In \code{declare_estimator}, you can optionally provide the name of an estimand or an objected created by \code{\link{declare_estimand}} to connect your estimate(s) to estimand(s).
 
 The first is through \code{label_estimator(model_handler)}, which is the default value of the \code{handler} argument. Users can use standard modeling functions like lm, glm, or iv_robust. The models are summarized using the function passed to the \code{model_summary} argument. This will usually be a "tidier" like \code{broom::tidy}. The default \code{model_summary} function is \code{tidy_try}, which applies a tidy method if available, and if not, tries to make one on the fly.
 
