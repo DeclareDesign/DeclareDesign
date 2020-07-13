@@ -3,12 +3,9 @@
 \name{tidy_estimator}
 \alias{tidy_estimator}
 \alias{ourPkg-deprecated}
-\alias{get_estimands}
 \title{Deprecated functions in package \pkg{DeclareDesign}.}
 \usage{
 tidy_estimator(estimator_function)
-
-get_estimands(design)
 }
 \description{
 The functions listed below are deprecated and will be defunct in
@@ -19,11 +16,6 @@ The functions listed below are deprecated and will be defunct in
 \section{\code{tidy_estimator}}{
 
 For \code{tidy_estimator}, use \code{\link{label_estimator}}.
-}
-
-\section{\code{get_estimands}}{
-
-For \code{get_estimands}, use \code{\link{draw_estimands}}.
 }
 
 \keyword{internal}

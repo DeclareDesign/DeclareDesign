@@ -62,7 +62,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
     phi
   }
 
-  estimator <- declare_estimator(handler = tidy_estimator(my_estimator), estimand = estimand)
+  estimator <- declare_estimator(handler = label_estimator(my_estimator), estimand = estimand)
 
   diagnosand <- declare_diagnosands(bias = mean(estimate - estimand), keep_defaults = FALSE)
 

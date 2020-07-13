@@ -265,11 +265,9 @@ label_estimator <- function(fn) {
 #' @section \code{tidy_estimator}:
 #' For \code{tidy_estimator}, use \code{\link{label_estimator}}.
 #'
-#' @importFrom lifecycle deprecate_soft
-#'
 #' @export
 tidy_estimator <- function(estimator_function) {
-  deprecate_soft("1.0.0", "tidy_estimator()", "label_estimator()")
+  warning("tidy_estimator() has been deprecated. Please use label_estimator() instead.")
   label_estimator(fn = estimator_function)
 }
 
@@ -362,7 +360,7 @@ validation_fn(model_handler) <- function(ret, dots, label) {
   ret
 }
 
-# helper methods for estimand=my_estimand arguments to estimator_handler
+# helper methods for estimand = my_estimand arguments to estimator_handler
 #
 get_estimand_label <- function(estimand) {
   force(estimand) # no promise nonsense when we look at it

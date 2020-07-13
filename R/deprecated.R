@@ -8,13 +8,3 @@
 #' @keywords internal
 NULL
 
-#' @rdname ourPkg-deprecated
-#' @section \code{get_estimands}:
-#' For \code{get_estimands}, use \code{\link{draw_estimands}}.
-#'
-#' @importFrom lifecycle deprecate_stop
-#'
-#' @export
-get_estimands <- function(design) {
-  deprecate_stop("1.0.0", "get_estimands()", "draw_estimands()")
-}
