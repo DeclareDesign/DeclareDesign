@@ -20,6 +20,8 @@ Depends:
     estimatr (>= 0.20.0)
 Imports:
     rlang, generics
+Remotes:
+    DeclareDesign/estimatr
 License: MIT + file LICENSE
 URL: https://declaredesign.org, https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues
