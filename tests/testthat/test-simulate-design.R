@@ -102,7 +102,7 @@ test_that("designs with some estimators that don't have p.values return the p.va
     declare_assignment() +
     declare_reveal(Y, Z) +
     declare_estimator(Y ~ Z, estimand = "ATE", label = "blah") +
-    declare_estimator(handler = tidy_estimator(my_custom_estimator), estimand = "ATE")
+    declare_estimator(handler = label_estimator(my_custom_estimator), estimand = "ATE")
   
   expect_equivalent(names(simulate_design(des, sims = 1)), c("design_label", "sim_ID", "estimand_label", "estimand", "estimator_label", 
                                                         "term", "estimate", "std.error", "statistic", "p.value", "conf.low", 
