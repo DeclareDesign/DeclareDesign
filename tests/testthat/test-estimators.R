@@ -35,7 +35,7 @@ test_that("custom estimator function", {
   my_mean <- function(data) {
     data.frame(estimate = with(data, 2), foo = mean(data$Y))
   }
-  my_estimator_custom <- declare_estimator(handler = tidy_estimator(my_mean))
+  my_estimator_custom <- declare_estimator(handler = label_estimator(my_mean))
   cust <- my_population() %>% my_potential_outcomes() %>% my_assignment() %>% reveal_outcomes() %>% my_estimator_custom()
   expect_equal(cust$estimate, 2)
 })
@@ -266,8 +266,8 @@ test_that("default estimator handler validation fn", {
   expect_error(declare_estimator(model = I))
 })
 
-test_that("tidy_estimator, handler does not take data", {
-  expect_error(tidy_estimator(I), "function with a data argument")
+test_that("label_estimator, handler does not take data", {
+  expect_error(label_estimator(I), "function with a data argument")
 })
 
 test_that("model_handler runs directly", {
@@ -315,7 +315,7 @@ test_that("estimators have different columns", {
   }
 
   estimator_m <- declare_estimator(
-    handler = tidy_estimator(matching_helper),
+    handler = label_estimator(matching_helper),
     estimand = att,
     label = "matching"
   )
