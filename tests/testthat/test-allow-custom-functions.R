@@ -36,7 +36,7 @@ test_that("a dplyr pipeline can be used in a design", {
 
 # Use dyplr functions as handlers ?
 
-test_that("dplyr functions can be handlers", {
+test_that("dplyr::mutate can be handlers", {
 
   design2 <- declare_population(N = 5, X = rnorm(N)) + declare_step(Y = 4, handler = mutate)
 
@@ -45,3 +45,11 @@ test_that("dplyr functions can be handlers", {
   expect_equal(df$Y, rep(4,5))
 })
 
+test_that("dplyr filter can be handlers", {
+  
+  design2 <- declare_population(N = 5, X = rnorm(N)) + declare_step(ID > 3, handler = filter)
+  
+  df <- draw_data(design2)
+  
+  expect_equal(df$ID, 4:5)
+})
