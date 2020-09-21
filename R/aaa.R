@@ -37,28 +37,40 @@ dots_env_copy <- function(dots) {
 
 
 # Given a function and dots, rename dots based on how things will positionally match
-#' @importFrom rlang is_empty
+#' @importFrom rlang is_empty is_scalar_character get_expr
 rename_dots <- function(handler, dots, addData = TRUE) {
+  if(addData && !any(c('data', '.data') %in% names(dots))) {
+    # first check if ^data argument was already provided by user in dots.
+    # DD data param in this comment
+    dot_is_data <- vapply(lapply(dots, get_expr), identical, TRUE, quote(data))
+    
+    if(!any(dot_is_data)) {
+    
+      # To make handlers quasi-compatible with hadley naming of functions
+      # eg .data and not data
+      
+      # If there is neither a data or .data, match positional argument #1
+      data_arg <- list(quote(data))
+      data_arg_name <- names(formals(handler)) %i% c('data', '.data')
+      if(is_scalar_character(data_arg_name)) {
+        names(data_arg) <- data_arg_name
+      }
+      
+      dots <- append(dots, data_arg, after = FALSE)
+    }
+  }   
+  
   if (is_empty(dots)) {
     return(dots)
   }
-
+  
   f <- function(...) as.list(match.call(handler)[-1])
-
+  
+  # Match positions to parameter names of handler, copy names onto dots.
+  # Defensive, will help when handlers are wrapped in HOF
   d_idx <- setNames(seq_along(dots), names(dots))
-
-  if (addData) {
-    d_idx["data"] <- list(NULL)
-  }
-
   d_idx <- eval_tidy(quo(f(!!!d_idx)))
-
-  if (addData) {
-    d_idx$data <- NULL
-  }
-
   d_idx <- unlist(d_idx)
-
   d_idx <- d_idx[names(d_idx) != "" ]
 
   names(dots)[d_idx] <- names(d_idx)
@@ -73,27 +85,19 @@ currydata <- function(FUN, dots, addDataArg = TRUE, strictDataParam = TRUE, clon
     dots <- dots_env_copy(dots)
   }
 
-  quoNoData <- quo((FUN)(!!!dots))
-
-  if (addDataArg && !"data" %in% names(dots) && !".data" %in% names(dots)) {
-    # To make handlers quasi-compatible with hadley naming of functions
-    # eg .data and not data
-    hadley_naming <- ".data" %in% names(formals(FUN))
-
-    data_arg <- list(data = quote(data))
-    if(hadley_naming) names(data_arg) <- ".data"
-    dots <- append(dots, data_arg, after = FALSE)
-  }
-
   quo <- quo((FUN)(!!!dots))
-
 
   if (isTRUE(strictDataParam)) {
     function(data) eval_tidy(quo, data = list(data = data))
   } else {
+    quoNoData <- quo((FUN)(!!!dots))
+    
     function(data = NULL) {
       # message(quo)
-      # used for declare_population with no seed data provided
+      # used for declare_population with no seed data provided, in which case null is not the same as missing.
+      # Unfortunately, steps do not know at time of declaration if they are in first position or not; 
+      # combining steps into design happens after.
+      # This could in theory be caught be a design validation function for declare_population.
       res <- if (is.null(data)) eval_tidy(quoNoData) else eval_tidy(quo, data = list(data = data))
       res
     }
