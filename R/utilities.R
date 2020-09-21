@@ -50,8 +50,14 @@ declare_time_warn <- function(message, declaration) {
   warning(simpleWarning(message, call = attr(declaration, "call")))
 }
 
+
+### Helper functions for below, to skip warn for data dot added by rename_dots.
+`is_implicit_data_arg<-` <- function(dot, value=TRUE) structure(dot, implicit_data_arg=value)
+is_implicit_data_arg <- function(dot) isTRUE(attr(dot, "implicit_data_arg"))
+
 declare_time_error_if_data <- function(declaration) {
-  if ("data" %in% names(attr(declaration, "dots"))) {
+  dots <- attr(declaration, "dots")
+  if (hasName(dots, "data") && !is_implicit_data_arg(dots)) {
     declare_time_error("`data` should not be a declared argument.", declaration)
   }
 }

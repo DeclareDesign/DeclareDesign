@@ -57,6 +57,7 @@ rename_dots <- function(handler, dots, addData = TRUE) {
       }
       
       dots <- append(dots, data_arg, after = FALSE)
+      is_implicit_data_arg(dots) <- TRUE
     }
   }   
   
@@ -85,11 +86,12 @@ currydata <- function(FUN, dots, addDataArg = TRUE, strictDataParam = TRUE, clon
     dots <- dots_env_copy(dots)
   }
 
-  quo <- quo((FUN)(!!!dots))
+  quoData <- quo((FUN)(!!!dots))
 
   if (isTRUE(strictDataParam)) {
-    function(data) eval_tidy(quo, data = list(data = data))
+    function(data) eval_tidy(quoData, data = list(data = data))
   } else {
+    dotsNoData <- dots[names(dots) != 'data']
     quoNoData <- quo((FUN)(!!!dots))
     
     function(data = NULL) {
@@ -98,7 +100,7 @@ currydata <- function(FUN, dots, addDataArg = TRUE, strictDataParam = TRUE, clon
       # Unfortunately, steps do not know at time of declaration if they are in first position or not; 
       # combining steps into design happens after.
       # This could in theory be caught be a design validation function for declare_population.
-      res <- if (is.null(data)) eval_tidy(quoNoData) else eval_tidy(quo, data = list(data = data))
+      res <- if (is.null(data)) eval_tidy(quoNoData) else eval_tidy(quoData, data = list(data = data))
       res
     }
   }

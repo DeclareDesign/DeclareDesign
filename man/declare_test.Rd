@@ -90,7 +90,6 @@ ttest_design <-
     Xclus = rbinom(n = N, size = 1, prob = 0.2), 
     outcome = 3 + rnorm(N)) +
   declare_test(handler = label_test(our_ttest), label = "t-test")
-
   
 \dontrun{
 diagnosis <- diagnose_design(
