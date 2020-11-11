@@ -59,7 +59,7 @@ declare_time_error_if_data <- function(declaration) {
 
 # Wrapper function, use future_lapply if we have it, fallback to lapply if not
 
-future_lapply <- function(..., future.seed = NA, future.globals = TRUE) {
+future_lapply <- function(..., future.seed = TRUE, future.globals = TRUE) {
   if (requireNamespace("future.apply", quietly = TRUE)) {
     future.apply::future_lapply(..., future.seed = future.seed, future.globals = future.globals)
   } else {
