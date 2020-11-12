@@ -61,6 +61,7 @@ tidy_try_internal <- function(x, conf.int = TRUE) {
 generics::tidy
 
 #' @importFrom utils getS3method
+#' @importFrom methods extends
 hasS3Method <- function(f, obj) {
   o_classes <- if(isS4(obj)) extends(class(obj)) else class(obj)
   for(i in o_classes) {
