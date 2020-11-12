@@ -37,7 +37,7 @@ jobs:
       R_FUTURE_PLAN: ${{ matrix.config.future_plan }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.3.4
 
       - uses: r-lib/actions/setup-r@master
         with:
@@ -46,24 +46,12 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@master
       
       # this is because of sf package
-      - name: Brew and macOS config
+      - name: "[Custom block] [macOS] Install spatial libraries"
         if: runner.os == 'macOS'
         run: |
-          brew install pkg-config
-          brew install udunits
-          brew install gdal
-          cat <<EOT >> .Renviron
-          PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
-          PROJ_LIB=/usr/local/opt/proj/share/proj/
-          # for installing XML package from source
-          XML_CONFIG=/usr/local/opt/libxml2/bin/xml2-config
-          EOT
-          cat <<EOT >> .Rprofile
-          config_args <- c("sf" = "--with-proj-lib=/usr/local/lib/", "rgdal" = "--with-proj-lib=/usr/local/lib/ --with-proj-include=/usr/local/include/")
-          r <- getOption("repos")
-          r["CRAN"] <- "https://cran.rstudio.com"
-          options(configure.args = config_args, repos = r)
-          EOT
+          # conflicts with gfortran from r-lib/actions when linking gcc
+          rm '/usr/local/bin/gfortran'
+          brew install pkg-config gdal proj geos
 
       - name: Query dependencies
         run: |

@@ -19,7 +19,7 @@ Depends:
     fabricatr (>= 0.10.0),
     estimatr (>= 0.20.0)
 Imports:
-    rlang, generics
+    rlang, generics, methods
 Remotes:
     DeclareDesign/estimatr
 License: MIT + file LICENSE
