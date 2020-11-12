@@ -13,7 +13,8 @@
 #' 
 #' design <-
 #'   declare_population(N = 10, latent = seq(0, 1, length.out = N)) +
-#'   declare_measurement(observed = as.numeric(cut(latent, breaks = seq(0, 1, length.out = 6), include.lowest = TRUE)))
+#'   declare_measurement(
+#'     observed = as.numeric(cut(latent, breaks = seq(0, 1, length.out = 6), include.lowest = TRUE)))
 #' 
 #' draw_data(design)
 #'
