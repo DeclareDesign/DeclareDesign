@@ -102,7 +102,7 @@ validation_fn(sampling_handler) <- function(ret, dots, label) {
         dots[rs_args] <- NULL
         dots$declaration <- declaration
 
-        ret <- build_step(currydata(sampling_handler, dots, strictDataParam = attr(ret, "strictDataParam")),
+        ret <- build_step(currydata(sampling_handler, dots),
           handler = sampling_handler,
           dots = dots,
           label = label,

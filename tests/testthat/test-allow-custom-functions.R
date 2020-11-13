@@ -36,12 +36,32 @@ test_that("a dplyr pipeline can be used in a design", {
 
 # Use dyplr functions as handlers ?
 
-test_that("dplyr functions can be handlers", {
+test_that("dplyr::mutate can be handlers", {
 
   design2 <- declare_population(N = 5, X = rnorm(N)) + declare_step(Y = 4, handler = mutate)
 
   df <- draw_data(design2)
 
   expect_equal(df$Y, rep(4,5))
+})
+
+test_that("dplyr filter can be handlers", {
+  
+  design2 <- declare_population(N = 5, X = rnorm(N)) + declare_step(ID > 3, handler = filter)
+  
+  df <- draw_data(design2)
+  
+  expect_equal(df$ID, as.character(4:5))
+ expect_true(DeclareDesign:::is_implicit_data_arg(environment(design2[[2]])$dots))
+})
+
+test_that("dplyr filter can be handlers with explicit .data", {
+  
+  design2 <- declare_population(N = 5, X = rnorm(N)) + declare_step(.data=data, ID > 3, handler = filter)
+  
+  df <- draw_data(design2)
+  
+  expect_equal(df$ID, as.character(4:5))
+ expect_false(DeclareDesign:::is_implicit_data_arg(environment(design2[[2]])$dots))
 })
 

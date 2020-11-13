@@ -18,5 +18,5 @@
 #' 
 #' draw_data(design)
 #'
-declare_measurement <- make_declarations(fabricate, "measurement", strictDataParam = FALSE)
+declare_measurement <- make_declarations(fabricate, "measurement")
 
