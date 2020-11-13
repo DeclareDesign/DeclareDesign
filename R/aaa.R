@@ -37,28 +37,46 @@ dots_env_copy <- function(dots) {
 
 
 # Given a function and dots, rename dots based on how things will positionally match
-#' @importFrom rlang is_empty
-rename_dots <- function(handler, dots, addData = TRUE) {
+#' @importFrom rlang is_empty is_scalar_character get_expr
+rename_dots <- function(handler, dots) {
+  
+  initial_call <- match.call(handler, as.call(get_expr(quo(handler(!!!dots)))))
+  
+  free_vars <- setdiff(names(formals(handler)), names(initial_call))
+  
+  if(length(free_vars) > 0 & !any(c('data', '.data') %in% names(dots))) {
+    # first check if ^data argument was already provided by user in dots.
+    # DD data param in this comment
+    dot_is_data <- vapply(lapply(dots, get_expr), identical, TRUE, quote(data))
+    
+    if(!any(dot_is_data)) {
+    
+      # To make handlers quasi-compatible with hadley naming of functions
+      # eg .data and not data
+      
+      # If there is neither a data or .data, match positional argument #1
+      data_arg <- list(quote(data))
+      data_arg_name <- names(formals(handler)) %i% c('data', '.data')
+      if(is_scalar_character(data_arg_name)) {
+        names(data_arg) <- data_arg_name
+      }
+      
+      dots <- append(dots, data_arg, after = FALSE)
+      is_implicit_data_arg(dots) <- TRUE
+    }
+  }   
+  
   if (is_empty(dots)) {
     return(dots)
   }
-
+  
   f <- function(...) as.list(match.call(handler)[-1])
-
+  
+  # Match positions to parameter names of handler, copy names onto dots.
+  # Defensive, will help when handlers are wrapped in HOF
   d_idx <- setNames(seq_along(dots), names(dots))
-
-  if (addData) {
-    d_idx["data"] <- list(NULL)
-  }
-
   d_idx <- eval_tidy(quo(f(!!!d_idx)))
-
-  if (addData) {
-    d_idx$data <- NULL
-  }
-
   d_idx <- unlist(d_idx)
-
   d_idx <- d_idx[names(d_idx) != "" ]
 
   names(dots)[d_idx] <- names(d_idx)
@@ -67,36 +85,19 @@ rename_dots <- function(handler, dots, addData = TRUE) {
 }
 
 # Returns a new function(data) which calls FUN(data, dots)
-currydata <- function(FUN, dots, addDataArg = TRUE, strictDataParam = TRUE, cloneDots = TRUE) {
-  # heuristic to reuse deep clones
-  if (cloneDots) {
-    dots <- dots_env_copy(dots)
-  }
+currydata <- function(FUN, dots) {
 
-  quoNoData <- quo((FUN)(!!!dots))
+  quoData <- quo((FUN)(!!!dots))
+  quoNoData <- quo((FUN)(!!!(dots[names(dots) != 'data'])))
+  
+  function(data = NULL) {
+    #message(quo)
+    # used for declare_population with no seed data provided, in which case null is not the same as missing.
+    # Unfortunately, steps do not know at time of declaration if they are in first position or not; 
+    # combining steps into design happens after.
+    # This could in theory be caught be a design validation function for declare_population.
 
-  if (addDataArg && !"data" %in% names(dots) && !".data" %in% names(dots)) {
-    # To make handlers quasi-compatible with hadley naming of functions
-    # eg .data and not data
-    hadley_naming <- ".data" %in% names(formals(FUN))
-
-    data_arg <- list(data = quote(data))
-    if(hadley_naming) names(data_arg) <- ".data"
-    dots <- append(dots, data_arg, after = FALSE)
-  }
-
-  quo <- quo((FUN)(!!!dots))
-
-
-  if (isTRUE(strictDataParam)) {
-    function(data) eval_tidy(quo, data = list(data = data))
-  } else {
-    function(data = NULL) {
-      # message(quo)
-      # used for declare_population with no seed data provided
-      res <- if (is.null(data)) eval_tidy(quoNoData) else eval_tidy(quo, data = list(data = data))
-      res
-    }
+    eval_tidy(if (is.null(data) & is_implicit_data_arg(dots)) quoNoData else quoData, data = list(data = data))
   }
 }
 
@@ -114,14 +115,11 @@ declaration_template <- function(..., handler, label = NULL) {
     dots$label <- NULL
   }
 
-  dots <- rename_dots(handler, dots, this$strictDataParam)
+  dots <- rename_dots(handler, dots)
   dots <- dots_env_copy(dots)
 
 
-  ret <- build_step(currydata(handler,
-                              dots,
-                              strictDataParam = this$strictDataParam,
-                              cloneDots = FALSE),
+  ret <- build_step(currydata(handler, dots),
                     handler = handler,
                     dots = dots,
                     label = label,

@@ -143,7 +143,7 @@ validation_fn(assignment_handler) <- function(ret, dots, label) {
   }
 
   if (dirty) {
-    ret <- build_step(currydata(assignment_handler, dots, strictDataParam = attr(ret, "strictDataParam")),
+    ret <- build_step(currydata(assignment_handler, dots),
       handler = assignment_handler,
       dots = dots,
       label = label,
