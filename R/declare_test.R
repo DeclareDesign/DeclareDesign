@@ -27,7 +27,7 @@
 #' diagnosis <- diagnose_design(
 #'   design = balance_test_design,
 #'   diagnosands = declare_diagnosands(
-#'   false_positive_rate = mean(p.value <= 0.05), keep_defaults = FALSE)
+#'   false_positive_rate = mean(p.value <= 0.05))
 #' )
 #' }
 #' 
@@ -76,7 +76,7 @@
 #' diagnosis <- diagnose_design(
 #'   design = ttest_design,
 #'   diagnosands = declare_diagnosands(
-#'     false_positive_rate = mean(p.value <= 0.05), keep_defaults = FALSE)
+#'     false_positive_rate = mean(p.value <= 0.05))
 #' )
 #' }
 #' 
