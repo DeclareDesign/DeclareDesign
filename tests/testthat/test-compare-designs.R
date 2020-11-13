@@ -13,7 +13,7 @@ sate <- declare_estimand(sate = mean(Y_Z_1 - Y_Z_0))
 pate_estimator <- declare_estimator(Y ~ Z, estimand = pate)
 sate_estimator <- declare_estimator(Y ~ Z, estimand = sate)
 
-reveal <- declare_reveal()
+reveal <- reveal_outcomes()
 
 my_design_1 <- my_population +
   my_potential_outcomes +
@@ -76,7 +76,7 @@ sate <- declare_estimand(sate = mean(Y_Z_1 - Y_Z_0))
 pate_estimator <- declare_estimator(Y ~ Z, estimand = pate)
 sate_estimator <- declare_estimator(Y ~ Z, estimand = sate)
 
-reveal <- declare_reveal()
+reveal <- reveal_outcomes()
 
 my_special_step <- declare_estimand(ATE = 5)
 

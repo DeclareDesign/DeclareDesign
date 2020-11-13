@@ -18,7 +18,7 @@ test_that("error if more than one label is sent to any step", {
     m = 10,
     label = c("lbl1", "lbl2")), "Please provide only one label.")
   
-  expect_error(declare_reveal(
+  expect_error(reveal_outcomes(
     label = c("lbl1", "lbl2")), "Please provide only one label.")
   
   expect_error(declare_estimator(

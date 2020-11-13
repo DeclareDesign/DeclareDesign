@@ -16,7 +16,7 @@ pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
 
 pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = "test")
 
-reveal_outcomes <- declare_reveal()
+reveal_outcomes <- reveal_outcomes()
 
 my_design <- my_pop +
   my_potential_outcomes +

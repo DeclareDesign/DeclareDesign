@@ -11,7 +11,7 @@
 #'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_step(dplyr::mutate, noise_sq = noise^2) +
 #'   declare_assignment(m = 25) +
-#'   declare_reveal() +
+#'   reveal_outcomes() +
 #'   declare_estimator(Y ~ Z, estimand = "my_estimand")
 #'
 #' design

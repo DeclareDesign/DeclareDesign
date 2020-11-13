@@ -9,7 +9,7 @@ my_potential_outcomes <-
     Y_Z_1 = draw_binary(latent = noise + 2, link = "probit")
   )
 my_assignment <- declare_assignment()
-my_reveal <- declare_reveal()
+my_reveal <- reveal_outcomes()
 my_design <- my_population +
   my_potential_outcomes +
   my_assignment +

@@ -19,8 +19,8 @@ test_that("multiple potential outcomes", {
     my_potential_outcomes_Y +
     my_potential_outcomes_attrition +
     my_assignment +
-    declare_reveal(outcome_variable = "R", assignment_variable = "Z") +
-    declare_reveal(outcome_variable = "Y", assignment_variable = "Z")
+    reveal_outcomes(outcome_variable = "R", assignment_variable = "Z") +
+    reveal_outcomes(outcome_variable = "Y", assignment_variable = "Z")
 
   expect_true(all(
     c("R", "Y") %in% colnames(draw_data(my_design))

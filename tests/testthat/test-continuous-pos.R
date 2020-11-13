@@ -12,7 +12,7 @@ test_that("you can do continuous POs", {
 
   my_assignment <- declare_assignment(conditions = conditions)
 
-  my_reveal <- declare_reveal()
+  my_reveal <- reveal_outcomes()
 
   my_design <- my_population +
     my_potential_outcomes +
@@ -67,7 +67,7 @@ test_that("Hooke's law", {
   )
 
   # 1mm of measurment error
-  reveal <- declare_reveal(
+  reveal <- reveal_outcomes(
     handler = fabricate,
     length = potential_outcome_f(resting, stiffness, force) +
       rnorm(N, sd = .1)
