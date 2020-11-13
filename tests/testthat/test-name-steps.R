@@ -16,7 +16,7 @@ test_that("design steps are named appropriately when blank", {
     "assignment", "auto_reveal", "estimator"
   ))
 
-  des <- declare_population(N = 50) + declare_potential_outcomes(Y_Z_0 = rnorm(N), Y_Z_1 = Y_Z_0 + 1) + declare_estimand(mean(Y_Z_1 - Y_Z_0)) + declare_sampling(n = 25) + declare_assignment(m = 10) + declare_reveal() + declare_estimator(Y ~ Z)
+  des <- declare_population(N = 50) + declare_potential_outcomes(Y_Z_0 = rnorm(N), Y_Z_1 = Y_Z_0 + 1) + declare_estimand(mean(Y_Z_1 - Y_Z_0)) + declare_sampling(n = 25) + declare_assignment(m = 10) + reveal_outcomes() + declare_estimator(Y ~ Z)
   expect_equal(names(des), c(
     "population", "potential_outcomes", "estimand", "sampling",
     "assignment", "reveal", "estimator"

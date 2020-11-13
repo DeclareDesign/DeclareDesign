@@ -12,7 +12,7 @@
 #'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_sampling(n = 75) +
 #'   declare_assignment(m = 50) +
-#'   declare_reveal(Y, Z) +
+#'   reveal_outcomes(Y, Z) +
 #'   declare_estimator(Y ~ Z, estimand = "ATE")
 #' 
 #' dat <- draw_data(design)

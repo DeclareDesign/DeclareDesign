@@ -64,7 +64,7 @@ test_that("More multiple estimands", {
   smp <- declare_sampling(handler = my_smp_fun)
   sate <- declare_estimand(sate = mean(Y_Z_1 - Y_Z_0))
   assgn <- declare_assignment(m = 10)
-  my_reveal <- declare_reveal()
+  my_reveal <- reveal_outcomes()
   mator_both <- declare_estimator(Y ~ Z, estimand = c(pate, sate))
 
 

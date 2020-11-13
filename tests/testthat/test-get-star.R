@@ -8,7 +8,7 @@ potential_outcomes <- declare_potential_outcomes(Y_Z_0 = 0,
 estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 sampling <- declare_sampling(n = 75)
 assignment <- declare_assignment(m = 50)
-reveal_Y <- declare_reveal(Y, Z)
+reveal_Y <- reveal_outcomes(Y, Z)
 estimator <- declare_estimator(Y ~ Z, estimand = estimand)
 design <-
   population + potential_outcomes + estimand + sampling + assignment + reveal_Y + estimator

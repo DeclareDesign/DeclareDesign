@@ -252,7 +252,7 @@ test_that("Reveal step injected (default names)", {
   po <- declare_potential_outcomes(Y ~ Z + foo)
   assn <- declare_assignment(m = N / 2)
   d <- pop + po + assn
-  # expect_warning(d <- pop +  po + assn, "inject a `declare_reveal")
+  # expect_warning(d <- pop +  po + assn, "inject a `reveal_outcomes")
   expect_true("Y" %in% colnames(draw_data(d)))
 })
 
@@ -286,7 +286,7 @@ test_that("Reveal step injected (default names)", {
   # expect_warning(d <- pop + po + assn, "never later revealed")
   expect_true("Q" %in% colnames(draw_data(d)))
 
-  # expect_warning(d <- pop + assn + po + identity, "inject a `declare_reveal")
+  # expect_warning(d <- pop + assn + po + identity, "inject a `reveal_outcomes")
 })
 
 
@@ -299,7 +299,7 @@ test_that("Reveal step injected after another injected reveal step", {
   assn <- declare_assignment(m = N / 2)
 
   d <- pop + po + po2 + assn
-  # expect_warning(d <- pop + po + po2 + assn, "inject a `declare_reveal[(]Q, Y")
+  # expect_warning(d <- pop + po + po2 + assn, "inject a `reveal_outcomes[(]Q, Y")
   expect_true("Y" %in% colnames(draw_data(d)))
 
   expect_equal(attr(d[[5]], "step_type"), "reveal")

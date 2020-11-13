@@ -1,15 +1,21 @@
 #' Declare a reveal outcomes step
 #'
 #' Potential outcomes declarations indicate what outcomes would obtain for different possible values of assignment variables. 
-#' To reveal actual outcomes we combine assignments with potential outcomes. \code{declare_reveal} provides information on how this
+#' To reveal actual outcomes we combine assignments with potential outcomes. \code{reveal_outcomes} provides information on how this
 #' revelation should be implemented, identifying the relevant assignment variables (for example created by \code{declare_assignment}) and outcome variables. 
 #' Revelation steps are usefully included after declaration of all assignments of conditions required to determine the realized outcome.
 #' If a revelation is not declared DeclareDesign will try to guess appropriate revelations though explicit revelation is recommended.
+#' 
+#' This function was previously called \code{declare_reveal}. You can still use either one.
 #'
 #' @inheritParams declare_internal_inherit_params
 #'
 #' @export
-declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal")
+reveal_outcomes <- make_declarations(reveal_outcomes_handler, "reveal")
+
+#' @rdname reveal_outcomes
+#' @export
+declare_reveal <- reveal_outcomes
 
 #' @param data A data.frame containing columns for assignment and potential outcomes.
 #'
@@ -19,10 +25,10 @@ declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal")
 #'
 #' @details
 #'
-#' \code{declare_reveal} declares how outcomes should be realized.  
+#' \code{reveal_outcomes} declares how outcomes should be realized.  
 #' A "revelation" uses the random assignment to pluck out the correct potential outcomes (Gerber and Green 2012, Chapter 2).
 #' If you create a simple design (with assignment variable Z and outcome variable Y) with the + operator but omit a reveal declaration, DeclareDesign will attempt to insert a revelation  step automatically.
-#' If you have multiple outcomes to reveal or different names for the outcome or assignment variables, use \code{declare_reveal} to customize which outcomes are revealed.
+#' If you have multiple outcomes to reveal or different names for the outcome or assignment variables, use \code{reveal_outcomes} to customize which outcomes are revealed.
 #' Revelation requires that every named outcome variable is a function of every named assignment variable within a step. Thus if multiple outcome variables depend on different assignment variables, multiple revelations are needed.  
 #'
 #' 
@@ -30,7 +36,7 @@ declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal")
 #' @importFrom rlang enexpr expr_text
 #'
 #' @export
-#' @rdname declare_reveal
+#' @rdname reveal_outcomes
 #'
 #' @examples
 #'
@@ -42,7 +48,7 @@ declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal")
 #'
 #' my_assignment <- declare_assignment(m = 50)
 #'
-#' my_reveal <- declare_reveal()
+#' my_reveal <- reveal_outcomes()
 #'
 #' design <- my_population +
 #'   my_potential_outcomes +
@@ -52,7 +58,7 @@ declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal")
 #' design
 #'
 #' #  Here the + operator results in the same design being
-#' #  created, because it automatically adds a declare_reveal step.
+#' #  created, because it automatically adds a reveal_outcomes step.
 #'
 #' design <- my_population + my_potential_outcomes + my_assignment
 #'
@@ -64,16 +70,16 @@ declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal")
 #' potentials_3 <- declare_potential_outcomes(Y3 ~ 1 - X*Z, conditions = list(X = 0:1, Z = 0:1))  
 #' assignment_Z <- declare_assignment(assignment_variable = "Z")
 #' assignment_X <- declare_assignment(assignment_variable = "X")
-#' reveal_1     <- declare_reveal(outcome_variables = c("Y1", "Y2"), assignment_variables = "Z")
-#' reveal_2     <- declare_reveal(outcome_variables = "Y3", assignment_variables = c("X", "Z"))
+#' reveal_1     <- reveal_outcomes(outcome_variables = c("Y1", "Y2"), assignment_variables = "Z")
+#' reveal_2     <- reveal_outcomes(outcome_variables = "Y3", assignment_variables = c("X", "Z"))
 #'
 #' # Note here that the reveal cannot be done in one step, e.g. by using
-#' # declare_reveal(outcome_variables = c("Y1", "Y2", "Y3"),
+#' # reveal_outcomes(outcome_variables = c("Y1", "Y2", "Y3"),
 #' #   assignment_variables = c("X","Z"))
 #' # The reason is that in each revelation all outcome variables should be a
 #' # function of all assignment variables.
 #' 
-#' # declare_reveal can also be used to declare outcomes that include attrition
+#' # reveal_outcomes can also be used to declare outcomes that include attrition
 #' 
 #' population <- declare_population(N = 100, age = sample(18:95, N, replace = TRUE))
 #' 
@@ -84,8 +90,8 @@ declare_reveal <- make_declarations(reveal_outcomes_handler, "reveal")
 #' potential_outcomes_attrition <- 
 #'   declare_potential_outcomes(R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
 #' 
-#' reveal_attrition <- declare_reveal(outcome_variables = "R")
-#' reveal_outcomes <- declare_reveal(outcome_variables = "Y", attrition_variables = "R")
+#' reveal_attrition <- reveal_outcomes(outcome_variables = "R")
+#' reveal_outcomes <- reveal_outcomes(outcome_variables = "Y", attrition_variables = "R")
 #' 
 #' my_design <- population + potential_outcomes_Y + potential_outcomes_attrition + 
 #'   my_assignment + reveal_attrition + reveal_outcomes

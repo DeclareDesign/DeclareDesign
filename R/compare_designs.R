@@ -67,7 +67,7 @@ compare_partial <- function(FUN, DIFFFUN, is_data = FALSE){
 #'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_sampling(n = 75) +
 #'   declare_assignment(m = 50) +
-#'   declare_reveal(Y, Z) +
+#'   reveal_outcomes(Y, Z) +
 #'   declare_estimator(Y ~ Z, estimand = "ATE")
 #' 
 #' design2 <- declare_population(N = 200, u = rnorm(N)) +
@@ -75,7 +75,7 @@ compare_partial <- function(FUN, DIFFFUN, is_data = FALSE){
 #'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_sampling(n = 100) +
 #'   declare_assignment(m = 25) +
-#'   declare_reveal(Y, Z) +
+#'   reveal_outcomes(Y, Z) +
 #'   declare_estimator(Y ~ Z, model = lm_robust, estimand = "ATE")
 #'  
 #'  compare_designs(design1, design2)

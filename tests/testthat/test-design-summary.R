@@ -13,7 +13,7 @@ test_that("Basic design summary", {
 
   my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
-  reveal_outcomes <- declare_reveal()
+  reveal_outcomes <- reveal_outcomes()
 
   design <- my_population +
     my_potential_outcomes +

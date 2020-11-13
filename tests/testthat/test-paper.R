@@ -66,7 +66,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
 
   diagnosand <- declare_diagnosands(bias = mean(estimate - estimand), keep_defaults = FALSE)
 
-  reveal_outcomes <- declare_reveal()
+  reveal_outcomes <- reveal_outcomes()
 
   design <-
     population +
