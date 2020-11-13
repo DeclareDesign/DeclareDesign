@@ -199,7 +199,7 @@ test_that("Overriding join conditions", {
 
   attr(custom, "group_by") <- c("estimand_label", "estimator_label")
 
-  design <- declare_population(sleep, handler = fabricatr::resample_data) +
+  design <- declare_population(data=sleep, handler = fabricatr::resample_data) +
     declare_estimand(group1 = 1, group2 = 2, term = TRUE, label = "e") +
     declare_estimator(extra ~ group + 0, term = TRUE, estimand = "e", model = lm, label = "my_estimator")
 

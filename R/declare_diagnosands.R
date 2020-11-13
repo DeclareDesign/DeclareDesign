@@ -120,7 +120,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
     default_diagnosand_names <- default_diagnosand_names[!default_diagnosand_names %in% subtract_set]
   }
   
-  options <- names(dots)[!names(dots) %in% c("select", "subtract", "keep_defaults", "subset", "alpha", "label")]
+  options <- names(dots)[!names(dots) %in% c("select", "subtract", "keep_defaults", "subset", "alpha", "label", "data")]
   if (!("keep_defaults" %in% names(dots)) ||
       ("keep_defaults" %in% names(dots) && eval_tidy(dots[["keep_defaults"]]) == TRUE)) {
     options <- c(options, default_diagnosand_names)
