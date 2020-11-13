@@ -108,6 +108,6 @@ test_that("designs with some estimators that don't have p.values return the p.va
                                                         "term", "estimate", "std.error", "statistic", "p.value", "conf.low", 
                                                         "conf.high", "df", "outcome"))
   
-  expect_equal(nrow(get_diagnosands(diagnose_design(des, sims = 2, diagnosands = declare_diagnosands(select = power)))), 2)
+  expect_equal(nrow(get_diagnosands(diagnose_design(des, sims = 2, diagnosands = declare_diagnosands(power = mean(p.value <= 0.05))))), 2)
   
 })
