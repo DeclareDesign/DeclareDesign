@@ -14,7 +14,7 @@ test_that("multiple PO / reveal", {
 
   my_outcomes <- paste0("Y", 1:3)
 
-  reveal_multiple <- declare_reveal(outcome_variables = !!my_outcomes)
+  reveal_multiple <- reveal_outcomes(outcome_variables = !!my_outcomes)
 
   design <- my_population + my_potential_outcomes3 + my_assignment + reveal_multiple
 
@@ -37,7 +37,7 @@ test_that("Lots of levels", {
   design <- declare_population(N = 26000, preference = sample(LETTERS, N, replace = TRUE)) +
     declare_potential_outcomes(!!!outcomes) +
     declare_assignment(conditions = !!LETTERS) +
-    declare_reveal()
+    reveal_outcomes()
 
   expect_equal(colnames(draw_data(design)), c(
     "ID", "preference", "Y_Z_A", "Y_Z_B", "Y_Z_C", "Y_Z_D", "Y_Z_E",

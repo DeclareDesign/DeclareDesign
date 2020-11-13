@@ -21,7 +21,7 @@ test_that("Reveal Outcomes", {
 
   my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
-  my_reveal <- declare_reveal()
+  my_reveal <- reveal_outcomes()
 
   my_design <- my_population + my_potential_outcomes + my_estimand + my_sampling + my_assignment + my_reveal + my_estimator
 
@@ -41,18 +41,18 @@ test_that("Reveal Outcomes NSE for assignment / outcome variables ", {
 
   my_assignment <- declare_assignment(prob = 1)
 
-  design <- my_population + my_potential_outcomes + my_assignment + declare_reveal()
+  design <- my_population + my_potential_outcomes + my_assignment + reveal_outcomes()
 
   df1 <- draw_data(design)
 
 
   design <- my_population + my_potential_outcomes + my_assignment +
-    declare_reveal(assignment_variables = Z, outcome_variables = Y)
+    reveal_outcomes(assignment_variables = Z, outcome_variables = Y)
 
   df2 <- draw_data(design)
 
   design <- my_population + my_potential_outcomes + my_assignment +
-    declare_reveal(assignment_variable = "Z", outcome_variable = "Y")
+    reveal_outcomes(assignment_variable = "Z", outcome_variable = "Y")
 
   df3 <- draw_data(design)
 
@@ -69,17 +69,17 @@ test_that("reveal multiple outcomes works", {
   my_assignment <- declare_assignment(prob = 1)
 
   design <- my_population + my_potential_outcomes1 + my_potential_outcomes2 + my_assignment +
-    declare_reveal(outcome_variables = c(Y1, Y2))
+    reveal_outcomes(outcome_variables = c(Y1, Y2))
   df1 <- draw_data(design)
 
   design <- my_population + my_potential_outcomes1 + my_potential_outcomes2 + my_assignment +
-    declare_reveal(outcome_variables = c("Y1", "Y2"))
+    reveal_outcomes(outcome_variables = c("Y1", "Y2"))
   df2 <- draw_data(design)
 
   expect_identical(df1, df2)
 })
 
-test_that("declare_reveal custom handler works", {
+test_that("reveal_outcomes custom handler works", {
   N <- 25
 
   my_population <- declare_population(N = N, noise = rnorm(N))
@@ -90,7 +90,7 @@ test_that("declare_reveal custom handler works", {
     return(data)
   }
 
-  design <- my_population + my_assignment + declare_reveal(handler = my_outcome_function)
+  design <- my_population + my_assignment + reveal_outcomes(handler = my_outcome_function)
   df <- draw_data(design)
 
   expect_true("Y" %in% colnames(df))
@@ -98,7 +98,7 @@ test_that("declare_reveal custom handler works", {
 
 test_that("missing PO stops", {
   expect_error(
-    declare_reveal(outcome_variables = foo, assignment_variables = extra)(sleep)
+    reveal_outcomes(outcome_variables = foo, assignment_variables = extra)(sleep)
   )
 })
 
@@ -106,7 +106,7 @@ test_that("Not all Potential outcome columns present", {
   df <- data.frame(Z = sample(1:3, 100, replace = TRUE), Y_Z_0 = 1:100, Y_Z_1 = 1:100)
 
   expect_error(
-    declare_reveal()(df),
+    reveal_outcomes()(df),
     "Y_Z_3"
   )
 })
@@ -139,7 +139,7 @@ test_that("Single outcome, multiple assn", {
     blocks = A + 10 * as.numeric(blocks), assignment_variable = B
   )
 
-  design <- population + potential_outcomes + assign_A + assign_B + declare_reveal(outcome_variables = Y, assignment_variables = c(A, B))
+  design <- population + potential_outcomes + assign_A + assign_B + reveal_outcomes(outcome_variables = Y, assignment_variables = c(A, B))
 
   dd <- draw_data(design)
 

@@ -6,7 +6,7 @@ design_a <-
   declare_potential_outcomes(Y_Z_0 = u, Y_Z_1 = u + rnorm(N, .5)) +
   declare_assignment(prob = prob_assgn) + 
   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0), label = "ATE") +
-  declare_reveal() +
+  reveal_outcomes() +
   declare_estimator(Y ~ Z, estimand = "ATE", label = "est1")
 design_b <- redesign(design_a, prob_assgn = 0.1)
 set.seed(2000)

@@ -7,7 +7,7 @@ test_that("plus works", {
   my_assignment <- declare_assignment(m = 25)
   my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
   my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-  my_reveal <- declare_reveal()
+  my_reveal <- reveal_outcomes()
 
   design <- my_population + my_potential_outcomes + my_sampling + my_estimand + my_assignment + my_reveal + my_estimator
   expect_length(design, 7)
@@ -20,7 +20,7 @@ test_that("more plus", {
   U <- declare_population(N = 10, noise = rnorm(N))
   Y <- declare_potential_outcomes(Y ~ Z + noise)
   Z <- declare_assignment()
-  R <- declare_reveal()
+  R <- reveal_outcomes()
 
 
   # auto adds

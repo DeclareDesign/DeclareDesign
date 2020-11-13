@@ -133,7 +133,7 @@ A few other features:
     parameters that returns a design.
 2.  You can change the features of the design to be diagnosed with
     `declare_diagnosands()`.
-3.  `declare_reveal()` implements a general switching equation, which
+3.  `reveal_outcomes()` implements a general switching equation, which
     allows you to reveal outcomes from potential outcomes and a
     treatment assignment.
 4.  You can provide custom functions to any `declare_*` step, as

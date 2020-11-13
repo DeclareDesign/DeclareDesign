@@ -31,7 +31,7 @@
 #'
 #' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 #'
-#' my_reveal <- declare_reveal()
+#' my_reveal <- reveal_outcomes()
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 #'

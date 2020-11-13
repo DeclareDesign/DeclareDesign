@@ -47,7 +47,7 @@ my_potential_outcomes  <- declare_potential_outcomes(
   Y ~ (.25 + X) * Z + rnorm(N))
 my_assignment  <- declare_assignment(m = 50)
 design_stub <- my_population + my_potential_outcomes + my_assignment + 
-  declare_reveal()
+  reveal_outcomes()
 
 # Get example data to compute estimands on
 dat <- draw_data(design_stub)

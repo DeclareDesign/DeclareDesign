@@ -17,7 +17,7 @@ test_that("allow design functions to be sent to simulate design and diagnose_des
 
     my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
-    my_reveal <- declare_reveal()
+    my_reveal <- reveal_outcomes()
 
     design <- my_population +
       my_potential_outcomes +
@@ -79,7 +79,7 @@ test_that("default diagnosands work", {
 
     my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
-    my_reveal <- declare_reveal()
+    my_reveal <- reveal_outcomes()
 
     design <- my_population +
       my_potential_outcomes +
