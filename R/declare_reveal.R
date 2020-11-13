@@ -136,8 +136,7 @@ validation_fn(reveal_outcomes_handler) <- function(ret, dots, label) {
   ret <- build_step(
     currydata(
       reveal_outcomes_handler,
-      dots,
-      strictDataParam = attr(ret, "strictDataParam")
+      dots
     ),
     handler = reveal_outcomes_handler,
     dots = dots,

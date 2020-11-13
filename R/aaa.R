@@ -38,8 +38,13 @@ dots_env_copy <- function(dots) {
 
 # Given a function and dots, rename dots based on how things will positionally match
 #' @importFrom rlang is_empty is_scalar_character get_expr
-rename_dots <- function(handler, dots, addData = TRUE) {
-  if(addData && !any(c('data', '.data') %in% names(dots))) {
+rename_dots <- function(handler, dots) {
+  
+  initial_call <- match.call(handler, as.call(get_expr(quo(handler(!!!dots)))))
+  
+  free_vars <- setdiff(names(formals(handler)), names(initial_call))
+  
+  if(length(free_vars) > 0 & !any(c('data', '.data') %in% names(dots))) {
     # first check if ^data argument was already provided by user in dots.
     # DD data param in this comment
     dot_is_data <- vapply(lapply(dots, get_expr), identical, TRUE, quote(data))
@@ -80,29 +85,19 @@ rename_dots <- function(handler, dots, addData = TRUE) {
 }
 
 # Returns a new function(data) which calls FUN(data, dots)
-currydata <- function(FUN, dots, addDataArg = TRUE, strictDataParam = TRUE, cloneDots = TRUE) {
-  # heuristic to reuse deep clones
-  if (cloneDots) {
-    dots <- dots_env_copy(dots)
-  }
+currydata <- function(FUN, dots) {
 
   quoData <- quo((FUN)(!!!dots))
+  quoNoData <- quo((FUN)(!!!(dots[names(dots) != 'data'])))
+  
+  function(data = NULL) {
+    #message(quo)
+    # used for declare_population with no seed data provided, in which case null is not the same as missing.
+    # Unfortunately, steps do not know at time of declaration if they are in first position or not; 
+    # combining steps into design happens after.
+    # This could in theory be caught be a design validation function for declare_population.
 
-  if (isTRUE(strictDataParam)) {
-    function(data) eval_tidy(quoData, data = list(data = data))
-  } else {
-    dotsNoData <- dots[names(dots) != 'data']
-    quoNoData <- quo((FUN)(!!!dots))
-    
-    function(data = NULL) {
-      # message(quo)
-      # used for declare_population with no seed data provided, in which case null is not the same as missing.
-      # Unfortunately, steps do not know at time of declaration if they are in first position or not; 
-      # combining steps into design happens after.
-      # This could in theory be caught be a design validation function for declare_population.
-      res <- if (is.null(data)) eval_tidy(quoNoData) else eval_tidy(quoData, data = list(data = data))
-      res
-    }
+    eval_tidy(if (is.null(data) & is_implicit_data_arg(dots)) quoNoData else quoData, data = list(data = data))
   }
 }
 
@@ -120,14 +115,11 @@ declaration_template <- function(..., handler, label = NULL) {
     dots$label <- NULL
   }
 
-  dots <- rename_dots(handler, dots, this$strictDataParam)
+  dots <- rename_dots(handler, dots)
   dots <- dots_env_copy(dots)
 
 
-  ret <- build_step(currydata(handler,
-                              dots,
-                              strictDataParam = this$strictDataParam,
-                              cloneDots = FALSE),
+  ret <- build_step(currydata(handler, dots),
                     handler = handler,
                     dots = dots,
                     label = label,

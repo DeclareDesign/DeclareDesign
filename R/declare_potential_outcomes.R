@@ -90,7 +90,7 @@ validation_fn(potential_outcomes_handler) <- function(ret, dots, label) {
 
 
   ret <- build_step(
-    currydata(s3method, dots, strictDataParam = attr(ret, "strictDataParam")),
+    currydata(s3method, dots),
     handler = s3method,
     dots = dots,
     label = label,
@@ -198,10 +198,7 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
   dots$assignment_variables <- names(dots$conditions)
 
   ret <- build_step(currydata(potential_outcomes.formula,
-    dots,
-    strictDataParam = attr(ret, "strictDataParam"),
-    cloneDots = FALSE
-  ),
+    dots),
   handler = potential_outcomes.formula,
   dots = dots,
   label = label,
