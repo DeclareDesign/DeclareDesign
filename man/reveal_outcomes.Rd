@@ -35,10 +35,12 @@ reveal_outcomes_handler(
 }
 \description{
 Potential outcomes declarations indicate what outcomes would obtain for different possible values of assignment variables. 
-To reveal actual outcomes we combine assignments with potential outcomes. \code{reveal_outcomes} provides information on how this
-revelation should be implemented, identifying the relevant assignment variables (for example created by \code{declare_assignment}) and outcome variables. 
+But realized outcomes need to be "revealed." 
+\code{reveal_outcomes} generates these realized outcomes using information on 
+potential outcomes  (for instance generated via \code{declare_potential_outcomes})  and the relevant 
+assignment variables (for example created by \code{declare_assignment}). 
 Revelation steps are usefully included after declaration of all assignments of conditions required to determine the realized outcome.
-If a revelation is not declared DeclareDesign will try to guess appropriate revelations though explicit revelation is recommended.
+If a revelation is not declared, DeclareDesign will try to guess appropriate revelations. Explicit revelation is recommended however.
 }
 \details{
 This function was previously called \code{declare_reveal}. You can still use either one.
