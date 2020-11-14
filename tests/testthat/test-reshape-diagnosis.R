@@ -89,7 +89,7 @@ test_that("designs with factors in diagnosands_df do not produce warnings", {
   design <- design <- my_population +
     declare_estimator(handler = label_estimator(my_estimator), label = "my_label")
 
-  diagnose_design(design, sims = 2, diagnosands = declare_diagnosands(first = first(estimate), keep_defaults = FALSE))
+  diagnose_design(design, sims = 2, diagnosands = declare_diagnosands(first = first(estimate)))
   
   my_estimator <- function(data) {
     data.frame(estimate = c("answer1", "answer2"), estimator_label = "my_label", stringsAsFactors = TRUE)
@@ -98,6 +98,6 @@ test_that("designs with factors in diagnosands_df do not produce warnings", {
   design <- design <- my_population +
     declare_estimator(handler = my_estimator)
   
-  expect_silent(reshape_diagnosis(diagnose_design(design, sims = 2, diagnosands = declare_diagnosands(first = first(estimate), keep_defaults = FALSE))))
+  expect_silent(reshape_diagnosis(diagnose_design(design, sims = 2, diagnosands = declare_diagnosands(first = first(estimate)))))
   
 })

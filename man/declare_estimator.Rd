@@ -209,8 +209,7 @@ design <- replace_step(design_def, my_estimator_dim, my_estimator_median)
 
 draw_estimates(design)
 
-my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand),
-  keep_defaults = FALSE)
+my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand))
 
 \dontrun{
 diagnose_design(design, diagnosands = my_diagnosand, sims = 5,
