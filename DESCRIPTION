@@ -1,6 +1,6 @@
 Package: DeclareDesign
 Title: Declare and Diagnose Research Designs
-Version: 0.23.0
+Version: 0.24.0
 Authors@R: c(person("Graeme", "Blair", email = "graeme.blair@ucla.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9164-2102")),
              person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = c("aut"), comment = c(ORCID = "0000-0002-8639-3188")),
              person("Alexander", "Coppock", email = "acoppock@gmail.com", role = c("aut"), comment = c(ORCID = "0000-0002-5733-2386")),
@@ -20,8 +20,6 @@ Depends:
     estimatr (>= 0.20.0)
 Imports:
     rlang, generics, methods
-Remotes:
-    DeclareDesign/estimatr
 License: MIT + file LICENSE
 URL: https://declaredesign.org, https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues

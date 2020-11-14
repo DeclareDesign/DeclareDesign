@@ -1,7 +1,11 @@
-# DeclareDesign 0.23.0
+# DeclareDesign 0.24.0
 
-* Add `model_summary` option to `declare_estimator`, to enable specifying a model and then a separate post-estimation function to extract coefficient estimates (e.g., estimate of a treatment effect) or model summary statistics (e.g., R^2 or the result of an F-test from a regression).
+* Add new step `declare_measurement` for measuring outcome variables. 
 * Add `declare_test` to enable hypothesis testing where no estimand is targeted. For example, `declare_test` could be used for a K-S test of distributional equality and `declare_estimator` for a difference-in-means estimate of an average treatment effect.
+* Add `model_summary` option to `declare_estimator`, to enable specifying a model and then a separate post-estimation function to extract coefficient estimates (e.g., estimate of a treatment effect) or model summary statistics (e.g., R^2 or the result of an F-test from a regression).
+* Simplify `declare_diagnosands` functionality. `diagnose_design()` by default runs an internal function with a set of default diagnosands, including power, RMSE, bias, type S rate, coverage, mean estimate, and mean estimand.
+* Improve compatibility with dplyr verbs as handlers. `filter` now works. 
+* Rename `declare_reveal` to `reveal_outcomes`. Both continue to work.
 
 # DeclareDesign 0.22.0
 
