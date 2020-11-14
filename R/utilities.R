@@ -55,6 +55,7 @@ declare_time_warn <- function(message, declaration) {
 `is_implicit_data_arg<-` <- function(dot, value=TRUE) structure(dot, implicit_data_arg=value)
 is_implicit_data_arg <- function(dot) isTRUE(attr(dot, "implicit_data_arg"))
 
+#' @importFrom utils hasName
 declare_time_error_if_data <- function(declaration) {
   dots <- attr(declaration, "dots")
   if (hasName(dots, "data") && !is_implicit_data_arg(dots)) {
