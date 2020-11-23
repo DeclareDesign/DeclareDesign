@@ -127,6 +127,11 @@ test_that("duplicated labels fail", {
 test_that("estimands can use other estimands in calculations", {
   prop_estimand <- declare_estimand(yz1.mu = mean(Y_Z_1), yz0.mu = mean(Y_Z_0), percent.diff = abs(yz1.mu - yz0.mu) / yz0.mu)
 
-  prop_estimand(df)
+  expect_equal(
+    prop_estimand(df),
+    structure(list(estimand_label = c("yz1.mu", "yz0.mu", "percent.diff"), 
+                   estimand = c(7.5, 5.5, 0.363636363636364)), 
+              class = "data.frame", row.names = c(NA, -3L))
+  )
 })
 
