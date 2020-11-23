@@ -122,3 +122,11 @@ test_that("duplicated labels fail", {
     design_3 <- declare_population(df) + pate_nolabel + sate_nolabel
   })
 })
+
+
+test_that("estimands can use other estimands in calculations", {
+  prop_estimand <- declare_estimand(yz1.mu = mean(Y_Z_1), yz0.mu = mean(Y_Z_0), percent.diff = abs(yz1.mu - yz0.mu) / yz0.mu)
+
+  prop_estimand(df)
+})
+
