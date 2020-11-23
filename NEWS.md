@@ -1,3 +1,7 @@
+# DeclareDesign 0.25.0
+
+* Allow estimands to be functions of other estimands
+
 # DeclareDesign 0.24.0
 
 * Add new step `declare_measurement` for measuring outcome variables. 
