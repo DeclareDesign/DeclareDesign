@@ -193,10 +193,12 @@ estimand_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
     data <- data[idx, , drop = FALSE]
   }
   
-  ret <- vector("list", length(options))
-  for (i in seq_along(options)) {
-    ret[i] <- eval_tidy(options[[i]], data = data)
+#  ret <- vector("list", length(options))
+  ret <- new.env(parent=emptyenv())
+  for (i in names(options)) {
+    ret[[i]] <- eval_tidy(options[[i]], data = data, env = ret)
   }
+  ret <- mget(names(options), ret)
   ret <- simplify2array(ret)
   
   if (term) {
@@ -204,13 +206,15 @@ estimand_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
       estimand_label = label,
       term = names(options),
       estimand = ret,
-      stringsAsFactors = FALSE
+      stringsAsFactors = FALSE,
+      row.names = NULL
     )
   } else {
     data.frame(
       estimand_label = names(options),
       estimand = ret,
-      stringsAsFactors = FALSE
+      stringsAsFactors = FALSE,
+      row.names = NULL
     )
   }
 }
