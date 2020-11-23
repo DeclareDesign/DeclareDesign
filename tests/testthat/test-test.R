@@ -2,7 +2,6 @@
 context("declare_test")
 
 test_that("declare_test works", {
-  
   skip_if_not_installed("coin")
   
   # thanks to Jake Bowers for this test

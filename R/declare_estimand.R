@@ -180,7 +180,7 @@ declare_estimands <- declare_estimand
 #' an additional dimension for use in diagnosis.
 #'
 #'
-#' @importFrom rlang eval_tidy quos is_quosure quo_get_expr
+#' @importFrom rlang eval_tidy quos is_quosure quo_get_expr as_data_mask
 #' @rdname declare_estimand
 estimand_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
   options <- quos(...)
@@ -193,10 +193,12 @@ estimand_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
     data <- data[idx, , drop = FALSE]
   }
   
-  ret <- vector("list", length(options))
-  for (i in seq_along(options)) {
-    ret[i] <- eval_tidy(options[[i]], data = data)
+#  ret <- vector("list", length(options))
+  ret <- as_data_mask(data)
+  for (i in names(options)) {
+    ret[[i]] <- eval_tidy(options[[i]], data = ret)
   }
+  ret <- mget(names(options), ret)
   ret <- simplify2array(ret)
   
   if (term) {
@@ -204,13 +206,15 @@ estimand_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
       estimand_label = label,
       term = names(options),
       estimand = ret,
-      stringsAsFactors = FALSE
+      stringsAsFactors = FALSE,
+      row.names = NULL
     )
   } else {
     data.frame(
       estimand_label = names(options),
       estimand = ret,
-      stringsAsFactors = FALSE
+      stringsAsFactors = FALSE,
+      row.names = NULL
     )
   }
 }
