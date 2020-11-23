@@ -2,6 +2,8 @@
 context("declare_test")
 
 test_that("declare_test works", {
+  skip_if_not_installed("coin")
+  
   
   skip_if_not_installed("coin")
   
