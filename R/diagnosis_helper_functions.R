@@ -15,7 +15,7 @@
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 #'
-#' my_reveal <- declare_reveal()
+#' my_reveal <- reveal_outcomes()
 #'
 #' design <- my_population +
 #'   my_potential_outcomes +
@@ -98,7 +98,7 @@ print.summary.diagnosis <- function(x, ...) {
 #'
 #' @examples
 #' # library(DesignLibrary)
-#' # diagnosis <- diagnose_design(simple_two_arm_designer(), sims = 3)
+#' # diagnosis <- diagnose_design(two_arm_designer(), sims = 3)
 #' # reshape_diagnosis(diagnosis)
 #' # reshape_diagnosis(diagnosis, select = c("Bias", "Power"))
 reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
@@ -135,6 +135,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
   for(i in c(parameter_names, "design_label")) {
     levels(return_df[[i]]) <- c(levels(return_df[[i]]), "")
   }
+  return_df$estimator_label <- as.character(return_df$estimator_label)
   return_df[return_df$statistic == "SE", c(sort_by_list, parameter_names, "n_sims")] <- ""
   return_df$statistic <- NULL
 

@@ -11,7 +11,7 @@
 #'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_step(dplyr::mutate, noise_sq = noise^2) +
 #'   declare_assignment(m = 25) +
-#'   declare_reveal() +
+#'   reveal_outcomes() +
 #'   declare_estimator(Y ~ Z, estimand = "my_estimand")
 #'
 #' design
@@ -20,6 +20,8 @@
 #'
 #' estimates <- draw_estimates(design)
 #' estimands <- draw_estimands(design)
+#' 
+#' print_code(design)
 #'
 #' @name post_design
 NULL
@@ -138,24 +140,6 @@ run_design_internal.design <- function(design, current_df = NULL, results = NULL
   }
 }
 
-#' @param data A data.frame object with sufficient information to run estimators. 
-#' @param start (Defaults to 1) a scalar indicating which step in the design to begin getting estimates from. By default all estimators are calculated, from step 1 to the last step of the design.
-#' @param end (Defaults to \code{length(design)}) a scalar indicating which step in the design to finish getting estimates from. 
-#'
-#' @rdname post_design
-#' @export
-get_estimates <- function(design, data = NULL, start = 1, end = length(design)) {
-  
-  if(is.null(data)){
-    stop("Please provide a data frame to the data argument. If you would like to get estimates from simulated data, use draw_estimates to draw data and get estimates in one step.")
-  }
-
-  estimators <- Filter(function(x) attr(x, "causal_type") == "estimator", design[start:end])
-  run_design_internal.design(estimators, current_df = data)$estimates_df
-                       
-}
-
-
 # for when the user sends a function that runs a design itself
 #   to run_design (or simulate_design / diagnose_design above it)
 run_design_internal.function <- function(design) {
@@ -187,23 +171,6 @@ execution_st <- function(design, current_df = NULL, results = NULL, start = 1, e
 }
 
 
-#' @rdname post_design
-#'
-#' @export
-draw_data <- function(design) {
-  run_design_internal(design, results = list(current_df = 0))$current_df
-}
-
-#' @rdname post_design
-#'
-#' @export
-draw_estimands <- function(...) apply_on_design_dots(draw_estimands_single_design, ...)
-
-#' @rdname post_design
-#'
-#' @export
-draw_estimates <- function(...) apply_on_design_dots(draw_estimates_single_design, ...)
-
 apply_on_design_dots <- function(FUN, ...) {
   designs <- dots_to_list_of_designs(...)
 
@@ -218,6 +185,11 @@ apply_on_design_dots <- function(FUN, ...) {
 
 dots_to_list_of_designs <- function(...) {
   dotqs <- enquos(...)
+  
+  if (length(dotqs) == 0){
+    stop("Please provide at least one design.", call. = FALSE)
+  }
+  
   d1 <- eval_tidy(dotqs[[1]])
 
   ## Two cases:
@@ -240,42 +212,7 @@ dots_to_list_of_designs <- function(...) {
   designs
 }
 
-
-draw_estimates_single_design <- function(design) {
-  results <- list("estimator" = vector("list", length(design)))
-  run_design_internal(design, results = results)$estimates_df
-}
-
-draw_estimands_single_design <- function(design) {
-  results <- list("estimand" = vector("list", length(design)))
-  run_design_internal(design, results = results)$estimands_df
-}
-
-#' Obtain the preferred citation for a design
-#'
-#' @param design a design object created using the + operator
-#'
-#' @param ... options for printing the citation if it is a BibTeX entry
-#'
-#' @export
-cite_design <- function(design, ...) {
-  citation <- attr(design, "citation")
-  if (class(citation) == "bibentry") {
-    print(citation, style = "bibtex", ... = ...)
-  } else {
-    print(citation, style = "text", ... = ...)
-  }
-}
-
-#' @export
-print.design_step <- function(x, ...) {
-  print(attr(x, "call"))
-  # invisible(summary(x))
-}
-
 #' Print code to recreate a design
-#'
-#' @param design A design object, typically created using the + operator
 #'
 #' @examples
 #'
@@ -287,298 +224,64 @@ print.design_step <- function(x, ...) {
 #'
 #' print_code(my_design)
 #'
+#' @rdname post_design
+#'
 #' @export
 print_code <- function(design) {
-
+  
+  check_design_class_single(design)
+  
   # if there is not a code attribute, construct code via the calls for each step
   #   and the call for the declare step
-
+  
   if (is.null(attributes(design)$code)) {
     clean_call <- function(call) {
       paste(sapply(deparse(call), trimws), collapse = " ")
     }
-
+    
     # print each step
-
+    
     for (i in seq_along(design)) {
       # only print steps that are not calls within the design call i.e. mutate(q = 5)
       if (inherits(attributes(design[[i]])$call, "call")) {
         cat(names(design)[i], "<-", clean_call(attributes(design[[i]])$call), "\n\n")
       }
     }
-
+    
     # print the design declaration
-
+    
     cat("my_design <-", clean_call(attributes(design)$call), "\n\n")
   } else {
     print(attributes(design)$code)
   }
 }
 
-#' @param x a design object, typically created using the + operator
-#' @rdname post_design
+#' Obtain the preferred citation for a design
+#'
+#' @param design a design object created using the + operator
+#'
+#' @param ... options for printing the citation if it is a BibTeX entry
+#'
 #' @export
-print.design <- function(x, verbose = TRUE, ...) {
-  print(summary(x, verbose = verbose, ... = ...))
-  # invisible(summary(x))
-}
-
-#' @param object a design object created using the + operator
-#' @param verbose an indicator for printing a long summary of the design, defaults to \code{TRUE}
-#' @param ... optional arguments to be sent to summary function
-#'
-#' @examples
-#'
-#' my_population <- declare_population(N = 500, noise = rnorm(N))
-#'
-#' my_potential_outcomes <- declare_potential_outcomes(
-#'   Y_Z_0 = noise, Y_Z_1 = noise +
-#'   rnorm(N, mean = 2, sd = 2))
-#'
-#' my_sampling <- declare_sampling(n = 250)
-#'
-#' my_assignment <- declare_assignment(m = 25)
-#'
-#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-#'
-#' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-#'
-#' my_mutate <- declare_step(dplyr::mutate, noise_sq = noise ^ 2)
-#'
-#' my_reveal <- declare_reveal()
-#'
-#' design <- my_population +
-#'   my_potential_outcomes +
-#'   my_sampling +
-#'   my_estimand +
-#'   my_mutate +
-#'   my_assignment +
-#'   my_reveal +
-#'   my_estimator
-#'
-#' summary(design)
-#' @rdname post_design
-#' @export
-#' @importFrom rlang is_lang
-summary.design <- function(object, verbose = TRUE, ...) {
-  design <- object
-
-  title <- NULL
-  authors <- NULL
-
-  get_formula_from_step <- function(step) {
-    call <- attr(step, "call")
-    type <- attr(step, "step_type")
-    if (is_lang(call) && is.character(type) && type != "wrapped") {
-      formulae <- Filter(is_formula, lang_args(call))
-      if (length(formulae) == 1) {
-        return(formulae[[1]])
-      }
-    }
-    return(NULL)
-  }
-
-  variables_added <- variables_modified <-
-    quantities_added <- quantities_modified <-
-    N <- extra_summary <-
-    vector("list", length(design))
-
-  formulae <- lapply(design, get_formula_from_step)
-  calls <- lapply(design, attr, "call")
-
-  current_df <- design[[1]]()
-
-  var_desc <- variables_added[[1]] <- lapply(current_df, describe_variable)
-
-  N[[1]] <- paste0("N = ", nrow(current_df))
-
-  estimates_df <- estimands_df <- data.frame()
-
-  last_df <- current_df
-
-  for (i in 1 + seq_along(design[-1])) {
-    causal_type <- attr(design[[i]], "causal_type")
-    if (is.null(causal_type)) next
-
-    extra_summary[i] <- list(attr(design[[i]], "extra_summary"))
-
-    # if it's a dgp
-    if (causal_type == "dgp") {
-      current_df <- design[[i]](last_df)
-
-      variables_added_names <-
-        get_added_variables(last_df = last_df, current_df = current_df)
-
-      variables_modified_names <-
-        get_modified_variables(last_df = last_df, current_df = current_df)
-
-      if (!is.null(variables_added_names)) {
-        variables_added[[i]] <-
-          lapply(
-            current_df[, variables_added_names, drop = FALSE],
-            describe_variable
-          )
-        var_desc[variables_added_names] <- variables_added[[i]]
-      }
-
-      if (!is.null(variables_modified_names)) {
-        v_mod <- lapply(
-          current_df[, variables_modified_names, drop = FALSE],
-          describe_variable
-        )
-        variables_modified[[i]] <- mapply(list,
-          before = var_desc[variables_modified_names],
-          after = v_mod,
-          SIMPLIFY = FALSE, USE.NAMES = TRUE
-        )
-        var_desc[variables_modified_names] <- v_mod
-      }
-
-      N[i] <- local({
-        c_row <- nrow(current_df)
-        l_row <- nrow(last_df)
-        if (c_row == l_row) {
-          list(NULL)
-        } else {
-          sprintf(
-            "N = %d (%d %s)", c_row, abs(c_row - l_row),
-            ifelse(c_row > l_row, "added", "subtracted")
-          )
-        }
-      })
-
-      last_df <- current_df
-    } else if (causal_type %in% c("estimand", "estimator")) {
-      quantities_added[[i]] <- design[[i]](current_df)
-    }
-  }
+cite_design <- function(design, ...) {
+  
+  check_design_class_single(design)
   
   citation <- attr(design, "citation")
-  if (!is.character(citation)) {
-    title <- citation$title
-    authors <- citation$author
-  } 
-
-  function_types <- lapply(design, attr, "step_type")
-
-  structure(
-    list(
-      variables_added = variables_added,
-      quantities_added = quantities_added,
-      variables_modified = variables_modified,
-      function_types = function_types,
-      N = N,
-      call = calls,
-      formulae = formulae,
-      title = title,
-      authors = authors,
-      citation = citation,
-      extra_summary = extra_summary,
-      verbose = verbose
-    ),
-    class = c("summary.design", "list")
-  )
+  if (class(citation) == "bibentry") {
+    print(citation, style = "bibtex", ... = ...)
+  } else {
+    print(citation, style = "text", ... = ...)
+  }
 }
 
 #' @export
-print.summary.design <- function(x, ...) {
-  cat("\nDesign Summary\n\n")
-
-  if (!is.null(x$title)) {
-    cat("Study title: ", x$title, ifelse(is.null(x$authors), "\n\n", ""), sep = "")
-  }
-
-  if (!is.null(x$authors)) {
-    cat(
-      ifelse(!is.null(x$title), "\n", ""),
-      "Authors: ",
-      paste0(x$authors, collapse = ", "),
-      "\n\n",
-      sep = ""
-    )
-  }
-
-  for (i in 1:max(length(x$variables_added), length(x$quantities_added))) {
-    step_name <- if (is.null(x$call[[i]])) "" else deparse(x$call[[i]])
-    step_class <-
-      ifelse(
-        x$function_types[[i]] != "unknown",
-        gsub("_", " ", x$function_types[[i]]),
-        "custom data modification"
-      )
-
-    dash_width <-
-      max(c(80 - 11 - nchar(i) - nchar(step_class) - nchar(step_name[1]), 0))
-
-    cat(
-      "Step ",
-      i,
-      " (",
-      step_class,
-      "): ",
-      step_name,
-      " ",
-      paste0(rep("-", dash_width), collapse = ""),
-      "\n\n",
-      sep = ""
-    )
-
-    if (x$verbose == TRUE) {
-      if (!is.null(x$N[[i]])) {
-        cat(x$N[[i]], "\n\n")
-      }
-
-      if (!is.null(x$formulae[[i]])) {
-        cat("Formula:", deparse(x$formula[[i]]), "\n\n")
-      }
-      if (is.character(x$extra_summary[[i]])) {
-        cat(x$extra_summary[[i]], "\n\n")
-      }
-
-      if (!is.null(x$quantities_added[[i]])) {
-        if (class(x$quantities_added[[i]]) == "data.frame") {
-          cat("A single draw of the ", x$function_types[[i]], ":\n", sep = "")
-          print(x$quantities_added[[i]], row.names = FALSE)
-          cat("\n")
-        } else {
-          cat(x$quantities_added[[i]], sep = "\n")
-          cat("\n")
-        }
-      }
-      if (!is.null(x$variables_added[[i]])) {
-        for (j in seq_along(x$variables_added[[i]])) {
-          cat("Added variable:", names(x$variables_added[[i]])[j], "\n")
-          print(x$variables_added[[i]][[j]], row.names = FALSE)
-          cat("\n")
-        }
-      }
-      if (!is.null(x$variables_modified[[i]])) {
-        for (j in seq_along(x$variables_modified[[i]])) {
-          cat(
-            "Altered variable:",
-            names(x$variables_modified[[i]])[j],
-            "\n  Before: \n"
-          )
-          print(x$variables_modified[[i]][[j]][["before"]], row.names = FALSE)
-          cat("\n  After:\n")
-          print(x$variables_modified[[i]][[j]][["after"]], row.names = FALSE)
-          cat("\n")
-        }
-      }
-    }
-  }
-
-  if (!is.null(x$citation)) {
-    cat("Citation:\n")
-    print(x$citation)
-  }
-
-  invisible(x)
+print.design_step <- function(x, ...) {
+  print(attr(x, "call"))
 }
 
 #' @export
 str.design_step <- function(object, ...) cat("design_step:\t", paste0(deparse(attr(object, "call"), width.cutoff = 500L), collapse = ""), "\n")
-
 
 make_fan_counter <- function(fan) {
   k <- nrow(fan)

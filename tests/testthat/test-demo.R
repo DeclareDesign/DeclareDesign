@@ -90,8 +90,8 @@ test_that("demo runs", {
   my_estimand(pop_pos)
 
   ## ------------------------------------------------------------------------
-  reveal_outcomes <- declare_reveal()
-  smp <- reveal_outcomes(smp)
+  my_reveal_outcomes <- reveal_outcomes()
+  smp <- my_reveal_outcomes(smp)
   my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
   my_estimator_dim(smp)
 
@@ -112,7 +112,7 @@ test_that("demo runs", {
     declare_step(dplyr::mutate, big_income = 5 * income) +
     my_sampling +
     my_assignment +
-    reveal_outcomes +
+    my_reveal_outcomes +
     my_estimator_dim
 
   ## ------------------------------------------------------------------------
@@ -201,7 +201,7 @@ test_that("demo runs", {
 
   my_estimator_custom <-
     declare_estimator(
-      handler = tidy_estimator(my_mean),
+      handler = label_estimator(my_mean),
       estimand = my_estimand
     )
 
@@ -225,7 +225,7 @@ test_that("demo runs", {
       my_estimand +
       my_sampling +
       my_assignment +
-      reveal_outcomes +
+      my_reveal_outcomes +
       my_estimator_dim
     return(my_design)
   }
@@ -243,7 +243,7 @@ test_that("demo runs", {
   my_design <- declare_population(my_population()) +
     my_potential_outcomes_continuous +
     my_assignment_continuous +
-    reveal_outcomes
+    my_reveal_outcomes
 
   head(draw_data(my_design))
 
@@ -256,8 +256,8 @@ test_that("demo runs", {
     my_potential_outcomes +
     my_potential_outcomes_attrition +
     my_assignment +
-    declare_reveal(outcome_variables = "R") +
-    declare_reveal(attrition_variables = "R")
+    reveal_outcomes(outcome_variables = "R") +
+    reveal_outcomes(attrition_variables = "R")
 
   head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
 

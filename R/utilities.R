@@ -50,8 +50,15 @@ declare_time_warn <- function(message, declaration) {
   warning(simpleWarning(message, call = attr(declaration, "call")))
 }
 
+
+### Helper functions for below, to skip warn for data dot added by rename_dots.
+`is_implicit_data_arg<-` <- function(dot, value=TRUE) structure(dot, implicit_data_arg=value)
+is_implicit_data_arg <- function(dot) isTRUE(attr(dot, "implicit_data_arg"))
+
+#' @importFrom utils hasName
 declare_time_error_if_data <- function(declaration) {
-  if ("data" %in% names(attr(declaration, "dots"))) {
+  dots <- attr(declaration, "dots")
+  if (hasName(dots, "data") && !is_implicit_data_arg(dots)) {
     declare_time_error("`data` should not be a declared argument.", declaration)
   }
 }
@@ -59,7 +66,7 @@ declare_time_error_if_data <- function(declaration) {
 
 # Wrapper function, use future_lapply if we have it, fallback to lapply if not
 
-future_lapply <- function(..., future.seed = NA, future.globals = TRUE) {
+future_lapply <- function(..., future.seed = TRUE, future.globals = TRUE) {
   if (requireNamespace("future.apply", quietly = TRUE)) {
     future.apply::future_lapply(..., future.seed = future.seed, future.globals = future.globals)
   } else {
@@ -181,13 +188,14 @@ get_modified_variables <- function(last_df = NULL, current_df) {
 # string literals, or functions of either
 # eg Y:Z => c("Y","Z")
 
+#' @importFrom rlang quo_squash
 reveal_nse_helper <- function(X) {
   if (is.character(X) || is.logical(X)) {
     X
   } else if (is.name(X)) {
     as.character(X)
   } else if (is_quosure(X)) {
-    reveal_nse_helper(quo_expr(X))
+    reveal_nse_helper(quo_squash(X))
   } else if (is.call(X)) {
     unlist(lapply(X[-1], reveal_nse_helper))
   }

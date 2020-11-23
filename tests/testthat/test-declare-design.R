@@ -19,7 +19,7 @@ test_that(
 
     my_mutate <- declare_step(dplyr::mutate, noise_sq = noise^2)
 
-    my_reveal <- declare_reveal()
+    my_reveal <- reveal_outcomes()
 
     design <- my_population +
       my_potential_outcomes +
@@ -46,19 +46,12 @@ test_that("No estimators / estimands", {
     declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + 1) +
     declare_sampling(n = 250) +
     declare_assignment(m = 25) +
-    declare_reveal()
+    reveal_outcomes()
 
   head(draw_data(design))
-  expect_identical(
-    run_design(design),
-    structure(list(
-      estimates_df = structure(list(), class = "data.frame", row.names = integer(0)),
-      estimands_df = structure(list(), class = "data.frame", row.names = integer(0))
-    ), .Names = c(
-      "estimates_df",
-      "estimands_df"
-    ))
-  )
+  des_obj <- run_design(design)
+  expect_equal(dim(des_obj$estimates_df), c(0, 0))
+  expect_equal(dim(des_obj$estimands_df), c(0, 0))
 })
 
 test_that("single-step designs work", {
@@ -93,3 +86,4 @@ test_that("send function that doesn't have data as first arg sends warning", {
 
   expect_warning(declare_population(N = 100) + my_func, "Undeclared Step 2 function arguments are not exactly 'data'")
 })
+

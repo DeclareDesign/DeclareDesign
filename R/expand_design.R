@@ -11,6 +11,8 @@
 #' @return if set of designs is size one, the design, otherwise a `by`-list of designs. Designs are given a parameters attribute with the values of parameters assigned by expand_design.
 #'
 #' @examples
+#' 
+#' \dontrun{
 #'
 #' # in conjunction with DesignLibrary
 #' 
@@ -32,15 +34,12 @@
 #' # returns list of eight designs
 #' designs <- expand_design(designer, N = seq(30, 100, 10))
 #'
-#' \dontrun{
 #'  # diagnose a list of designs created by expand_design or redesign
 #'  diagnosis <- diagnose_design(designs, sims = 50)
-#' }
 #'
 #' # returns a single design
 #' large_design <- expand_design(designer, N = 200)
 #'
-#' \dontrun{
 #'  diagnose_large_design <- diagnose_design(large_design, sims = 50)
 #' }
 #'
@@ -50,27 +49,26 @@ expand_design <- function(designer, ..., expand = TRUE, prefix = "design") {
 
   if (length(dots_quos) == 0) return(designer())
     
-  T <- function(zx,ix) do.call(mapply, 
+  # transpose
+  transp <- function(zx,ix) do.call(mapply, 
                                append(mapply(`[`, zx, ix, SIMPLIFY = FALSE), 
-                                      list(FUN=list, SIMPLIFY=FALSE), 
+                                      list(FUN = list, SIMPLIFY = FALSE), 
                                       after = 0)
                                )
-  
 
   args <- list(...)
   args <- lapply(args, function(x) if(is.function(x)) list(x) else x)
   
   ix <- lapply(args, seq_along)
   ix <- if(expand) expand.grid(ix) else data.frame(ix)
-
   
-  designs <- lapply(T(args, ix), do.call, what=designer)
+  designs <- lapply(transp(args, ix), do.call, what = designer)
 
   args_names <- lapply(dots_quos, expand_args_names)
   
   designs <- mapply(structure, 
                     designs, 
-                    parameters=T(args_names, ix), 
+                    parameters = transp(args_names, ix), 
                     SIMPLIFY = FALSE)
   
 

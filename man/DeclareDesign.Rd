@@ -3,7 +3,6 @@
 \docType{package}
 \name{DeclareDesign}
 \alias{DeclareDesign}
-\alias{DeclareDesign-package}
 \title{DeclareDesign package}
 \description{
 The four main types of functions are to declare a step, to combine steps into designs,
@@ -16,7 +15,7 @@ and to manipulate designs and designers (functions that return designs).
   \item{\code{\link{declare_potential_outcomes}}}{Potential outcomes step}
   \item{\code{\link{declare_sampling}}}{Sampling step}
   \item{\code{\link{declare_assignment}}}{Assignment step}
-  \item{\code{\link{declare_reveal}}}{Reveal outcomes step}
+  \item{\code{\link{reveal_outcomes}}}{Reveal outcomes step}
   \item{\code{\link{declare_estimand}}}{Estimand step}
   \item{\code{\link{declare_estimator}}}{Estimator step}
 }

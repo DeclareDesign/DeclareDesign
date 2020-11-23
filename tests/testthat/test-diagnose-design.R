@@ -17,7 +17,7 @@ test_that("allow design functions to be sent to simulate design and diagnose_des
 
     my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
-    my_reveal <- declare_reveal()
+    my_reveal <- reveal_outcomes()
 
     design <- my_population +
       my_potential_outcomes +
@@ -79,7 +79,7 @@ test_that("default diagnosands work", {
 
     my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
-    my_reveal <- declare_reveal()
+    my_reveal <- reveal_outcomes()
 
     design <- my_population +
       my_potential_outcomes +
@@ -89,7 +89,7 @@ test_that("default diagnosands work", {
       my_reveal +
       my_estimator
 
-    diagnosands <- declare_diagnosands(med_bias = median(estimate - estimand), keep_defaults = FALSE)
+    diagnosands <- declare_diagnosands(med_bias = median(estimate - estimand))
 
     set_diagnosands(design, diagnosands)
   }
@@ -127,8 +127,8 @@ test_that("default diagnosands work", {
   design_1 <- set_diagnosands(my_designer(N = 100), NULL)
   design_2 <- set_diagnosands(my_designer(N = 200), NULL)
 
-  diagnosand_1 <- declare_diagnosands(my_bias = median(estimate - estimand), keep_defaults = FALSE)
-  diagnosand_2 <- declare_diagnosands(my_power = mean(p.value <= .5), keep_defaults = FALSE)
+  diagnosand_1 <- declare_diagnosands(my_bias = median(estimate - estimand))
+  diagnosand_2 <- declare_diagnosands(my_power = mean(p.value <= .5))
 
   # intentionally out of order to confirm they don't get mixed
   diag <- diagnose_design(
@@ -161,7 +161,7 @@ test_that("default diagnosands work", {
   diag <- diagnose_design(
     design_2 = design_2,
     design_1 = design_1,
-    diagnosands = declare_diagnosands(med_bias = median(estimate - estimand), keep_defaults = FALSE),
+    diagnosands = declare_diagnosands(med_bias = median(estimate - estimand)),
     sims = 2
   )
     
@@ -196,17 +196,6 @@ test_that("default diagnosands work", {
   # // simulation df
   sims <- set_diagnosands(simulate_design(designs, sims = 5), declare_diagnosands(med_bias = median(estimate - estimand)))
   diag <- diagnose_design(sims, sims = 5, bootstrap_sims = FALSE)
-})
-
-
-test_that("with and without term",{
-  skip_if_not_installed("DesignLibrary")
-  design_1 <- DesignLibrary::simple_factorial_designer(N = 500, outcome_means = c(0,0,1,2), weight_A = 0, weight_B = 0)
-  design_2 <- DesignLibrary::multi_arm_designer(N = 500, m_arms = 3, outcome_means = c(0, 0, 1))
-  dx <- diagnose_design(design_1, design_2, sims = 3, bootstrap_sims = FALSE)
-
-  expect_true(all(c("design_1", "design_2") %in% dx$diagnosands_df$design_label))
-  
 })
 
 
@@ -259,3 +248,59 @@ test_that("more term",{
   
 })
 
+test_that("diagnose_design does not reclass the variable N", {
+  skip_if(compareVersion("3.5", paste(R.Version()$major, R.Version()$minor, sep = ".")) == 1)
+  # works for redesign
+  design <-
+    declare_population(N = 5, noise = rnorm(N)) +
+       declare_estimand(mean_noise = mean(noise))
+  
+  designs <- redesign(design, N = 5:10) 
+  dx <- diagnose_design(designs, sims = 50, bootstrap_sims = FALSE)
+  
+  expect_equal(class(dx$simulations_df$N), "integer") 
+  expect_equal(class(dx$diagnosands_df$N), "integer")
+  
+  # works for expand_design
+  designer <- function(N = 5) {
+    declare_population(N = N, noise = rnorm(N)) +
+    declare_estimand(mean_noise = mean(noise))
+  }
+  
+  designs <- expand_design(designer, N = 5:10) 
+  dx <- diagnose_design(designs, sims = 50, bootstrap_sims = FALSE)
+  
+  expect_equal(class(dx$simulations_df$N), "integer") 
+  expect_equal(class(dx$diagnosands_df$N), "integer")
+  
+})
+
+
+test_that("diagnose_design works when simulations_df lacking parameters attr", {
+
+  design <- declare_population(N = 100, X = rnorm(N), Y = rnorm(N, X)) +
+    declare_estimand(true_effect = 1) +
+    declare_estimator(Y ~ X, model=lm_robust, estimand = "true_effect", label = "Y on X") 
+  
+  simulations <-  simulate_design(design, sims = 20) 
+  
+  simulations_no_attr <- simulations
+  attributes(simulations_no_attr)["parameters"] <- NULL
+  
+  d1 <- diagnose_design(simulations, bootstrap_sims = FALSE)
+  d2 <- diagnose_design(simulations_no_attr, bootstrap_sims = FALSE)
+  
+  # strip params from d1
+  # These are expected differences
+  attributes(d1$simulations_df)["parameters"] <- NULL
+  d1$simulations_df$design_label <- as.character(d1$simulations_df$design_label)
+  d1$diagnosands_df$design_label <- as.character(d1$diagnosands_df$design_label)
+  d1["parameters_df"] <- list(NULL)
+    
+  expect_identical(d1,d2)
+})
+
+
+test_that("diagnose_design stops when a zero-row simulations_df is sent", {
+  expect_error(diagnose_design(data.frame(estimator_label = rep(1, 0))), "which has zero rows")
+})

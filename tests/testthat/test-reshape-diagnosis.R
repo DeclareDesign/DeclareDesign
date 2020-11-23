@@ -15,7 +15,7 @@ my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
 my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
-my_reveal <- declare_reveal()
+my_reveal <- reveal_outcomes()
 
 design <- my_population +
   my_potential_outcomes +
@@ -48,7 +48,7 @@ test_that("capitalization of parameter names are retained", {
     my_asgn <- declare_assignment(m = floor(n / 2))
     my_mand <- declare_estimand(mean(Y_Z_1) - mean(Y_Z_0))
     my_estimator <- declare_estimator(Y ~ Z, estimand = my_mand)
-    my_design <- my_pop + my_pos + my_mand + my_smp + my_asgn + declare_reveal() + my_estimator
+    my_design <- my_pop + my_pos + my_mand + my_smp + my_asgn + reveal_outcomes() + my_estimator
     my_design
   }
 
@@ -77,4 +77,27 @@ test_that("select", {
   dx <- diagnose_design(design, sims = 10, bootstrap_sims = 5)
   reshape <- reshape_diagnosis(dx, select = "Bias")
   expect_equal(colnames(reshape), c("Design Label", "Estimand Label", "Estimator Label", "Term", "N Sims", "Bias"))
+})
+
+
+test_that("designs with factors in diagnosands_df do not produce warnings", {
+  
+  my_estimator <- function(data) {
+    data.frame(estimate = c("answer1", "answer2"), stringsAsFactors = TRUE)
+  }
+
+  design <- design <- my_population +
+    declare_estimator(handler = label_estimator(my_estimator), label = "my_label")
+
+  diagnose_design(design, sims = 2, diagnosands = declare_diagnosands(first = first(estimate)))
+  
+  my_estimator <- function(data) {
+    data.frame(estimate = c("answer1", "answer2"), estimator_label = "my_label", stringsAsFactors = TRUE)
+  }
+  
+  design <- design <- my_population +
+    declare_estimator(handler = my_estimator)
+  
+  expect_silent(reshape_diagnosis(diagnose_design(design, sims = 2, diagnosands = declare_diagnosands(first = first(estimate)))))
+  
 })

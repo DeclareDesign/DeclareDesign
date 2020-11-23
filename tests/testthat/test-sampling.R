@@ -96,10 +96,40 @@ test_that("Factor out declarations", {
   m <- 25
 
   expect_message(
-    design <- declare_population(N = N, noise = 1:N) + declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + 1) + declare_sampling(N = N, n = n) + declare_assignment(N = n, m = m) + declare_reveal(),
+    design <- declare_population(N = N, noise = 1:N) + declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + 1) + declare_sampling(N = N, n = n) + declare_assignment(N = n, m = m) + reveal_outcomes(),
     "declaration"
   )
 
   expect_true(inherits(attr(design[[3]], "dots")$declaration, "rs_complete"))
   expect_true(inherits(attr(design[[4]], "dots")$declaration, "ra_complete"))
+})
+
+# two by two: keep/drop standard name/non standard name
+
+test_that("keep/drop options work with diff sampling names", {
+  
+  desgn <- declare_population(N = 10) + NULL 
+  
+  dat1 <- draw_data(desgn + declare_sampling(n = 5))
+  dat2 <- draw_data(desgn + declare_sampling(n = 5, drop_nonsampled = TRUE))
+  dat3 <- draw_data(desgn + declare_sampling(n = 5, drop_nonsampled = FALSE))
+  dat4 <- draw_data(desgn + declare_sampling(n = 5, sampling_variable = "smpld"))
+  dat5 <- draw_data(desgn + declare_sampling(n = 5, sampling_variable = "smpld", drop_nonsampled = TRUE))
+  dat6 <- draw_data(desgn + declare_sampling(n = 5, sampling_variable = "smpld", drop_nonsampled = FALSE))
+  
+  # length, which variables
+  expect_equal(nrow(dat1), 5)
+  expect_equal(nrow(dat2), 5)
+  expect_equal(nrow(dat3), 10)
+  expect_false("S" %in% names(dat1))
+  expect_false("S" %in% names(dat2))
+  expect_true("S" %in% names(dat3))
+  
+  expect_equal(nrow(dat4), 5)
+  expect_equal(nrow(dat5), 5)
+  expect_equal(nrow(dat6), 10)
+  expect_false("smpld" %in% names(dat4))
+  expect_false("smpld" %in% names(dat5))
+  expect_true("smpld" %in% names(dat6))
+  
 })

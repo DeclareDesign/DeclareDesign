@@ -6,7 +6,7 @@ my_potential_outcomes <-
 my_assignment <- declare_assignment(m = 25)
 my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-my_reveal <- declare_reveal()
+my_reveal <- reveal_outcomes()
 
 my_design_1 <- my_population + my_potential_outcomes + my_estimand + my_assignment + my_reveal + my_estimator
 
@@ -54,7 +54,7 @@ my_designer <- function(N, tau) {
   my_assignment <- declare_assignment(m = floor(N / 2))
   my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
   my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-  my_reveal <- declare_reveal()
+  my_reveal <- reveal_outcomes()
   my_design_1 <- pop + pos + my_estimand + my_assignment + my_reveal + my_estimator
   my_design_1
 }
@@ -93,14 +93,21 @@ test_that("no estimates estimands declared", {
 })
 
 
-test_that("fan out IDs are correct", {
+test_that("designs with some estimators that don't have p.values return the p.values for the estimators that do have them", {
+  my_custom_estimator <- function(data) return(data.frame(estimate = 5))
   
-  skip_if_not_installed("DesignLibrary")
+  des <- declare_population(N = 100) +
+    declare_potential_outcomes(Y ~ .25 * Z + rnorm(N)) +
+    declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment() +
+    reveal_outcomes(Y, Z) +
+    declare_estimator(Y ~ Z, estimand = "ATE", label = "blah") +
+    declare_estimator(handler = label_estimator(my_custom_estimator), estimand = "ATE")
   
-  sims <- c(30, 1, 2, 1, 1, 2)
-  design <- DesignLibrary::simple_two_arm_designer(rho = 0)
+  expect_equivalent(names(simulate_design(des, sims = 1)), c("design_label", "sim_ID", "estimand_label", "estimand", "estimator_label", 
+                                                        "term", "estimate", "std.error", "statistic", "p.value", "conf.low", 
+                                                        "conf.high", "df", "outcome"))
   
-  sx <- simulate_design(design, sims = sims)
+  expect_equal(nrow(get_diagnosands(diagnose_design(des, sims = 2, diagnosands = declare_diagnosands(power = mean(p.value <= 0.05))))), 2)
   
-  expect_equivalent(vapply(sx[c("step_1_draw", "step_3_draw", "step_6_draw")], max, 0), c(30, 60, 120))
 })

@@ -4,8 +4,11 @@
 \alias{declare_step}
 \title{Declare a custom step}
 \usage{
-declare_step(..., handler = function(data, ...f, ...) ...f(data, ...),
-  label = NULL)
+declare_step(
+  ...,
+  handler = function(data, ...f, ...) ...f(data, ...),
+  label = NULL
+)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}

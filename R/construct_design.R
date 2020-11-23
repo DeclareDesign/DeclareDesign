@@ -1,4 +1,4 @@
-#' Add steps to create a design
+#' Declare a design 
 #'
 #' @param lhs A step in a research design, beginning with a function that draws the population. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a \code{data.frame} as an argument and return a \code{data.frame}. Typically, many steps are declared using the \code{declare_} functions, i.e., \code{\link{declare_population}}, \code{\link{declare_population}}, \code{\link{declare_sampling}}, \code{\link{declare_potential_outcomes}}, \code{\link{declare_estimand}}, \code{\link{declare_assignment}}, and \code{\link{declare_estimator}}.
 #' @param rhs A second step in a research design
@@ -21,7 +21,9 @@
 #'
 #' @return a list of two functions, the \code{design_function} and the \code{data_function}. The \code{design_function} runs the design once, i.e. draws the data and calculates any estimates and estimands defined in \code{...}, returned separately as two \code{data.frame}'s. The \code{data_function} runs the design once also, but only returns the final data.
 #'
-#' @importFrom rlang quos quo_expr eval_tidy quo_text lang_args is_formula is_symbol
+#' @name declare_design
+#'
+#' @importFrom rlang quos eval_tidy quo_text is_formula is_symbol
 #' @importFrom utils bibentry
 #' @export
 #'
@@ -41,7 +43,7 @@
 #'
 #' my_mutate <- declare_step(dplyr::mutate, noise_sq = noise^2)
 #'
-#' my_reveal <- declare_reveal()
+#' my_reveal <- reveal_outcomes()
 #'
 #' design <- my_population + my_potential_outcomes + my_sampling +
 #'          my_estimand + my_mutate +

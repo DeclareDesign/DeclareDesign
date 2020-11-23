@@ -1,19 +1,39 @@
 #' Declare estimator
 #'
 #' @description Declares an estimator which generates estimates and associated statistics.
+#' 
+#' Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific estimand in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an estimand. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
 #'
 #' @inheritParams declare_internal_inherit_params
-#'
+#' 
+#' @details
+#' 
+#' \code{declare_estimator} is designed to handle two main ways of generating parameter estimates from data.
+#' 
+#' In \code{declare_estimator}, you can optionally provide the name of an estimand or an objected created by \code{\link{declare_estimand}} to connect your estimate(s) to estimand(s).
+#' 
+#' The first is through \code{label_estimator(model_handler)}, which is the default value of the \code{handler} argument. Users can use standard modeling functions like lm, glm, or iv_robust. The models are summarized using the function passed to the \code{model_summary} argument. This will usually be a "tidier" like \code{broom::tidy}. The default \code{model_summary} function is \code{tidy_try}, which applies a tidy method if available, and if not, tries to make one on the fly.
+#' 
+#' An example of this approach is:
+#' 
+#' \code{declare_estimator(Y ~ Z + X, model = lm_robust, model_summary = tidy, term = "Z", estimand = "ATE")}
+#' 
+#' The second approach is using a custom data-in, data-out function, usually first passed to \code{label_estimator}. The reason to pass the custom function to \code{label_estimator} first is to enable clean labeling and linking to estimands.
+#' 
+#' An example of this approach is:
+#' 
+#' \code{
+#' my_fun <- function(data){ with(data, median(Y[Z == 1]) - median(Y[Z == 0])) }
+#' }
+#' 
+#' \code{
+#' declare_estimator(handler = label_estimator(my_fun), estimand = "ATE")
+#' }
+#' 
 #' @export
 #' @importFrom estimatr difference_in_means
 #'
 #' @return A function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimator and associated statistics.
-#'
-#' @section Custom Estimators:
-#'
-#' \code{estimator_functions} implementations should be tidy (accept and return a data.frame)
-#'
-#' \code{model} implementations should at a minimum provide S3 methods for \code{summary} and \code{confint}.
 #'
 #' @examples
 #'
@@ -67,14 +87,14 @@
 #'
 #' # Declare estimator using a custom handler
 #'
-#' # Define your own estimator and use the `tidy_estimator` function for labeling
+#' # Define your own estimator and use the `label_estimator` function for labeling
 #' # Must have `data` argument that is a data.frame
 #' my_estimator_function <- function(data){
 #'   data.frame(estimate = with(data, mean(Y)))
 #' }
 #'
 #' my_estimator_custom <- declare_estimator(
-#'   handler = tidy_estimator(my_estimator_function),
+#'   handler = label_estimator(my_estimator_function),
 #'   estimand = my_estimand
 #' )
 #'
@@ -103,7 +123,7 @@
 #'   declare_potential_outcomes(Y ~ .25 * Z + noise) +
 #'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_assignment(m = 50) +
-#'   declare_reveal() +
+#'   reveal_outcomes() +
 #'   my_estimator_dim
 #'
 #' draw_estimates(design_def)
@@ -138,7 +158,7 @@
 #' my_median <- function(data) data.frame(med = median(data$Y))
 #'
 #' my_estimator_median <- declare_estimator(
-#'   handler = tidy_estimator(my_median),
+#'   handler = label_estimator(my_median),
 #'   estimand = my_estimand
 #' )
 #'
@@ -146,8 +166,7 @@
 #'
 #' draw_estimates(design)
 #'
-#' my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand),
-#'   keep_defaults = FALSE)
+#' my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand))
 #'
 #' \dontrun{
 #' diagnose_design(design, diagnosands = my_diagnosand, sims = 5,
@@ -168,7 +187,7 @@
 #' }
 declare_estimator <-
   make_declarations(
-    estimator_handler,
+    label_estimator(model_handler),
     step_type = "estimator",
     causal_type = "estimator",
     default_label = "estimator"
@@ -179,23 +198,20 @@ declare_estimator <-
 declare_estimators <- declare_estimator
 
 #' @details
-#' \code{tidy_estimator} takes an untidy estimation function, and returns a tidy handler which accepts standard labeling options.
-#'
-#' The intent here is to factor out the estimator/estimand labeling so that it can be reused by other model handlers.
-#'
-#' @param estimator_function A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval) and a label.
+#' \code{label_estimator} takes a data-in-data out function to \code{fn}, and returns a data-in-data-out function that first runs the provided estimation function \code{fn} and then appends a label for the estimator and, if an estimand is provided, a label for the estimand.
+#' 
+#' @param fn A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval), and a term column for labeling coefficient estimates.
+#' 
 #' @rdname declare_estimator
 #' @export
-#' @importFrom rlang UQ
-tidy_estimator <- function(estimator_function) {
-  if (!("data" %in% names(formals(estimator_function)))) {
+label_estimator <- function(fn) {
+  if (!("data" %in% names(formals(fn)))) {
     stop("Must provide a `estimator_function` function with a data argument.")
   }
 
-
   f <- function(data, ..., estimand = NULL, label) {
     calling_args <-
-      names(match.call(expand.dots = FALSE)) %i% names(formals(estimator_function))
+      names(match.call(expand.dots = FALSE)) %i% names(formals(fn))
 
     dots <- if ("..." %in% calling_args) {
       quos(...)
@@ -210,7 +226,7 @@ tidy_estimator <- function(estimator_function) {
         do.call(enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. IDK
     }
 
-    ret <- eval_tidy(quo(estimator_function(data, !!!dots)))
+    ret <- eval_tidy(quo(fn(data, !!!dots)))
 
     ret <- data.frame(
       estimator_label = label,
@@ -231,7 +247,7 @@ tidy_estimator <- function(estimator_function) {
     ret
   }
 
-  formals(f) <- formals(estimator_function)
+  formals(f) <- formals(fn)
   if (!"estimand" %in% names(formals(f))) {
     formals(f)["estimand"] <- list(NULL)
   }
@@ -239,19 +255,32 @@ tidy_estimator <- function(estimator_function) {
     formals(f)$label <- alist(a = )$a
   }
 
-  attributes(f) <- attributes(estimator_function)
+  attributes(f) <- attributes(fn)
 
   f
 }
 
+#' @rdname ourPkg-deprecated
+#' @section \code{tidy_estimator}:
+#' For \code{tidy_estimator}, use \code{\link{label_estimator}}.
+#'
+#' @export
+tidy_estimator <- function(estimator_function) {
+  warning("tidy_estimator() has been deprecated. Please use label_estimator() instead.")
+  label_estimator(fn = estimator_function)
+}
+
 #' @param data a data.frame
 #' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
+#' @param model_summary A model-in data-out function to extract coefficient estimates or model summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} model summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the model object sent to \code{model}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the model object, it fails.
 #' @param term Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.
-#' @rdname declare_estimator
+#' @rdname declare_estimator 
+#' @importFrom rlang eval_tidy
 model_handler <-
   function(data,
              ...,
              model = estimatr::difference_in_means,
+             model_summary = tidy_try,
              term = FALSE) {
     coefficient_names <-
       enquo(term) # forces evaluation of quosure
@@ -262,11 +291,55 @@ model_handler <-
     # todo special case weights offsets for glm etc?
 
     results <- eval_tidy(quo(model(!!!args, data = data)))
-
-    results <- fit2tidy(results, coefficient_names)
-
+    
+    model_summary_fn <- interpret_model_summary(model_summary)
+    
+    results <- eval_tidy(model_summary_fn(results))
+    
+    if("term" %in% colnames(results)) {
+      if (is.character(coefficient_names)) {
+        coefs_in_output <- coefficient_names %in% results$term
+        if (!all(coefs_in_output)) {
+          stop(
+            "Not all of the terms declared in your estimator are present in the model output, including ",
+            paste(coefficient_names[!coefs_in_output], collapse = ", "),
+            ".",
+            call. = FALSE
+          )
+        }
+        results <- results[results$term %in% coefficient_names, , drop = FALSE]
+      } else if (is.logical(coefficient_names) && !coefficient_names) {
+        results <- results[which.max(results$term != "(Intercept)"), , drop = FALSE]
+      }
+    }
+    
     results
+    
   }
+
+# this is an internal function that is a helper to allow users to provide the model_summary arg in a variety of formats
+#' @importFrom rlang is_formula expr_interp as_function expr quo eval_bare is_character is_function
+interpret_model_summary <- function(model_summary) {
+  # parts copied from dplyr:::as_inlined_function and dplyr:::as_fun_list
+  
+  if(is_formula(model_summary)) {
+    f <- expr_interp(model_summary)
+    # TODO: unsure of what env should be here!
+    fn <- as_function(f, env = parent.frame())
+    body(fn) <- expr({
+      # pairlist(...)
+      `_quo` <- quo(!!body(fn))
+      eval_bare(`_quo`, parent.frame())
+    })
+    return(fn)
+  } else if (is_character(model_summary)) {
+    return(get(model_summary, envir = parent.frame(), mode = "function"))
+  } else if (is_function(model_summary)) {
+    return(model_summary)
+  } else {
+    stop("Please provide one sided formula, a function, or a function name to model_summary.")
+  }
+}
 
 validation_fn(model_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
@@ -275,18 +348,9 @@ validation_fn(model_handler) <- function(ret, dots, label) {
     model <- eval_tidy(dots$model)
     if (!is.function(model) || !"data" %in% names(formals(model))) {
       declare_time_error(
-        "Must provide a function for `model` which takes a `data` argument.",
+        "Must provide a function for `model` that takes a `data` argument.",
         ret
       )
-    }
-
-    if (!quo_text(dots$model)
-    %in%
-      c("lm", "glm", "lm_robust", "iv_robust", "difference_in_means", "horvitz_thompson")
-    &
-      !requireNamespace("broom", quietly = TRUE)
-    ) {
-      stop("You provided a ", quo_text(dots$model), " model, which DeclareDesign does not directly support. It's possible that the broom package can help. Please install the broom package with install.packages('broom') and try declaring your estimator again. If that fix does not work, you may need to write a custom estimator.")
     }
 
     attr(ret, "extra_summary") <-
@@ -295,60 +359,7 @@ validation_fn(model_handler) <- function(ret, dots, label) {
   ret
 }
 
-#' @param estimand a declare_estimand step object, or a character label, or a list of either
-#' @rdname declare_estimator
-estimator_handler <- tidy_estimator(model_handler)
-
-# called by model_handler, resets columns names !!!
-fit2tidy <- function(fit, term = FALSE) {
-  if (requireNamespace("broom", quietly = TRUE)) {
-
-    # broom if possible
-    tidy_df <- broom::tidy(fit, conf.int = TRUE)
-  } else {
-    summ <- coef(summary(fit))
-    summ <-
-      summ[, tolower(substr(colnames(summ), 1, 3)) %in% c("estimate", "std", "pr("), drop = FALSE]
-    ci <- suppressMessages(as.data.frame(confint(fit)))
-    tidy_df <-
-      data.frame(
-        term = rownames(summ),
-        summ,
-        ci,
-        stringsAsFactors = FALSE,
-        row.names = NULL
-      )
-    colnames(tidy_df) <-
-      c(
-        "term",
-        "estimate",
-        "std.error",
-        "p.value",
-        "conf.low",
-        "conf.high"
-      )
-  }
-
-  if (is.character(term)) {
-    coefs_in_output <- term %in% tidy_df$term
-    if (!all(coefs_in_output)) {
-      stop(
-        "Not all of the terms declared in your estimator are present in the model output, including ",
-        paste(term[!coefs_in_output], collapse = ", "),
-        ".",
-        call. = FALSE
-      )
-    }
-    tidy_df <- tidy_df[tidy_df$term %in% term, , drop = FALSE]
-  } else if (is.logical(term) && !term) {
-    tidy_df <-
-      tidy_df[which.max(tidy_df$term != "(Intercept)"), , drop = FALSE]
-  }
-
-  tidy_df
-}
-
-# helper methods for estimand=my_estimand arguments to estimator_handler
+# helper methods for estimand = my_estimand arguments to estimator_handler
 #
 get_estimand_label <- function(estimand) {
   force(estimand) # no promise nonsense when we look at it

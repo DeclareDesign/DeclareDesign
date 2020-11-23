@@ -9,7 +9,7 @@
 #'   \item{\code{\link{declare_potential_outcomes}}}{Potential outcomes step}
 #'   \item{\code{\link{declare_sampling}}}{Sampling step}
 #'   \item{\code{\link{declare_assignment}}}{Assignment step}
-#'   \item{\code{\link{declare_reveal}}}{Reveal outcomes step}
+#'   \item{\code{\link{reveal_outcomes}}}{Reveal outcomes step}
 #'   \item{\code{\link{declare_estimand}}}{Estimand step}
 #'   \item{\code{\link{declare_estimator}}}{Estimator step}
 #' }

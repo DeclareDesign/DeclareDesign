@@ -3,7 +3,7 @@ context("Estimators")
 my_population <- declare_population(N = 500, noise = rnorm(N))
 my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 my_assignment <- declare_assignment(m = 25)
-reveal_outcomes <- declare_reveal()
+my_reveal_outcomes <- reveal_outcomes()
 
 expect_estimates <- function(estimates, label = NULL) {
   expect_equal(
@@ -17,26 +17,26 @@ expect_estimates <- function(estimates, label = NULL) {
 
 test_that("difference in means", {
   my_estimator <- declare_estimator(Y ~ Z)
-  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% reveal_outcomes() %>% my_estimator() %>% expect_estimates()
+  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_reveal_outcomes() %>% my_estimator() %>% expect_estimates()
 })
 
 test_that("lm with robust ses", {
   my_estimator <- declare_estimator(Y ~ Z, model = lm_robust)
-  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% reveal_outcomes() %>% my_estimator() %>% expect_estimates()
+  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_reveal_outcomes() %>% my_estimator() %>% expect_estimates()
 })
 
 
 test_that("lm with HC3 robust ses", {
   my_estimator <- declare_estimator(Y ~ Z, model = lm_robust, se_type = "HC3")
-  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% reveal_outcomes() %>% my_estimator() %>% expect_estimates()
+  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_reveal_outcomes() %>% my_estimator() %>% expect_estimates()
 })
 
 test_that("custom estimator function", {
   my_mean <- function(data) {
     data.frame(estimate = with(data, 2), foo = mean(data$Y))
   }
-  my_estimator_custom <- declare_estimator(handler = tidy_estimator(my_mean))
-  cust <- my_population() %>% my_potential_outcomes() %>% my_assignment() %>% reveal_outcomes() %>% my_estimator_custom()
+  my_estimator_custom <- declare_estimator(handler = label_estimator(my_mean))
+  cust <- my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_reveal_outcomes() %>% my_estimator_custom()
   expect_equal(cust$estimate, 2)
 })
 
@@ -47,7 +47,7 @@ test_that("check blocked d-i-m estimator", {
 
   ## lm with HC3 robust ses
   my_estimator_blocked <- declare_estimator(Y ~ Z, model = difference_in_means, blocks = `blocks`)
-  df <- my_population() %>% my_potential_outcomes() %>% my_assignment() %>% declare_reveal()()
+  df <- my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_reveal_outcomes()
   my_estimator_notblocked <- declare_estimator(Y ~ Z)
 
   df %>% my_estimator_notblocked() %>% expect_estimates()
@@ -66,13 +66,13 @@ test_that("regression from estimatr works as an estimator", {
     term = "noise",
     estimand = pate, label = "pate_hat"
   )
-  reveal_outcomes <- declare_reveal()
+  my_reveal_outcomes <- reveal_outcomes()
 
   my_design <- my_population +
     my_potential_outcomes +
     pate +
     my_assignment +
-    reveal_outcomes +
+    my_reveal_outcomes +
     pate_estimator
 
   estimate <- draw_estimates(my_design)
@@ -93,7 +93,7 @@ assignment <- declare_assignment(m = 50)
 
 sate <- declare_estimand(SATE = mean(Y_Z_1 - Y_Z_0))
 
-reveal_outcomes <- declare_reveal()
+my_reveal_outcomes <- reveal_outcomes()
 
 test_that("multiple estimator declarations work", {
   estimator_1 <-
@@ -117,7 +117,7 @@ test_that("multiple estimator declarations work", {
     sampling +
     sate +
     assignment +
-    reveal_outcomes +
+    my_reveal_outcomes +
     estimator_1 +
     estimator_2
 
@@ -148,7 +148,7 @@ test_that("multiple estimator declarations work", {
     sampling +
     sate +
     assignment +
-    reveal_outcomes +
+    my_reveal_outcomes +
     estimator_3 +
     estimator_4
 
@@ -179,7 +179,7 @@ test_that("multiple estimator declarations work", {
       sampling +
       sate +
       assignment +
-      reveal_outcomes +
+      my_reveal_outcomes +
       estimator_5 +
       estimator_6
   })
@@ -266,8 +266,8 @@ test_that("default estimator handler validation fn", {
   expect_error(declare_estimator(model = I))
 })
 
-test_that("tidy_estimator, handler does not take data", {
-  expect_error(tidy_estimator(I), "function with a data argument")
+test_that("label_estimator, handler does not take data", {
+  expect_error(label_estimator(I), "function with a data argument")
 })
 
 test_that("model_handler runs directly", {
@@ -315,7 +315,7 @@ test_that("estimators have different columns", {
   }
 
   estimator_m <- declare_estimator(
-    handler = tidy_estimator(matching_helper),
+    handler = label_estimator(matching_helper),
     estimand = att,
     label = "matching"
   )
@@ -323,7 +323,7 @@ test_that("estimators have different columns", {
   matching <- population +
     potential_outcomes +
     assignment +
-    declare_reveal(Y, Z) +
+    reveal_outcomes(Y, Z) +
     estimator_d_i_m +
     estimator_m
 

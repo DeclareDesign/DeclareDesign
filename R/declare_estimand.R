@@ -8,7 +8,7 @@
 #'
 #' @details
 #'
-#' For the default diagnosands, the return value of the handler should have `estimand_label` and `estimand` columns.
+#' For the default diagnosands, the return value of the handler should have \code{estimand_label} and \code{estimand} columns.
 #'
 #' @export
 #'
@@ -21,7 +21,7 @@
 #'   Y ~ (.25 + X) * Z + rnorm(N))
 #' my_assignment  <- declare_assignment(m = 50)
 #' design_stub <- my_population + my_potential_outcomes + my_assignment + 
-#'   declare_reveal()
+#'   reveal_outcomes()
 #'
 #' # Get example data to compute estimands on
 #' dat <- draw_data(design_stub)
@@ -175,28 +175,30 @@ declare_estimands <- declare_estimand
 #' @param data a data.frame
 #' @details
 #'
-#' If term is TRUE, the names of ... will be returned in a `term` column,
-#' and `estimand_label` will contain the step label. This can be used as
+#' If term is TRUE, the names of ... will be returned in a \code{term} column,
+#' and \code{estimand_label} will contain the step label. This can be used as
 #' an additional dimension for use in diagnosis.
 #'
 #'
-#' @importFrom rlang eval_tidy quos  is_quosure
+#' @importFrom rlang eval_tidy quos is_quosure quo_get_expr as_data_mask
 #' @rdname declare_estimand
 estimand_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
   options <- quos(...)
   if (names(options)[1] == "") names(options)[1] <- label
   
   subset <- substitute(subset)
-  if (is_quosure(subset)) subset <- subset[[2]]
+  if (is_quosure(subset)) subset <- quo_get_expr(subset)
   idx <- eval_tidy(subset, data = data)
   if (!is.null(idx)) {
     data <- data[idx, , drop = FALSE]
   }
   
-  ret <- vector("list", length(options))
-  for (i in seq_along(options)) {
-    ret[i] <- eval_tidy(options[[i]], data = data)
+#  ret <- vector("list", length(options))
+  ret <- as_data_mask(data)
+  for (i in names(options)) {
+    ret[[i]] <- eval_tidy(options[[i]], data = ret)
   }
+  ret <- mget(names(options), ret)
   ret <- simplify2array(ret)
   
   if (term) {
@@ -204,13 +206,15 @@ estimand_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
       estimand_label = label,
       term = names(options),
       estimand = ret,
-      stringsAsFactors = FALSE
+      stringsAsFactors = FALSE,
+      row.names = NULL
     )
   } else {
     data.frame(
       estimand_label = names(options),
       estimand = ret,
-      stringsAsFactors = FALSE
+      stringsAsFactors = FALSE,
+      row.names = NULL
     )
   }
 }

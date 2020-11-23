@@ -31,7 +31,7 @@
 #'
 #' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 #'
-#' my_reveal <- declare_reveal()
+#' my_reveal <- reveal_outcomes()
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 #'
@@ -85,6 +85,9 @@ diagnose_design <- function(...,
     if (is_empty(c("estimator_label", "estimand_label") %icn% simulations_df)) {
       stop("Can't calculate diagnosands on this data.frame, which does not include either an estimator_label or an estimand_label. Did you send a simulations data frame?")
     }
+    if (nrow(simulations_df) == 0) {
+      stop("Can't calculate diagnosands on this data.frame, which has zero rows.")
+    }
     diagnosands <- diagnosands %||% attr(simulations_df, "diagnosands") %||% default_diagnosands
   } else {
     # simulate if needed ------------------------------------------------------
@@ -134,28 +137,19 @@ diagnose_design <- function(...,
   diagnosands_df <- merge(x = diagnosands_df, y = n_sims_df, by = group_by_set, all = TRUE)
 
   parameters_df <- attr(simulations_df, "parameters")
-  diagnosands_df <- merge(diagnosands_df, parameters_df, by = "design_label")
-
-  # make design_label a factor
-  diagnosands_df$design_label <- factor(diagnosands_df$design_label, levels = as.character(parameters_df$design_label))
-
+  diagnosands_df <- merge_param_df(diagnosands_df, parameters_df)
+  
   # Reorder rows
   sort_by_list <- c(group_by_set, "statistic") %icn% diagnosands_df
   diagnosands_df <- diagnosands_df[do.call(order, as.list(diagnosands_df[sort_by_list])), , drop = FALSE]
-
+  
   rownames(diagnosands_df) <- NULL
-
-  # reorder columns
-
-  diagnosands_df <- diagnosands_df[, reorder_columns(parameters_df, diagnosands_df), drop = FALSE]
-
+  
   # Return frames
   out <- list(simulations_df = simulations_df, diagnosands_df = diagnosands_df, diagnosand_names = diagnosand_names, group_by_set = group_by_set, parameters_df = parameters_df)
 
   if (bootstrap_sims != 0) {
-    out$bootstrap_replicates <- bootout$diagnosand_replicates
-    out$bootstrap_replicates <- merge(out$bootstrap_replicates, parameters_df, by = "design_label")
-    out$bootstrap_replicates <- out$bootstrap_replicates[, reorder_columns(parameters_df, out$bootstrap_replicates), drop = FALSE]
+    out$bootstrap_replicates <- merge_param_df(bootout$diagnosand_replicates, parameters_df)
   }
   out$bootstrap_sims <- bootstrap_sims
 
@@ -168,6 +162,21 @@ diagnose_designs <- diagnose_design
 
 reorder_columns <- function(a, b, n1 = colnames(a), n2 = colnames(b))
   c(n1, setdiff(n2, n1))
+
+merge_param_df <- function(df, parameters_df) {
+
+  if(!is.data.frame(parameters_df)) return(df)
+  
+  df <- merge(df, parameters_df, by = "design_label")
+  
+  # make design_label a factor
+  df$design_label <- factor(df$design_label, levels = as.character(parameters_df$design_label))
+  
+  # reorder columns
+  df <- df[, reorder_columns(parameters_df, df), drop = FALSE]
+  
+  df
+}
 
 check_design_class <- function(designs) {
   if (!all(sapply(designs, function(x) {

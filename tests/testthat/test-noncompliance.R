@@ -41,7 +41,7 @@ test_that("Noncompliance", {
     return_frame[return_frame$variable_names == "D", ]
   }
 
-  cace_hat <- declare_estimator(handler = tidy_estimator(cace_estimator), estimand = CACE, label = "CACE_hat")
+  cace_hat <- declare_estimator(handler = label_estimator(cace_estimator), estimand = CACE, label = "CACE_hat")
 
   design <- my_population +
     POS_Y +
@@ -50,8 +50,8 @@ test_that("Noncompliance", {
     ITT_d +
     CACE +
     my_assignment +
-    declare_reveal(outcome_variables = "D", assignment_variables = "Z") +
-    declare_reveal(outcome_variables = "Y", assignment_variables = "D") +
+    reveal_outcomes(outcome_variables = "D", assignment_variables = "Z") +
+    reveal_outcomes(outcome_variables = "Y", assignment_variables = "D") +
     cace_hat
 
   df <- draw_data(design)
@@ -97,9 +97,9 @@ test_that("POs correctly assembled for noncompliance case", {
       pop +
       pos_D +
       assignment +
-      # declare_reveal(D, Z) +
+      # reveal_outcomes(D, Z) +
       pos_Y +
-      declare_reveal(Y, D)
+      reveal_outcomes(Y, D)
   )
 
   e <- (noncompliance[[4]])

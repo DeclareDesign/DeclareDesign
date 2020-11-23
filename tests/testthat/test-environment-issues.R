@@ -15,7 +15,7 @@ test_that("send estimand to estimator works", {
 
   pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = "test")
 
-  reveal_outcomes <- declare_reveal()
+  reveal_outcomes <- reveal_outcomes()
 
   my_design <- my_population +
     my_potential_outcomes +

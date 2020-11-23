@@ -1,17 +1,20 @@
 citHeader("To cite list in publications use:")
 
-citEntry(entry = "misc",
+citEntry(entry = "article",
   title        = "Declaring and Diagnosing Research Designs",
   author       = personList(as.person("Graeme Blair"), as.person("Jasper Cooper"),
                             as.person("Alexander Coppock"), as.person("Macartan Humphreys")),
-  howpublished = "Working paper",
-  year         = "2017",
-  url          = "http://declaredesign.org/paper.pdf",
+  journal      = "American Political Science Review",
+  volume       = "113",
+  issue        = "3",
+  pages        = "838-859",
+  year         = "2019",
+  url          = "https://declaredesign.org/paper.pdf",
 
   textVersion  =
-  paste("Graeme Blair, Jasper Cooper, Alexander Coppock, and Macartan Humphreys (2017).",
+  paste("Graeme Blair, Jasper Cooper, Alexander Coppock, and Macartan Humphreys (2019).",
         "``Declaring and Diagnosing Research Designs.''",
-        "Working paper.",
+        "American Poliitcal Science Review 113(3): 838-859.",
         "URL http://declaredesign.org/paper.pdf")
 )
 

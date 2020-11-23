@@ -7,13 +7,13 @@
 #' @details
 #'\code{declare_sampling} can work with any sampling_function that takes data and returns data. The default handler is \code{draw_rs} from the \code{randomizr} package. This allows quick declaration of many sampling schemes that involve strata and clusters.
 #'
-#'The arguments to \code{\link{draw_rs}} can include N, strata_var, clust_var, n, prob, strata_n, and strata_prob.
+#'The arguments to \code{\link{draw_rs}} can include N, strata, clusters, n, prob, strata_n, and strata_prob.
 #'The arguments you need to specify are different for different designs.
 #'
 #'Note that \code{declare_sampling} works similarly to \code{declare_assignment} a key difference being that \code{declare_sampling} functions subset data to sampled units rather than simply appending an indicator for membership of a sample (assignment). If you need to sample but keep the dataset use \code{declare_assignment} and define further steps (such as estimation) with respect to subsets defined by the assignment.
 #'
 #'For details see the help files for \code{\link{complete_rs}}, \code{\link{strata_rs}}, \code{\link{cluster_rs}}, or \code{\link{strata_and_cluster_rs}}
-#' @importFrom rlang quos quo lang_modify eval_tidy !!!
+#' @importFrom rlang quos quo call_modify eval_tidy !!!
 #' @importFrom randomizr declare_rs
 #'
 #' @examples
@@ -38,32 +38,35 @@
 declare_sampling <- make_declarations(sampling_handler, "sampling")
 
 #' @param sampling_variable The prefix for the sampling inclusion probability variable.
+#' @param drop_nonsampled Logical indicating whether to drop units that are not sampled. Default is \code{TRUE}.
 #' @param data A data.frame.
-#' @importFrom rlang quos !!! lang_modify eval_tidy quo
+#' @importFrom rlang quos !!! call_modify eval_tidy quo
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
 #' @rdname declare_sampling
-sampling_handler <- function(data, ..., sampling_variable = "S") {
+sampling_handler <- function(data, ..., sampling_variable = "S", drop_nonsampled = TRUE) {
   ## draw sample
 
   options <- quos(...)
 
   samp <- reveal_nse_helper(sampling_variable)
-  samp <- as.symbol(paste0(samp, "_inclusion_prob"))
+  samp_inclusion_prob <- as.symbol(paste0(samp, "_inclusion_prob"))
 
-  S <- as.symbol(".__Sample") # Matching old code but also eliminating the R CMD check warning that .__Sample is a undef/global variable
-
-  decl <- eval_tidy(quo(declare_rs(N=!!nrow(data), !!!options)), data)
+  decl <- eval_tidy(quo(declare_rs(N = !!nrow(data), !!!options)), data)
   
   data <- fabricate(data,
-    !!S := draw_rs(!!decl),
-    !!samp := obtain_inclusion_probabilities(!!decl),
+    !!samp := draw_rs(!!decl),
+    !!samp_inclusion_prob := obtain_inclusion_probabilities(!!decl),
     ID_label = NA
   )
-
-  S <- as.character(S)
+  
+  S <- as.character(as.symbol(samp))
 
   ## subset to the sampled observations
-  data[ data[[S]] %in% 1, names(data) != S, drop = FALSE]
+  if(drop_nonsampled == TRUE) {
+    data[ data[[S]] %in% 1, names(data) != S, drop = FALSE]
+  } else {
+    data
+  }
 }
 
 validation_fn(sampling_handler) <- function(ret, dots, label) {
@@ -99,7 +102,7 @@ validation_fn(sampling_handler) <- function(ret, dots, label) {
         dots[rs_args] <- NULL
         dots$declaration <- declaration
 
-        ret <- build_step(currydata(sampling_handler, dots, strictDataParam = attr(ret, "strictDataParam")),
+        ret <- build_step(currydata(sampling_handler, dots),
           handler = sampling_handler,
           dots = dots,
           label = label,

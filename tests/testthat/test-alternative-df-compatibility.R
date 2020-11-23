@@ -30,6 +30,23 @@ test_that("tibble", {
   expect_identical(dim(df), 5:4)
 })
 
+test_that("tibble more", {
+  
+  population <- declare_population(N = 100, u = rnorm(N))
+  potential_outcomes <- declare_potential_outcomes(Y ~ Z)
+  assignment <- declare_assignment(m = 50)
+  reveal_Y <- reveal_outcomes(Y,Z)
+  
+  my_func <- function(data){
+    data %>% (tibble::as_tibble)
+  }
+  
+  design <- population + potential_outcomes + assignment + declare_step(handler = my_func)
+  
+  expect_s3_class(draw_data(design), "tbl_df")
+  
+})
+
 
 test_that("data.table", {
   skip_if_not_installed("data.table")
@@ -62,3 +79,4 @@ test_that("sf", {
 
   expect_identical(dim(df), 5:6)
 })
+

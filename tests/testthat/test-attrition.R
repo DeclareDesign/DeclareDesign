@@ -18,8 +18,8 @@ test_that("attrition / formula PO", {
   )
 
 
-  my_reveal_attrition <- declare_reveal(outcome_variables = "R")
-  my_reveal_outcomes <- declare_reveal(outcome_variables = "Y", attrition_variables = "R")
+  my_reveal_attrition <- reveal_outcomes(outcome_variables = "R")
+  my_reveal_outcomes <- reveal_outcomes(outcome_variables = "Y", attrition_variables = "R")
 
   my_design <-
     my_population +
@@ -46,8 +46,8 @@ test_that("attrition / legacy PO", {
     my_potential_outcomes_Y +
     my_potential_outcomes_attrition +
     my_assignment +
-    declare_reveal(outcome_variables = "R") +
-    declare_reveal(attrition_variables = "R")
+    reveal_outcomes(outcome_variables = "R") +
+    reveal_outcomes(attrition_variables = "R")
 
   out <- head(draw_data(my_design))
 

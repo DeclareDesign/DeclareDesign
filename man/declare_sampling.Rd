@@ -7,7 +7,7 @@
 \usage{
 declare_sampling(..., handler = sampling_handler, label = NULL)
 
-sampling_handler(data, ..., sampling_variable = "S")
+sampling_handler(data, ..., sampling_variable = "S", drop_nonsampled = TRUE)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -19,6 +19,8 @@ sampling_handler(data, ..., sampling_variable = "S")
 \item{data}{A data.frame.}
 
 \item{sampling_variable}{The prefix for the sampling inclusion probability variable.}
+
+\item{drop_nonsampled}{Logical indicating whether to drop units that are not sampled. Default is \code{TRUE}.}
 }
 \value{
 A function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
@@ -29,7 +31,7 @@ Declare sampling procedure
 \details{
 \code{declare_sampling} can work with any sampling_function that takes data and returns data. The default handler is \code{draw_rs} from the \code{randomizr} package. This allows quick declaration of many sampling schemes that involve strata and clusters.
 
-The arguments to \code{\link{draw_rs}} can include N, strata_var, clust_var, n, prob, strata_n, and strata_prob.
+The arguments to \code{\link{draw_rs}} can include N, strata, clusters, n, prob, strata_n, and strata_prob.
 The arguments you need to specify are different for different designs.
 
 Note that \code{declare_sampling} works similarly to \code{declare_assignment} a key difference being that \code{declare_sampling} functions subset data to sampled units rather than simply appending an indicator for membership of a sample (assignment). If you need to sample but keep the dataset use \code{declare_assignment} and define further steps (such as estimation) with respect to subsets defined by the assignment.

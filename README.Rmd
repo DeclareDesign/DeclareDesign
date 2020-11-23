@@ -15,6 +15,7 @@ options(digits=2)
 [![Travis-CI Build Status](https://travis-ci.org/DeclareDesign/DeclareDesign.svg?branch=master)](https://travis-ci.org/DeclareDesign/DeclareDesign)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/DeclareDesign/DeclareDesign?branch=master&svg=true)](https://ci.appveyor.com/project/DeclareDesign/DeclareDesign)
 [![Coverage Status](https://coveralls.io/repos/github/DeclareDesign/DeclareDesign/badge.svg?branch=master)](https://coveralls.io/github/DeclareDesign/DeclareDesign?branch=master)
+[![R build status](https://github.com/DeclareDesign/DeclareDesign/workflows/R-CMD-check/badge.svg)](https://github.com/DeclareDesign/DeclareDesign/actions)
 
 DeclareDesign is a system for describing research designs in code and simulating them in order to understand their properties. Because DeclareDesign employs a consistent grammar of designs, you can focus on the intellectually challenging part -- designing good research studies -- without having to code up simulations from scratch.
 
@@ -92,7 +93,7 @@ A few other features:
 
 1. A designer is a function that takes parameters (e.g., `N`) and returns a design. `expand_design()` is a function of a designer and parameters that returns a design.
 2. You can change the features of the design to be diagnosed with `declare_diagnosands()`.
-3. `declare_reveal()` implements a general switching equation, which allows you to reveal outcomes from potential outcomes and a treatment assignment.
+3. `reveal_outcomes()` implements a general switching equation, which allows you to reveal outcomes from potential outcomes and a treatment assignment.
 4. You can provide custom functions to any `declare_*` step, as described in the [custom functions vignette](/r/declaredesign/articles/custom_functions.html).
 
 ---

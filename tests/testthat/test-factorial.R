@@ -19,7 +19,7 @@ test_that("Factorial", {
     term = "Z1:Z2"
   )
 
-  reveal_outcomes <- declare_reveal()
+  reveal_outcomes <- reveal_outcomes()
 
   my_design <-
     my_population +
