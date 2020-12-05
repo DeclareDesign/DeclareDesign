@@ -48,7 +48,13 @@ design <-
   declare_assignment(m = 50) +
   declare_estimator(Y ~ Z)
 
-diagnosis <- diagnose_design(design, diagnosands = declare_diagnosands(select = c("power", "bias")))
+
+diagnosands <-
+  declare_diagnosands(bias = mean(estimate - estimand),
+                      power = mean(p.value <= 0.05))
+
+
+diagnosis <- diagnose_design(design, diagnosands = diagnosands)
 diagnosis
 ```
 
@@ -67,7 +73,7 @@ The core DeclareDesign package relies on four companion packages, each of which 
 
 2. You can also browse a [library](https://declaredesign.org/library/) of already declared designs, which relies on the `DesignLibrary` package. The library includes canonical designs that you can download, modify, and deploy.
 
-3. A fuller description of the philosophy underlying the software is described in this [working paper](https://declaredesign.org/declare.pdf).
+3. A fuller description of the philosophy underlying the software is described in this [paper](https://declaredesign.org/declare.pdf).
 
 ## Package structure
 
@@ -77,6 +83,7 @@ Each of these `declare_*()` functions returns a *function*.
 2. `declare_potential_outcomes()` (takes population or sample and adds potential outcomes produced by interventions)
 3. `declare_sampling()` (takes a population and selects a sample)
 4. `declare_assignment()` (takes a population or sample and adds treatment assignments)
+4. `declare_measurement()` (adds measured variables)
 5. `declare_estimand()` (takes potential outcomes and calculates a quantity of interest)
 6. `declare_estimator()` (takes data produced by sampling and assignment and returns estimates)
 

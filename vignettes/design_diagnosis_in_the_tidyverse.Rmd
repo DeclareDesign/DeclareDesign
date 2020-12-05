@@ -1,0 +1,25 @@
+---
+title: "Design Diagnosis in the tidy verse"
+output:
+  blogdown::html_page:
+    toc: true
+    toc_depth: 1
+vignette: >
+  %\VignetteIndexEntry{MIDA}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r include=FALSE}
+set.seed(42)
+options(digits=2)
+library(knitr)
+library(kableExtra)
+library(gridExtra)
+library(DeclareDesign)
+library(tidyverse)
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, message = FALSE)
+```
+
+
+[to be written]
