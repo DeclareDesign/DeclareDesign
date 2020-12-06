@@ -48,11 +48,9 @@ design <-
   declare_assignment(m = 50) +
   declare_estimator(Y ~ Z)
 
-
 diagnosands <-
   declare_diagnosands(bias = mean(estimate - estimand),
                       power = mean(p.value <= 0.05))
-
 
 diagnosis <- diagnose_design(design, diagnosands = diagnosands)
 diagnosis
