@@ -12,7 +12,8 @@
 #'
 #' @examples
 #' 
-#' Potential outcomes can be declared in two ways: by using a formula or as separate variables.
+#' # Potential outcomes can be declared in two ways: 
+#' # by using a formula or as separate variables.
 #' 
 #' 
 #' # Using a formula

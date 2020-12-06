@@ -23,7 +23,6 @@
 #' declare_population(N = 100,
 #'                    female = rbinom(N, 1, 0.5),
 #'                    U = rnorm(N)) +
-#'   # building in treatment effect heterogeneity for fun
 #'   declare_potential_outcomes(Y ~ 0.5 * Z + 0.2 * female + 0.1 * Z * female + U)
 #' 
 #' design_with_sampling <- design + declare_sampling(n = 50)
@@ -43,7 +42,6 @@
 #'
 #' design + declare_sampling(handler = my_sampling_function)
 #'
-#' my_sampling_custom(sleep)
 declare_sampling <- make_declarations(sampling_handler, "sampling")
 
 #' @param sampling_variable The prefix for the sampling inclusion probability variable.

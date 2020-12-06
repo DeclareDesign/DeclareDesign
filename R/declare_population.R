@@ -43,7 +43,8 @@
 #'
 #' # Declare a population using a custom function
 #' 
-#' the default handler is fabricatr::fabricate, but you can supply any function that returns a data.frame
+#' # the default handler is fabricatr::fabricate, 
+#' # but you can supply any function that returns a data.frame
 #'
 #' my_population_function <- function(N) {
 #'   data.frame(u = rnorm(N))

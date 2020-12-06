@@ -21,10 +21,9 @@ test_that("test the custom execution strategy", {
   output <- run_design(exst)
 
   expect_equal(
-    regular$estimates_df$estimate,
-    output$estimates_df$estimate + 1
+    regular$estimate,
+    output$estimate + 1
   )
-  expect_equal(names(output), "estimates_df") # no estimands
 })
 
 

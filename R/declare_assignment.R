@@ -48,19 +48,31 @@
 #' # Declare assignment specifying assignment probability for each block
 #' design + declare_assignment(block_prob = c(1/3, 2/3), blocks = female)
 #' 
-#' # Declare factorial assignment (Approach 1): Use complete random assignment to assign T1 and then use T1 as a block to assign T2. 
+#' # Declare factorial assignment (Approach 1): Use complete random assignment 
+#' # to assign Z1 and then use Z1 as a block to assign Z2.
 #' 
-#'  design +
-#'    declare_assignment(assignment_variable = "T1") + 
-#'    declare_assignment(blocks = T1, assignment_variable = "T2")
-#'    
+#' design <-
+#'   declare_population(N = 100,
+#'                    U = rnorm(N)) +
+#'   declare_potential_outcomes(Y ~ Z1 + Z2 + Z1*Z2 + U, 
+#'                              conditions = list(Z1 = 0:1, Z2 = 0:1)) 
+#' 
+#' 
+#' design +
+#'   declare_assignment(assignment_variable = "Z1") +
+#'   declare_assignment(blocks = Z1, assignment_variable = "Z2")
+#' 
+#' 
+#' 
 #' # Declare factorial assignment (Approach 2): 
 #' #   Assign to four conditions and then split into separate factors. 
 #' 
-#'  design +
-#'    declare_assignment(conditions = 1:4) + 
-#'    declare_step(fabricate, T1 = as.numeric(Z %in% 2:3), T2 = as.numeric(Z %in% 3:4))
-#'    
+#' design +
+#'   declare_assignment(conditions = 1:4) + 
+#'   declare_step(fabricate, Z1 = as.numeric(Z %in% 2:3), Z2 = as.numeric(Z %in% 3:4))
+#' 
+#' 
+#' 
 #' # Declare clustered assignment
 #' 
 #' clustered_design <-
