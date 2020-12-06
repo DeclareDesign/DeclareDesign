@@ -67,12 +67,27 @@ check_sims <- function(design, sims) {
   ret
 }
 
-#' Execute a design
+#' Run a design one time
 #'
 #' @param design a DeclareDesign object
 #'
+#' @examples 
+#' design <-
+#'   declare_population(N = 100, X = rnorm(N)) +
+#'   declare_potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N)) +
+#'   declare_assignment(m = 50) +
+#'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_estimator(Y ~ Z, estimand = "ATE")
+#' 
+#' run_design(design)
+#' 
+#'
 #' @export
-run_design <- function(design) run_design_internal(design)
+run_design <- function(design){
+  ret <- simulate_single_design(design, sims = 1, low_simulations_warning = FALSE)
+  ret$sim_ID <- NULL
+  return(ret)
+}
 
 run_design_internal <- function(design, ...) UseMethod("run_design_internal", design)
 
@@ -308,7 +323,7 @@ fan_out <- function(design, fan) {
       st[[j]]$fan[i] <- j
     
     
-    st <- future_lapply(seq_along(st), function(j) run_design(st[[j]]), future.seed = NA, future.globals = "st")
+    st <- future_lapply(seq_along(st), function(j) run_design_internal(st[[j]]), future.seed = NA, future.globals = "st")
   }
   
   st <- lapply(st, function(x){
