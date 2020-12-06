@@ -16,14 +16,16 @@ navbar:
   - text: "Help"
     href: http://discuss.declaredesign.org
   right:
-  - text: DeclareDesign home
-    href: https://declaredesign.org/r/declaredesign/
+  - text: Get started
+    href: articles/DeclareDesign_101.html 
   - text: Reference
     href: reference/index.html
-  - text: Articles
-    menu:
-    - text: DeclareDesign 101
-      href: articles/DeclareDesign_101.html 
+  - text: DeclareDesign home
+    href: https://declaredesign.org/r/declaredesign/
+  # - text: Articles
+  #   menu:
+  #   - text: DeclareDesign 101
+  #     href: articles/DeclareDesign_101.html 
 
 
 reference:
