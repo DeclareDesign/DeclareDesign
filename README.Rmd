@@ -65,7 +65,7 @@ The core DeclareDesign package relies on four companion packages, each of which 
 1. [randomizr](https://declaredesign.org/r/randomizr/): Easy to use tools for common forms of random assignment and sampling.
 2. [fabricatr](https://declaredesign.org/r/fabricatr/): Imagine your data before you collect it.
 3. [estimatr](https://declaredesign.org/r/estimatr/): Fast estimators for social scientists.
-4. [DesignLibrary](https://declaredesign.org/library): Templates to quickly adopt and adapt common research designs.
+4. [DesignLibrary](https://declaredesign.org/r/designlibrary/): Templates to quickly adopt and adapt common research designs.
 
 ## Learning DeclareDesign
 
