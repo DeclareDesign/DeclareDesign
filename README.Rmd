@@ -69,9 +69,9 @@ The core DeclareDesign package relies on four companion packages, each of which 
 
 ## Learning DeclareDesign
 
-1. To get started, have a look at this vignette on [the idea behind DeclareDesign](https://declaredesign.org/idea/), which covers the main functionality of the software.
+1. To get started, have a look at this vignette on [the idea behind DeclareDesign](https://declaredesign.org/getting-started.html), which covers the main functionality of the software.
 
-2. You can also browse a [library](https://declaredesign.org/library/) of already declared designs, which relies on the `DesignLibrary` package. The library includes canonical designs that you can download, modify, and deploy.
+2. You can also browse a [library](https://declaredesign.org/r/designlibrary/) of already declared designs, which relies on the `DesignLibrary` package. The library includes canonical designs that you can download, modify, and deploy.
 
 3. A fuller description of the philosophy underlying the software is described in this [paper](https://declaredesign.org/declare.pdf).
 
