@@ -16,7 +16,7 @@ navbar:
   - text: "Help"
     href: http://discuss.declaredesign.org
   right:
-  - text: Get startd
+  - text: Get started
     href: articles/DeclareDesign_101.html 
   - text: Reference
     href: reference/index.html
