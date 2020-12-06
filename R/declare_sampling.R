@@ -2,7 +2,7 @@
 #'
 #' @inheritParams declare_internal_inherit_params
 #'
-#' @return A function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
+#' @return A sampling declaration, which is a function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
 #' @export
 #' @details
 #'\code{declare_sampling} can work with any sampling_function that takes data and returns data. The default handler is \code{draw_rs} from the \code{randomizr} package. This allows quick declaration of many sampling schemes that involve strata and clusters.
@@ -18,21 +18,30 @@
 #'
 #' @examples
 #'
-#' # Default handler is `draw_rs` from `randomizr` package
-#' 
 #' # Simple random sampling
-#' my_sampling <- declare_sampling(n = 50)
+#' design <-
+#' declare_population(N = 100,
+#'                    female = rbinom(N, 1, 0.5),
+#'                    U = rnorm(N)) +
+#'   # building in treatment effect heterogeneity for fun
+#'   declare_potential_outcomes(Y ~ 0.5 * Z + 0.2 * female + 0.1 * Z * female + U)
+#' 
+#' design_with_sampling <- design + declare_sampling(n = 50)
+#' 
+#' nrow(draw_data(design))
+#' nrow(draw_data(design_with_sampling))
 #'
 #' # Stratified random sampling
-#' my_stratified_sampling <- declare_sampling(strata = female)
+#' design + declare_sampling(strata = female)
 #'
 #' # Custom random sampling functions
 #'
-#' my_sampling_function <- function(data, n=nrow(data)) {
-#'    data[sample(n,n,replace=TRUE), , drop=FALSE]
+#' my_sampling_function <- function(data, n = 20) {
+#'   data[sample(n, n, replace = TRUE), , drop = FALSE]
 #' }
+#' 
 #'
-#' my_sampling_custom <- declare_sampling(handler = my_sampling_function)
+#' design + declare_sampling(handler = my_sampling_function)
 #'
 #' my_sampling_custom(sleep)
 declare_sampling <- make_declarations(sampling_handler, "sampling")

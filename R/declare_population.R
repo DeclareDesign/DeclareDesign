@@ -1,7 +1,7 @@
 #' Declare the size and features of the population
 #'
 #' @inheritParams declare_internal_inherit_params
-#' @return A function that returns a data.frame.
+#' @return A potential outcomes declaration, which is a function that returns a data.frame.
 #' @export
 #' @importFrom fabricatr fabricate
 #'
@@ -15,15 +15,22 @@
 #' my_population <- declare_population(N = 100)
 #' #' my_population()
 #'
-#' # Declare a population from existing data
-#' declare_population(sleep)
-#'
 #' # Declare a single-level population with a covariate
 #' declare_population(
 #'   N = 6,
 #'   female = rbinom(n = N, 1, prob = 0.5),
 #'   height_ft = rnorm(N, mean = 5.67 - 0.33 * female, sd = 0.25)
 #' )
+#' 
+#' 
+#' # Declare a population from existing data
+#' 
+#' declare_population(mtcars)
+#' 
+#' # Resample from existing data
+#' 
+#' declare_population(N = 100, data = mtcars, handler = resample_data)
+#' 
 #' 
 #' # Declare a two-level hierarchical population
 #' # containing cities within regions and a
