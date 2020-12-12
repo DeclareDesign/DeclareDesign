@@ -101,6 +101,7 @@ simulate_designs <- simulate_design
 
 
 #' @importFrom rlang as_list
+#' @importFrom progressr progressor
 simulate_single_design <- function(design, sims) {
   if (!is_bare_integerish(sims) || (length(design) != length(sims) & length(sims) != 1)) {
     stop("Please provide sims a scalar or a numeric vector of length the number of steps in designs.", call. = FALSE)
@@ -126,9 +127,12 @@ simulate_single_design <- function(design, sims) {
   # If sims is set correctly, fan out
   
   if (length(sims) == 1 && is.null(names(sims))) {
+    p <- progressor(steps = sims)
     results_list <- future_lapply(seq_len(sims),
-                                  function(i)
-                                    run_design(design),
+                                  function(i) {
+                                    run_design(design)
+                                    p()
+                                  },
                                   future.seed = NA, future.globals = "design"
     )
   } else {

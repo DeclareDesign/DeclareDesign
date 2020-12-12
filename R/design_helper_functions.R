@@ -292,9 +292,12 @@ make_fan_counter <- function(fan) {
 }
 
 # A wrapper around conduct design for fan-out execution strategies
+#' @importFrom progressr progressor
 fan_out <- function(design, fan) {
   st <- list(execution_st(design, fan=make_fan_counter(fan)))
 
+  p <- progressor(steps = prod(fan))
+  
   for (i in seq_len(nrow(fan))) {
     end <- fan[i, "end"]
     n <- fan[i, "n"]
@@ -308,7 +311,12 @@ fan_out <- function(design, fan) {
       st[[j]]$fan[i] <- j
     
     
-    st <- future_lapply(seq_along(st), function(j) run_design(st[[j]]), future.seed = NA, future.globals = "st")
+    st <- future_lapply(
+      seq_along(st), function(j) { 
+        p()
+        run_design(st[[j]])
+      }, 
+      future.seed = NA, future.globals = "st")
   }
   
   st <- lapply(st, function(x){
