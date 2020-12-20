@@ -3,12 +3,15 @@
 \name{declare_estimand}
 \alias{declare_estimand}
 \alias{declare_estimands}
+\alias{declare_inquiry}
 \alias{estimand_handler}
 \title{Declare estimand}
 \usage{
 declare_estimand(..., handler = estimand_handler, label = "estimand")
 
 declare_estimands(..., handler = estimand_handler, label = "estimand")
+
+declare_inquiry(..., handler = estimand_handler, label = "estimand")
 
 estimand_handler(data, ..., subset = NULL, term = FALSE, label)
 }
@@ -47,7 +50,7 @@ my_potential_outcomes  <- declare_potential_outcomes(
   Y ~ (.25 + X) * Z + rnorm(N))
 my_assignment  <- declare_assignment(m = 50)
 design_stub <- my_population + my_potential_outcomes + my_assignment + 
-  reveal_outcomes()
+  declare_reveal()
 
 # Get example data to compute estimands on
 dat <- draw_data(design_stub)

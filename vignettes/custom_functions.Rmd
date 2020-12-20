@@ -70,7 +70,7 @@ design <-
   declare_estimand(handler = custom_estimand, label = "medianTE") + 
   declare_sampling(handler = custom_sampling) + 
   declare_assignment(handler = custom_assignment) + 
-  reveal_outcomes(handler = custom_reveal) + 
+  declare_reveal(handler = custom_reveal) + 
   declare_estimator(handler = tidy_estimator(custom_estimator), 
                     estimand = "medianTE")
 head(draw_data(design))

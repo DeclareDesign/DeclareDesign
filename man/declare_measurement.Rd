@@ -2,9 +2,12 @@
 % Please edit documentation in R/declare_measurement.R
 \name{declare_measurement}
 \alias{declare_measurement}
+\alias{measurement_handler}
 \title{Declare measurement procedure}
 \usage{
-declare_measurement(..., handler = fabricate, label = NULL)
+declare_measurement(..., handler = measurement_handler, label = NULL)
+
+measurement_handler(data, ...)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -12,6 +15,8 @@ declare_measurement(..., handler = fabricate, label = NULL)
 \item{handler}{a tidy-in, tidy-out function}
 
 \item{label}{a string describing the step}
+
+\item{data}{A data.frame.}
 }
 \value{
 A function that returns a data.frame.

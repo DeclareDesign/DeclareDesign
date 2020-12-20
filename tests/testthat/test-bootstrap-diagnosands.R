@@ -15,7 +15,7 @@ test_that("test diagnosands", {
   pate_estimator1 <- declare_estimator(Y ~ Z, estimand = pate, label = "test1")
   pate_estimator2 <- declare_estimator(Y ~ Z - 1, estimand = pate, label = "test2")
 
-  reveal <- reveal_outcomes()
+  reveal <- declare_reveal()
 
   fixed_data <- my_population()
 

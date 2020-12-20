@@ -15,7 +15,7 @@ my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 
 my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
-my_reveal <- reveal_outcomes()
+my_reveal <- declare_reveal()
 
 design <- my_population +
   my_potential_outcomes +
@@ -48,7 +48,7 @@ test_that("capitalization of parameter names are retained", {
     my_asgn <- declare_assignment(m = floor(n / 2))
     my_mand <- declare_estimand(mean(Y_Z_1) - mean(Y_Z_0))
     my_estimator <- declare_estimator(Y ~ Z, estimand = my_mand)
-    my_design <- my_pop + my_pos + my_mand + my_smp + my_asgn + reveal_outcomes() + my_estimator
+    my_design <- my_pop + my_pos + my_mand + my_smp + my_asgn + declare_reveal() + my_estimator
     my_design
   }
 

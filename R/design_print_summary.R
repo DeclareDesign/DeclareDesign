@@ -29,7 +29,7 @@ print.design <- function(x, verbose = TRUE, ...) {
 #'
 #' my_mutate <- declare_step(dplyr::mutate, noise_sq = noise ^ 2)
 #'
-#' my_reveal <- reveal_outcomes()
+#' my_reveal <- declare_reveal()
 #'
 #' design <- my_population +
 #'   my_potential_outcomes +

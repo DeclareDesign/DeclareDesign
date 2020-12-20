@@ -3,7 +3,7 @@ context("Estimators")
 my_population <- declare_population(N = 500, noise = rnorm(N))
 my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 my_assignment <- declare_assignment(m = 25)
-my_reveal_outcomes <- reveal_outcomes()
+my_reveal_outcomes <- declare_reveal()
 
 expect_estimates <- function(estimates, label = NULL) {
   expect_equal(
@@ -66,7 +66,7 @@ test_that("regression from estimatr works as an estimator", {
     term = "noise",
     estimand = pate, label = "pate_hat"
   )
-  my_reveal_outcomes <- reveal_outcomes()
+  my_reveal_outcomes <- declare_reveal()
 
   my_design <- my_population +
     my_potential_outcomes +
@@ -93,7 +93,7 @@ assignment <- declare_assignment(m = 50)
 
 sate <- declare_estimand(SATE = mean(Y_Z_1 - Y_Z_0))
 
-my_reveal_outcomes <- reveal_outcomes()
+my_reveal_outcomes <- declare_reveal()
 
 test_that("multiple estimator declarations work", {
   estimator_1 <-
@@ -323,7 +323,7 @@ test_that("estimators have different columns", {
   matching <- population +
     potential_outcomes +
     assignment +
-    reveal_outcomes(Y, Z) +
+    declare_reveal(Y, Z) +
     estimator_d_i_m +
     estimator_m
 

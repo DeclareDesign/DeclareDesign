@@ -19,7 +19,7 @@ test_that("Factorial", {
     term = "Z1:Z2"
   )
 
-  reveal_outcomes <- reveal_outcomes()
+  declare_reveal <- declare_reveal()
 
   my_design <-
     my_population +
@@ -30,7 +30,7 @@ test_that("Factorial", {
       Z1 = as.numeric(Z %in% c("T2", "T4")),
       Z2 = as.numeric(Z %in% c("T3", "T4"))
     ) +
-    reveal_outcomes +
+    declare_reveal +
     my_estimator
 
   expect_equal(my_design %>% draw_data() %>% nrow(), 2000)

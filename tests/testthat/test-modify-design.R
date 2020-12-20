@@ -75,7 +75,7 @@ test_that("names are correct", {
   design <- my_population +
     my_potential_outcomes +
     my_assignment +
-    reveal_outcomes()
+    declare_reveal()
 
 
   processing <- declare_step(handler = fabricate, q = 5)

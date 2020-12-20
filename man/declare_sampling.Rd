@@ -3,11 +3,19 @@
 \name{declare_sampling}
 \alias{declare_sampling}
 \alias{sampling_handler}
+\alias{sampling_handler_legacy}
 \title{Declare sampling procedure}
 \usage{
 declare_sampling(..., handler = sampling_handler, label = NULL)
 
-sampling_handler(data, ..., sampling_variable = "S", drop_nonsampled = TRUE)
+sampling_handler(data, ..., subset = S == 1)
+
+sampling_handler_legacy(
+  data,
+  ...,
+  sampling_variable = "S",
+  drop_nonsampled = TRUE
+)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -17,6 +25,8 @@ sampling_handler(data, ..., sampling_variable = "S", drop_nonsampled = TRUE)
 \item{label}{a string describing the step}
 
 \item{data}{A data.frame.}
+
+\item{subset}{Unquoted expression for subsetting S. By default subsets to \code{S == 1}.}
 
 \item{sampling_variable}{The prefix for the sampling inclusion probability variable.}
 

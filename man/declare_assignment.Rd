@@ -3,11 +3,14 @@
 \name{declare_assignment}
 \alias{declare_assignment}
 \alias{assignment_handler}
+\alias{assignment_handler_legacy}
 \title{Declare assignment procedure}
 \usage{
 declare_assignment(..., handler = assignment_handler, label = NULL)
 
-assignment_handler(
+assignment_handler(data, ...)
+
+assignment_handler_legacy(
   data,
   ...,
   assignment_variable = "Z",

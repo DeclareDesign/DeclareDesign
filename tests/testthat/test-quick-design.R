@@ -8,12 +8,12 @@ test_that("expand_design works", {
     pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
       declare_estimator(Y ~ Z, estimand = pate, label = "pate_hat")
-    reveal_outcomes <- reveal_outcomes()
+    declare_reveal <- declare_reveal()
     my_design <- my_population +
       my_potential_outcomes +
       pate +
       my_assignment +
-      reveal_outcomes +
+      declare_reveal +
       pate_estimator
     return(my_design)
   }
@@ -68,12 +68,12 @@ test_that("vary works", {
     pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
       declare_estimator(Y ~ Z, estimand = pate, label = "pate_hat")
-    reveal_outcomes <- reveal_outcomes()
+    declare_reveal <- declare_reveal()
     my_design <- my_population +
       my_potential_outcomes +
       pate +
       my_assignment +
-      reveal_outcomes +
+      declare_reveal +
       pate_estimator
     return(my_design)
   }
@@ -119,12 +119,12 @@ test_that("power curve", {
     pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
       declare_estimator(Y ~ Z, estimand = pate, label = "pate_hat")
-    reveal_outcomes <- reveal_outcomes()
+    declare_reveal <- declare_reveal()
     my_design <- my_population +
       my_potential_outcomes +
       pate +
       my_assignment +
-      reveal_outcomes +
+      declare_reveal +
       pate_estimator
     return(my_design)
   }

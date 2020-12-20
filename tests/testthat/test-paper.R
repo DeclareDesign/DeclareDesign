@@ -66,7 +66,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
 
   diagnosand <- declare_diagnosands(bias = mean(estimate - estimand), keep_defaults = FALSE)
 
-  reveal_outcomes <- reveal_outcomes()
+  declare_reveal <- declare_reveal()
 
   design <-
     population +
@@ -74,7 +74,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
     assignment +
     potential_outcomes +
     estimand +
-    reveal_outcomes +
+    declare_reveal +
     estimator
 
   df <- draw_data(design)

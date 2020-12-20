@@ -90,7 +90,7 @@ test_that("demo runs", {
   my_estimand(pop_pos)
 
   ## ------------------------------------------------------------------------
-  my_reveal_outcomes <- reveal_outcomes()
+  my_reveal_outcomes <- declare_reveal()
   smp <- my_reveal_outcomes(smp)
   my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
   my_estimator_dim(smp)
@@ -256,8 +256,8 @@ test_that("demo runs", {
     my_potential_outcomes +
     my_potential_outcomes_attrition +
     my_assignment +
-    reveal_outcomes(outcome_variables = "R") +
-    reveal_outcomes(attrition_variables = "R")
+    declare_reveal(outcome_variables = "R") +
+    declare_reveal(attrition_variables = "R")
 
   head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
 

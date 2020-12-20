@@ -15,7 +15,7 @@
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 #'
-#' my_reveal <- reveal_outcomes()
+#' my_reveal <- declare_reveal()
 #'
 #' design <- my_population +
 #'   my_potential_outcomes +

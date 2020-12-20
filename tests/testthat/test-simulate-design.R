@@ -6,7 +6,7 @@ my_potential_outcomes <-
 my_assignment <- declare_assignment(m = 25)
 my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-my_reveal <- reveal_outcomes()
+my_reveal <- declare_reveal()
 
 my_design_1 <- my_population + my_potential_outcomes + my_estimand + my_assignment + my_reveal + my_estimator
 
@@ -54,7 +54,7 @@ my_designer <- function(N, tau) {
   my_assignment <- declare_assignment(m = floor(N / 2))
   my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
   my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-  my_reveal <- reveal_outcomes()
+  my_reveal <- declare_reveal()
   my_design_1 <- pop + pos + my_estimand + my_assignment + my_reveal + my_estimator
   my_design_1
 }
@@ -100,7 +100,7 @@ test_that("designs with some estimators that don't have p.values return the p.va
     declare_potential_outcomes(Y ~ .25 * Z + rnorm(N)) +
     declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
     declare_assignment() +
-    reveal_outcomes(Y, Z) +
+    declare_reveal(Y, Z) +
     declare_estimator(Y ~ Z, estimand = "ATE", label = "blah") +
     declare_estimator(handler = label_estimator(my_custom_estimator), estimand = "ATE")
   

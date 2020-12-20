@@ -166,7 +166,7 @@ design_def <-
   declare_potential_outcomes(Y ~ .25 * Z + noise) +
   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
   declare_assignment(m = 50) +
-  reveal_outcomes() +
+  declare_reveal() +
   my_estimator_dim
 
 draw_estimates(design_def)
