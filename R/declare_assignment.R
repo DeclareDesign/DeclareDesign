@@ -62,6 +62,17 @@
 #'    
 declare_assignment <- make_declarations(assignment_handler, "assignment")
 
+#' @param data A data.frame.
+#' @importFrom rlang quos !!!
+#' @importFrom fabricatr fabricate
+#' @rdname declare_assignment
+assignment_handler <- function(data, ...) {
+  
+  options <- quos(...)
+  
+  fabricate(data = data, !!!options, ID_label = NA)
+  
+}
 
 #' @importFrom rlang quos !!! call_modify eval_tidy quo f_rhs
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities
@@ -69,7 +80,7 @@ declare_assignment <- make_declarations(assignment_handler, "assignment")
 #' @param append_probabilities_matrix Should the condition probabilities matrix be appended to the data? Defaults to FALSE.  Argument to be used with default handler.
 #' @param data A data.frame.
 #' @rdname declare_assignment
-assignment_handler <-
+assignment_handler_legacy <-
   function(data, ..., assignment_variable = "Z", append_probabilities_matrix = FALSE) {
     options <- quos(...)
 

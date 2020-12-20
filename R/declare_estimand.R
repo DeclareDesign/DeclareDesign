@@ -21,7 +21,7 @@
 #'   Y ~ (.25 + X) * Z + rnorm(N))
 #' my_assignment  <- declare_assignment(m = 50)
 #' design_stub <- my_population + my_potential_outcomes + my_assignment + 
-#'   reveal_outcomes()
+#'   declare_reveal()
 #'
 #' # Get example data to compute estimands on
 #' dat <- draw_data(design_stub)
@@ -169,6 +169,11 @@ declare_estimand <- make_declarations(estimand_handler, "estimand",
 #' @rdname declare_estimand
 #' @export
 declare_estimands <- declare_estimand
+
+#' @rdname declare_estimand
+#' @export
+declare_inquiry <- declare_estimand
+
 
 #' @param subset a subset expression
 #' @param term TRUE/FALSE

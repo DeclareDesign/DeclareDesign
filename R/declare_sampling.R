@@ -37,13 +37,32 @@
 #' my_sampling_custom(sleep)
 declare_sampling <- make_declarations(sampling_handler, "sampling")
 
+#' @param subset Unquoted expression for subsetting S. By default subsets to \code{S == 1}.
+#' @param data A data.frame.
+#' @importFrom rlang quos !!!
+#' @importFrom fabricatr fabricate
+#' @rdname declare_sampling
+sampling_handler <- function(data, ..., subset = S == 1) {
+
+  options <- quos(...)
+  
+  data <- fabricate(data = data, !!!options, ID_label = NA)
+  
+  rows <- enquo(subset)
+  rows_val <- eval_tidy(rows, data)
+  stopifnot(is.logical(rows_val))
+  
+  data[rows_val, , drop = FALSE]
+  
+}
+
 #' @param sampling_variable The prefix for the sampling inclusion probability variable.
 #' @param drop_nonsampled Logical indicating whether to drop units that are not sampled. Default is \code{TRUE}.
 #' @param data A data.frame.
 #' @importFrom rlang quos !!! call_modify eval_tidy quo
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
 #' @rdname declare_sampling
-sampling_handler <- function(data, ..., sampling_variable = "S", drop_nonsampled = TRUE) {
+sampling_handler_legacy <- function(data, ..., sampling_variable = "S", drop_nonsampled = TRUE) {
   ## draw sample
 
   options <- quos(...)

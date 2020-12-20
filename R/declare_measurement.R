@@ -18,5 +18,16 @@
 #' 
 #' draw_data(design)
 #'
-declare_measurement <- make_declarations(fabricate, "measurement")
+declare_measurement <- make_declarations(measurement_handler, "measurement")
 
+#' @param data A data.frame.
+#' @importFrom rlang quos !!!
+#' @importFrom fabricatr fabricate
+#' @rdname declare_measurement
+measurement_handler <- function(data, ...) {
+  
+  options <- quos(...)
+  
+  fabricate(data = data, !!!options, ID_label = NA)
+  
+}
