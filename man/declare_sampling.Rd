@@ -23,7 +23,7 @@ sampling_handler(data, ..., sampling_variable = "S", drop_nonsampled = TRUE)
 \item{drop_nonsampled}{Logical indicating whether to drop units that are not sampled. Default is \code{TRUE}.}
 }
 \value{
-A function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
+A sampling declaration, which is a function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
 }
 \description{
 Declare sampling procedure
@@ -40,21 +40,28 @@ For details see the help files for \code{\link{complete_rs}}, \code{\link{strata
 }
 \examples{
 
-# Default handler is `draw_rs` from `randomizr` package
-
 # Simple random sampling
-my_sampling <- declare_sampling(n = 50)
+design <-
+declare_population(N = 100,
+                   female = rbinom(N, 1, 0.5),
+                   U = rnorm(N)) +
+  declare_potential_outcomes(Y ~ 0.5 * Z + 0.2 * female + 0.1 * Z * female + U)
+
+design_with_sampling <- design + declare_sampling(n = 50)
+
+nrow(draw_data(design))
+nrow(draw_data(design_with_sampling))
 
 # Stratified random sampling
-my_stratified_sampling <- declare_sampling(strata = female)
+design + declare_sampling(strata = female)
 
 # Custom random sampling functions
 
-my_sampling_function <- function(data, n=nrow(data)) {
-   data[sample(n,n,replace=TRUE), , drop=FALSE]
+my_sampling_function <- function(data, n = 20) {
+  data[sample(n, n, replace = TRUE), , drop = FALSE]
 }
 
-my_sampling_custom <- declare_sampling(handler = my_sampling_function)
 
-my_sampling_custom(sleep)
+design + declare_sampling(handler = my_sampling_function)
+
 }

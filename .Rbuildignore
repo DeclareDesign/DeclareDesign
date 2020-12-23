@@ -23,3 +23,4 @@ paper.pdf
 ^cran-comments\.md$
 vignettes
 ^\.github$
+^pkgdown$

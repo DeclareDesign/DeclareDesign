@@ -15,3 +15,4 @@ tests/testthat/*.pdf
 .DS_Store
 inst/doc
 *.tar.gz
+docs

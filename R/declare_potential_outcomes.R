@@ -8,53 +8,45 @@
 #'
 #' @details
 #'
-#' A \code{declare_potential_outcomes} declaration returns a function. The function takes and returns a data.frame with potential outcomes columns appended. These columns describe the outcomes that each unit would express if that unit were in the corresponding treatment condition.
-#'
-#' Declaring a potential outcomes function requires postulating a particular causal process. One can then assess how designs fare under the postulated process. 
-#' Multiple processes can be considered in a single design or across design. For instance one could declare two processes that rival theories would predict.
-#' 
-#' Potential outcomes can be declared as separate variables or by using a formula. See examples below.
+#' A \code{declare_potential_outcomes} function is used to create outcomes that each unit would express in each possible treatment condition. 
 #'
 #' @examples
-#'
-#' # Declare potential outcomes using default handler
-#'
-#' # There are two ways of declaring potential outcomes:
-#'
-#' # As separate variables
-#'
-#' my_potential_outcomes <- declare_potential_outcomes(
-#'   Y_Z_0 = .05,
-#'   Y_Z_1 = .30 + .01 * age
-#' )
-#'
+#' 
+#' # Potential outcomes can be declared in two ways: 
+#' # by using a formula or as separate variables.
+#' 
+#' 
 #' # Using a formula
-#'  my_potential_outcomes <- declare_potential_outcomes(
-#'    Y ~ .05 + .25 * Z + .01 * age * Z)
+#' declare_population(N = 100, U = rnorm(N)) +
+#'   declare_potential_outcomes(Y ~ 0.5*Z + U)
+#'   
+#' # As separate variables
+#' declare_population(N = 100, U = rnorm(N)) +
+#'   declare_potential_outcomes(Y_Z_0 = U,
+#'                              Y_Z_1 = U + 0.5)
+#' # (notice the naming structure: outcome_assignment_condition: Y_Z_1)  
+#' 
+#'   
+#' # You can change the name of the outcome
+#' declare_population(N = 100, U = rnorm(N)) +
+#'   declare_potential_outcomes(Y2 ~ 0.5*Z + U)
+#'   
+#' # You can change the name of the assignment_variable
+#' declare_population(N = 100, U = rnorm(N)) +
+#'   declare_potential_outcomes(Y ~ 0.5*D + U, assignment_variable = "D")
+#'   
 #'
 #' # `conditions` defines the "range" of the potential outcomes function
-#'  my_potential_outcomes <- declare_potential_outcomes(
-#'    formula = Y ~ .05 + .25 * Z + .01 * age * Z,
-#'    conditions = 1:4
-#'  )
+#' declare_population(N = 100, age = sample(18:65, N, replace = TRUE)) +
+#'   declare_potential_outcomes(formula = Y ~ .05 + .25 * Z + .01 * age * Z,
+#'                              conditions = 1:4)
 #'
 #' # Multiple assignment variables can be specified in `conditions`. For example,
 #' # in a 2x2 factorial potential outcome:
 #'
-#'  my_potential_outcomes <- declare_potential_outcomes(
-#'    formula = Y ~ .05 + .25 * Z1 + .01 * age * Z2,
-#'    conditions = list(Z1 = 0:1, Z2 = 0:1)
-#'  )
-#'
-#' # You can also declare potential outcomes using a custom handler
-#'
-#' my_po_function <- function(data) {
-#'   data$Y_treated   <- rexp(nrow(data), .2)
-#'   data$Y_untreated <- rexp(nrow(data), .4)
-#'   data
-#' }
-#'
-#' custom_potential <- declare_potential_outcomes(handler = my_po_function)
+#' declare_population(N = 100, age = sample(18:65, N, replace = TRUE)) +
+#'   declare_potential_outcomes(formula = Y ~ .05 + .25 * Z1 + .01 * age * Z2,
+#'                              conditions = list(Z1 = 0:1, Z2 = 0:1))
 #'
 declare_potential_outcomes <- make_declarations(potential_outcomes_handler, "potential_outcomes")
 ### Default handler calls either the formula handler or non-formula handler

@@ -1,0 +1,31 @@
+---
+title: "Design Diagnosis in other languages"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{PAP}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+  
+| Language  | Declaration in code                                                         | Figure based on mock data                                       | Diagnosis                                                                 |
+| --------  | -------------------                                                         | ------------------------------------------------------------    | ---------                                                                 |
+| R         | <a href = "https://declaredesign.org/other_languages/two_arm_design_r.r"><img width="250px" src="https://declaredesign.org/other_languages/figures/two_arm_design_r_declaration.png"/></a>       | <a href = "https://declaredesign.org/other_languages/two_arm_design_r_figure.r"><img width="250px" src="https://declaredesign.org/other_languages/figures/two_arm_design_r.png"/></a>       | <a href = "https://declaredesign.org/other_languages/two_arm_design_r.html"><img width="250px" src="https://declaredesign.org/other_languages/figures/two_arm_design_r_diagnosis.png"/></a>       |
+| Stata     | <a href = "https://declaredesign.org/other_languages/two_arm_design_stata.do"><img width="250px" src="https://declaredesign.org/other_languages/figures/two_arm_design_stata_declaration.png"/></a>    | <a href = "https://declaredesign.org/other_languages/two_arm_design_stata.txt"><img width="250px" src="https://declaredesign.org/other_languages/figures/two_arm_design_stata.png"/></a>   | <a href = "https://declaredesign.org/other_languages/two_arm_design_stata.html"><img width="250px" src="https://declaredesign.org/other_languages/figures/two_arm_design_stata_diagnosis.png"/></a>   |
+| Python    | <a href = "https://declaredesign.org/other_languages/two_arm_design_python.py"><img width="250px" src="https://declaredesign.org/other_languages/figures/two_arm_design_python_declaration.png"/></a>   | <a href = "https://declaredesign.org/other_languages/two_arm_design_python_figure.py"><img width="250px" src="https://declaredesign.org/other_languages/figures/two_arm_design_python.png"/></a>  | <a href = "https://declaredesign.org/other_languages/two_arm_design_python.html"><img width="250px" src="https://declaredesign.org/other_languages/figures/two_arm_design_python_diagnosis.png"/></a>  |
+| Excel     | <a href = "https://declaredesign.org/other_languages/two_arm_design_excel.xlsx"><img width="250px" src="https://declaredesign.org/other_languages/figures/two_arm_design_excel_declaration.png"/></a>   | <a href = "https://declaredesign.org/other_languages/two_arm_design_excel.xlsx"><img width="250px" src="https://declaredesign.org/other_languages/figures/two_arm_design_excel.png"/></a>   | <a href = "https://declaredesign.org/other_languages/two_arm_design_r.html"><img width="250px" src="https://declaredesign.org/other_languages/figures/two_arm_design_excel_diagnosis.png"/></a>   |
+Table: Design declaration in four languages
+
+Click on the declarations to download the code files; the figures to download the code that generated them; and the diagnosis to download a reproducible document that includes the diagnosis. You can also download the code for the reproducible documents for [R](https://declaredesign.org/other_languages/figures/two_arm_design_r.rmd), [Stata](https://declaredesign.org/other_languages/figures/two_arm_design_stata.txt), and [Python](https://declaredesign.org/other_languages/figures/two_arm_design_python.md).
+
+# How to compile the reproducible documents
+
+R: the .rmd is knit in Rstudio
+
+Python: compiled through pandoc using the following command:
+
+`stitch two_arm_design_python.md -o two_arm_design_python.html`
+
+Stata: compiled from within Stata via the command:
+
+`dyndoc two_arm_design_stata.txt, replace`
+

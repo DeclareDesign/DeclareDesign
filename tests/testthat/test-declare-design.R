@@ -34,8 +34,7 @@ test_that(
     expect_equal(dim(df), c(250, 9))
 
     output <- run_design(design)
-    expect_equal(dim(output$estimates_df), c(1, 11))
-    expect_equal(dim(output$estimands), c(1, 2))
+    expect_equal(dim(output), c(1, 12))
   }
 )
 
@@ -49,9 +48,7 @@ test_that("No estimators / estimands", {
     reveal_outcomes()
 
   head(draw_data(design))
-  des_obj <- run_design(design)
-  expect_equal(dim(des_obj$estimates_df), c(0, 0))
-  expect_equal(dim(des_obj$estimands_df), c(0, 0))
+  expect_error(run_design(design), "No estimates or estimands were declared, so design cannot be simulated.")
 })
 
 test_that("single-step designs work", {

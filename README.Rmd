@@ -48,7 +48,11 @@ design <-
   declare_assignment(m = 50) +
   declare_estimator(Y ~ Z)
 
-diagnosis <- diagnose_design(design, diagnosands = declare_diagnosands(select = c("power", "bias")))
+diagnosands <-
+  declare_diagnosands(bias = mean(estimate - estimand),
+                      power = mean(p.value <= 0.05))
+
+diagnosis <- diagnose_design(design, diagnosands = diagnosands)
 diagnosis
 ```
 
@@ -59,15 +63,15 @@ The core DeclareDesign package relies on four companion packages, each of which 
 1. [randomizr](https://declaredesign.org/r/randomizr/): Easy to use tools for common forms of random assignment and sampling.
 2. [fabricatr](https://declaredesign.org/r/fabricatr/): Imagine your data before you collect it.
 3. [estimatr](https://declaredesign.org/r/estimatr/): Fast estimators for social scientists.
-4. [DesignLibrary](https://declaredesign.org/library): Templates to quickly adopt and adapt common research designs.
+4. [DesignLibrary](https://declaredesign.org/r/designlibrary/): Templates to quickly adopt and adapt common research designs.
 
 ## Learning DeclareDesign
 
-1. To get started, have a look at this vignette on [the idea behind DeclareDesign](https://declaredesign.org/idea/), which covers the main functionality of the software.
+1. To get started, have a look at this vignette on [the idea behind DeclareDesign](https://declaredesign.org/getting-started.html), which covers the main functionality of the software.
 
-2. You can also browse a [library](https://declaredesign.org/library/) of already declared designs, which relies on the `DesignLibrary` package. The library includes canonical designs that you can download, modify, and deploy.
+2. You can also browse a [library](https://declaredesign.org/r/designlibrary/) of already declared designs, which relies on the `DesignLibrary` package. The library includes canonical designs that you can download, modify, and deploy.
 
-3. A fuller description of the philosophy underlying the software is described in this [working paper](https://declaredesign.org/declare.pdf).
+3. A fuller description of the philosophy underlying the software is described in this [paper](https://declaredesign.org/declare.pdf).
 
 ## Package structure
 
@@ -77,6 +81,7 @@ Each of these `declare_*()` functions returns a *function*.
 2. `declare_potential_outcomes()` (takes population or sample and adds potential outcomes produced by interventions)
 3. `declare_sampling()` (takes a population and selects a sample)
 4. `declare_assignment()` (takes a population or sample and adds treatment assignments)
+4. `declare_measurement()` (adds measured variables)
 5. `declare_estimand()` (takes potential outcomes and calculates a quantity of interest)
 6. `declare_estimator()` (takes data produced by sampling and assignment and returns estimates)
 

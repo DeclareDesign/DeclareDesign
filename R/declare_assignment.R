@@ -2,7 +2,7 @@
 #'
 #' @inheritParams declare_internal_inherit_params
 #'
-#' @return A function that takes a data.frame as an argument and returns a data.frame with additional columns appended including an assignment variable and (optionally) probabilities of assignment.
+#' @return An assignment declaration, which is a function that takes a data.frame as an argument and returns a data.frame with additional columns appended including an assignment variable and (optionally) probabilities of assignment.
 #' @export
 #'
 #' @details
@@ -19,34 +19,71 @@
 #'
 #' @examples
 #'
-#' # Default handler delegates to conduct_ra
+#' 
+#' # let's work with the beginnings of a design
+#' 
+#' design <-
+#' declare_population(N = 100,
+#'                    female = rbinom(N, 1, 0.5),
+#'                    U = rnorm(N)) +
+#'   # building in treatment effect heterogeneity for fun
+#'   declare_potential_outcomes(Y ~ 0.5 * Z + 0.2 * female + 0.1 * Z * female + U)
+#'
+#'
+#' # Declare simple (or "Bernoulli", or "coin flip) random assignment
+#' 
+#' design_with_assignment <- design + declare_assignment(prob = 0.5, simple = TRUE)
+#'
+#' head(draw_data(design_with_assignment))
 #'
 #' # Declare assignment of m units to treatment
-#' my_assignment <- declare_assignment(m = 50)
+#' design + declare_assignment(m = 50)
+#' 
+#' # Declare assignment of exactly half of the  units to treatment
+#' design + declare_assignment(prob = 0.5)
+#' 
+#' # Declare blocked assignment
+#' design + declare_assignment(blocks = female)
 #' 
 #' # Declare assignment specifying assignment probability for each block
-#' my_assignment <- declare_assignment(block_prob = c(1/3, 2/3), blocks = female)
+#' design + declare_assignment(block_prob = c(1/3, 2/3), blocks = female)
 #' 
-#' # Declare assignment of clusters with probability 1/4
-#' my_assignment <- declare_assignment(
-#'   prob = 1/4,
-#'   clusters = classrooms,
-#'   assignment_variable = "X1"
-#' )
-#'  
-#' # Declare factorial assignment (Approach 1): 
-#' #   Use complete random assignment to assign T1 and then use T1 as a block to assign T2. 
-#'  design <- declare_population(N = 4) + 
-#'    declare_assignment(assignment_variable = "T1") + 
-#'    declare_assignment(blocks = T1, assignment_variable = "T2")
-#'    draw_data(design)
-#'    
+#' # Declare factorial assignment (Approach 1): Use complete random assignment 
+#' # to assign Z1 and then use Z1 as a block to assign Z2.
+#' 
+#' design <-
+#'   declare_population(N = 100,
+#'                    U = rnorm(N)) +
+#'   declare_potential_outcomes(Y ~ Z1 + Z2 + Z1*Z2 + U, 
+#'                              conditions = list(Z1 = 0:1, Z2 = 0:1)) 
+#' 
+#' 
+#' design +
+#'   declare_assignment(assignment_variable = "Z1") +
+#'   declare_assignment(blocks = Z1, assignment_variable = "Z2")
+#' 
+#' 
+#' 
 #' # Declare factorial assignment (Approach 2): 
 #' #   Assign to four conditions and then split into separate factors. 
-#'  design <- declare_population(N = 4) + 
-#'    declare_assignment(conditions = 1:4) + 
-#'    declare_step(fabricate, T1 = as.numeric(Z %in% 2:3), T2 = as.numeric(Z %in% 3:4))
-#'    draw_data(design)
+#' 
+#' design +
+#'   declare_assignment(conditions = 1:4) + 
+#'   declare_step(fabricate, Z1 = as.numeric(Z %in% 2:3), Z2 = as.numeric(Z %in% 3:4))
+#' 
+#' 
+#' 
+#' # Declare clustered assignment
+#' 
+#' clustered_design <-
+#'   declare_population(
+#'     classrooms = add_level(25, cluster_shock = rnorm(N, sd = 0.5)),
+#'     students = add_level(5, individual_shock = rnorm(N, sd = 1.0))
+#'   ) +
+#'   declare_potential_outcomes(Y ~ 0.5* Z + cluster_shock + individual_shock)
+#' 
+#' clustered_design + declare_assignment(clusters = classrooms)
+#' 
 #'    
 #' # Declare assignment using custom handler
 #'

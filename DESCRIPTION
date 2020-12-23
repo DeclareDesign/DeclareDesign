@@ -47,4 +47,5 @@ Suggests:
     sf,
     reshape2,
     DesignLibrary,
-    coin
+    coin,
+    margins
