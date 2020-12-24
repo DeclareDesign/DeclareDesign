@@ -43,7 +43,6 @@ Suggests:
     betareg,
     biglm,
     gam,
-    lfe,
     sf,
     reshape2,
     DesignLibrary,
