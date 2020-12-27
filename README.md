@@ -4,15 +4,13 @@ DeclareDesign: Declare and Diagnose Research Designs
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 [![CRAN
-Status](https://www.r-pkg.org/badges/version/DeclareDesign)](https://cran.r-project.org/package=DeclareDesign)
-[![Travis-CI Build
-Status](https://travis-ci.org/DeclareDesign/DeclareDesign.svg?branch=master)](https://travis-ci.org/DeclareDesign/DeclareDesign)
-[![AppVeyor Build
-Status](https://ci.appveyor.com/api/projects/status/github/DeclareDesign/DeclareDesign?branch=master&svg=true)](https://ci.appveyor.com/project/DeclareDesign/DeclareDesign)
-[![Coverage
-Status](https://coveralls.io/repos/github/DeclareDesign/DeclareDesign/badge.svg?branch=master)](https://coveralls.io/github/DeclareDesign/DeclareDesign?branch=master)
-[![R build
+status](https://www.r-pkg.org/badges/version/DeclareDesign)](https://cran.r-project.org/package=DeclareDesign)
+[![CRAN RStudio mirror
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/DeclareDesign?color=green)](https://r-pkg.org/pkg/DeclareDesign)
+[![Build
 status](https://github.com/DeclareDesign/DeclareDesign/workflows/R-CMD-check/badge.svg)](https://github.com/DeclareDesign/DeclareDesign/actions)
+[![Code
+coverage](https://codecov.io/gh/DeclareDesign/DeclareDesign/branch/master/graph/badge.svg?token=3WzOK9Glc2)](https://codecov.io/gh/DeclareDesign/DeclareDesign)
 
 DeclareDesign is a system for describing research designs in code and
 simulating them in order to understand their properties. Because
