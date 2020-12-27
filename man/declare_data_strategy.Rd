@@ -7,7 +7,7 @@
 \usage{
 declare_data_strategy(..., handler = data_strategy_handler, label = NULL)
 
-data_strategy_handler(data, ...)
+data_strategy_handler(data, ..., filter = NULL)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}

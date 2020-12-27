@@ -10,13 +10,21 @@
 declare_data_strategy <- make_declarations(data_strategy_handler, "data_strategy")
 
 #' @param data A data.frame.
-#' @importFrom rlang quos !!!
+#' @importFrom rlang quos !!! quo_is_null enquo 
+#' @importFrom dplyr filter
 #' @importFrom fabricatr fabricate
 #' @rdname declare_data_strategy
-data_strategy_handler <- function(data, ...) {
+data_strategy_handler <- function(data, ..., filter = NULL) {
   
   options <- quos(...)
   
-  fabricate(data = data, !!!options, ID_label = NA)
+  data <- fabricate(data = data, !!!options, ID_label = NA)
+  
+  filter <- enquo(filter)
+  if(!quo_is_null(filter)){
+    data <- dplyr::filter(data, {{filter}})
+  }
+  
+  data
   
 }
