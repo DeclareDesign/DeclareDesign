@@ -10,7 +10,7 @@
 declare_data_strategy <- make_declarations(data_strategy_handler, "data_strategy")
 
 #' @param data A data.frame.
-#' @importFrom rlang quos !!! quo_is_null enquo 
+#' @importFrom rlang quos !!! quo_get_expr eval_tidy is_quosure 
 #' @importFrom fabricatr fabricate
 #' @rdname declare_data_strategy
 data_strategy_handler <- function(data, ..., subset = NULL) {
