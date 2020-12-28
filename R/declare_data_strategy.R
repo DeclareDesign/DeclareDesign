@@ -18,13 +18,8 @@ data_strategy_handler <- function(data, ..., filter = NULL) {
   
   options <- quos(...)
   
-  data <- fabricate(data = data, !!!options, ID_label = NA)
-  
   filter <- enquo(filter)
-  if(!quo_is_null(filter)){
-    data <- dplyr::filter(data, {{filter}})
-  }
-  
-  data
+  fabricate(data = data, !!!options, ID_label = NA) %>% 
+    purrr::when(!quo_is_null(filter) ~ dplyr::filter(., {{filter}}), TRUE ~ .)
   
 }
