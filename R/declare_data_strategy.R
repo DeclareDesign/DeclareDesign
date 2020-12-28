@@ -11,15 +11,19 @@ declare_data_strategy <- make_declarations(data_strategy_handler, "data_strategy
 
 #' @param data A data.frame.
 #' @importFrom rlang quos !!! quo_is_null enquo 
-#' @importFrom dplyr filter
 #' @importFrom fabricatr fabricate
 #' @rdname declare_data_strategy
-data_strategy_handler <- function(data, ..., filter = NULL) {
+data_strategy_handler <- function(data, ..., subset = NULL) {
   
   options <- quos(...)
   
-  filter <- enquo(filter)
-  fabricate(data = data, !!!options, ID_label = NA) %>% 
-    purrr::when(!quo_is_null(filter) ~ dplyr::filter(., {{filter}}), TRUE ~ .)
+  data <- fabricate(data = data, !!!options, ID_label = NA)
+  
+  subset <- substitute(subset)
+  if (is_quosure(subset)) subset <- quo_get_expr(subset)
+  idx <- eval_tidy(subset, data = data)
+  if (!is.null(idx)) {
+    data <- data[idx, , drop = FALSE]
+  }
   
 }
