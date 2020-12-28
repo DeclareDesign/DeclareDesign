@@ -90,6 +90,7 @@ run_design_internal.default <- function(design) {
   stop("Please only send design objects or functions with no arguments to run_design.")
 }
 
+#' @importFrom rlang new_environment
 run_design_internal.design <- function(design, current_df = NULL, results = NULL, start = 1, end = length(design), ...) {
   if (!is.list(results)) {
     results <- list(
@@ -97,21 +98,29 @@ run_design_internal.design <- function(design, current_df = NULL, results = NULL
       estimator = vector("list", length(design))
     )
   }
+  
+  wallet <- new_environment()
 
   for (i in seq(start, end)) {
     step <- design[[i]]
 
     causal_type <- attr(step, "causal_type")
     step_type <- attr(step, "step_type")
+    
+    attach(wallet, warn.conflicts = FALSE)
 
     # if it's a dgp
     if ("dgp" %in% causal_type) {
       current_df <- next_step(step, current_df, i)
     } else if (step_type %in% names(results)) {
       results[[step_type]][[i]] <- next_step(step, current_df, i)
+    } else if (step_type %in% "wallet") {
+      list2env(next_step(step, current_df, i), envir = wallet)
     } else {
       NULL # skipping steps not in the requested results types
     }
+    
+    detach("wallet")
   }
 
   if (i == length(design)) {
