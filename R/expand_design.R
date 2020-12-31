@@ -26,9 +26,9 @@
 #'   pop <- declare_population(N = N, noise = rnorm(N))
 #'   pos <- declare_potential_outcomes(Y ~ 0.20 * Z + noise)
 #'   assgn <- declare_assignment(m = N / 2)
-#'   mand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-#'   estimator <- declare_estimator(Y ~ Z, inquiry = mand)
-#'   pop + pos + assgn + mand + estimator
+#'   inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+#'   estimator <- declare_estimator(Y ~ Z, inquiry = inquiry)
+#'   pop + pos + assgn + inquiry + estimator
 #' }
 #'
 #' # returns list of eight designs

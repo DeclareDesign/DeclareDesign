@@ -6,7 +6,7 @@ test_that("simple designer works", {
   my_designer <- function(N = 100,
                             my_inquiry_func = mean) {
     my_pop <- declare_population(N = N, Y = rnorm(N))
-    my_inquiry <- declare_inquiry(mand = my_inquiry_func(Y))
+    my_inquiry <- declare_inquiry(inquiry = my_inquiry_func(Y))
     my_design <- my_pop + my_inquiry
     my_design
   }
@@ -46,7 +46,7 @@ test_that("designer with vector argument works", {
   my_designer <- function(N = c(100, 50),
                             my_inquiry_func = mean) {
     my_pop <- declare_population(N = min(N), Y = rnorm(N))
-    my_inquiry <- declare_inquiry(mand = my_inquiry_func(Y))
+    my_inquiry <- declare_inquiry(inquiry = my_inquiry_func(Y))
     my_design <- my_pop + my_inquiry
     my_design
   }
@@ -67,7 +67,7 @@ context("functions in designers")
 my_designer <- function(N = 100,
                         my_inquiry_func = mean) {
   my_pop <- declare_population(N = N, Y = rnorm(N))
-  my_inquiry <- declare_inquiry(mand = my_inquiry_func(Y))
+  my_inquiry <- declare_inquiry(inquiry = my_inquiry_func(Y))
   my_design <- my_pop + my_inquiry
   my_design
 }
@@ -119,9 +119,9 @@ test_that("even more kinds of parameters can be sent, vectors and scalars, etc."
     pop <- declare_population(N = N, noise = rnorm(N))
     pos <- declare_potential_outcomes(Y ~ ate * Z + noise)
     assgn <- declare_assignment(m = N / 2)
-    mand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-    estimator <- declare_estimator(Y ~ Z, inquiry = mand)
-    pop + pos + assgn + mand + estimator
+    inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+    estimator <- declare_estimator(Y ~ Z, inquiry = inquiry)
+    pop + pos + assgn + inquiry + estimator
   }
 
   designs <- expand_design(my_designer, N = seq(30, 100, 10), ate = seq(0, .5, length.out = 3))
@@ -147,7 +147,7 @@ test_that("even more kinds of parameters can be sent, vectors and scalars, etc."
   my_designer <- function(N = 100,
                             my_inquiry_func = mean) {
     my_pop <- declare_population(N = N, Y = rnorm(N))
-    my_inquiry <- declare_inquiry(mand = my_inquiry_func(Y))
+    my_inquiry <- declare_inquiry(inquiry = my_inquiry_func(Y))
     my_design <- my_pop + my_inquiry
     my_design
   }
@@ -199,7 +199,7 @@ test_that("edge case with expand but one arg works", {
   my_designer <- function(N = 100,
                           my_inquiry_func = mean) {
     my_pop <- declare_population(N = N, Y = rnorm(N))
-    my_inquiry <- declare_inquiry(mand = my_inquiry_func(Y))
+    my_inquiry <- declare_inquiry(inquiry = my_inquiry_func(Y))
     my_design <- my_pop + my_inquiry
     my_design
   }
@@ -215,7 +215,7 @@ test_that("expand with vector arguments", {
   my_designer <- function(N=10, z = list(1,5,9)) {
     my_pop <- declare_population(top=add_level(N = length(z), z=unlist(z)), 
                                  bottom=add_level(N=z, Y = rnorm(N)))
-    my_inquiry <- declare_inquiry(mand = max(table(top)))
+    my_inquiry <- declare_inquiry(inquiry = max(table(top)))
     my_design <- my_pop + my_inquiry
     my_design
   }

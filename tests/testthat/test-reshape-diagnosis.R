@@ -46,9 +46,9 @@ test_that("capitalization of parameter names are retained", {
       )
     my_smp <- declare_sampling(n = n)
     my_asgn <- declare_assignment(m = floor(n / 2))
-    my_mand <- declare_inquiry(mean(Y_Z_1) - mean(Y_Z_0))
-    my_estimator <- declare_estimator(Y ~ Z, inquiry = my_mand)
-    my_design <- my_pop + my_pos + my_mand + my_smp + my_asgn + declare_reveal() + my_estimator
+    my_inquiry <- declare_inquiry(mean(Y_Z_1) - mean(Y_Z_0))
+    my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
+    my_design <- my_pop + my_pos + my_inquiry + my_smp + my_asgn + declare_reveal() + my_estimator
     my_design
   }
 
