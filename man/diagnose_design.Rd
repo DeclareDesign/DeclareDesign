@@ -56,7 +56,7 @@ my_assignment <- declare_assignment(Z = complete_ra(N))
 
 my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
-my_reveal <- declare_reveal()
+my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
 
 my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 

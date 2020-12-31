@@ -87,7 +87,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 #'
-#' my_reveal <- declare_reveal()
+#' my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #'
 #' design <- my_population + my_potential_outcomes + my_inquiry +
 #'         my_assignment + my_reveal + my_estimator

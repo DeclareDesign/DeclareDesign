@@ -42,7 +42,7 @@ declare_potential_outcomes(
   Y_Z_1 = u + rnorm(N, mean = 2, sd = 2)) +
 declare_assignment(Z = complete_ra(N, prob = 0.5)) +
 declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-declare_reveal() +
+declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
 declare_estimator(Y ~ Z, inquiry = "ATE")
 
 design_b <- replace_step(

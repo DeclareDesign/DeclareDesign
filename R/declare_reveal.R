@@ -44,7 +44,7 @@ declare_reveal <- make_declarations(declare_reveal_handler, "reveal")
 #'
 #' my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
 #'
-#' my_reveal <- declare_reveal()
+#' my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #'
 #' design <- my_population +
 #'   my_potential_outcomes +
@@ -61,16 +61,9 @@ declare_reveal <- make_declarations(declare_reveal_handler, "reveal")
 #' potentials_3 <- declare_potential_outcomes(Y3 ~ 1 - X*Z, conditions = list(X = 0:1, Z = 0:1))  
 #' assignment_Z <- declare_assignment(Z = complete_ra(N))
 #' assignment_X <- declare_assignment(X = complete_ra(N))
-#' reveal_1     <- declare_reveal(outcome_variables = c("Y1", "Y2"), assignment_variables = "Z")
-#' reveal_2     <- declare_reveal(outcome_variables = "Y3", assignment_variables = c("X", "Z"))
-#'
-#' # Note here that the reveal cannot be done in one step, e.g. by using
-#' # declare_reveal(outcome_variables = c("Y1", "Y2", "Y3"),
-#' #   assignment_variables = c("X","Z"))
-#' # The reason is that in each revelation all outcome variables should be a
-#' # function of all assignment variables.
-#' 
-#' # declare_reveal can also be used to declare outcomes that include attrition
+#' measurement  <- declare_measurement(Y1 = reveal_outcomes(Y1 ~ Z), 
+#'                                     Y2 = reveal_outcomes(Y2 ~ Z),
+#'                                     Y3 = reveal_outcomes(Y3 ~ X + Z))
 #' 
 #' population <- declare_population(N = 100, age = sample(18:95, N, replace = TRUE))
 #' 
@@ -81,11 +74,12 @@ declare_reveal <- make_declarations(declare_reveal_handler, "reveal")
 #' potential_outcomes_attrition <- 
 #'   declare_potential_outcomes(R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
 #' 
-#' reveal_attrition <- declare_reveal(outcome_variables = "R")
-#' declare_reveal <- declare_reveal(outcome_variables = "Y", attrition_variables = "R")
+#' outcomes <- declare_measurement(R = reveal_outcomes(R ~ Z),
+#'                                         Y = reveal_outcomes(Y ~ Z),
+#'                                         Y = ifelse(R == 1, Y, NA))
 #' 
 #' my_design <- population + potential_outcomes_Y + potential_outcomes_attrition + 
-#'   my_assignment + reveal_attrition + declare_reveal
+#'   my_assignment + outcomes
 #'
 declare_reveal_handler <- function(data = NULL,
                                     outcome_variables = Y,

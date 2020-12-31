@@ -61,7 +61,7 @@ distributional_equality_design <-
   declare_population(N = 100) + 
   declare_potential_outcomes(Y_Z_1 = rnorm(N), Y_Z_0 = rnorm(N, sd = 1.5)) + 
   declare_assignment(Z = complete_ra(N, prob = 0.5)) + 
-  declare_reveal(Y, Z) + 
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
   declare_test(handler = label_test(ks_test), label = "ks-test")
   
 \dontrun{

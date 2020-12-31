@@ -21,7 +21,7 @@
 #'   Y ~ (.25 + X) * Z + rnorm(N))
 #' my_assignment  <- declare_assignment(Z = complete_ra(N, m = 50))
 #' design_stub <- my_population + my_potential_outcomes + my_assignment + 
-#'   declare_reveal()
+#'   declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #'
 #' # Get example data to compute inquiries on
 #' dat <- draw_data(design_stub)
