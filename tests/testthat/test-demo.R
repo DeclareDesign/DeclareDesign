@@ -86,13 +86,13 @@ test_that("demo runs", {
   head(smp)
 
   ## ------------------------------------------------------------------------
-  my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-  my_estimand(pop_pos)
+  my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+  my_inquiry(pop_pos)
 
   ## ------------------------------------------------------------------------
   my_reveal_outcomes <- declare_reveal()
   smp <- my_reveal_outcomes(smp)
-  my_estimator_dim <- declare_estimator(Y ~ Z, inquiry = my_estimand)
+  my_estimator_dim <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
   my_estimator_dim(smp)
 
   ## ------------------------------------------------------------------------
@@ -100,7 +100,7 @@ test_that("demo runs", {
     declare_estimator(Y ~ Z,
       model = estimatr::lm_robust,
       term = "Z",
-      inquiry = my_estimand
+      inquiry = my_inquiry
     )
 
   my_estimator_lm(smp)
@@ -108,7 +108,7 @@ test_that("demo runs", {
   ## ------------------------------------------------------------------------
   design <- my_population +
     my_potential_outcomes +
-    my_estimand +
+    my_inquiry +
     declare_step(dplyr::mutate, big_income = 5 * income) +
     my_sampling +
     my_assignment +
@@ -202,7 +202,7 @@ test_that("demo runs", {
   my_estimator_custom <-
     declare_estimator(
       handler = label_estimator(my_mean),
-      inquiry = my_estimand
+      inquiry = my_inquiry
     )
 
   my_estimator_custom(smp)
@@ -218,11 +218,11 @@ test_that("demo runs", {
     )
     my_sampling <- declare_sampling(n = 250)
     my_assignment <- declare_assignment(m = 25)
-    my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-    my_estimator_dim <- declare_estimator(Y ~ Z, inquiry = my_estimand)
+    my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+    my_estimator_dim <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
     my_design <- my_population +
       my_potential_outcomes +
-      my_estimand +
+      my_inquiry +
       my_sampling +
       my_assignment +
       my_reveal_outcomes +

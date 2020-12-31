@@ -37,14 +37,14 @@ test_that("expand_design works some more", {
       Y = rnorm(N),
       Z = rbinom(N, 1, .5)
     )
-    my_estimand <- declare_inquiry(mean(Y))
+    my_inquiry <- declare_inquiry(mean(Y))
     my_estimator <-
       declare_estimator(Y ~ Z,
         model = lm_robust,
         term = "Z",
-        inquiry = my_estimand
+        inquiry = my_inquiry
       )
-    my_design <- pop + my_estimand + my_estimator
+    my_design <- pop + my_inquiry + my_estimator
     return(my_design)
   }
 

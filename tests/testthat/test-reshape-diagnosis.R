@@ -11,16 +11,16 @@ my_sampling <- declare_sampling(n = 250)
 
 my_assignment <- declare_assignment(m = 25)
 
-my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
-my_estimator <- declare_estimator(Y ~ Z, inquiry = my_estimand)
+my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
 my_reveal <- declare_reveal()
 
 design <- my_population +
   my_potential_outcomes +
   my_sampling +
-  my_estimand +
+  my_inquiry +
   declare_step(dplyr::mutate, q = 5) +
   my_assignment +
   my_reveal +

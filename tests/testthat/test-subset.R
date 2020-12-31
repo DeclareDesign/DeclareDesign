@@ -7,7 +7,7 @@ test_that("Test Subsetting on default estimand handler", {
 
   my_sampling <- declare_sampling(n = 250)
 
-  my_estimand <- declare_inquiry(
+  my_inquiry <- declare_inquiry(
     ATE_pos = mean(Y_Z_1 - Y_Z_0),
     subset = Y_Z_1 > 0
   )
@@ -19,7 +19,7 @@ test_that("Test Subsetting on default estimand handler", {
 
 
 
-  design <- my_population + my_potential_outcomes + my_sampling + my_estimand + my_estimand2
+  design <- my_population + my_potential_outcomes + my_sampling + my_inquiry + my_estimand2
 
   expect_true(design %>% draw_inquiries() %>% with(estimand[1] > 2 && estimand[2] < 0))
   # > z <- replicate(10000, design  %>%  draw_inquiries() %>% with(estimand[[1]] > 2 && estimand[2] < 0)) %>% table

@@ -4,43 +4,43 @@ df <- data.frame(Y_Z_0 = 1:10, Y_Z_1 = 3:12)
 
 test_that("splat labels", {
   ## default labeling
-  my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+  my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
   expect_identical(
-    my_estimand(df),
+    my_inquiry(df),
     structure(list(estimand_label = "ATE", inquiry = 2), .Names = c(
       "estimand_label",
       "estimand"
     ), row.names = c(NA, -1L), class = "data.frame")
   )
-  expect_equal(attr(my_estimand, "label"), "ATE")
+  expect_equal(attr(my_inquiry, "label"), "ATE")
 })
 
 test_that("default label", {
   ## no label
-  my_estimand <- declare_inquiry(mean(Y_Z_1 - Y_Z_0))
+  my_inquiry <- declare_inquiry(mean(Y_Z_1 - Y_Z_0))
   expect_identical(
-    my_estimand(df),
+    my_inquiry(df),
     structure(list(estimand_label = "estimand", inquiry = 2), .Names = c(
       "estimand_label",
       "estimand"
     ), row.names = c(NA, -1L), class = "data.frame")
   )
-  expect_equal(attr(my_estimand, "label"), "estimand")
+  expect_equal(attr(my_inquiry, "label"), "estimand")
 })
 
 test_that("manual label", {
 
   ## manual label
-  my_estimand <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "ATE2")
+  my_inquiry <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "ATE2")
 
   expect_identical(
-    my_estimand(df),
+    my_inquiry(df),
     structure(list(estimand_label = "ATE2", inquiry = 2), .Names = c(
       "estimand_label",
       "estimand"
     ), row.names = c(NA, -1L), class = "data.frame")
   )
-  expect_equal(attr(my_estimand, "label"), "ATE2")
+  expect_equal(attr(my_inquiry, "label"), "ATE2")
 })
 
 test_that("custom estimand has label", {
@@ -66,9 +66,9 @@ test_that("custom estimand has label", {
 })
 
 test_that("splat label overrides label", {
-  my_estimand <- declare_inquiry(SATT = mean(Y_Z_1 - Y_Z_0), label = "ATE")
+  my_inquiry <- declare_inquiry(SATT = mean(Y_Z_1 - Y_Z_0), label = "ATE")
   expect_equal(
-    attributes(my_estimand)$label,
+    attributes(my_inquiry)$label,
     "SATT"
   )
 })

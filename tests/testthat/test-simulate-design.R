@@ -4,11 +4,11 @@ my_population <- declare_population(N = 50, noise = rnorm(N))
 my_potential_outcomes <-
   declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 my_assignment <- declare_assignment(m = 25)
-my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-my_estimator <- declare_estimator(Y ~ Z, inquiry = my_estimand)
+my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 my_reveal <- declare_reveal()
 
-my_design_1 <- my_population + my_potential_outcomes + my_estimand + my_assignment + my_reveal + my_estimator
+my_design_1 <- my_population + my_potential_outcomes + my_inquiry + my_assignment + my_reveal + my_estimator
 
 my_design_2 <- my_design_1
 
@@ -52,10 +52,10 @@ my_designer <- function(N, tau) {
   pos <-
     declare_potential_outcomes(Y_Z_0 = rnorm(N), Y_Z_1 = Y_Z_0 + tau)
   my_assignment <- declare_assignment(m = floor(N / 2))
-  my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-  my_estimator <- declare_estimator(Y ~ Z, inquiry = my_estimand)
+  my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+  my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
   my_reveal <- declare_reveal()
-  my_design_1 <- pop + pos + my_estimand + my_assignment + my_reveal + my_estimator
+  my_design_1 <- pop + pos + my_inquiry + my_assignment + my_reveal + my_estimator
   my_design_1
 }
 
@@ -86,7 +86,7 @@ test_that("dupe designs give error", {
 
 
 test_that("no estimates inquiries declared", {
-  my_design_noestmand <- delete_step(my_design_1, my_estimand)
+  my_design_noestmand <- delete_step(my_design_1, my_inquiry)
   my_design_noestmand <- delete_step(my_design_noestmand, my_estimator)
 
   expect_error(simulate_design(my_design_noestmand, sims = 2), "No estimates or inquiries were declared, so design cannot be simulated.")

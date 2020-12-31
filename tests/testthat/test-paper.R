@@ -46,14 +46,14 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
     handler = my_potential_outcomes
   )
 
-  my_estimand <- function(data) {
+  my_inquiry <- function(data) {
     with(
       data,
       data.frame(estimand_label = "estimand", inquiry = mean(Y_Z_1 - Y_Z_0), stringsAsFactors = FALSE)
     )
   }
 
-  estimand <- declare_inquiry(handler = my_estimand)
+  estimand <- declare_inquiry(handler = my_inquiry)
 
   my_estimator <- function(data) {
     reg <- lm(Y ~ Z, data = data)

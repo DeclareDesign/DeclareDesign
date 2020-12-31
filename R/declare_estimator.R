@@ -38,7 +38,7 @@
 #' @examples
 #'
 #' # Declare estimand
-#' my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+#' my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 #' 
 #' # Declare estimator using the default handler using `difference_in_means`
 #' # estimator from `estimatr` package. Returns the first non-intercept term
@@ -63,7 +63,7 @@
 #' # Set `term` if estimate of interest is not the first non-intercept variable
 #' my_estimator_lm_rob_x <- declare_estimator(
 #'   Y ~ X + Z,
-#'   inquiry = my_estimand,
+#'   inquiry = my_inquiry,
 #'   term = "Z",
 #'   model = lm_robust
 #' )
@@ -72,7 +72,7 @@
 #' my_estimator_glm <- declare_estimator(
 #'   Y ~ X + Z,
 #'   family = "gaussian",
-#'   inquiry = my_estimand,
+#'   inquiry = my_inquiry,
 #'   term = "Z",
 #'   model = glm
 #' )
@@ -95,7 +95,7 @@
 #'
 #' my_estimator_custom <- declare_estimator(
 #'   handler = label_estimator(my_estimator_function),
-#'   inquiry = my_estimand
+#'   inquiry = my_inquiry
 #' )
 #'
 #' # Customize labeling
@@ -159,7 +159,7 @@
 #'
 #' my_estimator_median <- declare_estimator(
 #'   handler = label_estimator(my_median),
-#'   inquiry = my_estimand
+#'   inquiry = my_inquiry
 #' )
 #'
 #' design <- replace_step(design_def, my_estimator_dim, my_estimator_median)
@@ -359,7 +359,7 @@ validation_fn(model_handler) <- function(ret, dots, label) {
   ret
 }
 
-# helper methods for inquiry = my_estimand arguments to estimator_handler
+# helper methods for inquiry = my_inquiry arguments to estimator_handler
 #
 get_estimand_label <- function(estimand) {
   force(estimand) # no promise nonsense when we look at it

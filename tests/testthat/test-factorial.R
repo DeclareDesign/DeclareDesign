@@ -12,7 +12,7 @@ test_that("Factorial", {
 
   my_assignment <- declare_assignment(num_arms = 4)
 
-  my_estimand <- declare_inquiry(interaction = mean(Y_Z_T4 - Y_Z_T3) - mean(Y_Z_T2 - Y_Z_T1))
+  my_inquiry <- declare_inquiry(interaction = mean(Y_Z_T4 - Y_Z_T3) - mean(Y_Z_T2 - Y_Z_T1))
 
   my_estimator <- declare_estimator(Y ~ Z1 + Z2 + Z1 * Z2,
     model = lm_robust,
@@ -24,7 +24,7 @@ test_that("Factorial", {
   my_design <-
     my_population +
     my_potential_outcomes +
-    my_estimand +
+    my_inquiry +
     my_assignment +
     declare_step(dplyr::mutate,
       Z1 = as.numeric(Z %in% c("T2", "T4")),

@@ -9,16 +9,16 @@ test_that("Basic design summary", {
 
   my_assignment <- declare_assignment(m = 25)
 
-  my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+  my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
-  my_estimator <- declare_estimator(Y ~ Z, inquiry = my_estimand)
+  my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
   declare_reveal <- declare_reveal()
 
   design <- my_population +
     my_potential_outcomes +
     my_sampling +
-    my_estimand +
+    my_inquiry +
     declare_step(dplyr::mutate, q = 5) +
     my_assignment +
     declare_reveal +
@@ -41,13 +41,13 @@ test_that("Basic design summary", {
 
 test_that("Add Quantitites and Alter Variables", {
   my_population <- declare_population(N = 500, noise = rnorm(N))
-  my_estimand <- declare_inquiry(foo = mean(noise))
+  my_inquiry <- declare_inquiry(foo = mean(noise))
   my_transform <- declare_population(noise = noise / 2)
   my_estimand2 <- declare_inquiry(foo2 = mean(noise))
 
 
   design <- my_population +
-    my_estimand +
+    my_inquiry +
     my_transform +
     my_estimand2
 

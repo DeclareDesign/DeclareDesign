@@ -12,7 +12,7 @@
 #'   declare_step(dplyr::mutate, noise_sq = noise^2) +
 #'   declare_assignment(m = 25) +
 #'   declare_reveal() +
-#'   declare_estimator(Y ~ Z, inquiry = "my_estimand")
+#'   declare_estimator(Y ~ Z, inquiry = "my_inquiry")
 #'
 #' design
 #'
