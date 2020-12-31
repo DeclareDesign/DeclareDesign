@@ -120,8 +120,8 @@ test_that("even more kinds of parameters can be sent, vectors and scalars, etc."
     pos <- declare_potential_outcomes(Y ~ ate * Z + noise)
     assgn <- declare_assignment(m = N / 2)
     mand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-    mator <- declare_estimator(Y ~ Z, inquiry = mand)
-    pop + pos + assgn + mand + mator
+    estimator <- declare_estimator(Y ~ Z, inquiry = mand)
+    pop + pos + assgn + mand + estimator
   }
 
   designs <- expand_design(my_designer, N = seq(30, 100, 10), ate = seq(0, .5, length.out = 3))

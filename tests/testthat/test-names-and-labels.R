@@ -9,8 +9,8 @@ test_that("inquiry labels work", {
 
   # Unmarked case
   mand <- declare_inquiry(mean(Y))
-  mator <- declare_estimator(inquiry = mand, handler = label_estimator(my_private_estimator))
-  design <- pop + mand + mator
+  estimator <- declare_estimator(inquiry = mand, handler = label_estimator(my_private_estimator))
+  design <- pop + mand + estimator
   names(design)
   diagnosis <- diagnose_design(design, sims = 10, bootstrap_sims = FALSE)
 
