@@ -5,7 +5,7 @@ design_a <-
   declare_population(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +
   declare_potential_outcomes(Y_Z_0 = u, Y_Z_1 = u + rnorm(N, .5)) +
   declare_assignment(prob = prob_assgn) + 
-  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0), label = "ATE") +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0), label = "ATE") +
   declare_reveal() +
   declare_estimator(Y ~ Z, estimand = "ATE", label = "est1")
 design_b <- redesign(design_a, prob_assgn = 0.1)
@@ -53,7 +53,7 @@ test_that("compare_diagnoses errors when it should", {
     declare_population(N = N, noise = rnorm(N)) +
       declare_potential_outcomes(Y ~ 0.20 * Z + noise) +
       declare_assignment() +
-      declare_estimand(ate = mean(Y_Z_1 - Y_Z_0)) +
+      declare_inquiry(ate = mean(Y_Z_1 - Y_Z_0)) +
       declare_estimator(Y ~ Z)
   }
   

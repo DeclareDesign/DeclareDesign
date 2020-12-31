@@ -5,7 +5,7 @@ test_that("expand_design works", {
     my_population <- declare_population(N = N, noise = rnorm(N))
     my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
     my_assignment <- declare_assignment(m = N / 2)
-    pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
+    pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
       declare_estimator(Y ~ Z, estimand = pate, label = "pate_hat")
     declare_reveal <- declare_reveal()
@@ -37,7 +37,7 @@ test_that("expand_design works some more", {
       Y = rnorm(N),
       Z = rbinom(N, 1, .5)
     )
-    my_estimand <- declare_estimand(mean(Y))
+    my_estimand <- declare_inquiry(mean(Y))
     my_estimator <-
       declare_estimator(Y ~ Z,
         model = lm_robust,
@@ -65,7 +65,7 @@ test_that("vary works", {
       declare_population(N = N, noise = rnorm(N, sd = noise_sd))
     my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
     my_assignment <- declare_assignment(m = N / 2)
-    pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
+    pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
       declare_estimator(Y ~ Z, estimand = pate, label = "pate_hat")
     declare_reveal <- declare_reveal()
@@ -116,7 +116,7 @@ test_that("power curve", {
     my_population <- declare_population(N = N, noise = rnorm(N))
     my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + .25)
     my_assignment <- declare_assignment(m = N / 2)
-    pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
+    pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
       declare_estimator(Y ~ Z, estimand = pate, label = "pate_hat")
     declare_reveal <- declare_reveal()

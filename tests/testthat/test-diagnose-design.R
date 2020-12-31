@@ -13,7 +13,7 @@ test_that("allow design functions to be sent to simulate design and diagnose_des
 
     my_assignment <- declare_assignment(m = 25)
 
-    my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+    my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
     my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
@@ -75,7 +75,7 @@ test_that("default diagnosands work", {
 
     my_assignment <- declare_assignment(m = 25)
 
-    my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+    my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
     my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
@@ -205,7 +205,7 @@ test_that("more term",{
                        Z = rep(0:1, 50),
                        Y = rnorm(N))
   
-  estimands_regression <- declare_estimand(
+  estimands_regression <- declare_inquiry(
     `(Intercept)` = 0,
     `Z` = 1,
     term = TRUE,
@@ -217,7 +217,7 @@ test_that("more term",{
                                              model = lm_robust,
                                              term = TRUE)
   
-  estimand_2  <- declare_estimand(ATE = 2,   label = "2")
+  estimand_2  <- declare_inquiry(ATE = 2,   label = "2")
   estimator_2 <-
     declare_estimator(Y ~ Z, estimand = estimand_2, label = "dim")
   
@@ -253,7 +253,7 @@ test_that("diagnose_design does not reclass the variable N", {
   # works for redesign
   design <-
     declare_population(N = 5, noise = rnorm(N)) +
-       declare_estimand(mean_noise = mean(noise))
+       declare_inquiry(mean_noise = mean(noise))
   
   designs <- redesign(design, N = 5:10) 
   dx <- diagnose_design(designs, sims = 50, bootstrap_sims = FALSE)
@@ -264,7 +264,7 @@ test_that("diagnose_design does not reclass the variable N", {
   # works for expand_design
   designer <- function(N = 5) {
     declare_population(N = N, noise = rnorm(N)) +
-    declare_estimand(mean_noise = mean(noise))
+    declare_inquiry(mean_noise = mean(noise))
   }
   
   designs <- expand_design(designer, N = 5:10) 
@@ -279,7 +279,7 @@ test_that("diagnose_design does not reclass the variable N", {
 test_that("diagnose_design works when simulations_df lacking parameters attr", {
 
   design <- declare_population(N = 100, X = rnorm(N), Y = rnorm(N, X)) +
-    declare_estimand(true_effect = 1) +
+    declare_inquiry(true_effect = 1) +
     declare_estimator(Y ~ X, model=lm_robust, estimand = "true_effect", label = "Y on X") 
   
   simulations <-  simulate_design(design, sims = 20) 

@@ -10,7 +10,7 @@ test_that("test diagnosands", {
 
   my_assignment <- declare_assignment(m = 25)
 
-  pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
+  pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
 
   pate_estimator1 <- declare_estimator(Y ~ Z, estimand = pate, label = "test1")
   pate_estimator2 <- declare_estimator(Y ~ Z - 1, estimand = pate, label = "test2")
@@ -41,7 +41,7 @@ test_that("Bootstrap ses close", {
   skip("Skipped bootstrap SE test for speed")
   
   pop <- declare_population(N = 100, S100 = rnorm(N, sd = 100), S10000 = rnorm(N, sd = 10000))
-  estimand <- declare_estimand(S100 = mean(S100), S10000 = mean(S10000))
+  estimand <- declare_inquiry(S100 = mean(S100), S10000 = mean(S10000))
   estimate <- declare_estimator(S100 ~ S10000, model = lm, estimand = list("S100", "S10000"))
   design <- pop + estimand + estimate
   d <- diagnose_design(design, sims = 10000)

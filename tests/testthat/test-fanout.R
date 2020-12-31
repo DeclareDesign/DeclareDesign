@@ -5,7 +5,7 @@ test_that("Fanout does something", {
 
   pop <- declare_population(N = N)
   pop2 <- declare_step(fabricate, noise = rnorm(N))
-  estimand <- declare_estimand(foo = mean(noise))
+  estimand <- declare_inquiry(foo = mean(noise))
   D <- pop + pop2 + estimand
 
   fan_strategy <- data.frame(end = 2:3, n = c(1, 100))
@@ -23,7 +23,7 @@ test_that("fanout should not be exposed to users", {
 
   pop <- declare_population(N = N)
   pop2 <- declare_step(fabricate, noise = rnorm(N))
-  estimand <- declare_estimand(foo = mean(noise))
+  estimand <- declare_inquiry(foo = mean(noise))
   D <- pop + pop2 + estimand
 
   fan_strategy <- data.frame(end = 2:3, n = c(1, 100))
@@ -44,7 +44,7 @@ test_that("Diagnosing a fanout", {
 
   pop <- declare_population(N = N, noise = rnorm(N))
 
-  estimand <- declare_estimand(foo = mean(noise))
+  estimand <- declare_inquiry(foo = mean(noise))
   sampl <- declare_sampling(n = N / 2)
   estimator <-
     declare_estimator(
@@ -82,11 +82,11 @@ test_that("Diagnosing a fanout", {
 
 test_that("sims expansion is correct", {
   design <- declare_population(sleep) +
-    declare_estimand(2, label = "a") +
-    declare_estimand(b = rnorm(1))
+    declare_inquiry(2, label = "a") +
+    declare_inquiry(b = rnorm(1))
 
-  some_design <- declare_population(sleep) + declare_estimand(2, label = "a")
-  some_design + declare_estimand(b = rnorm(1))
+  some_design <- declare_population(sleep) + declare_inquiry(2, label = "a")
+  some_design + declare_inquiry(b = rnorm(1))
 
   sims <- c(1, 1, 1)
   expanded <- check_sims(design, sims)
@@ -108,7 +108,7 @@ test_that("fanout warnings", {
 
   pop <- declare_population(N = N, noise = rnorm(N))
 
-  estimand <- declare_estimand(foo = mean(noise))
+  estimand <- declare_inquiry(foo = mean(noise))
   sampl <- declare_sampling(n = N / 2)
   estimator <-
     declare_estimator(
@@ -153,9 +153,9 @@ test_that("correct fan out", {
       i
     }
   })
-  e1 <- declare_estimand(a = f1())
-  e2 <- declare_estimand(b = f2())
-  e3 <- declare_estimand(c = f3())
+  e1 <- declare_inquiry(a = f1())
+  e2 <- declare_inquiry(b = f2())
+  e3 <- declare_inquiry(c = f3())
   
   out <-
     simulate_design(declare_population(sleep) + e1 + e2 + e3, sims = c(30, 1, 5, 2))

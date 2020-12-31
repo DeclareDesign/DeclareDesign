@@ -9,7 +9,7 @@ test_that("multiple design draw_estimates", {
     
     my_assignment <- declare_assignment(m = 25)
     
-    my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+    my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
     
     my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
     
@@ -33,7 +33,7 @@ test_that("multiple design draw_estimates", {
   
   my_assignment <- declare_assignment(m = 25)
   
-  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+  my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
   
   my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
   

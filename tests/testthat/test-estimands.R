@@ -4,7 +4,7 @@ df <- data.frame(Y_Z_0 = 1:10, Y_Z_1 = 3:12)
 
 test_that("splat labels", {
   ## default labeling
-  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+  my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
   expect_identical(
     my_estimand(df),
     structure(list(estimand_label = "ATE", estimand = 2), .Names = c(
@@ -17,7 +17,7 @@ test_that("splat labels", {
 
 test_that("default label", {
   ## no label
-  my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
+  my_estimand <- declare_inquiry(mean(Y_Z_1 - Y_Z_0))
   expect_identical(
     my_estimand(df),
     structure(list(estimand_label = "estimand", estimand = 2), .Names = c(
@@ -31,7 +31,7 @@ test_that("default label", {
 test_that("manual label", {
 
   ## manual label
-  my_estimand <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "ATE2")
+  my_estimand <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "ATE2")
 
   expect_identical(
     my_estimand(df),
@@ -48,7 +48,7 @@ test_that("custom estimand has label", {
   my_estimand_function <- function(data, label) {
     with(data, data.frame(estimand_label = label, estimand = median(Y_Z_1 - Y_Z_0), stringsAsFactors = TRUE))
   }
-  my_estimand_custom <- declare_estimand(
+  my_estimand_custom <- declare_inquiry(
     handler = my_estimand_function, label = "medianTE"
   )
 
@@ -66,7 +66,7 @@ test_that("custom estimand has label", {
 })
 
 test_that("splat label overrides label", {
-  my_estimand <- declare_estimand(SATT = mean(Y_Z_1 - Y_Z_0), label = "ATE")
+  my_estimand <- declare_inquiry(SATT = mean(Y_Z_1 - Y_Z_0), label = "ATE")
   expect_equal(
     attributes(my_estimand)$label,
     "SATT"
@@ -76,8 +76,8 @@ test_that("splat label overrides label", {
 
 test_that("multiple estimand declarations work", {
   # splat label, should inherit
-  sate <- declare_estimand(SATE = mean(Y_Z_1 - Y_Z_0))
-  pate <- declare_estimand(PATE = mean(Y_Z_1 - Y_Z_0))
+  sate <- declare_inquiry(SATE = mean(Y_Z_1 - Y_Z_0))
+  pate <- declare_inquiry(PATE = mean(Y_Z_1 - Y_Z_0))
 
   design_1 <- declare_population(df) + pate + sate
   expect_identical(
@@ -95,8 +95,8 @@ test_that("multiple estimand declarations work", {
 test_that("multiple estimand declarations work", {
 
   # Explicit label, should not inherit
-  sate_label <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "The SATE")
-  pate_label <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "The PATE")
+  sate_label <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "The SATE")
+  pate_label <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "The PATE")
 
   design_2 <- declare_population(df) + pate_label + sate_label
 
@@ -115,8 +115,8 @@ test_that("multiple estimand declarations work", {
 test_that("duplicated labels fail", {
   # This could eventually be fixed so that the estimand object names are inherited
   # default labeling whatsoever
-  sate_nolabel <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
-  pate_nolabel <- declare_estimand(mean(Y_Z_1 - Y_Z_0))
+  sate_nolabel <- declare_inquiry(mean(Y_Z_1 - Y_Z_0))
+  pate_nolabel <- declare_inquiry(mean(Y_Z_1 - Y_Z_0))
 
   expect_error({
     design_3 <- declare_population(df) + pate_nolabel + sate_nolabel
@@ -125,7 +125,7 @@ test_that("duplicated labels fail", {
 
 
 test_that("inquiries can use other inquiries in calculations", {
-  prop_estimand <- declare_estimand(yz1.mu = mean(Y_Z_1), yz0.mu = mean(Y_Z_0), percent.diff = abs(yz1.mu - yz0.mu) / yz0.mu)
+  prop_estimand <- declare_inquiry(yz1.mu = mean(Y_Z_1), yz0.mu = mean(Y_Z_0), percent.diff = abs(yz1.mu - yz0.mu) / yz0.mu)
 
   expect_equal(
     prop_estimand(df),

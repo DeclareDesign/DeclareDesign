@@ -52,7 +52,7 @@ library(DeclareDesign)
 design <-
   declare_population(N = 100) +
   declare_potential_outcomes(Y ~ rbinom(n = N, size = 1, prob = 0.5 + 0.05 * Z)) +
-  declare_estimand(ATE = 0.05) +
+  declare_inquiry(ATE = 0.05) +
   declare_assignment(m = 50) +
   declare_estimator(Y ~ Z)
 
@@ -107,7 +107,7 @@ Each of these `declare_*()` functions returns a *function*.
 3.  `declare_sampling()` (takes a population and selects a sample)
 4.  `declare_assignment()` (takes a population or sample and adds
     treatment assignments)
-5.  `declare_estimand()` (takes potential outcomes and calculates a
+5.  `declare_inquiry()` (takes potential outcomes and calculates a
     quantity of interest)
 6.  `declare_estimator()` (takes data produced by sampling and
     assignment and returns estimates)

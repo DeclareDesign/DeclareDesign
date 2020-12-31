@@ -66,7 +66,7 @@ test_that("warning for wrong class estimator label", {
     )
   }
   
-  my_estimand <- declare_estimand(handler = custom_func)
+  my_estimand <- declare_inquiry(handler = custom_func)
   
   design <- my_population + my_estimand 
   

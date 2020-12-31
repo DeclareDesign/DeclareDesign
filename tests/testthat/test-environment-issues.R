@@ -11,7 +11,7 @@ test_that("send estimand to estimator works", {
 
   my_assignment <- declare_assignment(m = 25)
 
-  pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
+  pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
 
   pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = "test")
 

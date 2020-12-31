@@ -13,8 +13,8 @@ test_that("Noncompliance", {
 
   my_assignment <- declare_assignment(m = 50)
 
-  CACE <- declare_estimand(CACE = mean(Y_D_1[complier == 1] - Y_D_0[complier == 1]))
-  ITT_d <- declare_estimand(ITT_d = mean(complier))
+  CACE <- declare_inquiry(CACE = mean(Y_D_1[complier == 1] - Y_D_0[complier == 1]))
+  ITT_d <- declare_inquiry(ITT_d = mean(complier))
 
   cace_estimator <- function(data, alpha = 0.05) {
     fit <- AER::ivreg(Y ~ D | Z, data = data)

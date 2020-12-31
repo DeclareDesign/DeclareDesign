@@ -23,7 +23,7 @@
 #'   Y_Z_0 = u,
 #'   Y_Z_1 = u + rnorm(N, mean = 2, sd = 2)) +
 #' declare_assignment(prob = 0.5) +
-#' declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#' declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #' declare_reveal() +
 #' declare_estimator(Y ~ Z, estimand = "ATE")
 #'

@@ -86,7 +86,7 @@ test_that("demo runs", {
   head(smp)
 
   ## ------------------------------------------------------------------------
-  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+  my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
   my_estimand(pop_pos)
 
   ## ------------------------------------------------------------------------
@@ -188,7 +188,7 @@ test_that("demo runs", {
   my_estimand_function <- function(data) {
     with(data, median(Y_Z_1 - Y_Z_0))
   }
-  my_estimand_custom <- declare_estimand(
+  my_estimand_custom <- declare_inquiry(
     handler = my_estimand_function, label = "medianTE"
   )
 
@@ -218,7 +218,7 @@ test_that("demo runs", {
     )
     my_sampling <- declare_sampling(n = 250)
     my_assignment <- declare_assignment(m = 25)
-    my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+    my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
     my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
     my_design <- my_population +
       my_potential_outcomes +

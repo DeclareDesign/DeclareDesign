@@ -7,8 +7,8 @@ my_potential_outcomes <-
 
 my_assignment <- declare_assignment(m = 25)
 
-pate <- declare_estimand(pate = mean(Y_Z_1 - Y_Z_0))
-sate <- declare_estimand(sate = mean(Y_Z_1 - Y_Z_0))
+pate <- declare_inquiry(pate = mean(Y_Z_1 - Y_Z_0))
+sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))
 
 pate_estimator <- declare_estimator(Y ~ Z, estimand = pate)
 sate_estimator <- declare_estimator(Y ~ Z, estimand = sate)
@@ -70,15 +70,15 @@ my_potential_outcomes <-
 
 my_assignment <- declare_assignment(m = 25)
 
-pate <- declare_estimand(pate = mean(Y_Z_1 - Y_Z_0))
-sate <- declare_estimand(sate = mean(Y_Z_1 - Y_Z_0))
+pate <- declare_inquiry(pate = mean(Y_Z_1 - Y_Z_0))
+sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))
 
 pate_estimator <- declare_estimator(Y ~ Z, estimand = pate)
 sate_estimator <- declare_estimator(Y ~ Z, estimand = sate)
 
 reveal <- declare_reveal()
 
-my_special_step <- declare_estimand(ATE = 5)
+my_special_step <- declare_inquiry(ATE = 5)
 
 my_design_3 <- my_population +
   my_potential_outcomes +

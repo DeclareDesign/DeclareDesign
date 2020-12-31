@@ -7,12 +7,12 @@ test_that("Test Subsetting on default estimand handler", {
 
   my_sampling <- declare_sampling(n = 250)
 
-  my_estimand <- declare_estimand(
+  my_estimand <- declare_inquiry(
     ATE_pos = mean(Y_Z_1 - Y_Z_0),
     subset = Y_Z_1 > 0
   )
 
-  my_estimand2 <- declare_estimand(
+  my_estimand2 <- declare_inquiry(
     ATE_neg = mean(Y_Z_1 - Y_Z_0),
     subset = Y_Z_1 < 0
   )

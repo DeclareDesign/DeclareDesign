@@ -29,7 +29,7 @@
 #'
 #' my_assignment <- declare_assignment()
 #'
-#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+#' my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 #'
 #' my_reveal <- declare_reveal()
 #'

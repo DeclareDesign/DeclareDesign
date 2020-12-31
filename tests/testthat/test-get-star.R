@@ -5,7 +5,7 @@ context("get_ functions")
 population <- declare_population(N = 100, u = rnorm(N))
 potential_outcomes <- declare_potential_outcomes(Y_Z_0 = 0,
                                                  Y_Z_1 = 1 + u)
-estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 sampling <- declare_sampling(n = 75)
 assignment <- declare_assignment(m = 50)
 reveal_Y <- declare_reveal(Y, Z)

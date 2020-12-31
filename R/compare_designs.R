@@ -64,7 +64,7 @@ compare_partial <- function(FUN, DIFFFUN, is_data = FALSE){
 #' 
 #' design1 <- declare_population(N = 100, u = rnorm(N)) +
 #'   declare_potential_outcomes(Y ~ Z + u) +
-#'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_sampling(n = 75) +
 #'   declare_assignment(m = 50) +
 #'   declare_reveal(Y, Z) +
@@ -72,7 +72,7 @@ compare_partial <- function(FUN, DIFFFUN, is_data = FALSE){
 #' 
 #' design2 <- declare_population(N = 200, u = rnorm(N)) +
 #'   declare_potential_outcomes(Y ~ 0.5*Z + u) +
-#'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_sampling(n = 100) +
 #'   declare_assignment(m = 25) +
 #'   declare_reveal(Y, Z) +

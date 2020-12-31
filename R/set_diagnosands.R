@@ -11,7 +11,7 @@
 #'
 #' design <-
 #' declare_population(data = sleep) +
-#'   declare_estimand(mean_outcome = mean(extra)) +
+#'   declare_inquiry(mean_outcome = mean(extra)) +
 #'   declare_sampling(n = 10) +
 #'   declare_estimator(extra ~ 1, estimand = "mean_outcome",
 #'      term = '(Intercept)', model = lm_robust)

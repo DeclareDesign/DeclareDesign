@@ -60,7 +60,7 @@ test_that("regression from estimatr works as an estimator", {
   my_population <- declare_population(N = 500, noise = rnorm(N))
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
   my_assignment <- declare_assignment(m = 100)
-  pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
+  pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
   pate_estimator <- declare_estimator(Y ~ Z + noise,
     model = lm_robust,
     term = "noise",
@@ -91,7 +91,7 @@ sampling <- declare_sampling(n = 100)
 
 assignment <- declare_assignment(m = 50)
 
-sate <- declare_estimand(SATE = mean(Y_Z_1 - Y_Z_0))
+sate <- declare_inquiry(SATE = mean(Y_Z_1 - Y_Z_0))
 
 my_reveal_outcomes <- declare_reveal()
 
@@ -187,8 +187,8 @@ test_that("multiple estimator declarations work", {
 
 context("Labeling estimator output with inquiries")
 
-mand_arg_label <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-mand_explicit_label <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "ATE")
+mand_arg_label <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+mand_explicit_label <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "ATE")
 
 expect_label <- function(df, expected_label, estimand_label) {
   expect_equal(df$estimator_label, expected_label)
@@ -301,7 +301,7 @@ test_that("estimators have different columns", {
     }
   )
 
-  att <- declare_estimand(att = mean(Y_Z_1[Z == 1] - Y_Z_0[Z == 1]))
+  att <- declare_inquiry(att = mean(Y_Z_1[Z == 1] - Y_Z_0[Z == 1]))
 
   estimator_d_i_m <- declare_estimator(Y ~ Z, estimand = "estimand", label = "dim")
 

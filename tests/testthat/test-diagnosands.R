@@ -12,7 +12,7 @@ my_potential_outcomes <-
 
 my_assignment <- declare_assignment(m = 25)
 
-pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
+pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
 
 pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = "test")
 
@@ -143,7 +143,7 @@ test_that("diagnosis, list of designs", {
 
 test_that("diagnosis, unlinked estimator", {
   d <- declare_population(sleep) +
-    declare_estimand(foo = 2, bar = 3) +
+    declare_inquiry(foo = 2, bar = 3) +
     declare_estimator(extra ~ group, model = lm, term = TRUE)
   expect_warning(diagnose_design(d, sims = 5, bootstrap_sims = FALSE), "Estimators lack estimand/term labels for matching, a many-to-many merge was performed.")
 })
@@ -151,7 +151,7 @@ test_that("diagnosis, unlinked estimator", {
 
 test_that("diagnosis, no estimator", {
   d <- declare_population(sleep) +
-    declare_estimand(foo = 2, bar = 3)
+    declare_inquiry(foo = 2, bar = 3)
 
   diagnosand <- declare_diagnosands(z = mean(estimand > 0))
  
@@ -196,7 +196,7 @@ test_that("Overriding join conditions", {
   attr(custom, "group_by") <- c("estimand_label", "estimator_label")
 
   design <- declare_population(data=sleep, handler = fabricatr::resample_data) +
-    declare_estimand(group1 = 1, group2 = 2, term = TRUE, label = "e") +
+    declare_inquiry(group1 = 1, group2 = 2, term = TRUE, label = "e") +
     declare_estimator(extra ~ group + 0, term = TRUE, estimand = "e", model = lm, label = "my_estimator")
 
   diagnosands <- get_diagnosands(diagnose_design(design, diagnosands = custom, sims = 5, bootstrap_sims = FALSE))
@@ -223,7 +223,7 @@ expect_equivalent(diagnose_design(d, sims = 4, bootstrap_sims = 5)$diagnosands_d
 })
 
 test_that("diagnosis, NAs if no estimand", {
-  mu <- declare_estimand(mean(extra))
+  mu <- declare_inquiry(mean(extra))
   d <- declare_population(sleep) + mu
   
   sleep_ols <-

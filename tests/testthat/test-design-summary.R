@@ -9,7 +9,7 @@ test_that("Basic design summary", {
 
   my_assignment <- declare_assignment(m = 25)
 
-  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+  my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
   my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
 
@@ -41,9 +41,9 @@ test_that("Basic design summary", {
 
 test_that("Add Quantitites and Alter Variables", {
   my_population <- declare_population(N = 500, noise = rnorm(N))
-  my_estimand <- declare_estimand(foo = mean(noise))
+  my_estimand <- declare_inquiry(foo = mean(noise))
   my_transform <- declare_population(noise = noise / 2)
-  my_estimand2 <- declare_estimand(foo2 = mean(noise))
+  my_estimand2 <- declare_inquiry(foo2 = mean(noise))
 
 
   design <- my_population +

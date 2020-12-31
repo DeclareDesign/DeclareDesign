@@ -40,7 +40,7 @@ test_that("draw_data does not run estimand/estimator", {
 
   # closes ticket #12
   design <- declare_population(sleep) +
-    declare_estimand(
+    declare_inquiry(
       "Should not be run",
       handler = function(data, msg)
         stop(x)

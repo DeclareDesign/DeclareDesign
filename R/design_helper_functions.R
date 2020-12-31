@@ -8,7 +8,7 @@
 #'   declare_population(N = 500, noise = rnorm(N)) +
 #'   declare_potential_outcomes(Y ~ noise + Z * rnorm(N, 2, 2)) +
 #'   declare_sampling(n = 250) +
-#'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_step(dplyr::mutate, noise_sq = noise^2) +
 #'   declare_assignment(m = 25) +
 #'   declare_reveal() +

@@ -3,11 +3,11 @@ context("Multiple estimators")
 test_that("Two estimators, Two inquiries (matched)", {
   des <-
     declare_population(sleep) +
-    declare_estimand(
+    declare_inquiry(
       CATE_1_5 = mean(extra[group == 2]) - mean(extra[group == 1]),
       subset = ID %in% 1:5
     ) +
-    declare_estimand(
+    declare_inquiry(
       CATE_6_10 = mean(extra[group == 2]) - mean(extra[group == 1]),
       subset = ID %in% 6:10
     ) +
@@ -40,8 +40,8 @@ test_that("Two estimators, Two inquiries (crossed)", {
     # Make a noisier outcome
     declare_potential_outcomes(extra1 ~ extra + 2 * (Z == 1) + rnorm(length(extra))) +
 
-    declare_estimand(ATE = mean(extra1_Z_1) - mean(extra1_Z_0)) +
-    declare_estimand(ATT = mean(extra1_Z_1) - mean(extra1_Z_0), subset = group == 2) +
+    declare_inquiry(ATE = mean(extra1_Z_1) - mean(extra1_Z_0)) +
+    declare_inquiry(ATT = mean(extra1_Z_1) - mean(extra1_Z_0), subset = group == 2) +
 
     declare_assignment() +
     declare_reveal(outcome_variables = extra1, assignment_variables = Z) +

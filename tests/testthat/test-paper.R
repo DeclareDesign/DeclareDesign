@@ -53,7 +53,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
     )
   }
 
-  estimand <- declare_estimand(handler = my_estimand)
+  estimand <- declare_inquiry(handler = my_estimand)
 
   my_estimator <- function(data) {
     reg <- lm(Y ~ Z, data = data)

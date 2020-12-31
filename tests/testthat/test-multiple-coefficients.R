@@ -12,7 +12,7 @@ test_that("Multiple Coefficients", {
     Y = alpha + beta * X + noise
   )
 
-  theta <- declare_estimand(
+  theta <- declare_inquiry(
     `(Intercept)` = alpha,
     X = beta,
     term = TRUE

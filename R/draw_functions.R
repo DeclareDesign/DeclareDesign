@@ -11,7 +11,7 @@
 #' 
 #' design <- declare_population(N = 100, u = rnorm(N)) +
 #'   declare_potential_outcomes(Y ~ Z + u) +
-#'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_sampling(n = 75) +
 #'   declare_assignment(m = 50) +
 #'   declare_reveal(Y, Z) +

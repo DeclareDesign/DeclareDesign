@@ -10,7 +10,7 @@
 #' 
 #' \code{declare_estimator} is designed to handle two main ways of generating parameter estimates from data.
 #' 
-#' In \code{declare_estimator}, you can optionally provide the name of an estimand or an objected created by \code{\link{declare_estimand}} to connect your estimate(s) to estimand(s).
+#' In \code{declare_estimator}, you can optionally provide the name of an estimand or an objected created by \code{\link{declare_inquiry}} to connect your estimate(s) to estimand(s).
 #' 
 #' The first is through \code{label_estimator(model_handler)}, which is the default value of the \code{handler} argument. Users can use standard modeling functions like lm, glm, or iv_robust. The models are summarized using the function passed to the \code{model_summary} argument. This will usually be a "tidier" like \code{broom::tidy}. The default \code{model_summary} function is \code{tidy_try}, which applies a tidy method if available, and if not, tries to make one on the fly.
 #' 
@@ -38,7 +38,7 @@
 #' @examples
 #'
 #' # Declare estimand
-#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+#' my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 #' 
 #' # Declare estimator using the default handler using `difference_in_means`
 #' # estimator from `estimatr` package. Returns the first non-intercept term
@@ -121,7 +121,7 @@
 #' design_def <-
 #'   declare_population(N = 100, X = rnorm(N), W = rexp(N, 1), noise = rnorm(N)) +
 #'   declare_potential_outcomes(Y ~ .25 * Z + noise) +
-#'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_assignment(m = 50) +
 #'   declare_reveal() +
 #'   my_estimator_dim

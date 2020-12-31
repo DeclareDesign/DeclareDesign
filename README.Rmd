@@ -44,7 +44,7 @@ library(DeclareDesign)
 design <-
   declare_population(N = 100) +
   declare_potential_outcomes(Y ~ rbinom(n = N, size = 1, prob = 0.5 + 0.05 * Z)) +
-  declare_estimand(ATE = 0.05) +
+  declare_inquiry(ATE = 0.05) +
   declare_assignment(m = 50) +
   declare_estimator(Y ~ Z)
 
@@ -73,12 +73,12 @@ The core DeclareDesign package relies on four companion packages, each of which 
 
 Each of these `declare_*()` functions returns a *function*.
 
-1. `declare_population()` (describes dimensions and distributions over the variables in the population)
-2. `declare_potential_outcomes()` (takes population or sample and adds potential outcomes produced by interventions)
+1. `declare_model()` (describes dimensions and distributions over the variables, including potential outcomes)
+2. `declare_inquiry()` (takes potential outcomes and calculates inquiry value)
 3. `declare_sampling()` (takes a population and selects a sample)
 4. `declare_assignment()` (takes a population or sample and adds treatment assignments)
-5. `declare_estimand()` (takes potential outcomes and calculates a quantity of interest)
-6. `declare_estimator()` (takes data produced by sampling and assignment and returns estimates)
+5. `declare_measurement()` (takes data and adds measured values)
+6. `declare_estimator()` (takes data produced by sampling, assignment, and measurement and returns estimates)
 
 To *declare a design*, connect the components of your design with the + operator.
 
@@ -93,8 +93,7 @@ A few other features:
 
 1. A designer is a function that takes parameters (e.g., `N`) and returns a design. `expand_design()` is a function of a designer and parameters that returns a design.
 2. You can change the features of the design to be diagnosed with `declare_diagnosands()`.
-3. `declare_reveal()` implements a general switching equation, which allows you to reveal outcomes from potential outcomes and a treatment assignment.
-4. You can provide custom functions to any `declare_*` step, as described in the [custom functions vignette](/r/declaredesign/articles/custom_functions.html).
+3. You can provide custom functions to any `declare_*` step, as described in the [custom functions vignette](/r/declaredesign/articles/custom_functions.html).
 
 ---
 
