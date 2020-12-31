@@ -17,7 +17,7 @@
 #' # Balance test F test
 #' 
 #' balance_test_design <-
-#'   declare_population(
+#'   declare_model(
 #'     N = 100, 
 #'     cov1 = rnorm(N), cov2 = rnorm(N), cov3 = rnorm(N)) +
 #'   declare_assignment(Z = complete_ra(N, prob = 0.2)) +
@@ -39,7 +39,7 @@
 #' }
 #' 
 #' distributional_equality_design <-
-#'   declare_population(N = 100) + 
+#'   declare_model(N = 100) + 
 #'   declare_potential_outcomes(Y_Z_1 = rnorm(N), Y_Z_0 = rnorm(N, sd = 1.5)) + 
 #'   declare_assignment(Z = complete_ra(N, prob = 0.5)) + 
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
@@ -66,7 +66,7 @@
 #' }
 #' 
 #' ttest_design <- 
-#'   declare_population(
+#'   declare_model(
 #'     N = 100, 
 #'     Xclus = rbinom(n = N, size = 1, prob = 0.2), 
 #'     outcome = 3 + rnorm(N)) +

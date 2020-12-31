@@ -5,7 +5,7 @@
 #' @examples
 #'
 #' design <-
-#'   declare_population(N = 500, noise = rnorm(N)) +
+#'   declare_model(N = 500, noise = rnorm(N)) +
 #'   declare_potential_outcomes(Y ~ noise + Z * rnorm(N, 2, 2)) +
 #'   declare_sampling(S = complete_rs(N, n = 250)) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
@@ -216,7 +216,7 @@ dots_to_list_of_designs <- function(...) {
 #'
 #' @examples
 #'
-#' my_population <- declare_population(N = 100)
+#' my_population <- declare_model(N = 100)
 #'
 #' my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
 #'

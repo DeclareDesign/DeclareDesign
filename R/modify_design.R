@@ -29,7 +29,7 @@ find_step <- function(design, step, verb) {
 #'
 #' @examples
 #'
-#'  my_population <- declare_population(N = 100, noise = rnorm(N), label = "my_pop")
+#'  my_population <- declare_model(N = 100, noise = rnorm(N), label = "my_pop")
 #'
 #'  my_potential_outcomes <-
 #'    declare_potential_outcomes(Y_Z_0 = noise,

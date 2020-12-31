@@ -7,7 +7,7 @@
 #'
 #' @examples
 #' 
-#' design <- declare_population(N = 100, u = rnorm(N)) +
+#' design <- declare_model(N = 100, u = rnorm(N)) +
 #'   declare_potential_outcomes(Y ~ Z + u) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_sampling(S = complete_rs(N, n = 75)) +

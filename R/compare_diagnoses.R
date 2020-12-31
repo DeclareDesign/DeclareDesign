@@ -18,7 +18,7 @@
 #' The function \code{compare_diagnoses} runs a many-to-many merge matching by \code{inquiry_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
 #'
 #' @examples
-#' design_a <- declare_population(N = 100, u = rnorm(N)) +
+#' design_a <- declare_model(N = 100, u = rnorm(N)) +
 #' declare_potential_outcomes(
 #'   Y_Z_0 = u,
 #'   Y_Z_1 = u + rnorm(N, mean = 2, sd = 2)) +

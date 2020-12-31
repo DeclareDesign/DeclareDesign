@@ -23,7 +23,7 @@
 #' # with a custom designer function
 #' 
 #' designer <- function(N) {
-#'   pop <- declare_population(N = N, noise = rnorm(N))
+#'   pop <- declare_model(N = N, noise = rnorm(N))
 #'   pos <- declare_potential_outcomes(Y ~ 0.20 * Z + noise)
 #'   assgn <- declare_assignment(Z = complete_ra(N, m = N/2))
 #'   inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))

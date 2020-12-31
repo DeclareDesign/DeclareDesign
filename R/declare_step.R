@@ -7,7 +7,7 @@
 #' @export
 #' @examples
 #'
-#' population <- declare_population(N = 5, noise = rnorm(N))
+#' population <- declare_model(N = 5, noise = rnorm(N))
 #' manipulate <- declare_step(fabricate, noise_squared = noise^2, zero = 0)
 #'
 #' design <- population + manipulate

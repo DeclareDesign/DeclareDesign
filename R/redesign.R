@@ -13,7 +13,7 @@
 #' @examples
 #'
 #' n <- 500
-#' population <- declare_population(N = 1000)
+#' population <- declare_model(N = 1000)
 #' sampling <- declare_sampling(S = complete_rs(N, n = n))
 #' design <- population + sampling
 #'
@@ -50,9 +50,9 @@
 #'f <- function(b, X) b*X
 #'g <- function(b) b*X
 #'
-#'design1 <- declare_population(N = 1, A = X)       + NULL
-#'design2 <- declare_population(N = 1, A = f(2, X)) + NULL
-#'design3 <- declare_population(N = 1, A = g(2))    + NULL
+#'design1 <- declare_model(N = 1, A = X)       + NULL
+#'design2 <- declare_model(N = 1, A = f(2, X)) + NULL
+#'design3 <- declare_model(N = 1, A = g(2))    + NULL
 #'
 #'draw_data(design1)
 #'draw_data(design2)

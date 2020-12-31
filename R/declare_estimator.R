@@ -119,7 +119,7 @@
 #' set.seed(42)
 #'
 #' design_def <-
-#'   declare_population(N = 100, X = rnorm(N), W = rexp(N, 1), noise = rnorm(N)) +
+#'   declare_model(N = 100, X = rnorm(N), W = rexp(N, 1), noise = rnorm(N)) +
 #'   declare_potential_outcomes(Y ~ .25 * Z + noise) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_assignment(Z = complete_ra(N, m = 50)) +

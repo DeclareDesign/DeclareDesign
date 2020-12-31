@@ -36,7 +36,7 @@ declare_reveal <- make_declarations(declare_reveal_handler, "reveal")
 #'
 #' @examples
 #'
-#' my_population <- declare_population(N = 100, noise = rnorm(N))
+#' my_population <- declare_model(N = 100, noise = rnorm(N))
 #'
 #' my_potential_outcomes <- declare_potential_outcomes(
 #'   Y_Z_0 = noise, Y_Z_1 = noise +
@@ -55,7 +55,7 @@ declare_reveal <- make_declarations(declare_reveal_handler, "reveal")
 #'
 #' # Declaring multiple assignment variables or multiple outcome variables
 #'
-#' population   <- declare_population(N = 10)
+#' population   <- declare_model(N = 10)
 #' potentials_1 <- declare_potential_outcomes(Y1 ~ Z)  
 #' potentials_2 <- declare_potential_outcomes(Y2 ~ 1 + 2*Z)  
 #' potentials_3 <- declare_potential_outcomes(Y3 ~ 1 - X*Z, conditions = list(X = 0:1, Z = 0:1))  
@@ -65,7 +65,7 @@ declare_reveal <- make_declarations(declare_reveal_handler, "reveal")
 #'                                     Y2 = reveal_outcomes(Y2 ~ Z),
 #'                                     Y3 = reveal_outcomes(Y3 ~ X + Z))
 #' 
-#' population <- declare_population(N = 100, age = sample(18:95, N, replace = TRUE))
+#' population <- declare_model(N = 100, age = sample(18:95, N, replace = TRUE))
 #' 
 #' potential_outcomes_Y <- declare_potential_outcomes(Y ~ .25 * Z + .01 * age * Z)
 #' 

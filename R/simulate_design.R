@@ -11,7 +11,7 @@
 #' @importFrom utils head type.convert
 #' @export
 #' @examples
-#' my_population <- declare_population(N = 500, noise = rnorm(N))
+#' my_population <- declare_model(N = 500, noise = rnorm(N))
 #'
 #' my_potential_outcomes <- declare_potential_outcomes(
 #'   Y_Z_0 = noise, Y_Z_1 = noise +

@@ -12,7 +12,7 @@
 #' @examples
 #'
 #' design <-
-#' declare_population(data = sleep) +
+#' declare_model(data = sleep) +
 #'   declare_sampling(S = complete_rs(N, n = 10))
 #'
 #' design <-
