@@ -8,3 +8,6 @@
 #' @keywords internal
 NULL
 
+estimand_handler <- function(...){
+  .Deprecated(new = "inquiry_handler")
+}

@@ -1,14 +1,14 @@
-#' Declare estimand
+#' Declare inquiry
 #'
-#' @description Declares estimands. Estimands are the subjects of inquiry and can be estimated by an estimator.
+#' @description Declares inquiries, or the inferential target of interest. Conceptually very close to "estimand" or "quantity of interest".
 #'
 #' @inheritParams declare_internal_inherit_params
 #'
-#' @return a function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimand.
+#' @return a function, I(), that accepts a data.frame as an argument and returns a data.frame containing the value of the inquiry,  a^m. 
 #'
 #' @details
 #'
-#' For the default diagnosands, the return value of the handler should have \code{estimand_label} and \code{estimand} columns.
+#' For the default diagnosands, the return value of the handler should have \code{inquiry_label} and \code{inquiry_value} columns.
 #'
 #' @export
 #'
@@ -23,99 +23,97 @@
 #' design_stub <- my_population + my_potential_outcomes + my_assignment + 
 #'   declare_reveal()
 #'
-#' # Get example data to compute estimands on
+#' # Get example data to compute inquiries on
 #' dat <- draw_data(design_stub)
 #'
 #' # ----------
-#' # 1. Single estimand
+#' # 1. Single inquiry
 #' # ----------
 #'
-#' # Declare an average treatment effect (ATE) estimand
+#' # Declare an average treatment effect (ATE) inquiry
 #' 
-#' my_estimand_ATE <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-#' my_estimand_ATE(dat)
+#' my_inquiry_ATE <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+#' my_inquiry_ATE(dat)
 #' 
-#' # or a conditional estimand
+#' # or a conditional inquiry
 #' 
-#' my_estimand_ATT <- declare_estimand(ATT = mean(Y_Z_1 - Y_Z_0),
-#'                                     subset = (Z == 1))
-#' my_estimand_ATT (dat)
+#' my_inquiry_ATT <- declare_inquiry(ATT = mean(Y_Z_1 - Y_Z_0),
+#'                                   subset = (Z == 1))
+#' my_inquiry_ATT(dat)
 #' 
-#' # Add estimands to a design along with estimators that reference them
+#' # Add inquiries to a design along with answer strategies 
+#' # (estimators) that reference them
 #' 
-#' my_estimator <- declare_estimator(Y ~ Z, 
-#'   estimand = my_estimand_ATE, label = "estimator")
+#' my_estimator <- declare_estimator(Y ~ Z, inquiry = "ATE")
 #'
-#' design_one <- design_stub + my_estimand_ATE + my_estimator
+#' design_one <- design_stub + my_inquiry_ATE + my_estimator
 #'
-#' draw_estimands(design_one)
+#' draw_inquiries(design_one)
 #'
 #' # ----------
-#' # 2. Multiple estimands
+#' # 2. Multiple inquiries
 #' # ----------
 #'
-#' # You can also specify multiple estimands for a single estimator 
+#' # You can also specify multiple inquiries for a single estimator 
 #'
-#' # With multiple estimands, you can use one estimator for both...
+#' my_estimator_two <- declare_estimator(Y ~ Z, 
+#' inquiry = c("ATE", "ATT"))
+#'
+#' design_two <- design_stub + my_inquiry_ATE + 
+#'   my_inquiry_ATT + my_estimator_two
 #' 
-#' my_estimator_two <- declare_estimator(Y ~ Z,
-#'   estimand = c(my_estimand_ATE, my_estimand_ATT))
-#'
-#' design_two <- design_stub + my_estimand_ATE + 
-#'   my_estimand_ATT + my_estimator_two
-#' 
-#' draw_estimands(design_two)
+#' draw_inquiries(design_two)
 #'
 #' # ----------
-#' # 3. Paired estimands / estimators from a single model
+#' # 3. Paired inquiries / estimators from a single model
 #' # ----------
 #'
-#' # For convenience you can also declare multiple estimands
+#' # For convenience you can also declare multiple inquiries
 #' # simultaneously and connect these to the corresponding 
-#' # terms for estimates used in the mode. 
+#' # terms in the estimator. 
 #'
-#' # Name your estimands the term name they get in your
+#' # Name your inquiries the term name they get in your
 #' # estimator, and set `term = TRUE`
 #'
-#' estimands_regression <- declare_estimand(
+#' inquiries_regression <- declare_inquiries(
 #'   `(Intercept)` = mean(Y_Z_0),
 #'   `Z` = mean(Y_Z_1 - Y_Z_0),
 #'   term = TRUE,
-#'   label="Regression_Estimands"
+#'   label="Regression_inquiries"
 #' )
 #'
-#' # For the model based estimator, specify the estimand as usual,
+#' # For the model based estimator, specify the inquiry as usual,
 #' # but also set `term = TRUE`
 #' estimators_regression <- declare_estimator(
 #'   Y ~ Z,
-#'   estimand = estimands_regression,
+#'   inquiry = inquiries_regression,
 #'   model = lm,
 #'   term = TRUE
 #' )
 #'
-#' design_regression <- design_stub + estimands_regression +
+#' design_regression <- design_stub + inquiries_regression +
 #'   estimators_regression
 #'
 #' run_design(design_regression)
 #'
 #' # ----------
-#' # 4. Custom estimand function
+#' # 4. Custom inquiry function
 #' # ----------
 #'
-#' # You can declare more complex estimands by defining custom
-#' # estimand functions:
+#' # You can declare more complex inquiries by defining custom
+#' # inquiry functions:
 #' 
-#' estimand_function <- function(data, label) {
+#' inquiry_function <- function(data, label) {
 #'   ret <- with(data, median(Y_Z_1 - Y_Z_0))
-#'   data.frame(estimand_label = label,
-#'              estimand = ret,
+#'   data.frame(inquiry_label = label,
+#'              inquiry_value = ret,
 #'              stringsAsFactors = FALSE)
 #' }
 #' 
-#' estimand_custom <- declare_estimand(handler = estimand_function,
+#' inquiry_custom <- declare_inquiry(handler = inquiry_function,
 #'   label = "medianTE")
 #'
-#' estimand_custom(dat)
+#' inquiry_custom(dat)
 #'
 #' # Use with custom estimators
 #' estimator_function <- function(data){
@@ -123,56 +121,68 @@
 #' }
 #' estimator_custom <-
 #'   declare_estimator(handler = tidy_estimator(estimator_function),
-#'                     estimand = estimand_custom)
+#'                     inquiry = inquiry_custom)
 #'
-#' design_custom <- design_stub + estimand_custom +
+#' design_custom <- design_stub + inquiry_custom +
 #'   estimator_custom
 #' 
 #' run_design(design_custom)
 #'
 #' # ----------
-#' # 5. Batch estimands and estimators
+#' # 5. Batch inquiries and estimators
 #' # ----------
 #' 
-#' # You can declare a group of estimands with distinct labels
+#' # You can declare a group of inquiries with distinct labels
 #' # in one go and link them manually to a group of estimators.
 #' # In this case you can add a \code{term} argument to the 
 #' # custom estimators to identify them.
 #' 
 #' f1 <- function(data) {
-#'   data.frame(estimand_label = c("control", "ate"),
-#'              estimand = with(data, c(mean(Y_Z_0), mean(Y_Z_1 - Y_Z_0))),
+#'   data.frame(inquiry_label = c("control", "ate"),
+#'              inquiry_value = with(data, c(mean(Y_Z_0), mean(Y_Z_1 - Y_Z_0))),
 #'              stringsAsFactors = FALSE)
 #' }
-#' estimands <- declare_estimand(handler = f1)
+#' inquiries <- declare_inquiry(handler = f1)
 #' 
-#' f2 <- function(data) data.frame(estimate = with(data,
-#'                             c(mean(Y[Z == 0]),
+#' f2 <- function(data) {
+#'   data.frame(estimate = 
+#'                with(data, c(mean(Y[Z == 0]),
 #'                             mean(Y[Z == 1]) - mean(Y[Z == 0]))),
-#'                             term = 1:2)
+#'              term = 1:2)
+#' }
 #' 
-#' estimators <- declare_estimator(handler = tidy_estimator(f2), 
-#'                             estimand = c("control", "ate"), label = "custom")
+#' estimators <- declare_estimator(handler = label_estimator(f2), 
+#'                             inquiry = c("control", "ate"), label = "custom")
 #'                             
-#' design      <- design_stub + estimands + estimators
+#' design   <- design_stub + inquiries + estimators
 #' 
 #' \dontrun{
 #' diagnose_design(design, sims = 20, bootstrap_sims = FALSE,
 #'                 diagnosands = declare_diagnosands(
-#'                 select = c(mean_estimate, mean_estimand)))
+#'                 select = c(mean_estimate, mean_inquiry_value)))
 #' }
-declare_estimand <- make_declarations(estimand_handler, "estimand",
-                                      causal_type = "estimand", 
-                                      default_label = "estimand"
+declare_inquiry <- make_declarations(inquiry_handler, "inquiry",
+                                      causal_type = "inquiry", 
+                                      default_label = "inquiry"
 )
 
-#' @rdname declare_estimand
+#' @rdname declare_inquiry
 #' @export
-declare_estimands <- declare_estimand
+declare_inquiries <- declare_inquiry
 
-#' @rdname declare_estimand
+#' @rdname declare_inquiry
 #' @export
-declare_inquiry <- declare_estimand
+declare_estimand <-  function(...){
+  .Deprecated(new = "declare_inquiry")
+  declare_inquiry(...)
+}
+
+#' @rdname declare_inquiry
+#' @export
+declare_estimands <- function(...){
+  .Deprecated(new = "declare_inquiry")
+  declare_inquiry(...)
+}
 
 
 #' @param subset a subset expression
@@ -181,13 +191,13 @@ declare_inquiry <- declare_estimand
 #' @details
 #'
 #' If term is TRUE, the names of ... will be returned in a \code{term} column,
-#' and \code{estimand_label} will contain the step label. This can be used as
+#' and \code{inquiry_label} will contain the step label. This can be used as
 #' an additional dimension for use in diagnosis.
 #'
 #'
 #' @importFrom rlang eval_tidy quos is_quosure quo_get_expr as_data_mask
-#' @rdname declare_estimand
-estimand_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
+#' @rdname declare_inquiry
+inquiry_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
   options <- quos(...)
   if (names(options)[1] == "") names(options)[1] <- label
   
@@ -208,23 +218,23 @@ estimand_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
   
   if (term) {
     data.frame(
-      estimand_label = label,
+      inquiry_label = label,
       term = names(options),
-      estimand = ret,
+      inquiry_value = ret,
       stringsAsFactors = FALSE,
       row.names = NULL
     )
   } else {
     data.frame(
-      estimand_label = names(options),
-      estimand = ret,
+      inquiry_label = names(options),
+      inquiry_value = ret,
       stringsAsFactors = FALSE,
       row.names = NULL
     )
   }
 }
 
-validation_fn(estimand_handler) <- function(ret, dots, label) {
+validation_fn(inquiry_handler) <- function(ret, dots, label) {
   force(ret)
   # add ... labels at build time
   dotnames <- names(dots)
@@ -236,10 +246,10 @@ validation_fn(estimand_handler) <- function(ret, dots, label) {
     return(ret)
   }
   
-  maybeDotLabel <- dotnames[!dotnames %in% c("", names(formals(estimand_handler)))]
+  maybeDotLabel <- dotnames[!dotnames %in% c("", names(formals(inquiry_handler)))]
   if (any(duplicated(maybeDotLabel))) {
     stop(paste0(
-      "Please provide unique names for each estimand. Duplicates include ",
+      "Please provide unique names for each inquiry. Duplicates include ",
       paste(maybeDotLabel[duplicated(maybeDotLabel)], collapse = ", "), "."
     ), call. = FALSE)
   }
