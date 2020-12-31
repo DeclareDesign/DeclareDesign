@@ -76,7 +76,7 @@ summary.design <- function(object, verbose = TRUE, ...) {
   
   N[[1]] <- paste0("N = ", nrow(current_df))
   
-  estimates_df <- estimands_df <- data.frame()
+  estimates_df <- inquiries_df <- data.frame()
   
   last_df <- current_df
   

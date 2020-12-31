@@ -34,7 +34,7 @@ test_that("Factorial", {
     my_estimator
 
   expect_equal(my_design %>% draw_data() %>% nrow(), 2000)
-  expect_equal(my_design %>% run_design() %>% names(), c("estimates_df", "estimands_df"))
+  expect_equal(my_design %>% run_design() %>% names(), c("estimates_df", "inquiries_df"))
 
   diagnosis <- diagnose_design(my_design, sims = 2, bootstrap_sims = FALSE)
 

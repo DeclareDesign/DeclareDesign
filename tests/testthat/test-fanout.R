@@ -11,10 +11,10 @@ test_that("Fanout does something", {
   fan_strategy <- data.frame(end = 2:3, n = c(1, 100))
   out <- DeclareDesign:::fan_out(D, fan_strategy)
 
-  estimands_out <- do.call(rbind, lapply(out, `[[`, "estimands_df"))
-  expect_equal(length(unique(estimands_out$estimand)), 1)
-  expect_equal(estimands_out$step_1_draw, rep(1,100))
-  expect_equal(estimands_out$step_3_draw, 1:100)
+  inquiries_out <- do.call(rbind, lapply(out, `[[`, "inquiries_df"))
+  expect_equal(length(unique(inquiries_out$estimand)), 1)
+  expect_equal(inquiries_out$step_1_draw, rep(1,100))
+  expect_equal(inquiries_out$step_3_draw, 1:100)
   
 })
 

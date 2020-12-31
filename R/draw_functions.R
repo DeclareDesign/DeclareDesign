@@ -42,7 +42,7 @@ draw_data <- function(design, data = NULL, start = 1, end = length(design)) {
 #' @rdname draw_functions
 #'
 #' @export
-draw_inquiries <- function(...) apply_on_design_dots(draw_estimands_single_design, ...)
+draw_inquiries <- function(...) apply_on_design_dots(draw_inquiries_single_design, ...)
 
 #' @rdname draw_functions
 #'
@@ -55,9 +55,9 @@ draw_estimates_single_design <- function(design) {
     list("estimator" = vector("list", length(design))), "estimates_df", step_type = "estimator")
 }
 
-draw_estimands_single_design <- function(design) {
+draw_inquiries_single_design <- function(design) {
   get_function_internal(
     design, -9, 1, length(design), function(x) TRUE, 
-    list("estimand" = vector("list", length(design))), "estimands_df", step_type = "estimand")
+    list("estimand" = vector("list", length(design))), "inquiries_df", step_type = "estimand")
 }
 

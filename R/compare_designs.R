@@ -83,7 +83,7 @@ compare_partial <- function(FUN, DIFFFUN, is_data = FALSE){
 #'  compare_design_summaries(design1, design2)
 #'  compare_design_data(design1, design2)
 #'  compare_design_estimates(design1, design2)
-#'  compare_design_estimands(design1, design2)
+#'  compare_design_inquiries(design1, design2)
 #' 
 #' @name compare_functions
 
@@ -95,7 +95,7 @@ compare_designs <- function(design1, design2, format = "ansi8", pager = "off", c
   compare_functions <-
     list(code_comparison = compare_design_code,
          data_comparison = compare_design_data, 
-         estimands_comparison = compare_design_estimands,
+         inquiries_comparison = compare_design_inquiries,
          estimates_comparison = compare_design_estimates)
   
   vals <-
@@ -121,7 +121,7 @@ print.design_comparison <- function(x, ...) {
   
   labels <- c("code_comparison" = "design code", 
               "data_comparison" = "draw_data(design)",
-              "estimands_comparison" = "draw_inquiries(design)",
+              "inquiries_comparison" = "draw_inquiries(design)",
               "estimates_comparison" = "draw_estimates(design)")
   
   for(n in names(labels)) {
@@ -150,7 +150,7 @@ compare_design_estimates <- compare_partial(draw_estimates, "diffObj", is_data =
 
 #' @rdname compare_functions
 #' @export
-compare_design_estimands <- compare_partial(draw_inquiries, "diffObj", is_data = FALSE)
+compare_design_inquiries <- compare_partial(draw_inquiries, "diffObj", is_data = FALSE)
 
 
 compare_design_internal <- function(FUN, DIFFFUN, design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE){

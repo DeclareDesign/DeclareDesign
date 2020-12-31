@@ -33,7 +33,7 @@ test_that("allow design functions to be sent to simulate design and diagnose_des
 
   des_out <- run_design(my_design_function)
 
-  expect_equal(names(des_out), c("estimates_df", "estimands_df"))
+  expect_equal(names(des_out), c("estimates_df", "inquiries_df"))
 
   sims_out <- simulate_design(my_design_function, sims = 2)
 
@@ -205,7 +205,7 @@ test_that("more term",{
                        Z = rep(0:1, 50),
                        Y = rnorm(N))
   
-  estimands_regression <- declare_inquiry(
+  inquiries_regression <- declare_inquiry(
     `(Intercept)` = 0,
     `Z` = 1,
     term = TRUE,
@@ -213,7 +213,7 @@ test_that("more term",{
   )
   
   estimators_regression <- declare_estimator(Y ~ Z,
-                                             inquiry = estimands_regression,
+                                             inquiry = inquiries_regression,
                                              model = lm_robust,
                                              term = TRUE)
   
@@ -222,7 +222,7 @@ test_that("more term",{
     declare_estimator(Y ~ Z, inquiry = estimand_2, label = "dim")
   
   design <-
-    population + estimands_regression + estimators_regression + estimand_2 + estimator_2
+    population + inquiries_regression + estimators_regression + estimand_2 + estimator_2
   
   sims_df <- simulate_design(design, sims = 1)
   

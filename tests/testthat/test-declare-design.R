@@ -51,7 +51,7 @@ test_that("No estimators / inquiries", {
   head(draw_data(design))
   des_obj <- run_design(design)
   expect_equal(dim(des_obj$estimates_df), c(0, 0))
-  expect_equal(dim(des_obj$estimands_df), c(0, 0))
+  expect_equal(dim(des_obj$inquiries_df), c(0, 0))
 })
 
 test_that("single-step designs work", {

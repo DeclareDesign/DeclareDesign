@@ -101,7 +101,7 @@ get_function_internal <- function(design, data = NULL, start, end, pred, results
             ". Try using handler = tidy_estimator(your_estimator_function)", call. = FALSE)
   }
   
-  if(what == "estimands_df" && !is.null(ret$estimand_label) && typeof(ret$estimand_label) != "character"){
+  if(what == "inquiries_df" && !is.null(ret$estimand_label) && typeof(ret$estimand_label) != "character"){
     warning("The estimand label should be a character, but it is a ", 
             class(ret$estimand_label), 
             ". You may need stringsAsFactors = FALSE in your estimand function.", call. = FALSE)

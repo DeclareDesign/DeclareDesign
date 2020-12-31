@@ -120,7 +120,7 @@ run_design_internal.design <- function(design, current_df = NULL, results = NULL
       results[["estimator"]] <- NULL
     }
     if ("estimand" %in% names(results)) {
-      results[["estimands_df"]] <- rbind_disjoint(results[["estimand"]])
+      results[["inquiries_df"]] <- rbind_disjoint(results[["estimand"]])
       results[["estimand"]] <- NULL
     }
     if ("current_df" %in% names(results)) {
