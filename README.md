@@ -123,7 +123,7 @@ post-design-declaration commands used to modify or diagnose your design:
 2.  `draw_data()` (takes a design and returns a single draw of the data)
 3.  `draw_estimates()` (takes a design a returns a single simulation of
     estimates)
-4.  `draw_estimands()` (takes a design a returns a single simulation of
+4.  `draw_inquiries()` (takes a design a returns a single simulation of
     inquiries)
 
 A few other features:

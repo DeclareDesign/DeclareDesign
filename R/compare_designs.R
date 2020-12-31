@@ -121,7 +121,7 @@ print.design_comparison <- function(x, ...) {
   
   labels <- c("code_comparison" = "design code", 
               "data_comparison" = "draw_data(design)",
-              "estimands_comparison" = "draw_estimands(design)",
+              "estimands_comparison" = "draw_inquiries(design)",
               "estimates_comparison" = "draw_estimates(design)")
   
   for(n in names(labels)) {
@@ -150,7 +150,7 @@ compare_design_estimates <- compare_partial(draw_estimates, "diffObj", is_data =
 
 #' @rdname compare_functions
 #' @export
-compare_design_estimands <- compare_partial(draw_estimands, "diffObj", is_data = FALSE)
+compare_design_estimands <- compare_partial(draw_inquiries, "diffObj", is_data = FALSE)
 
 
 compare_design_internal <- function(FUN, DIFFFUN, design1, design2, format = "ansi256", mode = "sidebyside", pager = "off", context = -1L, rmd = FALSE){

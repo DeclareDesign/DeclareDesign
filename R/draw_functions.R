@@ -21,7 +21,7 @@
 #' 
 #' dat_no_sampling <- draw_data(design, end = 3)
 #' 
-#' draw_estimands(design)
+#' draw_inquiries(design)
 #' 
 #' draw_estimates(design)
 #'
@@ -42,7 +42,7 @@ draw_data <- function(design, data = NULL, start = 1, end = length(design)) {
 #' @rdname draw_functions
 #'
 #' @export
-draw_estimands <- function(...) apply_on_design_dots(draw_estimands_single_design, ...)
+draw_inquiries <- function(...) apply_on_design_dots(draw_estimands_single_design, ...)
 
 #' @rdname draw_functions
 #'

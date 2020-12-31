@@ -70,7 +70,7 @@ test_that("warning for wrong class estimator label", {
   
   design <- my_population + my_estimand 
   
-  expect_warning(draw_estimands(design), "The estimand label should be a character")
+  expect_warning(draw_inquiries(design), "The estimand label should be a character")
   
 })
 

@@ -15,7 +15,7 @@
 #'
 #' The location of the estimand and estimator functions in the pipeline of functions determine *when* the values of the estimand and estimator are calculated. This allows users to, for example, differentiate between a population average treatment effect and a sample average treatment effect by placing the estimand function before or after sampling.
 #'
-#' Design objects declared with the + operator can be investigated with a series of post-declaration commands, such as \code{\link{draw_data}}, \code{\link{draw_estimands}}, \code{\link{draw_estimates}}, and \code{\link{diagnose_design}}.
+#' Design objects declared with the + operator can be investigated with a series of post-declaration commands, such as \code{\link{draw_data}}, \code{\link{draw_inquiries}}, \code{\link{draw_estimates}}, and \code{\link{diagnose_design}}.
 #'
 #' The print and summary methods for a design object return some helpful descriptions of the steps in your research design. If randomizr functions are used for any assignment or sampling steps, additional details about those steps are provided.
 #'
@@ -54,7 +54,7 @@
 #' df <- draw_data(design)
 #'
 #' estimates <- draw_estimates(design)
-#' inquiries <- draw_estimands(design)
+#' inquiries <- draw_inquiries(design)
 #'
 #' # You can add steps to a design
 #'

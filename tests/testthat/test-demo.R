@@ -121,7 +121,7 @@ test_that("demo runs", {
 
   ## ------------------------------------------------------------------------
   draw_estimates(design)
-  draw_estimands(design)
+  draw_inquiries(design)
 
   ## ------------------------------------------------------------------------
   my_population_function <- function(N) {
