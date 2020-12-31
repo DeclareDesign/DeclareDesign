@@ -1,6 +1,6 @@
 context("environment problems")
 
-test_that("send estimand to estimator works", {
+test_that("send inquiry to estimator works", {
   my_population <- declare_population(N = 50, noise = rnorm(N))
 
   my_potential_outcomes <-

@@ -43,13 +43,13 @@ test_that("Add Quantitites and Alter Variables", {
   my_population <- declare_population(N = 500, noise = rnorm(N))
   my_inquiry <- declare_inquiry(foo = mean(noise))
   my_transform <- declare_population(noise = noise / 2)
-  my_estimand2 <- declare_inquiry(foo2 = mean(noise))
+  my_inquiry2 <- declare_inquiry(foo2 = mean(noise))
 
 
   design <- my_population +
     my_inquiry +
     my_transform +
-    my_estimand2
+    my_inquiry2
 
   # Adding Quantitites
   expect_output(

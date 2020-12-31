@@ -159,12 +159,12 @@ simulate_single_design <- function(design, sims) {
     simulations_df <- estimates_df
   } else if (is_empty(estimates_df)) {
     simulations_df <- inquiries_df
-  } else if (all(inquiries_df$estimand_label %in% estimates_df$estimand_label) &
-             all(estimates_df$estimand_label %in% inquiries_df$estimand_label)){
+  } else if (all(inquiries_df$inquiry_label %in% estimates_df$inquiry_label) &
+             all(estimates_df$inquiry_label %in% inquiries_df$inquiry_label)){
     
     
-    inquiries_df_split <- split(x = inquiries_df, f = inquiries_df$estimand_label)
-    estimates_df_split <- split(x = estimates_df, f = estimates_df$estimand_label)
+    inquiries_df_split <- split(x = inquiries_df, f = inquiries_df$inquiry_label)
+    estimates_df_split <- split(x = estimates_df, f = estimates_df$inquiry_label)
     
     non_missing_columns <- function(dat){
       nonmissing <- apply(dat, 2, FUN = function(x) any(!is.na(x)))
@@ -202,7 +202,7 @@ simulate_single_design <- function(design, sims) {
     
     if (nrow(simulations_df) > max(nrow(inquiries_df), nrow(estimates_df))) {
       warning(
-        "Estimators lack estimand/term labels for matching, a many-to-many merge was performed."
+        "Estimators lack inquiry/term labels for matching, a many-to-many merge was performed."
       )
     }
   }

@@ -46,7 +46,7 @@ test_that("Hooke's law", {
       resting + stiffness * force
     }
 
-  estimand <- declare_inquiry(
+  inquiry <- declare_inquiry(
     `(Intercept)` = mean(potential_outcome_f(resting, stiffness, 0)),
     stiffness = mean(potential_outcome_f(resting, stiffness, 1) - potential_outcome_f(resting, stiffness, 0)),
     term = TRUE
@@ -75,7 +75,7 @@ test_that("Hooke's law", {
 
   estimator <- declare_estimator(length ~ force, model = lm, term = TRUE)
 
-  design <- pop + estimand + sampling + assignment + reveal + estimator
+  design <- pop + inquiry + sampling + assignment + reveal + estimator
 
   df <- draw_data(design)
 

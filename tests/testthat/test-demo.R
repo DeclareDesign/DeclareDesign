@@ -185,14 +185,14 @@ test_that("demo runs", {
   table(my_assignment_custom(pop_pos)$Z)
 
   ## ------------------------------------------------------------------------
-  my_estimand_function <- function(data) {
+  my_inquiry_function <- function(data) {
     with(data, median(Y_Z_1 - Y_Z_0))
   }
-  my_estimand_custom <- declare_inquiry(
-    handler = my_estimand_function, label = "medianTE"
+  my_inquiry_custom <- declare_inquiry(
+    handler = my_inquiry_function, label = "medianTE"
   )
 
-  my_estimand_custom(pop_pos)
+  my_inquiry_custom(pop_pos)
 
   ## ------------------------------------------------------------------------
   my_mean <- function(data) {

@@ -13,7 +13,7 @@
 #'
 #' 3. Estimator functions.
 #'
-#' The location of the estimand and estimator functions in the pipeline of functions determine *when* the values of the estimand and estimator are calculated. This allows users to, for example, differentiate between a population average treatment effect and a sample average treatment effect by placing the estimand function before or after sampling.
+#' The location of the inquiry and estimator functions in the pipeline of functions determine *when* the values of the inquiry and estimator are calculated. This allows users to, for example, differentiate between a population average treatment effect and a sample average treatment effect by placing the inquiry function before or after sampling.
 #'
 #' Design objects declared with the + operator can be investigated with a series of post-declaration commands, such as \code{\link{draw_data}}, \code{\link{draw_inquiries}}, \code{\link{draw_estimates}}, and \code{\link{diagnose_design}}.
 #'
@@ -179,7 +179,7 @@ construct_design <- function(steps) {
       }
     }
 
-    check_unique_labels(labels, function_types, "estimand")
+    check_unique_labels(labels, function_types, "inquiry")
     check_unique_labels(labels, function_types, "estimator")
   })
 

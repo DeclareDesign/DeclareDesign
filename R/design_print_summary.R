@@ -132,7 +132,7 @@ summary.design <- function(object, verbose = TRUE, ...) {
       })
       
       last_df <- current_df
-    } else if (causal_type %in% c("estimand", "estimator")) {
+    } else if (causal_type %in% c("inquiry", "estimator")) {
       quantities_added[[i]] <- design[[i]](current_df)
     }
   }

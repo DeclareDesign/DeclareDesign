@@ -49,7 +49,7 @@ test_that("allow design functions to be sent to simulate design and diagnose_des
     diag_out$diagnosands_df[, 1:4],
     structure(list(
       design_label = structure(1L, .Label = "my_design_function", class = "factor"),
-      estimand_label = "ATE", estimator_label = "estimator",
+      inquiry_label = "ATE", estimator_label = "estimator",
       term = "Z"
     ), class = "data.frame", row.names = c(
       NA,
@@ -89,7 +89,7 @@ test_that("default diagnosands work", {
       my_reveal +
       my_estimator
 
-    diagnosands <- declare_diagnosands(med_bias = median(estimate - estimand))
+    diagnosands <- declare_diagnosands(med_bias = median(estimate - inquiry))
 
     set_diagnosands(design, diagnosands)
   }
@@ -118,7 +118,7 @@ test_that("default diagnosands work", {
   )
 
   expect_equal(names(diag$diagnosands_df), 
-               c("design_label", "estimand_label", "estimator_label", "term", 
+               c("design_label", "inquiry_label", "estimator_label", "term", 
                  "med_bias", "se(med_bias)", "n_sims"
                ))
   
@@ -127,7 +127,7 @@ test_that("default diagnosands work", {
   design_1 <- set_diagnosands(my_designer(N = 100), NULL)
   design_2 <- set_diagnosands(my_designer(N = 200), NULL)
 
-  diagnosand_1 <- declare_diagnosands(my_bias = median(estimate - estimand))
+  diagnosand_1 <- declare_diagnosands(my_bias = median(estimate - inquiry))
   diagnosand_2 <- declare_diagnosands(my_power = mean(p.value <= .5))
 
   # intentionally out of order to confirm they don't get mixed
@@ -137,7 +137,7 @@ test_that("default diagnosands work", {
     sims = 2
   )
   
-  expect_equal(names(diag$diagnosands_df), c("design_label", "estimand_label", "estimator_label", "term", 
+  expect_equal(names(diag$diagnosands_df), c("design_label", "inquiry_label", "estimator_label", "term", 
                                              "my_bias", "se(my_bias)", "my_power", 
                                              "se(my_power)", "n_sims"))
   
@@ -150,23 +150,23 @@ test_that("default diagnosands work", {
   )
   
   expect_equal(names(diag$diagnosands_df), 
-               c("design_label", "estimand_label", "estimator_label", "term", 
+               c("design_label", "inquiry_label", "estimator_label", "term", 
                  "bias", "se(bias)", "rmse", "se(rmse)", "power", "se(power)", 
                  "coverage", "se(coverage)", "mean_estimate", "se(mean_estimate)", 
                  "sd_estimate", "se(sd_estimate)", "mean_se", "se(mean_se)", "type_s_rate", 
-                 "se(type_s_rate)", "mean_estimand", "se(mean_estimand)", "n_sims"))
+                 "se(type_s_rate)", "mean_inquiry", "se(mean_inquiry)", "n_sims"))
   
   # w/ none set and override
 
   diag <- diagnose_design(
     design_2 = design_2,
     design_1 = design_1,
-    diagnosands = declare_diagnosands(med_bias = median(estimate - estimand)),
+    diagnosands = declare_diagnosands(med_bias = median(estimate - inquiry)),
     sims = 2
   )
     
   expect_equal(names(diag$diagnosands_df), 
-               c("design_label", "estimand_label", "estimator_label", "term", 
+               c("design_label", "inquiry_label", "estimator_label", "term", 
                  "med_bias", "se(med_bias)", "n_sims"
                ))
   
@@ -182,7 +182,7 @@ test_that("default diagnosands work", {
   diag <- diagnose_design(designs, sims = 5, bootstrap_sims = FALSE)
  
   expect_equal(names(diag$diagnosands_df), 
-               c("design_label", "N", "estimand_label", "estimator_label", "term", 
+               c("design_label", "N", "inquiry_label", "estimator_label", "term", 
                  "med_bias", "n_sims"))
   
   # w mix of diagnosands set
@@ -194,7 +194,7 @@ test_that("default diagnosands work", {
   expect_equal(ncol(diag$diagnosands_df), 16)
   
   # // simulation df
-  sims <- set_diagnosands(simulate_design(designs, sims = 5), declare_diagnosands(med_bias = median(estimate - estimand)))
+  sims <- set_diagnosands(simulate_design(designs, sims = 5), declare_diagnosands(med_bias = median(estimate - inquiry)))
   diag <- diagnose_design(sims, sims = 5, bootstrap_sims = FALSE)
 })
 
@@ -217,12 +217,12 @@ test_that("more term",{
                                              model = lm_robust,
                                              term = TRUE)
   
-  estimand_2  <- declare_inquiry(ATE = 2,   label = "2")
+  inquiry_2  <- declare_inquiry(ATE = 2,   label = "2")
   estimator_2 <-
-    declare_estimator(Y ~ Z, inquiry = estimand_2, label = "dim")
+    declare_estimator(Y ~ Z, inquiry = inquiry_2, label = "dim")
   
   design <-
-    population + inquiries_regression + estimators_regression + estimand_2 + estimator_2
+    population + inquiries_regression + estimators_regression + inquiry_2 + estimator_2
   
   sims_df <- simulate_design(design, sims = 1)
   
@@ -233,7 +233,7 @@ test_that("more term",{
                  list(
                    design_label = c("design", "design", "design"),
                    sim_ID = c(1L, 1L, 1L),
-                   estimand_label = c("ATE", "Regression_Estimands",
+                   inquiry_label = c("ATE", "Regression_Estimands",
                                       "Regression_Estimands"),
                    inquiry = c(2, 0, 1),
                    estimator_label = c("dim",

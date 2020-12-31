@@ -107,7 +107,7 @@ test_that("custom diagnosand function", {
 
 test_that("single diagnosand function", {
   # works with only one diagnosand with bootstrapping (!)
-  my_one_dig <- declare_diagnosands(se_bias = mean(std.error - sd(estimand)))
+  my_one_dig <- declare_diagnosands(se_bias = mean(std.error - sd(inquiry)))
   diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_one_dig, bootstrap_sims = 5)
 
   expect_true("se_bias" %in% names(diagnosis$diagnosands))
@@ -133,7 +133,7 @@ test_that("diagnosis, list of designs", {
 
   diagnosand <- declare_diagnosands(z = mean(estimate > 0))
 
-  expect_error(diagnose_design(sleep), "Can't calculate diagnosands on this data.frame, which does not include either an estimator_label or an estimand_label. Did you send a simulations data frame?")
+  expect_error(diagnose_design(sleep), "Can't calculate diagnosands on this data.frame, which does not include either an estimator_label or an inquiry_label. Did you send a simulations data frame?")
 
   diag1 <- diagnose_design(list(d, d), diagnosands = diagnosand, sims = 5, bootstrap_sims = FALSE)
   diag2 <- diagnose_design(design_1 = d, design_2 = d, diagnosands = diagnosand, sims = 5, bootstrap_sims = FALSE)
@@ -145,7 +145,7 @@ test_that("diagnosis, unlinked estimator", {
   d <- declare_population(sleep) +
     declare_inquiry(foo = 2, bar = 3) +
     declare_estimator(extra ~ group, model = lm, term = TRUE)
-  expect_warning(diagnose_design(d, sims = 5, bootstrap_sims = FALSE), "Estimators lack estimand/term labels for matching, a many-to-many merge was performed.")
+  expect_warning(diagnose_design(d, sims = 5, bootstrap_sims = FALSE), "Estimators lack inquiry/term labels for matching, a many-to-many merge was performed.")
 })
 
 
@@ -153,7 +153,7 @@ test_that("diagnosis, no estimator", {
   d <- declare_population(sleep) +
     declare_inquiry(foo = 2, bar = 3)
 
-  diagnosand <- declare_diagnosands(z = mean(estimand > 0))
+  diagnosand <- declare_diagnosands(z = mean(inquiry > 0))
  
 
   expect_equivalent(
@@ -164,7 +164,7 @@ test_that("diagnosis, no estimator", {
       bootstrap_sims = 5
     )$diagnosands_df,
     structure(list(design_label = structure(c(1L, 1L), .Label = "d", class = "factor"), 
-                   estimand_label = c("bar", "foo"), z = c(1, 1), `se(z)` = c(0, 
+                   inquiry_label = c("bar", "foo"), z = c(1, 1), `se(z)` = c(0, 
                                                                               0), n_sims = c(5L, 5L)), class = "data.frame", row.names = c(NA, 
                                                                                                                                            -2L)))
 })
@@ -190,10 +190,10 @@ test_that("Overriding join conditions", {
         num_significant = mean(num_significant),
         all_significant = mean(all_significant)
       ) %>%
-      reshape2::melt(id.vars = NULL, variable.name = "estimand_label", value.name = "estimand")
+      reshape2::melt(id.vars = NULL, variable.name = "inquiry_label", value.name = "inquiry")
   })
 
-  attr(custom, "group_by") <- c("estimand_label", "estimator_label")
+  attr(custom, "group_by") <- c("inquiry_label", "estimator_label")
 
   design <- declare_population(data=sleep, handler = fabricatr::resample_data) +
     declare_inquiry(group1 = 1, group2 = 2, term = TRUE, label = "e") +
@@ -204,7 +204,7 @@ test_that("Overriding join conditions", {
   expect_true(is.data.frame(diagnosands) && nrow(diagnosands) == 2)
 })
 
-test_that("diagnosis, NAs if no estimand", {
+test_that("diagnosis, NAs if no inquiry", {
   ols <- declare_estimator(extra ~ group)
   d <- declare_population(sleep) + ols
   
@@ -214,27 +214,27 @@ test_that("diagnosis, NAs if no estimand", {
                              power = 0, `se(power)` = 0, coverage = NA_real_, `se(coverage)` = NA_real_, 
                              mean_estimate = 1.58, `se(mean_estimate)` = 0, sd_estimate = 0, 
                              `se(sd_estimate)` = 0, mean_se = 0.849091017238762, `se(mean_se)` = 0, 
-                             type_s_rate = NaN, `se(type_s_rate)` = NA_real_, mean_estimand = NA_real_, 
-                             `se(mean_estimand)` = NA_real_, n_sims = 4L), class = "data.frame", row.names = c(NA, 
+                             type_s_rate = NaN, `se(type_s_rate)` = NA_real_, mean_inquiry = NA_real_, 
+                             `se(mean_inquiry)` = NA_real_, n_sims = 4L), class = "data.frame", row.names = c(NA, 
                                                                                                                -1L))
   
 expect_equivalent(diagnose_design(d, sims = 4, bootstrap_sims = 5)$diagnosands_df, sleep_ols)
   
 })
 
-test_that("diagnosis, NAs if no estimand", {
+test_that("diagnosis, NAs if no inquiry", {
   mu <- declare_inquiry(mean(extra))
   d <- declare_population(sleep) + mu
   
   sleep_ols <-
     structure(list(design_label = structure(1L, .Label = "d", class = "factor"), 
-                   estimand_label = "estimand", bias = NA_real_, `se(bias)` = NA_real_, 
+                   inquiry_label = "inquiry", bias = NA_real_, `se(bias)` = NA_real_, 
                    rmse = NA_real_, `se(rmse)` = NA_real_, power = NA_real_, 
                    `se(power)` = NA_real_, coverage = NA_real_, `se(coverage)` = NA_real_, 
                    mean_estimate = NA_real_, `se(mean_estimate)` = NA_real_, 
                    sd_estimate = NA_real_, `se(sd_estimate)` = NA_real_, mean_se = NA_real_, 
                    `se(mean_se)` = NA_real_, type_s_rate = NA_real_, `se(type_s_rate)` = NA_real_, 
-                   mean_estimand = 1.54, `se(mean_estimand)` = 0, n_sims = 4L), class = "data.frame", row.names = c(NA, 
+                   mean_inquiry = 1.54, `se(mean_inquiry)` = 0, n_sims = 4L), class = "data.frame", row.names = c(NA, 
                                                                                                                     -1L))
   
     expect_equivalent(diagnose_design(d, sims = 4)$diagnosands_df, sleep_ols)
@@ -255,7 +255,7 @@ test_that("subset diagnosands", {
 })
 
 test_that("declare time errors", {
-  expect_s3_class(declare_diagnosands(bias = mean(estimate - estimand)), "design_step")
+  expect_s3_class(declare_diagnosands(bias = mean(estimate - inquiry)), "design_step")
   expect_error(declare_diagnosands(), "No diagnosands were declared.")
   expect_s3_class(declare_diagnosands(my_diag = mean(p.value)), "design_step")
 })
@@ -291,7 +291,7 @@ test_that("declare time errors", {
 #       "sd_estimate",
 #       "mean_se",
 #       "type_s_rate",
-#       "mean_estimand",
+#       "mean_inquiry",
 #       "n_deleted",
 #       "n_sims"
 #     )

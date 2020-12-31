@@ -41,7 +41,7 @@ test_that("Simulate Design works x2", {
   e2 <- declare_inquiry(b=f2())
   e3 <- declare_inquiry(c=f3())
   out <- simulate_design(declare_population(sleep) + e1 + e2 + e3, sims=c(1,1,5,2))
-  expect_equal(out$estimand, 
+  expect_equal(out$inquiry, 
                     as.vector(t(out[(1:10)*3, c("step_1_draw", "step_3_draw", "step_4_draw")])))
 })
 
@@ -104,7 +104,7 @@ test_that("designs with some estimators that don't have p.values return the p.va
     declare_estimator(Y ~ Z, inquiry = "ATE", label = "blah") +
     declare_estimator(handler = label_estimator(my_custom_estimator), inquiry = "ATE")
   
-  expect_equivalent(names(simulate_design(des, sims = 1)), c("design_label", "sim_ID", "estimand_label", "estimand", "estimator_label", 
+  expect_equivalent(names(simulate_design(des, sims = 1)), c("design_label", "sim_ID", "inquiry_label", "inquiry", "estimator_label", 
                                                         "term", "estimate", "std.error", "statistic", "p.value", "conf.low", 
                                                         "conf.high", "df", "outcome"))
   

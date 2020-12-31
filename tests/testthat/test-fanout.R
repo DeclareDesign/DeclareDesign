@@ -5,14 +5,14 @@ test_that("Fanout does something", {
 
   pop <- declare_population(N = N)
   pop2 <- declare_step(fabricate, noise = rnorm(N))
-  estimand <- declare_inquiry(foo = mean(noise))
-  D <- pop + pop2 + estimand
+  inquiry <- declare_inquiry(foo = mean(noise))
+  D <- pop + pop2 + inquiry
 
   fan_strategy <- data.frame(end = 2:3, n = c(1, 100))
   out <- DeclareDesign:::fan_out(D, fan_strategy)
 
   inquiries_out <- do.call(rbind, lapply(out, `[[`, "inquiries_df"))
-  expect_equal(length(unique(inquiries_out$estimand)), 1)
+  expect_equal(length(unique(inquiries_out$inquiry)), 1)
   expect_equal(inquiries_out$step_1_draw, rep(1,100))
   expect_equal(inquiries_out$step_3_draw, 1:100)
   
@@ -23,8 +23,8 @@ test_that("fanout should not be exposed to users", {
 
   pop <- declare_population(N = N)
   pop2 <- declare_step(fabricate, noise = rnorm(N))
-  estimand <- declare_inquiry(foo = mean(noise))
-  D <- pop + pop2 + estimand
+  inquiry <- declare_inquiry(foo = mean(noise))
+  D <- pop + pop2 + inquiry
 
   fan_strategy <- data.frame(end = 2:3, n = c(1, 100))
   expect_error(
@@ -44,19 +44,19 @@ test_that("Diagnosing a fanout", {
 
   pop <- declare_population(N = N, noise = rnorm(N))
 
-  estimand <- declare_inquiry(foo = mean(noise))
+  inquiry <- declare_inquiry(foo = mean(noise))
   sampl <- declare_sampling(n = N / 2)
   estimator <-
     declare_estimator(
       noise ~ 1,
       model = lm,
-      inquiry = estimand,
+      inquiry = inquiry,
       label = "ha",
       term = TRUE
     )
 
 
-  D <- pop + estimand + sampl + estimator
+  D <- pop + inquiry + sampl + estimator
 
   strategy <- c(1, 1, 5, 20)
 
@@ -67,7 +67,7 @@ test_that("Diagnosing a fanout", {
   
   # inquiries don't vary overall
   expect_equal(
-    dx$diagnosands[1, "se(mean_estimand)"], 0
+    dx$diagnosands[1, "se(mean_inquiry)"], 0
   )
 
   rep_id <-
@@ -108,19 +108,19 @@ test_that("fanout warnings", {
 
   pop <- declare_population(N = N, noise = rnorm(N))
 
-  estimand <- declare_inquiry(foo = mean(noise))
+  inquiry <- declare_inquiry(foo = mean(noise))
   sampl <- declare_sampling(n = N / 2)
   estimator <-
     declare_estimator(
       noise ~ 1,
       model = lm,
-      inquiry = estimand,
+      inquiry = inquiry,
       label = "ha",
       term = TRUE
     )
 
 
-  D <- pop + estimand + sampl + estimator
+  D <- pop + inquiry + sampl + estimator
 
   strategy <- c(1, 1, 1, 1)
 
@@ -161,7 +161,7 @@ test_that("correct fan out", {
     simulate_design(declare_population(sleep) + e1 + e2 + e3, sims = c(30, 1, 5, 2))
   
   expect_equivalent(apply(out[,c(5:7)], 2, max), c(30, 150, 300))
-  expect_equivalent(tapply(out$estimand, INDEX = out$estimand_label, max), c(30, 150, 300))
+  expect_equivalent(tapply(out$inquiry, INDEX = out$inquiry_label, max), c(30, 150, 300))
   
 })
 

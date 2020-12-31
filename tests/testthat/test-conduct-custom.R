@@ -36,7 +36,7 @@ test_that("test error messages in run_design", {
   expect_error(run_design(design), "Error in step 2")
 })
 
-test_that("draw_data does not run estimand/estimator", {
+test_that("draw_data does not run inquiry/estimator", {
 
   # closes ticket #12
   design <- declare_population(sleep) +

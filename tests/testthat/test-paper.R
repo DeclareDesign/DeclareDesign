@@ -49,11 +49,11 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
   my_inquiry <- function(data) {
     with(
       data,
-      data.frame(estimand_label = "estimand", inquiry = mean(Y_Z_1 - Y_Z_0), stringsAsFactors = FALSE)
+      data.frame(inquiry_label = "inquiry", inquiry = mean(Y_Z_1 - Y_Z_0), stringsAsFactors = FALSE)
     )
   }
 
-  estimand <- declare_inquiry(handler = my_inquiry)
+  inquiry <- declare_inquiry(handler = my_inquiry)
 
   my_estimator <- function(data) {
     reg <- lm(Y ~ Z, data = data)
@@ -62,9 +62,9 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
     phi
   }
 
-  estimator <- declare_estimator(handler = label_estimator(my_estimator), inquiry = estimand)
+  estimator <- declare_estimator(handler = label_estimator(my_estimator), inquiry = inquiry)
 
-  diagnosand <- declare_diagnosands(bias = mean(estimate - estimand), keep_defaults = FALSE)
+  diagnosand <- declare_diagnosands(bias = mean(estimate - inquiry), keep_defaults = FALSE)
 
   declare_reveal <- declare_reveal()
 
@@ -73,7 +73,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
     sampling +
     assignment +
     potential_outcomes +
-    estimand +
+    inquiry +
     declare_reveal +
     estimator
 

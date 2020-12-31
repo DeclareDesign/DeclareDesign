@@ -1,6 +1,6 @@
 context("Subsetting")
 
-test_that("Test Subsetting on default estimand handler", {
+test_that("Test Subsetting on default inquiry handler", {
   my_population <- declare_population(N = 500, noise = rnorm(N))
 
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
@@ -12,17 +12,17 @@ test_that("Test Subsetting on default estimand handler", {
     subset = Y_Z_1 > 0
   )
 
-  my_estimand2 <- declare_inquiry(
+  my_inquiry2 <- declare_inquiry(
     ATE_neg = mean(Y_Z_1 - Y_Z_0),
     subset = Y_Z_1 < 0
   )
 
 
 
-  design <- my_population + my_potential_outcomes + my_sampling + my_inquiry + my_estimand2
+  design <- my_population + my_potential_outcomes + my_sampling + my_inquiry + my_inquiry2
 
-  expect_true(design %>% draw_inquiries() %>% with(estimand[1] > 2 && estimand[2] < 0))
-  # > z <- replicate(10000, design  %>%  draw_inquiries() %>% with(estimand[[1]] > 2 && estimand[2] < 0)) %>% table
+  expect_true(design %>% draw_inquiries() %>% with(inquiry[1] > 2 && inquiry[2] < 0))
+  # > z <- replicate(10000, design  %>%  draw_inquiries() %>% with(inquiry[[1]] > 2 && inquiry[2] < 0)) %>% table
   # > z
   # .
   # FALSE  TRUE

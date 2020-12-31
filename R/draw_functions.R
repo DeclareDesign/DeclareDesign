@@ -58,6 +58,6 @@ draw_estimates_single_design <- function(design) {
 draw_inquiries_single_design <- function(design) {
   get_function_internal(
     design, -9, 1, length(design), function(x) TRUE, 
-    list("estimand" = vector("list", length(design))), "inquiries_df", step_type = "estimand")
+    list("inquiry" = vector("list", length(design))), "inquiries_df", step_type = "inquiry")
 }
 

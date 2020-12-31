@@ -17,7 +17,7 @@
 #'      term = '(Intercept)', model = lm_robust)
 #'
 #' diagnosands <- declare_diagnosands(
-#'   median_bias = median(estimate - estimand))
+#'   median_bias = median(estimate - inquiry))
 #'
 #' design <- set_diagnosands(design, diagnosands)
 #'

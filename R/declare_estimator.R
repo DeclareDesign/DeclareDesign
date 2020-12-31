@@ -2,7 +2,7 @@
 #'
 #' @description Declares an estimator which generates estimates and associated statistics.
 #' 
-#' Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific estimand in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an estimand. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
+#' Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific inquiry in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an inquiry. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
 #'
 #' @inheritParams declare_internal_inherit_params
 #' 
@@ -10,7 +10,7 @@
 #' 
 #' \code{declare_estimator} is designed to handle two main ways of generating parameter estimates from data.
 #' 
-#' In \code{declare_estimator}, you can optionally provide the name of an estimand or an objected created by \code{\link{declare_inquiry}} to connect your estimate(s) to estimand(s).
+#' In \code{declare_estimator}, you can optionally provide the name of an inquiry or an objected created by \code{\link{declare_inquiry}} to connect your estimate(s) to inquiry(s).
 #' 
 #' The first is through \code{label_estimator(model_handler)}, which is the default value of the \code{handler} argument. Users can use standard modeling functions like lm, glm, or iv_robust. The models are summarized using the function passed to the \code{model_summary} argument. This will usually be a "tidier" like \code{broom::tidy}. The default \code{model_summary} function is \code{tidy_try}, which applies a tidy method if available, and if not, tries to make one on the fly.
 #' 
@@ -37,7 +37,7 @@
 #'
 #' @examples
 #'
-#' # Declare estimand
+#' # Declare inquiry
 #' my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 #' 
 #' # Declare estimator using the default handler using `difference_in_means`
@@ -103,7 +103,7 @@
 #' my_estimator_function <- function(data){
 #'   data.frame(
 #'     estimator_label = "foo",
-#'     estimand_label = "bar",
+#'     inquiry_label = "bar",
 #'     estimate = with(data, mean(Y)),
 #'     n = nrow(data),
 #'     stringsAsFactors = FALSE
@@ -166,7 +166,7 @@
 #'
 #' draw_estimates(design)
 #'
-#' my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand))
+#' my_diagnosand <- declare_diagnosands(med_to_inquiry = mean(med - inquiry))
 #'
 #' \dontrun{
 #' diagnose_design(design, diagnosands = my_diagnosand, sims = 5,
@@ -174,7 +174,7 @@
 #' }
 #'
 #' # ----------
-#' # 4. Multiple estimators per estimand
+#' # 4. Multiple estimators per inquiry
 #' # ----------
 #'
 #' design_two <- insert_step(design_def,  my_estimator_lm,
@@ -198,7 +198,7 @@ declare_estimator <-
 declare_estimators <- declare_estimator
 
 #' @details
-#' \code{label_estimator} takes a data-in-data out function to \code{fn}, and returns a data-in-data-out function that first runs the provided estimation function \code{fn} and then appends a label for the estimator and, if an estimand is provided, a label for the estimand.
+#' \code{label_estimator} takes a data-in-data out function to \code{fn}, and returns a data-in-data-out function that first runs the provided estimation function \code{fn} and then appends a label for the estimator and, if an inquiry is provided, a label for the inquiry.
 #' 
 #' @param fn A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval), and a term column for labeling coefficient estimates.
 #' 
@@ -234,12 +234,12 @@ label_estimator <- function(fn) {
       stringsAsFactors = FALSE
     )
 
-    estimand_label <- get_estimand_label(estimand)
-    if (length(estimand_label) > 0) {
+    inquiry_label <- get_inquiry_label(inquiry)
+    if (length(inquiry_label) > 0) {
       ret <-
         cbind(
           ret,
-          estimand_label = estimand_label,
+          inquiry_label = inquiry_label,
           row.names = NULL,
           stringsAsFactors = FALSE
         )
@@ -248,8 +248,8 @@ label_estimator <- function(fn) {
   }
 
   formals(f) <- formals(fn)
-  if (!"estimand" %in% names(formals(f))) {
-    formals(f)["estimand"] <- list(NULL)
+  if (!"inquiry" %in% names(formals(f))) {
+    formals(f)["inquiry"] <- list(NULL)
   }
   if (!"label" %in% names(formals(f))) {
     formals(f)$label <- alist(a = )$a
@@ -361,15 +361,15 @@ validation_fn(model_handler) <- function(ret, dots, label) {
 
 # helper methods for inquiry = my_inquiry arguments to estimator_handler
 #
-get_estimand_label <- function(estimand) {
-  force(estimand) # no promise nonsense when we look at it
+get_inquiry_label <- function(inquiry) {
+  force(inquiry) # no promise nonsense when we look at it
   switch(
-    class(estimand)[1],
-    "character" = estimand,
-    "design_step" = attributes(estimand)$label,
-    "list" = vapply(estimand, get_estimand_label, NA_character_),
+    class(inquiry)[1],
+    "character" = inquiry,
+    "design_step" = attributes(inquiry)$label,
+    "list" = vapply(inquiry, get_inquiry_label, NA_character_),
     # note recursion here
     NULL = NULL,
-    warning("Did not match class of `estimand`")
+    warning("Did not match class of `inquiry`")
   )
 }

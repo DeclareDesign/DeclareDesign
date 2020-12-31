@@ -36,12 +36,12 @@ test_that("Multiple inquiries can be mapped to one estimator", {
     lmc
 
   my_dig <- declare_diagnosands(
-    bias_se = mean(std.error - estimand),
-    bias_est = mean(std.error - sd(estimand)),
+    bias_se = mean(std.error - inquiry),
+    bias_est = mean(std.error - sd(inquiry)),
     mean_se = mean(std.error),
     sd_se = sd(std.error),
-    mean_estimand = mean(estimand),
-    sd_estimand = sd(estimand)
+    mean_inquiry = mean(inquiry),
+    sd_inquiry = sd(inquiry)
   )
 
   diag <- diagnose_design(des, sims = 2, diagnosands = my_dig, bootstrap_sims = FALSE)
@@ -70,5 +70,5 @@ test_that("More multiple inquiries", {
 
 
   des <- pop + pos + pate + smp + sate + assgn + my_reveal + mator_both
-  expect_equal(draw_estimates(des)$estimand_label, c("pate", "sate"))
+  expect_equal(draw_estimates(des)$inquiry_label, c("pate", "sate"))
 })
