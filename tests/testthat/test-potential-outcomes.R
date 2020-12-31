@@ -250,7 +250,7 @@ test_that("Reveal step injected (default names)", {
 
   pop <- declare_population(N = N, foo = rnorm(N))
   po <- declare_potential_outcomes(Y ~ Z + foo)
-  assn <- declare_assignment(m = N / 2)
+  assn <- declare_assignment(Z = complete_ra(N, m = N/2))
   d <- pop + po + assn
   # expect_warning(d <- pop +  po + assn, "inject a `declare_reveal")
   expect_true("Y" %in% colnames(draw_data(d)))
@@ -262,7 +262,7 @@ test_that("Reveal step injected (default names)", {
   # Assn is buggy, but masked by po autoreveal error
   pop <- declare_population(N = N, foo = rnorm(N))
   po <- declare_potential_outcomes(Q ~ T + foo, assignment_variables = list(T = 1:3))
-  assn <- declare_assignment(m = N / 2, assignment_variable = T)
+  assn <- declare_assignment(T = complete_ra(N, m = N / 2))
   d <- pop + po + assn
   # expect_warning(d <- pop + po + assn)
   # Not autoreveal injected, so length 3
@@ -296,7 +296,7 @@ test_that("Reveal step injected after another injected reveal step", {
   pop <- declare_population(N = N, foo = rnorm(N))
   po <- declare_potential_outcomes(Y ~ draw_binary(plogis(Z + foo)))
   po2 <- declare_potential_outcomes(Q ~ Y + foo, conditions = list(Y = 0:1))
-  assn <- declare_assignment(m = N / 2)
+  assn <- declare_assignment(Z = complete_ra(N, m = N/2))
 
   d <- pop + po + po2 + assn
   # expect_warning(d <- pop + po + po2 + assn, "inject a `declare_reveal[(]Q, Y")

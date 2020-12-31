@@ -52,20 +52,20 @@ A function that accepts a data.frame as an argument and returns a data.frame con
 \description{
 Declares an estimator which generates estimates and associated statistics.
 
-Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific estimand in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an estimand. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
+Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific inquiry in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an inquiry. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
 }
 \details{
 \code{declare_estimator} is designed to handle two main ways of generating parameter estimates from data.
 
-In \code{declare_estimator}, you can optionally provide the name of an estimand or an objected created by \code{\link{declare_estimand}} to connect your estimate(s) to estimand(s).
+In \code{declare_estimator}, you can optionally provide the name of an inquiry or an objected created by \code{\link{declare_inquiry}} to connect your estimate(s) to inquiry(s).
 
 The first is through \code{label_estimator(model_handler)}, which is the default value of the \code{handler} argument. Users can use standard modeling functions like lm, glm, or iv_robust. The models are summarized using the function passed to the \code{model_summary} argument. This will usually be a "tidier" like \code{broom::tidy}. The default \code{model_summary} function is \code{tidy_try}, which applies a tidy method if available, and if not, tries to make one on the fly.
 
 An example of this approach is:
 
-\code{declare_estimator(Y ~ Z + X, model = lm_robust, model_summary = tidy, term = "Z", estimand = "ATE")}
+\code{declare_estimator(Y ~ Z + X, model = lm_robust, model_summary = tidy, term = "Z", inquiry = "ATE")}
 
-The second approach is using a custom data-in, data-out function, usually first passed to \code{label_estimator}. The reason to pass the custom function to \code{label_estimator} first is to enable clean labeling and linking to estimands.
+The second approach is using a custom data-in, data-out function, usually first passed to \code{label_estimator}. The reason to pass the custom function to \code{label_estimator} first is to enable clean labeling and linking to inquiries.
 
 An example of this approach is:
 
@@ -74,31 +74,31 @@ my_fun <- function(data){ with(data, median(Y[Z == 1]) - median(Y[Z == 0])) }
 }
 
 \code{
-declare_estimator(handler = label_estimator(my_fun), estimand = "ATE")
+declare_estimator(handler = label_estimator(my_fun), inquiry = "ATE")
 }
 
-\code{label_estimator} takes a data-in-data out function to \code{fn}, and returns a data-in-data-out function that first runs the provided estimation function \code{fn} and then appends a label for the estimator and, if an estimand is provided, a label for the estimand.
+\code{label_estimator} takes a data-in-data out function to \code{fn}, and returns a data-in-data-out function that first runs the provided estimation function \code{fn} and then appends a label for the estimator and, if an inquiry is provided, a label for the inquiry.
 }
 \examples{
 
-# Declare estimand
-my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+# Declare inquiry
+my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
 # Declare estimator using the default handler using `difference_in_means`
 # estimator from `estimatr` package. Returns the first non-intercept term
 # as estimate
 
-my_estimator_dim <- declare_estimator(Y ~ Z, estimand = "ATE", label = "DIM")
+my_estimator_dim <- declare_estimator(Y ~ Z, inquiry = "ATE", label = "DIM")
 
 # Use lm function from base R
-my_estimator_lm <- declare_estimator(Y ~ Z, estimand = "ATE",
+my_estimator_lm <- declare_estimator(Y ~ Z, inquiry = "ATE",
   model = lm, label = "LM")
 # Use lm_robust (linear regression with robust standard errors) from
 # `estimatr` package
 
 my_estimator_lm_rob <- declare_estimator(
   Y ~ Z,
-  estimand = "ATE",
+  inquiry = "ATE",
   model = lm_robust,
   label = "LM_Robust"
 )
@@ -106,7 +106,7 @@ my_estimator_lm_rob <- declare_estimator(
 # Set `term` if estimate of interest is not the first non-intercept variable
 my_estimator_lm_rob_x <- declare_estimator(
   Y ~ X + Z,
-  estimand = my_estimand,
+  inquiry = my_inquiry,
   term = "Z",
   model = lm_robust
 )
@@ -115,7 +115,7 @@ my_estimator_lm_rob_x <- declare_estimator(
 my_estimator_glm <- declare_estimator(
   Y ~ X + Z,
   family = "gaussian",
-  estimand = my_estimand,
+  inquiry = my_inquiry,
   term = "Z",
   model = glm
 )
@@ -138,7 +138,7 @@ my_estimator_function <- function(data){
 
 my_estimator_custom <- declare_estimator(
   handler = label_estimator(my_estimator_function),
-  estimand = my_estimand
+  inquiry = my_inquiry
 )
 
 # Customize labeling
@@ -146,7 +146,7 @@ my_estimator_custom <- declare_estimator(
 my_estimator_function <- function(data){
   data.frame(
     estimator_label = "foo",
-    estimand_label = "bar",
+    inquiry_label = "bar",
     estimate = with(data, mean(Y)),
     n = nrow(data),
     stringsAsFactors = FALSE
@@ -164,7 +164,7 @@ set.seed(42)
 design_def <-
   declare_population(N = 100, X = rnorm(N), W = rexp(N, 1), noise = rnorm(N)) +
   declare_potential_outcomes(Y ~ .25 * Z + noise) +
-  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
   declare_assignment(m = 50) +
   declare_reveal() +
   my_estimator_dim
@@ -202,14 +202,14 @@ my_median <- function(data) data.frame(med = median(data$Y))
 
 my_estimator_median <- declare_estimator(
   handler = label_estimator(my_median),
-  estimand = my_estimand
+  inquiry = my_inquiry
 )
 
 design <- replace_step(design_def, my_estimator_dim, my_estimator_median)
 
 draw_estimates(design)
 
-my_diagnosand <- declare_diagnosands(med_to_estimand = mean(med - estimand))
+my_diagnosand <- declare_diagnosands(med_to_inquiry = mean(med - inquiry))
 
 \dontrun{
 diagnose_design(design, diagnosands = my_diagnosand, sims = 5,
@@ -217,7 +217,7 @@ diagnose_design(design, diagnosands = my_diagnosand, sims = 5,
 }
 
 # ----------
-# 4. Multiple estimators per estimand
+# 4. Multiple estimators per inquiry
 # ----------
 
 design_two <- insert_step(design_def,  my_estimator_lm,

@@ -31,15 +31,15 @@ my_potential_outcomes <- declare_potential_outcomes(
 
 my_assignment <- declare_assignment()
 
-my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
-my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
 my_reveal <- declare_reveal()
 
 design <- my_population +
   my_potential_outcomes +
-  my_estimand +
+  my_inquiry +
   my_assignment +
   my_reveal +
   my_estimator

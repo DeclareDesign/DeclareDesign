@@ -36,18 +36,18 @@ design <-
   declare_population(N = 500, noise = rnorm(N)) +
   declare_potential_outcomes(Y ~ noise + Z * rnorm(N, 2, 2)) +
   declare_sampling(n = 250) +
-  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
   declare_step(dplyr::mutate, noise_sq = noise^2) +
   declare_assignment(m = 25) +
   declare_reveal() +
-  declare_estimator(Y ~ Z, estimand = "my_estimand")
+  declare_estimator(Y ~ Z, inquiry = "my_inquiry")
 
 design
 
 df <- draw_data(design)
 
 estimates <- draw_estimates(design)
-estimands <- draw_estimands(design)
+inquiries <- draw_inquiries(design)
 
 print_code(design)
 
@@ -71,9 +71,9 @@ my_sampling <- declare_sampling(n = 250)
 
 my_assignment <- declare_assignment(m = 25)
 
-my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
-my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
 my_mutate <- declare_step(dplyr::mutate, noise_sq = noise ^ 2)
 
@@ -82,7 +82,7 @@ my_reveal <- declare_reveal()
 design <- my_population +
   my_potential_outcomes +
   my_sampling +
-  my_estimand +
+  my_inquiry +
   my_mutate +
   my_assignment +
   my_reveal +

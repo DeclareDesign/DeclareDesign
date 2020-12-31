@@ -33,7 +33,7 @@ A list with a \code{data.frame} of compared diagnoses and both diagnoses.
 Diagnose and compare designs.
 }
 \details{
-The function \code{compare_diagnoses} runs a many-to-many merge matching by \code{estimand_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
+The function \code{compare_diagnoses} runs a many-to-many merge matching by \code{inquiry_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
 }
 \examples{
 design_a <- declare_population(N = 100, u = rnorm(N)) +
@@ -41,9 +41,9 @@ declare_potential_outcomes(
   Y_Z_0 = u,
   Y_Z_1 = u + rnorm(N, mean = 2, sd = 2)) +
 declare_assignment(prob = 0.5) +
-declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
 declare_reveal() +
-declare_estimator(Y ~ Z, estimand = "ATE")
+declare_estimator(Y ~ Z, inquiry = "ATE")
 
 design_b <- replace_step(design_a, step = "assignment", declare_assignment(prob = 0.3) )
 

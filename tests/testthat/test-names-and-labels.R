@@ -67,7 +67,7 @@ test_that("label conflicts", {
 
 test_that("step name conflicts in design", {
   pop <- declare_population(N = 6, Y = rnorm(N))
-  assign_1 <- declare_assignment(m = 2)
+  assign_1 <- declare_assignment(Z = complete_ra(N, m = 2))
   inquiry_1 <- declare_inquiry(some_stat = mean(Y))
   expect_error(design <- pop + inquiry_1 + inquiry_1, "You have inquiries with identical labels: some_stat\nPlease provide inquiries with unique labels")
   expect_equal(names(pop + assign_1 + assign_1), c("pop", "assign_1", "assign_1_1"))

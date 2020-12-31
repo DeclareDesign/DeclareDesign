@@ -1,25 +1,9 @@
 #' Declare a design 
 #'
-#' @param lhs A step in a research design, beginning with a function that draws the population. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a \code{data.frame} as an argument and return a \code{data.frame}. Typically, many steps are declared using the \code{declare_} functions, i.e., \code{\link{declare_population}}, \code{\link{declare_population}}, \code{\link{declare_sampling}}, \code{\link{declare_potential_outcomes}}, \code{\link{declare_inquiry}}, \code{\link{declare_assignment}}, and \code{\link{declare_estimator}}.
+#' @param lhs A step in a research design, beginning with a function that defines the model. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a \code{data.frame} as an argument and return a \code{data.frame}. Steps are declared using the \code{declare_} functions, i.e., \code{\link{declare_model}}, \code{\link{declare_inquiry}}, \code{\link{declare_sampling}}, \code{\link{declare_assignment}}, \code{\link{declare_measurement}}, \code{\link{declare_estimator}}, and \code{\link{declare_test}}.
 #' @param rhs A second step in a research design
 #'
-#' @details
-#'
-#' Users can supply three kinds of functions to create a design:
-#'
-#' 1. Data generating functions. These include population, assignment, and sampling functions.
-#'
-#' 2. Estimand functions.
-#'
-#' 3. Estimator functions.
-#'
-#' The location of the inquiry and estimator functions in the pipeline of functions determine *when* the values of the inquiry and estimator are calculated. This allows users to, for example, differentiate between a population average treatment effect and a sample average treatment effect by placing the inquiry function before or after sampling.
-#'
-#' Design objects declared with the + operator can be investigated with a series of post-declaration commands, such as \code{\link{draw_data}}, \code{\link{draw_inquiries}}, \code{\link{draw_estimates}}, and \code{\link{diagnose_design}}.
-#'
-#' The print and summary methods for a design object return some helpful descriptions of the steps in your research design. If randomizr functions are used for any assignment or sampling steps, additional details about those steps are provided.
-#'
-#' @return a list of two functions, the \code{design_function} and the \code{data_function}. The \code{design_function} runs the design once, i.e. draws the data and calculates any estimates and inquiries defined in \code{...}, returned separately as two \code{data.frame}'s. The \code{data_function} runs the design once also, but only returns the final data.
+#' @return a design
 #'
 #' @name declare_design
 #'
@@ -29,45 +13,31 @@
 #'
 #' @examples
 #'
-#' my_population <- declare_population(N = 500, noise = rnorm(N))
-#'
-#' my_potential_outcomes <- declare_potential_outcomes(Y ~ Z + noise)
-#'
-#' my_sampling <- declare_sampling(n = 250)
-#'
-#' my_assignment <- declare_assignment(m = 25)
-#'
-#' my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-#'
-#' my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
-#'
-#' my_mutate <- declare_step(dplyr::mutate, noise_sq = noise^2)
-#'
-#' my_reveal <- declare_reveal()
-#'
-#' design <- my_population + my_potential_outcomes + my_sampling +
-#'          my_inquiry + my_mutate +
-#'          my_assignment + my_reveal + my_estimator
-#'
-#' design
-#'
-#' df <- draw_data(design)
-#'
-#' estimates <- draw_estimates(design)
-#' inquiries <- draw_inquiries(design)
-#'
+#' design <-
+#'   declare_population(N = 500, noise = rnorm(N)) +
+#'   declare_potential_outcomes(Y ~ Z + noise) +
+#'   declare_sampling(n = 250) +
+#'   declare_assignment(m = 25) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_estimator(Y ~ Z, inquiry = my_inquiry) +
+#'   declare_step(dplyr::mutate, noise_sq = noise ^ 2) +
+#'   declare_reveal()
+#' 
+#' dat <- draw_data(design)
+#' head(dat)
+#' 
+#' run_design(design)
+#' 
 #' # You can add steps to a design
-#'
+#' 
 #' design <- my_population + my_potential_outcomes
 #' design + my_sampling
-#'
+#' 
 #' # Special Cases
-#'
+#' 
 #' # You may wish to have a design with only one step:
-#'
+#' 
 #' design <- my_population + NULL
-#' design
-#'
 #'
 #' \dontrun{
 #' diagnosis <- diagnose_design(design)

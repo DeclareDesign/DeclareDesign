@@ -7,7 +7,7 @@
 \alias{compare_design_summaries}
 \alias{compare_design_data}
 \alias{compare_design_estimates}
-\alias{compare_design_estimands}
+\alias{compare_design_inquiries}
 \title{Compare two designs}
 \usage{
 compare_designs(
@@ -59,7 +59,7 @@ compare_design_estimates(
   rmd = FALSE
 )
 
-compare_design_estimands(
+compare_design_inquiries(
   design1,
   design2,
   format = "ansi256",
@@ -91,25 +91,25 @@ Compare two designs
 
 design1 <- declare_population(N = 100, u = rnorm(N)) +
   declare_potential_outcomes(Y ~ Z + u) +
-  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
   declare_sampling(n = 75) +
   declare_assignment(m = 50) +
   declare_reveal(Y, Z) +
-  declare_estimator(Y ~ Z, estimand = "ATE")
+  declare_estimator(Y ~ Z, inquiry = "ATE")
 
 design2 <- declare_population(N = 200, u = rnorm(N)) +
   declare_potential_outcomes(Y ~ 0.5*Z + u) +
-  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
   declare_sampling(n = 100) +
   declare_assignment(m = 25) +
   declare_reveal(Y, Z) +
-  declare_estimator(Y ~ Z, model = lm_robust, estimand = "ATE")
+  declare_estimator(Y ~ Z, model = lm_robust, inquiry = "ATE")
  
  compare_designs(design1, design2)
  compare_design_code(design1, design2)
  compare_design_summaries(design1, design2)
  compare_design_data(design1, design2)
  compare_design_estimates(design1, design2)
- compare_design_estimands(design1, design2)
+ compare_design_inquiries(design1, design2)
 
 }

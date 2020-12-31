@@ -75,12 +75,12 @@ test_that("demo runs", {
   head(my_potential_outcomes(pop))
 
   ## ------------------------------------------------------------------------
-  my_sampling <- declare_sampling(n = 250)
+  my_sampling <- declare_sampling(S = complete_rs(N, n = 250))
   smp <- my_sampling(pop_pos)
   nrow(smp)
 
   ## ------------------------------------------------------------------------
-  my_assignment <- declare_assignment(m = 25)
+  my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
   smp <- my_assignment(smp)
   table(smp$Z)
   head(smp)
@@ -216,8 +216,8 @@ test_that("demo runs", {
     my_potential_outcomes <- declare_potential_outcomes(
       formula = Y ~ .25 * Z + .01 * age * Z
     )
-    my_sampling <- declare_sampling(n = 250)
-    my_assignment <- declare_assignment(m = 25)
+    my_sampling <- declare_sampling(S = complete_rs(N, n = 250))
+    my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
     my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
     my_estimator_dim <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
     my_design <- my_population +
@@ -238,7 +238,7 @@ test_that("demo runs", {
     formula = Y ~ .25 * Z + .01 * age * Z, conditions = seq(0, 1, by = .1)
   )
 
-  my_assignment_continuous <- declare_assignment(conditions = seq(0, 1, by = .1))
+  my_assignment_continuous <- declare_assignment(Z = complete_ra(N, conditions = seq(0, 1, by = .1)))
 
   my_design <- declare_population(my_population()) +
     my_potential_outcomes_continuous +

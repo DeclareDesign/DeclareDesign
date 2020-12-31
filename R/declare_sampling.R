@@ -4,51 +4,43 @@
 #'
 #' @return A function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
 #' @export
-#' @details
-#'\code{declare_sampling} can work with any sampling_function that takes data and returns data. The default handler is \code{draw_rs} from the \code{randomizr} package. This allows quick declaration of many sampling schemes that involve strata and clusters.
 #'
-#'The arguments to \code{\link{draw_rs}} can include N, strata, clusters, n, prob, strata_n, and strata_prob.
-#'The arguments you need to specify are different for different designs.
-#'
-#'Note that \code{declare_sampling} works similarly to \code{declare_assignment} a key difference being that \code{declare_sampling} functions subset data to sampled units rather than simply appending an indicator for membership of a sample (assignment). If you need to sample but keep the dataset use \code{declare_assignment} and define further steps (such as estimation) with respect to subsets defined by the assignment.
-#'
-#'For details see the help files for \code{\link{complete_rs}}, \code{\link{strata_rs}}, \code{\link{cluster_rs}}, or \code{\link{strata_and_cluster_rs}}
 #' @importFrom rlang quos quo call_modify eval_tidy !!!
 #' @importFrom randomizr declare_rs
 #'
 #' @examples
 #'
-#' # Default handler is `draw_rs` from `randomizr` package
+#' design <- declare_model(
 #' 
-#' # Simple random sampling
-#' my_sampling <- declare_sampling(n = 50)
+#'   classrooms = add_level(10),
+#'   individuals = add_level(20, female = rbinom(N, 1, 0.5))
 #'
+#' ) + NULL
+#'
+#' # Complete random sampling
+#' 
+#' design + declare_sampling(S = complete_rs(N = N, n = 50), filter = S == 1)
+#'
+#' # equivalently, by default filter is set to S == 1
+#' design + declare_sampling(S = complete_rs(N = N, n = 50))
+#' 
 #' # Stratified random sampling
-#' my_stratified_sampling <- declare_sampling(strata = female)
 #'
-#' # Custom random sampling functions
-#'
-#' my_sampling_function <- function(data, n=nrow(data)) {
-#'    data[sample(n,n,replace=TRUE), , drop=FALSE]
-#' }
-#'
-#' my_sampling_custom <- declare_sampling(handler = my_sampling_function)
-#'
-#' my_sampling_custom(sleep)
+#' design + declare_sampling(S = strata_rs(strata = female))
 declare_sampling <- make_declarations(sampling_handler, "sampling")
 
-#' @param subset Unquoted expression for subsetting S. By default subsets to \code{S == 1}.
+#' @param filter Unquoted expression for filtering S. By default subsets to \code{S == 1}.
 #' @param data A data.frame.
 #' @importFrom rlang quos !!!
 #' @importFrom fabricatr fabricate
 #' @rdname declare_sampling
-sampling_handler <- function(data, ..., subset = S == 1) {
+sampling_handler <- function(data, ..., filter = S == 1) {
 
   options <- quos(...)
   
   data <- fabricate(data = data, !!!options, ID_label = NA)
   
-  rows <- enquo(subset)
+  rows <- enquo(filter)
   rows_val <- eval_tidy(rows, data)
   stopifnot(is.logical(rows_val))
   
@@ -90,7 +82,6 @@ sampling_handler_legacy <- function(data, ..., sampling_variable = "S", drop_non
 
 validation_fn(sampling_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
-
 
   if ("sampling_variable" %in% names(dots) &&
     inherits(f_rhs(dots[["sampling_variable"]]), "NULL")) {

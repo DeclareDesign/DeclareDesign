@@ -24,13 +24,13 @@ diagnose_designs(
 \arguments{
 \item{...}{A design or set of designs typically created using the + operator, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.}
 
-\item{diagnosands}{A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).}
+\item{diagnosands}{A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the inquiry(s).}
 
 \item{sims}{The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}}
 
 \item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.}
 
-\item{add_grouping_variables}{Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_label", "estimand_label", "estimator_label", "term")}
+\item{add_grouping_variables}{Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_label", "inquiry_label", "estimator_label", "term")}
 }
 \value{
 a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
@@ -54,15 +54,15 @@ my_potential_outcomes <- declare_potential_outcomes(
 
 my_assignment <- declare_assignment()
 
-my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
 my_reveal <- declare_reveal()
 
-my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
 design <- my_population +
    my_potential_outcomes +
-   my_estimand +
+   my_inquiry +
    my_assignment +
    my_reveal +
    my_estimator
@@ -74,7 +74,7 @@ diagnosis
 }
 
 # using a user-defined diagnosand
-my_diagnosand <- declare_diagnosands(absolute_error = mean(abs(estimate - estimand)))
+my_diagnosand <- declare_diagnosands(absolute_error = mean(abs(estimate - inquiry)))
 
 \dontrun{
 diagnosis <- diagnose_design(design, diagnosands = my_diagnosand)

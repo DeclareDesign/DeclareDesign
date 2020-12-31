@@ -10,7 +10,7 @@ test_that("Factorial", {
     Y_Z_T4 = noise + 0.6
   )
 
-  my_assignment <- declare_assignment(num_arms = 4)
+  my_assignment <- declare_assignment(Z = complete_ra(N, num_arms = 4))
 
   my_inquiry <- declare_inquiry(interaction = mean(Y_Z_T4 - Y_Z_T3) - mean(Y_Z_T2 - Y_Z_T1))
 

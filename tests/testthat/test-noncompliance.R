@@ -11,7 +11,7 @@ test_that("Noncompliance", {
     D_Z_1 = rbinom(n = N, size = 1, prob = pnorm(noise + 1))
   )
 
-  my_assignment <- declare_assignment(m = 50)
+  my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
 
   CACE <- declare_inquiry(CACE = mean(Y_D_1[complier == 1] - Y_D_0[complier == 1]))
   ITT_d <- declare_inquiry(ITT_d = mean(complier))
@@ -90,7 +90,7 @@ test_that("POs correctly assembled for noncompliance case", {
     assignment_variables = "D"
   )
 
-  assignment <- declare_assignment(prob = 0.5)
+  assignment <- declare_assignment(Z = complete_ra(N, prob = 0.5))
 
   suppressWarnings(
     noncompliance <-

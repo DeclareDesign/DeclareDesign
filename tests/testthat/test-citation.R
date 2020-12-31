@@ -1,7 +1,7 @@
 context("add design citation")
 
 test_that("test with generated citation", {
-  design <- declare_population(data = sleep) + declare_sampling(n = 10)
+  design <- declare_population(data = sleep) + declare_sampling(S = complete_rs(N, n = 10))
 
   design <- set_citation(design,
     author = "Lovelace, Ada",
