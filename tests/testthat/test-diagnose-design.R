@@ -89,7 +89,7 @@ test_that("default diagnosands work", {
       my_reveal +
       my_estimator
 
-    diagnosands <- declare_diagnosands(med_bias = median(estimate - inquiry))
+    diagnosands <- declare_diagnosands(med_bias = median(estimate - inquiry_value))
 
     set_diagnosands(design, diagnosands)
   }
@@ -127,7 +127,7 @@ test_that("default diagnosands work", {
   design_1 <- set_diagnosands(my_designer(N = 100), NULL)
   design_2 <- set_diagnosands(my_designer(N = 200), NULL)
 
-  diagnosand_1 <- declare_diagnosands(my_bias = median(estimate - inquiry))
+  diagnosand_1 <- declare_diagnosands(my_bias = median(estimate - inquiry_value))
   diagnosand_2 <- declare_diagnosands(my_power = mean(p.value <= .5))
 
   # intentionally out of order to confirm they don't get mixed
@@ -161,7 +161,7 @@ test_that("default diagnosands work", {
   diag <- diagnose_design(
     design_2 = design_2,
     design_1 = design_1,
-    diagnosands = declare_diagnosands(med_bias = median(estimate - inquiry)),
+    diagnosands = declare_diagnosands(med_bias = median(estimate - inquiry_value)),
     sims = 2
   )
     
@@ -194,7 +194,7 @@ test_that("default diagnosands work", {
   expect_equal(ncol(diag$diagnosands_df), 16)
   
   # // simulation df
-  sims <- set_diagnosands(simulate_design(designs, sims = 5), declare_diagnosands(med_bias = median(estimate - inquiry)))
+  sims <- set_diagnosands(simulate_design(designs, sims = 5), declare_diagnosands(med_bias = median(estimate - inquiry_value)))
   diag <- diagnose_design(sims, sims = 5, bootstrap_sims = FALSE)
 })
 
@@ -235,7 +235,7 @@ test_that("more term",{
                    sim_ID = c(1L, 1L, 1L),
                    inquiry_label = c("ATE", "Regression_Inquiries",
                                       "Regression_Inquiries"),
-                   inquiry = c(2, 0, 1),
+                   inquiry_value = c(2, 0, 1),
                    estimator_label = c("dim",
                                        "estimator", "estimator"),
                    term = c("Z", "(Intercept)", "Z")
@@ -304,3 +304,4 @@ test_that("diagnose_design works when simulations_df lacking parameters attr", {
 test_that("diagnose_design stops when a zero-row simulations_df is sent", {
   expect_error(diagnose_design(data.frame(estimator_label = rep(1, 0))), "which has zero rows")
 })
+

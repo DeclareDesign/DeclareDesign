@@ -54,6 +54,7 @@ test_that("compare_diagnoses errors when it should", {
       declare_potential_outcomes(Y ~ 0.20 * Z + noise) +
       declare_assignment(Z = complete_ra(N, prob = 0.5)) +
       declare_inquiry(ate = mean(Y_Z_1 - Y_Z_0)) +
+      declare_reveal() + 
       declare_estimator(Y ~ Z)
   }
   

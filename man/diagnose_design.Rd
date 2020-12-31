@@ -52,7 +52,7 @@ my_potential_outcomes <- declare_potential_outcomes(
   Y_Z_0 = noise, Y_Z_1 = noise +
   rnorm(N, mean = 2, sd = 2))
 
-my_assignment <- declare_assignment()
+my_assignment <- declare_assignment(Z = complete_ra(N))
 
 my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
@@ -74,7 +74,7 @@ diagnosis
 }
 
 # using a user-defined diagnosand
-my_diagnosand <- declare_diagnosands(absolute_error = mean(abs(estimate - inquiry)))
+my_diagnosand <- declare_diagnosands(absolute_error = mean(abs(estimate - inquiry_value)))
 
 \dontrun{
 diagnosis <- diagnose_design(design, diagnosands = my_diagnosand)

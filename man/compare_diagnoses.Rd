@@ -40,12 +40,14 @@ design_a <- declare_population(N = 100, u = rnorm(N)) +
 declare_potential_outcomes(
   Y_Z_0 = u,
   Y_Z_1 = u + rnorm(N, mean = 2, sd = 2)) +
-declare_assignment(prob = 0.5) +
+declare_assignment(Z = complete_ra(N, prob = 0.5)) +
 declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
 declare_reveal() +
 declare_estimator(Y ~ Z, inquiry = "ATE")
 
-design_b <- replace_step(design_a, step = "assignment", declare_assignment(prob = 0.3) )
+design_b <- replace_step(
+  design_a, step = "assignment", 
+  declare_assignment(Z = complete_ra(N, prob = 0.3)) )
 
 comparison <- compare_diagnoses(design_a, design_b, sims = 40)
 

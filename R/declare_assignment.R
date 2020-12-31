@@ -58,7 +58,7 @@ assignment_handler <- function(data, ...) {
 }
 
 #' @importFrom rlang quos !!! call_modify eval_tidy quo f_rhs
-#' @importFrom randomizr conduct_ra obtain_condition_probabilities
+#' @importFrom randomizr conduct_ra obtain_condition_probabilities declare_ra
 #' @param assignment_variable Name for assignment variable (quoted). Defaults to "Z". Argument to be used with default handler. 
 #' @param append_probabilities_matrix Should the condition probabilities matrix be appended to the data? Defaults to FALSE.  Argument to be used with default handler.
 #' @param data A data.frame.

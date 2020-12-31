@@ -24,7 +24,7 @@ test_that("multiple PO / reveal", {
 
 test_that("+ constructors", {
   d <- declare_population(sleep) + declare_sampling(S = complete_rs(N)) + declare_assignment(Z = complete_ra(N, prob = 0.5))
-  expect_equal(dim(draw_data(d)), c(10, 6))
+  expect_equal(dim(draw_data(d)), c(10, 5))
 })
 
 

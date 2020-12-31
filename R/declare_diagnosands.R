@@ -133,21 +133,21 @@ declare_diagnosands <- make_declarations(diagnosand_handler, "diagnosand", "diag
 default_diagnosands <- function(data, alpha = .05){
   
   estimate <- data$estimate %||% NA
-  inquiry <- data$inquiry %||% NA
+  inquiry_value <- data$inquiry_value %||% NA
   p.value <- data$p.value %||% NA
   std.error <- data$std.error %||% NA
   conf.low <- data$conf.low %||% NA
   conf.high <- data$conf.high %||% NA
   
-  bias <- mean(estimate - inquiry)
-  rmse <- sqrt(mean((estimate - inquiry)^2))
+  bias <- mean(estimate - inquiry_value)
+  rmse <- sqrt(mean((estimate - inquiry_value)^2))
   power <- mean(p.value < alpha)
-  coverage <- mean(inquiry <= conf.high & inquiry >= conf.low)
+  coverage <- mean(inquiry_value <= conf.high & inquiry_value >= conf.low)
   mean_estimate <- mean(estimate)
   sd_estimate <- sd(estimate)
   mean_se <- mean(std.error)
-  type_s_rate <- mean((sign(estimate) != sign(inquiry))[p.value < alpha])
-  mean_inquiry <- mean(inquiry)
+  type_s_rate <- mean((sign(estimate) != sign(inquiry_value))[p.value < alpha])
+  mean_inquiry <- mean(inquiry_value)
   
   data.frame(
     diagnosand_label = c(

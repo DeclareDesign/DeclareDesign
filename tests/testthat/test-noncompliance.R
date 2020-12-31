@@ -92,15 +92,13 @@ test_that("POs correctly assembled for noncompliance case", {
 
   assignment <- declare_assignment(Z = complete_ra(N, prob = 0.5))
 
-  suppressWarnings(
     noncompliance <-
       pop +
       pos_D +
       assignment +
-      # declare_reveal(D, Z) +
+      declare_reveal(D, Z) +
       pos_Y +
       declare_reveal(Y, D)
-  )
 
   e <- (noncompliance[[4]])
 

@@ -27,7 +27,9 @@
 #' declare_reveal() +
 #' declare_estimator(Y ~ Z, inquiry = "ATE")
 #'
-#' design_b <- replace_step(design_a, step = "assignment", declare_assignment(Z = complete_ra(N, prob = 0.3)) )
+#' design_b <- replace_step(
+#'   design_a, step = "assignment", 
+#'   declare_assignment(Z = complete_ra(N, prob = 0.3)) )
 #'
 #' comparison <- compare_diagnoses(design_a, design_b, sims = 40)
 #'

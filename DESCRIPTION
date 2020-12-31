@@ -48,3 +48,5 @@ Suggests:
     reshape2,
     DesignLibrary,
     coin
+Remotes:
+    DeclareDesign/fabricatr@add_functions

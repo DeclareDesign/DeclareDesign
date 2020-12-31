@@ -31,7 +31,7 @@ test_that(
       my_estimator
 
     df <- (draw_data(design))
-    expect_equal(dim(df), c(250, 9))
+    expect_equal(dim(df), c(250, 8))
 
     output <- run_design(design)
     expect_equal(dim(output$estimates_df), c(1, 11))

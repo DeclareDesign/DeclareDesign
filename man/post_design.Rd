@@ -35,10 +35,10 @@ Print code to recreate a design
 design <-
   declare_population(N = 500, noise = rnorm(N)) +
   declare_potential_outcomes(Y ~ noise + Z * rnorm(N, 2, 2)) +
-  declare_sampling(n = 250) +
+  declare_sampling(S = complete_rs(N, n = 250)) +
   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
   declare_step(dplyr::mutate, noise_sq = noise^2) +
-  declare_assignment(m = 25) +
+  declare_assignment(Z = complete_ra(N, m = 25)) +
   declare_reveal() +
   declare_estimator(Y ~ Z, inquiry = "my_inquiry")
 
@@ -54,7 +54,7 @@ print_code(design)
 
 my_population <- declare_population(N = 100)
 
-my_assignment <- declare_assignment(m = 50)
+my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
 
 my_design <- my_population + my_assignment
 
@@ -67,9 +67,9 @@ my_potential_outcomes <- declare_potential_outcomes(
   Y_Z_0 = noise, Y_Z_1 = noise +
   rnorm(N, mean = 2, sd = 2))
 
-my_sampling <- declare_sampling(n = 250)
+my_sampling <- declare_sampling(S = complete_rs(N, n = 250))
 
-my_assignment <- declare_assignment(m = 25)
+my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 
 my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 

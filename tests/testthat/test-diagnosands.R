@@ -107,7 +107,7 @@ test_that("custom diagnosand function", {
 
 test_that("single diagnosand function", {
   # works with only one diagnosand with bootstrapping (!)
-  my_one_dig <- declare_diagnosands(se_bias = mean(std.error - sd(inquiry)))
+  my_one_dig <- declare_diagnosands(se_bias = mean(std.error - sd(inquiry_value)))
   diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_one_dig, bootstrap_sims = 5)
 
   expect_true("se_bias" %in% names(diagnosis$diagnosands))
@@ -153,7 +153,7 @@ test_that("diagnosis, no estimator", {
   d <- declare_population(sleep) +
     declare_inquiry(foo = 2, bar = 3)
 
-  diagnosand <- declare_diagnosands(z = mean(inquiry > 0))
+  diagnosand <- declare_diagnosands(z = mean(inquiry_value > 0))
  
 
   expect_equivalent(
@@ -234,8 +234,8 @@ test_that("diagnosis, NAs if no inquiry", {
                    mean_estimate = NA_real_, `se(mean_estimate)` = NA_real_, 
                    sd_estimate = NA_real_, `se(sd_estimate)` = NA_real_, mean_se = NA_real_, 
                    `se(mean_se)` = NA_real_, type_s_rate = NA_real_, `se(type_s_rate)` = NA_real_, 
-                   mean_inquiry = 1.54, `se(mean_inquiry)` = 0, n_sims = 4L), class = "data.frame", row.names = c(NA, 
-                                                                                                                    -1L))
+                   mean_inquiry = 1.54, `se(mean_inquiry)` = 0, n_sims = 4L), row.names = c(NA, 
+                                                                                            -1L), class = "data.frame")
   
     expect_equivalent(diagnose_design(d, sims = 4)$diagnosands_df, sleep_ols)
 })

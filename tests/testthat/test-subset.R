@@ -1,11 +1,11 @@
 context("Subsetting")
 
 test_that("Test Subsetting on default inquiry handler", {
-  my_population <- declare_population(N = 500, noise = rnorm(N))
+  my_population <- declare_population(N = 50, noise = rnorm(N))
 
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-  my_sampling <- declare_sampling(S = complete_rs(N, n = 250))
+  my_sampling <- declare_sampling(S = complete_rs(N, n = 25))
 
   my_inquiry <- declare_inquiry(
     ATE_pos = mean(Y_Z_1 - Y_Z_0),
@@ -21,7 +21,7 @@ test_that("Test Subsetting on default inquiry handler", {
 
   design <- my_population + my_potential_outcomes + my_sampling + my_inquiry + my_inquiry2
 
-  expect_true(design %>% draw_inquiries() %>% with(inquiry[1] > 2 && inquiry[2] < 0))
+  expect_true(design %>% draw_inquiries() %>% with(inquiry_value[1] > 2 && inquiry_value[2] < 0))
   # > z <- replicate(10000, design  %>%  draw_inquiries() %>% with(inquiry[[1]] > 2 && inquiry[2] < 0)) %>% table
   # > z
   # .
