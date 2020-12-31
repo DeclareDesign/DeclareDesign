@@ -10,8 +10,8 @@ my_assignment <- declare_assignment(m = 25)
 pate <- declare_inquiry(pate = mean(Y_Z_1 - Y_Z_0))
 sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))
 
-pate_estimator <- declare_estimator(Y ~ Z, estimand = pate)
-sate_estimator <- declare_estimator(Y ~ Z, estimand = sate)
+pate_estimator <- declare_estimator(Y ~ Z, inquiry = pate)
+sate_estimator <- declare_estimator(Y ~ Z, inquiry = sate)
 
 reveal <- declare_reveal()
 
@@ -73,8 +73,8 @@ my_assignment <- declare_assignment(m = 25)
 pate <- declare_inquiry(pate = mean(Y_Z_1 - Y_Z_0))
 sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))
 
-pate_estimator <- declare_estimator(Y ~ Z, estimand = pate)
-sate_estimator <- declare_estimator(Y ~ Z, estimand = sate)
+pate_estimator <- declare_estimator(Y ~ Z, inquiry = pate)
+sate_estimator <- declare_estimator(Y ~ Z, inquiry = sate)
 
 reveal <- declare_reveal()
 

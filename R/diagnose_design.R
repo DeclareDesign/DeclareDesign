@@ -33,7 +33,7 @@
 #'
 #' my_reveal <- declare_reveal()
 #'
-#' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+#' my_estimator <- declare_estimator(Y ~ Z, inquiry = my_estimand)
 #'
 #' design <- my_population +
 #'    my_potential_outcomes +

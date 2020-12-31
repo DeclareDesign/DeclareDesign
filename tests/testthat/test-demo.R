@@ -92,7 +92,7 @@ test_that("demo runs", {
   ## ------------------------------------------------------------------------
   my_reveal_outcomes <- declare_reveal()
   smp <- my_reveal_outcomes(smp)
-  my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
+  my_estimator_dim <- declare_estimator(Y ~ Z, inquiry = my_estimand)
   my_estimator_dim(smp)
 
   ## ------------------------------------------------------------------------
@@ -100,7 +100,7 @@ test_that("demo runs", {
     declare_estimator(Y ~ Z,
       model = estimatr::lm_robust,
       term = "Z",
-      estimand = my_estimand
+      inquiry = my_estimand
     )
 
   my_estimator_lm(smp)
@@ -202,7 +202,7 @@ test_that("demo runs", {
   my_estimator_custom <-
     declare_estimator(
       handler = label_estimator(my_mean),
-      estimand = my_estimand
+      inquiry = my_estimand
     )
 
   my_estimator_custom(smp)
@@ -219,7 +219,7 @@ test_that("demo runs", {
     my_sampling <- declare_sampling(n = 250)
     my_assignment <- declare_assignment(m = 25)
     my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-    my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
+    my_estimator_dim <- declare_estimator(Y ~ Z, inquiry = my_estimand)
     my_design <- my_population +
       my_potential_outcomes +
       my_estimand +

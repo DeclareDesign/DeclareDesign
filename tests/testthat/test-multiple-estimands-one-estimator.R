@@ -24,7 +24,7 @@ test_that("Multiple inquiries can be mapped to one estimator", {
     Y ~ X,
     model = estimatr::lm_robust,
     se_type = "classical",
-    estimand = c(dgp_se, obs_se),
+    inquiry = c(dgp_se, obs_se),
     term = "X"
   )
 
@@ -65,7 +65,7 @@ test_that("More multiple inquiries", {
   sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))
   assgn <- declare_assignment(m = 10)
   my_reveal <- declare_reveal()
-  mator_both <- declare_estimator(Y ~ Z, estimand = c(pate, sate))
+  mator_both <- declare_estimator(Y ~ Z, inquiry = c(pate, sate))
 
 
 

@@ -5,7 +5,7 @@ my_potential_outcomes <-
   declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 my_assignment <- declare_assignment(m = 25)
 my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+my_estimator <- declare_estimator(Y ~ Z, inquiry = my_estimand)
 my_reveal <- declare_reveal()
 
 my_design_1 <- my_population + my_potential_outcomes + my_estimand + my_assignment + my_reveal + my_estimator
@@ -53,7 +53,7 @@ my_designer <- function(N, tau) {
     declare_potential_outcomes(Y_Z_0 = rnorm(N), Y_Z_1 = Y_Z_0 + tau)
   my_assignment <- declare_assignment(m = floor(N / 2))
   my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-  my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+  my_estimator <- declare_estimator(Y ~ Z, inquiry = my_estimand)
   my_reveal <- declare_reveal()
   my_design_1 <- pop + pos + my_estimand + my_assignment + my_reveal + my_estimator
   my_design_1
@@ -101,8 +101,8 @@ test_that("designs with some estimators that don't have p.values return the p.va
     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
     declare_assignment() +
     declare_reveal(Y, Z) +
-    declare_estimator(Y ~ Z, estimand = "ATE", label = "blah") +
-    declare_estimator(handler = label_estimator(my_custom_estimator), estimand = "ATE")
+    declare_estimator(Y ~ Z, inquiry = "ATE", label = "blah") +
+    declare_estimator(handler = label_estimator(my_custom_estimator), inquiry = "ATE")
   
   expect_equivalent(names(simulate_design(des, sims = 1)), c("design_label", "sim_ID", "estimand_label", "estimand", "estimator_label", 
                                                         "term", "estimate", "std.error", "statistic", "p.value", "conf.low", 

@@ -9,7 +9,7 @@ estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 sampling <- declare_sampling(n = 75)
 assignment <- declare_assignment(m = 50)
 reveal_Y <- declare_reveal(Y, Z)
-estimator <- declare_estimator(Y ~ Z, estimand = estimand)
+estimator <- declare_estimator(Y ~ Z, inquiry = estimand)
 design <-
   population + potential_outcomes + estimand + sampling + assignment + reveal_Y + estimator
 

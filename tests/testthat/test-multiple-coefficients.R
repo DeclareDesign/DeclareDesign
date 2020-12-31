@@ -20,7 +20,7 @@ test_that("Multiple Coefficients", {
 
   OLS <- declare_estimator(Y ~ X,
     model = lm,
-    estimand = theta,
+    inquiry = theta,
     term = TRUE
   )
 

@@ -15,7 +15,7 @@ test_that("allow design functions to be sent to simulate design and diagnose_des
 
     my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
-    my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+    my_estimator <- declare_estimator(Y ~ Z, inquiry = my_estimand)
 
     my_reveal <- declare_reveal()
 
@@ -77,7 +77,7 @@ test_that("default diagnosands work", {
 
     my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
-    my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+    my_estimator <- declare_estimator(Y ~ Z, inquiry = my_estimand)
 
     my_reveal <- declare_reveal()
 
@@ -213,13 +213,13 @@ test_that("more term",{
   )
   
   estimators_regression <- declare_estimator(Y ~ Z,
-                                             estimand = estimands_regression,
+                                             inquiry = estimands_regression,
                                              model = lm_robust,
                                              term = TRUE)
   
   estimand_2  <- declare_inquiry(ATE = 2,   label = "2")
   estimator_2 <-
-    declare_estimator(Y ~ Z, estimand = estimand_2, label = "dim")
+    declare_estimator(Y ~ Z, inquiry = estimand_2, label = "dim")
   
   design <-
     population + estimands_regression + estimators_regression + estimand_2 + estimator_2
@@ -235,7 +235,7 @@ test_that("more term",{
                    sim_ID = c(1L, 1L, 1L),
                    estimand_label = c("ATE", "Regression_Estimands",
                                       "Regression_Estimands"),
-                   estimand = c(2, 0, 1),
+                   inquiry = c(2, 0, 1),
                    estimator_label = c("dim",
                                        "estimator", "estimator"),
                    term = c("Z", "(Intercept)", "Z")
@@ -280,7 +280,7 @@ test_that("diagnose_design works when simulations_df lacking parameters attr", {
 
   design <- declare_population(N = 100, X = rnorm(N), Y = rnorm(N, X)) +
     declare_inquiry(true_effect = 1) +
-    declare_estimator(Y ~ X, model=lm_robust, estimand = "true_effect", label = "Y on X") 
+    declare_estimator(Y ~ X, model=lm_robust, inquiry = "true_effect", label = "Y on X") 
   
   simulations <-  simulate_design(design, sims = 20) 
   

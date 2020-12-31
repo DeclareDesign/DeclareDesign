@@ -33,7 +33,7 @@ custom_potential_outcomes <-
 # I: Inquiry
 custom_estimand <- function(data, label) {
   data.frame(estimand_label = label,
-  estimand = with(data, median(Y_Z_1 - Y_Z_0)))
+  inquiry = with(data, median(Y_Z_1 - Y_Z_0)))
 }
 
 # D: Data Strategy
@@ -72,7 +72,7 @@ design <-
   declare_assignment(handler = custom_assignment) + 
   declare_reveal(handler = custom_reveal) + 
   declare_estimator(handler = tidy_estimator(custom_estimator), 
-                    estimand = "medianTE")
+                    inquiry = "medianTE")
 head(draw_data(design))
 run_design(design)
 ```

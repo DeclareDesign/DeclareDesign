@@ -15,7 +15,7 @@
 #'   declare_sampling(n = 75) +
 #'   declare_assignment(m = 50) +
 #'   declare_reveal(Y, Z) +
-#'   declare_estimator(Y ~ Z, estimand = "ATE")
+#'   declare_estimator(Y ~ Z, inquiry = "ATE")
 #' 
 #' dat <- draw_data(design)
 #' 

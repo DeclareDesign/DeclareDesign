@@ -13,7 +13,7 @@ test_that("send estimand to estimator works", {
 
   pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
 
-  pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = "test")
+  pate_estimator <- declare_estimator(Y ~ Z, inquiry = pate, label = "test")
 
   declare_reveal <- declare_reveal()
 

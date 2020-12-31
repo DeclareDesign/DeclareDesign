@@ -16,7 +16,7 @@ test_that("Two estimators, Two inquiries (matched)", {
       extra ~ group,
       subset = ID %in% 1:5,
       model = difference_in_means,
-      estimand = "CATE_1_5",
+      inquiry = "CATE_1_5",
       label = "DIM_1_5",
       term = group2
     ) +
@@ -24,7 +24,7 @@ test_that("Two estimators, Two inquiries (matched)", {
       extra ~ group,
       subset = ID %in% 6:10,
       model = difference_in_means,
-      estimand = "CATE_6_10",
+      inquiry = "CATE_6_10",
       label = "DIM_6_10",
       term = group2
     )
@@ -46,8 +46,8 @@ test_that("Two estimators, Two inquiries (crossed)", {
     declare_assignment() +
     declare_reveal(outcome_variables = extra1, assignment_variables = Z) +
 
-    declare_estimator(extra1 ~ Z, model = difference_in_means, estimand = c("ATE", "ATT"), label = "DIM") +
-    declare_estimator(extra1 ~ Z + group, model = lm_robust, clusters = ID, estimand = c("ATE", "ATT"), label = "OLS + control")
+    declare_estimator(extra1 ~ Z, model = difference_in_means, inquiry = c("ATE", "ATT"), label = "DIM") +
+    declare_estimator(extra1 ~ Z + group, model = lm_robust, clusters = ID, inquiry = c("ATE", "ATT"), label = "OLS + control")
 
   diag <- diagnose_design(des, sims = 5, bootstrap_sims = FALSE)
   expect_equal(nrow(diag$diagnosands), 4)

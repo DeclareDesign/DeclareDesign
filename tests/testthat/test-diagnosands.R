@@ -14,7 +14,7 @@ my_assignment <- declare_assignment(m = 25)
 
 pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
 
-pate_estimator <- declare_estimator(Y ~ Z, estimand = pate, label = "test")
+pate_estimator <- declare_estimator(Y ~ Z, inquiry = pate, label = "test")
 
 declare_reveal <- declare_reveal()
 
@@ -197,7 +197,7 @@ test_that("Overriding join conditions", {
 
   design <- declare_population(data=sleep, handler = fabricatr::resample_data) +
     declare_inquiry(group1 = 1, group2 = 2, term = TRUE, label = "e") +
-    declare_estimator(extra ~ group + 0, term = TRUE, estimand = "e", model = lm, label = "my_estimator")
+    declare_estimator(extra ~ group + 0, term = TRUE, inquiry = "e", model = lm, label = "my_estimator")
 
   diagnosands <- get_diagnosands(diagnose_design(design, diagnosands = custom, sims = 5, bootstrap_sims = FALSE))
 

@@ -103,7 +103,7 @@ label_test <- function(fn) {
     stop("Must provide a `test_function` function with a data argument.")
   }
   
-  f <- function(data, ..., estimand = NULL, label) {
+  f <- function(data, ..., inquiry = NULL, label) {
     
     calling_args <-
       names(match.call(expand.dots = FALSE)) %i% names(formals(fn))

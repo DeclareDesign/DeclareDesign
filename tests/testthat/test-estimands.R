@@ -7,7 +7,7 @@ test_that("splat labels", {
   my_estimand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
   expect_identical(
     my_estimand(df),
-    structure(list(estimand_label = "ATE", estimand = 2), .Names = c(
+    structure(list(estimand_label = "ATE", inquiry = 2), .Names = c(
       "estimand_label",
       "estimand"
     ), row.names = c(NA, -1L), class = "data.frame")
@@ -20,7 +20,7 @@ test_that("default label", {
   my_estimand <- declare_inquiry(mean(Y_Z_1 - Y_Z_0))
   expect_identical(
     my_estimand(df),
-    structure(list(estimand_label = "estimand", estimand = 2), .Names = c(
+    structure(list(estimand_label = "estimand", inquiry = 2), .Names = c(
       "estimand_label",
       "estimand"
     ), row.names = c(NA, -1L), class = "data.frame")
@@ -35,7 +35,7 @@ test_that("manual label", {
 
   expect_identical(
     my_estimand(df),
-    structure(list(estimand_label = "ATE2", estimand = 2), .Names = c(
+    structure(list(estimand_label = "ATE2", inquiry = 2), .Names = c(
       "estimand_label",
       "estimand"
     ), row.names = c(NA, -1L), class = "data.frame")
@@ -46,7 +46,7 @@ test_that("manual label", {
 test_that("custom estimand has label", {
   ## custom estimand function
   my_estimand_function <- function(data, label) {
-    with(data, data.frame(estimand_label = label, estimand = median(Y_Z_1 - Y_Z_0), stringsAsFactors = TRUE))
+    with(data, data.frame(estimand_label = label, inquiry = median(Y_Z_1 - Y_Z_0), stringsAsFactors = TRUE))
   }
   my_estimand_custom <- declare_inquiry(
     handler = my_estimand_function, label = "medianTE"
@@ -56,7 +56,7 @@ test_that("custom estimand has label", {
     my_estimand_custom(df),
     structure(list(
       estimand_label = structure(1L, .Label = "medianTE", class = "factor"),
-      estimand = 2
+      inquiry = 2
     ), .Names = c("estimand_label", "estimand"), row.names = c(
       NA,
       -1L
@@ -82,7 +82,7 @@ test_that("multiple estimand declarations work", {
   design_1 <- declare_population(df) + pate + sate
   expect_identical(
     draw_inquiries(design_1),
-    structure(list(estimand_label = c("PATE", "SATE"), estimand = c(
+    structure(list(estimand_label = c("PATE", "SATE"), inquiry = c(
       2,
       2
     )), .Names = c("estimand_label", "estimand"), row.names = c(
@@ -102,7 +102,7 @@ test_that("multiple estimand declarations work", {
 
   expect_identical(
     draw_inquiries(design_2),
-    structure(list(estimand_label = c("The PATE", "The SATE"), estimand = c(
+    structure(list(estimand_label = c("The PATE", "The SATE"), inquiry = c(
       2,
       2
     )), .Names = c("estimand_label", "estimand"), row.names = c(
@@ -130,7 +130,7 @@ test_that("inquiries can use other inquiries in calculations", {
   expect_equal(
     prop_estimand(df),
     structure(list(estimand_label = c("yz1.mu", "yz0.mu", "percent.diff"), 
-                   estimand = c(7.5, 5.5, 0.363636363636364)), 
+                   inquiry = c(7.5, 5.5, 0.363636363636364)), 
               class = "data.frame", row.names = c(NA, -3L))
   )
 })

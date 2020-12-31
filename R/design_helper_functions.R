@@ -12,7 +12,7 @@
 #'   declare_step(dplyr::mutate, noise_sq = noise^2) +
 #'   declare_assignment(m = 25) +
 #'   declare_reveal() +
-#'   declare_estimator(Y ~ Z, estimand = "my_estimand")
+#'   declare_estimator(Y ~ Z, inquiry = "my_estimand")
 #'
 #' design
 #'
@@ -93,7 +93,7 @@ run_design_internal.default <- function(design) {
 run_design_internal.design <- function(design, current_df = NULL, results = NULL, start = 1, end = length(design), ...) {
   if (!is.list(results)) {
     results <- list(
-      estimand = vector("list", length(design)),
+      inquiry = vector("list", length(design)),
       estimator = vector("list", length(design))
     )
   }

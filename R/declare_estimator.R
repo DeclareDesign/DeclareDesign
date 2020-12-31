@@ -16,7 +16,7 @@
 #' 
 #' An example of this approach is:
 #' 
-#' \code{declare_estimator(Y ~ Z + X, model = lm_robust, model_summary = tidy, term = "Z", estimand = "ATE")}
+#' \code{declare_estimator(Y ~ Z + X, model = lm_robust, model_summary = tidy, term = "Z", inquiry = "ATE")}
 #' 
 #' The second approach is using a custom data-in, data-out function, usually first passed to \code{label_estimator}. The reason to pass the custom function to \code{label_estimator} first is to enable clean labeling and linking to inquiries.
 #' 
@@ -27,7 +27,7 @@
 #' }
 #' 
 #' \code{
-#' declare_estimator(handler = label_estimator(my_fun), estimand = "ATE")
+#' declare_estimator(handler = label_estimator(my_fun), inquiry = "ATE")
 #' }
 #' 
 #' @export
@@ -44,10 +44,10 @@
 #' # estimator from `estimatr` package. Returns the first non-intercept term
 #' # as estimate
 #' 
-#' my_estimator_dim <- declare_estimator(Y ~ Z, estimand = "ATE", label = "DIM")
+#' my_estimator_dim <- declare_estimator(Y ~ Z, inquiry = "ATE", label = "DIM")
 #'
 #' # Use lm function from base R
-#' my_estimator_lm <- declare_estimator(Y ~ Z, estimand = "ATE",
+#' my_estimator_lm <- declare_estimator(Y ~ Z, inquiry = "ATE",
 #'   model = lm, label = "LM")
 #
 #' # Use lm_robust (linear regression with robust standard errors) from
@@ -55,7 +55,7 @@
 #'
 #' my_estimator_lm_rob <- declare_estimator(
 #'   Y ~ Z,
-#'   estimand = "ATE",
+#'   inquiry = "ATE",
 #'   model = lm_robust,
 #'   label = "LM_Robust"
 #' )
@@ -63,7 +63,7 @@
 #' # Set `term` if estimate of interest is not the first non-intercept variable
 #' my_estimator_lm_rob_x <- declare_estimator(
 #'   Y ~ X + Z,
-#'   estimand = my_estimand,
+#'   inquiry = my_estimand,
 #'   term = "Z",
 #'   model = lm_robust
 #' )
@@ -72,7 +72,7 @@
 #' my_estimator_glm <- declare_estimator(
 #'   Y ~ X + Z,
 #'   family = "gaussian",
-#'   estimand = my_estimand,
+#'   inquiry = my_estimand,
 #'   term = "Z",
 #'   model = glm
 #' )
@@ -95,7 +95,7 @@
 #'
 #' my_estimator_custom <- declare_estimator(
 #'   handler = label_estimator(my_estimator_function),
-#'   estimand = my_estimand
+#'   inquiry = my_estimand
 #' )
 #'
 #' # Customize labeling
@@ -159,7 +159,7 @@
 #'
 #' my_estimator_median <- declare_estimator(
 #'   handler = label_estimator(my_median),
-#'   estimand = my_estimand
+#'   inquiry = my_estimand
 #' )
 #'
 #' design <- replace_step(design_def, my_estimator_dim, my_estimator_median)
@@ -209,7 +209,7 @@ label_estimator <- function(fn) {
     stop("Must provide a `estimator_function` function with a data argument.")
   }
 
-  f <- function(data, ..., estimand = NULL, label) {
+  f <- function(data, ..., inquiry = NULL, label) {
     calling_args <-
       names(match.call(expand.dots = FALSE)) %i% names(formals(fn))
 
@@ -359,7 +359,7 @@ validation_fn(model_handler) <- function(ret, dots, label) {
   ret
 }
 
-# helper methods for estimand = my_estimand arguments to estimator_handler
+# helper methods for inquiry = my_estimand arguments to estimator_handler
 #
 get_estimand_label <- function(estimand) {
   force(estimand) # no promise nonsense when we look at it

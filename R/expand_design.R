@@ -27,7 +27,7 @@
 #'   pos <- declare_potential_outcomes(Y ~ 0.20 * Z + noise)
 #'   assgn <- declare_assignment(m = N / 2)
 #'   mand <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-#'   mator <- declare_estimator(Y ~ Z, estimand = mand)
+#'   mator <- declare_estimator(Y ~ Z, inquiry = mand)
 #'   pop + pos + assgn + mand + mator
 #' }
 #'

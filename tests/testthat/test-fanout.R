@@ -50,7 +50,7 @@ test_that("Diagnosing a fanout", {
     declare_estimator(
       noise ~ 1,
       model = lm,
-      estimand = estimand,
+      inquiry = estimand,
       label = "ha",
       term = TRUE
     )
@@ -114,7 +114,7 @@ test_that("fanout warnings", {
     declare_estimator(
       noise ~ 1,
       model = lm,
-      estimand = estimand,
+      inquiry = estimand,
       label = "ha",
       term = TRUE
     )
