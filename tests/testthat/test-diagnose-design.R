@@ -209,7 +209,7 @@ test_that("more term",{
     `(Intercept)` = 0,
     `Z` = 1,
     term = TRUE,
-    label = "Regression_Estimands"
+    label = "Regression_Inquiries"
   )
   
   estimators_regression <- declare_estimator(Y ~ Z,
@@ -233,8 +233,8 @@ test_that("more term",{
                  list(
                    design_label = c("design", "design", "design"),
                    sim_ID = c(1L, 1L, 1L),
-                   inquiry_label = c("ATE", "Regression_Estimands",
-                                      "Regression_Estimands"),
+                   inquiry_label = c("ATE", "Regression_Inquiries",
+                                      "Regression_Inquiries"),
                    inquiry = c(2, 0, 1),
                    estimator_label = c("dim",
                                        "estimator", "estimator"),

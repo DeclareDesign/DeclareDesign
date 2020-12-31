@@ -32,7 +32,7 @@ test_that("reshape works", {
   expect_error(reshape_diagnosis(dx, select = "mean_inquiry"),
     regexp = "select argument must only include elements from"
   )
-  reshape_diagnosis(dx, select = "Mean Estimand")
+  reshape_diagnosis(dx, select = "Mean Inquiry")
 })
 
 
@@ -76,7 +76,7 @@ test_that("capitalization of parameter names are retained", {
 test_that("select", {
   dx <- diagnose_design(design, sims = 10, bootstrap_sims = 5)
   reshape <- reshape_diagnosis(dx, select = "Bias")
-  expect_equal(colnames(reshape), c("Design Label", "Estimand Label", "Estimator Label", "Term", "N Sims", "Bias"))
+  expect_equal(colnames(reshape), c("Design Label", "Inquiry Label", "Estimator Label", "Term", "N Sims", "Bias"))
 })
 
 

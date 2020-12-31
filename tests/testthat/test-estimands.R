@@ -1,4 +1,4 @@
-context("Estimands")
+context("Inquiries")
 
 df <- data.frame(Y_Z_0 = 1:10, Y_Z_1 = 3:12)
 
