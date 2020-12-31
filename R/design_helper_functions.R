@@ -7,10 +7,10 @@
 #' design <-
 #'   declare_population(N = 500, noise = rnorm(N)) +
 #'   declare_potential_outcomes(Y ~ noise + Z * rnorm(N, 2, 2)) +
-#'   declare_sampling(n = 250) +
+#'   declare_sampling(S = complete_rs(N, n = 250)) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_step(dplyr::mutate, noise_sq = noise^2) +
-#'   declare_assignment(m = 25) +
+#'   declare_assignment(Z = complete_ra(N, m = 25)) +
 #'   declare_reveal() +
 #'   declare_estimator(Y ~ Z, inquiry = "my_inquiry")
 #'
@@ -218,7 +218,7 @@ dots_to_list_of_designs <- function(...) {
 #'
 #' my_population <- declare_population(N = 100)
 #'
-#' my_assignment <- declare_assignment(m = 50)
+#' my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
 #'
 #' my_design <- my_population + my_assignment
 #'

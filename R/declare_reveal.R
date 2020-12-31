@@ -44,7 +44,7 @@ declare_reveal <- make_declarations(declare_reveal_handler, "reveal")
 #'   Y_Z_0 = noise, Y_Z_1 = noise +
 #'   rnorm(N, mean = 2, sd = 2))
 #'
-#' my_assignment <- declare_assignment(m = 50)
+#' my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
 #'
 #' my_reveal <- declare_reveal()
 #'
@@ -66,8 +66,8 @@ declare_reveal <- make_declarations(declare_reveal_handler, "reveal")
 #' potentials_1 <- declare_potential_outcomes(Y1 ~ Z)  
 #' potentials_2 <- declare_potential_outcomes(Y2 ~ 1 + 2*Z)  
 #' potentials_3 <- declare_potential_outcomes(Y3 ~ 1 - X*Z, conditions = list(X = 0:1, Z = 0:1))  
-#' assignment_Z <- declare_assignment(assignment_variable = "Z")
-#' assignment_X <- declare_assignment(assignment_variable = "X")
+#' assignment_Z <- declare_assignment(Z = complete_ra(N))
+#' assignment_X <- declare_assignment(X = complete_ra(N))
 #' reveal_1     <- declare_reveal(outcome_variables = c("Y1", "Y2"), assignment_variables = "Z")
 #' reveal_2     <- declare_reveal(outcome_variables = "Y3", assignment_variables = c("X", "Z"))
 #'
@@ -83,7 +83,7 @@ declare_reveal <- make_declarations(declare_reveal_handler, "reveal")
 #' 
 #' potential_outcomes_Y <- declare_potential_outcomes(Y ~ .25 * Z + .01 * age * Z)
 #' 
-#' assignment <- declare_assignment(m = 25)
+#' assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 #' 
 #' potential_outcomes_attrition <- 
 #'   declare_potential_outcomes(R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))

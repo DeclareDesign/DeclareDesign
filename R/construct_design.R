@@ -16,8 +16,8 @@
 #' design <-
 #'   declare_population(N = 500, noise = rnorm(N)) +
 #'   declare_potential_outcomes(Y ~ Z + noise) +
-#'   declare_sampling(n = 250) +
-#'   declare_assignment(m = 25) +
+#'   declare_sampling(S = complete_rs(N, n = 250)) +
+#'   declare_assignment(Z = complete_ra(N, m = 25)) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_estimator(Y ~ Z, inquiry = my_inquiry) +
 #'   declare_step(dplyr::mutate, noise_sq = noise ^ 2) +

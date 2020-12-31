@@ -35,8 +35,8 @@ find_step <- function(design, step, verb) {
 #'    declare_potential_outcomes(Y_Z_0 = noise,
 #'                               Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 #'
-#'  my_assignment <- declare_assignment(m = 50)
-#'  my_assignment_2 <- declare_assignment(m = 25)
+#'  my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
+#'  my_assignment_2 <- declare_assignment(Z = complete_ra(N, m = 25))
 #'
 #'  design <- my_population + my_potential_outcomes + my_assignment
 #'
@@ -61,7 +61,7 @@ NULL
 #'  # get the labels for the steps
 #'  names(design)
 #'  
-#'  insert_step(design, declare_sampling(n = 50), after = "my_pop")
+#'  insert_step(design, declare_sampling(S = complete_rs(N, n = 50)), after = "my_pop")
 #'
 #' @export
 insert_step <- function(design, new_step, before, after) {
