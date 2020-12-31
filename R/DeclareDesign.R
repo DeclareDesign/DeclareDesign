@@ -18,7 +18,7 @@
 #' \describe{
 #'   \item{+}{Add steps to create a design}
 #'   \item{\code{\link{draw_data}}}{Simulate the DGP}
-#'   \item{\code{\link{run_design}}}{Simulate the DGP with estimands/estimators}
+#'   \item{\code{\link{run_design}}}{Simulate the DGP with inquiries/estimators}
 #'   \item{\code{\link{diagnose_design}}}{Diagnose a design}
 #'   \item{\code{\link{cite_design}}}{Cite a design}
 #' }

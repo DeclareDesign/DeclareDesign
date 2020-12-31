@@ -185,7 +185,7 @@ test_that("multiple estimator declarations work", {
   })
 })
 
-context("Labeling estimator output with estimands")
+context("Labeling estimator output with inquiries")
 
 mand_arg_label <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
 mand_explicit_label <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "ATE")
@@ -200,39 +200,39 @@ df <- data.frame(
   Z = c(0, 0, 0, 0, 1, 1, 1, 1)
 )
 
-test_that("labels for estimates and estimands work estimand splat labeld estimator default", {
+test_that("labels for estimates and inquiries work estimand splat labeld estimator default", {
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_arg_label)
   df %>% mator_no_label() %>% expect_label("estimator", "ATE")
 })
 
-test_that("labels for estimates and estimands work, label explicit, estimand splat labeled", {
+test_that("labels for estimates and inquiries work, label explicit, estimand splat labeled", {
   mator_label <- declare_estimator(Y ~ Z, estimand = mand_arg_label, label = "an_estimator")
   df %>% mator_label() %>% expect_label("an_estimator", "ATE")
 })
 
-test_that("labels for estimates and estimands work estimand splat labeld label =NULL", {
+test_that("labels for estimates and inquiries work estimand splat labeld label =NULL", {
   mator_label_null <- declare_estimator(Y ~ Z, estimand = mand_arg_label, label = NULL)
   expect_error(df %>% mator_label_null())
 })
 
-test_that("labels for estimates and estimands work - label default", {
+test_that("labels for estimates and inquiries work - label default", {
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label)
   df %>% mator_no_label() %>% expect_label("estimator", "ATE")
 })
 
-test_that("labels for estimates and estimands work - label explicit", {
+test_that("labels for estimates and inquiries work - label explicit", {
   mator_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label, label = "an_estimator")
   # mator_label_noquote <- declare_estimator(Y ~ Z, estimand = mand_explicit_label, label = an_estimator)
   df %>% mator_label() %>% expect_label("an_estimator", "ATE")
 })
 
-test_that("labels for estimates and estimands work- label=NULL", {
+test_that("labels for estimates and inquiries work- label=NULL", {
   mator_label_null <- declare_estimator(Y ~ Z, estimand = mand_explicit_label, label = NULL)
   expect_error(df %>% mator_label_null())
 })
 
 
-test_that("labels for estimates and estimands work estimand label, estimator default", {
+test_that("labels for estimates and inquiries work estimand label, estimator default", {
   mator_no_label <- declare_estimator(Y ~ Z, estimand = mand_explicit_label)
   df %>% mator_no_label() %>% expect_label("estimator", "ATE")
 })

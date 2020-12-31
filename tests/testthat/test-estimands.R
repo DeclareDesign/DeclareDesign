@@ -124,7 +124,7 @@ test_that("duplicated labels fail", {
 })
 
 
-test_that("estimands can use other estimands in calculations", {
+test_that("inquiries can use other inquiries in calculations", {
   prop_estimand <- declare_estimand(yz1.mu = mean(Y_Z_1), yz0.mu = mean(Y_Z_0), percent.diff = abs(yz1.mu - yz0.mu) / yz0.mu)
 
   expect_equal(

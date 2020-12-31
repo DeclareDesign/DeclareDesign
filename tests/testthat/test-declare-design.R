@@ -35,12 +35,12 @@ test_that(
 
     output <- run_design(design)
     expect_equal(dim(output$estimates_df), c(1, 11))
-    expect_equal(dim(output$estimands), c(1, 2))
+    expect_equal(dim(output$inquiries), c(1, 2))
   }
 )
 
 
-test_that("No estimators / estimands", {
+test_that("No estimators / inquiries", {
   design <-
     declare_population(N = 500, noise = 1:N) +
     declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + 1) +

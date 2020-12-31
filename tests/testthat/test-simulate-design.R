@@ -85,11 +85,11 @@ test_that("dupe designs give error", {
 
 
 
-test_that("no estimates estimands declared", {
+test_that("no estimates inquiries declared", {
   my_design_noestmand <- delete_step(my_design_1, my_estimand)
   my_design_noestmand <- delete_step(my_design_noestmand, my_estimator)
 
-  expect_error(simulate_design(my_design_noestmand, sims = 2), "No estimates or estimands were declared, so design cannot be simulated.")
+  expect_error(simulate_design(my_design_noestmand, sims = 2), "No estimates or inquiries were declared, so design cannot be simulated.")
 })
 
 

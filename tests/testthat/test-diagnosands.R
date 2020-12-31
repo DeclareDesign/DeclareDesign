@@ -75,7 +75,7 @@ test_that("Diagnosis prints ok", {
 })
 
 
-test_that("test diagnosands without estimands", {
+test_that("test diagnosands without inquiries", {
   my_design2 <- my_population +
     my_potential_outcomes +
     my_assignment +

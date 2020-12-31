@@ -1,7 +1,7 @@
-#' Get estimates, estimands, assignment vectors, or samples from a design given data
+#' Get estimates, inquiries, assignment vectors, or samples from a design given data
 #'  
 #' @param design A design object, typically created using the + operator
-#' @param data A data.frame object with sufficient information to get the data, estimates, estimands, an assignment vector, or a sample.
+#' @param data A data.frame object with sufficient information to get the data, estimates, inquiries, an assignment vector, or a sample.
 #' @param start (Defaults to 1) a scalar indicating which step in the design to begin with. By default all data steps are drawn, from step 1 to the last step of the design.
 #' @param end (Defaults to \code{length(design)}) a scalar indicating which step in the design to finish with.
 #'

@@ -44,7 +44,7 @@ test_that("estimand labels work", {
   expect_true(all(diagnosis$simulations_df$estimand_label == "some_stat"))
 })
 
-test_that("multiple estimands", {
+test_that("multiple inquiries", {
   pop <- declare_population(N = 6, Y = rnorm(N))
   mand <- declare_estimand(a1 = 1, a2 = 2, a3 = 3, label = "b")
   design <- pop + mand
@@ -69,6 +69,6 @@ test_that("step name conflicts in design", {
   pop <- declare_population(N = 6, Y = rnorm(N))
   assign_1 <- declare_assignment(m = 2)
   mand_1 <- declare_estimand(some_stat = mean(Y))
-  expect_error(design <- pop + mand_1 + mand_1, "You have estimands with identical labels: some_stat\nPlease provide estimands with unique labels")
+  expect_error(design <- pop + mand_1 + mand_1, "You have inquiries with identical labels: some_stat\nPlease provide inquiries with unique labels")
   expect_equal(names(pop + assign_1 + assign_1), c("pop", "assign_1", "assign_1_1"))
 })

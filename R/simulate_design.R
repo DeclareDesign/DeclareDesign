@@ -154,7 +154,7 @@ simulate_single_design <- function(design, sims) {
   estimands_df <- results2x(results_list, "estimands_df")
   
   if (is_empty(estimates_df) && is_empty(estimands_df)) {
-    stop("No estimates or estimands were declared, so design cannot be simulated.", call. = FALSE)
+    stop("No estimates or inquiries were declared, so design cannot be simulated.", call. = FALSE)
   } else if (is_empty(estimands_df)) {
     simulations_df <- estimates_df
   } else if (is_empty(estimates_df)) {

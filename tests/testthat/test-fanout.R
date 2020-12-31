@@ -65,7 +65,7 @@ test_that("Diagnosing a fanout", {
   Sys.setenv(TESTTHAT='true')
   
   
-  # estimands don't vary overall
+  # inquiries don't vary overall
   expect_equal(
     dx$diagnosands[1, "se(mean_estimand)"], 0
   )

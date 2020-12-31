@@ -19,7 +19,7 @@
 #'
 #' The print and summary methods for a design object return some helpful descriptions of the steps in your research design. If randomizr functions are used for any assignment or sampling steps, additional details about those steps are provided.
 #'
-#' @return a list of two functions, the \code{design_function} and the \code{data_function}. The \code{design_function} runs the design once, i.e. draws the data and calculates any estimates and estimands defined in \code{...}, returned separately as two \code{data.frame}'s. The \code{data_function} runs the design once also, but only returns the final data.
+#' @return a list of two functions, the \code{design_function} and the \code{data_function}. The \code{design_function} runs the design once, i.e. draws the data and calculates any estimates and inquiries defined in \code{...}, returned separately as two \code{data.frame}'s. The \code{data_function} runs the design once also, but only returns the final data.
 #'
 #' @name declare_design
 #'
@@ -54,7 +54,7 @@
 #' df <- draw_data(design)
 #'
 #' estimates <- draw_estimates(design)
-#' estimands <- draw_estimands(design)
+#' inquiries <- draw_estimands(design)
 #'
 #' # You can add steps to a design
 #'

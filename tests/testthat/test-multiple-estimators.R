@@ -1,6 +1,6 @@
 context("Multiple estimators")
 
-test_that("Two estimators, Two estimands (matched)", {
+test_that("Two estimators, Two inquiries (matched)", {
   des <-
     declare_population(sleep) +
     declare_estimand(
@@ -34,7 +34,7 @@ test_that("Two estimators, Two estimands (matched)", {
 })
 
 
-test_that("Two estimators, Two estimands (crossed)", {
+test_that("Two estimators, Two inquiries (crossed)", {
   des <-
     declare_population(sleep) +
     # Make a noisier outcome

@@ -1,7 +1,7 @@
-context("Multiple estimands can be mapped to one estimator")
+context("Multiple inquiries can be mapped to one estimator")
 
 
-test_that("Multiple estimands can be mapped to one estimator", {
+test_that("Multiple inquiries can be mapped to one estimator", {
   pop_var <- function(x) {
     mean((x - mean(x))^2)
   }
@@ -51,7 +51,7 @@ test_that("Multiple estimands can be mapped to one estimator", {
 })
 
 
-test_that("More multiple estimands", {
+test_that("More multiple inquiries", {
   my_smp_fun <- function(data) {
     S <- rbinom(n = nrow(data), size = 1, prob = pnorm(data$noise))
     return(data[S == 1, , drop = FALSE])

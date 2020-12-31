@@ -19,7 +19,7 @@
 #' df <- draw_data(design)
 #'
 #' estimates <- draw_estimates(design)
-#' estimands <- draw_estimands(design)
+#' inquiries <- draw_estimands(design)
 #' 
 #' print_code(design)
 #'
