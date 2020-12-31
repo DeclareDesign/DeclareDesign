@@ -44,8 +44,6 @@ This function was previously called \code{declare_reveal}. You can still use eit
 
 \code{declare_reveal} declares how outcomes should be realized.  
 A "revelation" uses the random assignment to pluck out the correct potential outcomes (Gerber and Green 2012, Chapter 2).
-If you create a simple design (with assignment variable Z and outcome variable Y) with the + operator but omit a reveal declaration, DeclareDesign will attempt to insert a revelation  step automatically.
-If you have multiple outcomes to reveal or different names for the outcome or assignment variables, use \code{declare_reveal} to customize which outcomes are revealed.
 Revelation requires that every named outcome variable is a function of every named assignment variable within a step. Thus if multiple outcome variables depend on different assignment variables, multiple revelations are needed.
 }
 \examples{
@@ -66,11 +64,6 @@ design <- my_population +
   my_reveal
 
 design
-
-#  Here the + operator results in the same design being
-#  created, because it automatically adds a declare_reveal step.
-
-design <- my_population + my_potential_outcomes + my_assignment
 
 # Declaring multiple assignment variables or multiple outcome variables
 
