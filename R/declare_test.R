@@ -19,7 +19,10 @@
 #' balance_test_design <-
 #'   declare_model(
 #'     N = 100, 
-#'     cov1 = rnorm(N), cov2 = rnorm(N), cov3 = rnorm(N)) +
+#'     cov1 = rnorm(N), 
+#'     cov2 = rnorm(N), 
+#'     cov3 = rnorm(N)
+#'   ) +
 #'   declare_assignment(Z = complete_ra(N, prob = 0.2)) +
 #'   declare_test(Z ~ cov1 + cov2 + cov3, model = lm_robust, model_summary = glance)
 #'   
@@ -39,8 +42,11 @@
 #' }
 #' 
 #' distributional_equality_design <-
-#'   declare_model(N = 100) + 
-#'   declare_potential_outcomes(Y_Z_1 = rnorm(N), Y_Z_0 = rnorm(N, sd = 1.5)) + 
+#'   declare_model(
+#'     N = 100, 
+#'     Y_Z_1 = rnorm(N), 
+#'     Y_Z_0 = rnorm(N, sd = 1.5)
+#'   ) + 
 #'   declare_assignment(Z = complete_ra(N, prob = 0.5)) + 
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
 #'   declare_test(handler = label_test(ks_test), label = "ks-test")
@@ -48,7 +54,7 @@
 #' \dontrun{
 #' diagnosis <- diagnose_design(
 #'   design = distributional_equality_design,
-#'   diagnosands = declare_diagnosands(select = power)
+#'   diagnosands = declare_diagnosands(power = mean(p.value <= 0.05))
 #' ) 
 #' }
 #' 

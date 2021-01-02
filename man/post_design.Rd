@@ -33,11 +33,13 @@ Print code to recreate a design
 \examples{
 
 design <-
-  declare_population(N = 500, noise = rnorm(N)) +
-  declare_potential_outcomes(Y ~ noise + Z * rnorm(N, 2, 2)) +
+  declare_model(
+    N = 500, 
+    U = rnorm(N)) +
+    potential_outcomes(Y ~ U + Z * rnorm(N, 2, 2))
+  ) +
   declare_sampling(S = complete_rs(N, n = 250)) +
   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-  declare_step(dplyr::mutate, noise_sq = noise^2) +
   declare_assignment(Z = complete_ra(N, m = 25)) +
   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
   declare_estimator(Y ~ Z, inquiry = "my_inquiry")
@@ -52,7 +54,7 @@ inquiries <- draw_inquiries(design)
 print_code(design)
 
 
-my_population <- declare_population(N = 100)
+my_population <- declare_model(N = 100)
 
 my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
 
@@ -61,11 +63,12 @@ my_design <- my_population + my_assignment
 print_code(my_design)
 
 
-my_population <- declare_population(N = 500, noise = rnorm(N))
-
-my_potential_outcomes <- declare_potential_outcomes(
-  Y_Z_0 = noise, Y_Z_1 = noise +
-  rnorm(N, mean = 2, sd = 2))
+my_population <- 
+  declare_model(
+    N = 500, noise = rnorm(N))
+    Y_Z_0 = noise, 
+    Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)
+  )
 
 my_sampling <- declare_sampling(S = complete_rs(N, n = 250))
 
@@ -74,8 +77,6 @@ my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
 my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
-
-my_mutate <- declare_step(dplyr::mutate, noise_sq = noise ^ 2)
 
 my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
 

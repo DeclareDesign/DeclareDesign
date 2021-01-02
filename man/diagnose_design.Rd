@@ -46,26 +46,17 @@ If \code{sims} is named, or longer than one element, a fan-out strategy is creat
 If the packages \code{future} and \code{future.apply} are installed, you can set \code{\link[future]{plan}} to run multiple simulations in parallel.
 }
 \examples{
-my_population <- declare_population(N = 500, noise = rnorm(N))
-
-my_potential_outcomes <- declare_potential_outcomes(
-  Y_Z_0 = noise, Y_Z_1 = noise +
-  rnorm(N, mean = 2, sd = 2))
-
-my_assignment <- declare_assignment(Z = complete_ra(N))
-
-my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-
-my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
-
-my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
-
-design <- my_population +
-   my_potential_outcomes +
-   my_inquiry +
-   my_assignment +
-   my_reveal +
-   my_estimator
+design <- 
+  declare_model(
+    N = 500, 
+    U = rnorm(N),
+    Y_Z_0 = U, 
+    Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
+  ) + 
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+  declare_assignment(Z = complete_ra(N)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
+  declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
 \dontrun{
 # using built-in defaults:

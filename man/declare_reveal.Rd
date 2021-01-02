@@ -48,49 +48,40 @@ Revelation requires that every named outcome variable is a function of every nam
 }
 \examples{
 
-my_population <- declare_population(N = 100, noise = rnorm(N))
-
-my_potential_outcomes <- declare_potential_outcomes(
-  Y_Z_0 = noise, Y_Z_1 = noise +
-  rnorm(N, mean = 2, sd = 2))
-
-my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
-
-my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
-
-design <- my_population +
-  my_potential_outcomes +
-  my_assignment +
-  my_reveal
-
-design
+design <- 
+  declare_model(
+    N = 100, 
+    U = rnorm(N), 
+    Y_Z_0 = U, 
+    Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
+  ) + 
+  declare_assignment(Z = complete_ra(N, m = 50)) + 
+  declare_measurement(Y = reveal_outcomes(Y ~ Z))
 
 # Declaring multiple assignment variables or multiple outcome variables
 
-population   <- declare_population(N = 10)
-potentials_1 <- declare_potential_outcomes(Y1 ~ Z)  
-potentials_2 <- declare_potential_outcomes(Y2 ~ 1 + 2*Z)  
-potentials_3 <- declare_potential_outcomes(Y3 ~ 1 - X*Z, conditions = list(X = 0:1, Z = 0:1))  
-assignment_Z <- declare_assignment(Z = complete_ra(N))
-assignment_X <- declare_assignment(X = complete_ra(N))
-measurement  <- declare_measurement(Y1 = reveal_outcomes(Y1 ~ Z), 
-                                    Y2 = reveal_outcomes(Y2 ~ Z),
-                                    Y3 = reveal_outcomes(Y3 ~ X + Z))
+design   <- 
+  declare_model(
+    N = 10,
+    potential_outcomes(Y1 ~ Z),
+    potential_outcomes(Y2 ~ 1 + 2 * Z),
+    potential_outcomes(Y3 ~ 1 - X * Z, conditions = list(X = 0:1, Z = 0:1))
+  ) + 
+  declare_assignment(Z = complete_ra(N)) + 
+  declare_assignment(X = complete_ra(N)) + 
+  declare_measurement(Y1 = reveal_outcomes(Y1 ~ Z), 
+                      Y2 = reveal_outcomes(Y2 ~ Z),
+                      Y3 = reveal_outcomes(Y3 ~ X + Z))
 
-population <- declare_population(N = 100, age = sample(18:95, N, replace = TRUE))
-
-potential_outcomes_Y <- declare_potential_outcomes(Y ~ .25 * Z + .01 * age * Z)
-
-assignment <- declare_assignment(Z = complete_ra(N, m = 25))
-
-potential_outcomes_attrition <- 
-  declare_potential_outcomes(R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
-
-outcomes <- declare_measurement(R = reveal_outcomes(R ~ Z),
-                                        Y = reveal_outcomes(Y ~ Z),
-                                        Y = ifelse(R == 1, Y, NA))
-
-my_design <- population + potential_outcomes_Y + potential_outcomes_attrition + 
-  my_assignment + outcomes
-
+design <- 
+  declare_model(
+    N = 100, 
+    age = sample(18:95, N, replace = TRUE),
+    potential_outcomes(Y ~ .25 * Z + .01 * age * Z),
+    potential_outcomes(R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
+  ) + 
+  declare_assignment(Z = complete_ra(N, m = 25))
+  declare_measurement(R = reveal_outcomes(R ~ Z),
+                      Y = reveal_outcomes(Y ~ Z),
+                      Y = ifelse(R == 1, Y, NA))
 }

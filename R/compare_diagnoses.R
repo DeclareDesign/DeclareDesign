@@ -18,10 +18,10 @@
 #' The function \code{compare_diagnoses} runs a many-to-many merge matching by \code{inquiry_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
 #'
 #' @examples
-#' design_a <- declare_model(N = 100, u = rnorm(N)) +
-#' declare_potential_outcomes(
-#'   Y_Z_0 = u,
-#'   Y_Z_1 = u + rnorm(N, mean = 2, sd = 2)) +
+#' design_a <- declare_model(N  = 100, 
+#'                           U = rnorm(N),
+#'                           Y_Z_0 = U,
+#'                           Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)) +
 #' declare_assignment(Z = complete_ra(N, prob = 0.5)) +
 #' declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #' declare_measurement(Y = reveal_outcomes(Y ~ Z)) +

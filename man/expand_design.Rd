@@ -34,8 +34,12 @@ designs <- expand_design(multi_arm_designer, outcome_means = list(c(3,2,4), c(1,
 # with a custom designer function
 
 designer <- function(N) {
-  pop <- declare_population(N = N, noise = rnorm(N))
-  pos <- declare_potential_outcomes(Y ~ 0.20 * Z + noise)
+  pop <- 
+    declare_model(
+      N = N, 
+      U = rnorm(N),
+      potential_outcomes(Y ~ 0.20 * Z + U)
+    )
   assgn <- declare_assignment(Z = complete_ra(N, m = N/2))
   inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
   estimator <- declare_estimator(Y ~ Z, inquiry = inquiry)

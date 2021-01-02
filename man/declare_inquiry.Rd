@@ -48,14 +48,16 @@ an additional dimension for use in diagnosis.
 
 # Set up a design stub for use in examples:
 
-my_population  <- declare_population(N = 100, X = rnorm(N))
-my_potential_outcomes  <- declare_potential_outcomes(
-  Y ~ (.25 + X) * Z + rnorm(N))
-my_assignment  <- declare_assignment(Z = complete_ra(N, m = 50))
-design_stub <- my_population + my_potential_outcomes + my_assignment + 
+design_stub  <- 
+  declare_model(
+    N = 100, 
+    X = rnorm(N),
+    potential_outcomes(Y ~ Z + rnorm(N))
+  ) + 
+  declare_assignment(Z = complete_ra(N, m = 50)) + 
   declare_measurement(Y = reveal_outcomes(Y ~ Z))
 
-# Get example data to compute inquiries on
+# sGet example data to compute inquiries on
 dat <- draw_data(design_stub)
 
 # ----------

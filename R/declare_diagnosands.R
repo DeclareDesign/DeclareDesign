@@ -75,22 +75,17 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #'
 #' @examples
 #'
-#' my_population <- declare_model(N = 500, noise = rnorm(N))
-#'
-#' my_potential_outcomes <- declare_potential_outcomes(
-#'   Y_Z_0 = noise, Y_Z_1 = noise +
-#'   rnorm(N, mean = 2, sd = 2))
-#'
-#' my_assignment <- declare_assignment(Z = complete_ra(N))
-#'
-#' my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-#'
-#' my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
-#'
-#' my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
-#'
-#' design <- my_population + my_potential_outcomes + my_inquiry +
-#'         my_assignment + my_reveal + my_estimator
+#' design <- 
+#'   declare_model(
+#'     N = 500, 
+#'     U = rnorm(N),
+#'     Y_Z_0 = U, 
+#'     Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
+#'   ) + 
+#'   declare_assignment(Z = complete_ra(N)) + 
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+#'   declare_estimator(Y ~ Z, inquiry = my_inquiry) + 
+#'   declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #'
 #' \dontrun{
 #' # using built-in defaults:

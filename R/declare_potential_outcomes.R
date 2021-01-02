@@ -63,7 +63,7 @@ declare_potential_outcomes <- make_declarations(potential_outcomes_handler, "pot
 ### this makes tracing the execution in run_design much simpler
 
 potential_outcomes_handler <- function(..., data, level) {
-  (function(formula, ...) UseMethod("potential_outcomes"))(..., data = data, level = level)
+  (function(formula, ...) UseMethod("potential_outcomes_internal"))(..., data = data, level = level)
 }
 
 validation_fn(potential_outcomes_handler) <- function(ret, dots, label) {
@@ -71,9 +71,9 @@ validation_fn(potential_outcomes_handler) <- function(ret, dots, label) {
 
   # Below is a similar redispatch strategy, only at declare time
   validation_delegate <- function(formula = NULL, ...) {
-    potential_outcomes <- function(formula, ...) UseMethod("potential_outcomes", formula)
+    potential_outcomes_internal <- function(formula, ...) UseMethod("potential_outcomes_internal", formula)
     for (c in class(formula)) {
-      s3method <- getS3method("potential_outcomes", class(formula))
+      s3method <- getS3method("potential_outcomes_internal", class(formula))
       if (is.function(s3method)) return(s3method)
     }
     declare_time_error("Could not find appropriate implementation", ret)
@@ -112,7 +112,7 @@ validation_fn(potential_outcomes_handler) <- function(ret, dots, label) {
 #' @importFrom fabricatr fabricate
 #' @importFrom rlang quos := !! !!! as_quosure
 #' @rdname declare_potential_outcomes
-potential_outcomes.formula <- function(formula,
+potential_outcomes_internal.formula <- function(formula,
                                        conditions = c(0, 1),
                                        assignment_variables = "Z", # only used to provide a default - read from names of conditions immediately after.
                                        data,
@@ -178,7 +178,7 @@ potential_outcomes.formula <- function(formula,
 }
 
 
-validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
+validation_fn(potential_outcomes_internal.formula) <- function(ret, dots, label) {
   dots$formula <- eval_tidy(dots$formula)
   outcome_variable <- as.character(dots$formula[[2]])
 
@@ -197,9 +197,9 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
   dots$conditions <- eval_tidy(quo(expand_conditions(!!!dots)))
   dots$assignment_variables <- names(dots$conditions)
 
-  ret <- build_step(currydata(potential_outcomes.formula,
+  ret <- build_step(currydata(potential_outcomes_internal.formula,
     dots),
-  handler = potential_outcomes.formula,
+  handler = potential_outcomes_internal.formula,
   dots = dots,
   label = label,
   step_type = attr(ret, "step_type"),
@@ -222,7 +222,7 @@ validation_fn(potential_outcomes.formula) <- function(ret, dots, label) {
 
 #' @importFrom fabricatr fabricate add_level modify_level
 #' @rdname declare_potential_outcomes
-potential_outcomes.NULL <- function(formula = stop("Not provided"), ..., data, level = NULL) {
+potential_outcomes_internal.NULL <- function(formula = stop("Not provided"), ..., data, level = NULL) {
   if (is.character(level)) {
     fabricate(data = data, !!level := modify_level(...))
   } else {
@@ -230,7 +230,7 @@ potential_outcomes.NULL <- function(formula = stop("Not provided"), ..., data, l
   }
 }
 
-validation_fn(potential_outcomes.NULL) <- function(ret, dots, label) {
+validation_fn(potential_outcomes_internal.NULL) <- function(ret, dots, label) {
   if ("ID_label" %in% names(dots)) {
     declare_time_error("Must not pass ID_label.", ret)
   }
@@ -271,5 +271,5 @@ expand_conditions <- function() {
   }
   conditions
 }
-formals(expand_conditions) <- formals(potential_outcomes.formula)
+formals(expand_conditions) <- formals(potential_outcomes_internal.formula)
 formals(expand_conditions)["label"] <- list(NULL) # Fixes R CMD Check warning outcome is undefined

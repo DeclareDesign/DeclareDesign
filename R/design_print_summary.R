@@ -13,11 +13,12 @@ print.design <- function(x, verbose = TRUE, ...) {
 #'
 #' @examples
 #'
-#' my_population <- declare_model(N = 500, noise = rnorm(N))
-#'
-#' my_potential_outcomes <- declare_potential_outcomes(
-#'   Y_Z_0 = noise, Y_Z_1 = noise +
-#'   rnorm(N, mean = 2, sd = 2))
+#' my_population <- 
+#'   declare_model(
+#'     N = 500, noise = rnorm(N))
+#'     Y_Z_0 = noise, 
+#'     Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)
+#'   )
 #'
 #' my_sampling <- declare_sampling(S = complete_rs(N, n = 250))
 #'
@@ -26,8 +27,6 @@ print.design <- function(x, verbose = TRUE, ...) {
 #' my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 #'
 #' my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
-#'
-#' my_mutate <- declare_step(dplyr::mutate, noise_sq = noise ^ 2)
 #'
 #' my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #'

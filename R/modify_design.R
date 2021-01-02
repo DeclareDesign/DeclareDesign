@@ -29,11 +29,13 @@ find_step <- function(design, step, verb) {
 #'
 #' @examples
 #'
-#'  my_population <- declare_model(N = 100, noise = rnorm(N), label = "my_pop")
-#'
-#'  my_potential_outcomes <-
-#'    declare_potential_outcomes(Y_Z_0 = noise,
-#'                               Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+#'  my_population <- 
+#'    declare_model(
+#'      N = 100, 
+#'      U = rnorm(N),
+#'      Y_Z_0 = U,
+#'      Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
+#'    )
 #'
 #'  my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
 #'  my_assignment_2 <- declare_assignment(Z = complete_ra(N, m = 25))
