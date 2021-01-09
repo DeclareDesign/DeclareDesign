@@ -11,7 +11,7 @@
 #' @importFrom utils head type.convert
 #' @export
 #' @examples
-#' my_population <- 
+#' my_model <- 
 #'   declare_model(
 #'     N = 500, 
 #'     U = rnorm(N),
@@ -27,8 +27,7 @@
 #'
 #' my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #'
-#' design <- my_population +
-#'   my_potential_outcomes +
+#' design <- my_model +
 #'   my_inquiry +
 #'   my_assignment +
 #'   my_reveal +

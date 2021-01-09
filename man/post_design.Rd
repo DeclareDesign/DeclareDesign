@@ -35,7 +35,7 @@ Print code to recreate a design
 design <-
   declare_model(
     N = 500, 
-    U = rnorm(N)) +
+    U = rnorm(N),
     potential_outcomes(Y ~ U + Z * rnorm(N, 2, 2))
   ) +
   declare_sampling(S = complete_rs(N, n = 250)) +
@@ -63,9 +63,10 @@ my_design <- my_population + my_assignment
 print_code(my_design)
 
 
-my_population <- 
+my_model <- 
   declare_model(
-    N = 500, noise = rnorm(N))
+    N = 500, 
+    noise = rnorm(N),
     Y_Z_0 = noise, 
     Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)
   )
@@ -80,11 +81,9 @@ my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
 my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
 
-design <- my_population +
-  my_potential_outcomes +
+design <- my_model +
   my_sampling +
   my_inquiry +
-  my_mutate +
   my_assignment +
   my_reveal +
   my_estimator

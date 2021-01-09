@@ -29,7 +29,7 @@ find_step <- function(design, step, verb) {
 #'
 #' @examples
 #'
-#'  my_population <- 
+#'  my_model <- 
 #'    declare_model(
 #'      N = 100, 
 #'      U = rnorm(N),
@@ -40,7 +40,7 @@ find_step <- function(design, step, verb) {
 #'  my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
 #'  my_assignment_2 <- declare_assignment(Z = complete_ra(N, m = 25))
 #'
-#'  design <- my_population + my_potential_outcomes + my_assignment
+#'  design <- my_model + my_assignment
 #'
 #'  design
 NULL
@@ -52,9 +52,11 @@ NULL
 #' @details See \code{\link{modify_design}} for details.
 #' @rdname modify_design
 #' @examples
-#'
+#'  
+#'  \dontrun{
 #'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), after = my_assignment)
 #'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), before = my_assignment)
+#'  
 #'
 #'  # If you are using a design created by a designer, for example from
 #'  #   the DesignLibrary package, you will not have access to the step
@@ -64,6 +66,7 @@ NULL
 #'  names(design)
 #'  
 #'  insert_step(design, declare_sampling(S = complete_rs(N, n = 50)), after = "my_pop")
+#'  }
 #'
 #' @export
 insert_step <- function(design, new_step, before, after) {

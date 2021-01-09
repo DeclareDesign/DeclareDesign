@@ -13,9 +13,10 @@ print.design <- function(x, verbose = TRUE, ...) {
 #'
 #' @examples
 #'
-#' my_population <- 
+#' my_model <- 
 #'   declare_model(
-#'     N = 500, noise = rnorm(N))
+#'     N = 500, 
+#'     noise = rnorm(N),
 #'     Y_Z_0 = noise, 
 #'     Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)
 #'   )
@@ -30,11 +31,9 @@ print.design <- function(x, verbose = TRUE, ...) {
 #'
 #' my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #'
-#' design <- my_population +
-#'   my_potential_outcomes +
+#' design <- my_model +
 #'   my_sampling +
 #'   my_inquiry +
-#'   my_mutate +
 #'   my_assignment +
 #'   my_reveal +
 #'   my_estimator

@@ -35,7 +35,7 @@ See \code{\link{modify_design}} for details.
 }
 \examples{
 
- my_population <- 
+ my_model <- 
    declare_model(
      N = 100, 
      U = rnorm(N),
@@ -46,12 +46,14 @@ See \code{\link{modify_design}} for details.
  my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
  my_assignment_2 <- declare_assignment(Z = complete_ra(N, m = 25))
 
- design <- my_population + my_potential_outcomes + my_assignment
+ design <- my_model + my_assignment
 
  design
-
+ 
+ \dontrun{
  insert_step(design, declare_step(dplyr::mutate, income = noise^2), after = my_assignment)
  insert_step(design, declare_step(dplyr::mutate, income = noise^2), before = my_assignment)
+ 
 
  # If you are using a design created by a designer, for example from
  #   the DesignLibrary package, you will not have access to the step
@@ -61,6 +63,7 @@ See \code{\link{modify_design}} for details.
  names(design)
  
  insert_step(design, declare_sampling(S = complete_rs(N, n = 50)), after = "my_pop")
+ }
 
 
  delete_step(design, my_assignment)

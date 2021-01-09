@@ -7,7 +7,7 @@
 #' design <-
 #'   declare_model(
 #'     N = 500, 
-#'     U = rnorm(N)) +
+#'     U = rnorm(N),
 #'     potential_outcomes(Y ~ U + Z * rnorm(N, 2, 2))
 #'   ) +
 #'   declare_sampling(S = complete_rs(N, n = 250)) +
