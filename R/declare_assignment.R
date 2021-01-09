@@ -57,6 +57,56 @@ assignment_handler <- function(data, ...) {
   
 }
 
+validation_fn(assignment_handler) <- function(ret, dots, label) {
+  declare_time_error_if_data(ret)
+  
+  randomizr_args <-
+    c(
+      "blocks",
+      "clusters",
+      "m",
+      "m_unit",
+      "m_each",
+      "prob",
+      "prob_unit",
+      "prob_each",
+      "block_m",
+      "block_m_each",
+      "block_prob",
+      "block_prob_each",
+      "num_arms",
+      "conditions",
+      "simple"
+    )
+  
+  if(any(randomizr_args %in% names(dots))){
+    
+    if("assignment_variable" %in% names(dots)){
+      assignment_variable <- get_expr(dots[["assignment_variable"]])
+    } else {
+      assignment_variable <- "Z"
+    }
+    
+    args_quos <- dots[names(dots) %in% randomizr_args]
+    
+    args_list <- lapply(args_quos, as_label)
+    
+    suggested_call <-
+      paste0(
+        "declare_assignment(",
+        assignment_variable,
+             " = conduct_ra(N = N, ",
+             paste0(
+               paste0(names(args_list), " = ", args_list), 
+               collapse = ", "),
+             "))")
+    
+    stop(paste0("You appear to have used now-deprecated declare_assignment() syntax. Consider:\n\n", suggested_call, "\n\nAlternatively, you can set handler = assignment_handler_legacy to restore the previous functionality."), call. = FALSE)
+  }
+  ret
+}
+
+
 #' @importFrom rlang quos !!! call_modify eval_tidy quo f_rhs
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities declare_ra
 #' @param assignment_variable Name for assignment variable (quoted). Defaults to "Z". Argument to be used with default handler. 
@@ -89,8 +139,12 @@ assignment_handler_legacy <-
     data
   }
 
-validation_fn(assignment_handler) <- function(ret, dots, label) {
+
+
+  
+validation_fn(assignment_handler_legacy) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
+  
 
   dirty <- FALSE
 

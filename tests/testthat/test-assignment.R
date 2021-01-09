@@ -16,3 +16,9 @@ test_that("use of randomizr works", {
 })
 
 
+test_that("legacy warnings", {
+  expect_error(declare_assignment(m = 50), "Z = conduct_ra\\(N = N, m = 50\\)")
+  expect_error(declare_assignment(m = 50, assignment_variable = "D"), "D = conduct_ra\\(N = N, m = 50\\)")
+  expect_silent(declare_assignment(Z = complete_ra(N = N, m = 20)))
+})
+

@@ -48,6 +48,51 @@ sampling_handler <- function(data, ..., filter = S == 1) {
   
 }
 
+validation_fn(sampling_handler) <- function(ret, dots, label) {
+  declare_time_error_if_data(ret)
+  
+  randomizr_args <-
+    c(
+      "strata",
+      "clusters",
+      "n",
+      "n_unit",
+      "prob",
+      "prob_unit",
+      "strata_n",
+      "strata_prob",
+      "simple"
+    )
+  
+  if(any(randomizr_args %in% names(dots))){
+    
+    if("sampling_variable" %in% names(dots)){
+      sampling_variable <- get_expr(dots[["sampling_variable"]])
+    } else {
+      sampling_variable <- "S"
+    }
+    
+    args_quos <- dots[names(dots) %in% randomizr_args]
+    
+    args_list <- lapply(args_quos, as_label)
+    
+    suggested_call <-
+      paste0(
+        "declare_sampling(",
+        sampling_variable,
+        " = draw_rs(N = N, ",
+        paste0(
+          paste0(names(args_list), " = ", args_list), 
+          collapse = ", "),
+        "), filter = ", sampling_variable, " == 1)")
+    
+    stop(paste0("You appear to have used now-deprecated declare_sampling() syntax. Consider:\n\n", suggested_call, "\n\nAlternatively, you can set handler = sampling_handler_legacy to restore the previous functionality."), call. = FALSE)
+  }
+  ret
+}
+
+
+
 #' @param sampling_variable The prefix for the sampling inclusion probability variable.
 #' @param drop_nonsampled Logical indicating whether to drop units that are not sampled. Default is \code{TRUE}.
 #' @param data A data.frame.
@@ -80,7 +125,7 @@ sampling_handler_legacy <- function(data, ..., sampling_variable = "S", drop_non
   }
 }
 
-validation_fn(sampling_handler) <- function(ret, dots, label) {
+validation_fn(sampling_handler_legacy) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
 
   if ("sampling_variable" %in% names(dots) &&

@@ -75,7 +75,7 @@ test_that("sending bad objects to design yields error", {
 })
 
 test_that("test send design as RHS", {
-  my_rhs <- declare_sampling(n = 50) + declare_assignment(Z = complete_ra(N, m = 5))
+  my_rhs <- declare_sampling(S = complete_rs(N, n = 50)) + declare_assignment(Z = complete_ra(N, m = 5))
 
   expect_length(declare_population(N = 100) + my_rhs, 3)
 })

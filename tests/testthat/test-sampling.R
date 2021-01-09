@@ -20,3 +20,8 @@ test_that("use of randomizr and filter works", {
 })
 
 
+test_that("legacy warnings", {
+  expect_error(declare_sampling(n = 50), "S = draw_rs\\(N = N, n = 50\\)")
+  expect_error(declare_sampling(n = 50, sampling_variable = "D"), "D = draw_rs\\(N = N, n = 50\\)")
+  expect_silent(declare_sampling(S = complete_rs(N = N, n = 20)))
+})
