@@ -19,14 +19,18 @@
 #'
 #' # Complete random sampling
 #' 
-#' design + declare_sampling(S = complete_rs(N = N, n = 50), filter = S == 1)
+#' design + declare_sampling(
+#'   S = complete_rs(N = N, n = 50), 
+#'   filter = S == 1, handler = sampling_handler)
 #'
 #' # equivalently, by default filter is set to S == 1
-#' design + declare_sampling(S = complete_rs(N = N, n = 50))
+#' design + declare_sampling(S = complete_rs(N = N, n = 50), 
+#'                           handler = sampling_handler)
 #' 
 #' # Stratified random sampling
 #'
-#' design + declare_sampling(S = strata_rs(strata = female))
+#' design + declare_sampling(S = strata_rs(strata = female), 
+#'                           handler = sampling_handler)
 declare_sampling <- make_declarations(sampling_handler_legacy, "sampling")
 
 #' @param filter Unquoted expression for filtering S. By default subsets to \code{S == 1}.
@@ -34,6 +38,7 @@ declare_sampling <- make_declarations(sampling_handler_legacy, "sampling")
 #' @importFrom rlang quos !!!
 #' @importFrom fabricatr fabricate
 #' @rdname declare_sampling
+#' @export
 sampling_handler <- function(data, ..., filter = S == 1) {
 
   options <- quos(...)

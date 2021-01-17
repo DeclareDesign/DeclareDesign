@@ -37,8 +37,8 @@ find_step <- function(design, step, verb) {
 #'      Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
 #'    )
 #'
-#'  my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
-#'  my_assignment_2 <- declare_assignment(Z = complete_ra(N, m = 25))
+#'  my_assignment <- declare_assignment(Z = complete_ra(N, m = 50), handler = assignment_handler)
+#'  my_assignment_2 <- declare_assignment(Z = complete_ra(N, m = 25), handler = assignment_handler)
 #'
 #'  design <- my_model + my_assignment
 #'
@@ -54,8 +54,10 @@ NULL
 #' @examples
 #'  
 #'  \dontrun{
-#'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), after = my_assignment)
-#'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), before = my_assignment)
+#'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), 
+#'              after = my_assignment)
+#'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), 
+#'              before = my_assignment)
 #'  
 #'
 #'  # If you are using a design created by a designer, for example from
@@ -65,7 +67,10 @@ NULL
 #'  # get the labels for the steps
 #'  names(design)
 #'  
-#'  insert_step(design, declare_sampling(S = complete_rs(N, n = 50)), after = "my_pop")
+#'  insert_step(design, 
+#'    declare_sampling(S = complete_rs(N, n = 50), 
+#'    handler = sampling_handler),
+#'    after = "my_pop")
 #'  }
 #'
 #' @export

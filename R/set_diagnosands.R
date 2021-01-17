@@ -12,7 +12,7 @@
 #' design <-
 #' declare_model(data = sleep) +
 #'   declare_inquiry(mean_outcome = mean(extra)) +
-#'   declare_sampling(S = complete_rs(N, n = 10)) +
+#'   declare_sampling(S = complete_rs(N, n = 10), handler = sampling_handler) +
 #'   declare_estimator(extra ~ 1, inquiry = "mean_outcome",
 #'      term = '(Intercept)', model = lm_robust)
 #'

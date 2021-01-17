@@ -14,7 +14,8 @@
 #'
 #' n <- 500
 #' population <- declare_model(N = 1000)
-#' sampling <- declare_sampling(S = complete_rs(N, n = n))
+#' sampling <- declare_sampling(S = complete_rs(N, n = n), 
+#'                              handler = sampling_handler)
 #' design <- population + sampling
 #'
 #' # returns a single, modified design
@@ -29,7 +30,9 @@
 #'
 #' prob_each <- c(.1, .5, .4)
 #'
-#' assignment <- declare_assignment(Z = complete_ra(prob_each = prob_each))
+#' assignment <- declare_assignment(
+#'   Z = complete_ra(prob_each = prob_each), 
+#'   handler = assignment_handler)
 #'
 #' design <- population + assignment
 #'

@@ -54,7 +54,7 @@ design_stub  <-
     X = rnorm(N),
     potential_outcomes(Y ~ Z + rnorm(N))
   ) + 
-  declare_assignment(Z = complete_ra(N, m = 50)) + 
+  declare_assignment(Z = complete_ra(N, m = 50), handler = assignment_handler) + 
   declare_measurement(Y = reveal_outcomes(Y ~ Z))
 
 # sGet example data to compute inquiries on

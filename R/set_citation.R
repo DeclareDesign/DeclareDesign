@@ -13,7 +13,7 @@
 #'
 #' design <-
 #' declare_model(data = sleep) +
-#'   declare_sampling(S = complete_rs(N, n = 10))
+#'   declare_sampling(S = complete_rs(N, n = 10), handler = sampling_handler)
 #'
 #' design <-
 #'   set_citation(design,

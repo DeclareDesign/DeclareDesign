@@ -45,33 +45,33 @@ design <- declare_model(
 ) + NULL
 
 # Declare assignment of m units to treatment
-design + declare_assignment(Z = complete_ra(N = N, m = 100))
+design + declare_assignment(Z = complete_ra(N = N, m = 100), handler = assignment_handler)
 
 # Declare assignment specifying varying block probabilities
 design + 
   declare_assignment(Z = block_ra(blocks = female, 
-                                  block_prob = c(1/3, 2/3)))
+                                  block_prob = c(1/3, 2/3)), handler = assignment_handler)
 
 # Declare assignment of clusters with probability 1/4
 design + declare_assignment(
-  Z = cluster_ra(prob = 1/4, clusters = classrooms))
+  Z = cluster_ra(prob = 1/4, clusters = classrooms), handler = assignment_handler)
  
 # Declare factorial assignment (Approach 1): 
 #   Use complete random assignment to assign Z1 
 #   then block on Z1 to assign Z2. 
 design + 
    declare_assignment(Z1 = complete_ra(N = N, m = 100),
-                      Z2 = block_ra(blocks = Z1))
+                      Z2 = block_ra(blocks = Z1), handler = assignment_handler)
    
 # Declare factorial assignment (Approach 2): 
 #   Assign to four conditions and then split into Z1 and Z2 
 design +  
   declare_assignment(Z = complete_ra(N = N, conditions = 1:4),
                      Z1 = as.numeric(Z \%in\% 2:3), 
-                     Z2 = as.numeric(Z \%in\% 3:4))
+                     Z2 = as.numeric(Z \%in\% 3:4), handler = assignment_handler)
    
 # Declare assignment using functions outside randomizr package:
 design + 
-  declare_assignment(Z = rbinom(n = N, size = 1, prob = 0.35))
+  declare_assignment(Z = rbinom(n = N, size = 1, prob = 0.35), handler = assignment_handler)
 
 }
