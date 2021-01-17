@@ -43,7 +43,7 @@
 #' design + 
 #'   declare_assignment(Z = rbinom(n = N, size = 1, prob = 0.35))
 #' 
-declare_assignment <- make_declarations(assignment_handler, "assignment")
+declare_assignment <- make_declarations(assignment_handler_legacy, "assignment")
 
 #' @param data A data.frame.
 #' @importFrom rlang quos !!!

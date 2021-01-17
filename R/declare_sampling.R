@@ -27,7 +27,7 @@
 #' # Stratified random sampling
 #'
 #' design + declare_sampling(S = strata_rs(strata = female))
-declare_sampling <- make_declarations(sampling_handler, "sampling")
+declare_sampling <- make_declarations(sampling_handler_legacy, "sampling")
 
 #' @param filter Unquoted expression for filtering S. By default subsets to \code{S == 1}.
 #' @param data A data.frame.

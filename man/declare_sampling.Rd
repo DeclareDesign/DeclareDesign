@@ -6,7 +6,7 @@
 \alias{sampling_handler_legacy}
 \title{Declare sampling procedure}
 \usage{
-declare_sampling(..., handler = sampling_handler, label = NULL)
+declare_sampling(..., handler = sampling_handler_legacy, label = NULL)
 
 sampling_handler(data, ..., filter = S == 1)
 
