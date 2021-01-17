@@ -4,7 +4,7 @@ prob_assgn <- 0.5
 design_a <-
   declare_population(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +
   declare_potential_outcomes(Y_Z_0 = u, Y_Z_1 = u + rnorm(N, .5)) +
-  declare_assignment(Z = complete_ra(N, prob = prob_assgn)) + 
+  declare_assignment(handler = assignment_handler, Z = complete_ra(N, prob = prob_assgn)) + 
   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0), label = "ATE") +
   declare_reveal() +
   declare_estimator(Y ~ Z, inquiry = "ATE", label = "est1")
@@ -52,7 +52,7 @@ test_that("compare_diagnoses errors when it should", {
   designer <- function(N) {
     declare_population(N = N, noise = rnorm(N)) +
       declare_potential_outcomes(Y ~ 0.20 * Z + noise) +
-      declare_assignment(Z = complete_ra(N, prob = 0.5)) +
+      declare_assignment(handler = assignment_handler, Z = complete_ra(N, prob = 0.5)) +
       declare_inquiry(ate = mean(Y_Z_1 - Y_Z_0)) +
       declare_reveal() + 
       declare_estimator(Y ~ Z)

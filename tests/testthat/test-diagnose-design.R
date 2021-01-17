@@ -9,9 +9,9 @@ test_that("allow design functions to be sent to simulate design and diagnose_des
     my_potential_outcomes <-
       declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-    my_sampling <- declare_sampling(S = complete_rs(N, n = 250))
+    my_sampling <- declare_sampling(handler = sampling_handler, S = complete_rs(N, n = 250))
 
-    my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
+    my_assignment <- declare_assignment(handler = assignment_handler, Z = complete_ra(N, m = 25))
 
     my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
@@ -73,7 +73,7 @@ test_that("default diagnosands work", {
     my_potential_outcomes <-
       declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-    my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
+    my_assignment <- declare_assignment(handler = assignment_handler, Z = complete_ra(N, m = 25))
 
     my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 

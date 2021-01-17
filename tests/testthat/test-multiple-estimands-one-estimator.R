@@ -63,7 +63,7 @@ test_that("More multiple inquiries", {
   pate <- declare_inquiry(pate = mean(Y_Z_1 - Y_Z_0))
   smp <- declare_sampling(handler = my_smp_fun)
   sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))
-  assgn <- declare_assignment(Z = complete_ra(N, m = 10))
+  assgn <- declare_assignment(handler = assignment_handler, Z = complete_ra(N, m = 10))
   my_reveal <- declare_reveal()
   mator_both <- declare_estimator(Y ~ Z, inquiry = c(pate, sate))
 

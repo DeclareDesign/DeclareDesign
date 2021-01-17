@@ -3,7 +3,7 @@ context("Simulate Design")
 my_population <- declare_population(N = 50, noise = rnorm(N))
 my_potential_outcomes <-
   declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
-my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
+my_assignment <- declare_assignment(handler = assignment_handler, Z = complete_ra(N, m = 25))
 my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 my_reveal <- declare_reveal()
@@ -51,7 +51,7 @@ my_designer <- function(N, tau) {
   pop <- declare_population(N = N)
   pos <-
     declare_potential_outcomes(Y_Z_0 = rnorm(N), Y_Z_1 = Y_Z_0 + tau)
-  my_assignment <- declare_assignment(Z = complete_ra(N, m = floor(N / 2)))
+  my_assignment <- declare_assignment(handler = assignment_handler, Z = complete_ra(N, m = floor(N / 2)))
   my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
   my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
   my_reveal <- declare_reveal()
@@ -99,7 +99,7 @@ test_that("designs with some estimators that don't have p.values return the p.va
   des <- declare_population(N = 100) +
     declare_potential_outcomes(Y ~ .25 * Z + rnorm(N)) +
     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-    declare_assignment(Z = complete_ra(N, prob = 0.5)) +
+    declare_assignment(handler = assignment_handler, Z = complete_ra(N, prob = 0.5)) +
     declare_reveal(Y, Z) +
     declare_estimator(Y ~ Z, inquiry = "ATE", label = "blah") +
     declare_estimator(handler = label_estimator(my_custom_estimator), inquiry = "ATE")

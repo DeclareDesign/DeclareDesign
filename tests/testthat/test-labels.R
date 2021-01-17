@@ -10,11 +10,11 @@ test_that("error if more than one label is sent to any step", {
     Y ~ Z,
     label = c("lbl1", "lbl2")), "Please provide only one label.")
   
-  expect_error(declare_sampling(
+  expect_error(declare_sampling(handler = sampling_handler, 
     n = 10,
     label = c("lbl1", "lbl2")), "Please provide only one label.")
   
-  expect_error(declare_assignment(
+  expect_error(declare_assignment(handler = assignment_handler, 
     Z = complete_ra(N, m = 10),
     label = c("lbl1", "lbl2")), "Please provide only one label.")
   

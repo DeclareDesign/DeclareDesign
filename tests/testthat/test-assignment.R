@@ -9,7 +9,7 @@ test_that("use of randomizr works", {
   
   dat <- draw_data(design)
   
-  assgn1 <- declare_assignment(Z = complete_ra(N = N, m = 10))
+  assgn1 <- declare_assignment(handler = assignment_handler, Z = complete_ra(N = N, m = 10))
   
   expect_equal(sum(assgn1(dat)$Z), 10)
   
@@ -17,8 +17,8 @@ test_that("use of randomizr works", {
 
 
 test_that("legacy warnings", {
-  expect_error(declare_assignment(m = 50), "Z = conduct_ra\\(N = N, m = 50\\)")
-  expect_error(declare_assignment(m = 50, assignment_variable = "D"), "D = conduct_ra\\(N = N, m = 50\\)")
-  expect_silent(declare_assignment(Z = complete_ra(N = N, m = 20)))
+  expect_error(declare_assignment(handler = assignment_handler, m = 50), "Z = conduct_ra\\(N = N, m = 50\\)")
+  expect_error(declare_assignment(handler = assignment_handler, m = 50, assignment_variable = "D"), "D = conduct_ra\\(N = N, m = 50\\)")
+  expect_silent(declare_assignment(handler = assignment_handler, Z = complete_ra(N = N, m = 20)))
 })
 
