@@ -10,7 +10,7 @@ my_potential_outcomes <-
     Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)
   )
 
-my_assignment <- declare_assignment(handler = assignment_handler, Z = complete_ra(N, m = 25))
+my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
 
 pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
 

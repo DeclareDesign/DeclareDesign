@@ -91,9 +91,13 @@ sampling_handler <- function(data, ..., legacy = TRUE) {
   
   if(!legacy) {
     
+    filtr <- options[["filter"]]
+    options[["filter"]] <- NULL
+    
+    
     data <- fabricate(data = data, !!!options, ID_label = NA)
     
-    rows <- enquo(filter)
+    rows <- reveal_nse_helper(filtr)
     rows_val <- eval_tidy(rows, data)
     stopifnot(is.logical(rows_val))
     
@@ -102,7 +106,9 @@ sampling_handler <- function(data, ..., legacy = TRUE) {
   } else {
     
     sampling_variable <- options[["sampling_variable"]]
+    options[["sampling_variable"]] <- NULL
     drop_nonsampled <- options[["drop_nonsampled"]]
+    options[["drop_nonsampled"]] <- NULL
     
     samp <- reveal_nse_helper(sampling_variable)
     samp_inclusion_prob <- as.symbol(paste0(samp, "_inclusion_prob"))
