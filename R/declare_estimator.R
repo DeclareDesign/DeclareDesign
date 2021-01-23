@@ -127,7 +127,7 @@
 #'     potential_outcomes(Y ~ .25 * Z + U)
 #'   ) + 
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_assignment(Z = complete_ra(N, m = 50), handler = assignment_handler) +
+#'   declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
 #'   my_estimator_dim
 #'

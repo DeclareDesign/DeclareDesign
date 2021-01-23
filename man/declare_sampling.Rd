@@ -19,10 +19,6 @@ sampling_handler(data, ..., legacy = TRUE)
 \item{data}{A data.frame.}
 
 \item{legacy}{Use the legacy randomizr functionality. This will be disabled in future; please use legacy = FALSE.}
-
-\item{sampling_variable}{The prefix for the sampling inclusion probability variable.}
-
-\item{drop_nonsampled}{Logical indicating whether to drop units that are not sampled. Default is \code{TRUE}.}
 }
 \value{
 A function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
@@ -43,14 +39,14 @@ design <- declare_model(
 
 design + declare_sampling(
   S = complete_rs(N = N, n = 50), 
-  filter = S == 1, handler = sampling_handler)
+  filter = S == 1, legacy = FALSE)
 
 # equivalently, by default filter is set to S == 1
 design + declare_sampling(S = complete_rs(N = N, n = 50), 
-                          handler = sampling_handler)
+                          legacy = FALSE)
 
 # Stratified random sampling
 
 design + declare_sampling(S = strata_rs(strata = female), 
-                          handler = sampling_handler)
+                          legacy = FALSE)
 }

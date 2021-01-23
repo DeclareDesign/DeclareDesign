@@ -21,21 +21,19 @@
 #' 
 #' design + declare_sampling(
 #'   S = complete_rs(N = N, n = 50), 
-#'   filter = S == 1, handler = sampling_handler)
+#'   filter = S == 1, legacy = FALSE)
 #'
 #' # equivalently, by default filter is set to S == 1
 #' design + declare_sampling(S = complete_rs(N = N, n = 50), 
-#'                           handler = sampling_handler)
+#'                           legacy = FALSE)
 #' 
 #' # Stratified random sampling
 #'
 #' design + declare_sampling(S = strata_rs(strata = female), 
-#'                           handler = sampling_handler)
+#'                           legacy = FALSE)
 declare_sampling <- make_declarations(sampling_handler, "sampling")
 
 #' @param legacy Use the legacy randomizr functionality. This will be disabled in future; please use legacy = FALSE.
-#' @param sampling_variable The prefix for the sampling inclusion probability variable.
-#' @param drop_nonsampled Logical indicating whether to drop units that are not sampled. Default is \code{TRUE}.
 #' @param data A data.frame.
 #' @importFrom rlang quos !!! call_modify eval_tidy quo
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
@@ -135,7 +133,7 @@ validation_fn(sampling_handler) <- function(ret, dots, label) {
           dots$declaration <- declaration
           
           ret <- build_step(currydata(sampling_handler, dots),
-                            handler = sampling_handler,
+                            legacy = FALSE,
                             dots = dots,
                             label = label,
                             step_type = attr(ret, "step_type"),

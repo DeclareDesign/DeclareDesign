@@ -37,8 +37,8 @@ find_step <- function(design, step, verb) {
 #'      Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
 #'    )
 #'
-#'  my_assignment <- declare_assignment(Z = complete_ra(N, m = 50), handler = assignment_handler)
-#'  my_assignment_2 <- declare_assignment(Z = complete_ra(N, m = 25), handler = assignment_handler)
+#'  my_assignment <- declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE)
+#'  my_assignment_2 <- declare_assignment(Z = complete_ra(N, m = 25), legacy = FALSE)
 #'
 #'  design <- my_model + my_assignment
 #'
@@ -69,7 +69,7 @@ NULL
 #'  
 #'  insert_step(design, 
 #'    declare_sampling(S = complete_rs(N, n = 50), 
-#'    handler = sampling_handler),
+#'    legacy = FALSE),
 #'    after = "my_pop")
 #'  }
 #'

@@ -14,42 +14,40 @@
 #' ) + NULL
 #' 
 #' # Declare assignment of m units to treatment
-#' design + declare_assignment(Z = complete_ra(N = N, m = 100), handler = assignment_handler)
+#' design + declare_assignment(Z = complete_ra(N = N, m = 100), legacy = FALSE)
 #' 
 #' # Declare assignment specifying varying block probabilities
 #' design + 
 #'   declare_assignment(Z = block_ra(blocks = female, 
-#'                                   block_prob = c(1/3, 2/3)), handler = assignment_handler)
+#'                                   block_prob = c(1/3, 2/3)), legacy = FALSE)
 #' 
 #' # Declare assignment of clusters with probability 1/4
 #' design + declare_assignment(
-#'   Z = cluster_ra(prob = 1/4, clusters = classrooms), handler = assignment_handler)
+#'   Z = cluster_ra(prob = 1/4, clusters = classrooms), legacy = FALSE)
 #'  
 #' # Declare factorial assignment (Approach 1): 
 #' #   Use complete random assignment to assign Z1 
 #' #   then block on Z1 to assign Z2. 
 #' design + 
 #'    declare_assignment(Z1 = complete_ra(N = N, m = 100),
-#'                       Z2 = block_ra(blocks = Z1), handler = assignment_handler)
+#'                       Z2 = block_ra(blocks = Z1), legacy = FALSE)
 #'    
 #' # Declare factorial assignment (Approach 2): 
 #' #   Assign to four conditions and then split into Z1 and Z2 
 #' design +  
 #'   declare_assignment(Z = complete_ra(N = N, conditions = 1:4),
 #'                      Z1 = as.numeric(Z %in% 2:3), 
-#'                      Z2 = as.numeric(Z %in% 3:4), handler = assignment_handler)
+#'                      Z2 = as.numeric(Z %in% 3:4), legacy = FALSE)
 #'    
 #' # Declare assignment using functions outside randomizr package:
 #' design + 
-#'   declare_assignment(Z = rbinom(n = N, size = 1, prob = 0.35), handler = assignment_handler)
+#'   declare_assignment(Z = rbinom(n = N, size = 1, prob = 0.35), legacy = FALSE)
 #' 
 declare_assignment <- make_declarations(assignment_handler, "assignment")
 
 #' @importFrom rlang quos !!! call_modify eval_tidy quo f_rhs
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities declare_ra
 #' @param legacy Use the legacy randomizr functionality. This will be disabled in future; please use legacy = FALSE.
-#' @param assignment_variable Name for assignment variable (quoted). Defaults to "Z". Argument to be used with default handler. 
-#' @param append_probabilities_matrix Should the condition probabilities matrix be appended to the data? Defaults to FALSE.  Argument to be used with default handler.
 #' @param data A data.frame.
 #' @rdname declare_assignment
 assignment_handler <- function(data, ..., legacy = TRUE) {
@@ -80,7 +78,7 @@ assignment_handler_internal_fabricatr <- function(data, ...) {
   
 }
 
-assignment_handler_internal_randomizer <-
+assignment_handler_internal_randomizr <-
   function(data, ..., assignment_variable = "Z", append_probabilities_matrix = FALSE) {
     options <- quos(...)
     
@@ -157,7 +155,7 @@ validation_fn(assignment_handler) <- function(ret, dots, label) {
     
     if (dirty) {
       ret <- build_step(currydata(assignment_handler, dots),
-                        handler = assignment_handler,
+                        legacy = FALSE,
                         dots = dots,
                         label = label,
                         step_type = attr(ret, "step_type"),
@@ -208,7 +206,7 @@ validation_fn(assignment_handler) <- function(ret, dots, label) {
             collapse = ", "),
           "))")
       
-      stop(paste0("You appear to have used now-deprecated declare_assignment() syntax. Consider:\n\n", suggested_call, "\n\nAlternatively, you can set handler = assignment_handler_legacy to restore the previous functionality."), call. = FALSE)
+      stop(paste0("You appear to have used legacy declare_assignment() syntax. Consider:\n\n", suggested_call, "\n\nAlternatively, you can set legacy = TRUE to restore the previous functionality."), call. = FALSE)
     }
     
   }

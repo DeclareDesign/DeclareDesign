@@ -19,10 +19,6 @@ assignment_handler(data, ..., legacy = TRUE)
 \item{data}{A data.frame.}
 
 \item{legacy}{Use the legacy randomizr functionality. This will be disabled in future; please use legacy = FALSE.}
-
-\item{assignment_variable}{Name for assignment variable (quoted). Defaults to "Z". Argument to be used with default handler.}
-
-\item{append_probabilities_matrix}{Should the condition probabilities matrix be appended to the data? Defaults to FALSE.  Argument to be used with default handler.}
 }
 \value{
 A function that takes a data.frame as an argument and returns a data.frame with assignment columns appended.
@@ -39,33 +35,33 @@ design <- declare_model(
 ) + NULL
 
 # Declare assignment of m units to treatment
-design + declare_assignment(Z = complete_ra(N = N, m = 100), handler = assignment_handler)
+design + declare_assignment(Z = complete_ra(N = N, m = 100), legacy = FALSE)
 
 # Declare assignment specifying varying block probabilities
 design + 
   declare_assignment(Z = block_ra(blocks = female, 
-                                  block_prob = c(1/3, 2/3)), handler = assignment_handler)
+                                  block_prob = c(1/3, 2/3)), legacy = FALSE)
 
 # Declare assignment of clusters with probability 1/4
 design + declare_assignment(
-  Z = cluster_ra(prob = 1/4, clusters = classrooms), handler = assignment_handler)
+  Z = cluster_ra(prob = 1/4, clusters = classrooms), legacy = FALSE)
  
 # Declare factorial assignment (Approach 1): 
 #   Use complete random assignment to assign Z1 
 #   then block on Z1 to assign Z2. 
 design + 
    declare_assignment(Z1 = complete_ra(N = N, m = 100),
-                      Z2 = block_ra(blocks = Z1), handler = assignment_handler)
+                      Z2 = block_ra(blocks = Z1), legacy = FALSE)
    
 # Declare factorial assignment (Approach 2): 
 #   Assign to four conditions and then split into Z1 and Z2 
 design +  
   declare_assignment(Z = complete_ra(N = N, conditions = 1:4),
                      Z1 = as.numeric(Z \%in\% 2:3), 
-                     Z2 = as.numeric(Z \%in\% 3:4), handler = assignment_handler)
+                     Z2 = as.numeric(Z \%in\% 3:4), legacy = FALSE)
    
 # Declare assignment using functions outside randomizr package:
 design + 
-  declare_assignment(Z = rbinom(n = N, size = 1, prob = 0.35), handler = assignment_handler)
+  declare_assignment(Z = rbinom(n = N, size = 1, prob = 0.35), legacy = FALSE)
 
 }

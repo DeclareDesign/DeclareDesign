@@ -54,7 +54,7 @@ design <-
     Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
   ) + 
   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-  declare_assignment(Z = complete_ra(N), handler = assignment_handler) +
+  declare_assignment(Z = complete_ra(N), legacy = FALSE) +
   declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
   declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
