@@ -3,19 +3,11 @@
 \name{declare_assignment}
 \alias{declare_assignment}
 \alias{assignment_handler}
-\alias{assignment_handler_legacy}
 \title{Declare Data Strategy: Assignment}
 \usage{
-declare_assignment(..., handler = assignment_handler_legacy, label = NULL)
+declare_assignment(..., handler = assignment_handler, label = NULL)
 
-assignment_handler(data, ...)
-
-assignment_handler_legacy(
-  data,
-  ...,
-  assignment_variable = "Z",
-  append_probabilities_matrix = FALSE
-)
+assignment_handler(data, ..., legacy = TRUE)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
