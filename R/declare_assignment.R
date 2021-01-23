@@ -45,158 +45,174 @@
 #' 
 declare_assignment <- make_declarations(assignment_handler, "assignment")
 
-# validation_fn(assignment_handler) <- function(ret, dots, label) {
-#   declare_time_error_if_data(ret)
-#   
-#   randomizr_args <-
-#     c(
-#       "blocks",
-#       "clusters",
-#       "m",
-#       "m_unit",
-#       "m_each",
-#       "prob",
-#       "prob_unit",
-#       "prob_each",
-#       "block_m",
-#       "block_m_each",
-#       "block_prob",
-#       "block_prob_each",
-#       "num_arms",
-#       "conditions",
-#       "simple"
-#     )
-#   
-#   if(any(randomizr_args %in% names(dots))){
-#     
-#     if("assignment_variable" %in% names(dots)){
-#       assignment_variable <- get_expr(dots[["assignment_variable"]])
-#     } else {
-#       assignment_variable <- "Z"
-#     }
-#     
-#     args_quos <- dots[names(dots) %in% randomizr_args]
-#     
-#     args_list <- lapply(args_quos, as_label)
-#     
-#     suggested_call <-
-#       paste0(
-#         "declare_assignment(",
-#         assignment_variable,
-#         " = conduct_ra(N = N, ",
-#         paste0(
-#           paste0(names(args_list), " = ", args_list), 
-#           collapse = ", "),
-#         "))")
-#     
-#     stop(paste0("You appear to have used now-deprecated declare_assignment() syntax. Consider:\n\n", suggested_call, "\n\nAlternatively, you can set handler = assignment_handler_legacy to restore the previous functionality."), call. = FALSE)
-#   }
-#   ret
-# }
-
-
 #' @importFrom rlang quos !!! call_modify eval_tidy quo f_rhs
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities declare_ra
+#' @param legacy Use the legacy randomizr functionality. This will be disabled in future; please use legacy = FALSE.
 #' @param assignment_variable Name for assignment variable (quoted). Defaults to "Z". Argument to be used with default handler. 
 #' @param append_probabilities_matrix Should the condition probabilities matrix be appended to the data? Defaults to FALSE.  Argument to be used with default handler.
 #' @param data A data.frame.
 #' @rdname declare_assignment
-assignment_handler <-
-  function(data, ..., legacy = TRUE) {
+assignment_handler <- function(data, ..., legacy = TRUE) {
+  
+  options <- quos(...)
+  
+  if(!legacy) {
+    
+    options$legacy <- NULL
+    
+    eval_tidy(quo(assignment_handler_internal_fabricatr(data = data, !!!options)))
+    
+  } else {
+    
+    options$legacy <- NULL
+    
+    eval_tidy(quo(assignment_handler_internal_randomizr(data = data, !!!options)))
+    
+  }
+  
+}
+
+assignment_handler_internal_fabricatr <- function(data, ...) {
+  
+  options <- quos(...)
+  
+  fabricate(data = data, !!!options, ID_label = NA)
+  
+}
+
+assignment_handler_internal_randomizer <-
+  function(data, ..., assignment_variable = "Z", append_probabilities_matrix = FALSE) {
     options <- quos(...)
     
-    if(!legacy) {
-      
-      fabricate(data = data, !!!options, ID_label = NA)
-      
-    } else {
-      
-      assignment_variable <- options[["assignment_variable"]]
-      append_probabilities_matrix <- options[["append_probabilities_matrix"]]
-      
-      decl <- eval_tidy(quo(declare_ra(N = !!nrow(data), !!!options)), data)    
-      
-      for (assn in assignment_variable) {
-        cond_prob <- as.symbol(paste0(assn, "_cond_prob"))
-        assn <- as.symbol(assn)
-        if(append_probabilities_matrix) {
-          # Creates Z.prob_1 cols
-          data <- fabricate(data, !!assn := !!decl$probabilities_matrix, ID_label = NA)
-          # change to underscore
-          names(data) <- sub(paste0("(?<=",assn,")[.]"), "_", names(data), perl = TRUE)
-        }
-        
-        data <- fabricate(data,
-                          !!assn := conduct_ra(!!decl),
-                          !!cond_prob := obtain_condition_probabilities(!!decl, assignment = !!assn),
-                          ID_label = NA
-        )
+    decl <- eval_tidy(quo(declare_ra(N = !!nrow(data), !!!options)), data)    
+    
+    for (assn in assignment_variable) {
+      cond_prob <- as.symbol(paste0(assn, "_cond_prob"))
+      assn <- as.symbol(assn)
+      if(append_probabilities_matrix) {
+        # Creates Z.prob_1 cols
+        data <- fabricate(data, !!assn := !!decl$probabilities_matrix, ID_label = NA)
+        # change to underscore
+        names(data) <- sub(paste0("(?<=",assn,")[.]"), "_", names(data), perl = TRUE)
       }
       
-      data
+      data <- fabricate(data,
+                        !!assn := conduct_ra(!!decl),
+                        !!cond_prob := obtain_condition_probabilities(!!decl, assignment = !!assn),
+                        ID_label = NA
+      )
+    }
+    
+    data
+  }
+
+validation_fn(assignment_handler) <- function(ret, dots, label) {
+  declare_time_error_if_data(ret)
+  
+  if(eval_tidy(dots[["legacy"]]) == TRUE) {
+    
+    dirty <- FALSE
+    
+    if (!"declaration" %in% names(dots)) {
+      if ("blocks" %in% names(dots)) {
+        if (class(f_rhs(dots[["blocks"]])) == "character") {
+          declare_time_error("Must provide the bare (unquoted) block variable name to blocks.", ret)
+        }
+      }
       
+      if ("clusters" %in% names(dots)) {
+        if (class(f_rhs(dots[["clusters"]])) == "character") {
+          declare_time_error("Must provide the bare (unquoted) cluster variable name to clusters.", ret)
+        }
+      }
+      
+      ra_args <- setdiff(names(dots), names(formals(assignment_handler))) # removes data and assignment_variable
+      
+      ra_dots <- dots[ra_args]
+      
+      if (length(ra_dots) > 0) {
+        declaration <- tryCatch(eval_tidy(quo(declare_ra(!!!ra_dots))), error = function(e) e)
+        
+        if (inherits(declaration, "ra_declaration")) {
+          # message("Assignment declaration factored out from execution path.")
+          dots[ra_args] <- NULL
+          dots$declaration <- declaration
+          dirty <- TRUE
+        }
+      }
+    }
+    
+    if ("assignment_variable" %in% names(dots)) {
+      if (class(f_rhs(dots[["assignment_variable"]])) == "NULL") {
+        declare_time_error("Must provide assignment_variable.", ret)
+      }
+      assignment_variable <- reveal_nse_helper(dots$assignment_variable)
+      
+      dots$assignment_variable <- assignment_variable
+      
+      dirty <- TRUE
+    } else {
+      assignment_variable <- formals(assignment_handler)$assignment_variable
+    } 
+    
+    if (dirty) {
+      ret <- build_step(currydata(assignment_handler, dots),
+                        handler = assignment_handler,
+                        dots = dots,
+                        label = label,
+                        step_type = attr(ret, "step_type"),
+                        causal_type = attr(ret, "causal_type"),
+                        call = attr(ret, "call")
+      )
+    }
+    
+  } else {
+    randomizr_args <-
+      c(
+        "blocks",
+        "clusters",
+        "m",
+        "m_unit",
+        "m_each",
+        "prob",
+        "prob_unit",
+        "prob_each",
+        "block_m",
+        "block_m_each",
+        "block_prob",
+        "block_prob_each",
+        "num_arms",
+        "conditions",
+        "simple"
+      )
+    
+    if("assignment_variable" %in% names(dots)){
+      assignment_variable <- get_expr(dots[["assignment_variable"]])
+    } else {
+      assignment_variable <- "Z"
+    }
+    
+    if(any(randomizr_args %in% names(dots))){
+      
+      args_quos <- dots[names(dots) %in% randomizr_args]
+      
+      args_list <- lapply(args_quos, as_label)
+      
+      suggested_call <-
+        paste0(
+          "declare_assignment(",
+          assignment_variable,
+          " = conduct_ra(N = N, ",
+          paste0(
+            paste0(names(args_list), " = ", args_list),
+            collapse = ", "),
+          "))")
+      
+      stop(paste0("You appear to have used now-deprecated declare_assignment() syntax. Consider:\n\n", suggested_call, "\n\nAlternatively, you can set handler = assignment_handler_legacy to restore the previous functionality."), call. = FALSE)
     }
     
   }
-
-# validation_fn(assignment_handler_legacy) <- function(ret, dots, label) {
-#   declare_time_error_if_data(ret)
-#   
-#   
-#   dirty <- FALSE
-#   
-#   if (!"declaration" %in% names(dots)) {
-#     if ("blocks" %in% names(dots)) {
-#       if (class(f_rhs(dots[["blocks"]])) == "character") {
-#         declare_time_error("Must provide the bare (unquoted) block variable name to blocks.", ret)
-#       }
-#     }
-#     
-#     if ("clusters" %in% names(dots)) {
-#       if (class(f_rhs(dots[["clusters"]])) == "character") {
-#         declare_time_error("Must provide the bare (unquoted) cluster variable name to clusters.", ret)
-#       }
-#     }
-#     
-#     ra_args <- setdiff(names(dots), names(formals(assignment_handler))) # removes data and assignment_variable
-#     
-#     ra_dots <- dots[ra_args]
-#     
-#     if (length(ra_dots) > 0) {
-#       declaration <- tryCatch(eval_tidy(quo(declare_ra(!!!ra_dots))), error = function(e) e)
-#       
-#       if (inherits(declaration, "ra_declaration")) {
-#         # message("Assignment declaration factored out from execution path.")
-#         dots[ra_args] <- NULL
-#         dots$declaration <- declaration
-#         dirty <- TRUE
-#       }
-#     }
-#   }
-#   
-#   if ("assignment_variable" %in% names(dots)) {
-#     if (class(f_rhs(dots[["assignment_variable"]])) == "NULL") {
-#       declare_time_error("Must provide assignment_variable.", ret)
-#     }
-#     assn <- reveal_nse_helper(dots$assignment_variable)
-#     
-#     dots$assignment_variable <- assn
-#     
-#     dirty <- TRUE
-#   } else {
-#     assn <- formals(assignment_handler)$assignment_variable
-#   }
-#   
-#   if (dirty) {
-#     ret <- build_step(currydata(assignment_handler, dots),
-#                       handler = assignment_handler,
-#                       dots = dots,
-#                       label = label,
-#                       step_type = attr(ret, "step_type"),
-#                       causal_type = attr(ret, "causal_type"),
-#                       call = attr(ret, "call")
-#     )
-#   }
-#   
-#   structure(ret, step_meta = list(assignment_variables = assn))
-# }
+  
+  structure(ret, step_meta = list(assignment_variables = assignment_variable))
+  
+}

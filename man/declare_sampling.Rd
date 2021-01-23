@@ -18,6 +18,8 @@ sampling_handler(data, ..., legacy = TRUE)
 
 \item{data}{A data.frame.}
 
+\item{legacy}{Use the legacy randomizr functionality. This will be disabled in future; please use legacy = FALSE.}
+
 \item{sampling_variable}{The prefix for the sampling inclusion probability variable.}
 
 \item{drop_nonsampled}{Logical indicating whether to drop units that are not sampled. Default is \code{TRUE}.}

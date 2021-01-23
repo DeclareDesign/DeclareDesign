@@ -18,6 +18,8 @@ assignment_handler(data, ..., legacy = TRUE)
 
 \item{data}{A data.frame.}
 
+\item{legacy}{Use the legacy randomizr functionality. This will be disabled in future; please use legacy = FALSE.}
+
 \item{assignment_variable}{Name for assignment variable (quoted). Defaults to "Z". Argument to be used with default handler.}
 
 \item{append_probabilities_matrix}{Should the condition probabilities matrix be appended to the data? Defaults to FALSE.  Argument to be used with default handler.}
