@@ -107,7 +107,7 @@ assignment_handler_internal_randomizr <-
 validation_fn(assignment_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
   
-  if(eval_tidy(dots[["legacy"]]) == TRUE) {
+  if(is.null(eval_tidy(dots[["legacy"]])) || eval_tidy(dots[["legacy"]]) == TRUE) {
     
     dirty <- FALSE
     

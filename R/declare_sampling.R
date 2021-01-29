@@ -101,7 +101,7 @@ sampling_handler_internal_randomizr <- function(data, ..., sampling_variable = "
 validation_fn(sampling_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
   
-  if(eval_tidy(dots[["legacy"]]) == TRUE) {
+  if(is.null(eval_tidy(dots[["legacy"]])) || eval_tidy(dots[["legacy"]]) == TRUE) {
     
     if ("sampling_variable" %in% names(dots) &&
         inherits(f_rhs(dots[["sampling_variable"]]), "NULL")) {
@@ -143,6 +143,7 @@ validation_fn(sampling_handler) <- function(ret, dots, label) {
         }
       }
     }
+    
   } else {
     
     randomizr_args <-
