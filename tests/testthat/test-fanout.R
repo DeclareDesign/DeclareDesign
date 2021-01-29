@@ -12,7 +12,7 @@ test_that("Fanout does something", {
   out <- DeclareDesign:::fan_out(D, fan_strategy)
 
   inquiries_out <- do.call(rbind, lapply(out, `[[`, "inquiries_df"))
-  expect_equal(length(unique(inquiries_out$inquiry_value)), 1)
+  expect_equal(length(unique(inquiries_out$estimand)), 1)
   expect_equal(inquiries_out$step_1_draw, rep(1,100))
   expect_equal(inquiries_out$step_3_draw, 1:100)
   
@@ -161,7 +161,7 @@ test_that("correct fan out", {
     simulate_design(declare_population(sleep) + e1 + e2 + e3, sims = c(30, 1, 5, 2))
   
   expect_equivalent(apply(out[,c(5:7)], 2, max), c(30, 150, 300))
-  expect_equivalent(tapply(out$inquiry_value, INDEX = out$inquiry_label, max), c(30, 150, 300))
+  expect_equivalent(tapply(out$estimand, INDEX = out$inquiry_label, max), c(30, 150, 300))
   
 })
 

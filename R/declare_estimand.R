@@ -8,7 +8,7 @@
 #'
 #' @details
 #'
-#' For the default diagnosands, the return value of the handler should have \code{inquiry_label} and \code{inquiry_value} columns.
+#' For the default diagnosands, the return value of the handler should have \code{inquiry_label} and \code{estimand} columns.
 #'
 #' @export
 #'
@@ -108,7 +108,7 @@
 #' inquiry_function <- function(data, label) {
 #'   ret <- with(data, median(Y_Z_1 - Y_Z_0))
 #'   data.frame(inquiry_label = label,
-#'              inquiry_value = ret,
+#'              estimand = ret,
 #'              stringsAsFactors = FALSE)
 #' }
 #' 
@@ -141,7 +141,7 @@
 #' 
 #' f1 <- function(data) {
 #'   data.frame(inquiry_label = c("control", "ate"),
-#'              inquiry_value = with(data, c(mean(Y_Z_0), mean(Y_Z_1 - Y_Z_0))),
+#'              estimand = with(data, c(mean(Y_Z_0), mean(Y_Z_1 - Y_Z_0))),
 #'              stringsAsFactors = FALSE)
 #' }
 #' inquiries <- declare_inquiry(handler = f1)
@@ -161,7 +161,7 @@
 #' \dontrun{
 #' diagnose_design(design, sims = 20, bootstrap_sims = FALSE,
 #'                 diagnosands = declare_diagnosands(
-#'                 select = c(mean_estimate, mean_inquiry_value)))
+#'                 select = c(mean_estimate, mean_estimand)))
 #' }
 declare_inquiry <- make_declarations(inquiry_handler, "inquiry",
                                       causal_type = "inquiry", 
@@ -222,14 +222,14 @@ inquiry_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
     data.frame(
       inquiry_label = label,
       term = names(options),
-      inquiry_value = ret,
+      estimand = ret,
       stringsAsFactors = FALSE,
       row.names = NULL
     )
   } else {
     data.frame(
       inquiry_label = names(options),
-      inquiry_value = ret,
+      estimand = ret,
       stringsAsFactors = FALSE,
       row.names = NULL
     )

@@ -36,12 +36,12 @@ test_that("Multiple inquiries can be mapped to one estimator", {
     lmc
 
   my_dig <- declare_diagnosands(
-    bias_se = mean(std.error - inquiry_value),
-    bias_est = mean(std.error - sd(inquiry_value)),
+    bias_se = mean(std.error - estimand),
+    bias_est = mean(std.error - sd(estimand)),
     mean_se = mean(std.error),
     sd_se = sd(std.error),
-    mean_inquiry = mean(inquiry_value),
-    sd_inquiry = sd(inquiry_value)
+    mean_inquiry = mean(estimand),
+    sd_inquiry = sd(estimand)
   )
 
   diag <- diagnose_design(des, sims = 2, diagnosands = my_dig, bootstrap_sims = FALSE)

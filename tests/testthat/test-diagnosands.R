@@ -107,7 +107,7 @@ test_that("custom diagnosand function", {
 
 test_that("single diagnosand function", {
   # works with only one diagnosand with bootstrapping (!)
-  my_one_dig <- declare_diagnosands(se_bias = mean(std.error - sd(inquiry_value)))
+  my_one_dig <- declare_diagnosands(se_bias = mean(std.error - sd(estimand)))
   diagnosis <- diagnose_design(my_design, sims = 2, diagnosands = my_one_dig, bootstrap_sims = 5)
 
   expect_true("se_bias" %in% names(diagnosis$diagnosands))
@@ -153,7 +153,7 @@ test_that("diagnosis, no estimator", {
   d <- declare_population(sleep) +
     declare_inquiry(foo = 2, bar = 3)
 
-  diagnosand <- declare_diagnosands(z = mean(inquiry_value > 0))
+  diagnosand <- declare_diagnosands(z = mean(estimand > 0))
  
 
   expect_equivalent(
