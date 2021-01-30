@@ -48,6 +48,18 @@ draw_data <- function(design, data = NULL, start = 1, end = length(design)) {
 #' @export
 draw_inquiries <- function(...) apply_on_design_dots(draw_inquiries_single_design, ...)
 
+#' @export
+draw_estimands <-  function(...){
+  .Deprecated(new = "draw_estimands")
+  draw_inquiries(...)
+}
+
+#' @export
+draw_estimand <-  function(...){
+  .Deprecated(new = "draw_estimand")
+  draw_inquiry(...)
+}
+
 #' @rdname draw_functions
 #'
 #' @export
