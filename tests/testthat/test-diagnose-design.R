@@ -246,3 +246,34 @@ test_that("diagnose_design works when simulations_df lacking parameters attr", {
 test_that("diagnose_design stops when a zero-row simulations_df is sent", {
   expect_error(diagnose_design(data.frame(estimator_label = rep(1, 0))), "which has zero rows")
 })
+
+
+test_that("diagnose_design can generate and use grouping variables", {
+  
+   design <- 
+    declare_population(N = 100, u = rnorm(N)) + 
+    declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = .1 + u) +
+    declare_assignment() + 
+    declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+    reveal_outcomes() + 
+    declare_estimator(Y ~ Z, estimand = "ATE")
+  
+  
+  diagnosis <- diagnose_design(design, 
+     make_groups = "significant = p.value <= 0.05",
+     add_groups = "significant"
+     )
+  expect_equivalent(diagnosis$diagnosands_df$significant,  c(FALSE, TRUE))
+  
+ diagnosis <- diagnose_design(design, 
+     make_groups = "effect_size = cut(estimand, quantile(estimand, (0:4)/4), include.lowest=TRUE)",
+     add_groups  = "effect_size",
+     select = "Power"
+     )
+
+ expect_equivalent(nrow(diagnosis$diagnosands_df),  4)
+ 
+})
+
+
+})

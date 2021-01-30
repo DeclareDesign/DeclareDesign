@@ -10,7 +10,9 @@ diagnose_design(
   diagnosands = NULL,
   sims = 500,
   bootstrap_sims = 100,
-  add_grouping_variables = NULL
+  make_groups = NULL,
+  add_groups = NULL,
+  select = NULL
 )
 
 diagnose_designs(
@@ -18,7 +20,9 @@ diagnose_designs(
   diagnosands = NULL,
   sims = 500,
   bootstrap_sims = 100,
-  add_grouping_variables = NULL
+  make_groups = NULL,
+  add_groups = NULL,
+  select = NULL
 )
 }
 \arguments{
@@ -30,7 +34,11 @@ diagnose_designs(
 
 \item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.}
 
-\item{add_grouping_variables}{Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_label", "estimand_label", "estimator_label", "term")}
+\item{make_groups}{Quoted expression. Add a grouping variable to simulations dataframe that is then available to \code{add_groups}}
+
+\item{add_groups}{Variables used to generate groups of simulations for diagnosis. Added to default list: c("design_label", "estimand_label", "estimator_label", "term")}
+
+\item{select}{A set of diagnosands to include in printing output.}
 }
 \value{
 a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
@@ -46,33 +54,39 @@ If \code{sims} is named, or longer than one element, a fan-out strategy is creat
 If the packages \code{future} and \code{future.apply} are installed, you can set \code{\link[future]{plan}} to run multiple simulations in parallel.
 }
 \examples{
-my_population <- declare_population(N = 500, noise = rnorm(N))
 
-my_potential_outcomes <- declare_potential_outcomes(
-  Y_Z_0 = noise, Y_Z_1 = noise +
-  rnorm(N, mean = 2, sd = 2))
-
-my_assignment <- declare_assignment()
-
-my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-
-my_reveal <- reveal_outcomes()
-
-my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-
-design <- my_population +
-   my_potential_outcomes +
-   my_estimand +
-   my_assignment +
-   my_reveal +
-   my_estimator
+design <- 
+ declare_population(N = 100, u = rnorm(N)) + 
+ declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = .1 + u) +
+ declare_assignment() + 
+ declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+ reveal_outcomes() + 
+ declare_estimator(Y ~ Z, estimand = "ATE")
 
 \dontrun{
 # using built-in defaults:
 diagnosis <- diagnose_design(design)
 diagnosis
+diagnosis <- diagnose_design(design, select = "Power")
+diagnosis
 }
 
+#' \dontrun{
+# Adding a group for within group diagnosis:
+diagnosis <- diagnose_design(design, 
+  make_groups = "significant = p.value <= 0.05",
+  add_groups = "significant",
+  select = "Bias"
+  )
+diagnosis
+
+diagnosis <- diagnose_design(design, 
+  make_groups = "effect_size = cut(estimand, quantile(estimand, (0:4)/4), include.lowest=TRUE)",
+  add_groups  = "effect_size",
+  select = "Power"
+  )
+diagnosis
+}
 # using a user-defined diagnosand
 my_diagnosand <- declare_diagnosands(absolute_error = mean(abs(estimate - estimand)))
 

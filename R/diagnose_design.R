@@ -5,9 +5,11 @@
 #'
 #' @param ... A design or set of designs typically created using the + operator, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
-#' @param add_grouping_variables Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_label", "estimand_label", "estimator_label", "term")
+#' @param add_groups Variables used to generate groups of simulations for diagnosis. Added to default list: c("design_label", "estimand_label", "estimator_label", "term")
+#' @param make_groups Quoted expression. Add a grouping variable to simulations dataframe that is then available to \code{add_groups} 
 #' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}
 #' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.
+#' @param select A set of diagnosands to include in printing output.
 #' @return a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
 #'
 #'
@@ -21,33 +23,41 @@
 #'
 #'
 #' @examples
-#' my_population <- declare_population(N = 500, noise = rnorm(N))
-#'
-#' my_potential_outcomes <- declare_potential_outcomes(
-#'   Y_Z_0 = noise, Y_Z_1 = noise +
-#'   rnorm(N, mean = 2, sd = 2))
-#'
-#' my_assignment <- declare_assignment()
-#'
-#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-#'
-#' my_reveal <- reveal_outcomes()
-#'
-#' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-#'
-#' design <- my_population +
-#'    my_potential_outcomes +
-#'    my_estimand +
-#'    my_assignment +
-#'    my_reveal +
-#'    my_estimator
+#' 
+#' design <- 
+#'  declare_population(N = 100, u = rnorm(N)) + 
+#'  declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = .1 + u) +
+#'  declare_assignment() + 
+#'  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+#'  reveal_outcomes() + 
+#'  declare_estimator(Y ~ Z, estimand = "ATE")
 #'
 #' \dontrun{
 #' # using built-in defaults:
 #' diagnosis <- diagnose_design(design)
 #' diagnosis
+#' diagnosis <- diagnose_design(design, select = "Power")
+#' diagnosis
 #' }
 #'
+#'#' \dontrun{
+#' # Adding a group for within group diagnosis:
+#' diagnosis <- diagnose_design(design, 
+#'   make_groups = "significant = p.value <= 0.05",
+#'   add_groups = "significant",
+#'   select = "Bias"
+#'   )
+#' diagnosis
+#' 
+#' diagnosis <- diagnose_design(design, 
+#'   make_groups = "effect_size = cut(estimand, quantile(estimand, (0:4)/4), include.lowest=TRUE)",
+#'   add_groups  = "effect_size",
+#'   select = "Power"
+#'   )
+#' diagnosis
+
+#' }
+
 #' # using a user-defined diagnosand
 #' my_diagnosand <- declare_diagnosands(absolute_error = mean(abs(estimate - estimand)))
 #'
@@ -74,7 +84,9 @@ diagnose_design <- function(...,
                             diagnosands = NULL,
                             sims = 500,
                             bootstrap_sims = 100,
-                            add_grouping_variables = NULL) {
+                            make_groups = NULL,
+                            add_groups = NULL,
+                            select = NULL) {
   dots <- quos(...)
 
   # two cases:
@@ -94,18 +106,21 @@ diagnose_design <- function(...,
     simulations_df <- simulate_design(!!!dots, sims = sims)
     diagnosands <- setup_diagnosands(!!!dots, diagnosands = diagnosands)
   }
-
+  
   # figure out what to group by ---------------------------------------------
+  # Optionally modify the simulations dataframe to create new grouping variables
+  if(!is.null(make_groups)) simulations_df <- 
+      eval(parse(text = paste("fabricate(simulations_df, ", make_groups, ")")))
+  
+  group_by_set <- 
+    c("design_label", "estimand_label", "estimator_label", "term", add_groups) %icn% 
+    simulations_df
 
-  group_by_set <- c("design_label", "estimand_label", "estimator_label", "term")
-
-  if (!is.null(add_grouping_variables)) {
-    group_by_set <- c(group_by_set, add_grouping_variables)
-  }
-
-  group_by_set <- group_by_set %icn% simulations_df
-
-  # Actually calculate diagnosands ------------------------------------------
+  # make sure simulations dataframe has "" factor value for add_groups for reshaping
+  for(j in add_groups) if(is.factor(simulations_df[[j]]))
+    simulations_df[[j]] <- factor(simulations_df[[j]], levels = c(levels(simulations_df[[j]]), ""))
+  
+  # Calculate diagnosands ------------------------------------------
 
   diagnosands_df <- calculate_diagnosands(
     simulations_df = simulations_df,
@@ -152,7 +167,7 @@ diagnose_design <- function(...,
     out$bootstrap_replicates <- merge_param_df(bootout$diagnosand_replicates, parameters_df)
   }
   out$bootstrap_sims <- bootstrap_sims
-
+  out$select <- select
   structure(out, class = "diagnosis")
 }
 

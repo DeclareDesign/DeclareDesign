@@ -79,7 +79,7 @@ print.summary.diagnosis <- function(x, ...) {
     cat(" Diagnosand estimates with bootstrapped standard errors in parentheses (", x$bootstrap_sims, " replicates).", sep = "")
   }
   cat("\n\n")
-  x <- reshape_diagnosis(x)
+  x <- reshape_diagnosis(x, select = x$select)
   class(x) <- "data.frame"
   print(x, row.names = FALSE)
   invisible(x)
@@ -123,8 +123,6 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL) {
     return_df[diagnosand_columns] <- lapply(return_df[diagnosand_columns], 
                                             format_num, digits = digits)
   }
-
-  sort_by_list <- diagnosis$group_by_set %i% colnames(return_df)
 
   # Reorder rows
   sort_by_list <- diagnosis$group_by_set %icn% return_df
@@ -206,7 +204,8 @@ clean_bootstrap_df <- function(diagnosis, digits, diagnosand_columns,
   return_df <- rbind_disjoint(list(diagnosands_only_df, se_only_df), infill = "")
 
   # NA bootstrap rows
+  return_df$design_label <- factor(return_df$design_label)
   return_df$design_label <- factor(return_df$design_label, levels = c(levels(return_df$design_label), ""))
-
+  
   return(return_df)
 }
