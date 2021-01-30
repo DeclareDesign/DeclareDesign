@@ -134,4 +134,3 @@ test_that("inquiries can use other inquiries in calculations", {
               class = "data.frame", row.names = c(NA, -3L))
   )
 })
-

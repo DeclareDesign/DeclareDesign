@@ -45,13 +45,12 @@
 #' 
 declare_assignment <- make_declarations(assignment_handler, "assignment")
 
-#' @importFrom rlang quos !!! call_modify eval_tidy quo f_rhs
+#' @importFrom rlang quos !!! call_modify eval_tidy quo f_rhs 
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities declare_ra
 #' @param legacy Use the legacy randomizr functionality. This will be disabled in future; please use legacy = FALSE.
 #' @param data A data.frame.
 #' @rdname declare_assignment
 assignment_handler <- function(data, ..., legacy = TRUE) {
-  
   options <- quos(...)
   
   if(!legacy) {
@@ -104,9 +103,9 @@ assignment_handler_internal_randomizr <-
     data
   }
 
+#' @importFrom rlang as_label
 validation_fn(assignment_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
-  
   if(is.null(eval_tidy(dots[["legacy"]])) || eval_tidy(dots[["legacy"]]) == TRUE) {
     
     dirty <- FALSE
@@ -124,7 +123,7 @@ validation_fn(assignment_handler) <- function(ret, dots, label) {
         }
       }
       
-      ra_args <- setdiff(names(dots), names(formals(assignment_handler))) # removes data and assignment_variable
+      ra_args <- setdiff(names(dots), names(formals(assignment_handler_internal_randomizr))) # removes data and assignment_variable
       
       ra_dots <- dots[ra_args]
       
@@ -150,12 +149,12 @@ validation_fn(assignment_handler) <- function(ret, dots, label) {
       
       dirty <- TRUE
     } else {
-      assignment_variable <- formals(assignment_handler)$assignment_variable
+      assignment_variable <- formals(assignment_handler_internal_randomizr)$assignment_variable
     } 
     
     if (dirty) {
       ret <- build_step(currydata(assignment_handler, dots),
-                        legacy = FALSE,
+                        handler = assignment_handler,
                         dots = dots,
                         label = label,
                         step_type = attr(ret, "step_type"),

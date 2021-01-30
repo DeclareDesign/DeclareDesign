@@ -214,7 +214,7 @@ label_estimator <- function(fn) {
     stop("Must provide a `estimator_function` function with a data argument.")
   }
 
-  f <- function(data, ..., inquiry = NULL, label) {
+  f <- function(data, ...,  inquiry = NULL,estimand = NULL, label) {
     calling_args <-
       names(match.call(expand.dots = FALSE)) %i% names(formals(fn))
 
@@ -239,6 +239,14 @@ label_estimator <- function(fn) {
       stringsAsFactors = FALSE
     )
 
+
+    if(!is.null(estimand) && !is.null(inquiry)) {stop("Please provide either an inquiry or an estimand, but not both")}
+    if(!is.null(estimand)){
+      inquiry <- estimand
+      warning("The argument 'estimand = ' is deprecated. Please use 'inquiry = ' instead.", call. = FALSE)
+    }
+    
+    
     inquiry_label <- get_inquiry_label(inquiry)
     if (length(inquiry_label) > 0) {
       ret <-
@@ -256,6 +264,10 @@ label_estimator <- function(fn) {
   if (!"inquiry" %in% names(formals(f))) {
     formals(f)["inquiry"] <- list(NULL)
   }
+  if (!"estimand" %in% names(formals(f))) {
+    formals(f)["estimand"] <- list(NULL)
+  }
+  
   if (!"label" %in% names(formals(f))) {
     formals(f)$label <- alist(a = )$a
   }

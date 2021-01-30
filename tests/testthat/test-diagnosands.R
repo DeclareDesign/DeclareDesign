@@ -256,7 +256,6 @@ test_that("subset diagnosands", {
 
 test_that("declare time errors", {
   expect_s3_class(declare_diagnosands(bias = mean(estimate - inquiry)), "design_step")
-  expect_error(declare_diagnosands(), "No diagnosands were declared.")
   expect_s3_class(declare_diagnosands(my_diag = mean(p.value)), "design_step")
 })
 

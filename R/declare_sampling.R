@@ -97,7 +97,7 @@ sampling_handler_internal_randomizr <- function(data, ..., sampling_variable = "
   }
 }
 
-
+#' @importFrom rlang as_label
 validation_fn(sampling_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
   
@@ -120,7 +120,7 @@ validation_fn(sampling_handler) <- function(ret, dots, label) {
           declare_time_error("Must provide the bare (unquoted) cluster variable name to clusters.", ret)
         }
       }
-      rs_args <- setdiff(names(dots), names(formals(sampling_handler))) # removes data and sampling_variable
+      rs_args <- setdiff(names(dots), names(formals(sampling_handler_internal_randomizr))) # removes data and sampling_variable
       
       rs_dots <- dots[rs_args]
       
@@ -133,7 +133,7 @@ validation_fn(sampling_handler) <- function(ret, dots, label) {
           dots$declaration <- declaration
           
           ret <- build_step(currydata(sampling_handler, dots),
-                            legacy = FALSE,
+                            handler = sampling_handler,
                             dots = dots,
                             label = label,
                             step_type = attr(ret, "step_type"),
