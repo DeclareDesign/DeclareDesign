@@ -52,9 +52,9 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
   
   options <- names(dots)[!names(dots) %in% c("subset", "alpha", "label", "data")]
   
-  if (length(options) == 0) {
-    declare_time_error("No diagnosands were declared.", ret)
-  }
+  # if (length(options) == 0) {
+  #   declare_time_error("No diagnosands were declared.", ret)
+  # }
   
   # check whether all diagnosands are named
   if (is.null(names(dots)) || "" %in% names(dots)) {
