@@ -38,7 +38,7 @@ a function, I(), that accepts a data.frame as an argument and returns a data.fra
 Declares inquiries, or the inferential target of interest. Conceptually very close to "estimand" or "quantity of interest".
 }
 \details{
-For the default diagnosands, the return value of the handler should have \code{inquiry_label} and \code{inquiry_value} columns.
+For the default diagnosands, the return value of the handler should have \code{inquiry_label} and \code{estimand} columns.
 
 If term is TRUE, the names of ... will be returned in a \code{term} column,
 and \code{inquiry_label} will contain the step label. This can be used as
@@ -140,7 +140,7 @@ run_design(design_regression)
 inquiry_function <- function(data, label) {
   ret <- with(data, median(Y_Z_1 - Y_Z_0))
   data.frame(inquiry_label = label,
-             inquiry_value = ret,
+             estimand = ret,
              stringsAsFactors = FALSE)
 }
 
@@ -173,7 +173,7 @@ run_design(design_custom)
 
 f1 <- function(data) {
   data.frame(inquiry_label = c("control", "ate"),
-             inquiry_value = with(data, c(mean(Y_Z_0), mean(Y_Z_1 - Y_Z_0))),
+             estimand = with(data, c(mean(Y_Z_0), mean(Y_Z_1 - Y_Z_0))),
              stringsAsFactors = FALSE)
 }
 inquiries <- declare_inquiry(handler = f1)
@@ -193,6 +193,6 @@ design   <- design_stub + inquiries + estimators
 \dontrun{
 diagnose_design(design, sims = 20, bootstrap_sims = FALSE,
                 diagnosands = declare_diagnosands(
-                select = c(mean_estimate, mean_inquiry_value)))
+                select = c(mean_estimate, mean_estimand)))
 }
 }

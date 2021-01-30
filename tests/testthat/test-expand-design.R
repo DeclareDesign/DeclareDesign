@@ -221,7 +221,7 @@ test_that("expand with vector arguments", {
   }
   
   expect_equal(
-    draw_inquiries(expand_design(my_designer, z=list(2)))$inquiry_value, 2)
+    draw_inquiries(expand_design(my_designer, z=list(2)))$estimand, 2)
   
   
   zx <- list(1:4, 2:10, 9:1, list(4,9,2))
