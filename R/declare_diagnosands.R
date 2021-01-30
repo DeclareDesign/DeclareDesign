@@ -18,27 +18,32 @@ diagnosand_handler <- function(data, ...,
                                label) {
   options <- quos(...)
   
-  # subsetting the data -----------------------------------------------------
-  
-  subset <- enquo(subset)
-  idx <- eval_tidy(subset, data = data)
-  if (!is.null(idx)) {
-    data <- data[idx, , drop = FALSE]
+  if(length(options) == 0) {
+    default_diagnosands(data = data, alpha = alpha)
+  } else {
+    
+    # subsetting the data -----------------------------------------------------
+    
+    subset <- enquo(subset)
+    idx <- eval_tidy(subset, data = data)
+    if (!is.null(idx)) {
+      data <- data[idx, , drop = FALSE]
+    }
+    
+    ret <- vector("list", length(options))
+    
+    for (i in seq_along(options)) {
+      ret[i] <- eval_tidy(options[[i]], data = data)
+    }
+    
+    ret <- simplify2array(ret)
+    
+    data.frame(
+      diagnosand_label = names(options),
+      diagnosand = ret,
+      stringsAsFactors = FALSE
+    )
   }
-  
-  ret <- vector("list", length(options))
-  
-  for (i in seq_along(options)) {
-    ret[i] <- eval_tidy(options[[i]], data = data)
-  }
-  
-  ret <- simplify2array(ret)
-  
-  data.frame(
-    diagnosand_label = names(options),
-    diagnosand = ret,
-    stringsAsFactors = FALSE
-  )
   
 }
 
