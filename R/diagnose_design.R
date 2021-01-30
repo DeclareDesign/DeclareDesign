@@ -1,4 +1,3 @@
-
 #' Diagnose the design
 #'
 #' Generates diagnosands from a design or simulations of a design.
@@ -11,7 +10,6 @@
 #' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.
 #' @param select A set of diagnosands to include in printing output.
 #' @return a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
-#'
 #'
 #' @details
 #'
@@ -55,9 +53,7 @@
 #'   select = "Power"
 #'   )
 #' diagnosis
-
 #' }
-
 #' # using a user-defined diagnosand
 #' my_diagnosand <- declare_diagnosands(absolute_error = mean(abs(estimate - estimand)))
 #'
