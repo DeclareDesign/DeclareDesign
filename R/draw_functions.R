@@ -46,14 +46,22 @@ draw_data <- function(design, data = NULL, start = 1, end = length(design)) {
 #' @rdname draw_functions
 #'
 #' @export
-draw_inquiries <- function(...) apply_on_design_dots(draw_inquiries_single_design, ...)
+draw_inquiry <- function(...) apply_on_design_dots(draw_inquiries_single_design, ...)
 
+#' @param ... A design or set of designs typically created using the + operator
+#' @rdname draw_functions
+#'
+#' @export
+draw_inquiries <- draw_inquiry
+
+#' @rdname draw_functions
 #' @export
 draw_estimands <-  function(...){
   .Deprecated(new = "draw_estimands")
   draw_inquiries(...)
 }
 
+#' @rdname draw_functions
 #' @export
 draw_estimand <-  function(...){
   .Deprecated(new = "draw_estimand")

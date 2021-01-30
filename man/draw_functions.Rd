@@ -3,13 +3,22 @@
 \name{draw_functions}
 \alias{draw_functions}
 \alias{draw_data}
+\alias{draw_inquiry}
 \alias{draw_inquiries}
+\alias{draw_estimands}
+\alias{draw_estimand}
 \alias{draw_estimates}
 \title{Draw data, estimates, and inquiries from a design}
 \usage{
 draw_data(design, data = NULL, start = 1, end = length(design))
 
+draw_inquiry(...)
+
 draw_inquiries(...)
+
+draw_estimands(...)
+
+draw_estimand(...)
 
 draw_estimates(...)
 }
