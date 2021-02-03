@@ -4,8 +4,8 @@
 #'
 #' @param ... A design or set of designs typically created using the + operator, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
-#' @param add_groups Variables used to generate groups of simulations for diagnosis. Added to default list: c("design_label", "estimand_label", "estimator_label", "term")
-#' @param make_groups Quoted expression. Add a grouping variable to simulations dataframe that is then available to \code{add_groups} 
+#' @param add_grouping_variables Variables used to generate groups of simulations for diagnosis. Added to default list: c("design_label", "estimand_label", "estimator_label", "term")
+#' @param make_groups Quoted expression. Add a grouping variable to simulations dataframe that is then available to \code{add_grouping_variables} 
 #' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}
 #' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.
 #' @param select A set of diagnosands to include in printing output.
@@ -41,15 +41,13 @@
 #'#' \dontrun{
 #' # Adding a group for within group diagnosis:
 #' diagnosis <- diagnose_design(design, 
-#'   make_groups = "significant = p.value <= 0.05",
-#'   add_groups = "significant",
+#'   make_groups = list(significant = "p.value <= 0.05"),
 #'   select = "Bias"
 #'   )
 #' diagnosis
 #' 
 #' diagnosis <- diagnose_design(design, 
-#'   make_groups = "effect_size = cut(estimand, quantile(estimand, (0:4)/4), include.lowest=TRUE)",
-#'   add_groups  = "effect_size",
+#'   make_groups = list(effect_size = "cut(estimand, quantile(estimand, (0:4)/4), include.lowest=TRUE)"),
 #'   select = "Power"
 #'   )
 #' diagnosis
@@ -81,7 +79,7 @@ diagnose_design <- function(...,
                             sims = 500,
                             bootstrap_sims = 100,
                             make_groups = NULL,
-                            add_groups = NULL,
+                            add_grouping_variables = NULL,
                             select = NULL) {
   dots <- quos(...)
 
@@ -105,15 +103,17 @@ diagnose_design <- function(...,
   
   # figure out what to group by ---------------------------------------------
   # Optionally modify the simulations dataframe to create new grouping variables
-  if(!is.null(make_groups)) simulations_df <- 
-      eval(parse(text = paste("fabricate(simulations_df, ", make_groups, ")")))
-  
+  if(!is.null(make_groups)) for(j in 1:length(make_groups)) 
+    simulations_df[[names(make_groups)[j]]] <- 
+      eval(parse(text = paste("with(simulations_df, ", make_groups[[j]], ")")))
+      # eval_tidy(quo(with(simulations_df, !!make_groups[[j]])))
+
   group_by_set <- 
-    c("design_label", "estimand_label", "estimator_label", "term", add_groups) %icn% 
+    c("design_label", "estimand_label", "estimator_label", "term", add_grouping_variables, names(make_groups)) %icn% 
     simulations_df
 
-  # make sure simulations dataframe has "" factor value for add_groups for reshaping
-  for(j in add_groups) if(is.factor(simulations_df[[j]]))
+  # make sure simulations dataframe has "" factor value for add_grouping_variables for reshaping
+  for(j in group_by_set) if(is.factor(simulations_df[[j]]))
     simulations_df[[j]] <- factor(simulations_df[[j]], levels = c(levels(simulations_df[[j]]), ""))
   
   # Calculate diagnosands ------------------------------------------

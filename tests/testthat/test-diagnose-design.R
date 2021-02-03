@@ -260,14 +260,12 @@ test_that("diagnose_design can generate and use grouping variables", {
   
   
   diagnosis <- diagnose_design(design, 
-     make_groups = "significant = p.value <= 0.05",
-     add_groups = "significant"
+     make_groups = list(significant = "p.value <= 0.05"),
      )
   expect_equivalent(diagnosis$diagnosands_df$significant,  c(FALSE, TRUE))
   
  diagnosis <- diagnose_design(design, 
-     make_groups = "effect_size = cut(estimand, quantile(estimand, (0:4)/4), include.lowest=TRUE)",
-     add_groups  = "effect_size",
+     make_groups = list(effect_size = "cut(estimand, quantile(estimand, (0:4)/4), include.lowest=TRUE)"),
      select = "Power"
      )
 
