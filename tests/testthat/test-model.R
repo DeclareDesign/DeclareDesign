@@ -252,13 +252,6 @@ test_that("gam", {
   
 })
 
-test_that("lfe", {
-  skip_if_not_installed(c("lfe", "broom"))
-  skip_on_cran()
-  des <- pop + declare_estimator(Y ~ Z, model = lfe::felm)
-  expect_equal(ncol(draw_estimates(des)), 8)
-})
-
 
 test_that("polr", {
   skip_if_not_installed(c("MASS", "broom"))
