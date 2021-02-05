@@ -34,8 +34,7 @@ test_that(
     expect_equal(dim(df), c(250, 8))
 
     output <- run_design(design)
-    expect_equal(dim(output$estimates_df), c(1, 11))
-    expect_equal(dim(output$inquiries), c(1, 2))
+    expect_equal(dim(output), c(1, 12))
   }
 )
 
@@ -49,9 +48,7 @@ test_that("No estimators / inquiries", {
     declare_reveal()
 
   head(draw_data(design))
-  des_obj <- run_design(design)
-  expect_equal(dim(des_obj$estimates_df), c(0, 0))
-  expect_equal(dim(des_obj$inquiries_df), c(0, 0))
+  expect_error(run_design(design), "No estimates or inquiries were declared")
 })
 
 test_that("single-step designs work", {

@@ -24,7 +24,7 @@ test_that("test the custom execution strategy", {
     regular$estimate,
     output$estimate + 1
   )
-  expect_equal(names(output), "estimates_df") # no inquiries
+  expect_true(!"estimand" %in% names(output)) # no inquiries
 })
 
 

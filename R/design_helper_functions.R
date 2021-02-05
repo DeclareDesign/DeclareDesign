@@ -107,7 +107,7 @@ next_step <- function(step, current_df, i) {
 }
 
 run_design_internal.default <- function(design) {
-  stop("Please only send design objects or functions with no arguments to run_design.")
+  stop("Please only send design objects to run_design.")
 }
 
 run_design_internal.design <- function(design, current_df = NULL, results = NULL, start = 1, end = length(design), ...) {
@@ -158,12 +158,6 @@ run_design_internal.design <- function(design, current_df = NULL, results = NULL
       ...
     )
   }
-}
-
-# for when the user sends a function that runs a design itself
-#   to run_design (or simulate_design / diagnose_design above it)
-run_design_internal.function <- function(design) {
-  design()
 }
 
 run_design_internal.execution_st <- function(design, ...) do.call(run_design_internal.design, design)
