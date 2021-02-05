@@ -246,3 +246,39 @@ test_that("diagnose_design stops when a zero-row simulations_df is sent", {
   expect_error(diagnose_design(data.frame(estimator_label = rep(1, 0))), "which has zero rows")
 })
 
+test_that("diagnose_design can generate and use grouping variables", {
+  
+  design <- 
+    declare_population(N = 100, u = rnorm(N)) + 
+    declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
+    declare_assignment() + 
+    declare_inquiry(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
+    declare_reveal() + 
+    declare_estimator(Y ~ Z, inquiry = "ATE_positive")
+  
+  diagnosis <- diagnose_design(design, 
+                               make_groups = vars(estimand, significant = p.value <= 0.05),
+                               sims = 5
+  )
+  expect_equivalent(diagnosis$diagnosands_df$significant,  c(FALSE, FALSE))
+  expect_equivalent(diagnosis$diagnosands_df$estimand,  c(FALSE, TRUE))
+  
+  design <- 
+    declare_population(N = 100, u = rnorm(N)) + 
+    declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
+    declare_assignment() + 
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+    declare_reveal() + 
+    declare_estimator(Y ~ Z, inquiry = "ATE")
+  
+  diagnosis <- diagnose_design(
+    design,
+    make_groups = vars(effect_size = cut(
+      estimand, quantile(estimand, (0:4) / 4), include.lowest = TRUE
+    )),
+    sims = 5
+  )
+  
+  expect_equivalent(nrow(diagnosis$diagnosands_df),  4)
+  
+})
