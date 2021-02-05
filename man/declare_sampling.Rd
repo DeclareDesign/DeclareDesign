@@ -21,7 +21,7 @@ sampling_handler(data, ..., legacy = TRUE)
 \item{legacy}{Use the legacy randomizr functionality. This will be disabled in future; please use legacy = FALSE.}
 }
 \value{
-A function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
+A sampling declaration, which is a function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
 }
 \description{
 Declare sampling procedure
