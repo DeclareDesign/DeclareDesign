@@ -252,26 +252,36 @@ test_that("diagnose_design can generate and use grouping variables", {
   
    design <- 
     declare_population(N = 100, u = rnorm(N)) + 
-    declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = .1 + u) +
+    declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
     declare_assignment() + 
-    declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-    reveal_outcomes() + 
-    declare_estimator(Y ~ Z, estimand = "ATE")
-  
+    declare_estimand(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
+    declare_reveal() + 
+    declare_estimator(Y ~ Z, estimand = "ATE_positive")
   
   diagnosis <- diagnose_design(design, 
-     make_groups = list(significant = "p.value <= 0.05"),
+     make_groups = vars(estimand, significant = p.value <= 0.05),
+     sims = 5
      )
-  expect_equivalent(diagnosis$diagnosands_df$significant,  c(FALSE, TRUE))
+  expect_equivalent(diagnosis$diagnosands_df$significant,  c(FALSE, FALSE))
+  expect_equivalent(diagnosis$diagnosands_df$estimand,  c(FALSE, TRUE))
   
- diagnosis <- diagnose_design(design, 
-     make_groups = list(effect_size = "cut(estimand, quantile(estimand, (0:4)/4), include.lowest=TRUE)"),
-     select = "Power"
-     )
-
+  design <- 
+    declare_population(N = 100, u = rnorm(N)) + 
+    declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
+    declare_assignment() + 
+    declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+    declare_reveal() + 
+    declare_estimator(Y ~ Z, estimand = "ATE")
+  
+  diagnosis <- diagnose_design(
+    design,
+    make_groups = vars(effect_size = cut(
+      estimand, quantile(estimand, (0:4) / 4), include.lowest = TRUE
+    )),
+    select = "Power",
+    sims = 5
+  )
+  
  expect_equivalent(nrow(diagnosis$diagnosands_df),  4)
  
-})
-
-
 })

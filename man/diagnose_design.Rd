@@ -3,6 +3,7 @@
 \name{diagnose_design}
 \alias{diagnose_design}
 \alias{diagnose_designs}
+\alias{vars}
 \title{Diagnose the design}
 \usage{
 diagnose_design(
@@ -11,7 +12,7 @@ diagnose_design(
   sims = 500,
   bootstrap_sims = 100,
   make_groups = NULL,
-  add_groups = NULL,
+  add_grouping_variables = NULL,
   select = NULL
 )
 
@@ -21,9 +22,11 @@ diagnose_designs(
   sims = 500,
   bootstrap_sims = 100,
   make_groups = NULL,
-  add_groups = NULL,
+  add_grouping_variables = NULL,
   select = NULL
 )
+
+vars(...)
 }
 \arguments{
 \item{...}{A design or set of designs typically created using the + operator, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.}
@@ -34,11 +37,9 @@ diagnose_designs(
 
 \item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.}
 
-\item{make_groups}{Quoted expression. Add a grouping variable to simulations dataframe that is then available to \code{add_groups}}
+\item{make_groups}{Add group variables within which diagnosand values will be calculated. New variables can be created or variables already in the simulations data frame selected. Type name-value pairs within the function \code{vars}, i.e. \code{vars(significant = p.value <= 0.05)}.}
 
-\item{add_groups}{Variables used to generate groups of simulations for diagnosis. Added to default list: c("design_label", "estimand_label", "estimator_label", "term")}
-
-\item{select}{A set of diagnosands to include in printing output.}
+\item{add_grouping_variables}{Deprecated. Please use make_groups instead. Variables used to generate groups of simulations for diagnosis. Added to default list: c("design_label", "estimand_label", "estimator_label", "term")}
 }
 \value{
 a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
@@ -66,24 +67,21 @@ design <-
 \dontrun{
 # using built-in defaults:
 diagnosis <- diagnose_design(design)
-diagnosis
-diagnosis <- diagnose_design(design, select = "Power")
-diagnosis
+reshape_diagnosis(diagnosis, select = "Power")
 }
 
-#' \dontrun{
+\dontrun{
 # Adding a group for within group diagnosis:
 diagnosis <- diagnose_design(design, 
-  make_groups = "significant = p.value <= 0.05",
-  add_groups = "significant",
-  select = "Bias"
+  make_groups = vars(significant = p.value <= 0.05),
   )
 diagnosis
 
 diagnosis <- diagnose_design(design, 
-  make_groups = "effect_size = cut(estimand, quantile(estimand, (0:4)/4), include.lowest=TRUE)",
-  add_groups  = "effect_size",
-  select = "Power"
+  make_groups = 
+    vars(effect_size = 
+      cut(estimand, quantile(estimand, (0:4)/4), 
+          include.lowest = TRUE)),
   )
 diagnosis
 }
