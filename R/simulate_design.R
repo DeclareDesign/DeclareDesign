@@ -102,7 +102,7 @@ simulate_designs <- simulate_design
 
 
 #' @importFrom rlang as_list
-simulate_single_design <- function(design, sims) {
+simulate_single_design <- function(design, sims, low_simulations_warning = TRUE) {
   if (!is_bare_integerish(sims) || (length(design) != length(sims) & length(sims) != 1)) {
     stop("Please provide sims a scalar or a numeric vector of length the number of steps in designs.", call. = FALSE)
   }
@@ -112,7 +112,7 @@ simulate_single_design <- function(design, sims) {
   }
   
   # See also ?testthat::is_testing
-  if (sims[1] < 30 && !identical(Sys.getenv("TESTTHAT"), "true")) {
+  if (low_simulations_warning && sims[1] < 30 && !identical(Sys.getenv("TESTTHAT"), "true")) {
     warning(
       "We recommend you choose a higher number of simulations than ",
       sims[1],
@@ -129,7 +129,7 @@ simulate_single_design <- function(design, sims) {
   if (length(sims) == 1 && is.null(names(sims))) {
     results_list <- future_lapply(seq_len(sims),
                                   function(i)
-                                    run_design(design),
+                                    run_design_internal(design),
                                   future.seed = NA, future.globals = "design"
     )
   } else {

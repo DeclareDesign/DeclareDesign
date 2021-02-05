@@ -40,53 +40,72 @@
 #' # Declare inquiry
 #' my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 #' 
-#' # Declare estimator using the default handler using `difference_in_means`
-#' # estimator from `estimatr` package. Returns the first non-intercept term
-#' # as estimate
+#' # Most estimators are modeling functions like lm or glm.
+#'   
+#' # Default statistical model is estimatr::difference_in_means
+#' design + declare_estimator(Y ~ Z, estimand = "ATE")
 #' 
-#' my_estimator_dim <- declare_estimator(Y ~ Z, inquiry = "ATE", label = "DIM")
-#'
-#' # Use lm function from base R
-#' my_estimator_lm <- declare_estimator(Y ~ Z, inquiry = "ATE",
-#'   model = lm, label = "LM")
-#
-#' # Use lm_robust (linear regression with robust standard errors) from
-#' # `estimatr` package
-#'
-#' my_estimator_lm_rob <- declare_estimator(
-#'   Y ~ Z,
-#'   inquiry = "ATE",
-#'   model = lm_robust,
-#'   label = "LM_Robust"
-#' )
-#'
-#' # Set `term` if estimate of interest is not the first non-intercept variable
-#' my_estimator_lm_rob_x <- declare_estimator(
-#'   Y ~ X + Z,
-#'   inquiry = my_inquiry,
-#'   term = "Z",
-#'   model = lm_robust
-#' )
-#'
+#' # lm from base R (classical standard errors assuming homoskedasticity)
+#' design + declare_estimator(Y ~ Z, model = lm, estimand = "ATE")
+#' 
+#' # Use lm_robust (linear regression with heteroskedasticity-robust standard errors) 
+#' # from `estimatr` package
+#' 
+#' design + declare_estimator(Y ~ Z, model = lm_robust, estimand = "ATE")
+#' 
+#' # use `term` to select particular coefficients
+#' design + declare_estimator(Y ~ Z*female, term = "Z:female", model = lm_robust)
+#' 
 #' # Use glm from base R
-#' my_estimator_glm <- declare_estimator(
-#'   Y ~ X + Z,
+#' design + declare_estimator(
+#'   Y ~ Z + female,
 #'   family = "gaussian",
 #'   inquiry = my_inquiry,
 #'   term = "Z",
 #'   model = glm
 #' )
-#'
-#' # A probit
-#' estimator_probit <- declare_estimator(
-#'   Y ~ Z,
-#'   model = glm,
-#'   family = binomial(link = "probit"),
-#'   term = "Z"
-#' )
-#'
+#' 
+#' # If we use logit, we'll need to estimate the average marginal effect with 
+#' # margins::margins. We wrap this up in function we'll pass to model_summary
+#' 
+#' library(margins) # for margins
+#' library(broom) # for tidy
+#' 
+#' tidy_margins <- function(x) {
+#'   tidy(margins(x, data = x$data), conf.int = TRUE)
+#' }
+#' 
+#' design +
+#'   declare_estimator(
+#'     Y ~ Z + female,
+#'     model = glm,
+#'     family = binomial("logit"),
+#'     model_summary = tidy_margins,
+#'     term = "Z"
+#'   ) 
+#' 
+#' # Multiple estimators for one estimand
+#' 
+#' two_estimators <-
+#'   design +
+#'   declare_estimator(Y ~ Z,
+#'                     model = lm_robust,
+#'                     estimand = "ATE",
+#'                     label = "OLS") +
+#'   declare_estimator(
+#'     Y ~ Z + female,
+#'     model = glm,
+#'     family = binomial("logit"),
+#'     model_summary = tidy_margins,
+#'     estimand = "ATE",
+#'     term = "Z",
+#'     label = "logit"
+#'   )
+#' 
+#' run_design(two_estimators)
+#' 
 #' # Declare estimator using a custom handler
-#'
+#' 
 #' # Define your own estimator and use the `label_estimator` function for labeling
 #' # Must have `data` argument that is a data.frame
 #' my_estimator_function <- function(data){

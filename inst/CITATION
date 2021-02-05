@@ -14,7 +14,7 @@ citEntry(entry = "article",
   textVersion  =
   paste("Graeme Blair, Jasper Cooper, Alexander Coppock, and Macartan Humphreys (2019).",
         "``Declaring and Diagnosing Research Designs.''",
-        "American Poliitcal Science Review 113(3): 838-859.",
-        "URL http://declaredesign.org/paper.pdf")
+        "American Political Science Review 113(3): 838-859.",
+        "URL http://declaredesign.org/declare.pdf")
 )
 

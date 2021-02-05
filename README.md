@@ -4,13 +4,13 @@ DeclareDesign: Declare and Diagnose Research Designs
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 [![CRAN
-Status](https://www.r-pkg.org/badges/version/DeclareDesign)](https://cran.r-project.org/package=DeclareDesign)
-[![Travis-CI Build
-Status](https://travis-ci.org/DeclareDesign/DeclareDesign.svg?branch=master)](https://travis-ci.org/DeclareDesign/DeclareDesign)
-[![AppVeyor Build
-Status](https://ci.appveyor.com/api/projects/status/github/DeclareDesign/DeclareDesign?branch=master&svg=true)](https://ci.appveyor.com/project/DeclareDesign/DeclareDesign)
-[![Coverage
-Status](https://coveralls.io/repos/github/DeclareDesign/DeclareDesign/badge.svg?branch=master)](https://coveralls.io/github/DeclareDesign/DeclareDesign?branch=master)
+status](https://www.r-pkg.org/badges/version/DeclareDesign)](https://cran.r-project.org/package=DeclareDesign)
+[![CRAN RStudio mirror
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/DeclareDesign?color=green)](https://r-pkg.org/pkg/DeclareDesign)
+[![Build
+status](https://github.com/DeclareDesign/DeclareDesign/workflows/R-CMD-check/badge.svg)](https://github.com/DeclareDesign/DeclareDesign/actions)
+[![Code
+coverage](https://codecov.io/gh/DeclareDesign/DeclareDesign/branch/master/graph/badge.svg?token=3WzOK9Glc2)](https://codecov.io/gh/DeclareDesign/DeclareDesign)
 
 DeclareDesign is a system for describing research designs in code and
 simulating them in order to understand their properties. Because
@@ -21,7 +21,7 @@ without having to code up simulations from scratch.
 ## Installation
 
 To install the latest stable release of **DeclareDesign**, please ensure
-that you are running version 3.5 or later of R and run the following
+that you are running version 3.3 or later of R and run the following
 code:
 
 ``` r
@@ -29,7 +29,7 @@ install.packages("DeclareDesign")
 ```
 
 To install the latest development release of all of the packages, please
-ensure that you are running version 3.5 or later of R and run the
+ensure that you are running version 3.4 or later of R and run the
 following code:
 
 ``` r
@@ -56,16 +56,20 @@ design <-
   declare_assignment(m = 50) +
   declare_estimator(Y ~ Z)
 
-diagnosis <- diagnose_design(design, diagnosands = declare_diagnosands(select = c("power", "bias")))
+diagnosands <-
+  declare_diagnosands(bias = mean(estimate - estimand),
+                      power = mean(p.value <= 0.05))
+
+diagnosis <- diagnose_design(design, diagnosands = diagnosands)
 diagnosis
 ```
 
     ## 
     ## Research design diagnosis based on 500 simulations. Diagnosand estimates with bootstrapped standard errors in parentheses (100 replicates).
     ## 
-    ##  Design Label Estimand Label Estimator Label Term N Sims  Power   Bias
-    ##        design            ATE       estimator    Z    500   0.08  -0.00
-    ##                                                          (0.01) (0.00)
+    ##  Design Label Estimand Label Estimator Label Term N Sims   Bias  Power
+    ##        design            ATE       estimator    Z    500  -0.00   0.08
+    ##                                                          (0.00) (0.01)
 
 ## Companion software
 
@@ -78,23 +82,23 @@ of which is useful in its own right.
     data before you collect it.
 3.  [estimatr](https://declaredesign.org/r/estimatr/): Fast estimators
     for social scientists.
-4.  [DesignLibrary](https://declaredesign.org/library): Templates to
-    quickly adopt and adapt common research designs.
+4.  [DesignLibrary](https://declaredesign.org/r/designlibrary/):
+    Templates to quickly adopt and adapt common research designs.
 
 ## Learning DeclareDesign
 
 1.  To get started, have a look at this vignette on [the idea behind
-    DeclareDesign](https://declaredesign.org/idea/), which covers the
-    main functionality of the software.
+    DeclareDesign](https://declaredesign.org/getting-started.html),
+    which covers the main functionality of the software.
 
-2.  You can also browse a [library](https://declaredesign.org/library/)
-    of already declared designs, which relies on the `DesignLibrary`
-    package. The library includes canonical designs that you can
-    download, modify, and deploy.
+2.  You can also browse a
+    [library](https://declaredesign.org/r/designlibrary/) of already
+    declared designs, which relies on the `DesignLibrary` package. The
+    library includes canonical designs that you can download, modify,
+    and deploy.
 
 3.  A fuller description of the philosophy underlying the software is
-    described in this [working
-    paper](https://declaredesign.org/declare.pdf).
+    described in this [paper](https://declaredesign.org/declare.pdf).
 
 ## Package structure
 
@@ -107,9 +111,9 @@ Each of these `declare_*()` functions returns a *function*.
 3.  `declare_sampling()` (takes a population and selects a sample)
 4.  `declare_assignment()` (takes a population or sample and adds
     treatment assignments)
-5.  `declare_inquiry()` (takes potential outcomes and calculates a
-    quantity of interest)
-6.  `declare_estimator()` (takes data produced by sampling and
+5.  `declare_inquiry()` (takes potential outcomes and calculates a quantity of interest)
+6.  `declare_measurement()` (adds measured variables) 
+7.  `declare_estimator()` (takes data produced by sampling and
     assignment and returns estimates)
 
 To *declare a design*, connect the components of your design with the +
@@ -140,7 +144,7 @@ A few other features:
     described in the [custom functions
     vignette](/r/declaredesign/articles/custom_functions.html).
 
------
+------------------------------------------------------------------------
 
 This project is generously supported by a grant from the [Laura and John
 Arnold Foundation](http://www.arnoldfoundation.org) and seed funding

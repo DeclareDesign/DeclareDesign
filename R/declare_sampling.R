@@ -2,7 +2,7 @@
 #'
 #' @inheritParams declare_internal_inherit_params
 #'
-#' @return A function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
+#' @return A sampling declaration, which is a function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
 #' @export
 #'
 #' @importFrom rlang quos quo call_modify eval_tidy !!!

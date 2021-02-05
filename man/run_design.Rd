@@ -2,7 +2,7 @@
 % Please edit documentation in R/design_helper_functions.R
 \name{run_design}
 \alias{run_design}
-\title{Execute a design}
+\title{Run a design one time}
 \usage{
 run_design(design)
 }
@@ -10,5 +10,17 @@ run_design(design)
 \item{design}{a DeclareDesign object}
 }
 \description{
-Execute a design
+Run a design one time
+}
+\examples{
+design <-
+  declare_population(N = 100, X = rnorm(N)) +
+  declare_potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N)) +
+  declare_assignment(m = 50) +
+  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_estimator(Y ~ Z, estimand = "ATE")
+
+run_design(design)
+
+
 }

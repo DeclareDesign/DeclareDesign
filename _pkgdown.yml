@@ -1,45 +1,100 @@
 template:
-  path: "docs/templates"
-
-home:
-  sections:
-    - links
-    - citation
-    - authors
-  link_order:
-    - github
-    - bug_report
-
-roles_include:
-  - aut
-  - cre
-  - fnd
-  - ctb
+  package: ddpkgdowntemplate
 
 navbar:
-  type: default
   left:
-  - text: "The Idea"
-    href: articles/idea.html
-  - text: "Design Library"
-    href: articles/design_library.html
-  - text: "Using DeclareDesign"
+  - text: "Software"
     menu:
-      - text: Custom functions
-        href: articles/custom_functions.html
+      - text: randomizr
+        href: https://declaredesign.org/r/randomizr/
+      - text: fabricatr
+        href: https://declaredesign.org/r/fabricatr/
+      - text: estimatr
+        href: https://declaredesign.org/r/estimatr/
+      - text: DesignLibrary
+        href: https://declaredesign.org/r/designlibrary/
+  - text: "Help"
+    href: http://discuss.declaredesign.org
+  right:
+  - text: Get started
+    href: articles/DeclareDesign_101.html 
   - text: Reference
     href: reference/index.html
-  - text: "Ask for Help"
-    href: http://discuss.declaredesign.org
-  - text: "Packages"
-    menu:
-      - text: DeclareDesign
-        href: http://declaredesign.org
-      - text: randomizr
-        href: http://randomizr.declaredesign.org
-      - text: fabricatr
-        href: http://fabricatr.declaredesign.org
-      - text: estimatr
-        href: http://estimatr.declaredesign.org
-  right:
-  - text: 
+  - text: DeclareDesign home
+    href: https://declaredesign.org/r/declaredesign/
+  # - text: Articles
+  #   menu:
+  #   - text: DeclareDesign 101
+  #     href: articles/DeclareDesign_101.html 
+
+
+reference:
+- title: Declare
+  description: These functions declare research design steps
+  contents:
+  - declare_assignment
+  - declare_estimand
+  - declare_estimands
+  - declare_estimator
+  - declare_estimators
+  - declare_measurement
+  - declare_population
+  - declare_potential_outcomes
+  - declare_sampling
+  - declare_step
+  - declare_test
+  - declare_reveal
+  - reveal_outcomes
+  - set_citation
+  - label_estimator
+  - label_test
+  - "`+.dd`"
+
+- title: Post-declaration functions
+  description: These functions operate on declared designs
+  contents:
+  - cite_design
+  - draw_data
+  - draw_estimands
+  - draw_estimates
+  - draw_assignment
+  - draw_sample
+  - run_design
+  - get_estimates
+  - print.design
+  - summary.design
+  - print_code
+
+- title: Diagnose
+  description: These functions assist with research design diagnosis
+  contents:
+  - declare_diagnosands
+  - diagnose_design
+  - diagnose_designs
+  - get_diagnosands
+  - get_simulations
+  - simulate_design
+  - simulate_designs
+  - set_diagnosands
+  - reshape_diagnosis
+
+- title: Redesign
+  description: These functions modify declared designs
+  contents:
+  - insert_step
+  - delete_step
+  - replace_step
+  - expand_design
+  - redesign
+
+- title: Comparison
+  description: These functions compare declared designs
+  contents:
+  - compare_diagnoses
+  - compare_designs
+  - compare_design_code
+  - compare_design_summaries
+  - compare_design_data
+  - compare_design_estimates
+  - compare_design_estimands
+

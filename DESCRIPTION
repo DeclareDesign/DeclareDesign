@@ -43,8 +43,8 @@ Suggests:
     betareg,
     biglm,
     gam,
-    lfe,
     sf,
     reshape2,
     DesignLibrary,
-    coin
+    coin,
+    margins
