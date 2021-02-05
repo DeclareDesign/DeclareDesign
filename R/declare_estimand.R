@@ -25,7 +25,7 @@
 #'   declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) + 
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #'
-#' # sGet example data to compute inquiries on
+#' # Get example data to compute inquiries on
 #' dat <- draw_data(design_stub)
 #'
 #' # ----------
