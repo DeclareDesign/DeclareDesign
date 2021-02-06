@@ -127,7 +127,7 @@ diagnose_design <- function(...,
   group_by_set <- 
     c("design_label", "inquiry_label", "estimator_label", "term", add_grouping_variables, make_groups_names) %icn% 
     simulations_df
-
+  
   # Actually calculate diagnosands ------------------------------------------
 
   diagnosands_df <- calculate_diagnosands(

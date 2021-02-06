@@ -41,7 +41,7 @@ declare_measurement <- make_declarations(measurement_handler, "measurement")
 #' @param data A data.frame.
 #' @importFrom rlang quos !!!
 #' @importFrom fabricatr fabricate
-#' @rdname declare_ qmeasurement
+#' @rdname declare_measurement
 measurement_handler <- function(data, ...) {
   
   options <- quos(...)

@@ -281,4 +281,24 @@ test_that("diagnose_design can generate and use grouping variables", {
   
   expect_equivalent(nrow(diagnosis$diagnosands_df),  4)
   
+  
+  
+  design <- 
+    declare_population(N = 100, u = rnorm(N)) + 
+    declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
+    declare_assignment() + 
+    declare_inquiry(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
+    declare_reveal() + 
+    declare_estimator(Y ~ Z, inquiry = "ATE_positive")
+  
+  diagnosis <- diagnose_design(design, 
+                               make_groups = vars(significant = ifelse(p.value > 0.1, NA, p.value <= 0.05)),
+                               sims = 5
+  )
+  
+  diagnosis <- diagnose_design(design, 
+                               make_groups = vars(significant = factor(ifelse(p.value > 0.1, NA, p.value <= 0.05))),
+                               sims = 100
+  )
+  
 })
