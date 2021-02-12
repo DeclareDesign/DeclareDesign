@@ -89,7 +89,7 @@ test_that("designs with factors in diagnosands_df do not produce warnings", {
   design <- design <- my_population +
     declare_estimator(handler = label_estimator(my_estimator), label = "my_label")
 
-  diagnose_design(design, sims = 2, diagnosands = declare_diagnosands(first = first(estimate)))
+  diagnose_design(design, sims = 2, diagnosands = declare_diagnosands(first = estimate[1]))
   
   my_estimator <- function(data) {
     data.frame(estimate = c("answer1", "answer2"), estimator_label = "my_label", stringsAsFactors = TRUE)
@@ -98,6 +98,29 @@ test_that("designs with factors in diagnosands_df do not produce warnings", {
   design <- design <- my_population +
     declare_estimator(handler = my_estimator)
   
-  expect_silent(reshape_diagnosis(diagnose_design(design, sims = 2, diagnosands = declare_diagnosands(first = first(estimate)))))
+  expect_silent(reshape_diagnosis(diagnose_design(design, sims = 31, diagnosands = declare_diagnosands(first = estimate[1]))))
+  
+})
+
+test_that("groups with factors", {
+  
+  design <- 
+    declare_population(N = 100, u = rnorm(N)) + 
+    declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
+    declare_assignment() + 
+    declare_inquiry(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
+    declare_reveal() + 
+    declare_estimator(Y ~ Z, inquiry = "ATE_positive")
+  
+  diagnosis <- diagnose_design(design, 
+                               make_groups = vars(significant = ifelse(p.value > 0.5, NA, p.value <= 0.05)),
+                               sims = 100
+  )
+  
+  diagnosis <- diagnose_design(design, 
+                               make_groups = vars(significant = factor(ifelse(p.value > 0.5, NA, p.value <= 0.05))),
+                               sims = 100
+  )
+  
   
 })

@@ -11,3 +11,7 @@ NULL
 estimand_handler <- function(...){
   .Deprecated(new = "inquiry_handler")
 }
+
+compare_design_estimands <- function(...){
+  .Deprecated(new = "compare_design_inquiries")
+}

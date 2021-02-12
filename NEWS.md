@@ -1,6 +1,12 @@
-# DeclareDesign 0.25.0
+# DeclareDesign 0.26.0
 
-* Allow estimands to be functions of other estimands
+* Rapid development phase is beginning to prepare for DeclareDesign 1.0. 
+* Add new step `declare_model` for defining the model of the world including sample size, levels of the data, and variables. 
+* Add new step `declare_inquiry` to replace `declare_estimand`. `declare_estimand` is still available but deprecated.
+* Soft-introduce new syntax for declare_assignment and declare_sampling. Old syntax is still available with legacy = TRUE, the current default. To use the new syntax, set legacy = FALSE. In future versions of DeclareDesign, the default will be set to FALSE.
+* `reveal_outcomes`, created in 0.24.0, has been removed as a step.
+* Change labels produced in diagnoses and `run_design` output to be `inquiry_label` rather than `estimand_label`. 
+* Allow estimands to be functions of other estimands.
 
 # DeclareDesign 0.24.0
 

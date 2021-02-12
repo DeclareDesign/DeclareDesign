@@ -296,6 +296,8 @@ test_that("diagnose_design can generate and use grouping variables", {
                                sims = 5
   )
   
+  print(diagnosis, digits = 5, select = "Bias")
+  
   diagnosis <- diagnose_design(design, 
                                make_groups = vars(significant = factor(ifelse(p.value > 0.1, NA, p.value <= 0.05))),
                                sims = 100

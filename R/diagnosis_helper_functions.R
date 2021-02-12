@@ -53,25 +53,23 @@ get_simulations <- function(diagnosis) {
 }
 
 #' @export
-print.diagnosis <- function(x, ...) {
-  print(summary(x))
-  invisible(summary(x))
+print.diagnosis <- function(x, digits = 2, select = NULL, exclude = NULL, ...) {
+  print_summary_diagnosis(x, digits = digits, select = select, exclude = exclude)
 }
 
 #' @export
-summary.diagnosis <- function(object, ...) {
-  structure(object, class = c("summary.diagnosis", "data.frame"))
+summary.diagnosis <- function(object, digits = 2, select = NULL, exclude = NULL, ...) {
+  print_summary_diagnosis(object, digits = digits, select = select, exclude = exclude)
 }
 
-#' @export
-print.summary.diagnosis <- function(x, ...) {
+print_summary_diagnosis <- function(x, digits = 2, select = NULL, exclude = NULL, ...) {
   n_sims <- unique(x$diagnosands_df$n_sims)
   cat(paste0("\nResearch design diagnosis", ifelse(length(n_sims) == 1, paste0(" based on ", n_sims, " simulations"), ""), "."))
   if (x$bootstrap_sims > 0) {
     cat(" Diagnosand estimates with bootstrapped standard errors in parentheses (", x$bootstrap_sims, " replicates).", sep = "")
   }
   cat("\n\n")
-  x <- reshape_diagnosis(x)
+  x <- reshape_diagnosis(x, digits = digits, select = select, exclude = exclude)
   class(x) <- "data.frame"
   print(x, row.names = FALSE)
   invisible(x)
