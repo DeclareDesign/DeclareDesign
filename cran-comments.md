@@ -14,7 +14,7 @@ Thank you for your time reviewing the submission.
 
 ## Reverse dependencies
 
-There is one change to worse in DesignLibrary due to these change. A patch has been prepared and will be submitted to CRAN as soon as this is accepted.
+There is one change to worse in DesignLibrary due to these change. A patch has been prepared and will be submitted to CRAN as soon as this is accepted (the package is maintained by the same team).
 
 ---
   
