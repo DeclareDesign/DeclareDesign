@@ -31,7 +31,6 @@ declare_reveal <- make_declarations(declare_reveal_handler, "reveal")
 #'
 #' @importFrom rlang enexpr expr_text
 #'
-#' @export
 #' @rdname declare_reveal
 #'
 #' @examples

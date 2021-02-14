@@ -66,6 +66,9 @@ sampling_handler_internal_fabricatr <- function(data, ..., filter = S == 1) {
   
   rows <- enquo(filter)
   rows_val <- eval_tidy(rows, data)
+  # rows_val <- rows_val && !is.na(rows_val)
+  rows_val[is.na(rows_val)] <- FALSE
+  
   stopifnot(is.logical(rows_val))
   
   data[rows_val, , drop = FALSE]

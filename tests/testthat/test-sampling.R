@@ -1,5 +1,9 @@
 context("Sampling and probability functions")
 
+
+
+
+
 test_that("use of randomizr and filter works", {
   
   design <- declare_model(
@@ -12,11 +16,12 @@ test_that("use of randomizr and filter works", {
   smp1 <- declare_sampling(legacy = FALSE, S = complete_rs(N = N, n = 10), filter = S == 1)
   smp2 <- declare_sampling(legacy = FALSE, S = complete_rs(N = N, n = 10))
   smp3 <- declare_sampling(legacy = FALSE, S = complete_rs(N = N, n = 10), filter = S == 0)
+  smp4 <- declare_sampling(legacy = FALSE, S = sample(x = c(0, 1, NA), N, replace = TRUE), filter = S == 0)
   
   expect_equal(nrow(smp1(dat)), 10)
   expect_equal(nrow(smp2(dat)), 10)
   expect_equal(nrow(smp3(dat)), 190)
-  
+  expect_true(sum(is.na(smp4(dat)$S)) == 0)
 })
 
 
