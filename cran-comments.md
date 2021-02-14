@@ -1,6 +1,6 @@
 ## Submission
 
-Thank you for your time reviewing the submission.
+Thank you for your time reviewing the submission. We have removed our revdep results, which our submission was kicked back for. Apologies!
 
 ## Test environments
 * local OS X install (release)
