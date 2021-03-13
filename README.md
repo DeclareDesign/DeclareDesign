@@ -21,20 +21,11 @@ without having to code up simulations from scratch.
 ## Installation
 
 To install the latest stable release of **DeclareDesign**, please ensure
-that you are running version 3.3 or later of R and run the following
+that you are running version 3.5 or later of R and run the following
 code:
 
 ``` r
 install.packages("DeclareDesign")
-```
-
-To install the latest development release of all of the packages, please
-ensure that you are running version 3.4 or later of R and run the
-following code:
-
-``` r
-install.packages("DeclareDesign", dependencies = TRUE,
-                 repos = c("http://R.declaredesign.org", "https://cloud.r-project.org"))
 ```
 
 ## Usage
@@ -50,26 +41,29 @@ The diagnosis shows that the study is unbiased but underpowered.
 library(DeclareDesign)
 
 design <-
-  declare_population(N = 100) +
-  declare_potential_outcomes(Y ~ rbinom(n = N, size = 1, prob = 0.5 + 0.05 * Z)) +
-  declare_estimand(ATE = 0.05) +
+  declare_population(
+    N = 100,
+    potential_outcomes(Y ~ rbinom(n = N, size = 1, prob = 0.5 + 0.05 * Z))
+  ) +
+  declare_inquiry(ATE = 0.05) +
   declare_assignment(m = 50) +
-  declare_estimator(Y ~ Z)
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
+  declare_estimator(Y ~ Z, model = lm_robust)
 
 diagnosands <-
   declare_diagnosands(bias = mean(estimate - estimand),
                       power = mean(p.value <= 0.05))
 
 diagnosis <- diagnose_design(design, diagnosands = diagnosands)
+```
+
+``` r
 diagnosis
 ```
 
-    ## 
-    ## Research design diagnosis based on 500 simulations. Diagnosand estimates with bootstrapped standard errors in parentheses (100 replicates).
-    ## 
-    ##  Design Label Estimand Label Estimator Label Term N Sims   Bias  Power
-    ##        design            ATE       estimator    Z    500  -0.00   0.08
-    ##                                                          (0.00) (0.01)
+| Inquiry | Estimator |   Bias | SE(Bias) | Power | SE(Power) | n sims |
+|:--------|:----------|-------:|---------:|------:|----------:|-------:|
+| ATE     | estimator | -0.004 |    0.004 | 0.076 |     0.011 |    500 |
 
 ## Companion software
 
@@ -104,18 +98,16 @@ of which is useful in its own right.
 
 Each of these `declare_*()` functions returns a *function*.
 
-1.  `declare_population()` (describes dimensions and distributions over
-    the variables in the population)
-2.  `declare_potential_outcomes()` (takes population or sample and adds
-    potential outcomes produced by interventions)
-3.  `declare_sampling()` (takes a population and selects a sample)
-4.  `declare_assignment()` (takes a population or sample and adds
+1.  `declare_model()` (describes dimensions and distributions over the
+    variables in the population)
+2.  `declare_sampling()` (takes a population and selects a sample)
+3.  `declare_assignment()` (takes a population or sample and adds
     treatment assignments)
-5.  `declare_measurement()` (adds measured variables)
-6.  `declare_estimand()` (takes potential outcomes and calculates a
-    quantity of interest)
-7.  `declare_estimator()` (takes data produced by sampling and
-    assignment and returns estimates)
+4.  `declare_measurement()` (adds measured variables)
+5.  `declare_inquiry()` (takes data and returns an estimand, the answer
+    to an inquiry)
+6.  `declare_estimator()` (takes data produced by sampling, assignment,
+    and measurement and returns estimates)
 
 To *declare a design*, connect the components of your design with the +
 operator.
@@ -128,7 +120,7 @@ post-design-declaration commands used to modify or diagnose your design:
 2.  `draw_data()` (takes a design and returns a single draw of the data)
 3.  `draw_estimates()` (takes a design a returns a single simulation of
     estimates)
-4.  `draw_estimands()` (takes a design a returns a single simulation of
+4.  `draw_inquiries()` (takes a design a returns a single simulation of
     estimands)
 
 A few other features:
@@ -138,12 +130,6 @@ A few other features:
     parameters that returns a design.
 2.  You can change the features of the design to be diagnosed with
     `declare_diagnosands()`.
-3.  `reveal_outcomes()` implements a general switching equation, which
-    allows you to reveal outcomes from potential outcomes and a
-    treatment assignment.
-4.  You can provide custom functions to any `declare_*` step, as
-    described in the [custom functions
-    vignette](/r/declaredesign/articles/custom_functions.html).
 
 ------------------------------------------------------------------------
 
