@@ -42,9 +42,9 @@ design <-
     potential_outcomes(Y ~ rbinom(n = N, size = 1, prob = 0.5 + 0.05 * Z))
   ) +
   declare_inquiry(ATE = 0.05) +
-  declare_assignment(m = 50) +
+  declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) +
   declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
-  declare_estimator(Y ~ Z, model = lm_robust)
+  declare_estimator(Y ~ Z, model = lm_robust, inquiry = "ATE")
 
 diagnosands <-
   declare_diagnosands(bias = mean(estimate - estimand),
@@ -84,26 +84,26 @@ The core DeclareDesign package relies on four companion packages, each of which 
 Each of these `declare_*()` functions returns a *function*.
 
 1. `declare_model()` (describes dimensions and distributions over the variables in the population)
+2. `declare_inquiry()` (takes data and returns an estimand, the answer to an inquiry)
 3. `declare_sampling()` (takes a population and selects a sample)
 4. `declare_assignment()` (takes a population or sample and adds treatment assignments)
-4. `declare_measurement()` (adds measured variables)
-5. `declare_inquiry()` (takes data and returns an estimand, the answer to an inquiry)
+5. `declare_measurement()` (adds measured variables)
 6. `declare_estimator()` (takes data produced by sampling, assignment, and measurement and returns estimates)
 
 To *declare a design*, connect the components of your design with the + operator.
 
 Once you have declared your design, there are four core post-design-declaration commands used to modify or diagnose your design:
 
-1. `diagnose_design()` (takes a design, returns simulations and diagnosis)
+1. `diagnose_design()` (takes a design and returns simulations and diagnosis)
 2. `draw_data()` (takes a design and returns a single draw of the data)
-3. `draw_estimates()` (takes a design a returns a single simulation of estimates)
-4. `draw_inquiries()` (takes a design a returns a single simulation of estimands)
+3. `draw_estimates()` (takes a design and returns a single simulation of estimates)
+4. `draw_inquiries()` (takes a design and returns a single simulation of estimands)
 
 A few other features:
 
-1. A designer is a function that takes parameters (e.g., `N`) and returns a design. `expand_design()` is a function of a designer and parameters that returns a design.
-2. You can change the features of the design to be diagnosed with `declare_diagnosands()`.
+1. A designer is a function that takes parameters (e.g., `N`) and returns a design. `expand_design()` is a function of a designer and parameters that return a design.
+2. You can change the diagnosands with `declare_diagnosands()`.
 
 ---
 
-This project is generously supported by a grant from the [Laura and John Arnold Foundation](http://www.arnoldfoundation.org) and seed funding from [EGAP](http://egap.org).
+This project was generously supported by a grant from the [Laura and John Arnold Foundation](http://www.arnoldfoundation.org) and seed funding from [EGAP](http://egap.org).
