@@ -44,6 +44,95 @@
 #' @name DeclareDesign
 NULL
 
+# tab completion
+
+comp_env <- list2env(list(completer = NULL), parent = emptyenv());
+
+.onAttach <- function(libname, pkgname){
+  
+  if(requireNamespace("utils", quietly = FALSE)){
+    comp_env$completer <- utils::rc.getOption("custom.completer")
+    
+    
+    rc.options("custom.completer"= DDcompletor)
+    
+  }
+  
+}
+
+.onDetach <- function(libPath){
+  rc.options(custom.completer = comp_env$completer)
+}
+
+# Sneaks around import checks ? see also jimhest/completeme on github
+complete_token <- get(".completeToken", asNamespace("utils"))
+
+DDcompletor <- function(CompletionEnv){
+  
+  on.exit( rc.options("custom.completer" = DDcompletor) )
+  rc.options(custom.completer = comp_env$completer)
+  ret <- complete_token() #fills in CompletionEnv data
+  
+  if(is.character(CompletionEnv$fguess) && length(CompletionEnv$fguess) > 0 && !any(grepl("handler", CompletionEnv$linebuffer))){
+    FUN <- get0(CompletionEnv$fguess, asNamespace("DeclareDesign"), mode = "function")
+    
+    if(is.function(FUN) && inherits(FUN, "declaration")){
+      
+      if(!CompletionEnv$fguess %in% c("declare_assignment", "declare_sampling", "declare_estimator")){ 
+        
+        h <- eval(formals(FUN)$handler, environment(FUN))
+        
+        h <- union(names(formals(FUN)), names(formals(h)))
+        
+      } else if (CompletionEnv$fguess == "declare_assignment") {
+        
+        h <- setdiff(names(formals(randomizr::conduct_ra)), c("N", "declaration", "permutation_matrix", "check_inputs"))
+        
+      } else if (CompletionEnv$fguess == "declare_sampling") {
+        
+        h <- setdiff(names(formals(randomizr::draw_rs)), c("N", "declaration", "check_inputs"))
+        
+      } else if (CompletionEnv$fguess == "declare_estimator") {
+        
+        h <- eval(formals(FUN)$handler, environment(FUN))
+        
+        handler_name <- quo_text(formals(FUN)$handler)
+        
+        if(handler_name %in% c("model_handler", "estimator_handler")) {
+          
+          model_args <- names(formals(eval(formals(h)$model)))
+          
+          h <- union(union(names(formals(FUN)), names(formals(h))), model_args)
+          
+        } else {
+          
+          h <- union(names(formals(FUN)), names(formals(h)))
+          
+        }
+        
+      }
+      
+      h <- setdiff(h, "data")
+      
+      CompletionEnv$comps = paste0(h, "=")
+      
+      ## TODO port to startsWith
+      if(length(CompletionEnv$token) == 1 && nchar(CompletionEnv$token) > 0){
+        w <- regexpr(CompletionEnv$token, h) == 1
+        if(sum(w) == 1) {
+          CompletionEnv$comps = h[w]
+          
+          return(h[w])
+          
+        }
+      }
+      
+      return(h)
+    }
+  }
+  
+  ret
+}
 
 .onLoad <- function(libname, pkgname) {
   repos <- getOption("repos")
