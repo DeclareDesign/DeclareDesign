@@ -29,10 +29,10 @@ design <- my_population +
 test_that("reshape works", {
   dx <- diagnose_design(design, sims = 10, bootstrap_sims = 5)
   reshape_diagnosis(dx)
-  expect_error(reshape_diagnosis(dx, select = "mean_inquiry"),
+  expect_error(reshape_diagnosis(dx, select = "mean_estimand"),
     regexp = "select argument must only include elements from"
   )
-  reshape_diagnosis(dx, select = "Mean Inquiry")
+  reshape_diagnosis(dx, select = "Mean Estimand")
 })
 
 

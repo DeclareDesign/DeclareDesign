@@ -80,7 +80,7 @@ mean_estimate = mean(estimate),
 sd_estimate = sd(estimate),
 mean_se = mean(std.error),
 type_s_rate = mean((sign(estimate) != sign(estimand))[p.value < alpha]),
-mean_inquiry = mean(estimand)
+mean_estimand = mean(estimand)
 )
 
 }

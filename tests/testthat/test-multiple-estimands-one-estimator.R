@@ -40,7 +40,7 @@ test_that("Multiple inquiries can be mapped to one estimator", {
     bias_est = mean(std.error - sd(estimand)),
     mean_se = mean(std.error),
     sd_se = sd(std.error),
-    mean_inquiry = mean(estimand),
+    mean_estimand = mean(estimand),
     sd_inquiry = sd(estimand)
   )
 

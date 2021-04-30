@@ -124,7 +124,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #' sd_estimate = sd(estimate),
 #' mean_se = mean(std.error),
 #' type_s_rate = mean((sign(estimate) != sign(estimand))[p.value < alpha]),
-#' mean_inquiry = mean(estimand)
+#' mean_estimand = mean(estimand)
 #' )
 #'
 declare_diagnosands <- make_declarations(diagnosand_handler, "diagnosand", "diagnosands")
@@ -147,7 +147,7 @@ default_diagnosands <- function(data, alpha = .05){
   sd_estimate <- sd(estimate)
   mean_se <- mean(std.error)
   type_s_rate <- mean((sign(estimate) != sign(estimand))[p.value < alpha])
-  mean_inquiry <- mean(estimand)
+  mean_estimand <- mean(estimand)
   
   data.frame(
     diagnosand_label = c(
@@ -159,7 +159,7 @@ default_diagnosands <- function(data, alpha = .05){
       "sd_estimate",
       "mean_se",
       "type_s_rate",
-      "mean_inquiry"
+      "mean_estimand"
     ),
     diagnosand = c(
       bias,
@@ -170,7 +170,7 @@ default_diagnosands <- function(data, alpha = .05){
       sd_estimate,
       mean_se,
       type_s_rate,
-      mean_inquiry
+      mean_estimand
     ), 
     stringsAsFactors = FALSE
   )

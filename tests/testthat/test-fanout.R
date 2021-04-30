@@ -67,7 +67,7 @@ test_that("Diagnosing a fanout", {
   
   # inquiries don't vary overall
   expect_equal(
-    dx$diagnosands[1, "se(mean_inquiry)"], 0
+    dx$diagnosands[1, "se(mean_estimand)"], 0
   )
 
   rep_id <-

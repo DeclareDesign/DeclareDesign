@@ -214,8 +214,8 @@ test_that("diagnosis, NAs if no inquiry", {
                              power = 0, `se(power)` = 0, coverage = NA_real_, `se(coverage)` = NA_real_, 
                              mean_estimate = 1.58, `se(mean_estimate)` = 0, sd_estimate = 0, 
                              `se(sd_estimate)` = 0, mean_se = 0.849091017238762, `se(mean_se)` = 0, 
-                             type_s_rate = NaN, `se(type_s_rate)` = NA_real_, mean_inquiry = NA_real_, 
-                             `se(mean_inquiry)` = NA_real_, n_sims = 4L), class = "data.frame", row.names = c(NA, 
+                             type_s_rate = NaN, `se(type_s_rate)` = NA_real_, mean_estimand = NA_real_, 
+                             `se(mean_estimand)` = NA_real_, n_sims = 4L), class = "data.frame", row.names = c(NA, 
                                                                                                                -1L))
   
 expect_equivalent(diagnose_design(d, sims = 4, bootstrap_sims = 5)$diagnosands_df, sleep_ols)
@@ -234,7 +234,7 @@ test_that("diagnosis, NAs if no inquiry", {
                    mean_estimate = NA_real_, `se(mean_estimate)` = NA_real_, 
                    sd_estimate = NA_real_, `se(sd_estimate)` = NA_real_, mean_se = NA_real_, 
                    `se(mean_se)` = NA_real_, type_s_rate = NA_real_, `se(type_s_rate)` = NA_real_, 
-                   mean_inquiry = 1.54, `se(mean_inquiry)` = 0, n_sims = 4L), row.names = c(NA, 
+                   mean_estimand = 1.54, `se(mean_estimand)` = 0, n_sims = 4L), row.names = c(NA, 
                                                                                             -1L), class = "data.frame")
   
     expect_equivalent(diagnose_design(d, sims = 4)$diagnosands_df, sleep_ols)
@@ -290,7 +290,7 @@ test_that("declare time errors", {
 #       "sd_estimate",
 #       "mean_se",
 #       "type_s_rate",
-#       "mean_inquiry",
+#       "mean_estimand",
 #       "n_deleted",
 #       "n_sims"
 #     )

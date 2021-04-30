@@ -45,9 +45,9 @@ test_that("Bootstrap ses close", {
   estimate <- declare_estimator(S100 ~ S10000, model = lm, inquiry = list("S100", "S10000"))
   design <- pop + inquiry + estimate
   d <- diagnose_design(design, sims = 10000)
-  expect_true(d$diagnosands_df$`se(mean_inquiry)`[1] > .06)
-  expect_true(d$diagnosands_df$`se(mean_inquiry)`[1] < .14)
-  expect_true(d$diagnosands_df$`se(mean_inquiry)`[2] > 6)
-  expect_true(d$diagnosands_df$`se(mean_inquiry)`[2] < 14)
+  expect_true(d$diagnosands_df$`se(mean_estimand)`[1] > .06)
+  expect_true(d$diagnosands_df$`se(mean_estimand)`[1] < .14)
+  expect_true(d$diagnosands_df$`se(mean_estimand)`[2] > 6)
+  expect_true(d$diagnosands_df$`se(mean_estimand)`[2] < 14)
 })
 

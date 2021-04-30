@@ -95,7 +95,7 @@ test_that("default diagnosands work", {
                  "bias", "se(bias)", "rmse", "se(rmse)", "power", "se(power)", 
                  "coverage", "se(coverage)", "mean_estimate", "se(mean_estimate)", 
                  "sd_estimate", "se(sd_estimate)", "mean_se", "se(mean_se)", "type_s_rate", 
-                 "se(type_s_rate)", "mean_inquiry", "se(mean_inquiry)", "n_sims"))
+                 "se(type_s_rate)", "mean_estimand", "se(mean_estimand)", "n_sims"))
   
   # w/ none set and override
 
