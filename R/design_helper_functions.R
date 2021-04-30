@@ -39,8 +39,8 @@ check_sims <- function(design, sims) {
     }
     else if (is.character(names(sims))) {
       sims_full <- rep(1, n)
-      design_labels <- as.character(lapply(design, attr, "label"))
-      i <- match(names(sims), design_labels)
+      designs <- as.character(lapply(design, attr, "label"))
+      i <- match(names(sims), designs)
       sims_full[i] <- sims
     } else if (length(sims) != n) {
       sims_full <- c(sims, rep(1, n))[1:n]
@@ -191,7 +191,7 @@ apply_on_design_dots <- function(FUN, ...) {
   elist <- lapply(designs, FUN)
 
   if (length(designs) > 1) {
-    elist <- Map(cbind, design_label = names(elist), elist, stringsAsFactors = FALSE)
+    elist <- Map(cbind, design = names(elist), elist, stringsAsFactors = FALSE)
   }
 
   rbind_disjoint(elist)

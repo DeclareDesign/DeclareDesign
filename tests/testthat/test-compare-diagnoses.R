@@ -48,7 +48,7 @@ test_that("compare_diagnoses errors when it should", {
  
   
   
-  # diagnosis_df must contain only one unique design_label
+  # diagnosis_df must contain only one unique design
   designer <- function(N) {
     declare_population(N = N, noise = rnorm(N)) +
       declare_potential_outcomes(Y ~ 0.20 * Z + noise) +

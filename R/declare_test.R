@@ -130,7 +130,7 @@ label_test <- function(fn) {
     ret <- eval_tidy(quo(fn(data, !!!dots)))
     
     ret <- data.frame(
-      estimator_label = label,
+      estimator = label,
       ret,
       stringsAsFactors = FALSE
     )

@@ -169,7 +169,7 @@ label_estimator <- function(fn) {
     ret <- eval_tidy(quo(fn(data, !!!dots)))
 
     ret <- data.frame(
-      estimator_label = label,
+      estimator = label,
       ret,
       stringsAsFactors = FALSE
     )
@@ -182,12 +182,12 @@ label_estimator <- function(fn) {
     }
     
     
-    inquiry_label <- get_inquiry_label(inquiry)
-    if (length(inquiry_label) > 0) {
+    inquiry <- get_inquiry(inquiry)
+    if (length(inquiry) > 0) {
       ret <-
         cbind(
           ret,
-          inquiry_label = inquiry_label,
+          inquiry = inquiry,
           row.names = NULL,
           stringsAsFactors = FALSE
         )
@@ -313,13 +313,13 @@ validation_fn(model_handler) <- function(ret, dots, label) {
 
 # helper methods for inquiry = my_inquiry arguments to estimator_handler
 #
-get_inquiry_label <- function(inquiry) {
+get_inquiry <- function(inquiry) {
   force(inquiry) # no promise nonsense when we look at it
   switch(
     class(inquiry)[1],
     "character" = inquiry,
     "design_step" = attributes(inquiry)$label,
-    "list" = vapply(inquiry, get_inquiry_label, NA_character_),
+    "list" = vapply(inquiry, get_inquiry, NA_character_),
     # note recursion here
     NULL = NULL,
     warning("Did not match class of `inquiry`")

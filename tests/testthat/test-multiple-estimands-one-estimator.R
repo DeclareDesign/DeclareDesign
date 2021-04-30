@@ -70,6 +70,6 @@ test_that("More multiple inquiries", {
 
 
   des <- pop + pos + pate + smp + sate + assgn + my_reveal + mator_both
-  expect_equal(draw_estimates(des)$inquiry_label, c("pate", "sate"))
+  expect_equal(draw_estimates(des)$inquiry, c("pate", "sate"))
 })
 

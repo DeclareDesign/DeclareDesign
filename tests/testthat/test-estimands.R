@@ -7,8 +7,8 @@ test_that("splat labels", {
   my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
   expect_identical(
     my_inquiry(df),
-    structure(list(inquiry_label = "ATE", estimand = 2), .Names = c(
-      "inquiry_label",
+    structure(list(inquiry = "ATE", estimand = 2), .Names = c(
+      "inquiry",
       "estimand"
     ), row.names = c(NA, -1L), class = "data.frame")
   )
@@ -20,8 +20,8 @@ test_that("default label", {
   my_inquiry <- declare_inquiry(mean(Y_Z_1 - Y_Z_0))
   expect_identical(
     my_inquiry(df),
-    structure(list(inquiry_label = "inquiry", estimand = 2), .Names = c(
-      "inquiry_label",
+    structure(list(inquiry = "inquiry", estimand = 2), .Names = c(
+      "inquiry",
       "estimand"
     ), row.names = c(NA, -1L), class = "data.frame")
   )
@@ -35,8 +35,8 @@ test_that("manual label", {
 
   expect_identical(
     my_inquiry(df),
-    structure(list(inquiry_label = "ATE2", estimand = 2), .Names = c(
-      "inquiry_label",
+    structure(list(inquiry = "ATE2", estimand = 2), .Names = c(
+      "inquiry",
       "estimand"
     ), row.names = c(NA, -1L), class = "data.frame")
   )
@@ -46,7 +46,7 @@ test_that("manual label", {
 test_that("custom inquiry has label", {
   ## custom inquiry function
   my_inquiry_function <- function(data, label) {
-    with(data, data.frame(inquiry_label = label, estimand = median(Y_Z_1 - Y_Z_0), stringsAsFactors = TRUE))
+    with(data, data.frame(inquiry = label, estimand = median(Y_Z_1 - Y_Z_0), stringsAsFactors = TRUE))
   }
   my_inquiry_custom <- declare_inquiry(
     handler = my_inquiry_function, label = "medianTE"
@@ -55,9 +55,9 @@ test_that("custom inquiry has label", {
   expect_identical(
     my_inquiry_custom(df),
     structure(list(
-      inquiry_label = structure(1L, .Label = "medianTE", class = "factor"),
+      inquiry = structure(1L, .Label = "medianTE", class = "factor"),
       estimand = 2
-    ), .Names = c("inquiry_label", "estimand"), row.names = c(
+    ), .Names = c("inquiry", "estimand"), row.names = c(
       NA,
       -1L
     ), class = "data.frame")
@@ -82,10 +82,10 @@ test_that("multiple inquiry declarations work", {
   design_1 <- declare_population(df) + pate + sate
   expect_identical(
     draw_inquiries(design_1),
-    structure(list(inquiry_label = c("PATE", "SATE"), estimand = c(
+    structure(list(inquiry = c("PATE", "SATE"), estimand = c(
       2,
       2
-    )), .Names = c("inquiry_label", "estimand"), row.names = c(
+    )), .Names = c("inquiry", "estimand"), row.names = c(
       NA,
       -2L
     ), class = "data.frame")
@@ -102,10 +102,10 @@ test_that("multiple inquiry declarations work", {
 
   expect_identical(
     draw_inquiries(design_2),
-    structure(list(inquiry_label = c("The PATE", "The SATE"), estimand = c(
+    structure(list(inquiry = c("The PATE", "The SATE"), estimand = c(
       2,
       2
-    )), .Names = c("inquiry_label", "estimand"), row.names = c(
+    )), .Names = c("inquiry", "estimand"), row.names = c(
       NA,
       -2L
     ), class = "data.frame")
@@ -129,7 +129,7 @@ test_that("inquiries can use other inquiries in calculations", {
 
   expect_equal(
     prop_inquiry(df),
-    structure(list(inquiry_label = c("yz1.mu", "yz0.mu", "percent.diff"), 
+    structure(list(inquiry = c("yz1.mu", "yz0.mu", "percent.diff"), 
                    estimand = c(7.5, 5.5, 0.363636363636364)), 
               class = "data.frame", row.names = c(NA, -3L))
   )
