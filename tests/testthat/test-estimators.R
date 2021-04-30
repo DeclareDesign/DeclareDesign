@@ -2,7 +2,7 @@ context("Estimators")
 
 my_population <- declare_population(N = 500, noise = rnorm(N))
 my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
-my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
+my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 my_reveal_outcomes <- declare_reveal()
 
 expect_estimates <- function(estimates, label = NULL) {
@@ -43,7 +43,7 @@ test_that("custom estimator function", {
 test_that("check blocked d-i-m estimator", {
   my_population <- declare_population(N = 500, noise = rnorm(N), blocks = sample(rep(c("A", "B"), each = 250), N, replace = F))
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2) + 5 * (blocks == "A"))
-  my_assignment <- declare_assignment(legacy = FALSE, Z = block_ra(blocks = blocks))
+  my_assignment <- declare_assignment(Z = block_ra(blocks = blocks))
 
   ## lm with HC3 robust ses
   my_estimator_blocked <- declare_estimator(Y ~ Z, model = difference_in_means, blocks = `blocks`)
@@ -59,7 +59,7 @@ test_that("check blocked d-i-m estimator", {
 test_that("regression from estimatr works as an estimator", {
   my_population <- declare_population(N = 500, noise = rnorm(N))
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
-  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 100))
+  my_assignment <- declare_assignment(Z = complete_ra(N, m = 100))
   pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
   pate_estimator <- declare_estimator(Y ~ Z + noise,
     model = lm_robust,
@@ -87,9 +87,9 @@ potential_outcomes <- declare_potential_outcomes(formula = Y ~ noise + Z * .5)
 
 pop <- potential_outcomes(population())
 
-sampling <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = 100))
+sampling <- declare_sampling(S = complete_rs(N, n = 100))
 
-assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 50))
+assignment <- declare_assignment(Z = complete_ra(N, m = 50))
 
 sate <- declare_inquiry(SATE = mean(Y_Z_1 - Y_Z_0))
 

@@ -31,7 +31,7 @@ my_model <-
     Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
   )
 
-my_assignment <- declare_assignment(Z = complete_ra(N), legacy = FALSE)
+my_assignment <- declare_assignment(Z = complete_ra(N))
 
 my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 

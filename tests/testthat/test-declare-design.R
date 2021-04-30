@@ -9,9 +9,9 @@ test_that(
     my_potential_outcomes <-
       declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-    my_sampling <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = 250))
+    my_sampling <- declare_sampling(S = complete_rs(N, n = 250))
 
-    my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
+    my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 
     my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
@@ -43,8 +43,8 @@ test_that("No estimators / inquiries", {
   design <-
     declare_population(N = 500, noise = 1:N) +
     declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + 1) +
-    declare_sampling(legacy = FALSE, S = complete_rs(N, n = 250)) +
-    declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25)) +
+    declare_sampling(S = complete_rs(N, n = 250)) +
+    declare_assignment(Z = complete_ra(N, m = 25)) +
     declare_reveal()
 
   head(draw_data(design))
@@ -72,7 +72,7 @@ test_that("sending bad objects to design yields error", {
 })
 
 test_that("test send design as RHS", {
-  my_rhs <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = 50)) + declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 5))
+  my_rhs <- declare_sampling(S = complete_rs(N, n = 50)) + declare_assignment(Z = complete_ra(N, m = 5))
 
   expect_length(declare_population(N = 100) + my_rhs, 3)
 })

@@ -46,7 +46,7 @@
 #'      Y ~ rbinom(N, 1, prob = pnorm(0.2 * Z + 0.2 * female + 0.1 * Z * female + U)))
 #'   ) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-#'   declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) + 
+#'   declare_assignment(Z = complete_ra(N, m = 50)) + 
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #' 
 #' # Most estimators are modeling functions like lm or glm.

@@ -7,9 +7,9 @@ context("Reveal Outcomes")
 test_that("Reveal Outcomes", {
   my_population <- declare_population(N = 1000, u = rnorm(N))
 
-  my_sampling <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = 100))
+  my_sampling <- declare_sampling(S = complete_rs(N, n = 100))
 
-  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 50))
+  my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
 
   my_potential_outcomes <-
     declare_potential_outcomes(
@@ -39,7 +39,7 @@ test_that("Reveal Outcomes NSE for assignment / outcome variables ", {
 
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + 1)
 
-  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, prob = 1))
+  my_assignment <- declare_assignment(Z = complete_ra(N, prob = 1))
 
   design <- my_population + my_potential_outcomes + my_assignment + declare_reveal()
 
@@ -66,7 +66,7 @@ test_that("reveal multiple outcomes works", {
   my_population <- declare_population(N = N, noise = 1:N)
   my_potential_outcomes1 <- declare_potential_outcomes(formula = Y1 ~ Z * .25, conditions = c(0, 1))
   my_potential_outcomes2 <- declare_potential_outcomes(formula = Y2 ~ Z * .5 + 3, conditions = c(0, 1))
-  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, prob = 1))
+  my_assignment <- declare_assignment(Z = complete_ra(N, prob = 1))
 
   design <- my_population + my_potential_outcomes1 + my_potential_outcomes2 + my_assignment +
     declare_reveal(outcome_variables = c(Y1, Y2))
@@ -83,7 +83,7 @@ test_that("declare_reveal custom handler works", {
   N <- 25
 
   my_population <- declare_population(N = N, noise = rnorm(N))
-  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 10))
+  my_assignment <- declare_assignment(Z = complete_ra(N, m = 10))
 
   my_outcome_function <- function(data) {
     data$Y <- rnorm(nrow(data))
@@ -132,10 +132,10 @@ test_that("Single outcome, multiple assn", {
 
 
   # Factorial assignments
-  assign_A <- declare_assignment(legacy = FALSE, 
+  assign_A <- declare_assignment(
     A = block_ra(blocks = blocks)
   )
-  assign_B <- declare_assignment(legacy = FALSE, 
+  assign_B <- declare_assignment(
     B = block_ra(blocks = A + 10 * as.numeric(blocks))
   )
 

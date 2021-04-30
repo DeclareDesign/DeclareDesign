@@ -45,7 +45,7 @@ test_that("Diagnosing a fanout", {
   pop <- declare_population(N = N, noise = rnorm(N))
 
   inquiry <- declare_inquiry(foo = mean(noise))
-  sampl <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = N / 2))
+  sampl <- declare_sampling(S = complete_rs(N, n = N / 2))
   estimator <-
     declare_estimator(
       noise ~ 1,
@@ -109,7 +109,7 @@ test_that("fanout warnings", {
   pop <- declare_population(N = N, noise = rnorm(N))
 
   inquiry <- declare_inquiry(foo = mean(noise))
-  sampl <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = N / 2))
+  sampl <- declare_sampling(S = complete_rs(N, n = N / 2))
   estimator <-
     declare_estimator(
       noise ~ 1,

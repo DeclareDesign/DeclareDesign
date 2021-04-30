@@ -4,7 +4,7 @@ test_that("expand_design works", {
   two_arm_trial <- function(N) {
     my_population <- declare_population(N = N, noise = rnorm(N))
     my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
-    my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = N/2))
+    my_assignment <- declare_assignment(Z = complete_ra(N, m = N/2))
     pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
       declare_estimator(Y ~ Z, inquiry = pate, label = "pate_hat")
@@ -64,7 +64,7 @@ test_that("vary works", {
     my_population <-
       declare_population(N = N, noise = rnorm(N, sd = noise_sd))
     my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
-    my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = N/2))
+    my_assignment <- declare_assignment(Z = complete_ra(N, m = N/2))
     pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
       declare_estimator(Y ~ Z, inquiry = pate, label = "pate_hat")
@@ -115,7 +115,7 @@ test_that("power curve", {
   two_arm_trial <- function(N) {
     my_population <- declare_population(N = N, noise = rnorm(N))
     my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + .25)
-    my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = N/2))
+    my_assignment <- declare_assignment(Z = complete_ra(N, m = N/2))
     pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
       declare_estimator(Y ~ Z, inquiry = pate, label = "pate_hat")

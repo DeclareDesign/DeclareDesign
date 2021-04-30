@@ -20,7 +20,7 @@
 #'   declare_model(N = 100,
 #'                 X = rnorm(N),
 #'                 potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N))) +
-#'   declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) +
+#'   declare_assignment(Z = complete_ra(N, m = 50)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #' 
 #' design + declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))

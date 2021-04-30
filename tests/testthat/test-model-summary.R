@@ -7,7 +7,7 @@ test_that("multiple design draw_estimates", {
     my_potential_outcomes <-
       declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
     
-    my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
+    my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
     
     my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
     
@@ -31,7 +31,7 @@ test_that("multiple design draw_estimates", {
   my_potential_outcomes <-
     declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
   
-  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
+  my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
   
   my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
   
@@ -46,7 +46,7 @@ test_that("multiple design draw_estimates", {
     my_reveal +
     my_estimator
   
-  my_assignment_2 <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 50))
+  my_assignment_2 <- declare_assignment(Z = complete_ra(N, m = 50))
   
   design_2 <- replace_step(design_1, my_assignment, my_assignment_2)
   

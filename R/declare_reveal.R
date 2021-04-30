@@ -42,7 +42,7 @@ declare_reveal <- make_declarations(declare_reveal_handler, "reveal")
 #'     Y_Z_0 = U, 
 #'     Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
 #'   ) + 
-#'   declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) + 
+#'   declare_assignment(Z = complete_ra(N, m = 50)) + 
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #'
 #' # Declaring multiple assignment variables or multiple outcome variables
@@ -54,8 +54,8 @@ declare_reveal <- make_declarations(declare_reveal_handler, "reveal")
 #'     potential_outcomes(Y2 ~ 1 + 2 * Z),
 #'     potential_outcomes(Y3 ~ 1 - X * Z, conditions = list(X = 0:1, Z = 0:1))
 #'   ) + 
-#'   declare_assignment(Z = complete_ra(N), legacy = FALSE) + 
-#'   declare_assignment(X = complete_ra(N), legacy = FALSE) + 
+#'   declare_assignment(Z = complete_ra(N)) + 
+#'   declare_assignment(X = complete_ra(N)) + 
 #'   declare_measurement(Y1 = reveal_outcomes(Y1 ~ Z), 
 #'                       Y2 = reveal_outcomes(Y2 ~ Z),
 #'                       Y3 = reveal_outcomes(Y3 ~ X + Z))
@@ -67,7 +67,7 @@ declare_reveal <- make_declarations(declare_reveal_handler, "reveal")
 #'     potential_outcomes(Y ~ .25 * Z + .01 * age * Z),
 #'     potential_outcomes(R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0)))
 #'   ) + 
-#'   declare_assignment(Z = complete_ra(N, m = 25), legacy = FALSE)
+#'   declare_assignment(Z = complete_ra(N, m = 25))
 #'   declare_measurement(R = reveal_outcomes(R ~ Z),
 #'                       Y = reveal_outcomes(Y ~ Z),
 #'                       Y = ifelse(R == 1, Y, NA))

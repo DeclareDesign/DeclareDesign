@@ -37,8 +37,8 @@ find_step <- function(design, step, verb) {
 #'      Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
 #'    )
 #'
-#'  my_assignment <- declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE)
-#'  my_assignment_2 <- declare_assignment(Z = complete_ra(N, m = 25), legacy = FALSE)
+#'  my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
+#'  my_assignment_2 <- declare_assignment(Z = complete_ra(N, m = 25))
 #'
 #'  design <- my_model + my_assignment
 #'

@@ -39,7 +39,7 @@ design <- declare_model(
 
 design + declare_sampling(
   S = complete_rs(N = N, n = 50), 
-  filter = S == 1, legacy = FALSE)
+  filter = S == 1)
 
 # equivalently, by default filter is set to S == 1
 design + declare_sampling(S = complete_rs(N = N, n = 50), 

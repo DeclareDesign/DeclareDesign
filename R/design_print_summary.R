@@ -21,9 +21,9 @@ print.design <- function(x, verbose = TRUE, ...) {
 #'     Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)
 #'   )
 #'
-#' my_sampling <- declare_sampling(S = complete_rs(N, n = 250), legacy = FALSE)
+#' my_sampling <- declare_sampling(S = complete_rs(N, n = 250))
 #'
-#' my_assignment <- declare_assignment(Z = complete_ra(N, m = 25), legacy = FALSE)
+#' my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 #'
 #' my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 #'
