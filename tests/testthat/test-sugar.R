@@ -10,11 +10,11 @@ test_that("multiple PO / reveal", {
 
   my_potential_outcomes3 <- declare_potential_outcomes(!!!multi_po)
 
-  my_assignment <- declare_assignment(m = 50)
+  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 50))
 
   my_outcomes <- paste0("Y", 1:3)
 
-  reveal_multiple <- reveal_outcomes(outcome_variables = !!my_outcomes)
+  reveal_multiple <- declare_reveal(outcome_variables = !!my_outcomes)
 
   design <- my_population + my_potential_outcomes3 + my_assignment + reveal_multiple
 
@@ -23,8 +23,8 @@ test_that("multiple PO / reveal", {
 
 
 test_that("+ constructors", {
-  d <- declare_population(sleep) + declare_sampling() + declare_assignment()
-  expect_equal(dim(draw_data(d)), c(10, 6))
+  d <- declare_population(sleep) + declare_sampling(legacy = FALSE, S = complete_rs(N)) + declare_assignment(legacy = FALSE, Z = complete_ra(N, prob = 0.5))
+  expect_equal(dim(draw_data(d)), c(10, 5))
 })
 
 
@@ -36,14 +36,14 @@ test_that("Lots of levels", {
 
   design <- declare_population(N = 26000, preference = sample(LETTERS, N, replace = TRUE)) +
     declare_potential_outcomes(!!!outcomes) +
-    declare_assignment(conditions = !!LETTERS) +
-    reveal_outcomes()
+    declare_assignment(legacy = FALSE, Z = complete_ra(N, conditions = !!LETTERS)) +
+    declare_reveal()
 
   expect_equal(colnames(draw_data(design)), c(
     "ID", "preference", "Y_Z_A", "Y_Z_B", "Y_Z_C", "Y_Z_D", "Y_Z_E",
     "Y_Z_F", "Y_Z_G", "Y_Z_H", "Y_Z_I", "Y_Z_J", "Y_Z_K", "Y_Z_L",
     "Y_Z_M", "Y_Z_N", "Y_Z_O", "Y_Z_P", "Y_Z_Q", "Y_Z_R", "Y_Z_S",
     "Y_Z_T", "Y_Z_U", "Y_Z_V", "Y_Z_W", "Y_Z_X", "Y_Z_Y", "Y_Z_Z",
-    "Z", "Z_cond_prob", "Y"
+    "Z", "Y"
   ))
 })

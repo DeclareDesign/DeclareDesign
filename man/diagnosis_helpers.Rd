@@ -17,26 +17,17 @@ get_simulations(diagnosis)
 Explore your design diagnosis
 }
 \examples{
-my_population <- declare_population(N = 500, noise = rnorm(N))
-
-my_potential_outcomes <- declare_potential_outcomes(
-  Y_Z_0 = noise, Y_Z_1 = noise +
-  rnorm(N, mean = 2, sd = 2))
-
-my_assignment <- declare_assignment()
-
-my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-
-my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-
-my_reveal <- reveal_outcomes()
-
-design <- my_population +
-  my_potential_outcomes +
-  my_estimand +
-  my_assignment +
-  my_reveal +
-  my_estimator
+design <- 
+  declare_model(
+    N = 500, 
+    U = rnorm(N),
+    Y_Z_0 = U, 
+    Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
+  ) + 
+  declare_assignment(Z = complete_ra(N), legacy = FALSE) + 
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, inquiry = "ATE") 
 
 \dontrun{
 # using built-in defaults:
@@ -45,7 +36,8 @@ diagnosis
 }
 
 # using a user-defined diagnosand
-my_diagnosand <- declare_diagnosands(absolute_error = mean(abs(estimate - estimand)))
+my_diagnosand <- declare_diagnosands(
+  absolute_error = mean(abs(estimate - estimand)))
 
 \dontrun{
 diagnosis <- diagnose_design(design, diagnosands = my_diagnosand)

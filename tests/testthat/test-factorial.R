@@ -10,30 +10,33 @@ test_that("Factorial", {
     Y_Z_T4 = noise + 0.6
   )
 
-  my_assignment <- declare_assignment(num_arms = 4)
+  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, num_arms = 4))
 
-  my_estimand <- declare_estimand(interaction = mean(Y_Z_T4 - Y_Z_T3) - mean(Y_Z_T2 - Y_Z_T1))
+  my_inquiry <- declare_inquiry(interaction = mean(Y_Z_T4 - Y_Z_T3) - mean(Y_Z_T2 - Y_Z_T1))
 
   my_estimator <- declare_estimator(Y ~ Z1 + Z2 + Z1 * Z2,
     model = lm_robust,
     term = "Z1:Z2"
   )
 
-  reveal_outcomes <- reveal_outcomes()
+  declare_reveal <- declare_reveal()
 
   my_design <-
     my_population +
     my_potential_outcomes +
-    my_estimand +
+    my_inquiry +
     my_assignment +
     declare_step(dplyr::mutate,
       Z1 = as.numeric(Z %in% c("T2", "T4")),
       Z2 = as.numeric(Z %in% c("T3", "T4"))
     ) +
-    reveal_outcomes +
+    declare_reveal +
     my_estimator
 
   expect_equal(my_design %>% draw_data() %>% nrow(), 2000)
+  expect_equal(my_design %>% run_design() %>% names(), c("inquiry_label", "estimand", "estimator_label", "term", "estimate", 
+                                                         "std.error", "statistic", "p.value", "conf.low", "conf.high", 
+                                                         "df", "outcome"))
 
   diagnosis <- diagnose_design(my_design, sims = 2, bootstrap_sims = FALSE)
 

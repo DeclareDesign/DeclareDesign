@@ -11,23 +11,24 @@
 #' @importFrom utils head type.convert
 #' @export
 #' @examples
-#' my_population <- declare_population(N = 500, noise = rnorm(N))
+#' my_model <- 
+#'   declare_model(
+#'     N = 500, 
+#'     U = rnorm(N),
+#'     Y_Z_0 = U, 
+#'     Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
+#'   )
 #'
-#' my_potential_outcomes <- declare_potential_outcomes(
-#'   Y_Z_0 = noise, Y_Z_1 = noise +
-#'   rnorm(N, mean = 2, sd = 2))
+#' my_assignment <- declare_assignment(Z = complete_ra(N), legacy = FALSE)
 #'
-#' my_assignment <- declare_assignment()
+#' my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 #'
-#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+#' my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 #'
-#' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+#' my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #'
-#' my_reveal <- reveal_outcomes()
-#'
-#' design <- my_population +
-#'   my_potential_outcomes +
-#'   my_estimand +
+#' design <- my_model +
+#'   my_inquiry +
 #'   my_assignment +
 #'   my_reveal +
 #'   my_estimator
@@ -151,20 +152,20 @@ simulate_single_design <- function(design, sims, low_simulations_warning = TRUE)
   }
   
   estimates_df <- results2x(results_list, "estimates_df")
-  estimands_df <- results2x(results_list, "estimands_df")
+  inquiries_df <- results2x(results_list, "inquiries_df")
   
-  if (is_empty(estimates_df) && is_empty(estimands_df)) {
-    stop("No estimates or estimands were declared, so design cannot be simulated.", call. = FALSE)
-  } else if (is_empty(estimands_df)) {
+  if (is_empty(estimates_df) && is_empty(inquiries_df)) {
+    stop("No estimates or inquiries were declared, so design cannot be simulated.", call. = FALSE)
+  } else if (is_empty(inquiries_df)) {
     simulations_df <- estimates_df
   } else if (is_empty(estimates_df)) {
-    simulations_df <- estimands_df
-  } else if (all(estimands_df$estimand_label %in% estimates_df$estimand_label) &
-             all(estimates_df$estimand_label %in% estimands_df$estimand_label)){
+    simulations_df <- inquiries_df
+  } else if (all(inquiries_df$inquiry_label %in% estimates_df$inquiry_label) &
+             all(estimates_df$inquiry_label %in% inquiries_df$inquiry_label)){
     
     
-    estimands_df_split <- split(x = estimands_df, f = estimands_df$estimand_label)
-    estimates_df_split <- split(x = estimates_df, f = estimates_df$estimand_label)
+    inquiries_df_split <- split(x = inquiries_df, f = inquiries_df$inquiry_label)
+    estimates_df_split <- split(x = estimates_df, f = estimates_df$inquiry_label)
     
     non_missing_columns <- function(dat){
       nonmissing <- apply(dat, 2, FUN = function(x) any(!is.na(x)))
@@ -172,17 +173,17 @@ simulate_single_design <- function(design, sims, low_simulations_warning = TRUE)
     }
     
     
-    estimands_df_split <- lapply(estimands_df_split, non_missing_columns)
+    inquiries_df_split <- lapply(inquiries_df_split, non_missing_columns)
     estimates_df_split <- lapply(estimates_df_split, non_missing_columns)
     
-    by_split <- lapply(X = seq_along(estimands_df_split), 
+    by_split <- lapply(X = seq_along(inquiries_df_split), 
                        FUN = function(x){
-                         colnames(estimands_df_split[[x]]) %icn% estimates_df_split[[x]]
+                         colnames(inquiries_df_split[[x]]) %icn% estimates_df_split[[x]]
                        })
     
     simulations_df_split <- 
       mapply(FUN = merge,
-             x = estimands_df_split,
+             x = inquiries_df_split,
              y = estimates_df_split,
              by = by_split,
              MoreArgs = list(all = TRUE, sort = FALSE),
@@ -193,16 +194,16 @@ simulate_single_design <- function(design, sims, low_simulations_warning = TRUE)
   } else {
     
     simulations_df <- merge(
-      estimands_df,
+      inquiries_df,
       estimates_df,
-      by = colnames(estimands_df) %icn% estimates_df,
+      by = colnames(inquiries_df) %icn% estimates_df,
       all = TRUE,
       sort = FALSE
     )
     
-    if (nrow(simulations_df) > max(nrow(estimands_df), nrow(estimates_df))) {
+    if (nrow(simulations_df) > max(nrow(inquiries_df), nrow(estimates_df))) {
       warning(
-        "Estimators lack estimand/term labels for matching, a many-to-many merge was performed."
+        "Estimators lack inquiry/term labels for matching, a many-to-many merge was performed."
       )
     }
   }

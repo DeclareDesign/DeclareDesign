@@ -75,24 +75,24 @@ test_that("demo runs", {
   head(my_potential_outcomes(pop))
 
   ## ------------------------------------------------------------------------
-  my_sampling <- declare_sampling(n = 250)
+  my_sampling <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = 250))
   smp <- my_sampling(pop_pos)
   nrow(smp)
 
   ## ------------------------------------------------------------------------
-  my_assignment <- declare_assignment(m = 25)
+  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
   smp <- my_assignment(smp)
   table(smp$Z)
   head(smp)
 
   ## ------------------------------------------------------------------------
-  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-  my_estimand(pop_pos)
+  my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+  my_inquiry(pop_pos)
 
   ## ------------------------------------------------------------------------
-  my_reveal_outcomes <- reveal_outcomes()
+  my_reveal_outcomes <- declare_reveal()
   smp <- my_reveal_outcomes(smp)
-  my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
+  my_estimator_dim <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
   my_estimator_dim(smp)
 
   ## ------------------------------------------------------------------------
@@ -100,7 +100,7 @@ test_that("demo runs", {
     declare_estimator(Y ~ Z,
       model = estimatr::lm_robust,
       term = "Z",
-      estimand = my_estimand
+      inquiry = my_inquiry
     )
 
   my_estimator_lm(smp)
@@ -108,7 +108,7 @@ test_that("demo runs", {
   ## ------------------------------------------------------------------------
   design <- my_population +
     my_potential_outcomes +
-    my_estimand +
+    my_inquiry +
     declare_step(dplyr::mutate, big_income = 5 * income) +
     my_sampling +
     my_assignment +
@@ -121,7 +121,7 @@ test_that("demo runs", {
 
   ## ------------------------------------------------------------------------
   draw_estimates(design)
-  draw_estimands(design)
+  draw_inquiries(design)
 
   ## ------------------------------------------------------------------------
   my_population_function <- function(N) {
@@ -185,14 +185,14 @@ test_that("demo runs", {
   table(my_assignment_custom(pop_pos)$Z)
 
   ## ------------------------------------------------------------------------
-  my_estimand_function <- function(data) {
+  my_inquiry_function <- function(data) {
     with(data, median(Y_Z_1 - Y_Z_0))
   }
-  my_estimand_custom <- declare_estimand(
-    handler = my_estimand_function, label = "medianTE"
+  my_inquiry_custom <- declare_inquiry(
+    handler = my_inquiry_function, label = "medianTE"
   )
 
-  my_estimand_custom(pop_pos)
+  my_inquiry_custom(pop_pos)
 
   ## ------------------------------------------------------------------------
   my_mean <- function(data) {
@@ -202,7 +202,7 @@ test_that("demo runs", {
   my_estimator_custom <-
     declare_estimator(
       handler = label_estimator(my_mean),
-      estimand = my_estimand
+      inquiry = my_inquiry
     )
 
   my_estimator_custom(smp)
@@ -216,13 +216,13 @@ test_that("demo runs", {
     my_potential_outcomes <- declare_potential_outcomes(
       formula = Y ~ .25 * Z + .01 * age * Z
     )
-    my_sampling <- declare_sampling(n = 250)
-    my_assignment <- declare_assignment(m = 25)
-    my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-    my_estimator_dim <- declare_estimator(Y ~ Z, estimand = my_estimand)
+    my_sampling <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = 250))
+    my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
+    my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+    my_estimator_dim <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
     my_design <- my_population +
       my_potential_outcomes +
-      my_estimand +
+      my_inquiry +
       my_sampling +
       my_assignment +
       my_reveal_outcomes +
@@ -238,7 +238,7 @@ test_that("demo runs", {
     formula = Y ~ .25 * Z + .01 * age * Z, conditions = seq(0, 1, by = .1)
   )
 
-  my_assignment_continuous <- declare_assignment(conditions = seq(0, 1, by = .1))
+  my_assignment_continuous <- declare_assignment(legacy = FALSE, Z = complete_ra(N, conditions = seq(0, 1, by = .1)))
 
   my_design <- declare_population(my_population()) +
     my_potential_outcomes_continuous +
@@ -256,8 +256,8 @@ test_that("demo runs", {
     my_potential_outcomes +
     my_potential_outcomes_attrition +
     my_assignment +
-    reveal_outcomes(outcome_variables = "R") +
-    reveal_outcomes(attrition_variables = "R")
+    declare_reveal(outcome_variables = "R") +
+    declare_reveal(attrition_variables = "R")
 
   head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
 

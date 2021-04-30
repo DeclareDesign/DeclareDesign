@@ -10,9 +10,9 @@ test_that("you can do continuous POs", {
     formula = Y ~ .25 * Z + .01 * age * Z, conditions = conditions
   )
 
-  my_assignment <- declare_assignment(conditions = conditions)
+  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N = N, conditions = conditions))
 
-  my_reveal <- reveal_outcomes()
+  my_reveal <- declare_reveal()
 
   my_design <- my_population +
     my_potential_outcomes +
@@ -46,14 +46,14 @@ test_that("Hooke's law", {
       resting + stiffness * force
     }
 
-  estimand <- declare_estimand(
+  inquiry <- declare_inquiry(
     `(Intercept)` = mean(potential_outcome_f(resting, stiffness, 0)),
     stiffness = mean(potential_outcome_f(resting, stiffness, 1) - potential_outcome_f(resting, stiffness, 0)),
     term = TRUE
   )
 
   # 30 is magic
-  sampling <- declare_sampling(n = 30)
+  sampling <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = 30))
 
   # We don't have a 1g weight, only 5, 10, 25, 50, 100
   # randomly put a combo of those on the spring
@@ -67,7 +67,7 @@ test_that("Hooke's law", {
   )
 
   # 1mm of measurment error
-  reveal <- reveal_outcomes(
+  reveal <- declare_reveal(
     handler = fabricate,
     length = potential_outcome_f(resting, stiffness, force) +
       rnorm(N, sd = .1)
@@ -75,7 +75,7 @@ test_that("Hooke's law", {
 
   estimator <- declare_estimator(length ~ force, model = lm, term = TRUE)
 
-  design <- pop + estimand + sampling + assignment + reveal + estimator
+  design <- pop + inquiry + sampling + assignment + reveal + estimator
 
   df <- draw_data(design)
 

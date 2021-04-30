@@ -5,16 +5,16 @@ test_that("Fanout does something", {
 
   pop <- declare_population(N = N)
   pop2 <- declare_step(fabricate, noise = rnorm(N))
-  estimand <- declare_estimand(foo = mean(noise))
-  D <- pop + pop2 + estimand
+  inquiry <- declare_inquiry(foo = mean(noise))
+  D <- pop + pop2 + inquiry
 
   fan_strategy <- data.frame(end = 2:3, n = c(1, 100))
   out <- DeclareDesign:::fan_out(D, fan_strategy)
 
-  estimands_out <- do.call(rbind, lapply(out, `[[`, "estimands_df"))
-  expect_equal(length(unique(estimands_out$estimand)), 1)
-  expect_equal(estimands_out$step_1_draw, rep(1,100))
-  expect_equal(estimands_out$step_3_draw, 1:100)
+  inquiries_out <- do.call(rbind, lapply(out, `[[`, "inquiries_df"))
+  expect_equal(length(unique(inquiries_out$estimand)), 1)
+  expect_equal(inquiries_out$step_1_draw, rep(1,100))
+  expect_equal(inquiries_out$step_3_draw, 1:100)
   
 })
 
@@ -23,8 +23,8 @@ test_that("fanout should not be exposed to users", {
 
   pop <- declare_population(N = N)
   pop2 <- declare_step(fabricate, noise = rnorm(N))
-  estimand <- declare_estimand(foo = mean(noise))
-  D <- pop + pop2 + estimand
+  inquiry <- declare_inquiry(foo = mean(noise))
+  D <- pop + pop2 + inquiry
 
   fan_strategy <- data.frame(end = 2:3, n = c(1, 100))
   expect_error(
@@ -44,19 +44,19 @@ test_that("Diagnosing a fanout", {
 
   pop <- declare_population(N = N, noise = rnorm(N))
 
-  estimand <- declare_estimand(foo = mean(noise))
-  sampl <- declare_sampling(n = N / 2)
+  inquiry <- declare_inquiry(foo = mean(noise))
+  sampl <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = N / 2))
   estimator <-
     declare_estimator(
       noise ~ 1,
       model = lm,
-      estimand = estimand,
+      inquiry = inquiry,
       label = "ha",
       term = TRUE
     )
 
 
-  D <- pop + estimand + sampl + estimator
+  D <- pop + inquiry + sampl + estimator
 
   strategy <- c(1, 1, 5, 20)
 
@@ -65,9 +65,9 @@ test_that("Diagnosing a fanout", {
   Sys.setenv(TESTTHAT='true')
   
   
-  # estimands don't vary overall
+  # inquiries don't vary overall
   expect_equal(
-    dx$diagnosands[1, "se(mean_estimand)"], 0
+    dx$diagnosands[1, "se(mean_inquiry)"], 0
   )
 
   rep_id <-
@@ -82,11 +82,11 @@ test_that("Diagnosing a fanout", {
 
 test_that("sims expansion is correct", {
   design <- declare_population(sleep) +
-    declare_estimand(2, label = "a") +
-    declare_estimand(b = rnorm(1))
+    declare_inquiry(2, label = "a") +
+    declare_inquiry(b = rnorm(1))
 
-  some_design <- declare_population(sleep) + declare_estimand(2, label = "a")
-  some_design + declare_estimand(b = rnorm(1))
+  some_design <- declare_population(sleep) + declare_inquiry(2, label = "a")
+  some_design + declare_inquiry(b = rnorm(1))
 
   sims <- c(1, 1, 1)
   expanded <- check_sims(design, sims)
@@ -108,19 +108,19 @@ test_that("fanout warnings", {
 
   pop <- declare_population(N = N, noise = rnorm(N))
 
-  estimand <- declare_estimand(foo = mean(noise))
-  sampl <- declare_sampling(n = N / 2)
+  inquiry <- declare_inquiry(foo = mean(noise))
+  sampl <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = N / 2))
   estimator <-
     declare_estimator(
       noise ~ 1,
       model = lm,
-      estimand = estimand,
+      inquiry = inquiry,
       label = "ha",
       term = TRUE
     )
 
 
-  D <- pop + estimand + sampl + estimator
+  D <- pop + inquiry + sampl + estimator
 
   strategy <- c(1, 1, 1, 1)
 
@@ -153,15 +153,15 @@ test_that("correct fan out", {
       i
     }
   })
-  e1 <- declare_estimand(a = f1())
-  e2 <- declare_estimand(b = f2())
-  e3 <- declare_estimand(c = f3())
+  e1 <- declare_inquiry(a = f1())
+  e2 <- declare_inquiry(b = f2())
+  e3 <- declare_inquiry(c = f3())
   
   out <-
     simulate_design(declare_population(sleep) + e1 + e2 + e3, sims = c(30, 1, 5, 2))
   
   expect_equivalent(apply(out[,c(5:7)], 2, max), c(30, 150, 300))
-  expect_equivalent(tapply(out$estimand, INDEX = out$estimand_label, max), c(30, 150, 300))
+  expect_equivalent(tapply(out$estimand, INDEX = out$inquiry_label, max), c(30, 150, 300))
   
 })
 

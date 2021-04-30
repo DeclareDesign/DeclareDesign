@@ -9,29 +9,29 @@ test_that(
     my_potential_outcomes <-
       declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-    my_sampling <- declare_sampling(n = 250)
+    my_sampling <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = 250))
 
-    my_assignment <- declare_assignment(m = 25)
+    my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
 
-    my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+    my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
-    my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+    my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
     my_mutate <- declare_step(dplyr::mutate, noise_sq = noise^2)
 
-    my_reveal <- reveal_outcomes()
+    my_reveal <- declare_reveal()
 
     design <- my_population +
       my_potential_outcomes +
       my_sampling +
-      my_estimand +
+      my_inquiry +
       my_mutate +
       my_assignment +
       my_reveal +
       my_estimator
 
     df <- (draw_data(design))
-    expect_equal(dim(df), c(250, 9))
+    expect_equal(dim(df), c(250, 8))
 
     output <- run_design(design)
     expect_equal(dim(output), c(1, 12))
@@ -39,16 +39,16 @@ test_that(
 )
 
 
-test_that("No estimators / estimands", {
+test_that("No estimators / inquiries", {
   design <-
     declare_population(N = 500, noise = 1:N) +
     declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + 1) +
-    declare_sampling(n = 250) +
-    declare_assignment(m = 25) +
-    reveal_outcomes()
+    declare_sampling(legacy = FALSE, S = complete_rs(N, n = 250)) +
+    declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25)) +
+    declare_reveal()
 
   head(draw_data(design))
-  expect_error(run_design(design), "No estimates or estimands were declared, so design cannot be simulated.")
+  expect_error(run_design(design), "No estimates or inquiries were declared")
 })
 
 test_that("single-step designs work", {
@@ -72,7 +72,7 @@ test_that("sending bad objects to design yields error", {
 })
 
 test_that("test send design as RHS", {
-  my_rhs <- declare_sampling(n = 50) + declare_assignment(m = 5)
+  my_rhs <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = 50)) + declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 5))
 
   expect_length(declare_population(N = 100) + my_rhs, 3)
 })

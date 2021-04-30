@@ -8,14 +8,14 @@ test_that("test diagnosands", {
       Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)
     )
 
-  my_assignment <- declare_assignment(m = 25)
+  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
 
-  pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
+  pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
 
-  pate_estimator1 <- declare_estimator(Y ~ Z, estimand = pate, label = "test1")
-  pate_estimator2 <- declare_estimator(Y ~ Z - 1, estimand = pate, label = "test2")
+  pate_estimator1 <- declare_estimator(Y ~ Z, inquiry = pate, label = "test1")
+  pate_estimator2 <- declare_estimator(Y ~ Z - 1, inquiry = pate, label = "test2")
 
-  reveal <- reveal_outcomes()
+  reveal <- declare_reveal()
 
   fixed_data <- my_population()
 
@@ -41,13 +41,13 @@ test_that("Bootstrap ses close", {
   skip("Skipped bootstrap SE test for speed")
   
   pop <- declare_population(N = 100, S100 = rnorm(N, sd = 100), S10000 = rnorm(N, sd = 10000))
-  estimand <- declare_estimand(S100 = mean(S100), S10000 = mean(S10000))
-  estimate <- declare_estimator(S100 ~ S10000, model = lm, estimand = list("S100", "S10000"))
-  design <- pop + estimand + estimate
+  inquiry <- declare_inquiry(S100 = mean(S100), S10000 = mean(S10000))
+  estimate <- declare_estimator(S100 ~ S10000, model = lm, inquiry = list("S100", "S10000"))
+  design <- pop + inquiry + estimate
   d <- diagnose_design(design, sims = 10000)
-  expect_true(d$diagnosands_df$`se(mean_estimand)`[1] > .06)
-  expect_true(d$diagnosands_df$`se(mean_estimand)`[1] < .14)
-  expect_true(d$diagnosands_df$`se(mean_estimand)`[2] > 6)
-  expect_true(d$diagnosands_df$`se(mean_estimand)`[2] < 14)
+  expect_true(d$diagnosands_df$`se(mean_inquiry)`[1] > .06)
+  expect_true(d$diagnosands_df$`se(mean_inquiry)`[1] < .14)
+  expect_true(d$diagnosands_df$`se(mean_inquiry)`[2] > 6)
+  expect_true(d$diagnosands_df$`se(mean_inquiry)`[2] < 14)
 })
 

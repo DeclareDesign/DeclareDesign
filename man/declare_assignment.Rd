@@ -3,16 +3,11 @@
 \name{declare_assignment}
 \alias{declare_assignment}
 \alias{assignment_handler}
-\title{Declare assignment procedure}
+\title{Declare Data Strategy: Assignment}
 \usage{
 declare_assignment(..., handler = assignment_handler, label = NULL)
 
-assignment_handler(
-  data,
-  ...,
-  assignment_variable = "Z",
-  append_probabilities_matrix = FALSE
-)
+assignment_handler(data, ..., legacy = TRUE)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -23,103 +18,50 @@ assignment_handler(
 
 \item{data}{A data.frame.}
 
-\item{assignment_variable}{Name for assignment variable (quoted). Defaults to "Z". Argument to be used with default handler.}
-
-\item{append_probabilities_matrix}{Should the condition probabilities matrix be appended to the data? Defaults to FALSE.  Argument to be used with default handler.}
+\item{legacy}{Use the legacy randomizr functionality. This will be disabled in future; please use legacy = FALSE.}
 }
 \value{
-An assignment declaration, which is a function that takes a data.frame as an argument and returns a data.frame with additional columns appended including an assignment variable and (optionally) probabilities of assignment.
+A function that takes a data.frame as an argument and returns a data.frame with assignment columns appended.
 }
 \description{
-Declare assignment procedure
-}
-\details{
-\code{declare_assignment} can work with any assignment_function that takes data and returns data. The default handler is \code{conduct_ra} from the \code{randomizr} package. This allows quick declaration of many assignment schemes that involve simple or complete random assignment with blocks and clusters.
-The arguments to \code{\link{conduct_ra}} can include \code{N}, \code{block_var}, \code{clust_var}, \code{m}, \code{m_each}, \code{prob}, \code{prob_each}, \code{block_m}, \code{block_m_each}, \code{block_prob}, \code{block_prob_each}, \code{num_arms}, and \code{conditions}.
-The arguments you need to specify are different for different designs. For details see the help files for \code{\link{complete_ra}}, \code{\link{block_ra}}, \code{\link{cluster_ra}}, or \code{\link{block_and_cluster_ra}}.
-
-By default, \code{declare_assignment} declares a simple random assignment with probability 0.5.
-
-Custom assignment handlers should augment the data frame with an appropriate column for the assignment(s).
+Declare Data Strategy: Assignment
 }
 \examples{
 
-
-# let's work with the beginnings of a design
-
-design <-
-declare_population(N = 100,
-                   female = rbinom(N, 1, 0.5),
-                   U = rnorm(N)) +
-  # building in treatment effect heterogeneity for fun
-  declare_potential_outcomes(Y ~ 0.5 * Z + 0.2 * female + 0.1 * Z * female + U)
-
-
-# Declare simple (or "Bernoulli", or "coin flip) random assignment
-
-design_with_assignment <- design + declare_assignment(prob = 0.5, simple = TRUE)
-
-head(draw_data(design_with_assignment))
+# setting up a design stub
+design <- declare_model(
+  classrooms = add_level(10),
+  individuals = add_level(20, female = rbinom(N, 1, 0.5))
+) + NULL
 
 # Declare assignment of m units to treatment
-design + declare_assignment(m = 50)
+design + declare_assignment(Z = complete_ra(N = N, m = 100), legacy = FALSE)
 
-# Declare assignment of exactly half of the  units to treatment
-design + declare_assignment(prob = 0.5)
+# Declare assignment specifying varying block probabilities
+design + 
+  declare_assignment(Z = block_ra(blocks = female, 
+                                  block_prob = c(1/3, 2/3)), legacy = FALSE)
 
-# Declare blocked assignment
-design + declare_assignment(blocks = female)
-
-# Declare assignment specifying assignment probability for each block
-design + declare_assignment(block_prob = c(1/3, 2/3), blocks = female)
-
-# Declare factorial assignment (Approach 1): Use complete random assignment 
-# to assign Z1 and then use Z1 as a block to assign Z2.
-
-design <-
-  declare_population(N = 100,
-                   U = rnorm(N)) +
-  declare_potential_outcomes(Y ~ Z1 + Z2 + Z1*Z2 + U, 
-                             conditions = list(Z1 = 0:1, Z2 = 0:1)) 
-
-
-design +
-  declare_assignment(assignment_variable = "Z1") +
-  declare_assignment(blocks = Z1, assignment_variable = "Z2")
-
-
-
-# Declare factorial assignment (Approach 2): 
-#   Assign to four conditions and then split into separate factors. 
-
-design +
-  declare_assignment(conditions = 1:4) + 
-  declare_step(fabricate, Z1 = as.numeric(Z \%in\% 2:3), Z2 = as.numeric(Z \%in\% 3:4))
-
-
-
-# Declare clustered assignment
-
-clustered_design <-
-  declare_population(
-    classrooms = add_level(25, cluster_shock = rnorm(N, sd = 0.5)),
-    students = add_level(5, individual_shock = rnorm(N, sd = 1.0))
-  ) +
-  declare_potential_outcomes(Y ~ 0.5* Z + cluster_shock + individual_shock)
-
-clustered_design + declare_assignment(clusters = classrooms)
-
-   
-# Declare assignment using custom handler
-
-custom_assignment <- function(data, assignment_variable = "X") {
- data[, assignment_variable] <- rbinom(n = nrow(data),
-                                       size = 1,
-                                       prob = 0.5)
- data
- }
+# Declare assignment of clusters with probability 1/4
+design + declare_assignment(
+  Z = cluster_ra(prob = 1/4, clusters = classrooms), legacy = FALSE)
  
- declare_population(N = 6) + 
-   declare_assignment(handler = custom_assignment, assignment_variable = "X")
+# Declare factorial assignment (Approach 1): 
+#   Use complete random assignment to assign Z1 
+#   then block on Z1 to assign Z2. 
+design + 
+   declare_assignment(Z1 = complete_ra(N = N, m = 100),
+                      Z2 = block_ra(blocks = Z1), legacy = FALSE)
    
+# Declare factorial assignment (Approach 2): 
+#   Assign to four conditions and then split into Z1 and Z2 
+design +  
+  declare_assignment(Z = complete_ra(N = N, conditions = 1:4),
+                     Z1 = as.numeric(Z \%in\% 2:3), 
+                     Z2 = as.numeric(Z \%in\% 3:4), legacy = FALSE)
+   
+# Declare assignment using functions outside randomizr package:
+design + 
+  declare_assignment(Z = rbinom(n = N, size = 1, prob = 0.35), legacy = FALSE)
+
 }

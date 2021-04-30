@@ -10,15 +10,15 @@ test_that("error if more than one label is sent to any step", {
     Y ~ Z,
     label = c("lbl1", "lbl2")), "Please provide only one label.")
   
-  expect_error(declare_sampling(
+  expect_error(declare_sampling(legacy = FALSE, 
     n = 10,
     label = c("lbl1", "lbl2")), "Please provide only one label.")
   
-  expect_error(declare_assignment(
-    m = 10,
+  expect_error(declare_assignment(legacy = FALSE, 
+    Z = complete_ra(N, m = 10),
     label = c("lbl1", "lbl2")), "Please provide only one label.")
   
-  expect_error(reveal_outcomes(
+  expect_error(declare_reveal(
     label = c("lbl1", "lbl2")), "Please provide only one label.")
   
   expect_error(declare_estimator(
@@ -26,7 +26,7 @@ test_that("error if more than one label is sent to any step", {
     model = lm_robust,
     label = c("lbl1", "lbl2")), "Please provide only one label.")
   
-  expect_error(declare_estimand(
+  expect_error(declare_inquiry(
     mean(Y),
     label = c("lbl1", "lbl2")), "Please provide only one label.")
   

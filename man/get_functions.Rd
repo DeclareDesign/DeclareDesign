@@ -5,7 +5,7 @@
 \alias{get_estimates}
 \alias{draw_assignment}
 \alias{draw_sample}
-\title{Get estimates, estimands, assignment vectors, or samples from a design given data}
+\title{Get estimates, inquiries, assignment vectors, or samples from a design given data}
 \usage{
 get_estimates(design, data = NULL, start = 1, end = length(design))
 
@@ -16,24 +16,28 @@ draw_sample(design, data = NULL, start = 1, end = length(design))
 \arguments{
 \item{design}{A design object, typically created using the + operator}
 
-\item{data}{A data.frame object with sufficient information to get the data, estimates, estimands, an assignment vector, or a sample.}
+\item{data}{A data.frame object with sufficient information to get the data, estimates, inquiries, an assignment vector, or a sample.}
 
 \item{start}{(Defaults to 1) a scalar indicating which step in the design to begin with. By default all data steps are drawn, from step 1 to the last step of the design.}
 
 \item{end}{(Defaults to \code{length(design)}) a scalar indicating which step in the design to finish with.}
 }
 \description{
-Get estimates, estimands, assignment vectors, or samples from a design given data
+Get estimates, inquiries, assignment vectors, or samples from a design given data
 }
 \examples{
 
-design <- declare_population(N = 100, u = rnorm(N)) +
-  declare_potential_outcomes(Y ~ Z + u) +
-  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
-  declare_sampling(n = 75) +
-  declare_assignment(m = 50) +
-  reveal_outcomes(Y, Z) +
-  declare_estimator(Y ~ Z, estimand = "ATE")
+design <- 
+  declare_model(
+    N = 100, 
+    U = rnorm(N),
+    potential_outcomes(Y ~ Z + U)
+  ) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_sampling(S = complete_rs(N, n = 75), legacy = FALSE) +
+  declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, inquiry = "ATE")
 
 dat <- draw_data(design)
 

@@ -1,6 +1,6 @@
 ## Submission
 
-Thank you for your time reviewing the submission.
+Thank you for your time reviewing the submission. We have removed our revdep results, which our submission was kicked back for. Apologies!
 
 ## Test environments
 * local OS X install (release)
@@ -14,7 +14,7 @@ Thank you for your time reviewing the submission.
 
 ## Reverse dependencies
 
-There is one change to worse in DesignLibrary due to these change. A patch has been prepared and will be submitted to CRAN as soon as this is accepted.
+There is one change to worse in DesignLibrary due to these change. A patch has been prepared and will be submitted to CRAN as soon as this is accepted (the package is maintained by the same team).
 
 ---
   

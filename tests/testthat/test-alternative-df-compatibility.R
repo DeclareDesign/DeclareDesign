@@ -34,8 +34,8 @@ test_that("tibble more", {
   
   population <- declare_population(N = 100, u = rnorm(N))
   potential_outcomes <- declare_potential_outcomes(Y ~ Z)
-  assignment <- declare_assignment(m = 50)
-  reveal_Y <- reveal_outcomes(Y,Z)
+  assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 50))
+  reveal_Y <- declare_reveal(Y,Z)
   
   my_func <- function(data){
     data %>% (tibble::as_tibble)

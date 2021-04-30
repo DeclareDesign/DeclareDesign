@@ -20,14 +20,14 @@ A researcher often has a set of diagnosands in mind to appropriately assess the 
 \examples{
 
 design <-
-declare_population(data = sleep) +
-  declare_estimand(mean_outcome = mean(extra)) +
-  declare_sampling(n = 10) +
-  declare_estimator(extra ~ 1, estimand = "mean_outcome",
+declare_model(data = sleep) +
+  declare_inquiry(mean_outcome = mean(extra)) +
+  declare_sampling(S = complete_rs(N, n = 10), legacy = FALSE) +
+  declare_estimator(extra ~ 1, inquiry = "mean_outcome",
      term = '(Intercept)', model = lm_robust)
 
 diagnosands <- declare_diagnosands(
-  median_bias = median(estimate - estimand))
+  median_bias = median(estimate - inquiry))
 
 design <- set_diagnosands(design, diagnosands)
 

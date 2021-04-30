@@ -31,9 +31,9 @@ custom_potential_outcomes <-
   }
 
 # I: Inquiry
-custom_estimand <- function(data, label) {
-  data.frame(estimand_label = label,
-  estimand = with(data, median(Y_Z_1 - Y_Z_0)))
+custom_inquiry <- function(data, label) {
+  data.frame(inquiry_label = label,
+  inquiry = with(data, median(Y_Z_1 - Y_Z_0)))
 }
 
 # D: Data Strategy
@@ -67,12 +67,12 @@ In order to declare the design, we pass each of the custom functions to the `han
 design <- 
   declare_population(handler = custom_population, N = 100) + 
   declare_potential_outcomes(handler = custom_potential_outcomes) + 
-  declare_estimand(handler = custom_estimand, label = "medianTE") + 
+  declare_inquiry(handler = custom_inquiry, label = "medianTE") + 
   declare_sampling(handler = custom_sampling) + 
   declare_assignment(handler = custom_assignment) + 
-  reveal_outcomes(handler = custom_reveal) + 
+  declare_reveal(handler = custom_reveal) + 
   declare_estimator(handler = tidy_estimator(custom_estimator), 
-                    estimand = "medianTE")
+                    inquiry = "medianTE")
 head(draw_data(design))
 run_design(design)
 ```

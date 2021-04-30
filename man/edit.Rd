@@ -26,7 +26,7 @@ eval_tidy(dot2)
 \dontrun{
 N <- 50
 
-pop50 <- declare_population(N=N, noise=rnorm(N))
+pop50 <- declare_model(N=N, noise=rnorm(N))
 nrow(pop50())
 
 pop100 <- DeclareDesign:::clone_step_edit(pop50, N=100)
@@ -38,7 +38,7 @@ N <- 50
 
 \dontrun{
 
-my_design <- declare_population(N=N, noise=rnorm(N)) + NULL
+my_design <- declare_model(N=N, noise=rnorm(N)) + NULL
 my_design2 <- DeclareDesign:::clone_design_edit(my_design, N=100)
 
 nrow(draw_data(my_design))

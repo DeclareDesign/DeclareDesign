@@ -3,20 +3,29 @@
 \name{draw_functions}
 \alias{draw_functions}
 \alias{draw_data}
+\alias{draw_inquiry}
+\alias{draw_inquiries}
 \alias{draw_estimands}
+\alias{draw_estimand}
 \alias{draw_estimates}
-\title{Draw data, estimates, and estimands from a design}
+\title{Draw data, estimates, and inquiries from a design}
 \usage{
 draw_data(design, data = NULL, start = 1, end = length(design))
 
+draw_inquiry(...)
+
+draw_inquiries(...)
+
 draw_estimands(...)
+
+draw_estimand(...)
 
 draw_estimates(...)
 }
 \arguments{
 \item{design}{A design object, typically created using the + operator}
 
-\item{data}{A data.frame object with sufficient information to get the data, estimates, estimands, an assignment vector, or a sample.}
+\item{data}{A data.frame object with sufficient information to get the data, estimates, inquiries, an assignment vector, or a sample.}
 
 \item{start}{(Defaults to 1) a scalar indicating which step in the design to begin with. By default all data steps are drawn, from step 1 to the last step of the design.}
 
@@ -25,23 +34,27 @@ draw_estimates(...)
 \item{...}{A design or set of designs typically created using the + operator}
 }
 \description{
-Draw data, estimates, and estimands from a design
+Draw data, estimates, and inquiries from a design
 }
 \examples{
 
-design <- declare_population(N = 100, u = rnorm(N)) +
-  declare_potential_outcomes(Y ~ Z + u) +
-  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
-  declare_sampling(n = 75) +
-  declare_assignment(m = 50) +
-  reveal_outcomes(Y, Z) +
-  declare_estimator(Y ~ Z, estimand = "ATE")
+design <- 
+  declare_model(
+    N = 100, 
+    U = rnorm(N),
+    potential_outcomes(Y ~ Z + U)
+  ) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_sampling(S = complete_rs(N, n = 75), legacy = FALSE) +
+  declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, inquiry = "ATE")
 
 dat <- draw_data(design)
 
 dat_no_sampling <- draw_data(design, end = 3)
 
-draw_estimands(design)
+draw_inquiries(design)
 
 draw_estimates(design)
 

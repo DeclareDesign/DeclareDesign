@@ -1,19 +1,23 @@
-#' Get estimates, estimands, assignment vectors, or samples from a design given data
+#' Get estimates, inquiries, assignment vectors, or samples from a design given data
 #'  
 #' @param design A design object, typically created using the + operator
-#' @param data A data.frame object with sufficient information to get the data, estimates, estimands, an assignment vector, or a sample.
+#' @param data A data.frame object with sufficient information to get the data, estimates, inquiries, an assignment vector, or a sample.
 #' @param start (Defaults to 1) a scalar indicating which step in the design to begin with. By default all data steps are drawn, from step 1 to the last step of the design.
 #' @param end (Defaults to \code{length(design)}) a scalar indicating which step in the design to finish with.
 #'
 #' @examples
 #' 
-#' design <- declare_population(N = 100, u = rnorm(N)) +
-#'   declare_potential_outcomes(Y ~ Z + u) +
-#'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_sampling(n = 75) +
-#'   declare_assignment(m = 50) +
-#'   reveal_outcomes(Y, Z) +
-#'   declare_estimator(Y ~ Z, estimand = "ATE")
+#' design <- 
+#'   declare_model(
+#'     N = 100, 
+#'     U = rnorm(N),
+#'     potential_outcomes(Y ~ Z + U)
+#'   ) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_sampling(S = complete_rs(N, n = 75), legacy = FALSE) +
+#'   declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) +
+#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+#'   declare_estimator(Y ~ Z, inquiry = "ATE")
 #' 
 #' dat <- draw_data(design)
 #' 
@@ -101,10 +105,10 @@ get_function_internal <- function(design, data = NULL, start, end, pred, results
             ". Try using handler = tidy_estimator(your_estimator_function)", call. = FALSE)
   }
   
-  if(what == "estimands_df" && !is.null(ret$estimand_label) && typeof(ret$estimand_label) != "character"){
-    warning("The estimand label should be a character, but it is a ", 
-            class(ret$estimand_label), 
-            ". You may need stringsAsFactors = FALSE in your estimand function.", call. = FALSE)
+  if(what == "inquiries_df" && !is.null(ret$inquiry_label) && typeof(ret$inquiry_label) != "character"){
+    warning("The inquiry label should be a character, but it is a ", 
+            class(ret$inquiry_label), 
+            ". You may need stringsAsFactors = FALSE in your inquiry function.", call. = FALSE)
   }
   
   ret

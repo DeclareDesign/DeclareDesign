@@ -8,14 +8,14 @@ test_that("test modify declare design ", {
 
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-  my_assignment <- declare_assignment(m = 25, label = "a_label")
+  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25), label = "a_label")
 
   design <- my_population +
     my_potential_outcomes +
     declare_step(dplyr::mutate, q = 5) +
     my_assignment
 
-  my_assignment_2 <- declare_assignment(m = 25, assignment_variable = "Z2")
+  my_assignment_2 <- declare_assignment(legacy = FALSE, Z2 = complete_ra(N, m = 25))
 
   expect_length(replace_step(design, new_step = my_assignment_2, step = my_assignment), 4)
   expect_length(replace_step(design, new_step = my_assignment_2, step = 4), 4)
@@ -50,8 +50,8 @@ test_that("placement doesn't matter", {
       Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)
     )
 
-  my_assignment <- declare_assignment(m = 50)
-  my_assignment_2 <- declare_assignment(m = 25)
+  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 50))
+  my_assignment_2 <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
 
   design <- my_population + my_potential_outcomes + my_assignment
 
@@ -70,12 +70,12 @@ test_that("names are correct", {
 
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-  my_assignment <- declare_assignment(m = 25, label = "a_label")
+  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25), label = "a_label")
 
   design <- my_population +
     my_potential_outcomes +
     my_assignment +
-    reveal_outcomes()
+    declare_reveal()
 
 
   processing <- declare_step(handler = fabricate, q = 5)

@@ -41,12 +41,12 @@ The diagnosis shows that the study is unbiased but underpowered.
 library(DeclareDesign)
 
 design <-
-  declare_population(
-    N = 100,
-    potential_outcomes(Y ~ rbinom(n = N, size = 1, prob = 0.5 + 0.05 * Z))
+  declare_model(
+    N = 100, 
+    potential_outcomes(Y ~ rbinom(N, size = 1, prob = 0.5 + 0.05 * Z))
   ) +
   declare_inquiry(ATE = 0.05) +
-  declare_assignment(m = 50) +
+  declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) +
   declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
   declare_estimator(Y ~ Z, model = lm_robust)
 
@@ -99,15 +99,17 @@ of which is useful in its own right.
 Each of these `declare_*()` functions returns a *function*.
 
 1.  `declare_model()` (describes dimensions and distributions over the
-    variables in the population)
-2.  `declare_sampling()` (takes a population and selects a sample)
-3.  `declare_assignment()` (takes a population or sample and adds
+    variables, including potential outcomes)
+2.  `declare_inquiry()` (takes variables in the model and calculates
+    estimand value)
+3.  `declare_sampling()` (takes a population and selects a sample)
+4.  `declare_assignment()` (takes a population or sample and adds
     treatment assignments)
-4.  `declare_measurement()` (adds measured variables)
-5.  `declare_inquiry()` (takes data and returns an estimand, the answer
-    to an inquiry)
+5.  `declare_measurement()` (takes data and adds measured values)
 6.  `declare_estimator()` (takes data produced by sampling, assignment,
-    and measurement and returns estimates)
+    and measurement and returns estimates linked to inquiries)
+7.  `declare_test()` (takes data produced by sampling, assignment, and
+    measurement and returns the result of a test)
 
 To *declare a design*, connect the components of your design with the +
 operator.

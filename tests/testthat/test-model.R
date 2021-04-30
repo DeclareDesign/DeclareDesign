@@ -8,8 +8,8 @@ my_potential_outcomes <-
     Y_Z_0 = draw_binary(latent = noise, link = "probit"),
     Y_Z_1 = draw_binary(latent = noise + 2, link = "probit")
   )
-my_assignment <- declare_assignment()
-my_reveal <- reveal_outcomes()
+my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, prob = 0.5))
+my_reveal <- declare_reveal()
 my_design <- my_population +
   my_potential_outcomes +
   my_assignment +
@@ -250,13 +250,6 @@ test_that("gam", {
   }
   
   
-})
-
-test_that("lfe", {
-  skip_if_not_installed(c("lfe", "broom"))
-  skip_on_cran()
-  des <- pop + declare_estimator(Y ~ Z, model = lfe::felm)
-  expect_equal(ncol(draw_estimates(des)), 8)
 })
 
 

@@ -1,7 +1,7 @@
-context("Multiple estimands can be mapped to one estimator")
+context("Multiple inquiries can be mapped to one estimator")
 
 
-test_that("Multiple estimands can be mapped to one estimator", {
+test_that("Multiple inquiries can be mapped to one estimator", {
   pop_var <- function(x) {
     mean((x - mean(x))^2)
   }
@@ -17,14 +17,14 @@ test_that("Multiple estimands can be mapped to one estimator", {
     Y = X + epsilon
   )
 
-  dgp_se <- declare_estimand(dgp_se = 2 / sqrt(sx))
-  obs_se <- declare_estimand(obs_se = sqrt(pop_var(epsilon) / sqrt(sx)))
+  dgp_se <- declare_inquiry(dgp_se = 2 / sqrt(sx))
+  obs_se <- declare_inquiry(obs_se = sqrt(pop_var(epsilon) / sqrt(sx)))
 
   lmc <- declare_estimator(
     Y ~ X,
     model = estimatr::lm_robust,
     se_type = "classical",
-    estimand = c(dgp_se, obs_se),
+    inquiry = c(dgp_se, obs_se),
     term = "X"
   )
 
@@ -40,8 +40,8 @@ test_that("Multiple estimands can be mapped to one estimator", {
     bias_est = mean(std.error - sd(estimand)),
     mean_se = mean(std.error),
     sd_se = sd(std.error),
-    mean_estimand = mean(estimand),
-    sd_estimand = sd(estimand)
+    mean_inquiry = mean(estimand),
+    sd_inquiry = sd(estimand)
   )
 
   diag <- diagnose_design(des, sims = 2, diagnosands = my_dig, bootstrap_sims = FALSE)
@@ -51,7 +51,7 @@ test_that("Multiple estimands can be mapped to one estimator", {
 })
 
 
-test_that("More multiple estimands", {
+test_that("More multiple inquiries", {
   my_smp_fun <- function(data) {
     S <- rbinom(n = nrow(data), size = 1, prob = pnorm(data$noise))
     return(data[S == 1, , drop = FALSE])
@@ -60,15 +60,16 @@ test_that("More multiple estimands", {
 
   pop <- declare_population(N = 100, noise = rnorm(N))
   pos <- declare_potential_outcomes(Y ~ Z * noise)
-  pate <- declare_estimand(pate = mean(Y_Z_1 - Y_Z_0))
+  pate <- declare_inquiry(pate = mean(Y_Z_1 - Y_Z_0))
   smp <- declare_sampling(handler = my_smp_fun)
-  sate <- declare_estimand(sate = mean(Y_Z_1 - Y_Z_0))
-  assgn <- declare_assignment(m = 10)
-  my_reveal <- reveal_outcomes()
-  mator_both <- declare_estimator(Y ~ Z, estimand = c(pate, sate))
+  sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))
+  assgn <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 10))
+  my_reveal <- declare_reveal()
+  mator_both <- declare_estimator(Y ~ Z, inquiry = c(pate, sate))
 
 
 
   des <- pop + pos + pate + smp + sate + assgn + my_reveal + mator_both
-  expect_equal(draw_estimates(des)$estimand_label, c("pate", "sate"))
+  expect_equal(draw_estimates(des)$inquiry_label, c("pate", "sate"))
 })
+

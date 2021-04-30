@@ -12,8 +12,8 @@
 #' @examples
 #'
 #' design <-
-#' declare_population(data = sleep) +
-#'   declare_sampling(n = 10)
+#' declare_model(data = sleep) +
+#'   declare_sampling(S = complete_rs(N, n = 10), legacy = FALSE)
 #'
 #' design <-
 #'   set_citation(design,

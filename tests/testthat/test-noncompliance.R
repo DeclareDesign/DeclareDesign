@@ -11,10 +11,10 @@ test_that("Noncompliance", {
     D_Z_1 = rbinom(n = N, size = 1, prob = pnorm(noise + 1))
   )
 
-  my_assignment <- declare_assignment(m = 50)
+  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 50))
 
-  CACE <- declare_estimand(CACE = mean(Y_D_1[complier == 1] - Y_D_0[complier == 1]))
-  ITT_d <- declare_estimand(ITT_d = mean(complier))
+  CACE <- declare_inquiry(CACE = mean(Y_D_1[complier == 1] - Y_D_0[complier == 1]))
+  ITT_d <- declare_inquiry(ITT_d = mean(complier))
 
   cace_estimator <- function(data, alpha = 0.05) {
     fit <- AER::ivreg(Y ~ D | Z, data = data)
@@ -41,7 +41,7 @@ test_that("Noncompliance", {
     return_frame[return_frame$variable_names == "D", ]
   }
 
-  cace_hat <- declare_estimator(handler = label_estimator(cace_estimator), estimand = CACE, label = "CACE_hat")
+  cace_hat <- declare_estimator(handler = label_estimator(cace_estimator), inquiry = CACE, label = "CACE_hat")
 
   design <- my_population +
     POS_Y +
@@ -50,8 +50,8 @@ test_that("Noncompliance", {
     ITT_d +
     CACE +
     my_assignment +
-    reveal_outcomes(outcome_variables = "D", assignment_variables = "Z") +
-    reveal_outcomes(outcome_variables = "Y", assignment_variables = "D") +
+    declare_reveal(outcome_variables = "D", assignment_variables = "Z") +
+    declare_reveal(outcome_variables = "Y", assignment_variables = "D") +
     cace_hat
 
   df <- draw_data(design)
@@ -59,7 +59,7 @@ test_that("Noncompliance", {
 
   diag <- diagnose_design(design, sims = 2, bootstrap_sims = FALSE)
 
-  expect_equal(diag$diagnosands$mean_estimand[1], 2)
+  expect_equal(diag$diagnosands$mean_inquiry[1], 2)
   expect_equal(diag$diagnosands$estimator_label[1], "CACE_hat") 
   # ITT_d is not in output - not estimated: AC: NOW IT IS!
 })
@@ -90,17 +90,15 @@ test_that("POs correctly assembled for noncompliance case", {
     assignment_variables = "D"
   )
 
-  assignment <- declare_assignment(prob = 0.5)
+  assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, prob = 0.5))
 
-  suppressWarnings(
     noncompliance <-
       pop +
       pos_D +
       assignment +
-      # reveal_outcomes(D, Z) +
+      declare_reveal(D, Z) +
       pos_Y +
-      reveal_outcomes(Y, D)
-  )
+      declare_reveal(Y, D)
 
   e <- (noncompliance[[4]])
 

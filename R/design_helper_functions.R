@@ -5,21 +5,23 @@
 #' @examples
 #'
 #' design <-
-#'   declare_population(N = 500, noise = rnorm(N)) +
-#'   declare_potential_outcomes(Y ~ noise + Z * rnorm(N, 2, 2)) +
-#'   declare_sampling(n = 250) +
-#'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_step(dplyr::mutate, noise_sq = noise^2) +
-#'   declare_assignment(m = 25) +
-#'   reveal_outcomes() +
-#'   declare_estimator(Y ~ Z, estimand = "my_estimand")
+#'   declare_model(
+#'     N = 500, 
+#'     U = rnorm(N),
+#'     potential_outcomes(Y ~ U + Z * rnorm(N, 2, 2))
+#'   ) +
+#'   declare_sampling(S = complete_rs(N, n = 250), legacy = FALSE) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_assignment(Z = complete_ra(N, m = 25), legacy = FALSE) +
+#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+#'   declare_estimator(Y ~ Z, inquiry = "my_inquiry")
 #'
 #' design
 #'
 #' df <- draw_data(design)
 #'
 #' estimates <- draw_estimates(design)
-#' estimands <- draw_estimands(design)
+#' inquiries <- draw_inquiries(design)
 #' 
 #' print_code(design)
 #'
@@ -73,11 +75,14 @@ check_sims <- function(design, sims) {
 #'
 #' @examples 
 #' design <-
-#'   declare_population(N = 100, X = rnorm(N)) +
-#'   declare_potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N)) +
-#'   declare_assignment(m = 50) +
-#'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_estimator(Y ~ Z, estimand = "ATE")
+#'   declare_model(
+#'     N = 100, X = rnorm(N),
+#'     potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N))
+#'   ) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) +
+#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
+#'   declare_estimator(Y ~ Z, inquiry = "ATE")
 #' 
 #' run_design(design)
 #' 
@@ -102,13 +107,13 @@ next_step <- function(step, current_df, i) {
 }
 
 run_design_internal.default <- function(design) {
-  stop("Please only send design objects or functions with no arguments to run_design.")
+  stop("Please only send design objects to run_design.")
 }
 
 run_design_internal.design <- function(design, current_df = NULL, results = NULL, start = 1, end = length(design), ...) {
   if (!is.list(results)) {
     results <- list(
-      estimand = vector("list", length(design)),
+      inquiry = vector("list", length(design)),
       estimator = vector("list", length(design))
     )
   }
@@ -134,9 +139,9 @@ run_design_internal.design <- function(design, current_df = NULL, results = NULL
       results[["estimates_df"]] <- rbind_disjoint(results[["estimator"]])
       results[["estimator"]] <- NULL
     }
-    if ("estimand" %in% names(results)) {
-      results[["estimands_df"]] <- rbind_disjoint(results[["estimand"]])
-      results[["estimand"]] <- NULL
+    if ("inquiry" %in% names(results)) {
+      results[["inquiries_df"]] <- rbind_disjoint(results[["inquiry"]])
+      results[["inquiry"]] <- NULL
     }
     if ("current_df" %in% names(results)) {
       results[["current_df"]] <- current_df
@@ -153,12 +158,6 @@ run_design_internal.design <- function(design, current_df = NULL, results = NULL
       ...
     )
   }
-}
-
-# for when the user sends a function that runs a design itself
-#   to run_design (or simulate_design / diagnose_design above it)
-run_design_internal.function <- function(design) {
-  design()
 }
 
 run_design_internal.execution_st <- function(design, ...) do.call(run_design_internal.design, design)
@@ -231,9 +230,9 @@ dots_to_list_of_designs <- function(...) {
 #'
 #' @examples
 #'
-#' my_population <- declare_population(N = 100)
+#' my_population <- declare_model(N = 100)
 #'
-#' my_assignment <- declare_assignment(m = 50)
+#' my_assignment <- declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE)
 #'
 #' my_design <- my_population + my_assignment
 #'

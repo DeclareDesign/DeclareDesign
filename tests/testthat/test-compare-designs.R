@@ -5,15 +5,15 @@ my_population <- declare_population(N = 50, noise = rnorm(N))
 my_potential_outcomes <-
   declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-my_assignment <- declare_assignment(m = 25)
+my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
 
-pate <- declare_estimand(pate = mean(Y_Z_1 - Y_Z_0))
-sate <- declare_estimand(sate = mean(Y_Z_1 - Y_Z_0))
+pate <- declare_inquiry(pate = mean(Y_Z_1 - Y_Z_0))
+sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))
 
-pate_estimator <- declare_estimator(Y ~ Z, estimand = pate)
-sate_estimator <- declare_estimator(Y ~ Z, estimand = sate)
+pate_estimator <- declare_estimator(Y ~ Z, inquiry = pate)
+sate_estimator <- declare_estimator(Y ~ Z, inquiry = sate)
 
-reveal <- reveal_outcomes()
+reveal <- declare_reveal()
 
 my_design_1 <- my_population +
   my_potential_outcomes +
@@ -68,17 +68,17 @@ my_population <- declare_population(N = 50, noise = rnorm(N))
 my_potential_outcomes <-
   declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-my_assignment <- declare_assignment(m = 25)
+my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
 
-pate <- declare_estimand(pate = mean(Y_Z_1 - Y_Z_0))
-sate <- declare_estimand(sate = mean(Y_Z_1 - Y_Z_0))
+pate <- declare_inquiry(pate = mean(Y_Z_1 - Y_Z_0))
+sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))
 
-pate_estimator <- declare_estimator(Y ~ Z, estimand = pate)
-sate_estimator <- declare_estimator(Y ~ Z, estimand = sate)
+pate_estimator <- declare_estimator(Y ~ Z, inquiry = pate)
+sate_estimator <- declare_estimator(Y ~ Z, inquiry = sate)
 
-reveal <- reveal_outcomes()
+reveal <- declare_reveal()
 
-my_special_step <- declare_estimand(ATE = 5)
+my_special_step <- declare_inquiry(ATE = 5)
 
 my_design_3 <- my_population +
   my_potential_outcomes +
@@ -99,7 +99,7 @@ test_that("compare works", {
   a <- compare_design_code(my_design_3, my_design_4)
   b <- compare_design_summaries(my_design_3, my_design_4)
   c <- compare_design_data(my_design_3, my_design_4)
-  d <- compare_design_estimands(my_design_3, my_design_4)
+  d <- compare_design_inquiries(my_design_3, my_design_4)
   e <- compare_design_estimates(my_design_3, my_design_4)
   f <- compare_designs(my_design_3, my_design_4)
 })

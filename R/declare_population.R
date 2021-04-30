@@ -8,15 +8,13 @@
 #' @examples
 #'
 #' # Declare a single-level population with no covariates
-#' declare_population(N = 100)
-#' 
-#' # declare_population returns a function:
-#' 
-#' my_population <- declare_population(N = 100)
-#' #' my_population()
+#' my_population <- declare_model(N = 100)
+#'
+#' # Declare a population from existing data
+#' my_population <- declare_model(sleep)
 #'
 #' # Declare a single-level population with a covariate
-#' declare_population(
+#' my_population <- declare_model(
 #'   N = 6,
 #'   female = rbinom(n = N, 1, prob = 0.5),
 #'   height_ft = rnorm(N, mean = 5.67 - 0.33 * female, sd = 0.25)
@@ -36,7 +34,7 @@
 #' # containing cities within regions and a
 #' # pollution variable defined at the city level
 #'
-#' declare_population(
+#' my_population <- declare_model(
 #'   regions = add_level(N = 5),
 #'   cities = add_level(N = 10, pollution = rnorm(N, mean = 5))
 #' )
@@ -50,6 +48,6 @@
 #'   data.frame(u = rnorm(N))
 #' }
 #'
-#' declare_population(N = 10, handler = my_population_function)
+#' my_population_custom <- declare_model(N = 10, handler = my_population_function)
 #'
 declare_population <- make_declarations(fabricate, "population")

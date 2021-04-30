@@ -8,72 +8,38 @@
 \method{+}{dd}(lhs, rhs)
 }
 \arguments{
-\item{lhs}{A step in a research design, beginning with a function that draws the population. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a \code{data.frame} as an argument and return a \code{data.frame}. Typically, many steps are declared using the \code{declare_} functions, i.e., \code{\link{declare_population}}, \code{\link{declare_population}}, \code{\link{declare_sampling}}, \code{\link{declare_potential_outcomes}}, \code{\link{declare_estimand}}, \code{\link{declare_assignment}}, and \code{\link{declare_estimator}}.}
+\item{lhs}{A step in a research design, beginning with a function that defines the model. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a \code{data.frame} as an argument and return a \code{data.frame}. Steps are declared using the \code{declare_} functions, i.e., \code{\link{declare_model}}, \code{\link{declare_inquiry}}, \code{\link{declare_sampling}}, \code{\link{declare_assignment}}, \code{\link{declare_measurement}}, \code{\link{declare_estimator}}, and \code{\link{declare_test}}.}
 
 \item{rhs}{A second step in a research design}
 }
 \value{
-a list of two functions, the \code{design_function} and the \code{data_function}. The \code{design_function} runs the design once, i.e. draws the data and calculates any estimates and estimands defined in \code{...}, returned separately as two \code{data.frame}'s. The \code{data_function} runs the design once also, but only returns the final data.
+a design
 }
 \description{
 Declare a design
 }
-\details{
-Users can supply three kinds of functions to create a design:
-
-1. Data generating functions. These include population, assignment, and sampling functions.
-
-2. Estimand functions.
-
-3. Estimator functions.
-
-The location of the estimand and estimator functions in the pipeline of functions determine *when* the values of the estimand and estimator are calculated. This allows users to, for example, differentiate between a population average treatment effect and a sample average treatment effect by placing the estimand function before or after sampling.
-
-Design objects declared with the + operator can be investigated with a series of post-declaration commands, such as \code{\link{draw_data}}, \code{\link{draw_estimands}}, \code{\link{draw_estimates}}, and \code{\link{diagnose_design}}.
-
-The print and summary methods for a design object return some helpful descriptions of the steps in your research design. If randomizr functions are used for any assignment or sampling steps, additional details about those steps are provided.
-}
 \examples{
 
-my_population <- declare_population(N = 500, noise = rnorm(N))
+design <-
+  declare_model(
+    N = 500, 
+    U = rnorm(N),
+    potential_outcomes(Y ~ Z + U)
+  ) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_sampling(S = complete_rs(N, n = 250), legacy = FALSE) +
+  declare_assignment(Z = complete_ra(N, m = 25), legacy = FALSE) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, inquiry = "ATE") 
 
-my_potential_outcomes <- declare_potential_outcomes(Y ~ Z + noise)
+dat <- draw_data(design)
+head(dat)
 
-my_sampling <- declare_sampling(n = 250)
-
-my_assignment <- declare_assignment(m = 25)
-
-my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-
-my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-
-my_mutate <- declare_step(dplyr::mutate, noise_sq = noise^2)
-
-my_reveal <- reveal_outcomes()
-
-design <- my_population + my_potential_outcomes + my_sampling +
-         my_estimand + my_mutate +
-         my_assignment + my_reveal + my_estimator
-
-design
-
-df <- draw_data(design)
-
-estimates <- draw_estimates(design)
-estimands <- draw_estimands(design)
-
-# You can add steps to a design
-
-design <- my_population + my_potential_outcomes
-design + my_sampling
-
-# Special Cases
+run_design(design)
 
 # You may wish to have a design with only one step:
 
-design <- my_population + NULL
-design
-
+design <- declare_model(N = 500, noise = rnorm(N)) + NULL
 
 \dontrun{
 diagnosis <- diagnose_design(design)

@@ -2,8 +2,8 @@
 % Please edit documentation in R/declare_potential_outcomes.R
 \name{declare_potential_outcomes}
 \alias{declare_potential_outcomes}
-\alias{potential_outcomes.formula}
-\alias{potential_outcomes.NULL}
+\alias{potential_outcomes_internal.formula}
+\alias{potential_outcomes_internal.NULL}
 \title{Declare potential outcomes}
 \usage{
 declare_potential_outcomes(
@@ -12,7 +12,7 @@ declare_potential_outcomes(
   label = NULL
 )
 
-potential_outcomes.formula(
+potential_outcomes_internal.formula(
   formula,
   conditions = c(0, 1),
   assignment_variables = "Z",
@@ -21,7 +21,7 @@ potential_outcomes.formula(
   label = outcome_variable
 )
 
-potential_outcomes.NULL(
+potential_outcomes_internal.NULL(
   formula = stop("Not provided"),
   ...,
   data,

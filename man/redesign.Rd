@@ -27,8 +27,9 @@ Please note that \code{redesign} functionality is experimental and may be change
 \examples{
 
 n <- 500
-population <- declare_population(N = 1000)
-sampling <- declare_sampling(n = n)
+population <- declare_model(N = 1000)
+sampling <- declare_sampling(S = complete_rs(N, n = n), 
+                             legacy = FALSE)
 design <- population + sampling
 
 # returns a single, modified design
@@ -43,7 +44,9 @@ design_vary_N <- redesign(design, n = seq(400, 900, 100))
 
 prob_each <- c(.1, .5, .4)
 
-assignment <- declare_assignment(prob_each = prob_each)
+assignment <- declare_assignment(
+  Z = complete_ra(prob_each = prob_each), 
+  legacy = FALSE)
 
 design <- population + assignment
 
@@ -64,9 +67,9 @@ X <- 3
 f <- function(b, X) b*X
 g <- function(b) b*X
 
-design1 <- declare_population(N = 1, A = X)       + NULL
-design2 <- declare_population(N = 1, A = f(2, X)) + NULL
-design3 <- declare_population(N = 1, A = g(2))    + NULL
+design1 <- declare_model(N = 1, A = X)       + NULL
+design2 <- declare_model(N = 1, A = f(2, X)) + NULL
+design3 <- declare_model(N = 1, A = g(2))    + NULL
 
 draw_data(design1)
 draw_data(design2)

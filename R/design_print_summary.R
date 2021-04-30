@@ -13,29 +13,27 @@ print.design <- function(x, verbose = TRUE, ...) {
 #'
 #' @examples
 #'
-#' my_population <- declare_population(N = 500, noise = rnorm(N))
+#' my_model <- 
+#'   declare_model(
+#'     N = 500, 
+#'     noise = rnorm(N),
+#'     Y_Z_0 = noise, 
+#'     Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)
+#'   )
 #'
-#' my_potential_outcomes <- declare_potential_outcomes(
-#'   Y_Z_0 = noise, Y_Z_1 = noise +
-#'   rnorm(N, mean = 2, sd = 2))
+#' my_sampling <- declare_sampling(S = complete_rs(N, n = 250), legacy = FALSE)
 #'
-#' my_sampling <- declare_sampling(n = 250)
+#' my_assignment <- declare_assignment(Z = complete_ra(N, m = 25), legacy = FALSE)
 #'
-#' my_assignment <- declare_assignment(m = 25)
+#' my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 #'
-#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+#' my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 #'
-#' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+#' my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #'
-#' my_mutate <- declare_step(dplyr::mutate, noise_sq = noise ^ 2)
-#'
-#' my_reveal <- reveal_outcomes()
-#'
-#' design <- my_population +
-#'   my_potential_outcomes +
+#' design <- my_model +
 #'   my_sampling +
-#'   my_estimand +
-#'   my_mutate +
+#'   my_inquiry +
 #'   my_assignment +
 #'   my_reveal +
 #'   my_estimator
@@ -76,7 +74,7 @@ summary.design <- function(object, verbose = TRUE, ...) {
   
   N[[1]] <- paste0("N = ", nrow(current_df))
   
-  estimates_df <- estimands_df <- data.frame()
+  estimates_df <- inquiries_df <- data.frame()
   
   last_df <- current_df
   
@@ -132,7 +130,7 @@ summary.design <- function(object, verbose = TRUE, ...) {
       })
       
       last_df <- current_df
-    } else if (causal_type %in% c("estimand", "estimator")) {
+    } else if (causal_type %in% c("inquiry", "estimator")) {
       quantities_added[[i]] <- design[[i]](current_df)
     }
   }

@@ -4,8 +4,9 @@
 #' Generates diagnosands from a design or simulations of a design.
 #'
 #' @param ... A design or set of designs typically created using the + operator, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.
-#' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the estimand(s).
-#' @param add_grouping_variables Variables used to generate groups of simulations for diagnosis. Added to list default list: c("design_label", "estimand_label", "estimator_label", "term")
+#' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the inquiry(s).
+#' @param make_groups Add group variables within which diagnosand values will be calculated. New variables can be created or variables already in the simulations data frame selected. Type name-value pairs within the function \code{vars}, i.e. \code{vars(significant = p.value <= 0.05)}.
+#' @param add_grouping_variables Deprecated. Please use make_groups instead. Variables used to generate groups of simulations for diagnosis. Added to default list: c("design_label", "estimand_label", "estimator_label", "term")
 #' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}
 #' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.
 #' @return a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
@@ -21,30 +22,37 @@
 #'
 #'
 #' @examples
-#' my_population <- declare_population(N = 500, noise = rnorm(N))
-#'
-#' my_potential_outcomes <- declare_potential_outcomes(
-#'   Y_Z_0 = noise, Y_Z_1 = noise +
-#'   rnorm(N, mean = 2, sd = 2))
-#'
-#' my_assignment <- declare_assignment()
-#'
-#' my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
-#'
-#' my_reveal <- reveal_outcomes()
-#'
-#' my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
-#'
-#' design <- my_population +
-#'    my_potential_outcomes +
-#'    my_estimand +
-#'    my_assignment +
-#'    my_reveal +
-#'    my_estimator
+#' design <- 
+#'   declare_model(
+#'     N = 500, 
+#'     U = rnorm(N),
+#'     Y_Z_0 = U, 
+#'     Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
+#'   ) + 
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+#'   declare_assignment(Z = complete_ra(N), legacy = FALSE) +
+#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
+#'   declare_estimator(Y ~ Z, inquiry = "ATE")
 #'
 #' \dontrun{
 #' # using built-in defaults:
 #' diagnosis <- diagnose_design(design)
+#' reshape_diagnosis(diagnosis, select = "Power")
+#' }
+#' 
+#' \dontrun{
+#' # Adding a group for within group diagnosis:
+#' diagnosis <- diagnose_design(design, 
+#'   make_groups = vars(significant = p.value <= 0.05),
+#'   )
+#' diagnosis
+#' 
+#' diagnosis <- diagnose_design(design, 
+#'   make_groups = 
+#'     vars(effect_size = 
+#'       cut(estimand, quantile(estimand, (0:4)/4), 
+#'           include.lowest = TRUE)),
+#'   )
 #' diagnosis
 #' }
 #'
@@ -74,16 +82,21 @@ diagnose_design <- function(...,
                             diagnosands = NULL,
                             sims = 500,
                             bootstrap_sims = 100,
+                            make_groups = NULL,
                             add_grouping_variables = NULL) {
   dots <- quos(...)
+  
+  if(!is.null(add_grouping_variables)){
+    warning("The argument add_grouping_variables is deprecated. Please use make_groups instead.", call. = FALSE)
+  }
 
   # two cases:
   # 1. it's a data frame -- this is the simulations df
   # 2. it's something else, and needs to be simulated
   if (is.data.frame(..1)) {
     simulations_df <- ..1
-    if (is_empty(c("estimator_label", "estimand_label") %icn% simulations_df)) {
-      stop("Can't calculate diagnosands on this data.frame, which does not include either an estimator_label or an estimand_label. Did you send a simulations data frame?")
+    if (is_empty(c("estimator_label", "inquiry_label") %icn% simulations_df)) {
+      stop("Can't calculate diagnosands on this data.frame, which does not include either an estimator_label or an inquiry_label. Did you send a simulations data frame?")
     }
     if (nrow(simulations_df) == 0) {
       stop("Can't calculate diagnosands on this data.frame, which has zero rows.")
@@ -97,14 +110,24 @@ diagnose_design <- function(...,
 
   # figure out what to group by ---------------------------------------------
 
-  group_by_set <- c("design_label", "estimand_label", "estimator_label", "term")
-
-  if (!is.null(add_grouping_variables)) {
-    group_by_set <- c(group_by_set, add_grouping_variables)
+  # Optionally modify the simulations dataframe to create new grouping variables
+  if (!is.null(make_groups)) {
+    make_groups_names <- names(make_groups)
+    make_groups_has_names <- make_groups_names != ""
+    make_groups_names[!make_groups_has_names] <-
+      sapply(make_groups, as_label)[!make_groups_has_names]
+    
+    simulations_df <-
+      eval_tidy(quo(fabricate(simulations_df,!!!make_groups[make_groups_has_names])))
+    
+  } else {
+    make_groups_names <- NULL
   }
 
-  group_by_set <- group_by_set %icn% simulations_df
-
+  group_by_set <- 
+    c("design_label", "inquiry_label", "estimator_label", "term", add_grouping_variables, make_groups_names) %icn% 
+    simulations_df
+  
   # Actually calculate diagnosands ------------------------------------------
 
   diagnosands_df <- calculate_diagnosands(
@@ -331,7 +354,7 @@ bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, d
   diagnosands_df <- diagnosands_df[, i, drop = FALSE]
 
   # Reordering columns
-  dim_cols <- c("estimator_label", "term", "estimand_label") %i% group_by_set
+  dim_cols <- c("estimator_label", "term", "inquiry_label") %i% group_by_set
   ix <- sort(match(dim_cols, colnames(diagnosands_df)))
   diagnosands_df[ix] <- diagnosands_df[dim_cols]
   names(diagnosands_df)[ix] <- dim_cols
@@ -340,4 +363,12 @@ bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, d
     diagnosands_df = diagnosands_df,
     diagnosand_replicates = diagnosand_replicates
   )
+}
+
+#' @rdname diagnose_design
+#'
+#' @importFrom rlang as_label
+#' @export
+vars <- function(...) {
+  quos(...)
 }

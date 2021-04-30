@@ -52,20 +52,20 @@ A function that accepts a data.frame as an argument and returns a data.frame con
 \description{
 Declares an estimator which generates estimates and associated statistics.
 
-Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific estimand in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an estimand. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
+Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific inquiry in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an inquiry. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
 }
 \details{
 \code{declare_estimator} is designed to handle two main ways of generating parameter estimates from data.
 
-In \code{declare_estimator}, you can optionally provide the name of an estimand or an objected created by \code{\link{declare_estimand}} to connect your estimate(s) to estimand(s).
+In \code{declare_estimator}, you can optionally provide the name of an inquiry or an objected created by \code{\link{declare_inquiry}} to connect your estimate(s) to inquiry(s).
 
 The first is through \code{label_estimator(model_handler)}, which is the default value of the \code{handler} argument. Users can use standard modeling functions like lm, glm, or iv_robust. The models are summarized using the function passed to the \code{model_summary} argument. This will usually be a "tidier" like \code{broom::tidy}. The default \code{model_summary} function is \code{tidy_try}, which applies a tidy method if available, and if not, tries to make one on the fly.
 
 An example of this approach is:
 
-\code{declare_estimator(Y ~ Z + X, model = lm_robust, model_summary = tidy, term = "Z", estimand = "ATE")}
+\code{declare_estimator(Y ~ Z + X, model = lm_robust, model_summary = tidy, term = "Z", inquiry = "ATE")}
 
-The second approach is using a custom data-in, data-out function, usually first passed to \code{label_estimator}. The reason to pass the custom function to \code{label_estimator} first is to enable clean labeling and linking to estimands.
+The second approach is using a custom data-in, data-out function, usually first passed to \code{label_estimator}. The reason to pass the custom function to \code{label_estimator} first is to enable clean labeling and linking to inquiries.
 
 An example of this approach is:
 
@@ -74,35 +74,37 @@ my_fun <- function(data){ with(data, median(Y[Z == 1]) - median(Y[Z == 0])) }
 }
 
 \code{
-declare_estimator(handler = label_estimator(my_fun), estimand = "ATE")
+declare_estimator(handler = label_estimator(my_fun), inquiry = "ATE")
 }
 
-\code{label_estimator} takes a data-in-data out function to \code{fn}, and returns a data-in-data-out function that first runs the provided estimation function \code{fn} and then appends a label for the estimator and, if an estimand is provided, a label for the estimand.
+\code{label_estimator} takes a data-in-data out function to \code{fn}, and returns a data-in-data-out function that first runs the provided estimation function \code{fn} and then appends a label for the estimator and, if an inquiry is provided, a label for the inquiry.
 }
 \examples{
-
 # base design
 design <-
-  declare_population(N = 100,
-                     female = rbinom(N, 1, 0.5),
-                     U = rnorm(N)) +
-  declare_potential_outcomes(
-    Y ~ rbinom(N, 1, prob = pnorm(0.2 * Z + 0.2 * female + 0.1 * Z * female + U))) +
-  declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-  declare_assignment(m = 50)
+  declare_model(
+    N = 100,
+    female = rbinom(N, 1, 0.5),
+    U = rnorm(N),
+    potential_outcomes(
+     Y ~ rbinom(N, 1, prob = pnorm(0.2 * Z + 0.2 * female + 0.1 * Z * female + U)))
+  ) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+  declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) + 
+  declare_measurement(Y = reveal_outcomes(Y ~ Z))
 
 # Most estimators are modeling functions like lm or glm.
   
 # Default statistical model is estimatr::difference_in_means
-design + declare_estimator(Y ~ Z, estimand = "ATE")
+design + declare_estimator(Y ~ Z, inquiry = "ATE")
 
 # lm from base R (classical standard errors assuming homoskedasticity)
-design + declare_estimator(Y ~ Z, model = lm, estimand = "ATE")
+design + declare_estimator(Y ~ Z, model = lm, inquiry = "ATE")
 
 # Use lm_robust (linear regression with heteroskedasticity-robust standard errors) 
 # from `estimatr` package
 
-design + declare_estimator(Y ~ Z, model = lm_robust, estimand = "ATE")
+design + declare_estimator(Y ~ Z, model = lm_robust, inquiry = "ATE")
 
 # use `term` to select particular coefficients
 design + declare_estimator(Y ~ Z*female, term = "Z:female", model = lm_robust)
@@ -111,7 +113,7 @@ design + declare_estimator(Y ~ Z*female, term = "Z:female", model = lm_robust)
 design + declare_estimator(
   Y ~ Z + female,
   family = "gaussian",
-  estimand = "ATE",
+  inquiry = "ATE",
   model = glm
 )
 
@@ -134,20 +136,20 @@ design +
     term = "Z"
   ) 
 
-# Multiple estimators for one estimand
+# Multiple estimators for one inquiry
 
 two_estimators <-
   design +
   declare_estimator(Y ~ Z,
                     model = lm_robust,
-                    estimand = "ATE",
+                    inquiry = "ATE",
                     label = "OLS") +
   declare_estimator(
     Y ~ Z + female,
     model = glm,
     family = binomial("logit"),
     model_summary = tidy_margins,
-    estimand = "ATE",
+    inquiry = "ATE",
     term = "Z",
     label = "logit"
   )
@@ -164,7 +166,7 @@ my_dim_function <- function(data){
 
 design + declare_estimator(
   handler = label_estimator(my_dim_function),
-  estimand = "ATE"
+  inquiry = "ATE"
 )
 
 }

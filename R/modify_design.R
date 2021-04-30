@@ -29,16 +29,18 @@ find_step <- function(design, step, verb) {
 #'
 #' @examples
 #'
-#'  my_population <- declare_population(N = 100, noise = rnorm(N), label = "my_pop")
+#'  my_model <- 
+#'    declare_model(
+#'      N = 100, 
+#'      U = rnorm(N),
+#'      Y_Z_0 = U,
+#'      Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
+#'    )
 #'
-#'  my_potential_outcomes <-
-#'    declare_potential_outcomes(Y_Z_0 = noise,
-#'                               Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+#'  my_assignment <- declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE)
+#'  my_assignment_2 <- declare_assignment(Z = complete_ra(N, m = 25), legacy = FALSE)
 #'
-#'  my_assignment <- declare_assignment(m = 50)
-#'  my_assignment_2 <- declare_assignment(m = 25)
-#'
-#'  design <- my_population + my_potential_outcomes + my_assignment
+#'  design <- my_model + my_assignment
 #'
 #'  design
 NULL
@@ -50,9 +52,13 @@ NULL
 #' @details See \code{\link{modify_design}} for details.
 #' @rdname modify_design
 #' @examples
-#'
-#'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), after = my_assignment)
-#'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), before = my_assignment)
+#'  
+#'  \dontrun{
+#'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), 
+#'              after = my_assignment)
+#'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), 
+#'              before = my_assignment)
+#'  
 #'
 #'  # If you are using a design created by a designer, for example from
 #'  #   the DesignLibrary package, you will not have access to the step
@@ -61,7 +67,11 @@ NULL
 #'  # get the labels for the steps
 #'  names(design)
 #'  
-#'  insert_step(design, declare_sampling(n = 50), after = "my_pop")
+#'  insert_step(design, 
+#'    declare_sampling(S = complete_rs(N, n = 50), 
+#'    legacy = FALSE),
+#'    after = "my_pop")
+#'  }
 #'
 #' @export
 insert_step <- function(design, new_step, before, after) {

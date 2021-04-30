@@ -7,18 +7,18 @@ test_that("multiple design draw_estimates", {
     my_potential_outcomes <-
       declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
     
-    my_assignment <- declare_assignment(m = 25)
+    my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
     
-    my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+    my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
     
-    my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+    my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
     
-    my_reveal <- reveal_outcomes()
+    my_reveal <- declare_reveal()
     
     my_design <-
       my_population +
       my_potential_outcomes +
-      my_estimand +
+      my_inquiry +
       my_assignment +
       my_reveal +
       my_estimator
@@ -31,34 +31,34 @@ test_that("multiple design draw_estimates", {
   my_potential_outcomes <-
     declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
   
-  my_assignment <- declare_assignment(m = 25)
+  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
   
-  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+  my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
   
-  my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+  my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
   
-  my_reveal <- reveal_outcomes()
+  my_reveal <- declare_reveal()
   
   design_1 <- my_population +
     my_potential_outcomes +
-    my_estimand +
+    my_inquiry +
     my_assignment +
     my_reveal +
     my_estimator
   
-  my_assignment_2 <- declare_assignment(m = 50)
+  my_assignment_2 <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 50))
   
   design_2 <- replace_step(design_1, my_assignment, my_assignment_2)
   
   my_designs <- expand_design(my_designer, N = c(50, 100))
   
-  draw_estimands(design_1)
+  draw_inquiries(design_1)
   
-  draw_estimands(design_2)
+  draw_inquiries(design_2)
   
-  draw_estimands(design_1, design_2)
+  draw_inquiries(design_1, design_2)
   
-  draw_estimands(my_designs)
+  draw_inquiries(my_designs)
   
   draw_estimates(design_1)
   

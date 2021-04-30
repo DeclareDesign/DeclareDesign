@@ -1,7 +1,7 @@
-#' Draw data, estimates, and estimands from a design
+#' Draw data, estimates, and inquiries from a design
 #'  
 #' @param design A design object, typically created using the + operator
-#' @param data A data.frame object with sufficient information to get the data, estimates, estimands, an assignment vector, or a sample.
+#' @param data A data.frame object with sufficient information to get the data, estimates, inquiries, an assignment vector, or a sample.
 #' @param start (Defaults to 1) a scalar indicating which step in the design to begin with. By default all data steps are drawn, from step 1 to the last step of the design.
 #' @param end (Defaults to \code{length(design)}) a scalar indicating which step in the design to finish drawing data by.
 #'
@@ -9,19 +9,23 @@
 #' 
 #' @examples 
 #' 
-#' design <- declare_population(N = 100, u = rnorm(N)) +
-#'   declare_potential_outcomes(Y ~ Z + u) +
-#'   declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_sampling(n = 75) +
-#'   declare_assignment(m = 50) +
-#'   reveal_outcomes(Y, Z) +
-#'   declare_estimator(Y ~ Z, estimand = "ATE")
+#' design <- 
+#'   declare_model(
+#'     N = 100, 
+#'     U = rnorm(N),
+#'     potential_outcomes(Y ~ Z + U)
+#'   ) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_sampling(S = complete_rs(N, n = 75), legacy = FALSE) +
+#'   declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) +
+#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+#'   declare_estimator(Y ~ Z, inquiry = "ATE")
 #' 
 #' dat <- draw_data(design)
 #' 
 #' dat_no_sampling <- draw_data(design, end = 3)
 #' 
-#' draw_estimands(design)
+#' draw_inquiries(design)
 #' 
 #' draw_estimates(design)
 #'
@@ -42,7 +46,27 @@ draw_data <- function(design, data = NULL, start = 1, end = length(design)) {
 #' @rdname draw_functions
 #'
 #' @export
-draw_estimands <- function(...) apply_on_design_dots(draw_estimands_single_design, ...)
+draw_inquiry <- function(...) apply_on_design_dots(draw_inquiries_single_design, ...)
+
+#' @param ... A design or set of designs typically created using the + operator
+#' @rdname draw_functions
+#'
+#' @export
+draw_inquiries <- draw_inquiry
+
+#' @rdname draw_functions
+#' @export
+draw_estimands <-  function(...){
+  .Deprecated(new = "draw_estimands")
+  draw_inquiries(...)
+}
+
+#' @rdname draw_functions
+#' @export
+draw_estimand <-  function(...){
+  .Deprecated(new = "draw_estimand")
+  draw_inquiry(...)
+}
 
 #' @rdname draw_functions
 #'
@@ -55,9 +79,9 @@ draw_estimates_single_design <- function(design) {
     list("estimator" = vector("list", length(design))), "estimates_df", step_type = "estimator")
 }
 
-draw_estimands_single_design <- function(design) {
+draw_inquiries_single_design <- function(design) {
   get_function_internal(
     design, -9, 1, length(design), function(x) TRUE, 
-    list("estimand" = vector("list", length(design))), "estimands_df", step_type = "estimand")
+    list("inquiry" = vector("list", length(design))), "inquiries_df", step_type = "inquiry")
 }
 

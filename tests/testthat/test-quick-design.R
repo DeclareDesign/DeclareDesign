@@ -4,16 +4,16 @@ test_that("expand_design works", {
   two_arm_trial <- function(N) {
     my_population <- declare_population(N = N, noise = rnorm(N))
     my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
-    my_assignment <- declare_assignment(m = N / 2)
-    pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
+    my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = N/2))
+    pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
-      declare_estimator(Y ~ Z, estimand = pate, label = "pate_hat")
-    reveal_outcomes <- reveal_outcomes()
+      declare_estimator(Y ~ Z, inquiry = pate, label = "pate_hat")
+    declare_reveal <- declare_reveal()
     my_design <- my_population +
       my_potential_outcomes +
       pate +
       my_assignment +
-      reveal_outcomes +
+      declare_reveal +
       pate_estimator
     return(my_design)
   }
@@ -37,14 +37,14 @@ test_that("expand_design works some more", {
       Y = rnorm(N),
       Z = rbinom(N, 1, .5)
     )
-    my_estimand <- declare_estimand(mean(Y))
+    my_inquiry <- declare_inquiry(mean(Y))
     my_estimator <-
       declare_estimator(Y ~ Z,
         model = lm_robust,
         term = "Z",
-        estimand = my_estimand
+        inquiry = my_inquiry
       )
-    my_design <- pop + my_estimand + my_estimator
+    my_design <- pop + my_inquiry + my_estimator
     return(my_design)
   }
 
@@ -64,16 +64,16 @@ test_that("vary works", {
     my_population <-
       declare_population(N = N, noise = rnorm(N, sd = noise_sd))
     my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
-    my_assignment <- declare_assignment(m = N / 2)
-    pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
+    my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = N/2))
+    pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
-      declare_estimator(Y ~ Z, estimand = pate, label = "pate_hat")
-    reveal_outcomes <- reveal_outcomes()
+      declare_estimator(Y ~ Z, inquiry = pate, label = "pate_hat")
+    declare_reveal <- declare_reveal()
     my_design <- my_population +
       my_potential_outcomes +
       pate +
       my_assignment +
-      reveal_outcomes +
+      declare_reveal +
       pate_estimator
     return(my_design)
   }
@@ -115,16 +115,16 @@ test_that("power curve", {
   two_arm_trial <- function(N) {
     my_population <- declare_population(N = N, noise = rnorm(N))
     my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + .25)
-    my_assignment <- declare_assignment(m = N / 2)
-    pate <- declare_estimand(mean(Y_Z_1 - Y_Z_0), label = "pate")
+    my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = N/2))
+    pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
-      declare_estimator(Y ~ Z, estimand = pate, label = "pate_hat")
-    reveal_outcomes <- reveal_outcomes()
+      declare_estimator(Y ~ Z, inquiry = pate, label = "pate_hat")
+    declare_reveal <- declare_reveal()
     my_design <- my_population +
       my_potential_outcomes +
       pate +
       my_assignment +
-      reveal_outcomes +
+      declare_reveal +
       pate_estimator
     return(my_design)
   }

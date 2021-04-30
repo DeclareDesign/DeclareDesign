@@ -2,7 +2,7 @@ context("Save-Reload-Redesign")
 
 test_that("Save Reload Redesign works", {
   N <- 100
-  d <- declare_population(N = N, foo = rnorm(N)) + declare_estimand(d = mean(foo))
+  d <- declare_population(N = N, foo = rnorm(N)) + declare_inquiry(d = mean(foo))
   f <- tempfile()
 
   suppressWarnings(

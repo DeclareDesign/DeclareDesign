@@ -5,23 +5,23 @@ test_that("Basic design summary", {
 
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-  my_sampling <- declare_sampling(n = 250)
+  my_sampling <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = 250))
 
-  my_assignment <- declare_assignment(m = 25)
+  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
 
-  my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+  my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
-  my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+  my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
-  reveal_outcomes <- reveal_outcomes()
+  declare_reveal <- declare_reveal()
 
   design <- my_population +
     my_potential_outcomes +
     my_sampling +
-    my_estimand +
+    my_inquiry +
     declare_step(dplyr::mutate, q = 5) +
     my_assignment +
-    reveal_outcomes +
+    declare_reveal +
     my_estimator
 
   s <- summary(design)
@@ -41,15 +41,15 @@ test_that("Basic design summary", {
 
 test_that("Add Quantitites and Alter Variables", {
   my_population <- declare_population(N = 500, noise = rnorm(N))
-  my_estimand <- declare_estimand(foo = mean(noise))
+  my_inquiry <- declare_inquiry(foo = mean(noise))
   my_transform <- declare_population(noise = noise / 2)
-  my_estimand2 <- declare_estimand(foo2 = mean(noise))
+  my_inquiry2 <- declare_inquiry(foo2 = mean(noise))
 
 
   design <- my_population +
-    my_estimand +
+    my_inquiry +
     my_transform +
-    my_estimand2
+    my_inquiry2
 
   # Adding Quantitites
   expect_output(

@@ -4,70 +4,94 @@
 #'
 #' @return A sampling declaration, which is a function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
 #' @export
-#' @details
-#'\code{declare_sampling} can work with any sampling_function that takes data and returns data. The default handler is \code{draw_rs} from the \code{randomizr} package. This allows quick declaration of many sampling schemes that involve strata and clusters.
 #'
-#'The arguments to \code{\link{draw_rs}} can include N, strata, clusters, n, prob, strata_n, and strata_prob.
-#'The arguments you need to specify are different for different designs.
-#'
-#'Note that \code{declare_sampling} works similarly to \code{declare_assignment} a key difference being that \code{declare_sampling} functions subset data to sampled units rather than simply appending an indicator for membership of a sample (assignment). If you need to sample but keep the dataset use \code{declare_assignment} and define further steps (such as estimation) with respect to subsets defined by the assignment.
-#'
-#'For details see the help files for \code{\link{complete_rs}}, \code{\link{strata_rs}}, \code{\link{cluster_rs}}, or \code{\link{strata_and_cluster_rs}}
 #' @importFrom rlang quos quo call_modify eval_tidy !!!
 #' @importFrom randomizr declare_rs
 #'
 #' @examples
 #'
-#' # Simple random sampling
-#' design <-
-#' declare_population(N = 100,
-#'                    female = rbinom(N, 1, 0.5),
-#'                    U = rnorm(N)) +
-#'   declare_potential_outcomes(Y ~ 0.5 * Z + 0.2 * female + 0.1 * Z * female + U)
+#' design <- declare_model(
 #' 
-#' design_with_sampling <- design + declare_sampling(n = 50)
-#' 
-#' nrow(draw_data(design))
-#' nrow(draw_data(design_with_sampling))
+#'   classrooms = add_level(10),
+#'   individuals = add_level(20, female = rbinom(N, 1, 0.5))
 #'
+#' ) + NULL
+#'
+#' # Complete random sampling
+#' 
+#' design + declare_sampling(
+#'   S = complete_rs(N = N, n = 50), 
+#'   filter = S == 1, legacy = FALSE)
+#'
+#' # equivalently, by default filter is set to S == 1
+#' design + declare_sampling(S = complete_rs(N = N, n = 50), 
+#'                           legacy = FALSE)
+#' 
 #' # Stratified random sampling
-#' design + declare_sampling(strata = female)
 #'
-#' # Custom random sampling functions
-#'
-#' my_sampling_function <- function(data, n = 20) {
-#'   data[sample(n, n, replace = TRUE), , drop = FALSE]
-#' }
-#' 
-#'
-#' design + declare_sampling(handler = my_sampling_function)
-#'
+#' design + declare_sampling(S = strata_rs(strata = female), 
+#'                           legacy = FALSE)
 declare_sampling <- make_declarations(sampling_handler, "sampling")
 
-#' @param sampling_variable The prefix for the sampling inclusion probability variable.
-#' @param drop_nonsampled Logical indicating whether to drop units that are not sampled. Default is \code{TRUE}.
+#' @param legacy Use the legacy randomizr functionality. This will be disabled in future; please use legacy = FALSE.
 #' @param data A data.frame.
 #' @importFrom rlang quos !!! call_modify eval_tidy quo
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
 #' @rdname declare_sampling
-sampling_handler <- function(data, ..., sampling_variable = "S", drop_nonsampled = TRUE) {
-  ## draw sample
-
+sampling_handler <- function(data, ..., legacy = TRUE) {
+  
   options <- quos(...)
+  
+  if(!legacy) {
+    
+    options$legacy <- NULL
+    
+    eval_tidy(quo(sampling_handler_internal_fabricatr(data = data, !!!options)))
+    
+  } else {
+    
+    options$legacy <- NULL
+    
+    eval_tidy(quo(sampling_handler_internal_randomizr(data = data, !!!options)))
+    
+  }
+  
+}
 
+sampling_handler_internal_fabricatr <- function(data, ..., filter = S == 1) {
+  
+  options <- quos(...)
+  
+  data <- fabricate(data = data, !!!options, ID_label = NA)
+  
+  rows <- enquo(filter)
+  rows_val <- eval_tidy(rows, data)
+  # rows_val <- rows_val && !is.na(rows_val)
+  rows_val[is.na(rows_val)] <- FALSE
+  
+  stopifnot(is.logical(rows_val))
+  
+  data[rows_val, , drop = FALSE]
+  
+}
+
+sampling_handler_internal_randomizr <- function(data, ..., sampling_variable = "S", drop_nonsampled = TRUE) {
+  
+  options <- quos(...)
+  
   samp <- reveal_nse_helper(sampling_variable)
   samp_inclusion_prob <- as.symbol(paste0(samp, "_inclusion_prob"))
-
+  
   decl <- eval_tidy(quo(declare_rs(N = !!nrow(data), !!!options)), data)
   
   data <- fabricate(data,
-    !!samp := draw_rs(!!decl),
-    !!samp_inclusion_prob := obtain_inclusion_probabilities(!!decl),
-    ID_label = NA
+                    !!samp := draw_rs(!!decl),
+                    !!samp_inclusion_prob := obtain_inclusion_probabilities(!!decl),
+                    ID_label = NA
   )
   
   S <- as.character(as.symbol(samp))
-
+  
   ## subset to the sampled observations
   if(drop_nonsampled == TRUE) {
     data[ data[[S]] %in% 1, names(data) != S, drop = FALSE]
@@ -76,49 +100,93 @@ sampling_handler <- function(data, ..., sampling_variable = "S", drop_nonsampled
   }
 }
 
+#' @importFrom rlang as_label
 validation_fn(sampling_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
-
-
-  if ("sampling_variable" %in% names(dots) &&
-    inherits(f_rhs(dots[["sampling_variable"]]), "NULL")) {
-    declare_time_error("Must not provide NULL as sampling_variable.", ret)
-  }
-
-  if (!"declaration" %in% names(dots)) {
-    if ("strata" %in% names(dots)) {
-      if (class(f_rhs(dots[["strata"]])) == "character") {
-        declare_time_error("Must provide the bare (unquoted) strata variable name to strata.", ret)
+  
+  if(is.null(eval_tidy(dots[["legacy"]])) || eval_tidy(dots[["legacy"]]) == TRUE) {
+    
+    if ("sampling_variable" %in% names(dots) &&
+        inherits(f_rhs(dots[["sampling_variable"]]), "NULL")) {
+      declare_time_error("Must not provide NULL as sampling_variable.", ret)
+    }
+    
+    if (!"declaration" %in% names(dots)) {
+      if ("strata" %in% names(dots)) {
+        if (class(f_rhs(dots[["strata"]])) == "character") {
+          declare_time_error("Must provide the bare (unquoted) strata variable name to strata.", ret)
+        }
+      }
+      
+      if ("clusters" %in% names(dots)) {
+        if (class(f_rhs(dots[["clusters"]])) == "character") {
+          declare_time_error("Must provide the bare (unquoted) cluster variable name to clusters.", ret)
+        }
+      }
+      rs_args <- setdiff(names(dots), names(formals(sampling_handler_internal_randomizr))) # removes data and sampling_variable
+      
+      rs_dots <- dots[rs_args]
+      
+      if (length(rs_dots) > 0) {
+        declaration <- tryCatch(eval_tidy(quo(declare_rs(!!!rs_dots))), error = function(e) e)
+        
+        if (inherits(declaration, "rs_declaration")) {
+          message("Sampling declaration factored out from execution path.")
+          dots[rs_args] <- NULL
+          dots$declaration <- declaration
+          
+          ret <- build_step(currydata(sampling_handler, dots),
+                            handler = sampling_handler,
+                            dots = dots,
+                            label = label,
+                            step_type = attr(ret, "step_type"),
+                            causal_type = attr(ret, "causal_type"),
+                            call = attr(ret, "call")
+          )
+        }
       }
     }
-
-    if ("clusters" %in% names(dots)) {
-      if (class(f_rhs(dots[["clusters"]])) == "character") {
-        declare_time_error("Must provide the bare (unquoted) cluster variable name to clusters.", ret)
+    
+  } else {
+    
+    randomizr_args <-
+      c(
+        "strata",
+        "clusters",
+        "n",
+        "n_unit",
+        "prob",
+        "prob_unit",
+        "strata_n",
+        "strata_prob",
+        "simple"
+      )
+    
+    if(any(randomizr_args %in% names(dots))){
+      
+      if("sampling_variable" %in% names(dots)){
+        sampling_variable <- get_expr(dots[["sampling_variable"]])
+      } else {
+        sampling_variable <- "S"
       }
+      
+      args_quos <- dots[names(dots) %in% randomizr_args]
+      
+      args_list <- lapply(args_quos, as_label)
+      
+      suggested_call <-
+        paste0(
+          "declare_sampling(",
+          sampling_variable,
+          " = draw_rs(N = N, ",
+          paste0(
+            paste0(names(args_list), " = ", args_list),
+            collapse = ", "),
+          "), filter = ", sampling_variable, " == 1)")
+      
+      stop(paste0("You appear to have used legacy declare_sampling() syntax. Consider:\n\n", suggested_call, "\n\nAlternatively, you can set legacy = TRUE to restore the previous functionality."), call. = FALSE)
     }
-    rs_args <- setdiff(names(dots), names(formals(sampling_handler))) # removes data and sampling_variable
-
-    rs_dots <- dots[rs_args]
-
-    if (length(rs_dots) > 0) {
-      declaration <- tryCatch(eval_tidy(quo(declare_rs(!!!rs_dots))), error = function(e) e)
-
-      if (inherits(declaration, "rs_declaration")) {
-        message("Sampling declaration factored out from execution path.")
-        dots[rs_args] <- NULL
-        dots$declaration <- declaration
-
-        ret <- build_step(currydata(sampling_handler, dots),
-          handler = sampling_handler,
-          dots = dots,
-          label = label,
-          step_type = attr(ret, "step_type"),
-          causal_type = attr(ret, "causal_type"),
-          call = attr(ret, "call")
-        )
-      }
-    }
+    
   }
   ret
 }

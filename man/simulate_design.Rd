@@ -23,23 +23,24 @@ structure of simulations is recorded in the dataset using a set of variables nam
 will be two distinct draws of step 1, indicated in variable "step_1_draw" (with values 1 and 2) and there will be three draws for step 4 within each of the step 1 draws, recorded in "step_4_draw" (with values 1 to 6).
 }
 \examples{
-my_population <- declare_population(N = 500, noise = rnorm(N))
+my_model <- 
+  declare_model(
+    N = 500, 
+    U = rnorm(N),
+    Y_Z_0 = U, 
+    Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
+  )
 
-my_potential_outcomes <- declare_potential_outcomes(
-  Y_Z_0 = noise, Y_Z_1 = noise +
-  rnorm(N, mean = 2, sd = 2))
+my_assignment <- declare_assignment(Z = complete_ra(N), legacy = FALSE)
 
-my_assignment <- declare_assignment()
+my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
-my_estimand <- declare_estimand(ATE = mean(Y_Z_1 - Y_Z_0))
+my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
-my_estimator <- declare_estimator(Y ~ Z, estimand = my_estimand)
+my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
 
-my_reveal <- reveal_outcomes()
-
-design <- my_population +
-  my_potential_outcomes +
-  my_estimand +
+design <- my_model +
+  my_inquiry +
   my_assignment +
   my_reveal +
   my_estimator
