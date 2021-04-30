@@ -7,7 +7,7 @@
 \usage{
 declare_sampling(..., handler = sampling_handler, label = NULL)
 
-sampling_handler(data, ..., legacy = TRUE)
+sampling_handler(data, ..., legacy = FALSE)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}

@@ -7,7 +7,7 @@
 \usage{
 declare_assignment(..., handler = assignment_handler, label = NULL)
 
-assignment_handler(data, ..., legacy = TRUE)
+assignment_handler(data, ..., legacy = FALSE)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}

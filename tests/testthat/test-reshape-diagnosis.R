@@ -104,23 +104,27 @@ test_that("designs with factors in diagnosands_df do not produce warnings", {
 
 test_that("groups with factors", {
   
+  set.seed(1)
   design <- 
     declare_population(N = 100, u = rnorm(N)) + 
     declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
-    declare_assignment() + 
+    declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
     declare_reveal() + 
     declare_estimator(Y ~ Z, inquiry = "ATE_positive")
   
   diagnosis <- diagnose_design(design, 
                                make_groups = vars(significant = ifelse(p.value > 0.5, NA, p.value <= 0.05)),
-                               sims = 100
+                               sims = 5
   )
+  
+  expect_equal(diagnosis$diagnosands_df$significant, c(FALSE, NA))
   
   diagnosis <- diagnose_design(design, 
                                make_groups = vars(significant = factor(ifelse(p.value > 0.5, NA, p.value <= 0.05))),
-                               sims = 100
+                               sims = 5
   )
   
+  expect_equal(diagnosis$diagnosands_df$significant, structure(c(1L, NA), .Label = "FALSE", class = "factor"))
   
 })

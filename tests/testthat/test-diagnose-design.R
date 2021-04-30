@@ -251,7 +251,7 @@ test_that("diagnose_design can generate and use grouping variables", {
   design <- 
     declare_population(N = 100, u = rnorm(N)) + 
     declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
-    declare_assignment() + 
+    declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
     declare_reveal() + 
     declare_estimator(Y ~ Z, inquiry = "ATE_positive")
@@ -266,7 +266,7 @@ test_that("diagnose_design can generate and use grouping variables", {
   design <- 
     declare_population(N = 100, u = rnorm(N)) + 
     declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
-    declare_assignment() + 
+    declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
     declare_reveal() + 
     declare_estimator(Y ~ Z, inquiry = "ATE")
@@ -286,7 +286,7 @@ test_that("diagnose_design can generate and use grouping variables", {
   design <- 
     declare_population(N = 100, u = rnorm(N)) + 
     declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
-    declare_assignment() + 
+    declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
     declare_reveal() + 
     declare_estimator(Y ~ Z, inquiry = "ATE_positive")

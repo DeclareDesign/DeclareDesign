@@ -50,7 +50,7 @@ declare_assignment <- make_declarations(assignment_handler, "assignment")
 #' @param legacy Use the legacy randomizr functionality. This will be disabled in future; please use legacy = FALSE.
 #' @param data A data.frame.
 #' @rdname declare_assignment
-assignment_handler <- function(data, ..., legacy = TRUE) {
+assignment_handler <- function(data, ..., legacy = FALSE) {
   options <- quos(...)
   
   if(!legacy) {
@@ -106,7 +106,7 @@ assignment_handler_internal_randomizr <-
 #' @importFrom rlang as_label
 validation_fn(assignment_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
-  if(is.null(eval_tidy(dots[["legacy"]])) || eval_tidy(dots[["legacy"]]) == TRUE) {
+  if(!is.null(eval_tidy(dots[["legacy"]])) && eval_tidy(dots[["legacy"]]) == TRUE) {
     
     dirty <- FALSE
     
@@ -164,6 +164,7 @@ validation_fn(assignment_handler) <- function(ret, dots, label) {
     }
     
   } else {
+    
     randomizr_args <-
       c(
         "blocks",
@@ -205,7 +206,9 @@ validation_fn(assignment_handler) <- function(ret, dots, label) {
             collapse = ", "),
           "))")
       
-      stop(paste0("You appear to have used legacy declare_assignment() syntax. Consider:\n\n", suggested_call, "\n\nAlternatively, you can set legacy = TRUE to restore the previous functionality."), call. = FALSE)
+      stop(paste0("You appear to have used legacy declare_assignment() syntax. Consider:\n\n", suggested_call, "\n\nAlternatively, you can set legacy = TRUE to restore the previous functionality.\n\nIf you received this message in error, please ensure that you do not name variables 'blocks', 'clusters', 'm', 'm_unit', 'm_each', 'prob', 'prob_unit', 'prob_each', 'block_m', 'block_m_each', 'block_prob', 'block_prob_each', 'num_arms', 'conditions', or 'simple'."), call. = FALSE)
+    } else if (length(names(dots)[!names(dots) %in% "data"]) == 0) {
+      stop(paste0("You appear to have used legacy declare_assignment() syntax. Consider:\n\n", "declare_assignment(Z = complete_ra(N = N))", "\n\nAlternatively, you can set legacy = TRUE to restore the previous functionality."), call. = FALSE)
     }
     
   }
