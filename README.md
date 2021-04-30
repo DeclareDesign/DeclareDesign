@@ -21,20 +21,11 @@ without having to code up simulations from scratch.
 ## Installation
 
 To install the latest stable release of **DeclareDesign**, please ensure
-that you are running version 3.3 or later of R and run the following
+that you are running version 3.5 or later of R and run the following
 code:
 
 ``` r
 install.packages("DeclareDesign")
-```
-
-To install the latest development release of all of the packages, please
-ensure that you are running version 3.4 or later of R and run the
-following code:
-
-``` r
-install.packages("DeclareDesign", dependencies = TRUE,
-                 repos = c("http://R.declaredesign.org", "https://cloud.r-project.org"))
 ```
 
 ## Usage
@@ -64,15 +55,15 @@ diagnosands <-
                       power = mean(p.value <= 0.05))
 
 diagnosis <- diagnose_design(design, diagnosands = diagnosands)
+```
+
+``` r
 diagnosis
 ```
 
-    ## 
-    ## Research design diagnosis based on 500 simulations. Diagnosand estimates with bootstrapped standard errors in parentheses (100 replicates).
-    ## 
-    ##  Design Label Inquiry Label Estimator Label Term N Sims   Bias  Power
-    ##        design           ATE       estimator    Z    500  -0.00   0.08
-    ##                                                         (0.00) (0.01)
+| Inquiry | Estimator |   Bias | SE(Bias) | Power | SE(Power) | n sims |
+|:--------|:----------|-------:|---------:|------:|----------:|-------:|
+| ATE     | estimator | -0.004 |    0.004 | 0.076 |     0.011 |    500 |
 
 ## Companion software
 
@@ -132,7 +123,7 @@ post-design-declaration commands used to modify or diagnose your design:
 3.  `draw_estimates()` (takes a design a returns a single simulation of
     estimates)
 4.  `draw_inquiries()` (takes a design a returns a single simulation of
-    inquiries)
+    estimands)
 
 A few other features:
 
@@ -141,9 +132,6 @@ A few other features:
     parameters that returns a design.
 2.  You can change the features of the design to be diagnosed with
     `declare_diagnosands()`.
-3.  You can provide custom functions to any `declare_*` step, as
-    described in the [custom functions
-    vignette](/r/declaredesign/articles/custom_functions.html).
 
 ------------------------------------------------------------------------
 
