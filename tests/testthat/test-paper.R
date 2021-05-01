@@ -64,7 +64,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
 
   estimator <- declare_estimator(handler = label_estimator(my_estimator), inquiry = inquiry)
 
-  diagnosand <- declare_diagnosands(bias = mean(estimate - inquiry), keep_defaults = FALSE)
+  diagnosand <- declare_diagnosands(bias = mean(estimate - estimand), keep_defaults = FALSE)
 
   declare_reveal <- declare_reveal()
 
