@@ -248,6 +248,8 @@ test_that("diagnose_design stops when a zero-row simulations_df is sent", {
 
 test_that("diagnose_design can generate and use grouping variables", {
   
+  set.seed(5)
+  
   design <- 
     declare_population(N = 100, u = rnorm(N)) + 
     declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
