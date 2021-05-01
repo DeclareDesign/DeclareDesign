@@ -99,15 +99,15 @@ get_function_internal <- function(design, data = NULL, start, end, pred, results
   
   ret <- run_design_internal.design(design_subset, current_df = data, results = results)[[what]]
   
-  if(what == "estimates_df" && !is.null(ret$estimator_label) && typeof(ret$estimator_label) != "character"){
+  if(what == "estimates_df" && !is.null(ret$estimator) && typeof(ret$estimator) != "character"){
     warning("The estimator label should be a character, but it is a ", 
-            class(ret$estimator_label), 
+            class(ret$estimator), 
             ". Try using handler = tidy_estimator(your_estimator_function)", call. = FALSE)
   }
   
-  if(what == "inquiries_df" && !is.null(ret$inquiry_label) && typeof(ret$inquiry_label) != "character"){
+  if(what == "inquiries_df" && !is.null(ret$inquiry) && typeof(ret$inquiry) != "character"){
     warning("The inquiry label should be a character, but it is a ", 
-            class(ret$inquiry_label), 
+            class(ret$inquiry), 
             ". You may need stringsAsFactors = FALSE in your inquiry function.", call. = FALSE)
   }
   

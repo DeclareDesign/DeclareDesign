@@ -14,7 +14,7 @@ test_that("inquiry labels work", {
   names(design)
   diagnosis <- diagnose_design(design, sims = 10, bootstrap_sims = FALSE)
 
-  expect_true(all(diagnosis$simulations_df$inquiry_label == "inquiry"))
+  expect_true(all(diagnosis$simulations_df$inquiry == "inquiry"))
 
   # declare_inquiry(b = 2) --> Label is b
   inquiry_2 <- declare_inquiry(some_stat = mean(Y))
@@ -23,7 +23,7 @@ test_that("inquiry labels work", {
   names(design)
   diagnosis <- diagnose_design(design, sims = 10, bootstrap_sims = FALSE)
   diagnosis$simulations_df
-  expect_true(all(diagnosis$simulations_df$inquiry_label == "some_stat"))
+  expect_true(all(diagnosis$simulations_df$inquiry == "some_stat"))
 
   # declare_inquiry(2, label = "b") -->  Label is b
   inquiry_3 <- declare_inquiry(mean(Y), label = "a_label")
@@ -32,7 +32,7 @@ test_that("inquiry labels work", {
   names(design)
   diagnosis <- diagnose_design(design, sims = 10, bootstrap_sims = FALSE)
   diagnosis$simulations_df
-  expect_true(all(diagnosis$simulations_df$inquiry_label == "a_label"))
+  expect_true(all(diagnosis$simulations_df$inquiry == "a_label"))
 
   # declare_inquiry(a = 2, label = "b") -->  Label is b
   inquiry_4 <- declare_inquiry(some_stat = mean(Y), label = "a_label")
@@ -41,7 +41,7 @@ test_that("inquiry labels work", {
   names(design)
   diagnosis <- diagnose_design(design, sims = 10, bootstrap_sims = FALSE)
   diagnosis$simulations_df
-  expect_true(all(diagnosis$simulations_df$inquiry_label == "some_stat"))
+  expect_true(all(diagnosis$simulations_df$inquiry == "some_stat"))
 })
 
 test_that("multiple inquiries", {
@@ -50,7 +50,7 @@ test_that("multiple inquiries", {
   design <- pop + inquiry
 
   diagnosis <- diagnose_design(design, sims = 5, bootstrap_sims = FALSE)
-  expect_true(all(diagnosis$diagnosands_df$inquiry_label %in% c("a1", "a2", "a3")))
+  expect_true(all(diagnosis$diagnosands_df$inquiry %in% c("a1", "a2", "a3")))
 })
 
 

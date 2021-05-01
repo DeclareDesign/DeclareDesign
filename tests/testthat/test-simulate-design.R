@@ -18,16 +18,16 @@ test_that("Simulate Design works", {
 
   sims <- simulate_design(my_design_1, my_design_2, sims = 5)
   expect_equal(nrow(sims), 10)
-  expect_true(all(sims$design_label %in% c("my_design_1", "my_design_2")))
+  expect_true(all(sims$design %in% c("my_design_1", "my_design_2")))
 
   sims <- simulate_design(list(my_design_1, my_design_2), sims = 5)
   expect_equal(nrow(sims), 10)
 
-  expect_true(all(sims$design_label %in% c("design_1", "design_2")))
+  expect_true(all(sims$design %in% c("design_1", "design_2")))
 
   sims <-
     simulate_design(a = my_design_1, b = my_design_2, sims = 5)
-  expect_true(all(sims$design_label %in% c("a", "b")))
+  expect_true(all(sims$design %in% c("a", "b")))
 })
 
 
@@ -67,7 +67,7 @@ test_that("expand and simulate", {
     )
   sims <- simulate_design(my_designs, sims = 5)
   expect_equal(nrow(sims), 20)
-  expect_true(all(sims$design_label %in% c("custom_prefix_1", "custom_prefix_2", "custom_prefix_3", "custom_prefix_4")))
+  expect_true(all(sims$design %in% c("custom_prefix_1", "custom_prefix_2", "custom_prefix_3", "custom_prefix_4")))
   expect_true(all(c("N", "tau") %in% colnames(sims)))
 })
 
@@ -104,7 +104,7 @@ test_that("designs with some estimators that don't have p.values return the p.va
     declare_estimator(Y ~ Z, inquiry = "ATE", label = "blah") +
     declare_estimator(handler = label_estimator(my_custom_estimator), inquiry = "ATE")
   
-  expect_equivalent(names(simulate_design(des, sims = 1)), c("design_label", "sim_ID", "inquiry_label", "estimand", "estimator_label", 
+  expect_equivalent(names(simulate_design(des, sims = 1)), c("design", "sim_ID", "inquiry", "estimand", "estimator", 
                                                         "term", "estimate", "std.error", "statistic", "p.value", "conf.low", 
                                                         "conf.high", "df", "outcome"))
   

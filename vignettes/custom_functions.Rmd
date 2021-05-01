@@ -32,7 +32,7 @@ custom_potential_outcomes <-
 
 # I: Inquiry
 custom_inquiry <- function(data, label) {
-  data.frame(inquiry_label = label,
+  data.frame(inquiry = label,
   inquiry = with(data, median(Y_Z_1 - Y_Z_0)))
 }
 

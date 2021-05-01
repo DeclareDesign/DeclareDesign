@@ -161,7 +161,7 @@ test_that("correct fan out", {
     simulate_design(declare_population(sleep) + e1 + e2 + e3, sims = c(30, 1, 5, 2))
   
   expect_equivalent(apply(out[,c(5:7)], 2, max), c(30, 150, 300))
-  expect_equivalent(tapply(out$estimand, INDEX = out$inquiry_label, max), c(30, 150, 300))
+  expect_equivalent(tapply(out$estimand, INDEX = out$inquiry, max), c(30, 150, 300))
   
 })
 

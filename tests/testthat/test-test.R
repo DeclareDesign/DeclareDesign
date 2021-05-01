@@ -26,6 +26,6 @@ test_that("declare_test works", {
   est <- draw_estimates(des)
   
   expect_equal(est, structure(list(p.value = c(7.6397665500938e-05, 7.6397665500938e-05
-  ), estimator_label = c(NA, "tidied")), row.names = c(NA, -2L), class = "data.frame"))
+  ), estimator = c(NA, "tidied")), row.names = c(NA, -2L), class = "data.frame"))
   
 })

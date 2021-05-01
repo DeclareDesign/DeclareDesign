@@ -22,7 +22,7 @@ compare_diagnoses(
 
 \item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to \code{FALSE} to turn off bootstrapping. Used for both designs. Must be greater or equal to 100.}
 
-\item{merge_by_estimator}{A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}.}
+\item{merge_by_estimator}{A logical. Whether to include \code{estimator} in the set of columns used for merging. Defaults to \code{TRUE}.}
 
 \item{alpha}{The significance level, 0.05 by default.}
 }
@@ -33,7 +33,7 @@ A list with a \code{data.frame} of compared diagnoses and both diagnoses.
 Diagnose and compare designs.
 }
 \details{
-The function \code{compare_diagnoses} runs a many-to-many merge matching by \code{inquiry_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
+The function \code{compare_diagnoses} runs a many-to-many merge matching by \code{inquiry} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
 }
 \examples{
 design_a <- declare_model(N  = 100, 

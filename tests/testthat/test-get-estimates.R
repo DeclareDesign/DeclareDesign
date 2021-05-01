@@ -17,7 +17,7 @@ test_that("get_estimates works", {
     declare_estimator(extra ~ group, model = lm_robust, label = "est2")
   
   expect_equal(draw_estimates(design),
-               structure(list(estimator_label = c("estimator", "est2"), term = c("group2", 
+               structure(list(estimator = c("estimator", "est2"), term = c("group2", 
                                                                                  "group2"), estimate = c(1.58, 1.58), std.error = c(0.849091017238762, 
                                                                                                                                     0.849091017238762), statistic = c(1.86081346748685, 1.86081346748685
                                                                                                                                     ), p.value = c(0.0791867142159381, 0.0791867142159381), conf.low = c(-0.203874032287598, 
@@ -26,7 +26,7 @@ test_that("get_estimates works", {
                                                                                                                                                                                                                                                                           -2L), class = "data.frame"))
   
   expect_equal(get_estimates(design, data = draw_data(design)),
-               structure(list(estimator_label = c("estimator", "est2"), term = c("group2", 
+               structure(list(estimator = c("estimator", "est2"), term = c("group2", 
                                                                                  "group2"), estimate = c(1.58, 1.58), std.error = c(0.849091017238762, 
                                                                                                                                     0.849091017238762), statistic = c(1.86081346748685, 1.86081346748685
                                                                                                                                     ), p.value = c(0.0791867142159381, 0.0791867142159381), conf.low = c(-0.203874032287598, 
@@ -35,7 +35,7 @@ test_that("get_estimates works", {
                                                                                                                                                                                                                                                                           -2L), class = "data.frame"))
   
   expect_equal(get_estimates(design, data = draw_data(design), start = 3),
-               structure(list(estimator_label = "est2", term = "group2", estimate = 1.58, 
+               structure(list(estimator = "est2", term = "group2", estimate = 1.58, 
                               std.error = 0.849091017238762, statistic = 1.86081346748685, 
                               p.value = 0.0791867142159381, conf.low = -0.203874032287598, 
                               conf.high = 3.3638740322876, df = 18, outcome = "extra"), row.names = c(NA, 
@@ -50,7 +50,7 @@ test_that("warning for wrong class estimator label", {
   
   custom_func <- function(data){
     data.frame(
-      est = 5, estimator_label = "test", stringsAsFactors = TRUE
+      est = 5, estimator = "test", stringsAsFactors = TRUE
     )
   }
   
@@ -62,7 +62,7 @@ test_that("warning for wrong class estimator label", {
   
   custom_func <- function(data){
     data.frame(
-      est = 5, inquiry_label = "test", stringsAsFactors = TRUE
+      est = 5, inquiry = "test", stringsAsFactors = TRUE
     )
   }
   

@@ -38,10 +38,10 @@ a function, I(), that accepts a data.frame as an argument and returns a data.fra
 Declares inquiries, or the inferential target of interest. Conceptually very close to "estimand" or "quantity of interest".
 }
 \details{
-For the default diagnosands, the return value of the handler should have \code{inquiry_label} and \code{estimand} columns.
+For the default diagnosands, the return value of the handler should have \code{inquiry} and \code{estimand} columns.
 
 If term is TRUE, the names of ... will be returned in a \code{term} column,
-and \code{inquiry_label} will contain the step label. This can be used as
+and \code{inquiry} will contain the step label. This can be used as
 an additional dimension for use in diagnosis.
 }
 \examples{

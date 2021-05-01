@@ -191,7 +191,7 @@ test_that("custom tidy method", {
   
   des <- pop + declare_estimator(model = model_function)
   
-  expect_equal(draw_estimates(des), structure(list(estimator_label = "estimator", term = structure(1L, .Label = "my-term", class = "factor"), 
+  expect_equal(draw_estimates(des), structure(list(estimator = "estimator", term = structure(1L, .Label = "my-term", class = "factor"), 
                                                    est = 1), row.names = c(NA, -1L), class = "data.frame"))
   
 })

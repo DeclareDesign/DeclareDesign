@@ -58,7 +58,7 @@ diagnosis
 ```
 
 ```{r, echo = FALSE}
-knitr::kable(get_diagnosands(diagnosis) %>% select(-term, -design_label), col.names = c("Inquiry", "Estimator", "Bias", "SE(Bias)", "Power", "SE(Power)", "n sims"), digits = 3)
+knitr::kable(get_diagnosands(diagnosis) %>% select(-term, -design), col.names = c("Inquiry", "Estimator", "Bias", "SE(Bias)", "Power", "SE(Power)", "n sims"), digits = 3)
 ```
 
 
