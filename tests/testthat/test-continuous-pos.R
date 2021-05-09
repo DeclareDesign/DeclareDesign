@@ -10,7 +10,7 @@ test_that("you can do continuous POs", {
     formula = Y ~ .25 * Z + .01 * age * Z, conditions = conditions
   )
 
-  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N = N, conditions = conditions))
+  my_assignment <- declare_assignment(Z = complete_ra(N = N, conditions = conditions))
 
   my_reveal <- declare_reveal()
 
@@ -53,7 +53,7 @@ test_that("Hooke's law", {
   )
 
   # 30 is magic
-  sampling <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = 30))
+  sampling <- declare_sampling(S = complete_rs(N, n = 30))
 
   # We don't have a 1g weight, only 5, 10, 25, 50, 100
   # randomly put a combo of those on the spring

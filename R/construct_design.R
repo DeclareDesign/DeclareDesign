@@ -20,8 +20,8 @@
 #'     potential_outcomes(Y ~ Z + U)
 #'   ) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_sampling(S = complete_rs(N, n = 250), legacy = FALSE) +
-#'   declare_assignment(Z = complete_ra(N, m = 25), legacy = FALSE) +
+#'   declare_sampling(S = complete_rs(N, n = 250)) +
+#'   declare_assignment(Z = complete_ra(N, m = 25)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
 #'   declare_estimator(Y ~ Z, inquiry = "ATE") 
 #' 

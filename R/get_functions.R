@@ -14,8 +14,8 @@
 #'     potential_outcomes(Y ~ Z + U)
 #'   ) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_sampling(S = complete_rs(N, n = 75), legacy = FALSE) +
-#'   declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) +
+#'   declare_sampling(S = complete_rs(N, n = 75)) +
+#'   declare_assignment(Z = complete_ra(N, m = 50)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
 #'   declare_estimator(Y ~ Z, inquiry = "ATE")
 #' 
@@ -99,15 +99,15 @@ get_function_internal <- function(design, data = NULL, start, end, pred, results
   
   ret <- run_design_internal.design(design_subset, current_df = data, results = results)[[what]]
   
-  if(what == "estimates_df" && !is.null(ret$estimator_label) && typeof(ret$estimator_label) != "character"){
+  if(what == "estimates_df" && !is.null(ret$estimator) && typeof(ret$estimator) != "character"){
     warning("The estimator label should be a character, but it is a ", 
-            class(ret$estimator_label), 
+            class(ret$estimator), 
             ". Try using handler = tidy_estimator(your_estimator_function)", call. = FALSE)
   }
   
-  if(what == "inquiries_df" && !is.null(ret$inquiry_label) && typeof(ret$inquiry_label) != "character"){
+  if(what == "inquiries_df" && !is.null(ret$inquiry) && typeof(ret$inquiry) != "character"){
     warning("The inquiry label should be a character, but it is a ", 
-            class(ret$inquiry_label), 
+            class(ret$inquiry), 
             ". You may need stringsAsFactors = FALSE in your inquiry function.", call. = FALSE)
   }
   

@@ -7,7 +7,7 @@
 \usage{
 declare_sampling(..., handler = sampling_handler, label = NULL)
 
-sampling_handler(data, ..., legacy = TRUE)
+sampling_handler(data, ..., legacy = FALSE)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -39,7 +39,7 @@ design <- declare_model(
 
 design + declare_sampling(
   S = complete_rs(N = N, n = 50), 
-  filter = S == 1, legacy = FALSE)
+  filter = S == 1)
 
 # equivalently, by default filter is set to S == 1
 design + declare_sampling(S = complete_rs(N = N, n = 50), 

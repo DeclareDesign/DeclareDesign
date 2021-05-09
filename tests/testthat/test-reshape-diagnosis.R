@@ -7,9 +7,9 @@ my_population <- declare_population(N = N, noise = rnorm(N))
 my_potential_outcomes <-
   declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-my_sampling <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = 250))
+my_sampling <- declare_sampling(S = complete_rs(N, n = 250))
 
-my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
+my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 
 my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
@@ -29,10 +29,10 @@ design <- my_population +
 test_that("reshape works", {
   dx <- diagnose_design(design, sims = 10, bootstrap_sims = 5)
   reshape_diagnosis(dx)
-  expect_error(reshape_diagnosis(dx, select = "mean_inquiry"),
+  expect_error(reshape_diagnosis(dx, select = "mean_estimand"),
     regexp = "select argument must only include elements from"
   )
-  reshape_diagnosis(dx, select = "Mean Inquiry")
+  reshape_diagnosis(dx, select = "Mean Estimand")
 })
 
 
@@ -44,8 +44,8 @@ test_that("capitalization of parameter names are retained", {
         Y_Z_0 = noise,
         Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)
       )
-    my_smp <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = n))
-    my_asgn <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = floor(n / 2)))
+    my_smp <- declare_sampling(S = complete_rs(N, n = n))
+    my_asgn <- declare_assignment(Z = complete_ra(N, m = floor(n / 2)))
     my_inquiry <- declare_inquiry(mean(Y_Z_1) - mean(Y_Z_0))
     my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
     my_design <- my_pop + my_pos + my_inquiry + my_smp + my_asgn + declare_reveal() + my_estimator
@@ -76,7 +76,7 @@ test_that("capitalization of parameter names are retained", {
 test_that("select", {
   dx <- diagnose_design(design, sims = 10, bootstrap_sims = 5)
   reshape <- reshape_diagnosis(dx, select = "Bias")
-  expect_equal(colnames(reshape), c("Design Label", "Inquiry Label", "Estimator Label", "Term", "N Sims", "Bias"))
+  expect_equal(colnames(reshape), c("Design", "Inquiry", "Estimator", "Term", "N Sims", "Bias"))
 })
 
 
@@ -92,7 +92,7 @@ test_that("designs with factors in diagnosands_df do not produce warnings", {
   diagnose_design(design, sims = 2, diagnosands = declare_diagnosands(first = estimate[1]))
   
   my_estimator <- function(data) {
-    data.frame(estimate = c("answer1", "answer2"), estimator_label = "my_label", stringsAsFactors = TRUE)
+    data.frame(estimate = c("answer1", "answer2"), estimator = "my_label", stringsAsFactors = TRUE)
   }
   
   design <- design <- my_population +
@@ -104,23 +104,27 @@ test_that("designs with factors in diagnosands_df do not produce warnings", {
 
 test_that("groups with factors", {
   
+  set.seed(1)
   design <- 
     declare_population(N = 100, u = rnorm(N)) + 
     declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
-    declare_assignment() + 
+    declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
     declare_reveal() + 
     declare_estimator(Y ~ Z, inquiry = "ATE_positive")
   
   diagnosis <- diagnose_design(design, 
                                make_groups = vars(significant = ifelse(p.value > 0.5, NA, p.value <= 0.05)),
-                               sims = 100
+                               sims = 5
   )
+  
+  expect_equal(diagnosis$diagnosands_df$significant, c(FALSE, NA))
   
   diagnosis <- diagnose_design(design, 
                                make_groups = vars(significant = factor(ifelse(p.value > 0.5, NA, p.value <= 0.05))),
-                               sims = 100
+                               sims = 5
   )
   
+  expect_equal(diagnosis$diagnosands_df$significant, structure(c(1L, NA), .Label = "FALSE", class = "factor"))
   
 })

@@ -5,7 +5,7 @@ my_population <- declare_population(N = 50, noise = rnorm(N))
 my_potential_outcomes <-
   declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
+my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 
 pate <- declare_inquiry(pate = mean(Y_Z_1 - Y_Z_0))
 sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))
@@ -37,23 +37,23 @@ test_that("compare_designs works", {
   
   # designs not in list, no names, names are imputed
   comparison <- diagnose_design(my_design_1, my_design_2, sims = 2, bootstrap_sims = FALSE)
-  expect_equal(as.character(comparison$diagnosands$design_label), c("my_design_1", "my_design_2"))
+  expect_equal(as.character(comparison$diagnosands$design), c("my_design_1", "my_design_2"))
   
   # designs in list, no names, names are imputed
   comparison <- diagnose_design(list(my_design_1, my_design_2), sims = 2, bootstrap_sims = FALSE)
-  expect_equal(as.character(comparison$diagnosands$design_label), c("design_1", "design_2"))
+  expect_equal(as.character(comparison$diagnosands$design), c("design_1", "design_2"))
   
   # designs not in list, all names, names used
   comparison <- diagnose_design(d1 = my_design_1, d2 = my_design_2, sims = 2, bootstrap_sims = FALSE)
-  expect_equal(as.character(comparison$diagnosands$design_label), c("d1", "d2"))
+  expect_equal(as.character(comparison$diagnosands$design), c("d1", "d2"))
   
   # designs in list, all names, names used
   comparison <- diagnose_design(list(d1 = my_design_1, d2 = my_design_2), sims = 2, bootstrap_sims = FALSE)
-  expect_equal(as.character(comparison$diagnosands$design_label), c("d1", "d2"))
+  expect_equal(as.character(comparison$diagnosands$design), c("d1", "d2"))
   
   # designs not in list, some names, available names used
   comparison <- diagnose_design(my_design_1, a_design_2 = my_design_2, sims = 2, bootstrap_sims = FALSE)
-  expect_true(all(as.character(comparison$diagnosands$design_label) %in% c("my_design_1", "a_design_2")))
+  expect_true(all(as.character(comparison$diagnosands$design) %in% c("my_design_1", "a_design_2")))
   
   # designs not in list, duplicated names used, error
   expect_error(comparison <- diagnose_design(d1 = my_design_1, d1 = my_design_2, sims = 2, bootstrap_sims = FALSE))
@@ -68,7 +68,7 @@ my_population <- declare_population(N = 50, noise = rnorm(N))
 my_potential_outcomes <-
   declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
+my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 
 pate <- declare_inquiry(pate = mean(Y_Z_1 - Y_Z_0))
 sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))

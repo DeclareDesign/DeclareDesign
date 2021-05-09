@@ -36,7 +36,7 @@ Set the citation of a design
 
 design <-
 declare_model(data = sleep) +
-  declare_sampling(S = complete_rs(N, n = 10), legacy = FALSE)
+  declare_sampling(S = complete_rs(N, n = 10))
 
 design <-
   set_citation(design,

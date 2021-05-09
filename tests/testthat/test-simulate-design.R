@@ -3,7 +3,7 @@ context("Simulate Design")
 my_population <- declare_population(N = 50, noise = rnorm(N))
 my_potential_outcomes <-
   declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
-my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
+my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 my_reveal <- declare_reveal()
@@ -18,16 +18,16 @@ test_that("Simulate Design works", {
 
   sims <- simulate_design(my_design_1, my_design_2, sims = 5)
   expect_equal(nrow(sims), 10)
-  expect_true(all(sims$design_label %in% c("my_design_1", "my_design_2")))
+  expect_true(all(sims$design %in% c("my_design_1", "my_design_2")))
 
   sims <- simulate_design(list(my_design_1, my_design_2), sims = 5)
   expect_equal(nrow(sims), 10)
 
-  expect_true(all(sims$design_label %in% c("design_1", "design_2")))
+  expect_true(all(sims$design %in% c("design_1", "design_2")))
 
   sims <-
     simulate_design(a = my_design_1, b = my_design_2, sims = 5)
-  expect_true(all(sims$design_label %in% c("a", "b")))
+  expect_true(all(sims$design %in% c("a", "b")))
 })
 
 
@@ -51,7 +51,7 @@ my_designer <- function(N, tau) {
   pop <- declare_population(N = N)
   pos <-
     declare_potential_outcomes(Y_Z_0 = rnorm(N), Y_Z_1 = Y_Z_0 + tau)
-  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = floor(N / 2)))
+  my_assignment <- declare_assignment(Z = complete_ra(N, m = floor(N / 2)))
   my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
   my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
   my_reveal <- declare_reveal()
@@ -67,7 +67,7 @@ test_that("expand and simulate", {
     )
   sims <- simulate_design(my_designs, sims = 5)
   expect_equal(nrow(sims), 20)
-  expect_true(all(sims$design_label %in% c("custom_prefix_1", "custom_prefix_2", "custom_prefix_3", "custom_prefix_4")))
+  expect_true(all(sims$design %in% c("custom_prefix_1", "custom_prefix_2", "custom_prefix_3", "custom_prefix_4")))
   expect_true(all(c("N", "tau") %in% colnames(sims)))
 })
 
@@ -99,12 +99,12 @@ test_that("designs with some estimators that don't have p.values return the p.va
   des <- declare_population(N = 100) +
     declare_potential_outcomes(Y ~ .25 * Z + rnorm(N)) +
     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-    declare_assignment(legacy = FALSE, Z = complete_ra(N, prob = 0.5)) +
+    declare_assignment(Z = complete_ra(N, prob = 0.5)) +
     declare_reveal(Y, Z) +
     declare_estimator(Y ~ Z, inquiry = "ATE", label = "blah") +
     declare_estimator(handler = label_estimator(my_custom_estimator), inquiry = "ATE")
   
-  expect_equivalent(names(simulate_design(des, sims = 1)), c("design_label", "sim_ID", "inquiry_label", "estimand", "estimator_label", 
+  expect_equivalent(names(simulate_design(des, sims = 1)), c("design", "sim_ID", "inquiry", "estimand", "estimator", 
                                                         "term", "estimate", "std.error", "statistic", "p.value", "conf.low", 
                                                         "conf.high", "df", "outcome"))
   

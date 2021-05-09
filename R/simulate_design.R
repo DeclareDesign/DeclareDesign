@@ -19,7 +19,7 @@
 #'     Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
 #'   )
 #'
-#' my_assignment <- declare_assignment(Z = complete_ra(N), legacy = FALSE)
+#' my_assignment <- declare_assignment(Z = complete_ra(N))
 #'
 #' my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 #'
@@ -67,7 +67,7 @@ simulate_design <- function(..., sims = 500) {
     SIMPLIFY = FALSE
   )
   
-  simulations_list <- Map(cbind, design_label = names(simulations_list), simulations_list, stringsAsFactors = FALSE)
+  simulations_list <- Map(cbind, design = names(simulations_list), simulations_list, stringsAsFactors = FALSE)
   
   # Cleanup
   simulations_df <- rbind_disjoint(simulations_list)
@@ -77,7 +77,7 @@ simulate_design <- function(..., sims = 500) {
   
   parameters_df_list <- lapply(designs, function(x) attr(x, "parameters"))
   parameters_df_list <- lapply(seq_along(parameters_df_list), function(i) {
-    out <- data.frame(design_label = names(parameters_df_list[i]))
+    out <- data.frame(design = names(parameters_df_list[i]))
     if (!is.null(parameters_df_list[[i]])) {
       out <- data.frame(out, parameters_df_list[[i]])
     }
@@ -86,7 +86,7 @@ simulate_design <- function(..., sims = 500) {
   parameters_df <- rbind_disjoint(parameters_df_list)
   parameters_df <- data.frame(lapply(parameters_df, type_convert), stringsAsFactors = FALSE)
   
-  simulations_df <- merge(simulations_df, parameters_df, by = "design_label", sort = FALSE, all = TRUE)
+  simulations_df <- merge(simulations_df, parameters_df, by = "design", sort = FALSE, all = TRUE)
   
   simulations_df <- simulations_df[, reorder_columns(parameters_df, simulations_df), drop = FALSE]
   
@@ -160,12 +160,12 @@ simulate_single_design <- function(design, sims, low_simulations_warning = TRUE)
     simulations_df <- estimates_df
   } else if (is_empty(estimates_df)) {
     simulations_df <- inquiries_df
-  } else if (all(inquiries_df$inquiry_label %in% estimates_df$inquiry_label) &
-             all(estimates_df$inquiry_label %in% inquiries_df$inquiry_label)){
+  } else if (all(inquiries_df$inquiry %in% estimates_df$inquiry) &
+             all(estimates_df$inquiry %in% inquiries_df$inquiry)){
     
     
-    inquiries_df_split <- split(x = inquiries_df, f = inquiries_df$inquiry_label)
-    estimates_df_split <- split(x = estimates_df, f = estimates_df$inquiry_label)
+    inquiries_df_split <- split(x = inquiries_df, f = inquiries_df$inquiry)
+    estimates_df_split <- split(x = estimates_df, f = estimates_df$inquiry)
     
     non_missing_columns <- function(dat){
       nonmissing <- apply(dat, 2, FUN = function(x) any(!is.na(x)))

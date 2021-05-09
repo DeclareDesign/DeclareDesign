@@ -7,7 +7,7 @@ test_that("multiple design draw_estimates", {
     my_potential_outcomes <-
       declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
     
-    my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
+    my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
     
     my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
     
@@ -31,7 +31,7 @@ test_that("multiple design draw_estimates", {
   my_potential_outcomes <-
     declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
   
-  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
+  my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
   
   my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
   
@@ -46,7 +46,7 @@ test_that("multiple design draw_estimates", {
     my_reveal +
     my_estimator
   
-  my_assignment_2 <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 50))
+  my_assignment_2 <- declare_assignment(Z = complete_ra(N, m = 50))
   
   design_2 <- replace_step(design_1, my_assignment, my_assignment_2)
   
@@ -64,7 +64,7 @@ test_that("multiple design draw_estimates", {
   
   draw_estimates(design_2)
   
-  expect_equal(draw_estimates(design_1, design_2)$design_label,
+  expect_equal(draw_estimates(design_1, design_2)$design,
                c("design_1", "design_2"))
   
   draw_estimates(my_designs)
@@ -97,7 +97,7 @@ test_that("glance works", {
   expect_equal(est,
                structure(
                  list(
-                   estimator_label = c("formula call", "bare function",
+                   estimator = c("formula call", "bare function",
                                        "string"),
                    r.squared = c(0.161332850791025, 0.161332850791025,
                                  0.161332850791025),
@@ -126,7 +126,7 @@ test_that("tidy works", {
   est <- draw_estimates(des)
   expect_equal(est, structure(
     list(
-      estimator_label = "formula",
+      estimator = "formula",
       term = "group2",
       estimate = 1.58,
       std.error = 0.849091017238762,
@@ -166,7 +166,7 @@ test_that("tidy works", {
   est <- draw_estimates(des)
   expect_equal(est, structure(
     list(
-      estimator_label = c("formula", "bare", "string"),
+      estimator = c("formula", "bare", "string"),
       term = c("group2", "group2", "group2"),
       estimate = c(1.58,
                    1.58, 1.58),
@@ -215,7 +215,7 @@ test_that("tidy works", {
   est <- draw_estimates(des)
   expect_equal(est, structure(
     list(
-      estimator_label = c("formula1", "bare", "string"),
+      estimator = c("formula1", "bare", "string"),
       term = c("group2", "group2", "group2"),
       estimate = c(1.58,
                    1.58, 1.58),
@@ -264,7 +264,7 @@ test_that("tidy works", {
   est <- draw_estimates(des)
   expect_equal(est, structure(
     list(
-      estimator_label = c("formula2", "formula2", "bare",
+      estimator = c("formula2", "formula2", "bare",
                           "bare", "string", "string"),
       term = c(
         "(Intercept)",
@@ -350,7 +350,7 @@ test_that("tidy works", {
   est <- draw_estimates(des)
   expect_equal(est, structure(
     list(
-      estimator_label = c("formula2", "bare", "string"),
+      estimator = c("formula2", "bare", "string"),
       term = c("group2", "group2", "group2"),
       estimate = c(1.58,
                    1.58, 1.58),
@@ -408,7 +408,7 @@ test_that("tidy works", {
   
   expect_equal(est, structure(
     list(
-      estimator_label = c("formula2", "bare", "string"),
+      estimator = c("formula2", "bare", "string"),
       term = c("group2", "group2", "group2"),
       estimate = c(1.58,
                    1.58, 1.58),

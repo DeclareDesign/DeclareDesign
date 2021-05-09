@@ -21,7 +21,7 @@
 #' 
 #' design + declare_sampling(
 #'   S = complete_rs(N = N, n = 50), 
-#'   filter = S == 1, legacy = FALSE)
+#'   filter = S == 1)
 #'
 #' # equivalently, by default filter is set to S == 1
 #' design + declare_sampling(S = complete_rs(N = N, n = 50), 
@@ -38,7 +38,7 @@ declare_sampling <- make_declarations(sampling_handler, "sampling")
 #' @importFrom rlang quos !!! call_modify eval_tidy quo
 #' @importFrom randomizr draw_rs obtain_inclusion_probabilities
 #' @rdname declare_sampling
-sampling_handler <- function(data, ..., legacy = TRUE) {
+sampling_handler <- function(data, ..., legacy = FALSE) {
   
   options <- quos(...)
   
@@ -104,7 +104,7 @@ sampling_handler_internal_randomizr <- function(data, ..., sampling_variable = "
 validation_fn(sampling_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
   
-  if(is.null(eval_tidy(dots[["legacy"]])) || eval_tidy(dots[["legacy"]]) == TRUE) {
+  if(!is.null(eval_tidy(dots[["legacy"]])) && eval_tidy(dots[["legacy"]]) == TRUE) {
     
     if ("sampling_variable" %in% names(dots) &&
         inherits(f_rhs(dots[["sampling_variable"]]), "NULL")) {
@@ -184,7 +184,9 @@ validation_fn(sampling_handler) <- function(ret, dots, label) {
             collapse = ", "),
           "), filter = ", sampling_variable, " == 1)")
       
-      stop(paste0("You appear to have used legacy declare_sampling() syntax. Consider:\n\n", suggested_call, "\n\nAlternatively, you can set legacy = TRUE to restore the previous functionality."), call. = FALSE)
+      stop(paste0("You appear to have used legacy declare_sampling() syntax. Consider:\n\n", suggested_call, "\n\nAlternatively, you can set legacy = TRUE to restore the previous functionality.\n\nIf you received this message in error, please ensure that you do not name variables 'strata', 'clusters', 'n', 'n_unit', 'prob', 'prob_unit', 'strata_n', 'strata_prob', or 'simple'."), call. = FALSE)
+    } else if (length(names(dots)[!names(dots) %in% "data"]) == 0) { 
+      stop(paste0("You appear to have used legacy declare_sampling() syntax. Consider:\n\n", "declare_sampling(Z = complete_rs(N = N))", "\n\nAlternatively, you can set legacy = TRUE to restore the previous functionality."), call. = FALSE)
     }
     
   }

@@ -6,7 +6,7 @@
 #' @param design2 A design or a diagnosis.
 #' @param sims The number of simulations, defaulting to 1000. \code{sims} may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.
 #' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to \code{FALSE} to turn off bootstrapping. Used for both designs. Must be greater or equal to 100.
-#' @param merge_by_estimator A logical. Whether to include \code{estimator_label} in the set of columns used for merging. Defaults to \code{TRUE}.
+#' @param merge_by_estimator A logical. Whether to include \code{estimator} in the set of columns used for merging. Defaults to \code{TRUE}.
 #' @param alpha The significance level, 0.05 by default.
 #'
 #' @return A list with a \code{data.frame} of compared diagnoses and both diagnoses.
@@ -15,21 +15,21 @@
 #'
 #' @details
 #'
-#' The function \code{compare_diagnoses} runs a many-to-many merge matching by \code{inquiry_label} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator_label} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
+#' The function \code{compare_diagnoses} runs a many-to-many merge matching by \code{inquiry} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
 #'
 #' @examples
 #' design_a <- declare_model(N  = 100, 
 #'                           U = rnorm(N),
 #'                           Y_Z_0 = U,
 #'                           Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)) +
-#' declare_assignment(Z = complete_ra(N, prob = 0.5), legacy = FALSE) +
+#' declare_assignment(Z = complete_ra(N, prob = 0.5)) +
 #' declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #' declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
 #' declare_estimator(Y ~ Z, inquiry = "ATE")
 #'
 #' design_b <- replace_step(
 #'   design_a, step = "assignment", 
-#'   declare_assignment(Z = complete_ra(N, prob = 0.3), legacy = FALSE) )
+#'   declare_assignment(Z = complete_ra(N, prob = 0.3)) )
 #'
 #' comparison <- compare_diagnoses(design_a, design_b, sims = 40)
 #'
@@ -76,38 +76,38 @@ compare_diagnoses_internal <-
     diagnosands <- intersect(diagnosis1$diagnosand_names, diagnosis2$diagnosand_names)
     
     # Get merge_set 
-    # merge_by_set, used to merge diagnosands_df, must at least contain inquiry_label
-    # At its largest possible cardinality, merge_by_set contains c('inquiry_label', 'estimator_label', 'term')
+    # merge_by_set, used to merge diagnosands_df, must at least contain inquiry
+    # At its largest possible cardinality, merge_by_set contains c('inquiry', 'estimator', 'term')
     group_by_set1 <- diagnosis1$group_by_set
     group_by_set2 <- diagnosis2$group_by_set
     
     inquiry_in_set  <-
-      "inquiry_label" %in% group_by_set1 &
-      "inquiry_label" %in% group_by_set2
+      "inquiry" %in% group_by_set1 &
+      "inquiry" %in% group_by_set2
     
     estimator_in_set <-
-      "estimator_label" %in% group_by_set1 &
-      "estimator_label" %in% group_by_set2
+      "estimator" %in% group_by_set1 &
+      "estimator" %in% group_by_set2
     
     merge_by_set <- NULL
     
-    # Stop if neither inquiry_label nor estimator_label are included in both diagnoses
+    # Stop if neither inquiry nor estimator are included in both diagnoses
     if ((inquiry_in_set + estimator_in_set) < 1) {
-      stop("Both diagnosands_df must contain at least inquiry_label or estimator_label")
+      stop("Both diagnosands_df must contain at least inquiry or estimator")
     }
     
     # Start adding names to the set of columns used for merging
     if (inquiry_in_set) {
-      merge_by_set <- c("inquiry_label")
+      merge_by_set <- c("inquiry")
     }
     
     if (merge_by_estimator) {
       if (!estimator_in_set) {
         warning(
-          "Estimator label not used for merging. At least one of the designs doesn't contain estimator_label."
+          "Estimator label not used for merging. At least one of the designs doesn't contain estimator."
         )
       } else {
-        merge_by_set <- c(merge_by_set, "estimator_label")
+        merge_by_set <- c(merge_by_set, "estimator")
       }
     }
     
@@ -115,8 +115,8 @@ compare_diagnoses_internal <-
       merge_by_set <- c(merge_by_set, "term")
     }
     
-    if (estimator_in_set & (!"estimator_label" %in% merge_by_set)) {
-      group_by_set <- c(merge_by_set, "estimator_label")
+    if (estimator_in_set & (!"estimator" %in% merge_by_set)) {
+      group_by_set <- c(merge_by_set, "estimator")
     } else{
       group_by_set <- merge_by_set
     }
@@ -142,14 +142,14 @@ compare_diagnoses_internal <-
     suffix <- c("_1", "_2")
     keepcols <-
       grepl("[[:digit:]]+$", c_names) |
-      grepl("label+$", c_names) | grepl("term", c_names) | filter_se
+      grepl("inquiry|design|estimator", c_names) | grepl("term", c_names) | filter_se
     comparison_df <- comparison_df[, keepcols, drop = FALSE]
     
-    # Divide comparison_df into groups defined by set= c(inquiry_label, estimator_label, term)
+    # Divide comparison_df into groups defined by set= c(inquiry, estimator, term)
     c_names <- colnames(comparison_df)
     set <-
-      grepl("^inquiry_label", c_names) |
-      grepl("^estimator_label", c_names) | grepl("^term", c_names)
+      grepl("^inquiry", c_names) |
+      grepl("^estimator", c_names) | grepl("^term", c_names)
     set <- unique(comparison_df[, c_names[set], drop = FALSE])
     comparison_list <-
       split(comparison_df, lapply(set, addNA), drop = TRUE)
@@ -165,7 +165,7 @@ compare_diagnoses_internal <-
     bootstrap_df2 <- split_bootstrap(diagnosis2, group_by_set)
     
     # Function to create output.
-    # For each combination of inquiry_label, estimator_label and term in comparison_list
+    # For each combination of inquiry, estimator and term in comparison_list
     # take the mean and the se of each estimated diagnosand "d" from comparison_list
     # and unite with
     # the mean difference computed as mean(bootstrap_df2[,"d"] - bootstrap_df1[, "d"]
@@ -184,9 +184,9 @@ compare_diagnoses_internal <-
       comp <- comparison[[comparison_label]]
       c_names <- colnames(comp)
       set <-
-        grepl("^inquiry_label", c_names) |
-        grepl("^estimator_label", c_names) | grepl("^term", c_names)
-      select_cols <- c_names[grepl("^design_label", c_names)]
+        grepl("^inquiry", c_names) |
+        grepl("^estimator", c_names) | grepl("^term", c_names)
+      select_cols <- c_names[grepl("^design", c_names)]
       select_cols <- c(select_cols, c_names[set])
       identifiers <- comp[, select_cols, drop = FALSE]
       
@@ -233,10 +233,10 @@ compare_diagnoses_internal <-
       
     } else {
       
-      # Bit needed to do many-to-many comparisons of estimators keeping e.g., inquiry_label and term fixed (assigned to c_labels)
+      # Bit needed to do many-to-many comparisons of estimators keeping e.g., inquiry and term fixed (assigned to c_labels)
       # extract labels that were used for merging
       # find the levels in the split bootstraps_df that start with each of those labels
-      # combine all possible levels that share the same e.g inquiry_label and term  (assigned to c_labels)
+      # combine all possible levels that share the same e.g inquiry and term  (assigned to c_labels)
       k <- length(merge_by_set)
       c_labels <- unique(lapply(comparison_labels, function(x) {
         x <- unlist(strsplit(x, "." , fixed = TRUE))
@@ -309,8 +309,8 @@ print.summary.compared_diagnoses <- function(x, conf.int = FALSE, ...) {
   alpha <- attr(x, "alpha")
   column_names <- colnames(compared_diagnoses_df)
   identifiers <-
-    column_names %in% c("inquiry_label", "term") |
-    grepl("^estimator_label", column_names)
+    column_names %in% c("inquiry", "term") |
+    grepl("^estimator", column_names)
   identifiers_columns <- column_names[identifiers]
   conf.low  <- compared_diagnoses_df$conf.low
   conf.high <- compared_diagnoses_df$conf.high

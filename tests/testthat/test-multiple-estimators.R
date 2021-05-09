@@ -43,7 +43,7 @@ test_that("Two estimators, Two inquiries (crossed)", {
     declare_inquiry(ATE = mean(extra1_Z_1) - mean(extra1_Z_0)) +
     declare_inquiry(ATT = mean(extra1_Z_1) - mean(extra1_Z_0), subset = group == 2) +
 
-    declare_assignment(legacy = FALSE, Z = complete_ra(N, prob = 0.5)) +
+    declare_assignment(Z = complete_ra(N, prob = 0.5)) +
     declare_reveal(outcome_variables = extra1, assignment_variables = Z) +
 
     declare_estimator(extra1 ~ Z, model = difference_in_means, inquiry = c("ATE", "ATT"), label = "DIM") +

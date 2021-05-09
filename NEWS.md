@@ -1,3 +1,8 @@
+# DeclareDesign 0.27.0
+
+* To simplify output of diagnoses, we changed the names of the variables from design_label to design, inquiry_label to inquiry, and estimator_label to estimator.
+* declare_assignment() and declare_sampling() have the default values for legacy set to FALSE. You can still use the legacy versions of these functions by manually setting legacy = TRUE for some time, but this functionality will later be removed. 
+
 # DeclareDesign 0.26.0
 
 * Rapid development phase is beginning to prepare for DeclareDesign 1.0. 

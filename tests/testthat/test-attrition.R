@@ -10,7 +10,7 @@ my_potential_outcomes_Y <- declare_potential_outcomes(
   formula = Y ~ .25 * Z + .01 * age * Z
 )
 
-my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
+my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 
 test_that("attrition / formula PO", {
   my_potential_outcomes_attrition <- declare_potential_outcomes(

@@ -8,7 +8,7 @@ my_potential_outcomes <-
     Y_Z_0 = draw_binary(latent = noise, link = "probit"),
     Y_Z_1 = draw_binary(latent = noise + 2, link = "probit")
   )
-my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, prob = 0.5))
+my_assignment <- declare_assignment(Z = complete_ra(N, prob = 0.5))
 my_reveal <- declare_reveal()
 my_design <- my_population +
   my_potential_outcomes +
@@ -191,7 +191,7 @@ test_that("custom tidy method", {
   
   des <- pop + declare_estimator(model = model_function)
   
-  expect_equal(draw_estimates(des), structure(list(estimator_label = "estimator", term = structure(1L, .Label = "my-term", class = "factor"), 
+  expect_equal(draw_estimates(des), structure(list(estimator = "estimator", term = structure(1L, .Label = "my-term", class = "factor"), 
                                                    est = 1), row.names = c(NA, -1L), class = "data.frame"))
   
 })

@@ -75,7 +75,8 @@ You could write your own function to do that but you can also use one of the `de
 Here is an example of a `declare_assignment` step.
 
 ```{r}
-simple_random_assignment_step <- declare_assignment(prob = 0.6)
+simple_random_assignment_step <- 
+  declare_assignment(Z = complete_ra(N, prob = 0.6))
 ```
 
 The big idea here is that the object we created, `simple_random_assignment_step`, is not a particular assignment, it is a *function* that conducts assignment when called. You can run the function on data:
@@ -152,34 +153,32 @@ In this section, we walk through how to declare each step of a research design u
 
 ### Model
 
-The model defines the structure of the world, both its size and background characteristics as well as how interventions in the world determine outcomes. In `DeclareDesign`, we split the model into two functions: `declare_population` and `declare_potential_outcomes`.
+The model defines the structure of the world, both its size and background characteristics as well as how interventions in the world determine outcomes.
 
-#### Population
-
-The population defines the number of units in the population, any multilevel structure to the data, and its background characteristics. We can define the population in several ways. In some cases, you may start a design with data on the population. When that happens, we do not need to simulate it. We can simply declare the data as our population:
+The model defines the number of units in the population, any multilevel structure to the data, and its background characteristics. We can define the population in several ways. In some cases, you may start a design with data on the population. When that happens, we do not need to simulate it. We can simply declare the data as our population:
 
 ```{r, eval = FALSE}
-declare_population(data = voter_file)
+declare_model(data = voter_file)
 ```
 ```{r voterfilepopulation, echo = FALSE}
-declare_population(data = voter_file)() %>% head(5) %>% kable(digits = 3, caption = "Draw from a fixed population", booktabs = TRUE) %>% 
+declare_model(data = voter_file)() %>% head(5) %>% kable(digits = 3, caption = "Draw from a fixed population", booktabs = TRUE) %>% 
   kable_styling()
 ```
 
-When we do not have complete data on the population, we simulate it. Relying on the data simulation functions from our `fabricatr` package, `declare_population` asks about the size and variables of the population. For instance, if we want a function that generates a dataset with 100 units and a random variable `U` we write:
+When we do not have complete data on the population, we simulate it. Relying on the data simulation functions from our `fabricatr` package, `declare_model` asks about the size and variables of the population. For instance, if we want a function that generates a dataset with 100 units and a random variable `U` we write:
 
 ```{r, eval = FALSE}
-declare_population(N = 100, U = rnorm(N))
+declare_model(N = 100, U = rnorm(N))
 ```
 
 When we run this population function, we will get a different 100-unit dataset each time, as shown here.
 
 ```{r fivepopulationdraws, echo = FALSE}
-tab1 <- declare_population(N = 100, U = rnorm(N))() %>% head(5) 
-tab2 <- declare_population(N = 100, U = rnorm(N))() %>% head(5) 
-tab3 <- declare_population(N = 100, U = rnorm(N))() %>% head(5)
-tab4 <- declare_population(N = 100, U = rnorm(N))() %>% head(5)
-tab5 <- declare_population(N = 100, U = rnorm(N))() %>% head(5)
+tab1 <- declare_model(N = 100, U = rnorm(N))() %>% head(5) 
+tab2 <- declare_model(N = 100, U = rnorm(N))() %>% head(5) 
+tab3 <- declare_model(N = 100, U = rnorm(N))() %>% head(5)
+tab4 <- declare_model(N = 100, U = rnorm(N))() %>% head(5)
+tab5 <- declare_model(N = 100, U = rnorm(N))() %>% head(5)
 
 gt_df <- 
   bind_cols(tab1, tab2, tab3, tab4, tab5) %>%
@@ -200,7 +199,7 @@ The `fabricatr` package can simulate many different types of data, including var
 As an example of a two-level hierarchical data structure, here is a declaration for 100 households with a random number of individuals within each household. This two-level structure could be declared as:
 
 ```{r, eval = FALSE}
-declare_population(
+declare_model(
   households = add_level(
     N = 100,
     individuals_per_hh = sample(1:6, N, replace = TRUE)
@@ -215,12 +214,12 @@ declare_population(
 As always, you can exit our built-in way of doing things and bring in your own code. This is useful for complex designs, or when you have already written code for your design and you want to use it directly. Here is an example of a custom population declaration:
 
 ```{r, eval = FALSE}
-complex_population_function <- function(data, N_units) {
+complex_model_function <- function(data, N_units) {
   data.frame(U = rnorm(N_units))
 }
 
-declare_population(
-  handler = complex_population_function, N_units = 100
+declare_model(
+  handler = complex_model_function, N_units = 100
 )
 ```
 
@@ -229,23 +228,29 @@ declare_population(
 Defining potential outcomes is as easy as a single expression per potential outcome. Potential outcomes may depend on background characteristics, other potential outcomes, or other R functions.
 
 ```{r, eval = FALSE}
-declare_potential_outcomes(
+declare_model(
   Y_Z_0 = U, 
   Y_Z_1 = Y_Z_0 + 0.25)
 ```
 
 ```{r, eval = FALSE}
 design <- 
-  declare_population(N = 100, U = rnorm(N)) +
-  declare_potential_outcomes(Y ~ 0.25 * Z + U)
+  declare_model(
+    N = 100,
+    U = rnorm(N),
+    potential_outcomes(Y ~ 0.25 * Z + U)
+  ) + NULL
 
 draw_data(design)
 ```
 
 ```{r potentialoutcomesdraw, echo = FALSE}
 design <- 
-  declare_population(N = 100, U = rnorm(N)) +
-  declare_potential_outcomes(Y ~ 0.25 * Z + U)
+  declare_model(
+    N = 100,
+    U = rnorm(N),
+    potential_outcomes(Y ~ 0.25 * Z + U)
+  ) + NULL
 
 draw_data(design) %>% 
   head(5) %>% 
@@ -253,20 +258,20 @@ draw_data(design) %>%
   kable_styling()
 ```
 
-The `declare_potential_outcomes` function also includes an alternative interface for defining potential outcomes that uses R's formula syntax. The formula syntax lets you specify "regression-like" outcome equations. One downside is that it mildly obscures how the names of the eventual potential outcomes columns are named. We build the names of the potential outcomes columns the outcome name (here `Y` on the left-hand side of the formula) and from the `assignment_variables` argument (here `Z`). 
+The `potential_outcomes` formula syntax lets you specify "regression-like" outcome equations. One downside is that it mildly obscures how the names of the eventual potential outcomes columns are named. We build the names of the potential outcomes columns the outcome name (here `Y` on the left-hand side of the formula) and from the `assignment_variables` argument (here `Z`). 
 
 ```{r, eval = FALSE}
-declare_potential_outcomes(Y ~ 0.25 * Z + U, assignment_variables = Z)
+declare_model(N = 100, potential_outcomes(Y ~ 0.25 * Z + U, assignment_variables = Z))
 ```
 
 Either way of creating potential outcomes works; one may be easier or harder to code up in a given research design setting.
 
 ### Inquiry
 
-To define your inquiry, declare your estimand. Estimands are typically summaries of the data produced in `declare_population` and `declare_potential_outcomes`. Here we define the average treatment effect as follows:
+To define your inquiry, declare your estimand. Estimands are typically summaries of the data produced in `declare_model`. Here we define the average treatment effect as follows:
 
 ```{r, eval = FALSE}
-declare_estimand(PATE = mean(Y_Z_1 - Y_Z_0))
+declare_inquiry(PATE = mean(Y_Z_1 - Y_Z_0))
 ```
 
 Notice that we defined the PATE (the *population* average treatment effect), but said nothing special related to the population -- it looks like we just defined the average treatment effect. This is because *order matters*. If we want to define a SATE (the *sample* average treatment effect), we would have to do so after sampling has occurred. We will see how to do this in a moment.
@@ -280,17 +285,20 @@ The data strategy constitutes one or more steps representing interventions the r
 The sampling step relies on the `randomizr` package to conduct random sampling. Here we define a procedure for drawing a 50-unit sample from the population:
 
 ```{r, eval = FALSE}
-declare_sampling(n = 50)
+declare_sampling(S = complete_rs(N, n = 50))
 ```
 
 When we draw data from our simple design at this point, it will have fewer rows: it will have shrunk from 100 units in the population to a data frame of 50 units representing the sample. The new data frame also includes a variable indicating the probability of being included in the sample. In this case, every unit in the population had an equal inclusion probability of 0.5.
 
 ```{r sampleddatadraw, echo = FALSE}
 simple_design <- 
-  declare_population(N = 100, U = rnorm(N)) +
-  declare_potential_outcomes(Y ~ 0.25 * Z + U) +
-  declare_estimand(PATE = mean(Y_Z_1 - Y_Z_0)) +
-  declare_sampling(n = 50) 
+  declare_model(
+    N = 100, 
+    U = rnorm(N),
+    potential_outcomes(Y ~ 0.25 * Z + U)
+  ) +
+  declare_inquiry(PATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_sampling(S = complete_rs(N, n = 50))
 
 draw_data(simple_design) %>% head(5) %>% kable(digits = 3, caption = "Sampled data.", booktabs = TRUE)%>% 
   kable_styling()
@@ -303,25 +311,28 @@ Sampling could also be non-random, which could be accomplished by using a custom
 The default handler for `declare_assignment` also relies on the `randomizr` package for random assignment. Here, we define an assignment procedure that allocates subjects to treatment with probability 0.5. One subtlety is that by default, `declare_assignment` conducts complete random assignment (exactly $m$ of $N$ units assigned to treatment, where $m$ = `prob` * $N$). 
 
 ```{r, eval = FALSE}
-declare_assignment(prob = 0.5)
+declare_assignment(Z = complete_ra(N, prob = 0.5))
 ```
 
-After treatments are assigned, some *potential* outcomes are *revealed*. Treated units reveal their treated potential outcomes and untreated units reveal their untreated potential outcomes. The `reveal_outcomes` function performs this switching operation.
+After treatments are assigned, some *potential* outcomes are *revealed*. Treated units reveal their treated potential outcomes and untreated units reveal their untreated potential outcomes. The `reveal_outcomes` function performs this switching operation within a `declare_measurement` call.
 
 ```{r, eval = FALSE}
-reveal_outcomes(Y, Z)
+declare_measurement(Y = reveal_outcomes(Y ~ Z))
 ```
 
 Adding these two declarations to the design results in a data frame with an additional indicator `Z` for the assignment as well as its corresponding probability of assignment. Again, here the assignment probabilities are constant, but in other designs they are not and this is crucial information for the analysis stage. The outcome variable `Y` is composed of each unit's potential outcomes depending on its treatment status.
 
 ```{r simpledesignassignment, echo = FALSE}
 simple_design <- 
-  declare_population(N = 100, U = rnorm(N)) +
-  declare_potential_outcomes(Y ~ 0.25 * Z + U) +
-  declare_estimand(PATE = mean(Y_Z_1 - Y_Z_0)) +
-  declare_sampling(n = 50) +
-  declare_assignment(prob = 0.5) +
-  reveal_outcomes(Y, Z)
+  declare_model(
+    N = 100, 
+    U = rnorm(N),
+    potential_outcomes(Y ~ 0.25 * Z + U)
+  ) +
+  declare_inquiry(PATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_sampling(S = complete_rs(N, n = 50)) +
+  declare_assignment(Z = complete_ra(N, prob = 0.5)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z))
 
 draw_data(simple_design) %>% 
   head(5) %>% 
@@ -339,15 +350,18 @@ declare_measurement(Y_binary = rbinom(N, 1, prob = pnorm(Y)))
 
 ```{r simpledesignmeasurement, echo = FALSE}
 simple_design <- 
-  declare_population(N = 100, U = rnorm(N)) +
-  declare_potential_outcomes(Y ~ 0.25 * Z + U) +
-  declare_estimand(PATE = mean(Y_Z_1 - Y_Z_0)) +
-  declare_sampling(n = 50) +
-  declare_assignment(prob = 0.5) +
-  declare_measurement(Y_binary = rbinom(N, 1, prob = pnorm(Y)))
+  declare_model(
+    N = 100, 
+    U = rnorm(N),
+    potential_outcomes(Y ~ 0.25 * Z + U)
+  ) +
+  declare_inquiry(PATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_sampling(S = complete_rs(N, n = 50)) +
+  declare_assignment(Z = complete_ra(N, prob = 0.5)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z),
+                      Y_binary = rbinom(N, 1, prob = pnorm(Y)))
 
 draw_data(simple_design) %>% 
-  select(-fab_ID_1) %>%
   head(5) %>% 
   kable(digits = 3, caption = "Sampled data with an explicitly measured outcome.", booktabs = TRUE)%>% 
   kable_styling()
@@ -359,12 +373,15 @@ Through our model and data strategy steps, we have simulated a dataset with two 
 
 ```{r simpledesignrevealedoutcomes, echo = FALSE}
 simple_design <- 
-  declare_population(N = 100, U = rnorm(N)) +
-  declare_potential_outcomes(Y ~ 0.25 * Z + U) +
-  declare_estimand(PATE = mean(Y_Z_1 - Y_Z_0)) +
-  declare_sampling(n = 50) +
-  declare_assignment(prob = 0.5) +
-  reveal_outcomes(outcome_variables = Y, assignment_variables = Z) +
+  declare_model(
+    N = 100, 
+    U = rnorm(N),
+    potential_outcomes(Y ~ 0.25 * Z + U)
+  ) +
+  declare_inquiry(PATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_sampling(S = complete_rs(N, n = 50)) +
+  declare_assignment(Z = complete_ra(N, prob = 0.5)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
   declare_estimator(Y ~ Z, model = difference_in_means, estimand = "PATE")
 
 simple_design_data <- draw_data(simple_design)
@@ -437,14 +454,6 @@ my_estimator <- function(data){
 declare_estimator(handler = label_estimator(my_estimator), label = "mean", estimand = "Y_bar")
 ```
 
-
-
-
-
-
-
-
-
 ### Other design steps
 
 The main `declare_*` functions cover many elements of research designs, but not all. You can include any operations we haven't explicitly included as steps in your design too, using `declare_step`. Here, you must define a specific handler. Some handlers that may be useful are the `dplyr` verbs such as `mutate` and `summarize`, and the `fabricate` function from our `fabricatr` package.
@@ -479,23 +488,24 @@ declare_step(handler = collapse_data, collapse_by = district)
 In the last section, we defined a set of individual research steps. We draw one version of them together here:
 
 ```{r}
-population <- 
-  declare_population(N = 100, U = rnorm(N)) 
+model <- 
+  declare_model(
+    N = 100, 
+    U = rnorm(N), 
+    potential_outcomes(Y ~ 0.25 * Z + U)
+  )
 
-potential_outcomes <- 
-  declare_potential_outcomes(Y ~ 0.25 * Z + U) 
-
-estimand <- 
-  declare_estimand(PATE = mean(Y_Z_1 - Y_Z_0)) 
+inquiry <- 
+  declare_inquiry(PATE = mean(Y_Z_1 - Y_Z_0)) 
 
 sampling <- 
-  declare_sampling(n = 50) 
+  declare_sampling(S = complete_rs(N, n = 50))
 
 assignment <- 
-  declare_assignment(prob = 0.5) 
+  declare_assignment(Z = complete_ra(N, prob = 0.5))
 
-reveal <- 
-  reveal_outcomes(outcome_variables = Y, assignment_variables = Z) 
+measurement <- 
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
 estimator <- 
   declare_estimator(
@@ -507,23 +517,23 @@ To construct a research design *object* that we can operate on --- diagnose it, 
 
 ```{r}
 design <- 
-  population + potential_outcomes + estimand + 
-  sampling + assignment + reveal + estimator
+  model + inquiry + sampling + assignment + measurement + estimator
 ```
 
 We will usually declare designs more compactly, concatenating steps directly with `+`:
 
 ```{r}
 design <- 
-  declare_population(N = 100, U = rnorm(N)) +
-  declare_potential_outcomes(Y ~ 0.25 * Z + U) +
-  declare_estimand(PATE = mean(Y_Z_1 - Y_Z_0)) +
-  declare_sampling(n = 50) +
-  declare_assignment(prob = 0.5) +
-  reveal_outcomes(outcome_variables = Y, assignment_variables = Z) +
-  declare_estimator(
-    Y ~ Z, model = difference_in_means, estimand = "PATE"
-  )
+  declare_model(
+    N = 100, 
+    U = rnorm(N),
+    potential_outcomes(Y ~ 0.25 * Z + U)
+  ) +
+  declare_inquiry(PATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_sampling(S = complete_rs(N, n = 50)) +
+  declare_assignment(Z = complete_ra(N, prob = 0.5)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, model = difference_in_means, estimand = "PATE")
 ```
 
 ### Order matters
@@ -531,15 +541,13 @@ design <-
 When defining a design, the order in which steps are included in the design via the `+` operator matters. Think of the order of your design as the temporal order in which steps take place. Here, since the estimand comes before sampling and assignment, it is a *population* estimand, the population average treatment effect. 
 
 ```{r, eval = FALSE}
-population + potential_outcomes + estimand + 
-  sampling + assignment + reveal + estimator
+model + inquiry + sampling + assignment + measurement + estimator
 ```
 
-We could define our estimand as a *sample* average treatment effect by putting `estimand` after `sampling`:
+We could define our estimand as a *sample* average treatment effect by putting `inquiry` after `sampling`:
 
 ```{r, eval = FALSE}
-population + potential_outcomes + sampling +
-  estimand + assignment + reveal + estimator
+model + sampling + inquiry + assignment + measurement + estimator
 ```
 
 ## Simulating a research design
@@ -561,10 +569,10 @@ draw_data(design) %>% head(5) %>% kable(digits = 3, caption = "Simulated data dr
 To simulate the estimands from a single run of the design, we use `draw_estimands`. This runs two operations at once: it draws the data, and calculates the estimands at the point defined by the design. For example, in our design, the estimand comes just after the potential outcomes. In this design, `draw_estimands` will run the first two steps and then calculate the estimands from the `estimand` function we declared:
 
 ```{r, eval = FALSE}
-draw_estimands(design)
+draw_inquiries(design)
 ```
 ```{r simpledesignestimanddraw, echo = FALSE}
-draw_estimands(design) %>% 
+draw_inquiries(design) %>% 
   kable(digits = 3, caption = "Estimands calculated from simulated data.", booktabs = TRUE)%>% 
   kable_styling()
 ```
@@ -577,7 +585,7 @@ draw_estimates(design)
 
 ```{r simpledesignestimatedraw, echo = FALSE}
 draw_estimates(design) %>% 
-  select(-estimator_label) %>%
+  select(-estimator) %>%
   kable(digits = 3, caption = "Estimates calculated from simulated data.", booktabs = TRUE)%>% 
   kable_styling()
 ```
@@ -591,7 +599,7 @@ simulation_df <- simulate_design(design)
 ```{r simpledesignsimulationsdf, echo = FALSE}
 simulation_df %>% 
   head(5) %>% 
-  select(-design_label, -estimator_label, -estimand_label, -term, -outcome) %>% 
+  select(-design, -estimator, -inquiry, -term, -outcome) %>% 
   kable(digits = 3, caption = "Simulations data frame.", booktabs = TRUE)%>% 
   kable_styling()
 ```
@@ -640,15 +648,16 @@ An alternative way to do this is to write a "designer." A designer is a function
 
 ```{r}
 simple_designer <- function(sample_size, effect_size) {
-  declare_population(N = sample_size, U = rnorm(N)) +
-    declare_potential_outcomes(Y ~ effect_size * Z + U) +
-    declare_estimand(PATE = mean(Y_Z_1 - Y_Z_0)) +
-    declare_sampling(n = 50) +
-    declare_assignment(prob = 0.5) +
-    reveal_outcomes(outcome_variables = Y, assignment_variables = Z) +
-    declare_estimator(
-      Y ~ Z, model = difference_in_means, estimand = "PATE"
-    )
+  declare_model(
+    N = sample_size, 
+    U = rnorm(N),
+    potential_outcomes(Y ~ effect_size * Z + U)
+  ) +
+  declare_inquiry(PATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_sampling(S = complete_rs(N, n = 50)) +
+  declare_assignment(Z = complete_ra(N, prob = 0.5)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, model = difference_in_means, estimand = "PATE")
 }
 ```
 
@@ -668,7 +677,7 @@ designs <- expand_design(
 )
 ```
 
-Our simulation and diagnosis tools can take a list of designs and simulate all of them at once, creating a column called `design_label` to keep track. For example:
+Our simulation and diagnosis tools can take a list of designs and simulate all of them at once, creating a column called `design` to keep track. For example:
 
 ```{r, eval = FALSE}
 diagnose_design(designs)

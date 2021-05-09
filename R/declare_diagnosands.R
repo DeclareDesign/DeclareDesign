@@ -6,7 +6,7 @@
 #'
 #' @details
 #'
-#' If term is TRUE, the names of ... will be returned in a \code{term} column, and \code{inquiry_label}
+#' If term is TRUE, the names of ... will be returned in a \code{term} column, and \code{inquiry}
 #' will contain the step label. This can be used as an additional dimension for use in diagnosis.
 #'
 #' @importFrom rlang eval_tidy quos is_quosure quo_is_call %||%
@@ -87,7 +87,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #'     Y_Z_0 = U, 
 #'     Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
 #'   ) + 
-#'   declare_assignment(Z = complete_ra(N), legacy = FALSE) + 
+#'   declare_assignment(Z = complete_ra(N)) + 
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
 #'   declare_estimator(Y ~ Z, inquiry = my_inquiry) + 
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z))
@@ -124,7 +124,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #' sd_estimate = sd(estimate),
 #' mean_se = mean(std.error),
 #' type_s_rate = mean((sign(estimate) != sign(estimand))[p.value < alpha]),
-#' mean_inquiry = mean(estimand)
+#' mean_estimand = mean(estimand)
 #' )
 #'
 declare_diagnosands <- make_declarations(diagnosand_handler, "diagnosand", "diagnosands")
@@ -147,7 +147,7 @@ default_diagnosands <- function(data, alpha = .05){
   sd_estimate <- sd(estimate)
   mean_se <- mean(std.error)
   type_s_rate <- mean((sign(estimate) != sign(estimand))[p.value < alpha])
-  mean_inquiry <- mean(estimand)
+  mean_estimand <- mean(estimand)
   
   data.frame(
     diagnosand_label = c(
@@ -159,7 +159,7 @@ default_diagnosands <- function(data, alpha = .05){
       "sd_estimate",
       "mean_se",
       "type_s_rate",
-      "mean_inquiry"
+      "mean_estimand"
     ),
     diagnosand = c(
       bias,
@@ -170,7 +170,7 @@ default_diagnosands <- function(data, alpha = .05){
       sd_estimate,
       mean_se,
       type_s_rate,
-      mean_inquiry
+      mean_estimand
     ), 
     stringsAsFactors = FALSE
   )

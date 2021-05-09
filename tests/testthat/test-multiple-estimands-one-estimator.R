@@ -40,7 +40,7 @@ test_that("Multiple inquiries can be mapped to one estimator", {
     bias_est = mean(std.error - sd(estimand)),
     mean_se = mean(std.error),
     sd_se = sd(std.error),
-    mean_inquiry = mean(estimand),
+    mean_estimand = mean(estimand),
     sd_inquiry = sd(estimand)
   )
 
@@ -63,13 +63,13 @@ test_that("More multiple inquiries", {
   pate <- declare_inquiry(pate = mean(Y_Z_1 - Y_Z_0))
   smp <- declare_sampling(handler = my_smp_fun)
   sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))
-  assgn <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 10))
+  assgn <- declare_assignment(Z = complete_ra(N, m = 10))
   my_reveal <- declare_reveal()
   mator_both <- declare_estimator(Y ~ Z, inquiry = c(pate, sate))
 
 
 
   des <- pop + pos + pate + smp + sate + assgn + my_reveal + mator_both
-  expect_equal(draw_estimates(des)$inquiry_label, c("pate", "sate"))
+  expect_equal(draw_estimates(des)$inquiry, c("pate", "sate"))
 })
 

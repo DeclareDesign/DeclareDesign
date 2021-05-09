@@ -49,7 +49,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
   my_inquiry <- function(data) {
     with(
       data,
-      data.frame(inquiry_label = "inquiry", inquiry = mean(Y_Z_1 - Y_Z_0), stringsAsFactors = FALSE)
+      data.frame(inquiry = "inquiry", estimand = mean(Y_Z_1 - Y_Z_0), stringsAsFactors = FALSE)
     )
   }
 
@@ -64,7 +64,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
 
   estimator <- declare_estimator(handler = label_estimator(my_estimator), inquiry = inquiry)
 
-  diagnosand <- declare_diagnosands(bias = mean(estimate - inquiry), keep_defaults = FALSE)
+  diagnosand <- declare_diagnosands(bias = mean(estimate - estimand), keep_defaults = FALSE)
 
   declare_reveal <- declare_reveal()
 

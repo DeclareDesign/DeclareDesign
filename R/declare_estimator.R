@@ -46,7 +46,7 @@
 #'      Y ~ rbinom(N, 1, prob = pnorm(0.2 * Z + 0.2 * female + 0.1 * Z * female + U)))
 #'   ) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-#'   declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) + 
+#'   declare_assignment(Z = complete_ra(N, m = 50)) + 
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #' 
 #' # Most estimators are modeling functions like lm or glm.
@@ -169,7 +169,7 @@ label_estimator <- function(fn) {
     ret <- eval_tidy(quo(fn(data, !!!dots)))
 
     ret <- data.frame(
-      estimator_label = label,
+      estimator = label,
       ret,
       stringsAsFactors = FALSE
     )
@@ -182,12 +182,12 @@ label_estimator <- function(fn) {
     }
     
     
-    inquiry_label <- get_inquiry_label(inquiry)
-    if (length(inquiry_label) > 0) {
+    inquiry <- get_inquiry(inquiry)
+    if (length(inquiry) > 0) {
       ret <-
         cbind(
           ret,
-          inquiry_label = inquiry_label,
+          inquiry = inquiry,
           row.names = NULL,
           stringsAsFactors = FALSE
         )
@@ -223,7 +223,7 @@ tidy_estimator <- function(estimator_function) {
 }
 
 #' @param data a data.frame
-#' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{difference_in_means}} function from the \link{estimatr} package.
+#' @param model A model function, e.g. lm or glm. By default, the model is the \code{\link{lm_robust}} function from the \link{estimatr} package, which fits OLS regression and calculates robust and cluster-robust standard errors.
 #' @param model_summary A model-in data-out function to extract coefficient estimates or model summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} model summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the model object sent to \code{model}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the model object, it fails.
 #' @param term Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.
 #' @rdname declare_estimator 
@@ -231,7 +231,7 @@ tidy_estimator <- function(estimator_function) {
 model_handler <-
   function(data,
              ...,
-             model = estimatr::difference_in_means,
+             model = estimatr::lm_robust,
              model_summary = tidy_try,
              term = FALSE) {
     coefficient_names <-
@@ -313,13 +313,13 @@ validation_fn(model_handler) <- function(ret, dots, label) {
 
 # helper methods for inquiry = my_inquiry arguments to estimator_handler
 #
-get_inquiry_label <- function(inquiry) {
+get_inquiry <- function(inquiry) {
   force(inquiry) # no promise nonsense when we look at it
   switch(
     class(inquiry)[1],
     "character" = inquiry,
     "design_step" = attributes(inquiry)$label,
-    "list" = vapply(inquiry, get_inquiry_label, NA_character_),
+    "list" = vapply(inquiry, get_inquiry, NA_character_),
     # note recursion here
     NULL = NULL,
     warning("Did not match class of `inquiry`")

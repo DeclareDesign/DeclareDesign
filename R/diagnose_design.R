@@ -6,7 +6,7 @@
 #' @param ... A design or set of designs typically created using the + operator, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the inquiry(s).
 #' @param make_groups Add group variables within which diagnosand values will be calculated. New variables can be created or variables already in the simulations data frame selected. Type name-value pairs within the function \code{vars}, i.e. \code{vars(significant = p.value <= 0.05)}.
-#' @param add_grouping_variables Deprecated. Please use make_groups instead. Variables used to generate groups of simulations for diagnosis. Added to default list: c("design_label", "estimand_label", "estimator_label", "term")
+#' @param add_grouping_variables Deprecated. Please use make_groups instead. Variables used to generate groups of simulations for diagnosis. Added to default list: c("design", "estimand_label", "estimator", "term")
 #' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}
 #' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.
 #' @return a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
@@ -30,7 +30,7 @@
 #'     Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
 #'   ) + 
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-#'   declare_assignment(Z = complete_ra(N), legacy = FALSE) +
+#'   declare_assignment(Z = complete_ra(N)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
 #'   declare_estimator(Y ~ Z, inquiry = "ATE")
 #'
@@ -95,8 +95,8 @@ diagnose_design <- function(...,
   # 2. it's something else, and needs to be simulated
   if (is.data.frame(..1)) {
     simulations_df <- ..1
-    if (is_empty(c("estimator_label", "inquiry_label") %icn% simulations_df)) {
-      stop("Can't calculate diagnosands on this data.frame, which does not include either an estimator_label or an inquiry_label. Did you send a simulations data frame?")
+    if (is_empty(c("estimator", "inquiry") %icn% simulations_df)) {
+      stop("Can't calculate diagnosands on this data.frame, which does not include either an estimator or an inquiry. Did you send a simulations data frame?")
     }
     if (nrow(simulations_df) == 0) {
       stop("Can't calculate diagnosands on this data.frame, which has zero rows.")
@@ -125,7 +125,7 @@ diagnose_design <- function(...,
   }
 
   group_by_set <- 
-    c("design_label", "inquiry_label", "estimator_label", "term", add_grouping_variables, make_groups_names) %icn% 
+    c("design", "inquiry", "estimator", "term", add_grouping_variables, make_groups_names) %icn% 
     simulations_df
   
   # Actually calculate diagnosands ------------------------------------------
@@ -190,10 +190,10 @@ merge_param_df <- function(df, parameters_df) {
 
   if(!is.data.frame(parameters_df)) return(df)
   
-  df <- merge(df, parameters_df, by = "design_label")
+  df <- merge(df, parameters_df, by = "design")
   
-  # make design_label a factor
-  df$design_label <- factor(df$design_label, levels = as.character(parameters_df$design_label))
+  # make design a factor
+  df$design <- factor(df$design, levels = as.character(parameters_df$design))
   
   # reorder columns
   df <- df[, reorder_columns(parameters_df, df), drop = FALSE]
@@ -216,8 +216,8 @@ setup_diagnosands <- function(..., diagnosands) {
 }
 
 calculate_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
-  if ("design_label" %in% group_by_set) {
-    group_by_list <- simulations_df[, "design_label", drop = FALSE]
+  if ("design" %in% group_by_set) {
+    group_by_list <- simulations_df[, "design", drop = FALSE]
     labels_df <- split(group_by_list, lapply(group_by_list, addNA), drop = TRUE)
     labels_df <- lapply(labels_df, head, n = 1)
 
@@ -354,7 +354,7 @@ bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, d
   diagnosands_df <- diagnosands_df[, i, drop = FALSE]
 
   # Reordering columns
-  dim_cols <- c("estimator_label", "term", "inquiry_label") %i% group_by_set
+  dim_cols <- c("estimator", "term", "inquiry") %i% group_by_set
   ix <- sort(match(dim_cols, colnames(diagnosands_df)))
   diagnosands_df[ix] <- diagnosands_df[dim_cols]
   names(diagnosands_df)[ix] <- dim_cols

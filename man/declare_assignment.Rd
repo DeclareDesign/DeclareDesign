@@ -7,7 +7,7 @@
 \usage{
 declare_assignment(..., handler = assignment_handler, label = NULL)
 
-assignment_handler(data, ..., legacy = TRUE)
+assignment_handler(data, ..., legacy = FALSE)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}
@@ -35,33 +35,33 @@ design <- declare_model(
 ) + NULL
 
 # Declare assignment of m units to treatment
-design + declare_assignment(Z = complete_ra(N = N, m = 100), legacy = FALSE)
+design + declare_assignment(Z = complete_ra(N = N, m = 100))
 
 # Declare assignment specifying varying block probabilities
 design + 
   declare_assignment(Z = block_ra(blocks = female, 
-                                  block_prob = c(1/3, 2/3)), legacy = FALSE)
+                                  block_prob = c(1/3, 2/3)))
 
 # Declare assignment of clusters with probability 1/4
 design + declare_assignment(
-  Z = cluster_ra(prob = 1/4, clusters = classrooms), legacy = FALSE)
+  Z = cluster_ra(prob = 1/4, clusters = classrooms))
  
 # Declare factorial assignment (Approach 1): 
 #   Use complete random assignment to assign Z1 
 #   then block on Z1 to assign Z2. 
 design + 
    declare_assignment(Z1 = complete_ra(N = N, m = 100),
-                      Z2 = block_ra(blocks = Z1), legacy = FALSE)
+                      Z2 = block_ra(blocks = Z1))
    
 # Declare factorial assignment (Approach 2): 
 #   Assign to four conditions and then split into Z1 and Z2 
 design +  
   declare_assignment(Z = complete_ra(N = N, conditions = 1:4),
                      Z1 = as.numeric(Z \%in\% 2:3), 
-                     Z2 = as.numeric(Z \%in\% 3:4), legacy = FALSE)
+                     Z2 = as.numeric(Z \%in\% 3:4))
    
 # Declare assignment using functions outside randomizr package:
 design + 
-  declare_assignment(Z = rbinom(n = N, size = 1, prob = 0.35), legacy = FALSE)
+  declare_assignment(Z = rbinom(n = N, size = 1, prob = 0.35))
 
 }

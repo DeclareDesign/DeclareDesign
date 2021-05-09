@@ -10,9 +10,9 @@
 #'     U = rnorm(N),
 #'     potential_outcomes(Y ~ U + Z * rnorm(N, 2, 2))
 #'   ) +
-#'   declare_sampling(S = complete_rs(N, n = 250), legacy = FALSE) +
+#'   declare_sampling(S = complete_rs(N, n = 250)) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_assignment(Z = complete_ra(N, m = 25), legacy = FALSE) +
+#'   declare_assignment(Z = complete_ra(N, m = 25)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
 #'   declare_estimator(Y ~ Z, inquiry = "my_inquiry")
 #'
@@ -39,8 +39,8 @@ check_sims <- function(design, sims) {
     }
     else if (is.character(names(sims))) {
       sims_full <- rep(1, n)
-      design_labels <- as.character(lapply(design, attr, "label"))
-      i <- match(names(sims), design_labels)
+      designs <- as.character(lapply(design, attr, "label"))
+      i <- match(names(sims), designs)
       sims_full[i] <- sims
     } else if (length(sims) != n) {
       sims_full <- c(sims, rep(1, n))[1:n]
@@ -80,7 +80,7 @@ check_sims <- function(design, sims) {
 #'     potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N))
 #'   ) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) +
+#'   declare_assignment(Z = complete_ra(N, m = 50)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
 #'   declare_estimator(Y ~ Z, inquiry = "ATE")
 #' 
@@ -191,7 +191,7 @@ apply_on_design_dots <- function(FUN, ...) {
   elist <- lapply(designs, FUN)
 
   if (length(designs) > 1) {
-    elist <- Map(cbind, design_label = names(elist), elist, stringsAsFactors = FALSE)
+    elist <- Map(cbind, design = names(elist), elist, stringsAsFactors = FALSE)
   }
 
   rbind_disjoint(elist)
@@ -232,7 +232,7 @@ dots_to_list_of_designs <- function(...) {
 #'
 #' my_population <- declare_model(N = 100)
 #'
-#' my_assignment <- declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE)
+#' my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
 #'
 #' my_design <- my_population + my_assignment
 #'

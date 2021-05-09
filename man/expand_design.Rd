@@ -40,7 +40,7 @@ designer <- function(N) {
       U = rnorm(N),
       potential_outcomes(Y ~ 0.20 * Z + U)
     )
-  assgn <- declare_assignment(Z = complete_ra(N, m = N/2), legacy = FALSE)
+  assgn <- declare_assignment(Z = complete_ra(N, m = N/2))
   inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
   estimator <- declare_estimator(Y ~ Z, inquiry = inquiry)
   pop + pos + assgn + inquiry + estimator

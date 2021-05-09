@@ -2,7 +2,7 @@ context("add design citation")
 
 test_that("test with generated citation", {
   debugonce(DeclareDesign:::sampling_handler)
-  design <- declare_population(data = sleep) + declare_sampling(legacy = FALSE, S = complete_rs(N, n = 10))
+  design <- declare_population(data = sleep) + declare_sampling(S = complete_rs(N, n = 10))
   design
 
   design <- set_citation(design,

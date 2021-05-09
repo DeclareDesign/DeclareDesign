@@ -45,7 +45,7 @@ test_that("Diagnosing a fanout", {
   pop <- declare_population(N = N, noise = rnorm(N))
 
   inquiry <- declare_inquiry(foo = mean(noise))
-  sampl <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = N / 2))
+  sampl <- declare_sampling(S = complete_rs(N, n = N / 2))
   estimator <-
     declare_estimator(
       noise ~ 1,
@@ -67,7 +67,7 @@ test_that("Diagnosing a fanout", {
   
   # inquiries don't vary overall
   expect_equal(
-    dx$diagnosands[1, "se(mean_inquiry)"], 0
+    dx$diagnosands[1, "se(mean_estimand)"], 0
   )
 
   rep_id <-
@@ -109,7 +109,7 @@ test_that("fanout warnings", {
   pop <- declare_population(N = N, noise = rnorm(N))
 
   inquiry <- declare_inquiry(foo = mean(noise))
-  sampl <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = N / 2))
+  sampl <- declare_sampling(S = complete_rs(N, n = N / 2))
   estimator <-
     declare_estimator(
       noise ~ 1,
@@ -161,7 +161,7 @@ test_that("correct fan out", {
     simulate_design(declare_population(sleep) + e1 + e2 + e3, sims = c(30, 1, 5, 2))
   
   expect_equivalent(apply(out[,c(5:7)], 2, max), c(30, 150, 300))
-  expect_equivalent(tapply(out$estimand, INDEX = out$inquiry_label, max), c(30, 150, 300))
+  expect_equivalent(tapply(out$estimand, INDEX = out$inquiry, max), c(30, 150, 300))
   
 })
 

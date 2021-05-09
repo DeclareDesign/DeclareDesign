@@ -8,7 +8,7 @@ test_that("test diagnosands", {
       Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)
     )
 
-  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
+  my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 
   pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
 
@@ -45,9 +45,9 @@ test_that("Bootstrap ses close", {
   estimate <- declare_estimator(S100 ~ S10000, model = lm, inquiry = list("S100", "S10000"))
   design <- pop + inquiry + estimate
   d <- diagnose_design(design, sims = 10000)
-  expect_true(d$diagnosands_df$`se(mean_inquiry)`[1] > .06)
-  expect_true(d$diagnosands_df$`se(mean_inquiry)`[1] < .14)
-  expect_true(d$diagnosands_df$`se(mean_inquiry)`[2] > 6)
-  expect_true(d$diagnosands_df$`se(mean_inquiry)`[2] < 14)
+  expect_true(d$diagnosands_df$`se(mean_estimand)`[1] > .06)
+  expect_true(d$diagnosands_df$`se(mean_estimand)`[1] < .14)
+  expect_true(d$diagnosands_df$`se(mean_estimand)`[2] > 6)
+  expect_true(d$diagnosands_df$`se(mean_estimand)`[2] < 14)
 })
 

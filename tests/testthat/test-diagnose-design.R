@@ -14,7 +14,7 @@ test_that("default diagnosands work", {
     my_potential_outcomes <-
       declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-    my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
+    my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 
     my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
@@ -59,7 +59,7 @@ test_that("default diagnosands work", {
   )
 
   expect_equal(names(diag$diagnosands_df), 
-               c("design_label", "inquiry_label", "estimator_label", "term", 
+               c("design", "inquiry", "estimator", "term", 
                  "med_bias", "se(med_bias)", "n_sims"
                ))
   
@@ -78,7 +78,7 @@ test_that("default diagnosands work", {
     sims = 2
   )
   
-  expect_equal(names(diag$diagnosands_df), c("design_label", "inquiry_label", "estimator_label", "term", 
+  expect_equal(names(diag$diagnosands_df), c("design", "inquiry", "estimator", "term", 
                                              "my_bias", "se(my_bias)", "my_power", 
                                              "se(my_power)", "n_sims"))
   
@@ -91,11 +91,11 @@ test_that("default diagnosands work", {
   )
   
   expect_equal(names(diag$diagnosands_df), 
-               c("design_label", "inquiry_label", "estimator_label", "term", 
+               c("design", "inquiry", "estimator", "term", 
                  "bias", "se(bias)", "rmse", "se(rmse)", "power", "se(power)", 
                  "coverage", "se(coverage)", "mean_estimate", "se(mean_estimate)", 
                  "sd_estimate", "se(sd_estimate)", "mean_se", "se(mean_se)", "type_s_rate", 
-                 "se(type_s_rate)", "mean_inquiry", "se(mean_inquiry)", "n_sims"))
+                 "se(type_s_rate)", "mean_estimand", "se(mean_estimand)", "n_sims"))
   
   # w/ none set and override
 
@@ -107,7 +107,7 @@ test_that("default diagnosands work", {
   )
     
   expect_equal(names(diag$diagnosands_df), 
-               c("design_label", "inquiry_label", "estimator_label", "term", 
+               c("design", "inquiry", "estimator", "term", 
                  "med_bias", "se(med_bias)", "n_sims"
                ))
   
@@ -123,7 +123,7 @@ test_that("default diagnosands work", {
   diag <- diagnose_design(designs, sims = 5, bootstrap_sims = FALSE)
  
   expect_equal(names(diag$diagnosands_df), 
-               c("design_label", "N", "inquiry_label", "estimator_label", "term", 
+               c("design", "N", "inquiry", "estimator", "term", 
                  "med_bias", "n_sims"))
   
   # w mix of diagnosands set
@@ -172,12 +172,12 @@ test_that("more term",{
   expect_equal(sims_df[, 1:6],
                structure(
                  list(
-                   design_label = c("design", "design", "design"),
+                   design = c("design", "design", "design"),
                    sim_ID = c(1L, 1L, 1L),
-                   inquiry_label = c("ATE", "Regression_Inquiries",
+                   inquiry = c("ATE", "Regression_Inquiries",
                                       "Regression_Inquiries"),
                    estimand = c(2, 0, 1),
-                   estimator_label = c("dim",
+                   estimator = c("dim",
                                        "estimator", "estimator"),
                    term = c("Z", "(Intercept)", "Z")
                  ),
@@ -234,8 +234,8 @@ test_that("diagnose_design works when simulations_df lacking parameters attr", {
   # strip params from d1
   # These are expected differences
   attributes(d1$simulations_df)["parameters"] <- NULL
-  d1$simulations_df$design_label <- as.character(d1$simulations_df$design_label)
-  d1$diagnosands_df$design_label <- as.character(d1$diagnosands_df$design_label)
+  d1$simulations_df$design <- as.character(d1$simulations_df$design)
+  d1$diagnosands_df$design <- as.character(d1$diagnosands_df$design)
   d1["parameters_df"] <- list(NULL)
     
   expect_identical(d1,d2)
@@ -243,15 +243,17 @@ test_that("diagnose_design works when simulations_df lacking parameters attr", {
 
 
 test_that("diagnose_design stops when a zero-row simulations_df is sent", {
-  expect_error(diagnose_design(data.frame(estimator_label = rep(1, 0))), "which has zero rows")
+  expect_error(diagnose_design(data.frame(estimator = rep(1, 0))), "which has zero rows")
 })
 
 test_that("diagnose_design can generate and use grouping variables", {
   
+  set.seed(5)
+  
   design <- 
     declare_population(N = 100, u = rnorm(N)) + 
     declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
-    declare_assignment() + 
+    declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
     declare_reveal() + 
     declare_estimator(Y ~ Z, inquiry = "ATE_positive")
@@ -266,7 +268,7 @@ test_that("diagnose_design can generate and use grouping variables", {
   design <- 
     declare_population(N = 100, u = rnorm(N)) + 
     declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
-    declare_assignment() + 
+    declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
     declare_reveal() + 
     declare_estimator(Y ~ Z, inquiry = "ATE")
@@ -286,7 +288,7 @@ test_that("diagnose_design can generate and use grouping variables", {
   design <- 
     declare_population(N = 100, u = rnorm(N)) + 
     declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
-    declare_assignment() + 
+    declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
     declare_reveal() + 
     declare_estimator(Y ~ Z, inquiry = "ATE_positive")

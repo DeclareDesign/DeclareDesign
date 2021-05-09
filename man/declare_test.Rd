@@ -42,7 +42,7 @@ balance_test_design <-
     cov2 = rnorm(N), 
     cov3 = rnorm(N)
   ) +
-  declare_assignment(Z = complete_ra(N, prob = 0.2), legacy = FALSE) +
+  declare_assignment(Z = complete_ra(N, prob = 0.2)) +
   declare_test(Z ~ cov1 + cov2 + cov3, model = lm_robust, model_summary = glance)
   
 \dontrun{
@@ -66,7 +66,7 @@ distributional_equality_design <-
     Y_Z_1 = rnorm(N), 
     Y_Z_0 = rnorm(N, sd = 1.5)
   ) + 
-  declare_assignment(Z = complete_ra(N, prob = 0.5), legacy = FALSE) + 
+  declare_assignment(Z = complete_ra(N, prob = 0.5)) + 
   declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
   declare_test(handler = label_test(ks_test), label = "ks-test")
   

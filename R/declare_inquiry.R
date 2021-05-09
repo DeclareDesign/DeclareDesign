@@ -8,7 +8,7 @@
 #'
 #' @details
 #'
-#' For the default diagnosands, the return value of the handler should have \code{inquiry_label} and \code{estimand} columns.
+#' For the default diagnosands, the return value of the handler should have \code{inquiry} and \code{estimand} columns.
 #'
 #' @export
 #'
@@ -20,7 +20,7 @@
 #'   declare_model(N = 100,
 #'                 X = rnorm(N),
 #'                 potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N))) +
-#'   declare_assignment(Z = complete_ra(N, m = 50), legacy = FALSE) +
+#'   declare_assignment(Z = complete_ra(N, m = 50)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #' 
 #' design + declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
@@ -92,7 +92,7 @@ declare_estimands <- function(...){
 #' @details
 #'
 #' If term is TRUE, the names of ... will be returned in a \code{term} column,
-#' and \code{inquiry_label} will contain the step label. This can be used as
+#' and \code{inquiry} will contain the step label. This can be used as
 #' an additional dimension for use in diagnosis.
 #'
 #'
@@ -119,7 +119,7 @@ inquiry_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
   
   if (term) {
     data.frame(
-      inquiry_label = label,
+      inquiry = label,
       term = names(options),
       estimand = ret,
       stringsAsFactors = FALSE,
@@ -127,7 +127,7 @@ inquiry_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
     )
   } else {
     data.frame(
-      inquiry_label = names(options),
+      inquiry = names(options),
       estimand = ret,
       stringsAsFactors = FALSE,
       row.names = NULL

@@ -33,7 +33,7 @@ design <-
   declare_model(N = 6,
                 U = rnorm(N),
                 potential_outcomes(Y ~ Z + U)) +
-  declare_assignment(Z = complete_ra(N), legacy = FALSE) + 
+  declare_assignment(Z = complete_ra(N)) + 
   declare_measurement(Y = reveal_outcomes(Y ~ Z))
 
 draw_data(design)

@@ -13,7 +13,7 @@ test_that("multiple potential outcomes", {
     formula = R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0))
   )
 
-  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
+  my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 
   my_design <- my_population +
     my_potential_outcomes_Y +

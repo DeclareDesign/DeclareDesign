@@ -10,7 +10,7 @@
 #'     Y_Z_0 = U, 
 #'     Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
 #'   ) + 
-#'   declare_assignment(Z = complete_ra(N), legacy = FALSE) + 
+#'   declare_assignment(Z = complete_ra(N)) + 
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
 #'   declare_estimator(Y ~ Z, inquiry = "ATE") 
@@ -121,10 +121,10 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL, exclude = NU
   return_df <- return_df[do.call(order, as.list(return_df[, sort_by_list])), , drop = FALSE]
 
   # blank cells for SE rows
-  for(i in c(parameter_names, "design_label")) {
+  for(i in c(parameter_names, "design")) {
     levels(return_df[[i]]) <- c(levels(return_df[[i]]), "")
   }
-  return_df$estimator_label <- as.character(return_df$estimator_label)
+  return_df$estimator <- as.character(return_df$estimator)
   
   for(j in c(sort_by_list, parameter_names)) if(is.factor(return_df[[j]]) && !"" %in% levels(return_df[[j]]))
     return_df[[j]] <- factor(return_df[[j]], levels = c(levels(return_df[[j]]), ""))
@@ -203,8 +203,8 @@ clean_bootstrap_df <- function(diagnosis, digits, diagnosand_columns,
   return_df <- rbind_disjoint(list(diagnosands_only_df, se_only_df), infill = "")
 
   # NA bootstrap rows
-  return_df$design_label <- factor(return_df$design_label)
-  return_df$design_label <- factor(return_df$design_label, levels = c(levels(return_df$design_label), ""))
+  return_df$design <- factor(return_df$design)
+  return_df$design <- factor(return_df$design, levels = c(levels(return_df$design), ""))
 
   return(return_df)
 }

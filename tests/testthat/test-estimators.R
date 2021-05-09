@@ -2,16 +2,16 @@ context("Estimators")
 
 my_population <- declare_population(N = 500, noise = rnorm(N))
 my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
-my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 25))
+my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 my_reveal_outcomes <- declare_reveal()
 
 expect_estimates <- function(estimates, label = NULL) {
   expect_equal(
     names(estimates),
-    c("estimator_label", "term", "estimate", "std.error", "statistic", "p.value", "conf.low", "conf.high", "df", "outcome")
+    c("estimator", "term", "estimate", "std.error", "statistic", "p.value", "conf.low", "conf.high", "df", "outcome")
   )
   if (is.character(label)) {
-    expect_equal(estimates$estimator_label, label)
+    expect_equal(estimates$estimator, label)
   }
 }
 
@@ -43,7 +43,7 @@ test_that("custom estimator function", {
 test_that("check blocked d-i-m estimator", {
   my_population <- declare_population(N = 500, noise = rnorm(N), blocks = sample(rep(c("A", "B"), each = 250), N, replace = F))
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2) + 5 * (blocks == "A"))
-  my_assignment <- declare_assignment(legacy = FALSE, Z = block_ra(blocks = blocks))
+  my_assignment <- declare_assignment(Z = block_ra(blocks = blocks))
 
   ## lm with HC3 robust ses
   my_estimator_blocked <- declare_estimator(Y ~ Z, model = difference_in_means, blocks = `blocks`)
@@ -59,7 +59,7 @@ test_that("check blocked d-i-m estimator", {
 test_that("regression from estimatr works as an estimator", {
   my_population <- declare_population(N = 500, noise = rnorm(N))
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
-  my_assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 100))
+  my_assignment <- declare_assignment(Z = complete_ra(N, m = 100))
   pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
   pate_estimator <- declare_estimator(Y ~ Z + noise,
     model = lm_robust,
@@ -76,9 +76,9 @@ test_that("regression from estimatr works as an estimator", {
     pate_estimator
 
   estimate <- draw_estimates(my_design)
-  expect_equal(estimate$estimator_label, "pate_hat")
+  expect_equal(estimate$estimator, "pate_hat")
   expect_equal(estimate$term, "noise")
-  expect_equal(estimate$inquiry_label, "pate")
+  expect_equal(estimate$inquiry, "pate")
 })
 
 population <- declare_population(N = 200, noise = rnorm(N))
@@ -87,9 +87,9 @@ potential_outcomes <- declare_potential_outcomes(formula = Y ~ noise + Z * .5)
 
 pop <- potential_outcomes(population())
 
-sampling <- declare_sampling(legacy = FALSE, S = complete_rs(N, n = 100))
+sampling <- declare_sampling(S = complete_rs(N, n = 100))
 
-assignment <- declare_assignment(legacy = FALSE, Z = complete_ra(N, m = 50))
+assignment <- declare_assignment(Z = complete_ra(N, m = 50))
 
 sate <- declare_inquiry(SATE = mean(Y_Z_1 - Y_Z_0))
 
@@ -123,7 +123,7 @@ test_that("multiple estimator declarations work", {
 
   e <- draw_estimates(design)
 
-  expect_equal(e$estimator_label, c("estimator_1", "estimator_2"))
+  expect_equal(e$estimator, c("estimator_1", "estimator_2"))
 })
 
 test_that("multiple estimator declarations work", {
@@ -154,7 +154,7 @@ test_that("multiple estimator declarations work", {
 
   e <- draw_estimates(design)
 
-  expect_equal(e$estimator_label, c("estimator_3", "estimator_4"))
+  expect_equal(e$estimator, c("estimator_3", "estimator_4"))
 })
 
 test_that("multiple estimator declarations work", {
@@ -190,9 +190,9 @@ context("Labeling estimator output with inquiries")
 inquiry_arg_label <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 inquiry_explicit_label <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "ATE")
 
-expect_label <- function(df, expected_label, inquiry_label) {
-  expect_equal(df$estimator_label, expected_label)
-  expect_equal(df$inquiry_label, inquiry_label)
+expect_label <- function(df, expected_label, inquiry) {
+  expect_equal(df$estimator, expected_label)
+  expect_equal(df$inquiry, inquiry)
 }
 
 df <- data.frame(
