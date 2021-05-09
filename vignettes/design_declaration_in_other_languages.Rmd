@@ -2,7 +2,7 @@
 title: "Design Diagnosis in other languages"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{PAP}
+  %\VignetteIndexEntry{Design Diagnosis in other languages}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
