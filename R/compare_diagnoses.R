@@ -142,7 +142,7 @@ compare_diagnoses_internal <-
     suffix <- c("_1", "_2")
     keepcols <-
       grepl("[[:digit:]]+$", c_names) |
-      grepl("label+$", c_names) | grepl("term", c_names) | filter_se
+      grepl("inquiry|design|estimator", c_names) | grepl("term", c_names) | filter_se
     comparison_df <- comparison_df[, keepcols, drop = FALSE]
     
     # Divide comparison_df into groups defined by set= c(inquiry, estimator, term)
