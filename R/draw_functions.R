@@ -25,7 +25,7 @@
 #' 
 #' dat_no_sampling <- draw_data(design, end = 3)
 #' 
-#' draw_inquiries(design)
+#' draw_estimands(design)
 #' 
 #' draw_estimates(design)
 #'
@@ -46,27 +46,13 @@ draw_data <- function(design, data = NULL, start = 1, end = length(design)) {
 #' @rdname draw_functions
 #'
 #' @export
-draw_inquiry <- function(...) apply_on_design_dots(draw_inquiries_single_design, ...)
+draw_estimand <- function(...) apply_on_design_dots(draw_estimands_single_design, ...)
 
 #' @param ... A design or set of designs typically created using the + operator
 #' @rdname draw_functions
 #'
 #' @export
-draw_inquiries <- draw_inquiry
-
-#' @rdname draw_functions
-#' @export
-draw_estimands <-  function(...){
-  .Deprecated(new = "draw_estimands")
-  draw_inquiries(...)
-}
-
-#' @rdname draw_functions
-#' @export
-draw_estimand <-  function(...){
-  .Deprecated(new = "draw_estimand")
-  draw_inquiry(...)
-}
+draw_estimands <- draw_estimand
 
 #' @rdname draw_functions
 #'
@@ -79,7 +65,7 @@ draw_estimates_single_design <- function(design) {
     list("estimator" = vector("list", length(design))), "estimates_df", step_type = "estimator")
 }
 
-draw_inquiries_single_design <- function(design) {
+draw_estimands_single_design <- function(design) {
   get_function_internal(
     design, -9, 1, length(design), function(x) TRUE, 
     list("inquiry" = vector("list", length(design))), "inquiries_df", step_type = "inquiry")
