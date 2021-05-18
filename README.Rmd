@@ -98,7 +98,7 @@ Once you have declared your design, there are four core post-design-declaration 
 1. `diagnose_design()` (takes a design and returns simulations and diagnosis)
 2. `draw_data()` (takes a design and returns a single draw of the data)
 3. `draw_estimates()` (takes a design and returns a single simulation of estimates)
-4. `draw_inquiries()` (takes a design and returns a single simulation of estimands)
+4. `draw_estimands()` (takes a design and returns a single simulation of estimands)
 
 A few other features:
 

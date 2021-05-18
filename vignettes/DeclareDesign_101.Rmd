@@ -569,10 +569,10 @@ draw_data(design) %>% head(5) %>% kable(digits = 3, caption = "Simulated data dr
 To simulate the estimands from a single run of the design, we use `draw_estimands`. This runs two operations at once: it draws the data, and calculates the estimands at the point defined by the design. For example, in our design, the estimand comes just after the potential outcomes. In this design, `draw_estimands` will run the first two steps and then calculate the estimands from the `estimand` function we declared:
 
 ```{r, eval = FALSE}
-draw_inquiries(design)
+draw_estimands(design)
 ```
 ```{r simpledesignestimanddraw, echo = FALSE}
-draw_inquiries(design) %>% 
+draw_estimands(design) %>% 
   kable(digits = 3, caption = "Estimands calculated from simulated data.", booktabs = TRUE)%>% 
   kable_styling()
 ```

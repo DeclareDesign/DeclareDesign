@@ -81,7 +81,7 @@ test_that("multiple inquiry declarations work", {
 
   design_1 <- declare_population(df) + pate + sate
   expect_identical(
-    draw_inquiries(design_1),
+    draw_estimands(design_1),
     structure(list(inquiry = c("PATE", "SATE"), estimand = c(
       2,
       2
@@ -101,7 +101,7 @@ test_that("multiple inquiry declarations work", {
   design_2 <- declare_population(df) + pate_label + sate_label
 
   expect_identical(
-    draw_inquiries(design_2),
+    draw_estimands(design_2),
     structure(list(inquiry = c("The PATE", "The SATE"), estimand = c(
       2,
       2

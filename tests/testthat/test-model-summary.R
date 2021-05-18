@@ -52,13 +52,13 @@ test_that("multiple design draw_estimates", {
   
   my_designs <- expand_design(my_designer, N = c(50, 100))
   
-  draw_inquiries(design_1)
+  draw_estimands(design_1)
   
-  draw_inquiries(design_2)
+  draw_estimands(design_2)
   
-  draw_inquiries(design_1, design_2)
+  draw_estimands(design_1, design_2)
   
-  draw_inquiries(my_designs)
+  draw_estimands(my_designs)
   
   draw_estimates(design_1)
   
