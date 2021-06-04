@@ -208,3 +208,75 @@ clean_bootstrap_df <- function(diagnosis, digits, diagnosand_columns,
 
   return(return_df)
 }
+
+
+
+#' Title
+#'
+#' @param diagnosis 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+tidy.diagnosis <- function(diagnosis) {
+  
+  diagnosand_columns <- diagnosis$diagnosand_names
+  
+  diagnosands_df <- get_diagnosands(diagnosis)
+  
+  parameter_names <- names(diagnosis$parameters_df)[-1]
+  
+  group_by_set <- diagnosis$group_by_set
+  
+  if (is.data.frame(diagnosis$bootstrap_replicates)) {
+    diagnosand_se_columns <- paste0("se(", diagnosis$diagnosand_names, ")")
+    group_columns <- setdiff(names(diagnosands_df), c(diagnosand_columns, diagnosand_se_columns))
+    
+    diagnosand_replicates <- diagnosis$bootstrap_replicates
+    
+    group_by_list <- diagnosand_replicates[, group_by_set, drop = FALSE]
+    
+    labels_df <- split(group_by_list, lapply(group_by_list, addNA), drop = TRUE)
+    labels_df <- lapply(labels_df, head, n = 1)
+    
+    use_vars <- setdiff(names(diagnosand_replicates), c(group_by_set, "bootstrap_id"))
+    diagnosands_summary_df <- split(diagnosand_replicates[use_vars], lapply(group_by_list, addNA), drop = TRUE)
+    
+    diagnosands_mean_list <- lapply(diagnosands_summary_df, function(data) lapply(data[diagnosand_columns], mean))
+    diagnosands_se_list <- lapply(diagnosands_summary_df, function(data) lapply(data[diagnosand_columns], sd))
+    diagnosands_conf_low_list <- lapply(diagnosands_summary_df, function(data) lapply(data[diagnosand_columns], quantile, 0.025))
+    diagnosands_conf_high_list <- lapply(diagnosands_summary_df, function(data) lapply(data[diagnosand_columns], quantile, 0.975))
+    
+    diagnosands_mean <- unlist(diagnosands_mean_list)
+    diagnosands_se <- unlist(diagnosands_se_list)
+    diagnosands_conf_low_df <- unlist(diagnosands_conf_low_list)
+    diagnosands_conf_high_df <- unlist(diagnosands_conf_high_list)
+    
+    names <- strsplit(names(diagnosands_mean), split = ".", fixed = TRUE)
+    
+    labels_df <- t(sapply(names, c))
+    colnames(labels_df) <- c(group_by_set, "diagnosand")
+    
+    diagnosand_df <- 
+      data.frame(
+        labels_df,
+        estimate = diagnosands_mean, 
+        std.error = diagnosands_se, 
+        conf.low = diagnosands_conf_low_df, 
+        conf.high = diagnosands_conf_high_df, 
+        row.names = NULL)
+    
+    diagnosand_df <- merge(diagnosand_df, diagnosis$parameters_df, by = "design")
+    
+  } else {
+    stop("error")
+  }
+  
+  diagnosand_df
+  
+}
+
+
+
+
