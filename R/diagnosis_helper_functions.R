@@ -245,8 +245,8 @@ tidy.diagnosis <- function(diagnosis) {
     
     diagnosands_mean_list <- lapply(diagnosands_summary_df, function(data) lapply(data[diagnosand_columns], mean))
     diagnosands_se_list <- lapply(diagnosands_summary_df, function(data) lapply(data[diagnosand_columns], sd))
-    diagnosands_conf_low_list <- lapply(diagnosands_summary_df, function(data) lapply(data[diagnosand_columns], quantile, 0.025))
-    diagnosands_conf_high_list <- lapply(diagnosands_summary_df, function(data) lapply(data[diagnosand_columns], quantile, 0.975))
+    diagnosands_conf_low_list <- lapply(diagnosands_summary_df, function(data) lapply(data[diagnosand_columns], quantile_NAsafe, 0.025))
+    diagnosands_conf_high_list <- lapply(diagnosands_summary_df, function(data) lapply(data[diagnosand_columns], quantile_NAsafe, 0.975))
     
     diagnosands_mean <- unlist(diagnosands_mean_list)
     diagnosands_se <- unlist(diagnosands_se_list)
@@ -258,6 +258,8 @@ tidy.diagnosis <- function(diagnosis) {
     labels_df <- t(sapply(names, c))
     colnames(labels_df) <- c(group_by_set, "diagnosand")
     
+    labels_df <- merge(labels_df, diagnosis$parameters_df, by = "design", sort = FALSE)
+    
     diagnosand_df <- 
       data.frame(
         labels_df,
@@ -267,10 +269,16 @@ tidy.diagnosis <- function(diagnosis) {
         conf.high = diagnosands_conf_high_df, 
         row.names = NULL)
     
-    diagnosand_df <- merge(diagnosand_df, diagnosis$parameters_df, by = "design")
     
   } else {
-    stop("error")
+    diagnosand_df <- 
+      data.frame(
+        labels_df,
+        estimate = diagnosands_mean, 
+        std.error = diagnosands_se, 
+        conf.low = diagnosands_conf_low_df, 
+        conf.high = diagnosands_conf_high_df, 
+        row.names = NULL)
   }
   
   diagnosand_df
@@ -278,5 +286,5 @@ tidy.diagnosis <- function(diagnosis) {
 }
 
 
-
+quantile_NAsafe <- function(x, ...) if(any(is.na(x))) NA else quantile(x, ...)
 
