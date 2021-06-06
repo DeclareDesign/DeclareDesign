@@ -1,6 +1,8 @@
 template:
   package: ddpkgdowntemplate
 
+url: https://declaredesign.org/r/declaredesign
+
 navbar:
   left:
   - text: "Software"
