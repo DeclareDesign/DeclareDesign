@@ -86,18 +86,28 @@ rename_dots <- function(handler, dots) {
 
 # Returns a new function(data) which calls FUN(data, dots)
 currydata <- function(FUN, dots) {
-
+  
   quoData <- quo((FUN)(!!!dots))
   quoNoData <- quo((FUN)(!!!(dots[names(dots) != 'data'])))
   
-  function(data = NULL) {
+  function(data = NULL, wallet = NULL) {
     #message(quo)
     # used for declare_population with no seed data provided, in which case null is not the same as missing.
     # Unfortunately, steps do not know at time of declaration if they are in first position or not; 
     # combining steps into design happens after.
     # This could in theory be caught be a design validation function for declare_population.
+    
+    if(is.null(wallet)) {
+      wallet <- new_environment()
+    }
+    if(!is.null(data)) {
+      data_env <- as_environment(list(data = data), parent = wallet)
+      mask <- new_data_mask(bottom = data_env, top = wallet)
+    } else {
+      mask <- new_data_mask(wallet)
+    }
 
-    eval_tidy(if (is.null(data) & is_implicit_data_arg(dots)) quoNoData else quoData, data = list(data = data))
+    eval_tidy(if (is.null(data) & is_implicit_data_arg(dots)) quoNoData else quoData, data = mask)
   }
 }
 
