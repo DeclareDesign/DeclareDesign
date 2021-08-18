@@ -14,5 +14,7 @@ This update to DeclareDesign completes the transition to non "legacy" syntax for
 
 ## Reverse dependencies
 
+* CausalQueries and DesignLibrary passed
+
 ---
   
