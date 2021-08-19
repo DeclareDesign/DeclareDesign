@@ -1,11 +1,12 @@
 ## Submission
 
-This update to DeclareDesign completes the transition to non "legacy" syntax for declare_assignment and declare_sampling.
+This is a minor patch switching over from a deprecated syntax to new syntax by default, after waiting nine months for users to transition.
 
 ## Test environments
 * local OS X install (release)
 * ubuntu on github actions (devel, release, oldrel)
-* OS X on Github actions (release, oldrel)
+* windows on github actions (devel, release, oldrel)
+* OS X on Github actions (devel, release, oldrel)
 * win-builder (devel, release, oldrel)
 
 ## R CMD check results
