@@ -48,5 +48,3 @@ Suggests:
     DesignLibrary,
     coin,
     margins
-Remotes:
-    DeclareDesign/DesignLibrary
