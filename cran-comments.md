@@ -1,6 +1,6 @@
 ## Submission
 
-This is a minor patch switching over from a deprecated syntax to new syntax by default, after waiting nine months for users to transition.
+This is a minor patch switching over from a deprecated syntax to new syntax by default, after waiting nine months for users to transition. Fixed URL redirect in original CRAN submission.
 
 ## Test environments
 * local OS X install (release)
