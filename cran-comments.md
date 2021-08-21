@@ -1,11 +1,12 @@
 ## Submission
 
-Thank you for your time reviewing the submission. We have removed our revdep results, which our submission was kicked back for. Apologies!
+This is a minor patch switching over from a deprecated syntax to new syntax by default, after waiting nine months for users to transition. Fixed URL redirect in original CRAN submission.
 
 ## Test environments
 * local OS X install (release)
 * ubuntu on github actions (devel, release, oldrel)
-* OS X on Github actions (release, oldrel)
+* windows on github actions (devel, release, oldrel)
+* OS X on Github actions (devel, release, oldrel)
 * win-builder (devel, release, oldrel)
 
 ## R CMD check results
@@ -14,7 +15,7 @@ Thank you for your time reviewing the submission. We have removed our revdep res
 
 ## Reverse dependencies
 
-There is one change to worse in DesignLibrary due to these change. A patch has been prepared and will be submitted to CRAN as soon as this is accepted (the package is maintained by the same team).
+* CausalQueries and DesignLibrary passed
 
 ---
   
