@@ -367,3 +367,22 @@ test_that("diagnose_design can generate and use grouping variables", {
   
   
 })
+
+
+
+test_that("tidy.diagnosis handles NAs", {
+  
+  design <- 
+    declare_model(N = 10, Y = rnorm(N)) +
+    declare_estimator(Y ~ 1, label = "normal") +
+    declare_estimator(handler = function(data){data.frame(estimate = 5)})
+  
+  dx <- diagnose_design(design, sims = 5)
+  
+  expect_equal(dim(tidy(dx)), c(18, 8))
+  
+  
+})
+
+
+

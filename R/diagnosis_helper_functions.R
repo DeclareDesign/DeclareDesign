@@ -284,7 +284,12 @@ tidy.diagnosis <- function(x,
   
   group_by_set <- x$group_by_set
   
-  diagnosands_df_long <- reshape(
+  diagnosands_df <-
+    cbind(data.frame(lapply(diagnosands_df[, c(group_by_set, parameter_names), drop = FALSE], function(x) if(any(is.na(x))) addNA(x) else x)),
+          diagnosands_df[, names(diagnosands_df)[!names(diagnosands_df) %in% c(group_by_set, parameter_names)], drop = FALSE])
+  
+  diagnosands_df_long <- 
+    reshape(
     diagnosands_df[,c(group_by_set, parameter_names, diagnosand_columns)], 
     idvar = c(group_by_set, parameter_names), 
     times = diagnosand_columns, 
