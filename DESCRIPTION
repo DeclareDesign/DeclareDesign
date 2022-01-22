@@ -24,7 +24,7 @@ License: MIT + file LICENSE
 URL: https://declaredesign.org/r/declaredesign/, https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Suggests:
     testthat,
     knitr,

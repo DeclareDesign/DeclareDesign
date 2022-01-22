@@ -22,8 +22,24 @@ A formatted text table with bootstrapped standard errors in parentheses.
 Take a diagnosis object and returns a pretty output table. If diagnosands are bootstrapped, se's are put in parentheses on a second line and rounded to \code{digits}.
 }
 \examples{
-# library(DesignLibrary)
-# diagnosis <- diagnose_design(two_arm_designer(), sims = 3)
-# reshape_diagnosis(diagnosis)
-# reshape_diagnosis(diagnosis, select = c("Bias", "Power"))
+
+effect_size <- 0.1
+design <-
+  declare_model(
+    N = 100,
+    U = rnorm(N),
+    X = rnorm(N),
+    potential_outcomes(Y ~ effect_size * Z + X + U)
+  ) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_assignment(Z = complete_ra(N)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, inquiry = "ATE", label = "unadjusted") + 
+  declare_estimator(Y ~ Z + X, inquiry = "ATE", label = "adjusted")
+
+diagnosis <- diagnose_design(design, sims = 100)
+
+reshape_diagnosis(diagnosis)
+
+reshape_diagnosis(diagnosis, select = c("Bias", "Power"))
 }
