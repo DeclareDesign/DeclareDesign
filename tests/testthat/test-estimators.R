@@ -17,18 +17,18 @@ expect_estimates <- function(estimates, label = NULL) {
 
 test_that("difference in means", {
   my_estimator <- declare_estimator(Y ~ Z)
-  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_reveal_outcomes() %>% my_estimator() %>% expect_estimates()
+  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_measurement() %>% my_estimator() %>% expect_estimates()
 })
 
 test_that("lm with robust ses", {
   my_estimator <- declare_estimator(Y ~ Z, model = lm_robust)
-  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_reveal_outcomes() %>% my_estimator() %>% expect_estimates()
+  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_measurement() %>% my_estimator() %>% expect_estimates()
 })
 
 
 test_that("lm with HC3 robust ses", {
   my_estimator <- declare_estimator(Y ~ Z, model = lm_robust, se_type = "HC3")
-  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_reveal_outcomes() %>% my_estimator() %>% expect_estimates()
+  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_measurement() %>% my_estimator() %>% expect_estimates()
 })
 
 test_that("custom estimator function", {
@@ -36,7 +36,7 @@ test_that("custom estimator function", {
     data.frame(estimate = with(data, 2), foo = mean(data$Y))
   }
   my_estimator_custom <- declare_estimator(handler = label_estimator(my_mean))
-  cust <- my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_reveal_outcomes() %>% my_estimator_custom()
+  cust <- my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_measurement() %>% my_estimator_custom()
   expect_equal(cust$estimate, 2)
 })
 
@@ -47,7 +47,7 @@ test_that("check blocked d-i-m estimator", {
 
   ## lm with HC3 robust ses
   my_estimator_blocked <- declare_estimator(Y ~ Z, model = difference_in_means, blocks = `blocks`)
-  df <- my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_reveal_outcomes()
+  df <- my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_measurement()
   my_estimator_notblocked <- declare_estimator(Y ~ Z)
 
   df %>% my_estimator_notblocked() %>% expect_estimates()

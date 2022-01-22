@@ -91,7 +91,7 @@ test_that("names are correct", {
 
   expect_equal(
     names(neighbors_design),
-    c("my_population", "my_potential_outcomes", "a_label", "processing", "reveal")
+    c("my_population", "my_potential_outcomes", "a_label", "processing", "measurement")
   )
 
   check0 <- neighbors_design + linear
@@ -102,7 +102,7 @@ test_that("names are correct", {
     names(check0),
     c(
       "my_population", "my_potential_outcomes", "a_label", "processing",
-      "reveal", "linear"
+      "measurement", "linear"
     )
   )
 
@@ -110,14 +110,14 @@ test_that("names are correct", {
     names(check1),
     c(
       "my_population", "my_potential_outcomes", "a_label", "processing",
-      "reveal", "saturated"
+      "measurement", "saturated"
     )
   )
   expect_equal(
     names(check2),
     c(
       "my_population", "my_potential_outcomes", "a_label", "processing",
-      "reveal", "linear", "saturated"
+      "measurement", "linear", "saturated"
     )
   )
 })

@@ -105,7 +105,7 @@ test_that("designs with factors in diagnosands_df do not produce warnings", {
 
 test_that("groups with factors", {
   
-  set.seed(1)
+  set.seed(5)
   design <- 
     declare_model(N = 100, u = rnorm(N)) + 
     declare_model(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +

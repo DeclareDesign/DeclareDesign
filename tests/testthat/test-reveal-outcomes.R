@@ -23,7 +23,7 @@ test_that("Reveal Outcomes", {
 
   my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
-  my_design <- my_population + my_potential_outcomes + my_inquiry + my_sampling + my_assignment + my_reveal + my_estimator
+  my_design <- my_population + my_potential_outcomes + my_inquiry + my_sampling + my_assignment + my_measurement + my_estimator
 
   dat <- draw_data(my_design)
 
@@ -105,6 +105,7 @@ test_that("missing PO stops", {
 })
 
 test_that("Not all Potential outcome columns present", {
+  set.seed(4)
   df <- data.frame(Z = sample(1:3, 100, replace = TRUE), Y_Z_0 = 1:100, Y_Z_1 = 1:100)
 
   expect_error(
@@ -161,3 +162,4 @@ test_that("handler rrror on symbols", {
     attrition_variables = as.symbol("R")
   ))
 })
+

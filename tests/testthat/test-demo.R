@@ -225,7 +225,7 @@ test_that("demo runs", {
       my_inquiry +
       my_sampling +
       my_assignment +
-      my_reveal_outcomes +
+      my_measurement +
       my_estimator_dim
     return(my_design)
   }
@@ -243,7 +243,7 @@ test_that("demo runs", {
   my_design <- declare_model(my_population()) +
     my_potential_outcomes_continuous +
     my_assignment_continuous +
-    my_reveal_outcomes
+    my_measurement
 
   head(draw_data(my_design))
 

@@ -85,14 +85,14 @@ my_design_3 <- my_population +
   pate +
   my_special_step +
   my_assignment +
-  reveal +
+  measurement +
   pate_estimator
 
 my_design_4 <- my_population +
   my_potential_outcomes +
   sate +
   my_assignment +
-  reveal +
+  measurement +
   sate_estimator
 
 test_that("compare works", {
