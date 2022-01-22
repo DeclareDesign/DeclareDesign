@@ -8,7 +8,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
   }
 
   population <-
-    declare_population(handler = my_population, N = 500)
+    declare_model(handler = my_population, N = 500)
 
   my_sampling <- function(data) {
     data$S <- rbinom(

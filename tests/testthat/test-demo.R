@@ -4,7 +4,7 @@ test_that("demo runs", {
 
   ## ------------------------------------------------------------------------
   my_population <-
-    declare_population(
+    declare_model(
       N = 1000,
       income = rnorm(N),
       age = sample(18:95, N, replace = T)
@@ -15,7 +15,7 @@ test_that("demo runs", {
   expect_equal(colnames(pop), c("ID", "income", "age"))
 
   ## ------------------------------------------------------------------------
-  my_population_nested <- declare_population(
+  my_population_nested <- declare_model(
     districts = add_level(N = 25, urban = sample(0:1, N, replace = TRUE)),
     villages = add_level(N = 10, altitude = rnorm(N)),
     individuals = add_level(
@@ -28,7 +28,7 @@ test_that("demo runs", {
 
   ## ------------------------------------------------------------------------
   region_data <- data.frame(capital = c(1, 0, 0, 0, 0))
-  pop_level_data <- declare_population(
+  pop_level_data <- declare_model(
     regions = add_level(N = 2, gdp = runif(N)),
     cities = add_level(N = 2, subways = rnorm(N, mean = 5))
   )
@@ -40,12 +40,12 @@ test_that("demo runs", {
     cow_code = c(504, 15, 100, 90),
     polity_iv = c(-9, 7, -1, 3)
   )
-  pop_data <- declare_population(data = country_data)
+  pop_data <- declare_model(data = country_data)
 
   head(pop_data())
 
   ## ------------------------------------------------------------------------
-  pop_data_bootstrap <- declare_population(
+  pop_data_bootstrap <- declare_model(
     data = country_data, handler = fabricatr::resample_data
   )
 
@@ -128,7 +128,7 @@ test_that("demo runs", {
     data.frame(u = rnorm(N))
   }
 
-  my_population_custom <- declare_population(
+  my_population_custom <- declare_model(
     handler = my_population_function, N = 100
   )
 
@@ -209,7 +209,7 @@ test_that("demo runs", {
 
   ## ------------------------------------------------------------------------
   m_arm_trial <- function(numb) {
-    my_population <- declare_population(
+    my_population <- declare_model(
       N = numb, income = rnorm(N), age = sample(18:95, N, replace = T)
     )
 
@@ -240,7 +240,7 @@ test_that("demo runs", {
 
   my_assignment_continuous <- declare_assignment(Z = complete_ra(N, conditions = seq(0, 1, by = .1)))
 
-  my_design <- declare_population(my_population()) +
+  my_design <- declare_model(my_population()) +
     my_potential_outcomes_continuous +
     my_assignment_continuous +
     my_reveal_outcomes
@@ -252,7 +252,7 @@ test_that("demo runs", {
     formula = R ~ rbinom(n = N, size = 1, prob = pnorm(Y_Z_0))
   )
 
-  my_design <- declare_population(my_population()) +
+  my_design <- declare_model(my_population()) +
     my_potential_outcomes +
     my_potential_outcomes_attrition +
     my_assignment +
@@ -262,7 +262,7 @@ test_that("demo runs", {
   head(draw_data(my_design)[, c("ID", "Y_Z_0", "Y_Z_1", "R_Z_0", "R_Z_1", "Z", "R", "Y")])
 
   ## ------------------------------------------------------------------------
-  stochastic_population <- declare_population(
+  stochastic_population <- declare_model(
     N = sample(500:1000, 1), income = rnorm(N), age = sample(18:95, N, replace = TRUE)
   )
 
@@ -280,7 +280,7 @@ test_that("demo runs", {
 
   ## set a variable used in the declaration
   my_N <- 1000
-  my_population_custom <- declare_population(
+  my_population_custom <- declare_model(
     handler = my_population_function, N = my_N
   )
 

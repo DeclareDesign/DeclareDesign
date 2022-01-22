@@ -6,7 +6,7 @@ test_that("custom population", {
     data.frame(u = rnorm(N))
   }
 
-  my_population_custom <- declare_population(
+  my_population_custom <- declare_model(
     handler = my_population_function, N = 100
   )
 

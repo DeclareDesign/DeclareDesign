@@ -1,6 +1,6 @@
 library(dplyr)
 
-my_pop <- declare_population(N = 100)
+my_pop <- declare_model(N = 100)
 
 # case 1
 
@@ -38,7 +38,7 @@ test_that("a dplyr pipeline can be used in a design", {
 
 test_that("dplyr::mutate can be handlers", {
 
-  design2 <- declare_population(N = 5, X = rnorm(N)) + declare_step(Y = 4, handler = mutate)
+  design2 <- declare_model(N = 5, X = rnorm(N)) + declare_step(Y = 4, handler = mutate)
 
   df <- draw_data(design2)
 
@@ -47,7 +47,7 @@ test_that("dplyr::mutate can be handlers", {
 
 test_that("dplyr filter can be handlers", {
   
-  design2 <- declare_population(N = 5, X = rnorm(N)) + declare_step(ID > 3, handler = filter)
+  design2 <- declare_model(N = 5, X = rnorm(N)) + declare_step(ID > 3, handler = filter)
   
   df <- draw_data(design2)
   
@@ -57,7 +57,7 @@ test_that("dplyr filter can be handlers", {
 
 test_that("dplyr filter can be handlers with explicit .data", {
   
-  design2 <- declare_population(N = 5, X = rnorm(N)) + declare_step(.data=data, ID > 3, handler = filter)
+  design2 <- declare_model(N = 5, X = rnorm(N)) + declare_step(.data=data, ID > 3, handler = filter)
   
   df <- draw_data(design2)
   

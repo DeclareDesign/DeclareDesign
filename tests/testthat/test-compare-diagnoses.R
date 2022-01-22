@@ -2,7 +2,7 @@ context("Compare Diagnoses")
 
 prob_assgn <- 0.5
 design_a <-
-  declare_population(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +
+  declare_model(N = 100, u = rnorm(N), X = runif(N, 0, 2)) +
   declare_potential_outcomes(Y_Z_0 = u, Y_Z_1 = u + rnorm(N, .5)) +
   declare_assignment(Z = complete_ra(N, prob = prob_assgn)) + 
   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0), label = "ATE") +
@@ -69,7 +69,7 @@ test_that("compare_diagnoses errors when it should", {
   
   # diagnosis_df must contain only one unique design
   designer <- function(N) {
-    declare_population(N = N, noise = rnorm(N)) +
+    declare_model(N = N, noise = rnorm(N)) +
       declare_potential_outcomes(Y ~ 0.20 * Z + noise) +
       declare_assignment(Z = complete_ra(N, prob = 0.5)) +
       declare_inquiry(ate = mean(Y_Z_1 - Y_Z_0)) +

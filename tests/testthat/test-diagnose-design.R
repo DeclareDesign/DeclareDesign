@@ -9,7 +9,7 @@ test_that("error when you send other objects to diagnose", {
 
 test_that("default diagnosands work", {
   my_designer <- function(N = 500) {
-    my_population <- declare_population(N = N, noise = rnorm(N))
+    my_population <- declare_model(N = N, noise = rnorm(N))
 
     my_potential_outcomes <-
       declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
@@ -142,7 +142,7 @@ test_that("default diagnosands work", {
 
 test_that("more term",{
   population  <-
-    declare_population(N = 100,
+    declare_model(N = 100,
                        Z = rep(0:1, 50),
                        Y = rnorm(N))
   
@@ -193,7 +193,7 @@ test_that("diagnose_design does not reclass the variable N", {
   skip_if(compareVersion("3.5", paste(R.Version()$major, R.Version()$minor, sep = ".")) == 1)
   # works for redesign
   design <-
-    declare_population(N = 5, noise = rnorm(N)) +
+    declare_model(N = 5, noise = rnorm(N)) +
        declare_inquiry(mean_noise = mean(noise))
   
   designs <- redesign(design, N = 5:10) 
@@ -204,7 +204,7 @@ test_that("diagnose_design does not reclass the variable N", {
   
   # works for expand_design
   designer <- function(N = 5) {
-    declare_population(N = N, noise = rnorm(N)) +
+    declare_model(N = N, noise = rnorm(N)) +
     declare_inquiry(mean_noise = mean(noise))
   }
   
@@ -219,7 +219,7 @@ test_that("diagnose_design does not reclass the variable N", {
 
 test_that("diagnose_design works when simulations_df lacking parameters attr", {
 
-  design <- declare_population(N = 100, X = rnorm(N), Y = rnorm(N, X)) +
+  design <- declare_model(N = 100, X = rnorm(N), Y = rnorm(N, X)) +
     declare_inquiry(true_effect = 1) +
     declare_estimator(Y ~ X, model=lm_robust, inquiry = "true_effect", label = "Y on X") 
   
@@ -251,8 +251,10 @@ test_that("diagnose_design can generate and use grouping variables", {
   set.seed(5)
   
   design <- 
-    declare_population(N = 100, u = rnorm(N)) + 
-    declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
+    declare_model(N = 100, u = rnorm(N),
+      Y_Z_0 = 0, 
+      Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u
+    ) +
     declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
     declare_reveal() + 
@@ -266,8 +268,10 @@ test_that("diagnose_design can generate and use grouping variables", {
   expect_equivalent(diagnosis$diagnosands_df$estimand,  c(FALSE, TRUE))
   
   design <- 
-    declare_population(N = 100, u = rnorm(N)) + 
-    declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
+    declare_model(N = 100, u = rnorm(N),
+      Y_Z_0 = 0, 
+      Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u
+    ) +
     declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
     declare_reveal() + 
@@ -286,8 +290,10 @@ test_that("diagnose_design can generate and use grouping variables", {
   
   
   design <- 
-    declare_population(N = 100, u = rnorm(N)) + 
-    declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
+    declare_model(N = 100, u = rnorm(N),
+      Y_Z_0 = 0, 
+      Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u
+    ) +
     declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
     declare_reveal() + 

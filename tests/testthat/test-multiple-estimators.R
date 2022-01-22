@@ -2,7 +2,7 @@ context("Multiple estimators")
 
 test_that("Two estimators, Two inquiries (matched)", {
   des <-
-    declare_population(sleep) +
+    declare_model(sleep) +
     declare_inquiry(
       CATE_1_5 = mean(extra[group == 2]) - mean(extra[group == 1]),
       subset = ID %in% 1:5
@@ -36,7 +36,7 @@ test_that("Two estimators, Two inquiries (matched)", {
 
 test_that("Two estimators, Two inquiries (crossed)", {
   des <-
-    declare_population(sleep) +
+    declare_model(sleep) +
     # Make a noisier outcome
     declare_potential_outcomes(extra1 ~ extra + 2 * (Z == 1) + rnorm(length(extra))) +
 

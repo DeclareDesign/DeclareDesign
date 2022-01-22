@@ -80,7 +80,7 @@ test_that("test assignment and probability functions", {
     sample(x)
   }
   
-  population <- declare_population(
+  population <- declare_model(
     villages = add_level(
       N = 100, elevation = rnorm(N),
       high_elevation = as.numeric(elevation > 0)
@@ -176,7 +176,7 @@ test_that("declare_assignment expected failures via validation fn", {
 
 
 test_that("can append probabilities matrix", {
-  pop <- declare_population(N = 10)
+  pop <- declare_model(N = 10)
   assignment <- declare_assignment(legacy = TRUE, m = 5, append_probabilities_matrix = TRUE)
   dat <- draw_data(pop + assignment)
   
@@ -187,7 +187,7 @@ test_that("can append probabilities matrix", {
 test_that("can append probabiliies matrix with blocks from data", {
   
   design <- 
-    declare_population(block = add_level(N = 3,
+    declare_model(block = add_level(N = 3,
                                          tau = c(3, 1, 0)),
                        indiv = add_level(N = 50,
                                          e = rnorm(N, 0, 5))) +

@@ -2,7 +2,7 @@ context("print")
 
 N <- 500
 
-my_population <- declare_population(N = N, noise = rnorm(N))
+my_population <- declare_model(N = N, noise = rnorm(N))
 
 my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
@@ -38,7 +38,7 @@ test_that("print code works", {
 # test_that("print full design", {
 #
 #   expect_equal(capture.output(print_code(design)),
-#                c("my_population <- declare_population(N = N, noise = rnorm(N)) ",
+#                c("my_population <- declare_model(N = N, noise = rnorm(N)) ",
 #                  "", "my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)) ",
 #                  "", "my_sampling <- declare_sampling(S = complete_rs(N, n = 250)) ", "", "my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) ",
 #                  "", "my_assignment <- declare_assignment(Z = complete_ra(N, m = 25)) ", "", "my_reveal <- declare_reveal() ",

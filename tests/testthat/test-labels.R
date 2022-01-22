@@ -2,7 +2,7 @@ context("general label issues")
 
 test_that("error if more than one label is sent to any step", {
   
-  expect_error(declare_population(
+  expect_error(declare_model(
     N = 5,
     label = c("lbl1", "lbl2")), "Please provide only one label.")
   

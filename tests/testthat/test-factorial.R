@@ -1,7 +1,7 @@
 context("Factorial Design")
 
 test_that("Factorial", {
-  my_population <- declare_population(N = 2000, noise = rnorm(N))
+  my_population <- declare_model(N = 2000, noise = rnorm(N))
 
   my_potential_outcomes <- declare_potential_outcomes(
     Y_Z_T1 = noise,

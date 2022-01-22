@@ -25,7 +25,7 @@ A function that returns a data.frame.
 This function adds measured data columns that can be functions of unmeasured data columns.
 }
 \details{
-It is also possible to include measured variables in your declare_population call or to add variables using declare_step. However, putting latent variables in declare_population and variables-as-measured in declare_measurement helps communicate which parts of your research design are in M and which parts are in D.
+It is also possible to include measured variables in your declare_model call or to add variables using declare_step. However, putting latent variables in declare_model and variables-as-measured in declare_measurement helps communicate which parts of your research design are in M and which parts are in D.
 }
 \examples{
 

@@ -1,7 +1,7 @@
 context("Estimators")
 
-my_population <- declare_population(N = 500, noise = rnorm(N))
-my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+my_population <- declare_model(N = 500, noise = rnorm(N))
+my_potential_outcomes <- declare_model(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 my_reveal_outcomes <- declare_reveal()
 
@@ -41,8 +41,8 @@ test_that("custom estimator function", {
 })
 
 test_that("check blocked d-i-m estimator", {
-  my_population <- declare_population(N = 500, noise = rnorm(N), blocks = sample(rep(c("A", "B"), each = 250), N, replace = F))
-  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2) + 5 * (blocks == "A"))
+  my_population <- declare_model(N = 500, noise = rnorm(N), blocks = sample(rep(c("A", "B"), each = 250), N, replace = F))
+  my_potential_outcomes <- declare_model(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2) + 5 * (blocks == "A"))
   my_assignment <- declare_assignment(Z = block_ra(blocks = blocks))
 
   ## lm with HC3 robust ses
@@ -57,8 +57,8 @@ test_that("check blocked d-i-m estimator", {
 
 
 test_that("regression from estimatr works as an estimator", {
-  my_population <- declare_population(N = 500, noise = rnorm(N))
-  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+  my_population <- declare_model(N = 500, noise = rnorm(N))
+  my_potential_outcomes <- declare_model(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
   my_assignment <- declare_assignment(Z = complete_ra(N, m = 100))
   pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
   pate_estimator <- declare_estimator(Y ~ Z + noise,
@@ -81,7 +81,7 @@ test_that("regression from estimatr works as an estimator", {
   expect_equal(estimate$inquiry, "pate")
 })
 
-population <- declare_population(N = 200, noise = rnorm(N))
+population <- declare_model(N = 200, noise = rnorm(N))
 
 potential_outcomes <- declare_potential_outcomes(formula = Y ~ noise + Z * .5)
 
@@ -283,7 +283,7 @@ test_that("model_handler runs directly", {
 
 test_that("estimators have different columns", {
   skip_if_not_installed("Matching")
-  population <- declare_population(
+  population <- declare_model(
     N = 1000,
     X1 = rnorm(N),
     X2 = rnorm(N),

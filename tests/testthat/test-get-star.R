@@ -2,8 +2,8 @@
 
 context("get_ functions")
 
-population <- declare_population(N = 100, u = rnorm(N))
-potential_outcomes <- declare_potential_outcomes(Y_Z_0 = 0,
+population <- declare_model(N = 100, u = rnorm(N))
+potential_outcomes <- declare_model(Y_Z_0 = 0,
                                                  Y_Z_1 = 1 + u)
 inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 sampling <- declare_sampling(S = complete_rs(N, n = 75))

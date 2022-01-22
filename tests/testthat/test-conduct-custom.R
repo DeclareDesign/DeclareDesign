@@ -4,7 +4,7 @@ test_that("test the custom execution strategy", {
 
   # closes ticket #62
 
-  design <- declare_population(sleep) + declare_estimator(extra ~ group)
+  design <- declare_model(sleep) + declare_estimator(extra ~ group)
 
   my_sleep <- sleep
   my_sleep$extra <- my_sleep$extra + 1 * (my_sleep$group == 1)
@@ -31,7 +31,7 @@ test_that("test the custom execution strategy", {
 test_that("test error messages in run_design", {
 
   # closes ticket #12
-  design <- declare_population(sleep) + declare_population(foo = bar)
+  design <- declare_model(sleep) + declare_model(foo = bar)
 
   expect_error(run_design(design), "Error in step 2")
 })
@@ -39,7 +39,7 @@ test_that("test error messages in run_design", {
 test_that("draw_data does not run inquiry/estimator", {
 
   # closes ticket #12
-  design <- declare_population(sleep) +
+  design <- declare_model(sleep) +
     declare_inquiry(
       "Should not be run",
       handler = function(data, msg)

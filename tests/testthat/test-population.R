@@ -1,12 +1,12 @@
 context("Population")
 
-test_that("declare_population N=10", {
-  my_population <- declare_population(N = 10)
+test_that("declare_model N=10", {
+  my_population <- declare_model(N = 10)
   expect_equal(nrow(my_population()), 10)
 })
 
-test_that("declare_population multilevel N=2", {
-  pop <- declare_population(
+test_that("declare_model multilevel N=2", {
+  pop <- declare_model(
     regions = add_level(N = 2, gdp = rnorm(N)),
     cities = add_level(N = sample(1:2), subways = rnorm(N, mean = gdp))
   )
@@ -15,7 +15,7 @@ test_that("declare_population multilevel N=2", {
 })
 
 test_that("declare_population multilevel N=5", {
-  pop <- declare_population(
+  pop <- declare_model(
     regions = add_level(N = 5),
     cities = add_level(N = sample(1:5), subways = rnorm(N, mean = 5))
   )
@@ -23,8 +23,8 @@ test_that("declare_population multilevel N=5", {
   expect_equal(pop() %>% with(unique(regions)), as.character(1:5))
 })
 
-test_that("declare_population multilevel 3 levels", {
-  pop <- declare_population(
+test_that("declare_model multilevel 3 levels", {
+  pop <- declare_model(
     districts = add_level(N = 25, urban = sample(0:1, N, replace = TRUE)),
     villages = add_level(N = 10, altitude = rnorm(N)),
     individuals = add_level(
@@ -44,7 +44,7 @@ test_that("custom declare", {
     data.frame(u = rnorm(N))
   }
 
-  my_population_custom <- declare_population(
+  my_population_custom <- declare_model(
     handler = my_population_function, N = 100
   )
 
@@ -56,7 +56,7 @@ test_that("custom declare", {
 })
 
 test_that("default function", {
-  my_population_default <- declare_population(N = 100, q = rnorm(100))
+  my_population_default <- declare_model(N = 100, q = rnorm(100))
 
   ## works
   pop_default <- my_population_default()
@@ -69,7 +69,7 @@ test_that("inside function", {
   ## do quick design
 
   design_func <- function(numb) {
-    pop <- declare_population(N = numb, q = rnorm(5))
+    pop <- declare_model(N = numb, q = rnorm(5))
     rm(numb)
     return(pop)
   }
@@ -83,7 +83,7 @@ test_that("inside function", {
 
 
 test_that("Two level", {
-  d <- declare_population(
+  d <- declare_model(
     districts = add_level(N = 5, gdp = rnorm(N)),
     villages = add_level(N = 12, subways = rnorm(N, mean = gdp))
   )()
@@ -92,16 +92,16 @@ test_that("Two level", {
 })
 
 
-test_that("use custom data with declare_population", {
+test_that("use custom data with declare_model", {
   region_data <- data.frame(regions = as.character(26:30), capital = c(1, 0, 0, 0, 0), stringsAsFactors = FALSE)
 
   ## create single-level data taking user data
-  d1 <- declare_population(data = region_data)()
+  d1 <- declare_model(data = region_data)()
 
   expect_identical(region_data, d1)
 
   ## create single-level data taking user data and adding variables
-  d2 <- declare_population(data = region_data, gdp = 1:N)()
+  d2 <- declare_model(data = region_data, gdp = 1:N)()
 
 
   expect_equal(d2$gdp, 1:5)
@@ -118,13 +118,13 @@ test_that("use custom data with declare_population", {
 test_that("test data generation functions - single level add level", {
 
   # Simple 1-level cases
-  one_lev1 <- declare_population(
+  one_lev1 <- declare_model(
     N = 10,
     income = 1:N,
     age = seq(10, 30, length.out = N),
     ID_label = "level_A"
   )
-  one_lev2 <- declare_population(
+  one_lev2 <- declare_model(
     level_A = add_level(
       N = 10,
       income = 1:N,
@@ -139,7 +139,7 @@ test_that("test data generation functions - single level add level", {
 test_that("test multi level with transformations", {
 
   # With transformations within levels
-  multi_lev2 <- declare_population(
+  multi_lev2 <- declare_model(
     region = add_level(N = 2),
     city = add_level(
       N = 5,
@@ -164,7 +164,7 @@ test_that("test multi level with transformations", {
 
 
 test_that("Population declaration variations", {
-  my_population <- declare_population(N = 10, noise = 1:N)
+  my_population <- declare_model(N = 10, noise = 1:N)
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + 2)
 
   # Way 1
@@ -175,12 +175,12 @@ test_that("Population declaration variations", {
   # Way 2
 
   fixed_df <- my_population()
-  design <- declare_population(fixed_df) + my_potential_outcomes
+  design <- declare_model(fixed_df) + my_potential_outcomes
   df2 <- draw_data(design)
 
   # Way 3
 
-  design <- declare_population(my_population()) + my_potential_outcomes
+  design <- declare_model(my_population()) + my_potential_outcomes
   df3 <- draw_data(design)
 
   expect_identical(df1, df2)

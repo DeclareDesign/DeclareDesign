@@ -12,7 +12,7 @@ test_that("Multiple inquiries can be mapped to one estimator", {
 
 
 
-  simp_pop <- declare_population(
+  simp_pop <- declare_model(
     epsilon = rnorm(N, sd = 2),
     Y = X + epsilon
   )
@@ -29,7 +29,7 @@ test_that("Multiple inquiries can be mapped to one estimator", {
   )
 
   des <-
-    declare_population(dat) +
+    declare_model(dat) +
     simp_pop +
     dgp_se +
     obs_se +
@@ -58,7 +58,7 @@ test_that("More multiple inquiries", {
   }
 
 
-  pop <- declare_population(N = 100, noise = rnorm(N))
+  pop <- declare_model(N = 100, noise = rnorm(N))
   pos <- declare_potential_outcomes(Y ~ Z * noise)
   pate <- declare_inquiry(pate = mean(Y_Z_1 - Y_Z_0))
   smp <- declare_sampling(handler = my_smp_fun)

@@ -79,7 +79,7 @@ test_that("multiple inquiry declarations work", {
   sate <- declare_inquiry(SATE = mean(Y_Z_1 - Y_Z_0))
   pate <- declare_inquiry(PATE = mean(Y_Z_1 - Y_Z_0))
 
-  design_1 <- declare_population(df) + pate + sate
+  design_1 <- declare_model(df) + pate + sate
   expect_identical(
     draw_estimands(design_1),
     structure(list(inquiry = c("PATE", "SATE"), estimand = c(
@@ -98,7 +98,7 @@ test_that("multiple inquiry declarations work", {
   sate_label <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "The SATE")
   pate_label <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "The PATE")
 
-  design_2 <- declare_population(df) + pate_label + sate_label
+  design_2 <- declare_model(df) + pate_label + sate_label
 
   expect_identical(
     draw_estimands(design_2),
@@ -119,7 +119,7 @@ test_that("duplicated labels fail", {
   pate_nolabel <- declare_inquiry(mean(Y_Z_1 - Y_Z_0))
 
   expect_error({
-    design_3 <- declare_population(df) + pate_nolabel + sate_nolabel
+    design_3 <- declare_model(df) + pate_nolabel + sate_nolabel
   })
 })
 

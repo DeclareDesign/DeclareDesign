@@ -3,8 +3,8 @@ context("Utilities")
 
 
 test_that("pretty printers", {
-  expect_output(print(declare_population(sleep)),
-                "declare_population\\(sleep\\)")
+  expect_output(print(declare_model(sleep)),
+                "declare_model\\(sleep\\)")
 })
 
 test_that("error if data is in there.", {

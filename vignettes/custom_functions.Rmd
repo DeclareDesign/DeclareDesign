@@ -65,7 +65,7 @@ In order to declare the design, we pass each of the custom functions to the `han
 
 ```{r}
 design <- 
-  declare_population(handler = custom_population, N = 100) + 
+  declare_model(handler = custom_population, N = 100) + 
   declare_potential_outcomes(handler = custom_potential_outcomes) + 
   declare_inquiry(handler = custom_inquiry, label = "medianTE") + 
   declare_sampling(handler = custom_sampling) + 

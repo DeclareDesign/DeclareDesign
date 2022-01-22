@@ -75,7 +75,7 @@ expect_sampling_step <- function(step, df, n, clusters = NULL, strata = NULL) {
 }
 
 test_that("test sampling and probability functions", {
-  population <- declare_population(
+  population <- declare_model(
     villages = add_level(
       N = 100, elevation = rnorm(N),
       high_elevation = as.numeric(elevation > 0)
@@ -127,7 +127,7 @@ test_that("declare_sampling expected failures via validation fn", {
 
 test_that("keep/drop options work with diff sampling names", {
   
-  desgn <- declare_population(N = 10) + NULL 
+  desgn <- declare_model(N = 10) + NULL 
   
   dat1 <- draw_data(desgn + declare_sampling(legacy = TRUE, n = 5))
   dat2 <- draw_data(desgn + declare_sampling(legacy = TRUE, n = 5, drop_nonsampled = TRUE))

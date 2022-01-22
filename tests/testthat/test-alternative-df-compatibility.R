@@ -5,7 +5,7 @@ test_that("data.frame", {
 
   pos <- declare_potential_outcomes(Y_Z_0 = y * 5, Y_Z_1 = y * 5 + 3)
 
-  design <- declare_population(dat) + pos
+  design <- declare_model(dat) + pos
 
   df <- draw_data(design)
 
@@ -21,7 +21,7 @@ test_that("tibble", {
 
   pos <- declare_potential_outcomes(Y_Z_0 = y * 5, Y_Z_1 = y * 5 + 3)
 
-  design <- declare_population(dat) + pos
+  design <- declare_model(dat) + pos
 
   df <- draw_data(design)
 
@@ -32,7 +32,7 @@ test_that("tibble", {
 
 test_that("tibble more", {
   
-  population <- declare_population(N = 100, u = rnorm(N))
+  population <- declare_model(N = 100, u = rnorm(N))
   potential_outcomes <- declare_potential_outcomes(Y ~ Z)
   assignment <- declare_assignment(Z = complete_ra(N, m = 50))
   reveal_Y <- declare_reveal(Y,Z)
@@ -55,7 +55,7 @@ test_that("data.table", {
 
   pos <- declare_potential_outcomes(Y_Z_0 = y * 5, Y_Z_1 = y * 5 + 3)
 
-  design <- declare_population(dat) + pos
+  design <- declare_model(dat) + pos
 
   df <- draw_data(design)
 
@@ -71,7 +71,7 @@ test_that("sf", {
 
   pos <- declare_potential_outcomes(Y_Z_0 = y * 5, Y_Z_1 = y * 5 + 3)
 
-  design <- declare_population(dat) + pos
+  design <- declare_model(dat) + pos
 
   df <- draw_data(design)
 

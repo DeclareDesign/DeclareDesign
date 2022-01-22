@@ -1,7 +1,7 @@
 context("environment problems")
 
 test_that("send inquiry to estimator works", {
-  my_population <- declare_population(N = 50, noise = rnorm(N))
+  my_population <- declare_model(N = 50, noise = rnorm(N))
 
   my_potential_outcomes <-
     declare_potential_outcomes(

@@ -1,8 +1,8 @@
 context("Diagnosands")
 
-my_population <- declare_population(N = 50, noise = rnorm(N))
+my_population <- declare_model(N = 50, noise = rnorm(N))
 fixed_pop <- my_population()
-my_pop <- declare_population(fixed_pop)
+my_pop <- declare_model(fixed_pop)
 
 my_potential_outcomes <-
   declare_potential_outcomes(
@@ -115,7 +115,7 @@ test_that("single diagnosand function", {
 
 
 test_that("no estimates, no estimators should error", {
-  my_population <- declare_population(N = 50)
+  my_population <- declare_model(N = 50)
 
   my_design <- my_population + NULL
 
@@ -128,7 +128,7 @@ test_that("no estimates, no estimators should error", {
 
 
 test_that("diagnosis, list of designs", {
-  d <- declare_population(sleep) +
+  d <- declare_model(sleep) +
     declare_estimator(extra ~ group, term = group2)
 
   diagnosand <- declare_diagnosands(z = mean(estimate > 0))
@@ -142,7 +142,7 @@ test_that("diagnosis, list of designs", {
 })
 
 test_that("diagnosis, unlinked estimator", {
-  d <- declare_population(sleep) +
+  d <- declare_model(sleep) +
     declare_inquiry(foo = 2, bar = 3) +
     declare_estimator(extra ~ group, model = lm, term = TRUE)
   expect_warning(diagnose_design(d, sims = 5, bootstrap_sims = FALSE), "Estimators lack inquiry/term labels for matching, a many-to-many merge was performed.")
@@ -150,7 +150,7 @@ test_that("diagnosis, unlinked estimator", {
 
 
 test_that("diagnosis, no estimator", {
-  d <- declare_population(sleep) +
+  d <- declare_model(sleep) +
     declare_inquiry(foo = 2, bar = 3)
 
   diagnosand <- declare_diagnosands(z = mean(estimand > 0))
@@ -195,7 +195,7 @@ test_that("Overriding join conditions", {
 
   attr(custom, "group_by") <- c("inquiry", "estimator")
 
-  design <- declare_population(data=sleep, handler = fabricatr::resample_data) +
+  design <- declare_model(data=sleep, handler = fabricatr::resample_data) +
     declare_inquiry(group1 = 1, group2 = 2, term = TRUE, label = "e") +
     declare_estimator(extra ~ group + 0, term = TRUE, inquiry = "e", model = lm, label = "my_estimator")
 
@@ -206,7 +206,7 @@ test_that("Overriding join conditions", {
 
 test_that("diagnosis, NAs if no inquiry", {
   ols <- declare_estimator(extra ~ group)
-  d <- declare_population(sleep) + ols
+  d <- declare_model(sleep) + ols
   
   sleep_ols <- structure(list(design = structure(1L, .Label = "d", class = "factor"), 
                              estimator = "estimator", term = "group2", bias = NA_real_, 
@@ -224,7 +224,7 @@ expect_equivalent(diagnose_design(d, sims = 4, bootstrap_sims = 5)$diagnosands_d
 
 test_that("diagnosis, NAs if no inquiry", {
   mu <- declare_inquiry(mean(extra))
-  d <- declare_population(sleep) + mu
+  d <- declare_model(sleep) + mu
   
   sleep_ols <-
     structure(list(design = structure(1L, .Label = "d", class = "factor"), 
@@ -262,9 +262,9 @@ test_that("declare time errors", {
 
 # test_that("missingness",{
 #   
-#   my_population <- declare_population(N = 50, noise = rnorm(N))
+#   my_population <- declare_model(N = 50, noise = rnorm(N))
 #   fixed_pop <-  my_population()
-#   my_pop <- declare_population(fixed_pop)
+#   my_pop <- declare_model(fixed_pop)
 # 
 #   my_odd_estimator <- function(data) {
 #     estimate = rnorm(1)

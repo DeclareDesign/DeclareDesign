@@ -1,6 +1,6 @@
 context("Continuous POs")
 test_that("you can do continuous POs", {
-  my_population <- declare_population(
+  my_population <- declare_model(
     N = 100, income = rnorm(N), age = sample(18:95, N, replace = T)
   )
 
@@ -34,7 +34,7 @@ test_that("Hooke's law", {
 
   # Variablity in manufacturing
   pop <-
-    declare_population(springs = add_level(
+    declare_model(springs = add_level(
       N = 100,
       resting = rnorm(N, 10, .1),
       stiffness = rnorm(N, 1, .05)

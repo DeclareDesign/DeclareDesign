@@ -8,7 +8,7 @@ test_that("get_estimates works", {
   
   N <- 500
   
-  my_population <- declare_population(data = sleep)
+  my_population <- declare_model(data = sleep)
   
   my_estimator <- declare_estimator(extra ~ group)
   
@@ -46,7 +46,7 @@ test_that("get_estimates works", {
 
 test_that("warning for wrong class estimator label", {
   
-  my_population <- declare_population(data = sleep)
+  my_population <- declare_model(data = sleep)
   
   custom_func <- function(data){
     data.frame(

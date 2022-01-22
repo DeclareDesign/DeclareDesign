@@ -5,7 +5,7 @@ context("Reveal Outcomes")
 
 
 test_that("Reveal Outcomes", {
-  my_population <- declare_population(N = 1000, u = rnorm(N))
+  my_population <- declare_model(N = 1000, u = rnorm(N))
 
   my_sampling <- declare_sampling(S = complete_rs(N, n = 100))
 
@@ -35,7 +35,7 @@ test_that("Reveal Outcomes", {
 })
 
 test_that("Reveal Outcomes NSE for assignment / outcome variables ", {
-  my_population <- declare_population(N = 500, noise = 1:N)
+  my_population <- declare_model(N = 500, noise = 1:N)
 
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + 1)
 
@@ -63,7 +63,7 @@ test_that("Reveal Outcomes NSE for assignment / outcome variables ", {
 test_that("reveal multiple outcomes works", {
   N <- 25
 
-  my_population <- declare_population(N = N, noise = 1:N)
+  my_population <- declare_model(N = N, noise = 1:N)
   my_potential_outcomes1 <- declare_potential_outcomes(formula = Y1 ~ Z * .25, conditions = c(0, 1))
   my_potential_outcomes2 <- declare_potential_outcomes(formula = Y2 ~ Z * .5 + 3, conditions = c(0, 1))
   my_assignment <- declare_assignment(Z = complete_ra(N, prob = 1))
@@ -82,7 +82,7 @@ test_that("reveal multiple outcomes works", {
 test_that("declare_reveal custom handler works", {
   N <- 25
 
-  my_population <- declare_population(N = N, noise = rnorm(N))
+  my_population <- declare_model(N = N, noise = rnorm(N))
   my_assignment <- declare_assignment(Z = complete_ra(N, m = 10))
 
   my_outcome_function <- function(data) {
@@ -113,7 +113,7 @@ test_that("Not all Potential outcome columns present", {
 
 
 test_that("Single outcome, multiple assn", {
-  population <- declare_population(
+  population <- declare_model(
     blocks = fabricatr::add_level(
       N = 40,
       block_shock = rnorm(N)

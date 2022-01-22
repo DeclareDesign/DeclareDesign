@@ -1,6 +1,6 @@
 context("Bootstrap Diagnosands")
 test_that("test diagnosands", {
-  my_population <- declare_population(N = 50, noise = rnorm(N))
+  my_population <- declare_model(N = 50, noise = rnorm(N))
 
   my_potential_outcomes <-
     declare_potential_outcomes(
@@ -19,7 +19,7 @@ test_that("test diagnosands", {
 
   fixed_data <- my_population()
 
-  my_design <- declare_population(data = fixed_data) +
+  my_design <- declare_model(data = fixed_data) +
     my_potential_outcomes +
     pate +
     my_assignment +
@@ -40,7 +40,7 @@ test_that("test diagnosands", {
 test_that("Bootstrap ses close", {
   skip("Skipped bootstrap SE test for speed")
   
-  pop <- declare_population(N = 100, S100 = rnorm(N, sd = 100), S10000 = rnorm(N, sd = 10000))
+  pop <- declare_model(N = 100, S100 = rnorm(N, sd = 100), S10000 = rnorm(N, sd = 10000))
   inquiry <- declare_inquiry(S100 = mean(S100), S10000 = mean(S10000))
   estimate <- declare_estimator(S100 ~ S10000, model = lm, inquiry = list("S100", "S10000"))
   design <- pop + inquiry + estimate
