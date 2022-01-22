@@ -13,7 +13,7 @@ test_that("Basic design summary", {
 
   my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
-  declare_reveal <- declare_reveal()
+  my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
   design <- my_population +
     my_potential_outcomes +
@@ -21,7 +21,7 @@ test_that("Basic design summary", {
     my_inquiry +
     declare_step(dplyr::mutate, q = 5) +
     my_assignment +
-    declare_reveal +
+    my_measurement +
     my_estimator
 
   s <- summary(design)

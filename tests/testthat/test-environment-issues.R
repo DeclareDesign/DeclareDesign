@@ -15,13 +15,13 @@ test_that("send inquiry to estimator works", {
 
   pate_estimator <- declare_estimator(Y ~ Z, inquiry = pate, label = "test")
 
-  declare_reveal <- declare_reveal()
+  my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
   my_design <- my_population +
     my_potential_outcomes +
     pate +
     my_assignment +
-    declare_reveal +
+    my_measurement +
     pate_estimator
 
   rm(list = ls()[-which(ls() %in% "my_design")])

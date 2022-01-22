@@ -44,7 +44,7 @@ test_that("Two estimators, Two inquiries (crossed)", {
     declare_inquiry(ATT = mean(extra1_Z_1) - mean(extra1_Z_0), subset = group == 2) +
 
     declare_assignment(Z = complete_ra(N, prob = 0.5)) +
-    declare_reveal(outcome_variables = extra1, assignment_variables = Z) +
+    declare_measurement(extra1 = reveal_outcomes(extra1 ~ Z)) +
 
     declare_estimator(extra1 ~ Z, model = difference_in_means, inquiry = c("ATE", "ATT"), label = "DIM") +
     declare_estimator(extra1 ~ Z + group, model = lm_robust, clusters = ID, inquiry = c("ATE", "ATT"), label = "OLS + control")

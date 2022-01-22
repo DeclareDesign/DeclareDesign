@@ -90,8 +90,8 @@ test_that("demo runs", {
   my_inquiry(pop_pos)
 
   ## ------------------------------------------------------------------------
-  my_reveal_outcomes <- declare_reveal()
-  smp <- my_reveal_outcomes(smp)
+  my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
+  smp <- my_measurement(smp)
   my_estimator_dim <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
   my_estimator_dim(smp)
 
@@ -112,7 +112,7 @@ test_that("demo runs", {
     declare_step(dplyr::mutate, big_income = 5 * income) +
     my_sampling +
     my_assignment +
-    my_reveal_outcomes +
+    my_measurement +
     my_estimator_dim
 
   ## ------------------------------------------------------------------------

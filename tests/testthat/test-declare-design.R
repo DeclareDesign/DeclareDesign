@@ -19,7 +19,7 @@ test_that(
 
     my_mutate <- declare_step(dplyr::mutate, noise_sq = noise^2)
 
-    my_reveal <- declare_reveal()
+    my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
     design <- my_population +
       my_potential_outcomes +
@@ -27,7 +27,7 @@ test_that(
       my_inquiry +
       my_mutate +
       my_assignment +
-      my_reveal +
+      my_measurement +
       my_estimator
 
     df <- (draw_data(design))
@@ -44,7 +44,7 @@ test_that("No estimators / inquiries", {
     declare_model(N = 500, noise = 1:N, Y_Z_0 = noise, Y_Z_1 = noise + 1) +
     declare_sampling(S = complete_rs(N, n = 250)) +
     declare_assignment(Z = complete_ra(N, m = 25)) +
-    declare_reveal()
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
   head(draw_data(design))
   expect_error(run_design(design), "No estimates or inquiries were declared")

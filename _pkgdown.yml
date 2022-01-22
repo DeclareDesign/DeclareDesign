@@ -34,19 +34,17 @@ reference:
 - title: Declare
   description: These functions declare research design steps
   contents:
+  - declare_model
+  - declare_inquiry
+  - declare_inquiries
+  - declare_sampling
   - declare_assignment
-  - declare_estimand
-  - declare_estimands
+  - declare_measurement
+  - reveal_outcomes
   - declare_estimator
   - declare_estimators
-  - declare_measurement
-  - declare_population
-  - declare_potential_outcomes
-  - declare_sampling
-  - declare_step
   - declare_test
-  - declare_reveal
-  - reveal_outcomes
+  - declare_step
   - set_citation
   - label_estimator
   - label_test
@@ -79,6 +77,7 @@ reference:
   - simulate_designs
   - set_diagnosands
   - reshape_diagnosis
+  - tidy
 
 - title: Redesign
   description: These functions modify declared designs

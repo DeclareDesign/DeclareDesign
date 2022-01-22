@@ -6,7 +6,7 @@ design_a <-
   declare_potential_outcomes(Y_Z_0 = u, Y_Z_1 = u + rnorm(N, .5)) +
   declare_assignment(Z = complete_ra(N, prob = prob_assgn)) + 
   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0), label = "ATE") +
-  declare_reveal() +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
   declare_estimator(Y ~ Z, inquiry = "ATE", label = "est1")
 design_b <- redesign(design_a, prob_assgn = 0.1)
 set.seed(2000)
@@ -73,7 +73,7 @@ test_that("compare_diagnoses errors when it should", {
       declare_potential_outcomes(Y ~ 0.20 * Z + noise) +
       declare_assignment(Z = complete_ra(N, prob = 0.5)) +
       declare_inquiry(ate = mean(Y_Z_1 - Y_Z_0)) +
-      declare_reveal() + 
+      declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
       declare_estimator(Y ~ Z)
   }
   

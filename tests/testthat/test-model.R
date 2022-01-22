@@ -9,11 +9,11 @@ my_potential_outcomes <-
     Y_Z_1 = draw_binary(latent = noise + 2, link = "probit")
   )
 my_assignment <- declare_assignment(Z = complete_ra(N, prob = 0.5))
-my_reveal <- declare_reveal()
+my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 my_design <- my_population +
   my_potential_outcomes +
   my_assignment +
-  my_reveal
+  my_measurement
 dat <- draw_data(my_design)
 
 test_that("test default term Z, lm", {

@@ -13,20 +13,20 @@ sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))
 pate_estimator <- declare_estimator(Y ~ Z, inquiry = pate)
 sate_estimator <- declare_estimator(Y ~ Z, inquiry = sate)
 
-reveal <- declare_reveal()
+measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
 my_design_1 <- my_population +
   my_potential_outcomes +
   pate +
   my_assignment +
-  reveal +
+  measurement +
   pate_estimator
 
 my_design_2 <- my_population +
   my_potential_outcomes +
   sate +
   my_assignment +
-  reveal +
+  measurement +
   sate_estimator
 
 test_that("compare_designs works", {
@@ -76,7 +76,7 @@ sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))
 pate_estimator <- declare_estimator(Y ~ Z, inquiry = pate)
 sate_estimator <- declare_estimator(Y ~ Z, inquiry = sate)
 
-reveal <- declare_reveal()
+measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
 my_special_step <- declare_inquiry(ATE = 5)
 

@@ -16,13 +16,13 @@ pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
 
 pate_estimator <- declare_estimator(Y ~ Z, inquiry = pate, label = "test")
 
-declare_reveal <- declare_reveal()
+my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
 my_design <- my_pop +
   my_potential_outcomes +
   pate +
   my_assignment +
-  declare_reveal +
+  my_measurement +
   pate_estimator
 
 my_design_2 <- my_design
@@ -79,7 +79,7 @@ test_that("test diagnosands without inquiries", {
   my_design2 <- my_population +
     my_potential_outcomes +
     my_assignment +
-    declare_reveal +
+    my_measurement +
     declare_estimator(Y ~ Z)
 
   my_dig <- declare_diagnosands(mean_est = mean(estimate), sd_est = sd(estimate))

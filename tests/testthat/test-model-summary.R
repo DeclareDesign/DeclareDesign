@@ -13,14 +13,14 @@ test_that("multiple design draw_estimates", {
     
     my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
     
-    my_reveal <- declare_reveal()
+    my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
     
     my_design <-
       my_population +
       my_potential_outcomes +
       my_inquiry +
       my_assignment +
-      my_reveal +
+      my_measurement +
       my_estimator
     
     my_design
@@ -37,13 +37,13 @@ test_that("multiple design draw_estimates", {
   
   my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
   
-  my_reveal <- declare_reveal()
+  my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
   
   design_1 <- my_population +
     my_potential_outcomes +
     my_inquiry +
     my_assignment +
-    my_reveal +
+    my_measurement +
     my_estimator
   
   my_assignment_2 <- declare_assignment(Z = complete_ra(N, m = 50))

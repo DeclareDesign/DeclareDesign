@@ -37,7 +37,7 @@ test_that("Lots of levels", {
   design <- declare_model(N = 26000, preference = sample(LETTERS, N, replace = TRUE)) +
     declare_potential_outcomes(!!!outcomes) +
     declare_assignment(Z = complete_ra(N, conditions = !!LETTERS)) +
-    declare_reveal()
+    declare_measurement(Y = reveal_outcomes(Y ~ Z))
 
   expect_equal(colnames(draw_data(design)), c(
     "ID", "preference", "Y_Z_A", "Y_Z_B", "Y_Z_C", "Y_Z_D", "Y_Z_E",

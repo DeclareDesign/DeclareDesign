@@ -12,12 +12,12 @@ test_that("you can do continuous POs", {
 
   my_assignment <- declare_assignment(Z = complete_ra(N = N, conditions = conditions))
 
-  my_reveal <- declare_reveal()
+  my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
   my_design <- my_population +
     my_potential_outcomes +
     my_assignment +
-    my_reveal
+    my_measurement
 
   df <- head(draw_data(my_design))
 

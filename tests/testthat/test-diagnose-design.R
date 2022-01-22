@@ -20,14 +20,14 @@ test_that("default diagnosands work", {
 
     my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
-    my_reveal <- declare_reveal()
+    my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
     design <- my_population +
       my_potential_outcomes +
       my_inquiry +
       declare_step(dplyr::mutate, q = 5) +
       my_assignment +
-      my_reveal +
+      my_measurement +
       my_estimator
 
     diagnosands <- declare_diagnosands(med_bias = median(estimate - estimand))
@@ -257,7 +257,7 @@ test_that("diagnose_design can generate and use grouping variables", {
     ) +
     declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
-    declare_reveal() + 
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, inquiry = "ATE_positive")
   
   diagnosis <- diagnose_design(design, 
@@ -274,7 +274,7 @@ test_that("diagnose_design can generate and use grouping variables", {
     ) +
     declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-    declare_reveal() + 
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, inquiry = "ATE")
   
   diagnosis <- diagnose_design(
@@ -296,7 +296,7 @@ test_that("diagnose_design can generate and use grouping variables", {
     ) +
     declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
-    declare_reveal() + 
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, inquiry = "ATE_positive")
   
   diagnosis <- diagnose_design(design, 

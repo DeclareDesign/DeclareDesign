@@ -6,9 +6,9 @@ my_potential_outcomes <-
 my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
-my_reveal <- declare_reveal()
+my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
 
-my_design_1 <- my_population + my_potential_outcomes + my_inquiry + my_assignment + my_reveal + my_estimator
+my_design_1 <- my_population + my_potential_outcomes + my_inquiry + my_assignment + my_measurement + my_estimator
 
 my_design_2 <- my_design_1
 
@@ -54,8 +54,8 @@ my_designer <- function(N, tau) {
   my_assignment <- declare_assignment(Z = complete_ra(N, m = floor(N / 2)))
   my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
   my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
-  my_reveal <- declare_reveal()
-  my_design_1 <- pop + pos + my_inquiry + my_assignment + my_reveal + my_estimator
+ my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
+  my_design_1 <- pop + pos + my_inquiry + my_assignment + my_measurement + my_estimator
   my_design_1
 }
 
@@ -100,7 +100,7 @@ test_that("designs with some estimators that don't have p.values return the p.va
     declare_potential_outcomes(Y ~ .25 * Z + rnorm(N)) +
     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
     declare_assignment(Z = complete_ra(N, prob = 0.5)) +
-    declare_reveal(Y, Z) +
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, inquiry = "ATE", label = "blah") +
     declare_estimator(handler = label_estimator(my_custom_estimator), inquiry = "ATE")
   

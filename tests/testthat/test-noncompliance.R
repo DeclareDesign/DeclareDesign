@@ -50,8 +50,8 @@ test_that("Noncompliance", {
     ITT_d +
     CACE +
     my_assignment +
-    declare_reveal(outcome_variables = "D", assignment_variables = "Z") +
-    declare_reveal(outcome_variables = "Y", assignment_variables = "D") +
+    declare_measurement(D = reveal_outcomes(D ~ Z)) +
+    declare_measurement(Y = reveal_outcomes(Y ~ D)) +  
     cace_hat
 
   df <- draw_data(design)
@@ -96,9 +96,9 @@ test_that("POs correctly assembled for noncompliance case", {
       pop +
       pos_D +
       assignment +
-      declare_reveal(D, Z) +
+      declare_measurement(D = reveal_outcomes(D ~ Z)) +
       pos_Y +
-      declare_reveal(Y, D)
+      declare_measurement(Y = reveal_outcomes(Y ~ D))
 
   e <- (noncompliance[[4]])
 

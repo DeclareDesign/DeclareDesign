@@ -64,12 +64,12 @@ test_that("More multiple inquiries", {
   smp <- declare_sampling(handler = my_smp_fun)
   sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))
   assgn <- declare_assignment(Z = complete_ra(N, m = 10))
-  my_reveal <- declare_reveal()
+  my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
   mator_both <- declare_estimator(Y ~ Z, inquiry = c(pate, sate))
 
 
 
-  des <- pop + pos + pate + smp + sate + assgn + my_reveal + mator_both
+  des <- pop + pos + pate + smp + sate + assgn + my_measurement + mator_both
   expect_equal(draw_estimates(des)$inquiry, c("pate", "sate"))
 })
 
