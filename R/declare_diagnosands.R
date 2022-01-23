@@ -114,7 +114,9 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #'
 #' # Below is the code that makes the default diagnosands.
 #' # You can use these as a model when writing your own diagnosands.
-#'
+#' 
+#' alpha <- 0.05
+#' 
 #' default_diagnosands <- declare_diagnosands(
 #' bias = mean(estimate - estimand),
 #' rmse = sqrt(mean((estimate - estimand) ^ 2)),
@@ -130,7 +132,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 declare_diagnosands <- make_declarations(diagnosand_handler, "diagnosand", "diagnosands")
 
 #' @importFrom stats na.omit
-default_diagnosands <- function(data, alpha = .05){
+default_diagnosands <- function(data, alpha = 0.05){
   
   estimate <- data$estimate %||% NA
   estimand <- data$estimand %||% NA
