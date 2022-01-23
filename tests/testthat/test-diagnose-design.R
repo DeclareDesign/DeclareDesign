@@ -381,8 +381,38 @@ test_that("tidy.diagnosis handles NAs", {
   
   expect_equal(dim(tidy(dx)), c(18, 8))
   
+  set.seed(343)
+  portola <-
+    fabricate(
+      N = 2100,
+      Y_star = rnorm(N)
+    )
+  
+  design <- 
+    declare_model(data = portola) + 
+    declare_measurement(Y = as.numeric(cut(Y_star, 7))) + 
+    declare_inquiry(Y_bar = mean(Y)) + 
+    declare_sampling(S = complete_rs(N, n = 100)) + 
+    declare_measurement(
+      R = rbinom(n = N, size = 1, prob = pnorm(Y_star + effort)),
+      Y = ifelse(R == 1, Y, NA_real_)
+    ) +
+    declare_estimator(Y ~ 1, inquiry = "Y_bar") +
+    declare_estimator(R ~ 1, label = "Response Rate")
+  
+  designs <- redesign(design, effort = seq(0, 5, by = 1))
+  diagnosis <-
+    diagnose_designs(
+      designs,
+      sims = 20,
+      bootstrap_sims = 20
+    )
+  
+  # checks a bug involved in sorting that led to NAs in mean estimate (possibly related to the case where you have parameters?)
+  expect_equal(sum(is.na(tidy(diagnosis) %>% filter(diagnosand == "mean_estimate", estimator == "estimator") %>% pull(estimate))), 0)
   
 })
+
 
 
 

@@ -322,12 +322,12 @@ tidy.diagnosis <- function(x,
     
     diagnosand_replicates <- x$bootstrap_replicates
     
-    group_by_list <- diagnosand_replicates[, group_by_set, drop = FALSE]
+    group_by_list <- diagnosand_replicates[, c(group_by_set, parameter_names), drop = FALSE]
     
     labels_df <- split(group_by_list, lapply(group_by_list, addNA), drop = TRUE, sep = "uNiquEsEp")
     labels_df <- lapply(labels_df, head, n = 1)
     
-    use_vars <- setdiff(names(diagnosand_replicates), c(group_by_set, "bootstrap_id"))
+    use_vars <- setdiff(names(diagnosand_replicates), c(group_by_set, parameter_names, "bootstrap_id"))
     diagnosands_summary_df <- split(diagnosand_replicates[use_vars], lapply(group_by_list, addNA), drop = TRUE, sep = "uNiquEsEp")
 
     diagnosands_conf_low_list <- lapply(diagnosands_summary_df, function(data) lapply(data[diagnosand_columns], quantile_NAsafe, alpha/2))
@@ -336,23 +336,22 @@ tidy.diagnosis <- function(x,
     diagnosands_conf_low_df <- unlist2(diagnosands_conf_low_list, sep = "uNiquEsEp")
     diagnosands_conf_high_df <- unlist2(diagnosands_conf_high_list, sep = "uNiquEsEp")
     
-    labels <- strsplit(names(diagnosands_conf_low_df), split = "uNiquEsEp", fixed = TRUE)
-    
-    labels_df <- t(sapply(labels, c))
-    colnames(labels_df) <- c(group_by_set, "diagnosand")
-    
-    if(!is.null(x$parameters_df)) {
-      labels_df <- merge(labels_df, x$parameters_df, by = "design", sort = FALSE)
+    make_df <- function(vec, var) {
+      nm <- names(vec)
+      val <- vec
+      nm_split <- strsplit(nm, split = "uNiquEsEp", fixed = TRUE)
+      nm_df <- t(sapply(nm_split, c))
+      colnames(nm_df) <- c(group_by_set, parameter_names, "diagnosand")
+      df <- data.frame(nm_df)
+      df[, var] <- val
+      df
     }
     
-    diagnosand_conf_int_df_long <- 
-      data.frame(
-        labels_df,
-        conf.low = diagnosands_conf_low_df, 
-        conf.high = diagnosands_conf_high_df, 
-        row.names = NULL)
+    diagnosands_conf_low_df <- make_df(diagnosands_conf_low_df, "conf.low")
+    diagnosands_conf_high_df <- make_df(diagnosands_conf_high_df, "conf.high")
     
-    diagnosands_df_long <- merge(diagnosands_df_long, diagnosand_conf_int_df_long, by = c(group_by_set, parameter_names, "diagnosand"), all = TRUE)
+    diagnosands_df_long <- merge(diagnosands_df_long, diagnosands_conf_low_df, by = c(group_by_set, parameter_names, "diagnosand"), all = TRUE)
+    diagnosands_df_long <- merge(diagnosands_df_long, diagnosands_conf_high_df, by = c(group_by_set, parameter_names, "diagnosand"), all = TRUE)
     
   } 
   
