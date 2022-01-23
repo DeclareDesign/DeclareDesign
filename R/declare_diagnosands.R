@@ -118,7 +118,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #' default_diagnosands <- declare_diagnosands(
 #' bias = mean(estimate - estimand),
 #' rmse = sqrt(mean((estimate - estimand) ^ 2)),
-#' power = mean(p.value < alpha),
+#' power = mean(p.value <= alpha),
 #' coverage = mean(estimand <= conf.high & estimand >= conf.low),
 #' mean_estimate = mean(estimate),
 #' sd_estimate = sd(estimate),
@@ -141,7 +141,7 @@ default_diagnosands <- function(data, alpha = .05){
   
   bias <- mean(estimate - estimand)
   rmse <- sqrt(mean((estimate - estimand)^2))
-  power <- mean(p.value < alpha)
+  power <- mean(p.value <= alpha)
   coverage <- mean(estimand <= conf.high & estimand >= conf.low)
   mean_estimate <- mean(estimate)
   sd_estimate <- sd(estimate)
