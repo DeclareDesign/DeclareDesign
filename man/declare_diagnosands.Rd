@@ -85,7 +85,7 @@ default_diagnosands <-
    coverage = mean(estimand <= conf.high & estimand >= conf.low)
   )
 
-A longer list of potentially useful diagnosands might include:
+# A longer list of potentially useful diagnosands might include:
 
 extended_diagnosands <- 
   declare_diagnosands(
