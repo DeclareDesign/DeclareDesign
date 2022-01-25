@@ -122,7 +122,7 @@ default_diagnosands <-
    coverage = mean(estimand <= conf.high & estimand >= conf.low)
   )
 
-A longer list of useful diagnosands might include:
+# A longer list of useful diagnosands might include:
 
 extended_diagnosands <- 
   declare_diagnosands(
@@ -134,10 +134,12 @@ extended_diagnosands <-
     power = mean(p.value <= alpha),
     coverage = mean(estimand <= conf.high & estimand >= conf.low),
     mean_se = mean(std.error),
-    type_s_rate = mean((sign(estimate) != sign(estimand))[p.value < alpha]),
-    exaggeration_ratio = mean((estimate/estimand)[p.value < alpha]),
+    type_s_rate = mean((sign(estimate) != sign(estimand))[p.value <= alpha]),
+    exaggeration_ratio = mean((estimate/estimand)[p.value <= alpha]),
     var_estimate = pop.var(estimate),
-    mean_var_hat = mean(std.error^2)
+    mean_var_hat = mean(std.error^2),
+    prop_pos_sig = estimate > 0 & p.value <= alpha,
+    mean_ci_length = mean(conf.high - conf.low)
   )
   
 }
