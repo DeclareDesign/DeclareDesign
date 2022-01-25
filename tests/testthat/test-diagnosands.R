@@ -209,14 +209,12 @@ test_that("diagnosis, NAs if no inquiry", {
   d <- declare_model(sleep) + ols
   
   sleep_ols <- structure(list(design = structure(1L, .Label = "d", class = "factor"), 
-                             estimator = "estimator", term = "group2", bias = NA_real_, 
-                             `se(bias)` = NA_real_, rmse = NA_real_, `se(rmse)` = NA_real_, 
-                             power = 0, `se(power)` = 0, coverage = NA_real_, `se(coverage)` = NA_real_, 
-                             mean_estimate = 1.58, `se(mean_estimate)` = 0, sd_estimate = 0, 
-                             `se(sd_estimate)` = 0, mean_se = 0.849091017238762, `se(mean_se)` = 0, 
-                             type_s_rate = NaN, `se(type_s_rate)` = NA_real_, mean_estimand = NA_real_, 
-                             `se(mean_estimand)` = NA_real_, n_sims = 4L), class = "data.frame", row.names = c(NA, 
-                                                                                                               -1L))
+                              estimator = "estimator", term = "group2", mean_estimand = NA_real_, 
+                              `se(mean_estimand)` = NA_real_, mean_estimate = 1.58, `se(mean_estimate)` = 0, 
+                              bias = NA_real_, `se(bias)` = NA_real_, sd_estimate = 0, 
+                              `se(sd_estimate)` = 0, rmse = NA_real_, `se(rmse)` = NA_real_, 
+                              power = 0, `se(power)` = 0, coverage = NA_real_, `se(coverage)` = NA_real_, 
+                              n_sims = 4L), row.names = c(NA, -1L), class = "data.frame")
   
 expect_equivalent(diagnose_design(d, sims = 4, bootstrap_sims = 5)$diagnosands_df, sleep_ols)
   
@@ -228,14 +226,13 @@ test_that("diagnosis, NAs if no inquiry", {
   
   sleep_ols <-
     structure(list(design = structure(1L, .Label = "d", class = "factor"), 
-                   inquiry = "inquiry", bias = NA_real_, `se(bias)` = NA_real_, 
-                   rmse = NA_real_, `se(rmse)` = NA_real_, power = NA_real_, 
-                   `se(power)` = NA_real_, coverage = NA_real_, `se(coverage)` = NA_real_, 
+                   inquiry = "inquiry", mean_estimand = 1.54, `se(mean_estimand)` = 0, 
                    mean_estimate = NA_real_, `se(mean_estimate)` = NA_real_, 
-                   sd_estimate = NA_real_, `se(sd_estimate)` = NA_real_, mean_se = NA_real_, 
-                   `se(mean_se)` = NA_real_, type_s_rate = NA_real_, `se(type_s_rate)` = NA_real_, 
-                   mean_estimand = 1.54, `se(mean_estimand)` = 0, n_sims = 4L), row.names = c(NA, 
-                                                                                            -1L), class = "data.frame")
+                   bias = NA_real_, `se(bias)` = NA_real_, sd_estimate = NA_real_, 
+                   `se(sd_estimate)` = NA_real_, rmse = NA_real_, `se(rmse)` = NA_real_, 
+                   power = NA_real_, `se(power)` = NA_real_, coverage = NA_real_, 
+                   `se(coverage)` = NA_real_, n_sims = 4L), row.names = c(NA, 
+                                                                          -1L), class = "data.frame")
   
     expect_equivalent(diagnose_design(d, sims = 4)$diagnosands_df, sleep_ols)
 })
@@ -306,4 +303,16 @@ test_that("declare time errors", {
 #   
 #   
 # })
+
+test_that("pop.var works", {
+  
+  x <- 1:4
+  expect_equal(pop.var(x), 1.25)
+  
+  x[4] <- NA
+  expect_equal(pop.var(x), NA_real_)
+  
+  expect_equal(pop.var(x, na.rm = TRUE), 2/3)
+  
+})
 

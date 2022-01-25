@@ -29,5 +29,5 @@ test_that("Multiple Coefficients", {
 
   expect_equal(diagnosis %>% get_simulations %>% dim, c(4, 12))
 
-  expect_equal(diagnosis %>% get_diagnosands %>% dim, c(2,14))
+  expect_equal(diagnosis %>% get_diagnosands %>% dim, c(2, 12))
 })

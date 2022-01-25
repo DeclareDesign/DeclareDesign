@@ -91,11 +91,10 @@ test_that("default diagnosands work", {
   )
   
   expect_equal(names(diag$diagnosands_df), 
-               c("design", "inquiry", "estimator", "term", 
-                 "bias", "se(bias)", "rmse", "se(rmse)", "power", "se(power)", 
-                 "coverage", "se(coverage)", "mean_estimate", "se(mean_estimate)", 
-                 "sd_estimate", "se(sd_estimate)", "mean_se", "se(mean_se)", "type_s_rate", 
-                 "se(type_s_rate)", "mean_estimand", "se(mean_estimand)", "n_sims"))
+               c("design", "inquiry", "estimator", "term", "mean_estimand", 
+                 "se(mean_estimand)", "mean_estimate", "se(mean_estimate)", "bias", 
+                 "se(bias)", "sd_estimate", "se(sd_estimate)", "rmse", "se(rmse)", 
+                 "power", "se(power)", "coverage", "se(coverage)", "n_sims"))
   
   # w/ none set and override
 
@@ -132,7 +131,7 @@ test_that("default diagnosands work", {
 
   diag <- diagnose_design(designs, sims = 5, bootstrap_sims = FALSE)
   
-  expect_equal(ncol(diag$diagnosands_df), 16)
+  expect_equal(ncol(diag$diagnosands_df), 14)
   
   # // simulation df
   sims <- set_diagnosands(simulate_design(designs, sims = 5), declare_diagnosands(med_bias = median(estimate - estimand)))
@@ -312,3 +311,4 @@ test_that("diagnose_design can generate and use grouping variables", {
   )
   
 })
+
