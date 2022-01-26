@@ -8,8 +8,8 @@ test_that("error when you send other objects to diagnose", {
 
 
 test_that("default diagnosands work", {
-  my_designer <- function(N = 500) {
-    my_population <- declare_model(N = N, noise = rnorm(N))
+  my_designer <- function(N = 10) {
+    my_population <- declare_population(N = N, noise = rnorm(N))
 
     my_potential_outcomes <-
       declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
@@ -57,7 +57,12 @@ test_that("default diagnosands work", {
     design_1 = design_1,
     sims = 2
   )
-
+  
+  # test tidy.diagnosis
+  expect_equal(dim(tidy(diag)), c(2, 9))
+  expect_equal(names(tidy(diag)), c("design", "inquiry", "estimator", "term", "diagnosand", "estimate", 
+                                    "std.error", "conf.low", "conf.high"))
+  
   expect_equal(names(diag$diagnosands_df), 
                c("design", "inquiry", "estimator", "term", 
                  "med_bias", "se(med_bias)", "n_sims"
@@ -78,6 +83,11 @@ test_that("default diagnosands work", {
     sims = 2
   )
   
+  # test tidy.diagnosis
+  expect_equal(dim(tidy(diag)), c(4, 9))
+  expect_equal(names(tidy(diag)), c("design", "inquiry", "estimator", "term", "diagnosand", "estimate", 
+                                    "std.error", "conf.low", "conf.high"))
+  
   expect_equal(names(diag$diagnosands_df), c("design", "inquiry", "estimator", "term", 
                                              "my_bias", "se(my_bias)", "my_power", 
                                              "se(my_power)", "n_sims"))
@@ -96,6 +106,11 @@ test_that("default diagnosands work", {
                  "se(bias)", "sd_estimate", "se(sd_estimate)", "rmse", "se(rmse)", 
                  "power", "se(power)", "coverage", "se(coverage)", "n_sims"))
   
+  # test tidy.diagnosis
+  expect_equal(dim(tidy(diag)), c(18, 9))
+  expect_equal(names(tidy(diag)), c("design", "inquiry", "estimator", "term", "diagnosand", "estimate", 
+                                    "std.error", "conf.low", "conf.high"))
+  
   # w/ none set and override
 
   diag <- diagnose_design(
@@ -110,6 +125,10 @@ test_that("default diagnosands work", {
                  "med_bias", "se(med_bias)", "n_sims"
                ))
   
+  # test tidy.diagnosis
+  expect_equal(dim(tidy(diag)), c(2, 9))
+  expect_equal(names(tidy(diag)), c("design", "inquiry", "estimator", "term", "diagnosand", "estimate", 
+                                    "std.error", "conf.low", "conf.high"))
   
   # w/ mix of set and unset
   
@@ -125,6 +144,10 @@ test_that("default diagnosands work", {
                c("design", "N", "inquiry", "estimator", "term", 
                  "med_bias", "n_sims"))
   
+  # test tidy.diagnosis
+  expect_equal(dim(tidy(diag)), c(2, 7))
+  expect_equal(names(tidy(diag)), c("design", "inquiry", "estimator", "term", "N", "diagnosand", "estimate"))
+  
   # w mix of diagnosands set
 
   attr(designs[[1]], "diagnosands") <- NULL
@@ -133,9 +156,17 @@ test_that("default diagnosands work", {
   
   expect_equal(ncol(diag$diagnosands_df), 14)
   
+  # test tidy.diagnosis
+  expect_equal(dim(tidy(diag)), c(20, 7))
+  expect_equal(names(tidy(diag)), c("design", "inquiry", "estimator", "term", "N", "diagnosand", "estimate"))
+  
   # // simulation df
   sims <- set_diagnosands(simulate_design(designs, sims = 5), declare_diagnosands(med_bias = median(estimate - estimand)))
   diag <- diagnose_design(sims, sims = 5, bootstrap_sims = FALSE)
+  
+  # test tidy.diagnosis
+  expect_equal(dim(tidy(diag)), c(2, 7))
+  expect_equal(names(tidy(diag)), c("design", "inquiry", "estimator", "term", "N", "diagnosand", "estimate"))
 })
 
 
@@ -201,6 +232,9 @@ test_that("diagnose_design does not reclass the variable N", {
   expect_equal(class(dx$simulations_df$N), "integer") 
   expect_equal(class(dx$diagnosands_df$N), "integer")
   
+  # test tidy.diagnosis
+  expect_equal(class(tidy(dx)$N), "integer") 
+  
   # works for expand_design
   designer <- function(N = 5) {
     declare_model(N = N, noise = rnorm(N)) +
@@ -212,6 +246,9 @@ test_that("diagnose_design does not reclass the variable N", {
   
   expect_equal(class(dx$simulations_df$N), "integer") 
   expect_equal(class(dx$diagnosands_df$N), "integer")
+  
+  # test tidy.diagnosis
+  expect_equal(class(tidy(dx)$N), "integer") 
   
 })
 
@@ -238,6 +275,10 @@ test_that("diagnose_design works when simulations_df lacking parameters attr", {
   d1["parameters_df"] <- list(NULL)
     
   expect_identical(d1,d2)
+  
+  # test tidy.diagnosis
+  expect_identical(tidy(d1), tidy(d2))
+  
 })
 
 
@@ -266,6 +307,11 @@ test_that("diagnose_design can generate and use grouping variables", {
   expect_equivalent(diagnosis$diagnosands_df$significant,  c(FALSE, FALSE))
   expect_equivalent(diagnosis$diagnosands_df$estimand,  c(FALSE, TRUE))
   
+  # test tidy.diagnosis
+  expect_equal(dim(tidy(diagnosis)), c(18, 11))
+  expect_equal(names(tidy(diagnosis)), c("design", "inquiry", "estimator", "term", "estimand", "significant", "diagnosand", "estimate", 
+                                         "std.error", "conf.low", "conf.high"))
+  
   design <- 
     declare_model(N = 100, u = rnorm(N),
       Y_Z_0 = 0, 
@@ -286,6 +332,10 @@ test_that("diagnose_design can generate and use grouping variables", {
   
   expect_equivalent(nrow(diagnosis$diagnosands_df),  4)
   
+  # test tidy.diagnosis
+  expect_equal(dim(tidy(diagnosis)), c(36, 10))
+  expect_equal(names(tidy(diagnosis)), c("design", "inquiry", "estimator", "term", "effect_size", "diagnosand", 
+                                         "estimate", "std.error", "conf.low", "conf.high"))
   
   
   design <- 
@@ -303,12 +353,67 @@ test_that("diagnose_design can generate and use grouping variables", {
                                sims = 5
   )
   
+  # test tidy.diagnosis
+  expect_equal(dim(tidy(diagnosis)), c(9, 10))
+  expect_equal(names(tidy(diagnosis)), c("design", "inquiry", "estimator", "term", "significant", "diagnosand", 
+                                         "estimate", "std.error", "conf.low", "conf.high"))
+  
   print(diagnosis, digits = 5, select = "Bias")
   
   diagnosis <- diagnose_design(design, 
                                make_groups = vars(significant = factor(ifelse(p.value > 0.1, NA, p.value <= 0.05))),
                                sims = 100
   )
+  
+  # test tidy.diagnosis
+  expect_equal(dim(tidy(diagnosis)), c(27, 10))
+  expect_equal(names(tidy(diagnosis)), c("design", "inquiry", "estimator", "term", "significant", "diagnosand", 
+                                         "estimate", "std.error", "conf.low", "conf.high"))
+  
+  
+})
+
+
+test_that("tidy.diagnosis handles NAs", {
+  
+  design <- 
+    declare_model(N = 10, Y = rnorm(N)) +
+    declare_estimator(Y ~ 1, label = "normal") +
+    declare_estimator(handler = function(data){data.frame(estimate = 5)})
+  
+  dx <- diagnose_design(design, sims = 5)
+  
+  expect_equal(dim(tidy(dx)), c(18, 8))
+  
+  set.seed(343)
+  portola <-
+    fabricate(
+      N = 2100,
+      Y_star = rnorm(N)
+    )
+  
+  design <- 
+    declare_model(data = portola) + 
+    declare_measurement(Y = as.numeric(cut(Y_star, 7))) + 
+    declare_inquiry(Y_bar = mean(Y)) + 
+    declare_sampling(S = complete_rs(N, n = 100)) + 
+    declare_measurement(
+      R = rbinom(n = N, size = 1, prob = pnorm(Y_star + effort)),
+      Y = ifelse(R == 1, Y, NA_real_)
+    ) +
+    declare_estimator(Y ~ 1, inquiry = "Y_bar") +
+    declare_estimator(R ~ 1, label = "Response Rate")
+  
+  designs <- redesign(design, effort = seq(0, 5, by = 1))
+  diagnosis <-
+    diagnose_designs(
+      designs,
+      sims = 20,
+      bootstrap_sims = 20
+    )
+  
+  # checks a bug involved in sorting that led to NAs in mean estimate (possibly related to the case where you have parameters?)
+  expect_equal(sum(is.na(tidy(diagnosis) %>% filter(diagnosand == "mean_estimate", estimator == "estimator") %>% pull(estimate))), 0)
   
 })
 
