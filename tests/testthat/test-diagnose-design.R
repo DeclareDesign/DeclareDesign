@@ -107,7 +107,7 @@ test_that("default diagnosands work", {
                  "power", "se(power)", "coverage", "se(coverage)", "n_sims"))
   
   # test tidy.diagnosis
-  expect_equal(dim(tidy(diag)), c(18, 9))
+  expect_equal(dim(tidy(diag)), c(14, 9))
   expect_equal(names(tidy(diag)), c("design", "inquiry", "estimator", "term", "diagnosand", "estimate", 
                                     "std.error", "conf.low", "conf.high"))
   
@@ -157,7 +157,7 @@ test_that("default diagnosands work", {
   expect_equal(ncol(diag$diagnosands_df), 14)
   
   # test tidy.diagnosis
-  expect_equal(dim(tidy(diag)), c(20, 7))
+  expect_equal(dim(tidy(diag)), c(16, 7))
   expect_equal(names(tidy(diag)), c("design", "inquiry", "estimator", "term", "N", "diagnosand", "estimate"))
   
   # // simulation df
@@ -308,7 +308,7 @@ test_that("diagnose_design can generate and use grouping variables", {
   expect_equivalent(diagnosis$diagnosands_df$estimand,  c(FALSE, TRUE))
   
   # test tidy.diagnosis
-  expect_equal(dim(tidy(diagnosis)), c(18, 11))
+  expect_equal(dim(tidy(diagnosis)), c(14, 11))
   expect_equal(names(tidy(diagnosis)), c("design", "inquiry", "estimator", "term", "estimand", "significant", "diagnosand", "estimate", 
                                          "std.error", "conf.low", "conf.high"))
   
@@ -333,7 +333,7 @@ test_that("diagnose_design can generate and use grouping variables", {
   expect_equivalent(nrow(diagnosis$diagnosands_df),  4)
   
   # test tidy.diagnosis
-  expect_equal(dim(tidy(diagnosis)), c(36, 10))
+  expect_equal(dim(tidy(diagnosis)), c(28, 10))
   expect_equal(names(tidy(diagnosis)), c("design", "inquiry", "estimator", "term", "effect_size", "diagnosand", 
                                          "estimate", "std.error", "conf.low", "conf.high"))
   
@@ -354,7 +354,7 @@ test_that("diagnose_design can generate and use grouping variables", {
   )
   
   # test tidy.diagnosis
-  expect_equal(dim(tidy(diagnosis)), c(9, 10))
+  expect_equal(dim(tidy(diagnosis)), c(14, 10))
   expect_equal(names(tidy(diagnosis)), c("design", "inquiry", "estimator", "term", "significant", "diagnosand", 
                                          "estimate", "std.error", "conf.low", "conf.high"))
   
@@ -366,7 +366,7 @@ test_that("diagnose_design can generate and use grouping variables", {
   )
   
   # test tidy.diagnosis
-  expect_equal(dim(tidy(diagnosis)), c(27, 10))
+  expect_equal(dim(tidy(diagnosis)), c(21, 10))
   expect_equal(names(tidy(diagnosis)), c("design", "inquiry", "estimator", "term", "significant", "diagnosand", 
                                          "estimate", "std.error", "conf.low", "conf.high"))
   
@@ -383,7 +383,7 @@ test_that("tidy.diagnosis handles NAs", {
   
   dx <- diagnose_design(design, sims = 5)
   
-  expect_equal(dim(tidy(dx)), c(18, 8))
+  expect_equal(dim(tidy(dx)), c(14, 8))
   
   set.seed(343)
   portola <-
@@ -413,7 +413,7 @@ test_that("tidy.diagnosis handles NAs", {
     )
   
   # checks a bug involved in sorting that led to NAs in mean estimate (possibly related to the case where you have parameters?)
-  expect_equal(sum(is.na(tidy(diagnosis) %>% filter(diagnosand == "mean_estimate", estimator == "estimator") %>% pull(estimate))), 0)
+  expect_equal(sum(is.na(tidy(diagnosis) %>% dplyr::filter(diagnosand == "mean_estimate", estimator == "estimator") %>% dplyr::pull(estimate))), 0)
   
 })
 
