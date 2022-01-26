@@ -92,10 +92,10 @@ currydata <- function(FUN, dots) {
   
   function(data = NULL) {
     #message(quo)
-    # used for declare_population with no seed data provided, in which case null is not the same as missing.
+    # used for declare_model with no seed data provided, in which case null is not the same as missing.
     # Unfortunately, steps do not know at time of declaration if they are in first position or not; 
     # combining steps into design happens after.
-    # This could in theory be caught be a design validation function for declare_population.
+    # This could in theory be caught be a design validation function for declare_model.
 
     eval_tidy(if (is.null(data) & is_implicit_data_arg(dots)) quoNoData else quoData, data = list(data = data))
   }
@@ -144,7 +144,7 @@ build_step <- function(curried_fn, handler, dots, label, step_type, causal_type,
   )
 }
 
-# generate declaration steps (eg declare_population) by setting the default handler and metadata
+# generate declaration steps (eg declare_model) by setting the default handler and metadata
 make_declarations <- function(default_handler, step_type, causal_type = "dgp", default_label, strictDataParam = TRUE) {
   declaration <- declaration_template
 

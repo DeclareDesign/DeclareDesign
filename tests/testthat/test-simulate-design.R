@@ -1,14 +1,14 @@
 context("Simulate Design")
 
-my_population <- declare_population(N = 50, noise = rnorm(N))
+my_population <- declare_model(N = 50, noise = rnorm(N))
 my_potential_outcomes <-
   declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
-my_reveal <- declare_reveal()
+my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
 
-my_design_1 <- my_population + my_potential_outcomes + my_inquiry + my_assignment + my_reveal + my_estimator
+my_design_1 <- my_population + my_potential_outcomes + my_inquiry + my_assignment + my_measurement + my_estimator
 
 my_design_2 <- my_design_1
 
@@ -40,7 +40,7 @@ test_that("Simulate Design works x2", {
   e1 <- declare_inquiry(a=f1())
   e2 <- declare_inquiry(b=f2())
   e3 <- declare_inquiry(c=f3())
-  out <- simulate_design(declare_population(sleep) + e1 + e2 + e3, sims=c(1,1,5,2))
+  out <- simulate_design(declare_model(sleep) + e1 + e2 + e3, sims=c(1,1,5,2))
   expect_equal(out$estimand, 
                     as.vector(t(out[(1:10)*3, c("step_1_draw", "step_3_draw", "step_4_draw")])))
 })
@@ -48,14 +48,14 @@ test_that("Simulate Design works x2", {
 
 
 my_designer <- function(N, tau) {
-  pop <- declare_population(N = N)
+  pop <- declare_model(N = N)
   pos <-
     declare_potential_outcomes(Y_Z_0 = rnorm(N), Y_Z_1 = Y_Z_0 + tau)
   my_assignment <- declare_assignment(Z = complete_ra(N, m = floor(N / 2)))
   my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
   my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
-  my_reveal <- declare_reveal()
-  my_design_1 <- pop + pos + my_inquiry + my_assignment + my_reveal + my_estimator
+ my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
+  my_design_1 <- pop + pos + my_inquiry + my_assignment + my_measurement + my_estimator
   my_design_1
 }
 
@@ -96,11 +96,11 @@ test_that("no estimates inquiries declared", {
 test_that("designs with some estimators that don't have p.values return the p.values for the estimators that do have them", {
   my_custom_estimator <- function(data) return(data.frame(estimate = 5))
   
-  des <- declare_population(N = 100) +
+  des <- declare_model(N = 100) +
     declare_potential_outcomes(Y ~ .25 * Z + rnorm(N)) +
     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
     declare_assignment(Z = complete_ra(N, prob = 0.5)) +
-    declare_reveal(Y, Z) +
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, inquiry = "ATE", label = "blah") +
     declare_estimator(handler = label_estimator(my_custom_estimator), inquiry = "ATE")
   

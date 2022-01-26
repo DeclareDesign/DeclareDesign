@@ -1,7 +1,7 @@
 context("Factorial Design")
 
 test_that("Factorial", {
-  my_population <- declare_population(N = 2000, noise = rnorm(N))
+  my_population <- declare_model(N = 2000, noise = rnorm(N))
 
   my_potential_outcomes <- declare_potential_outcomes(
     Y_Z_T1 = noise,
@@ -19,7 +19,7 @@ test_that("Factorial", {
     term = "Z1:Z2"
   )
 
-  declare_reveal <- declare_reveal()
+  my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
   my_design <-
     my_population +
@@ -30,7 +30,7 @@ test_that("Factorial", {
       Z1 = as.numeric(Z %in% c("T2", "T4")),
       Z2 = as.numeric(Z %in% c("T3", "T4"))
     ) +
-    declare_reveal +
+    my_measurement +
     my_estimator
 
   expect_equal(my_design %>% draw_data() %>% nrow(), 2000)
@@ -42,6 +42,6 @@ test_that("Factorial", {
 
   expect_equal(diagnosis %>% get_simulations %>% dim, c(2, 14))
 
-  expect_equal(diagnosis %>%  get_diagnosands %>% dim, c(1, 14))
+  expect_equal(diagnosis %>%  get_diagnosands %>% dim, c(1, 12))
 
 })

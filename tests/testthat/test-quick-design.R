@@ -2,18 +2,18 @@ context("Quick Design")
 
 test_that("expand_design works", {
   two_arm_trial <- function(N) {
-    my_population <- declare_population(N = N, noise = rnorm(N))
+    my_population <- declare_model(N = N, noise = rnorm(N))
     my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
     my_assignment <- declare_assignment(Z = complete_ra(N, m = N/2))
     pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
       declare_estimator(Y ~ Z, inquiry = pate, label = "pate_hat")
-    declare_reveal <- declare_reveal()
+    my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
     my_design <- my_population +
       my_potential_outcomes +
       pate +
       my_assignment +
-      declare_reveal +
+      my_measurement +
       pate_estimator
     return(my_design)
   }
@@ -32,7 +32,7 @@ rm(list = ls())
 
 test_that("expand_design works some more", {
   two_arm_trial <- function(N) {
-    pop <- declare_population(
+    pop <- declare_model(
       N = N,
       Y = rnorm(N),
       Z = rbinom(N, 1, .5)
@@ -62,18 +62,18 @@ test_that("expand_design works some more", {
 test_that("vary works", {
   two_arm_trial <- function(N, noise_sd) {
     my_population <-
-      declare_population(N = N, noise = rnorm(N, sd = noise_sd))
-    my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+      declare_model(N = N, noise = rnorm(N, sd = noise_sd))
+    my_potential_outcomes <- declare_model(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
     my_assignment <- declare_assignment(Z = complete_ra(N, m = N/2))
     pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
       declare_estimator(Y ~ Z, inquiry = pate, label = "pate_hat")
-    declare_reveal <- declare_reveal()
+    my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
     my_design <- my_population +
       my_potential_outcomes +
       pate +
       my_assignment +
-      declare_reveal +
+      my_measurement +
       pate_estimator
     return(my_design)
   }
@@ -113,18 +113,18 @@ test_that("vary works", {
 
 test_that("power curve", {
   two_arm_trial <- function(N) {
-    my_population <- declare_population(N = N, noise = rnorm(N))
-    my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + .25)
+    my_population <- declare_model(N = N, noise = rnorm(N))
+    my_potential_outcomes <- declare_model(Y_Z_0 = noise, Y_Z_1 = noise + .25)
     my_assignment <- declare_assignment(Z = complete_ra(N, m = N/2))
     pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
     pate_estimator <-
       declare_estimator(Y ~ Z, inquiry = pate, label = "pate_hat")
-    declare_reveal <- declare_reveal()
+    my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
     my_design <- my_population +
       my_potential_outcomes +
       pate +
       my_assignment +
-      declare_reveal +
+      my_measurement +
       pate_estimator
     return(my_design)
   }
@@ -150,7 +150,7 @@ test_that("single design can be created by expand_design", {
   my_designer <-
     function(N = 10) {
       pop <-
-        declare_population(N = N)
+        declare_model(N = N)
       design <- pop + NULL
       design
     }

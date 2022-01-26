@@ -2,7 +2,7 @@ context("post estimation")
 
 test_that("multiple design draw_estimates", {
   my_designer <- function(N = 50) {
-    my_population <- declare_population(N = N, noise = rnorm(N))
+    my_population <- declare_model(N = N, noise = rnorm(N))
     
     my_potential_outcomes <-
       declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
@@ -13,23 +13,23 @@ test_that("multiple design draw_estimates", {
     
     my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
     
-    my_reveal <- declare_reveal()
+    my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
     
     my_design <-
       my_population +
       my_potential_outcomes +
       my_inquiry +
       my_assignment +
-      my_reveal +
+      my_measurement +
       my_estimator
     
     my_design
   }
   
-  my_population <- declare_population(N = 100, noise = rnorm(N))
+  my_population <- declare_model(N = 100, noise = rnorm(N))
   
   my_potential_outcomes <-
-    declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+    declare_model(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
   
   my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
   
@@ -37,13 +37,13 @@ test_that("multiple design draw_estimates", {
   
   my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
   
-  my_reveal <- declare_reveal()
+  my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
   
   design_1 <- my_population +
     my_potential_outcomes +
     my_inquiry +
     my_assignment +
-    my_reveal +
+    my_measurement +
     my_estimator
   
   my_assignment_2 <- declare_assignment(Z = complete_ra(N, m = 50))
@@ -72,7 +72,7 @@ test_that("multiple design draw_estimates", {
 
 test_that("glance works", {
   des <-
-    declare_population(data = sleep) +
+    declare_model(data = sleep) +
     declare_estimator(
       extra ~ group,
       model = lm_robust,
@@ -121,7 +121,7 @@ test_that("glance works", {
 test_that("tidy works", {
   # default term
   des <-
-    declare_population(data = sleep) +
+    declare_model(data = sleep) +
     declare_estimator(extra ~ group, model = lm_robust, label = "formula")
   est <- draw_estimates(des)
   expect_equal(est, structure(
@@ -143,7 +143,7 @@ test_that("tidy works", {
   
   # default term
   des <-
-    declare_population(data = sleep) +
+    declare_model(data = sleep) +
     declare_estimator(
       extra ~ group,
       model = lm_robust,
@@ -189,7 +189,7 @@ test_that("tidy works", {
   
   # another default
   des <-
-    declare_population(data = sleep) +
+    declare_model(data = sleep) +
     declare_estimator(
       extra ~ group,
       model = lm_robust,
@@ -238,7 +238,7 @@ test_that("tidy works", {
   
   # return all coefs
   des <-
-    declare_population(data = sleep) +
+    declare_model(data = sleep) +
     declare_estimator(
       extra ~ group,
       model = lm_robust,
@@ -324,7 +324,7 @@ test_that("tidy works", {
   
   # select them manually
   des <-
-    declare_population(data = sleep) +
+    declare_model(data = sleep) +
     declare_estimator(
       extra ~ group,
       model = lm_robust,
@@ -374,7 +374,7 @@ test_that("tidy works", {
   
   # select them manually
   des <-
-    declare_population(data = sleep) +
+    declare_model(data = sleep) +
     # does not work (intentionally)
     # declare_estimator(
     #   extra ~ group,

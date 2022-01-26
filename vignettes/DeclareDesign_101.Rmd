@@ -101,14 +101,13 @@ Every step of a research design declaration can be written using one of the `dec
 
 | Design component | Function                       | Description                                                     |
 | ---------------- | ------------------------------ | --------------------------------------------------------------- |
-| Model            | `declare_population()`           | define background variables                                     |
-|                  | `declare_potential_outcomes()`   | define functional relationships between treatments and outcomes |
-| Inquiry          | `declare_estimand()`             | define research question                                        |
-| Data strategy    | `declare_sampling()`             | specify sampling procedures                                     |
-|                  | `declare_assignment()`           | specify assignment procedures                                   |
-|                  | `reveal_outcomes()`              | link potential outcomes to revealed outcomes via assignment     |
-|                  | `declare_measurement()`          | specify measurement procedures                                  |
-| Answer strategy  | `declare_estimator()`             | specify data summary procedures                                 |
+| Model            | `declare_model()`              | define background causal model                                  |
+| Inquiry          | `declare_inquiry()`            | define research question                                        |
+| Data strategy    | `declare_sampling()`           | specify sampling procedures                                     |
+|                  | `declare_assignment()`         | specify assignment procedures                                   |
+|                  | `declare_measurement()`        | specify measurement procedures                                  |
+| Answer strategy  | `declare_estimator()`          | specify data summary procedures                                 |
+|                  | `declare_test()`               | specify testing procedures                                      |
 
 
 ### Options and defaults
@@ -342,7 +341,7 @@ draw_data(simple_design) %>%
 
 #### Measurement
 
-Measurement is a critical part of every research design; sometimes it is beneficial to explicitly declare the measurement procedures of the design, rather than allowing them to be implicit in the ways variables are created in `declare_population` and `declare_potential_outcomes`. For example, we might imagine that the normally distributed outcome variable `Y` is a latent outcome that will be translated into a binary outcome when measured by the researcher:
+Measurement is a critical part of every research design; sometimes it is beneficial to explicitly declare the measurement procedures of the design, rather than allowing them to be implicit in the ways variables are created in `declare_model`. For example, we might imagine that the normally distributed outcome variable `Y` is a latent outcome that will be translated into a binary outcome when measured by the researcher:
 
 ```{r, eval = FALSE}
 declare_measurement(Y_binary = rbinom(N, 1, prob = pnorm(Y)))

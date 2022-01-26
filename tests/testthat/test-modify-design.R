@@ -4,7 +4,7 @@ test_that("test modify declare design ", {
   library(dplyr)
   N <- 500
 
-  my_population <- declare_population(N = N, noise = rnorm(N))
+  my_population <- declare_model(N = N, noise = rnorm(N))
 
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
@@ -38,14 +38,14 @@ test_that("test modify declare design ", {
 
 test_that("placement doesn't matter", {
   my_population <-
-    declare_population(
+    declare_model(
       N = 100,
       noise = rnorm(N),
       label = "mypop"
     )
 
   my_potential_outcomes <-
-    declare_potential_outcomes(
+    declare_model(
       Y_Z_0 = noise,
       Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)
     )
@@ -66,16 +66,16 @@ test_that("placement doesn't matter", {
 
 
 test_that("names are correct", {
-  my_population <- declare_population(N = 100, noise = rnorm(N))
+  my_population <- declare_model(N = 100, noise = rnorm(N))
 
-  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+  my_potential_outcomes <- declare_model(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
   my_assignment <- declare_assignment(Z = complete_ra(N, m = 25), label = "a_label")
 
   design <- my_population +
     my_potential_outcomes +
     my_assignment +
-    declare_reveal()
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
 
   processing <- declare_step(handler = fabricate, q = 5)
@@ -91,7 +91,7 @@ test_that("names are correct", {
 
   expect_equal(
     names(neighbors_design),
-    c("my_population", "my_potential_outcomes", "a_label", "processing", "reveal")
+    c("my_population", "my_potential_outcomes", "a_label", "processing", "measurement")
   )
 
   check0 <- neighbors_design + linear
@@ -102,7 +102,7 @@ test_that("names are correct", {
     names(check0),
     c(
       "my_population", "my_potential_outcomes", "a_label", "processing",
-      "reveal", "linear"
+      "measurement", "linear"
     )
   )
 
@@ -110,14 +110,14 @@ test_that("names are correct", {
     names(check1),
     c(
       "my_population", "my_potential_outcomes", "a_label", "processing",
-      "reveal", "saturated"
+      "measurement", "saturated"
     )
   )
   expect_equal(
     names(check2),
     c(
       "my_population", "my_potential_outcomes", "a_label", "processing",
-      "reveal", "linear", "saturated"
+      "measurement", "linear", "saturated"
     )
   )
 })

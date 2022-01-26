@@ -75,7 +75,7 @@ test_that("PO as a formula works", {
 
 test_that("POs at a higher level", {
   library(dplyr)
-  my_population <- declare_population(
+  my_population <- declare_model(
     villages = add_level(N = 3, elevation = rnorm(N)),
     citizens = add_level(N = 4, income = runif(N))
   )
@@ -130,12 +130,12 @@ test_that("POs at a higher level", {
     )
 
   my_design <-
-    declare_population(data = pop) +
+    declare_model(data = pop) +
     declare_step(group_by, villages) +
     my_potential_outcomes
 
   my_design <-
-    declare_population(data = pop) +
+    declare_model(data = pop) +
     declare_step(group_by, villages) +
     my_potential_outcomes
 
@@ -145,7 +145,7 @@ test_that("POs at a higher level", {
 
 test_that("draw POs at a level using a variable from another level (now allowed)", {
   set.seed(50)
-  my_population <- declare_population(
+  my_population <- declare_model(
     villages = add_level(N = 2, elevation = runif(N)),
     citizens = add_level(N = 2, income = runif(N))
   )

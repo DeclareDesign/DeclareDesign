@@ -1,7 +1,7 @@
 context("environment problems")
 
 test_that("send inquiry to estimator works", {
-  my_population <- declare_population(N = 50, noise = rnorm(N))
+  my_population <- declare_model(N = 50, noise = rnorm(N))
 
   my_potential_outcomes <-
     declare_potential_outcomes(
@@ -15,13 +15,13 @@ test_that("send inquiry to estimator works", {
 
   pate_estimator <- declare_estimator(Y ~ Z, inquiry = pate, label = "test")
 
-  declare_reveal <- declare_reveal()
+  my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
   my_design <- my_population +
     my_potential_outcomes +
     pate +
     my_assignment +
-    declare_reveal +
+    my_measurement +
     pate_estimator
 
   rm(list = ls()[-which(ls() %in% "my_design")])

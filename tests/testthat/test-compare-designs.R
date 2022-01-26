@@ -1,6 +1,6 @@
 context("Compare Designs")
 
-my_population <- declare_population(N = 50, noise = rnorm(N))
+my_population <- declare_model(N = 50, noise = rnorm(N))
 
 my_potential_outcomes <-
   declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
@@ -13,20 +13,20 @@ sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))
 pate_estimator <- declare_estimator(Y ~ Z, inquiry = pate)
 sate_estimator <- declare_estimator(Y ~ Z, inquiry = sate)
 
-reveal <- declare_reveal()
+measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
 my_design_1 <- my_population +
   my_potential_outcomes +
   pate +
   my_assignment +
-  reveal +
+  measurement +
   pate_estimator
 
 my_design_2 <- my_population +
   my_potential_outcomes +
   sate +
   my_assignment +
-  reveal +
+  measurement +
   sate_estimator
 
 test_that("compare_designs works", {
@@ -63,7 +63,7 @@ test_that("compare_designs works", {
 })
 
 
-my_population <- declare_population(N = 50, noise = rnorm(N))
+my_population <- declare_model(N = 50, noise = rnorm(N))
 
 my_potential_outcomes <-
   declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
@@ -76,7 +76,7 @@ sate <- declare_inquiry(sate = mean(Y_Z_1 - Y_Z_0))
 pate_estimator <- declare_estimator(Y ~ Z, inquiry = pate)
 sate_estimator <- declare_estimator(Y ~ Z, inquiry = sate)
 
-reveal <- declare_reveal()
+measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
 my_special_step <- declare_inquiry(ATE = 5)
 
@@ -85,14 +85,14 @@ my_design_3 <- my_population +
   pate +
   my_special_step +
   my_assignment +
-  reveal +
+  measurement +
   pate_estimator
 
 my_design_4 <- my_population +
   my_potential_outcomes +
   sate +
   my_assignment +
-  reveal +
+  measurement +
   sate_estimator
 
 test_that("compare works", {

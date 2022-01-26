@@ -8,7 +8,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
   }
 
   population <-
-    declare_population(handler = my_population, N = 500)
+    declare_model(handler = my_population, N = 500)
 
   my_sampling <- function(data) {
     data$S <- rbinom(
@@ -66,7 +66,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
 
   diagnosand <- declare_diagnosands(bias = mean(estimate - estimand), keep_defaults = FALSE)
 
-  declare_reveal <- declare_reveal()
+  measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
   design <-
     population +
@@ -74,7 +74,7 @@ test_that("section on 'Characterizing Research Designs in Code' works", {
     assignment +
     potential_outcomes +
     inquiry +
-    declare_reveal +
+    measurement +
     estimator
 
   df <- draw_data(design)

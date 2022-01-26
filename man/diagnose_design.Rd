@@ -105,4 +105,41 @@ simulations <- simulate_design(designs, sims = 2)
 diagnosis   <- diagnose_design(simulations_df = simulations_df)
 
 }
+
+# If you do not specify diagnosands, the function default_diagnosands() is used, 
+#   which is reproduced below.
+
+alpha <- 0.05
+
+default_diagnosands <- 
+  declare_diagnosands(
+   mean_estimand = mean(estimand),
+   mean_estimate = mean(estimate),
+   bias = mean(estimate - estimand),
+   sd_estimate = sqrt(pop.var(estimate)),
+   rmse = sqrt(mean((estimate - estimand) ^ 2)),
+   power = mean(p.value <= alpha),
+   coverage = mean(estimand <= conf.high & estimand >= conf.low)
+  )
+
+# A longer list of useful diagnosands might include:
+
+extended_diagnosands <- 
+  declare_diagnosands(
+    mean_estimand = mean(estimand),
+    mean_estimate = mean(estimate),
+    bias = mean(estimate - estimand),
+    sd_estimate = sd(estimate),
+    rmse = sqrt(mean((estimate - estimand) ^ 2)),
+    power = mean(p.value <= alpha),
+    coverage = mean(estimand <= conf.high & estimand >= conf.low),
+    mean_se = mean(std.error),
+    type_s_rate = mean((sign(estimate) != sign(estimand))[p.value <= alpha]),
+    exaggeration_ratio = mean((estimate/estimand)[p.value <= alpha]),
+    var_estimate = pop.var(estimate),
+    mean_var_hat = mean(std.error^2),
+    prop_pos_sig = estimate > 0 & p.value <= alpha,
+    mean_ci_length = mean(conf.high - conf.low)
+  )
+  
 }

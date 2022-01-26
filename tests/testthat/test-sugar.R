@@ -2,7 +2,7 @@ context("testing rlang NSE syntax sugar")
 
 
 test_that("multiple PO / reveal", {
-  my_population <- declare_population(N = 100, noise = rnorm(N))
+  my_population <- declare_model(N = 100, noise = rnorm(N))
 
   multi_po <- rlang:::quos()
   multi_po[paste0("Y", 1:3, "_Z_0")] <- list(rlang::quo(noise))
@@ -23,7 +23,7 @@ test_that("multiple PO / reveal", {
 
 
 test_that("+ constructors", {
-  d <- declare_population(sleep) + declare_sampling(S = complete_rs(N)) + declare_assignment(Z = complete_ra(N, prob = 0.5))
+  d <- declare_model(sleep) + declare_sampling(S = complete_rs(N)) + declare_assignment(Z = complete_ra(N, prob = 0.5))
   expect_equal(dim(draw_data(d)), c(10, 5))
 })
 
@@ -34,10 +34,10 @@ test_that("Lots of levels", {
   names(outcomes) <- paste0("Y_Z_", LETTERS)
 
 
-  design <- declare_population(N = 26000, preference = sample(LETTERS, N, replace = TRUE)) +
+  design <- declare_model(N = 26000, preference = sample(LETTERS, N, replace = TRUE)) +
     declare_potential_outcomes(!!!outcomes) +
     declare_assignment(Z = complete_ra(N, conditions = !!LETTERS)) +
-    declare_reveal()
+    declare_measurement(Y = reveal_outcomes(Y ~ Z))
 
   expect_equal(colnames(draw_data(design)), c(
     "ID", "preference", "Y_Z_A", "Y_Z_B", "Y_Z_C", "Y_Z_D", "Y_Z_E",

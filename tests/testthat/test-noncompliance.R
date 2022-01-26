@@ -3,10 +3,10 @@ context("Noncompliance")
 test_that("Noncompliance", {
   skip_if_not_installed("AER")
 
-  my_population <- declare_population(N = 100, noise = rnorm(N))
+  my_population <- declare_model(N = 100, noise = rnorm(N))
 
-  POS_Y <- declare_potential_outcomes(Y_D_0 = noise, Y_D_1 = Y_D_0 + 2)
-  POS_Z <- declare_potential_outcomes(
+  POS_Y <- declare_model(Y_D_0 = noise, Y_D_1 = Y_D_0 + 2)
+  POS_Z <- declare_model(
     D_Z_0 = rbinom(n = N, size = 1, prob = pnorm(noise - 1)),
     D_Z_1 = rbinom(n = N, size = 1, prob = pnorm(noise + 1))
   )
@@ -50,8 +50,8 @@ test_that("Noncompliance", {
     ITT_d +
     CACE +
     my_assignment +
-    declare_reveal(outcome_variables = "D", assignment_variables = "Z") +
-    declare_reveal(outcome_variables = "Y", assignment_variables = "D") +
+    declare_measurement(D = reveal_outcomes(D ~ Z)) +
+    declare_measurement(Y = reveal_outcomes(Y ~ D)) +  
     cace_hat
 
   df <- draw_data(design)
@@ -65,7 +65,7 @@ test_that("Noncompliance", {
 })
 
 test_that("POs correctly assembled for noncompliance case", {
-  pop <- declare_population(
+  pop <- declare_model(
     N = 10000,
     type = sample(
       c("Complier", "Never-taker", "Always-taker"),
@@ -96,21 +96,19 @@ test_that("POs correctly assembled for noncompliance case", {
       pop +
       pos_D +
       assignment +
-      declare_reveal(D, Z) +
+      declare_measurement(D = reveal_outcomes(D ~ Z)) +
       pos_Y +
-      declare_reveal(Y, D)
+      declare_measurement(Y = reveal_outcomes(Y ~ D))
 
   e <- (noncompliance[[4]])
 
   expect_true(inherits(e, "design_step"))
-  expect_equal(attr(e, "step_type"), "reveal")
-  expect_equal(attr(e, "step_meta")$assignment_variables, "Z")
-  expect_equal(attr(e, "step_meta")$outcome_variables, "D")
+  expect_equal(attr(e, "step_type"), "measurement")
 })
 
 
 test_that("POS don't erase Z", {
-  pop <- declare_population(N = 10, Z = rbinom(N, size = 1, prob = .5))
+  pop <- declare_model(N = 10, Z = rbinom(N, size = 1, prob = .5))
   po <- declare_potential_outcomes(Y ~ Z)
   df <- pop()
   expect_equal(df$Z, po(df)$Z)

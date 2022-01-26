@@ -112,25 +112,47 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #' diagnosis
 #' }
 #'
-#' # Below is the code that makes the default diagnosands.
-#' # You can use these as a model when writing your own diagnosands.
-#'
-#' default_diagnosands <- declare_diagnosands(
-#' bias = mean(estimate - estimand),
-#' rmse = sqrt(mean((estimate - estimand) ^ 2)),
-#' power = mean(p.value < alpha),
-#' coverage = mean(estimand <= conf.high & estimand >= conf.low),
-#' mean_estimate = mean(estimate),
-#' sd_estimate = sd(estimate),
-#' mean_se = mean(std.error),
-#' type_s_rate = mean((sign(estimate) != sign(estimand))[p.value < alpha]),
-#' mean_estimand = mean(estimand)
-#' )
-#'
+#' # If you do not specify diagnosands in diagnose_design, 
+#' #   the function default_diagnosands() is used, 
+#' #   which is reproduced below.
+#' 
+#' alpha <- 0.05
+#' 
+#' default_diagnosands <- 
+#'   declare_diagnosands(
+#'    mean_estimand = mean(estimand),
+#'    mean_estimate = mean(estimate),
+#'    bias = mean(estimate - estimand),
+#'    sd_estimate = sqrt(pop.var(estimate)),
+#'    rmse = sqrt(mean((estimate - estimand) ^ 2)),
+#'    power = mean(p.value <= alpha),
+#'    coverage = mean(estimand <= conf.high & estimand >= conf.low)
+#'   )
+#' 
+#' # A longer list of potentially useful diagnosands might include:
+#' 
+#' extended_diagnosands <- 
+#'   declare_diagnosands(
+#'     mean_estimand = mean(estimand),
+#'     mean_estimate = mean(estimate),
+#'     bias = mean(estimate - estimand),
+#'     sd_estimate = sd(estimate),
+#'     rmse = sqrt(mean((estimate - estimand) ^ 2)),
+#'     power = mean(p.value <= alpha),
+#'     coverage = mean(estimand <= conf.high & estimand >= conf.low),
+#'     mean_se = mean(std.error),
+#'     type_s_rate = mean((sign(estimate) != sign(estimand))[p.value <= alpha]),
+#'     exaggeration_ratio = mean((estimate/estimand)[p.value <= alpha]),
+#'     var_estimate = pop.var(estimate),
+#'     mean_var_hat = mean(std.error^2),
+#'     prop_pos_sig = estimate > 0 & p.value <= alpha,
+#'     mean_ci_length = mean(conf.high - conf.low)
+#'   )
+#' 
 declare_diagnosands <- make_declarations(diagnosand_handler, "diagnosand", "diagnosands")
 
 #' @importFrom stats na.omit
-default_diagnosands <- function(data, alpha = .05){
+default_diagnosands <- function(data, alpha = 0.05){
   
   estimate <- data$estimate %||% NA
   estimand <- data$estimand %||% NA
@@ -139,40 +161,60 @@ default_diagnosands <- function(data, alpha = .05){
   conf.low <- data$conf.low %||% NA
   conf.high <- data$conf.high %||% NA
   
-  bias <- mean(estimate - estimand)
-  rmse <- sqrt(mean((estimate - estimand)^2))
-  power <- mean(p.value < alpha)
-  coverage <- mean(estimand <= conf.high & estimand >= conf.low)
-  mean_estimate <- mean(estimate)
-  sd_estimate <- sd(estimate)
-  mean_se <- mean(std.error)
-  type_s_rate <- mean((sign(estimate) != sign(estimand))[p.value < alpha])
   mean_estimand <- mean(estimand)
+  mean_estimate <- mean(estimate)
+  bias <- mean(estimate - estimand)
+  sd_estimate <- sd(estimate)
+  rmse <- sqrt(mean((estimate - estimand)^2))
+  power <- mean(p.value <= alpha)
+  coverage <- mean(estimand <= conf.high & estimand >= conf.low)
   
   data.frame(
     diagnosand_label = c(
+      "mean_estimand",
+      "mean_estimate",
       "bias",
+      "sd_estimate",
       "rmse",
       "power",
-      "coverage",
-      "mean_estimate",
-      "sd_estimate",
-      "mean_se",
-      "type_s_rate",
-      "mean_estimand"
+      "coverage"
     ),
     diagnosand = c(
+      mean_estimand,
+      mean_estimate,
       bias,
+      sd_estimate,
       rmse,
       power,
-      coverage,
-      mean_estimate,
-      sd_estimate,
-      mean_se,
-      type_s_rate,
-      mean_estimand
+      coverage
     ), 
     stringsAsFactors = FALSE
   )
   
+}
+
+#' Population variance function
+#'
+#' @param x a numeric vector, matrix or data frame.
+#' @param na.rm logical. Should missing values be removed?
+#'
+#' @return numeric scalar of the population variance
+#' @export
+#'
+#' @examples
+#' 
+#' x <- 1:4
+#' var(x) # divides by (n-1)
+#' pop.var(x) # divides by n
+#' 
+#' 
+pop.var <- function(x, na.rm = FALSE){
+  # checks from the base R function var
+  if (is.data.frame(x)) 
+    x <- as.matrix(x)
+  else stopifnot(is.atomic(x))
+  
+  if(na.rm) x <- na.omit(x)
+  
+  mean((x - mean(x, na.rm = na.rm))^2) 
 }

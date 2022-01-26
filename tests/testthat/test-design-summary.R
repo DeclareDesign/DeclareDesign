@@ -1,7 +1,7 @@
 context("Design summary")
 
 test_that("Basic design summary", {
-  my_population <- declare_population(N = 500, noise = rnorm(N))
+  my_population <- declare_model(N = 500, noise = rnorm(N))
 
   my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
@@ -13,7 +13,7 @@ test_that("Basic design summary", {
 
   my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
-  declare_reveal <- declare_reveal()
+  my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
   design <- my_population +
     my_potential_outcomes +
@@ -21,7 +21,7 @@ test_that("Basic design summary", {
     my_inquiry +
     declare_step(dplyr::mutate, q = 5) +
     my_assignment +
-    declare_reveal +
+    my_measurement +
     my_estimator
 
   s <- summary(design)
@@ -40,9 +40,9 @@ test_that("Basic design summary", {
 
 
 test_that("Add Quantitites and Alter Variables", {
-  my_population <- declare_population(N = 500, noise = rnorm(N))
+  my_population <- declare_model(N = 500, noise = rnorm(N))
   my_inquiry <- declare_inquiry(foo = mean(noise))
-  my_transform <- declare_population(noise = noise / 2)
+  my_transform <- declare_model(noise = noise / 2)
   my_inquiry2 <- declare_inquiry(foo2 = mean(noise))
 
 
@@ -63,7 +63,7 @@ test_that("Add Quantitites and Alter Variables", {
 })
 
 test_that("str() works", {
-  expect_output(str(declare_population(N = 50)), "design_step:\\t declare_population[(]N = 50[)] ")
+  expect_output(str(declare_model(N = 50)), "design_step:\\t declare_model[(]N = 50[)] ")
 })
 
 test_that("summary, custom estimator handler, numeric value", {
@@ -71,18 +71,18 @@ test_that("summary, custom estimator handler, numeric value", {
     handler = function(data)
       mean(data$extra)
   )
-  d <- declare_population(sleep) + extra
+  d <- declare_model(sleep) + extra
 
   expect_output(print(d), "1.54")
 })
 
 test_that("summary, estimator formula print formula", {
   extra <- declare_estimator(extra ~ group)
-  d <- declare_population(sleep) + extra
+  d <- declare_model(sleep) + extra
   expect_output(print(d), "extra ~ group")
 })
 
 test_that("summary, estimator print model", {
-  d <- declare_population(sleep) + declare_estimator(extra ~ group, model = lm)
+  d <- declare_model(sleep) + declare_estimator(extra ~ group, model = lm)
   expect_output(print(d), "Model:\\s*lm")
 })

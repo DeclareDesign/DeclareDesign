@@ -1,4 +1,6 @@
 #' Declare the size and features of the population
+#' 
+#' Deprecated. Please use declare_model instead.
 #'
 #' @inheritParams declare_internal_inherit_params
 #' @return A potential outcomes declaration, which is a function that returns a data.frame.
@@ -8,13 +10,13 @@
 #' @examples
 #'
 #' # Declare a single-level population with no covariates
-#' my_population <- declare_model(N = 100)
+#' my_population <- declare_population(N = 100)
 #'
 #' # Declare a population from existing data
-#' my_population <- declare_model(sleep)
+#' my_population <- declare_population(sleep)
 #'
 #' # Declare a single-level population with a covariate
-#' my_population <- declare_model(
+#' my_population <- declare_population(
 #'   N = 6,
 #'   female = rbinom(n = N, 1, prob = 0.5),
 #'   height_ft = rnorm(N, mean = 5.67 - 0.33 * female, sd = 0.25)

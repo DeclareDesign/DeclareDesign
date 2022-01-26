@@ -1,9 +1,9 @@
 context("Estimators")
 
-my_population <- declare_population(N = 500, noise = rnorm(N))
-my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+my_population <- declare_model(N = 500, noise = rnorm(N))
+my_potential_outcomes <- declare_model(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
-my_reveal_outcomes <- declare_reveal()
+my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
 expect_estimates <- function(estimates, label = NULL) {
   expect_equal(
@@ -17,18 +17,18 @@ expect_estimates <- function(estimates, label = NULL) {
 
 test_that("difference in means", {
   my_estimator <- declare_estimator(Y ~ Z)
-  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_reveal_outcomes() %>% my_estimator() %>% expect_estimates()
+  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_measurement() %>% my_estimator() %>% expect_estimates()
 })
 
 test_that("lm with robust ses", {
   my_estimator <- declare_estimator(Y ~ Z, model = lm_robust)
-  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_reveal_outcomes() %>% my_estimator() %>% expect_estimates()
+  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_measurement() %>% my_estimator() %>% expect_estimates()
 })
 
 
 test_that("lm with HC3 robust ses", {
   my_estimator <- declare_estimator(Y ~ Z, model = lm_robust, se_type = "HC3")
-  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_reveal_outcomes() %>% my_estimator() %>% expect_estimates()
+  my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_measurement() %>% my_estimator() %>% expect_estimates()
 })
 
 test_that("custom estimator function", {
@@ -36,18 +36,18 @@ test_that("custom estimator function", {
     data.frame(estimate = with(data, 2), foo = mean(data$Y))
   }
   my_estimator_custom <- declare_estimator(handler = label_estimator(my_mean))
-  cust <- my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_reveal_outcomes() %>% my_estimator_custom()
+  cust <- my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_measurement() %>% my_estimator_custom()
   expect_equal(cust$estimate, 2)
 })
 
 test_that("check blocked d-i-m estimator", {
-  my_population <- declare_population(N = 500, noise = rnorm(N), blocks = sample(rep(c("A", "B"), each = 250), N, replace = F))
-  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2) + 5 * (blocks == "A"))
+  my_population <- declare_model(N = 500, noise = rnorm(N), blocks = sample(rep(c("A", "B"), each = 250), N, replace = F))
+  my_potential_outcomes <- declare_model(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2) + 5 * (blocks == "A"))
   my_assignment <- declare_assignment(Z = block_ra(blocks = blocks))
 
   ## lm with HC3 robust ses
   my_estimator_blocked <- declare_estimator(Y ~ Z, model = difference_in_means, blocks = `blocks`)
-  df <- my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_reveal_outcomes()
+  df <- my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_measurement()
   my_estimator_notblocked <- declare_estimator(Y ~ Z)
 
   df %>% my_estimator_notblocked() %>% expect_estimates()
@@ -57,8 +57,8 @@ test_that("check blocked d-i-m estimator", {
 
 
 test_that("regression from estimatr works as an estimator", {
-  my_population <- declare_population(N = 500, noise = rnorm(N))
-  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+  my_population <- declare_model(N = 500, noise = rnorm(N))
+  my_potential_outcomes <- declare_model(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
   my_assignment <- declare_assignment(Z = complete_ra(N, m = 100))
   pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
   pate_estimator <- declare_estimator(Y ~ Z + noise,
@@ -66,13 +66,13 @@ test_that("regression from estimatr works as an estimator", {
     term = "noise",
     inquiry = pate, label = "pate_hat"
   )
-  my_reveal_outcomes <- declare_reveal()
+  my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
   my_design <- my_population +
     my_potential_outcomes +
     pate +
     my_assignment +
-    my_reveal_outcomes +
+    my_measurement +
     pate_estimator
 
   estimate <- draw_estimates(my_design)
@@ -81,7 +81,7 @@ test_that("regression from estimatr works as an estimator", {
   expect_equal(estimate$inquiry, "pate")
 })
 
-population <- declare_population(N = 200, noise = rnorm(N))
+population <- declare_model(N = 200, noise = rnorm(N))
 
 potential_outcomes <- declare_potential_outcomes(formula = Y ~ noise + Z * .5)
 
@@ -283,7 +283,7 @@ test_that("model_handler runs directly", {
 
 test_that("estimators have different columns", {
   skip_if_not_installed("Matching")
-  population <- declare_population(
+  population <- declare_model(
     N = 1000,
     X1 = rnorm(N),
     X2 = rnorm(N),
@@ -323,7 +323,7 @@ test_that("estimators have different columns", {
   matching <- population +
     potential_outcomes +
     assignment +
-    declare_reveal(Y, Z) +
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     estimator_d_i_m +
     estimator_m
 

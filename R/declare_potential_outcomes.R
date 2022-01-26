@@ -1,5 +1,7 @@
 #' Declare potential outcomes
 #'
+#' Deprecated. Please use the potential_outcomes function within a declare_model declaration.
+#'
 #' @inheritParams declare_internal_inherit_params
 #'
 #' @return a function that returns a data.frame
@@ -17,34 +19,34 @@
 #' 
 #' 
 #' # Using a formula
-#' declare_population(N = 100, U = rnorm(N)) +
+#' declare_model(N = 100, U = rnorm(N)) +
 #'   declare_potential_outcomes(Y ~ 0.5*Z + U)
 #'   
 #' # As separate variables
-#' declare_population(N = 100, U = rnorm(N)) +
+#' declare_model(N = 100, U = rnorm(N)) +
 #'   declare_potential_outcomes(Y_Z_0 = U,
 #'                              Y_Z_1 = U + 0.5)
 #' # (notice the naming structure: outcome_assignment_condition: Y_Z_1)  
 #' 
 #'   
 #' # You can change the name of the outcome
-#' declare_population(N = 100, U = rnorm(N)) +
+#' declare_model(N = 100, U = rnorm(N)) +
 #'   declare_potential_outcomes(Y2 ~ 0.5*Z + U)
 #'   
 #' # You can change the name of the assignment_variable
-#' declare_population(N = 100, U = rnorm(N)) +
+#' declare_model(N = 100, U = rnorm(N)) +
 #'   declare_potential_outcomes(Y ~ 0.5*D + U, assignment_variable = "D")
 #'   
 #'
 #' # `conditions` defines the "range" of the potential outcomes function
-#' declare_population(N = 100, age = sample(18:65, N, replace = TRUE)) +
+#' declare_model(N = 100, age = sample(18:65, N, replace = TRUE)) +
 #'   declare_potential_outcomes(formula = Y ~ .05 + .25 * Z + .01 * age * Z,
 #'                              conditions = 1:4)
 #'
 #' # Multiple assignment variables can be specified in `conditions`. For example,
 #' # in a 2x2 factorial potential outcome:
 #'
-#' declare_population(N = 100, age = sample(18:65, N, replace = TRUE)) +
+#' declare_model(N = 100, age = sample(18:65, N, replace = TRUE)) +
 #'   declare_potential_outcomes(formula = Y ~ .05 + .25 * Z1 + .01 * age * Z2,
 #'                              conditions = list(Z1 = 0:1, Z2 = 0:1))
 #'

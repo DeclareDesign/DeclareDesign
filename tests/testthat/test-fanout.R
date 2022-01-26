@@ -3,7 +3,7 @@ context("Fanout execution")
 test_that("Fanout does something", {
   N <- 100
 
-  pop <- declare_population(N = N)
+  pop <- declare_model(N = N)
   pop2 <- declare_step(fabricate, noise = rnorm(N))
   inquiry <- declare_inquiry(foo = mean(noise))
   D <- pop + pop2 + inquiry
@@ -21,7 +21,7 @@ test_that("Fanout does something", {
 test_that("fanout should not be exposed to users", {
   N <- 100
 
-  pop <- declare_population(N = N)
+  pop <- declare_model(N = N)
   pop2 <- declare_step(fabricate, noise = rnorm(N))
   inquiry <- declare_inquiry(foo = mean(noise))
   D <- pop + pop2 + inquiry
@@ -42,7 +42,7 @@ test_that("fanout should not be exposed to users", {
 test_that("Diagnosing a fanout", {
   N <- 100
 
-  pop <- declare_population(N = N, noise = rnorm(N))
+  pop <- declare_model(N = N, noise = rnorm(N))
 
   inquiry <- declare_inquiry(foo = mean(noise))
   sampl <- declare_sampling(S = complete_rs(N, n = N / 2))
@@ -81,11 +81,11 @@ test_that("Diagnosing a fanout", {
 })
 
 test_that("sims expansion is correct", {
-  design <- declare_population(sleep) +
+  design <- declare_model(sleep) +
     declare_inquiry(2, label = "a") +
     declare_inquiry(b = rnorm(1))
 
-  some_design <- declare_population(sleep) + declare_inquiry(2, label = "a")
+  some_design <- declare_model(sleep) + declare_inquiry(2, label = "a")
   some_design + declare_inquiry(b = rnorm(1))
 
   sims <- c(1, 1, 1)
@@ -106,7 +106,7 @@ test_that("sims expansion is correct", {
 test_that("fanout warnings", {
   N <- 100
 
-  pop <- declare_population(N = N, noise = rnorm(N))
+  pop <- declare_model(N = N, noise = rnorm(N))
 
   inquiry <- declare_inquiry(foo = mean(noise))
   sampl <- declare_sampling(S = complete_rs(N, n = N / 2))
@@ -158,7 +158,7 @@ test_that("correct fan out", {
   e3 <- declare_inquiry(c = f3())
   
   out <-
-    simulate_design(declare_population(sleep) + e1 + e2 + e3, sims = c(30, 1, 5, 2))
+    simulate_design(declare_model(sleep) + e1 + e2 + e3, sims = c(30, 1, 5, 2))
   
   expect_equivalent(apply(out[,c(5:7)], 2, max), c(30, 150, 300))
   expect_equivalent(tapply(out$estimand, INDEX = out$inquiry, max), c(30, 150, 300))

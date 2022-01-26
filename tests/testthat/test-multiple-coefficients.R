@@ -5,7 +5,7 @@ test_that("Multiple Coefficients", {
   alpha <- 1
   beta <- 3
 
-  my_pop <- declare_population(
+  my_pop <- declare_model(
     N = 30,
     noise = rnorm(N, mean = 0, sd = 1),
     X = 1:N,
@@ -29,5 +29,5 @@ test_that("Multiple Coefficients", {
 
   expect_equal(diagnosis %>% get_simulations %>% dim, c(4, 12))
 
-  expect_equal(diagnosis %>% get_diagnosands %>% dim, c(2,14))
+  expect_equal(diagnosis %>% get_diagnosands %>% dim, c(2, 12))
 })

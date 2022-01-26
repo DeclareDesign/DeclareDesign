@@ -2,18 +2,18 @@ context("model estimator")
 library(DeclareDesign)
 library(testthat)
 
-my_population <- declare_population(N = 500, noise = rnorm(N))
+my_population <- declare_model(N = 500, noise = rnorm(N))
 my_potential_outcomes <-
   declare_potential_outcomes(
     Y_Z_0 = draw_binary(latent = noise, link = "probit"),
     Y_Z_1 = draw_binary(latent = noise + 2, link = "probit")
   )
 my_assignment <- declare_assignment(Z = complete_ra(N, prob = 0.5))
-my_reveal <- declare_reveal()
+my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 my_design <- my_population +
   my_potential_outcomes +
   my_assignment +
-  my_reveal
+  my_measurement
 dat <- draw_data(my_design)
 
 test_that("test default term Z, lm", {
@@ -169,7 +169,7 @@ dat <-
   )
 
 
-pop <- declare_population(dat)
+pop <- declare_model(dat)
 
 
 

@@ -2,7 +2,7 @@ context("Reshape Diagnosis")
 
 N <- 500
 
-my_population <- declare_population(N = N, noise = rnorm(N))
+my_population <- declare_model(N = N, noise = rnorm(N))
 
 my_potential_outcomes <-
   declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
@@ -15,7 +15,7 @@ my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
 my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
-my_reveal <- declare_reveal()
+my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
 design <- my_population +
   my_potential_outcomes +
@@ -23,7 +23,7 @@ design <- my_population +
   my_inquiry +
   declare_step(dplyr::mutate, q = 5) +
   my_assignment +
-  my_reveal +
+  my_measurement +
   my_estimator
 
 test_that("reshape works", {
@@ -38,7 +38,7 @@ test_that("reshape works", {
 
 test_that("capitalization of parameter names are retained", {
   my_designer <- function(N = 100, n = 50) {
-    my_pop <- declare_population(N = N, noise = rnorm(N))
+    my_pop <- declare_model(N = N, noise = rnorm(N))
     my_pos <-
       declare_potential_outcomes(
         Y_Z_0 = noise,
@@ -48,7 +48,8 @@ test_that("capitalization of parameter names are retained", {
     my_asgn <- declare_assignment(Z = complete_ra(N, m = floor(n / 2)))
     my_inquiry <- declare_inquiry(mean(Y_Z_1) - mean(Y_Z_0))
     my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
-    my_design <- my_pop + my_pos + my_inquiry + my_smp + my_asgn + declare_reveal() + my_estimator
+    my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
+    my_design <- my_pop + my_pos + my_inquiry + my_smp + my_asgn + my_measurement + my_estimator
     my_design
   }
 
@@ -104,13 +105,13 @@ test_that("designs with factors in diagnosands_df do not produce warnings", {
 
 test_that("groups with factors", {
   
-  set.seed(1)
+  set.seed(5)
   design <- 
-    declare_population(N = 100, u = rnorm(N)) + 
-    declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
+    declare_model(N = 100, u = rnorm(N)) + 
+    declare_model(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
     declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
-    declare_reveal() + 
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, inquiry = "ATE_positive")
   
   diagnosis <- diagnose_design(design, 

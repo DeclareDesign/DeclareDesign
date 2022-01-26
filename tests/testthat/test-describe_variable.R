@@ -54,7 +54,7 @@ test_that("Describle Variable", {
             to = as.POSIXct("2018-05-01"),
             by = "days"))
   # Different ways of bringing data into DD
-  pop1 <- declare_population(data = test)
+  pop1 <- declare_model(data = test)
   dsgn <- pop1 + NULL 
   expect_output(print(dsgn), "2018-01-01")
 })

@@ -20,14 +20,14 @@ test_that("default diagnosands work", {
 
     my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
-    my_reveal <- declare_reveal()
+    my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
     design <- my_population +
       my_potential_outcomes +
       my_inquiry +
       declare_step(dplyr::mutate, q = 5) +
       my_assignment +
-      my_reveal +
+      my_measurement +
       my_estimator
 
     diagnosands <- declare_diagnosands(med_bias = median(estimate - estimand))
@@ -101,11 +101,10 @@ test_that("default diagnosands work", {
   )
   
   expect_equal(names(diag$diagnosands_df), 
-               c("design", "inquiry", "estimator", "term", 
-                 "bias", "se(bias)", "rmse", "se(rmse)", "power", "se(power)", 
-                 "coverage", "se(coverage)", "mean_estimate", "se(mean_estimate)", 
-                 "sd_estimate", "se(sd_estimate)", "mean_se", "se(mean_se)", "type_s_rate", 
-                 "se(type_s_rate)", "mean_estimand", "se(mean_estimand)", "n_sims"))
+               c("design", "inquiry", "estimator", "term", "mean_estimand", 
+                 "se(mean_estimand)", "mean_estimate", "se(mean_estimate)", "bias", 
+                 "se(bias)", "sd_estimate", "se(sd_estimate)", "rmse", "se(rmse)", 
+                 "power", "se(power)", "coverage", "se(coverage)", "n_sims"))
   
   # test tidy.diagnosis
   expect_equal(dim(tidy(diag)), c(18, 9))
@@ -155,7 +154,7 @@ test_that("default diagnosands work", {
 
   diag <- diagnose_design(designs, sims = 5, bootstrap_sims = FALSE)
   
-  expect_equal(ncol(diag$diagnosands_df), 16)
+  expect_equal(ncol(diag$diagnosands_df), 14)
   
   # test tidy.diagnosis
   expect_equal(dim(tidy(diag)), c(20, 7))
@@ -173,7 +172,7 @@ test_that("default diagnosands work", {
 
 test_that("more term",{
   population  <-
-    declare_population(N = 100,
+    declare_model(N = 100,
                        Z = rep(0:1, 50),
                        Y = rnorm(N))
   
@@ -224,7 +223,7 @@ test_that("diagnose_design does not reclass the variable N", {
   skip_if(compareVersion("3.5", paste(R.Version()$major, R.Version()$minor, sep = ".")) == 1)
   # works for redesign
   design <-
-    declare_population(N = 5, noise = rnorm(N)) +
+    declare_model(N = 5, noise = rnorm(N)) +
        declare_inquiry(mean_noise = mean(noise))
   
   designs <- redesign(design, N = 5:10) 
@@ -238,7 +237,7 @@ test_that("diagnose_design does not reclass the variable N", {
   
   # works for expand_design
   designer <- function(N = 5) {
-    declare_population(N = N, noise = rnorm(N)) +
+    declare_model(N = N, noise = rnorm(N)) +
     declare_inquiry(mean_noise = mean(noise))
   }
   
@@ -256,7 +255,7 @@ test_that("diagnose_design does not reclass the variable N", {
 
 test_that("diagnose_design works when simulations_df lacking parameters attr", {
 
-  design <- declare_population(N = 100, X = rnorm(N), Y = rnorm(N, X)) +
+  design <- declare_model(N = 100, X = rnorm(N), Y = rnorm(N, X)) +
     declare_inquiry(true_effect = 1) +
     declare_estimator(Y ~ X, model=lm_robust, inquiry = "true_effect", label = "Y on X") 
   
@@ -292,11 +291,13 @@ test_that("diagnose_design can generate and use grouping variables", {
   set.seed(5)
   
   design <- 
-    declare_population(N = 100, u = rnorm(N)) + 
-    declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
+    declare_model(N = 100, u = rnorm(N),
+      Y_Z_0 = 0, 
+      Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u
+    ) +
     declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
-    declare_reveal() + 
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, inquiry = "ATE_positive")
   
   diagnosis <- diagnose_design(design, 
@@ -312,11 +313,13 @@ test_that("diagnose_design can generate and use grouping variables", {
                                          "std.error", "conf.low", "conf.high"))
   
   design <- 
-    declare_population(N = 100, u = rnorm(N)) + 
-    declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
+    declare_model(N = 100, u = rnorm(N),
+      Y_Z_0 = 0, 
+      Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u
+    ) +
     declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-    declare_reveal() + 
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, inquiry = "ATE")
   
   diagnosis <- diagnose_design(
@@ -336,11 +339,13 @@ test_that("diagnose_design can generate and use grouping variables", {
   
   
   design <- 
-    declare_population(N = 100, u = rnorm(N)) + 
-    declare_potential_outcomes(Y_Z_0 = 0, Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u) +
+    declare_model(N = 100, u = rnorm(N),
+      Y_Z_0 = 0, 
+      Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u
+    ) +
     declare_assignment(Z = complete_ra(N)) + 
     declare_inquiry(ATE_positive = mean(Y_Z_1 - Y_Z_0) > 0) + 
-    declare_reveal() + 
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, inquiry = "ATE_positive")
   
   diagnosis <- diagnose_design(design, 
@@ -367,7 +372,6 @@ test_that("diagnose_design can generate and use grouping variables", {
   
   
 })
-
 
 
 test_that("tidy.diagnosis handles NAs", {
@@ -412,7 +416,4 @@ test_that("tidy.diagnosis handles NAs", {
   expect_equal(sum(is.na(tidy(diagnosis) %>% filter(diagnosand == "mean_estimate", estimator == "estimator") %>% pull(estimate))), 0)
   
 })
-
-
-
 

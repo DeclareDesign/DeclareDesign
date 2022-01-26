@@ -18,8 +18,8 @@ test_that("declare_test works", {
   }
   
   des <- 
-    # declare_population(N = 100, Xclus = rbinom(n = N, size = 1, prob = 0.2), outcome = 0.2 * Xclus + 3 + rnorm(N)) +
-    declare_population(data = mtcars) + 
+    # declare_model(N = 100, Xclus = rbinom(n = N, size = 1, prob = 0.2), outcome = 0.2 * Xclus + 3 + rnorm(N)) +
+    declare_model(data = mtcars) + 
     declare_test(handler = our_ttest, label = "bare") + 
     declare_test(handler = label_test(our_ttest), label = "tidied")
   

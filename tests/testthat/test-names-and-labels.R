@@ -5,7 +5,7 @@ test_that("inquiry labels work", {
   my_private_estimator <- function(data) {
     data.frame(estimate = median(data$Y)^2)
   }
-  pop <- declare_population(N = 6, Y = rnorm(N))
+  pop <- declare_model(N = 6, Y = rnorm(N))
 
   # Unmarked case
   inquiry <- declare_inquiry(mean(Y))
@@ -45,7 +45,7 @@ test_that("inquiry labels work", {
 })
 
 test_that("multiple inquiries", {
-  pop <- declare_population(N = 6, Y = rnorm(N))
+  pop <- declare_model(N = 6, Y = rnorm(N))
   inquiry <- declare_inquiry(a1 = 1, a2 = 2, a3 = 3, label = "b")
   design <- pop + inquiry
 
@@ -55,7 +55,7 @@ test_that("multiple inquiries", {
 
 
 test_that("label conflicts", {
-  pop <- declare_population(N = 6, Y = rnorm(N))
+  pop <- declare_model(N = 6, Y = rnorm(N))
   inquiry_1 <- declare_inquiry(some_stat = mean(Y))
   inquiry_2 <- declare_inquiry(some_stat = median(Y))
   expect_error(design <- pop + inquiry_1 + inquiry_2)
@@ -66,7 +66,7 @@ test_that("label conflicts", {
 
 
 test_that("step name conflicts in design", {
-  pop <- declare_population(N = 6, Y = rnorm(N))
+  pop <- declare_model(N = 6, Y = rnorm(N))
   assign_1 <- declare_assignment(Z = complete_ra(N, m = 2))
   inquiry_1 <- declare_inquiry(some_stat = mean(Y))
   expect_error(design <- pop + inquiry_1 + inquiry_1, "You have inquiries with identical labels: some_stat\nPlease provide inquiries with unique labels")

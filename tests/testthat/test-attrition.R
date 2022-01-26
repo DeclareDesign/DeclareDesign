@@ -2,7 +2,7 @@ context("Attrition")
 
 ## would be nice to do with fixed POs
 
-my_population <- declare_population(
+my_population <- declare_model(
   N = 100, income = rnorm(N), age = sample(18:95, N, replace = TRUE)
 )
 
