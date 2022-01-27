@@ -114,9 +114,7 @@ simulate_single_design <- function(design, sims, low_simulations_warning = TRUE)
   # See also ?testthat::is_testing
   if (low_simulations_warning && sims[1] < 30 && !identical(Sys.getenv("TESTTHAT"), "true")) {
     warning(
-      "We recommend you choose a higher number of simulations than ",
-      sims[1],
-      " for the top level of simulation.",
+      "We recommend you choose a number of simulations higher than 30.",
       call. = FALSE
     )
   }

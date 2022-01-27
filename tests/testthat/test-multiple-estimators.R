@@ -18,7 +18,7 @@ test_that("Two estimators, Two inquiries (matched)", {
       model = difference_in_means,
       inquiry = "CATE_1_5",
       label = "DIM_1_5",
-      term = group2
+      term = "group2"
     ) +
     declare_estimator(
       extra ~ group,
@@ -26,7 +26,7 @@ test_that("Two estimators, Two inquiries (matched)", {
       model = difference_in_means,
       inquiry = "CATE_6_10",
       label = "DIM_6_10",
-      term = group2
+      term = "group2"
     )
 
   diag <- diagnose_design(des, sims = 5, bootstrap_sims = FALSE)
@@ -52,3 +52,4 @@ test_that("Two estimators, Two inquiries (crossed)", {
   diag <- diagnose_design(des, sims = 5, bootstrap_sims = FALSE)
   expect_equal(nrow(diag$diagnosands), 4)
 })
+

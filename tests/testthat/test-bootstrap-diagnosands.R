@@ -26,6 +26,8 @@ test_that("test diagnosands", {
     measurement +
     pate_estimator1 +
     pate_estimator2
+  
+  run_design(my_design)
 
   # default set
 
