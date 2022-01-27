@@ -64,7 +64,7 @@ summary.diagnosis <- function(object, digits = 2, select = NULL, exclude = NULL,
 
 print_summary_diagnosis <- function(x, digits = 2, select = NULL, exclude = NULL, ...) {
   n_sims <- unique(x$diagnosands_df$n_sims)
-  cat(paste0("\nResearch design diagnosis", ifelse(length(n_sims) == 1, paste0(" based on ", n_sims, " simulations"), ""), "."))
+  cat(paste0("\nResearch design diagnosis", ifelse(length(n_sims) == 1, paste0(" based on ", n_sims, " simulations"), ""), ". Diagnosis completed in ", x$diagnosis_duration, " seconds."))
   if (x$bootstrap_sims > 0) {
     cat(" Diagnosand estimates with bootstrapped standard errors in parentheses (", x$bootstrap_sims, " replicates).", sep = "")
   }

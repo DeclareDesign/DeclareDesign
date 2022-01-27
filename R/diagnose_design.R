@@ -121,6 +121,9 @@ diagnose_design <- function(...,
                             bootstrap_sims = 100,
                             make_groups = NULL,
                             add_grouping_variables = NULL) {
+  
+  start_time <- Sys.time()
+  
   dots <- quos(...)
   
   if(!is.null(add_grouping_variables)){
@@ -212,6 +215,8 @@ diagnose_design <- function(...,
     out$bootstrap_replicates <- merge_param_df(bootout$diagnosand_replicates, parameters_df)
   }
   out$bootstrap_sims <- bootstrap_sims
+  
+  out$diagnosis_duration <- as.numeric(Sys.time() - start_time)
 
   structure(out, class = "diagnosis")
 }
