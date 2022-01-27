@@ -1,3 +1,8 @@
+# DeclareDesign 0.30.0
+
+* Remove draw_assignment and draw_sample function.
+* Added diagnosis duration to summary function.
+
 # DeclareDesign 0.28.0
 
 * To simplify output of diagnoses, we changed the names of the variables from design_label to design, inquiry_label to inquiry, and estimator_label to estimator.

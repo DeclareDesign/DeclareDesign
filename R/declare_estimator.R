@@ -149,7 +149,7 @@ label_estimator <- function(fn) {
     stop("Must provide a `estimator_function` function with a data argument.")
   }
 
-  f <- function(data, ...,  inquiry = NULL,estimand = NULL, label) {
+  f <- function(data, ...,  inquiry = NULL, estimand = NULL, label) {
     calling_args <-
       names(match.call(expand.dots = FALSE)) %i% names(formals(fn))
 

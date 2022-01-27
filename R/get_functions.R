@@ -25,10 +25,6 @@
 #' 
 #' get_estimates(design, data = dat)
 #' 
-#' draw_assignment(design, data = dat)
-#' 
-#' draw_sample(design, data = dat)
-#'
 #' @name get_functions
 
 #' @rdname get_functions
@@ -42,22 +38,6 @@ get_estimates <- function(design, data = NULL, start = 1, end = length(design)) 
   get_function_internal(
     design, data, start, end, function(x) attr(x, "causal_type") %in% "estimator", NULL, "estimates_df", step_type = "estimator")
 }
-
-#' @rdname get_functions
-#' @export
-draw_assignment <- function(design, data = NULL, start = 1, end = length(design)) {
-  get_function_internal(
-    design, data, start, end, function(x) attr(x, "step_type") %in% "assignment", step_type = "assignment")
-}
-
-#' @rdname get_functions
-#' 
-#' @export
-draw_sample <- function(design, data = NULL, start = 1, end = length(design)) {
-  get_function_internal(
-    design, data, start, end, function(x) attr(x, "step_type") %in% "sampling", step_type = "sampling")
-}
-
 
 # utilities 
 
