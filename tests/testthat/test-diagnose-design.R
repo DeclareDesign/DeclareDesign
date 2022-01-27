@@ -273,6 +273,8 @@ test_that("diagnose_design works when simulations_df lacking parameters attr", {
   d1$simulations_df$design <- as.character(d1$simulations_df$design)
   d1$diagnosands_df$design <- as.character(d1$diagnosands_df$design)
   d1["parameters_df"] <- list(NULL)
+  d1$duration <- NULL
+  d2$duration <- NULL # dropped because durations will always be slightly different
     
   expect_identical(d1,d2)
   
