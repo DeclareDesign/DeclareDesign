@@ -216,7 +216,7 @@ diagnose_design <- function(...,
   }
   out$bootstrap_sims <- bootstrap_sims
   
-  out$diagnosis_duration <- as.numeric(Sys.time() - start_time)
+  out$duration <- Sys.time() - start_time
 
   structure(out, class = "diagnosis")
 }
