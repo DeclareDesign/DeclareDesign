@@ -137,6 +137,9 @@ test_that("diagnosis, list of designs", {
 
   diag1 <- diagnose_design(list(d, d), diagnosands = diagnosand, sims = 5, bootstrap_sims = FALSE)
   diag2 <- diagnose_design(design_1 = d, design_2 = d, diagnosands = diagnosand, sims = 5, bootstrap_sims = FALSE)
+  
+  diag1$duration <- NULL
+  diag2$duration <- NULL # durations unlikely to be exactly equal
 
   expect_identical(diag1, diag2)
 })
