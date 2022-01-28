@@ -24,3 +24,4 @@ paper.pdf
 vignettes
 ^\.github$
 ^pkgdown$
+^CRAN-SUBMISSION$
