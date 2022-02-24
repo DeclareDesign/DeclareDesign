@@ -149,7 +149,7 @@ label_estimator <- function(fn) {
     stop("Must provide a `estimator_function` function with a data argument.")
   }
 
-  f <- function(data, ...,  inquiry = NULL,estimand = NULL, label) {
+  f <- function(data, ...,  inquiry = NULL, estimand = NULL, label) {
     calling_args <-
       names(match.call(expand.dots = FALSE)) %i% names(formals(fn))
 
@@ -173,28 +173,36 @@ label_estimator <- function(fn) {
       ret,
       stringsAsFactors = FALSE
     )
-
-
+    
     if(!is.null(estimand) && !is.null(inquiry)) {stop("Please provide either an inquiry or an estimand, but not both")}
     if(!is.null(estimand)){
       inquiry <- estimand
       warning("The argument 'estimand = ' is deprecated. Please use 'inquiry = ' instead.", call. = FALSE)
     }
     
-    
     inquiry <- get_inquiry(inquiry)
+    
     if (length(inquiry) > 0) {
-      ret <-
-        cbind(
-          ret,
-          inquiry = inquiry,
-          row.names = NULL,
-          stringsAsFactors = FALSE
-        )
+      
+      if(exists("term") && is.character(term) && is.character(inquiry) && length(term) == length(inquiry)) {
+        merge_df <- data.frame(term = term, inquiry = inquiry)
+        ret <- merge(ret, merge_df, by = "term", all = TRUE, sort = FALSE)
+      } else {
+        ret <-
+          cbind(
+            ret,
+            inquiry = inquiry,
+            row.names = NULL,
+            stringsAsFactors = FALSE
+          )
+      } 
+      
     }
+    
     ret
+    
   }
-
+  
   formals(f) <- formals(fn)
   if (!"inquiry" %in% names(formals(f))) {
     formals(f)["inquiry"] <- list(NULL)

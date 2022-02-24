@@ -345,4 +345,24 @@ test_that("when a term is missing from a model there is an informative error", {
   expect_error(ols(data), "Not all of the terms declared in your estimator are present in the model output, including X.")
 })
 
-
+test_that("estimators and estimands are in the correct order when specified", {
+  
+  design <- 
+    declare_model(
+      N = 20,
+      X1 = rnorm(N),
+      X2 = rnorm(N),
+      Y = X1 - X2 + rnorm(N)
+    ) +
+    declare_inquiry(
+      x1 = 1, 
+      x2 = -1, 
+      interaction = 0) +
+    declare_estimator(Y ~ X1*X2, model = lm_robust, 
+                      term = c("X1:X2", "X1", "X2"),
+                      inquiry = c("interaction", "x1", "x2"))
+  
+  ret <- run_design(design)    
+  expect_equal(ret$inquiry, c("interaction", "x1", "x2"))
+  expect_equal(ret$term, c("X1:X2", "X1", "X2"))
+})

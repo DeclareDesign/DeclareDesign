@@ -3,15 +3,9 @@
 \name{get_functions}
 \alias{get_functions}
 \alias{get_estimates}
-\alias{draw_assignment}
-\alias{draw_sample}
 \title{Get estimates, inquiries, assignment vectors, or samples from a design given data}
 \usage{
 get_estimates(design, data = NULL, start = 1, end = length(design))
-
-draw_assignment(design, data = NULL, start = 1, end = length(design))
-
-draw_sample(design, data = NULL, start = 1, end = length(design))
 }
 \arguments{
 \item{design}{A design object, typically created using the + operator}
@@ -44,9 +38,5 @@ dat <- draw_data(design)
 draw_data(design, data = dat, start = 2)
 
 get_estimates(design, data = dat)
-
-draw_assignment(design, data = dat)
-
-draw_sample(design, data = dat)
 
 }

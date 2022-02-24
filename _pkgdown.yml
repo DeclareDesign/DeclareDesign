@@ -57,8 +57,6 @@ reference:
   - draw_data
   - draw_estimands
   - draw_estimates
-  - draw_assignment
-  - draw_sample
   - run_design
   - get_estimates
   - print.design

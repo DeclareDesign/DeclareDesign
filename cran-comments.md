@@ -1,6 +1,6 @@
 ## Submission
 
-This is a minor patch switching over from a deprecated syntax to new syntax by default, after waiting nine months for users to transition. Fixed URL redirect in original CRAN submission.
+Thanks for reviewing this new version including a small number of deprecations of old functionality, bug fixes, and one new helper function.
 
 ## Test environments
 * local OS X install (release)
@@ -15,7 +15,7 @@ This is a minor patch switching over from a deprecated syntax to new syntax by d
 
 ## Reverse dependencies
 
-* CausalQueries and DesignLibrary passed
+No changes to reverse. 
 
 ---
   

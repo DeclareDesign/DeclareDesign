@@ -1,3 +1,10 @@
+# DeclareDesign 0.30.0
+
+* New tidy(diagnosis) function to construct a tidy data frame of diagnosand estimates and summary statistics including bootstrapped standard error and confidence intervals.
+* Remove draw_assignment and draw_sample function.
+* Added diagnosis duration to summary function.
+* Bug fixes.
+
 # DeclareDesign 0.28.0
 
 * To simplify output of diagnoses, we changed the names of the variables from design_label to design, inquiry_label to inquiry, and estimator_label to estimator.

@@ -110,7 +110,7 @@ test_that("test assignment and probability functions", {
   
   
   # Complete Random Assignment assignments
-  assignment_0 <- declare_assignment(legacy = TRUE, ) %>% expect_assignment() # blug
+  assignment_0 <- declare_assignment(legacy = TRUE) %>% expect_assignment() # blug
   assignment_1 <- declare_assignment(legacy = TRUE, conditions = c(0, 1)) %>% expect_assignment()
   assignment_2 <- declare_assignment(legacy = TRUE, m = 60, conditions = c(0, 1)) %>% expect_assignment()
   assignment_3 <- declare_assignment(legacy = TRUE, m_each = c(20, 30, 50)) %>% expect_assignment()

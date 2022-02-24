@@ -68,19 +68,41 @@ diagnosis <- diagnose_design(design)
 diagnosis
 }
 
-# Below is the code that makes the default diagnosands.
-# You can use these as a model when writing your own diagnosands.
+# If you do not specify diagnosands in diagnose_design, 
+#   the function default_diagnosands() is used, 
+#   which is reproduced below.
 
-default_diagnosands <- declare_diagnosands(
-bias = mean(estimate - estimand),
-rmse = sqrt(mean((estimate - estimand) ^ 2)),
-power = mean(p.value < alpha),
-coverage = mean(estimand <= conf.high & estimand >= conf.low),
-mean_estimate = mean(estimate),
-sd_estimate = sd(estimate),
-mean_se = mean(std.error),
-type_s_rate = mean((sign(estimate) != sign(estimand))[p.value < alpha]),
-mean_estimand = mean(estimand)
-)
+alpha <- 0.05
+
+default_diagnosands <- 
+  declare_diagnosands(
+   mean_estimand = mean(estimand),
+   mean_estimate = mean(estimate),
+   bias = mean(estimate - estimand),
+   sd_estimate = sqrt(pop.var(estimate)),
+   rmse = sqrt(mean((estimate - estimand) ^ 2)),
+   power = mean(p.value <= alpha),
+   coverage = mean(estimand <= conf.high & estimand >= conf.low)
+  )
+
+# A longer list of potentially useful diagnosands might include:
+
+extended_diagnosands <- 
+  declare_diagnosands(
+    mean_estimand = mean(estimand),
+    mean_estimate = mean(estimate),
+    bias = mean(estimate - estimand),
+    sd_estimate = sd(estimate),
+    rmse = sqrt(mean((estimate - estimand) ^ 2)),
+    power = mean(p.value <= alpha),
+    coverage = mean(estimand <= conf.high & estimand >= conf.low),
+    mean_se = mean(std.error),
+    type_s_rate = mean((sign(estimate) != sign(estimand))[p.value <= alpha]),
+    exaggeration_ratio = mean((estimate/estimand)[p.value <= alpha]),
+    var_estimate = pop.var(estimate),
+    mean_var_hat = mean(std.error^2),
+    prop_pos_sig = estimate > 0 & p.value <= alpha,
+    mean_ci_length = mean(conf.high - conf.low)
+  )
 
 }

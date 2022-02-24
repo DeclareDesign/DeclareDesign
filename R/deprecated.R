@@ -8,10 +8,10 @@
 #' @keywords internal
 NULL
 
-estimand_handler <- function(...){
-  .Deprecated(new = "inquiry_handler")
+draw_assignment <- function(design, data = NULL, start = 1, end = length(design)) {
+  .Deprecated()
 }
 
-compare_design_estimands <- function(...){
-  .Deprecated(new = "compare_design_inquiries")
+draw_sample <- function(design, data = NULL, start = 1, end = length(design)) {
+  .Deprecated()
 }

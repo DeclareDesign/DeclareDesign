@@ -45,4 +45,4 @@
 #' @name DeclareDesign
 NULL
 
-utils::globalVariables(c("Y", "Z", "S", "N", "conf.low", "conf.high", "estimate", "inquiry", "p.value", "std.error"))
+utils::globalVariables(c("Y", "Z", "S", "N", "conf.low", "conf.high", "estimate", "inquiry", "p.value", "std.error", "term"))

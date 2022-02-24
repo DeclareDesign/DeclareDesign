@@ -76,7 +76,8 @@ Here is an example of a `declare_assignment` step.
 
 ```{r}
 simple_random_assignment_step <- 
-  declare_assignment(Z = complete_ra(N, prob = 0.6))
+  declare_assignment(Z = complete_ra(N, prob = 0.6),
+                     Z_cond_prob = obtain_condition_probabilities(Z, declaration = declare_ra(N, prob = 0.6)))
 ```
 
 The big idea here is that the object we created, `simple_random_assignment_step`, is not a particular assignment, it is a *function* that conducts assignment when called. You can run the function on data:
@@ -92,10 +93,6 @@ simple_random_assignment_step(voter_file) %>%
 ```
 
 The output of the `simple_random_assignment_step(voter_file)` call is the original dataset with a new column indicating treatment assignment (`Z`) appended. As a bonus, the data also includes the probability that each unit is assigned *to the condition in which it is in* (`Z_cond`), which is an extremely useful number to know in many analysis settings. The most important thing to understand here is that steps are "dataset-in, dataset-out" functions. The `simple_random_assignment_step` took the `voter_file` dataset and returned a dataset with assignment information appended.
-
-<!-- A few parts of this step declaration may seem a little bit odd. First, we did not tell R anything about the number of units in our dataset. Second, we did not give it the data. This is because a step declaration creates functions that are meant to be flexible, function that will work on any size dataset. We told `declare_assignment` that we want to assign treatment with probability `0.6`, regardless of how large the dataset is. We did not send the declaration the data because, although the assignment is a function of the data, the assignment *function* is not a function of the data. Put differently, the assignment function takes data as an argument, but the function to create the assignment function (`declare_assignment()`) does not.  -->
-
-<!-- When you implement your research design after you have conducted it, you can use the exact same functions you generated in this design phase. In the same way when you *diagnose* your design you will use the same function many times. This is one of the reasons we *declare* the assignment step --- because we will learn about the properties of your design with the same code you can actually use to randomly assign treatment. -->
 
 Every step of a research design declaration can be written using one of the `declare_*` functions. This table collects these according to the four elements of a research design. Below, we walk through the common uses of each of these declaration functions.
 

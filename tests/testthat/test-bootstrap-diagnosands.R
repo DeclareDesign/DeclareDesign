@@ -26,11 +26,13 @@ test_that("test diagnosands", {
     measurement +
     pate_estimator1 +
     pate_estimator2
+  
+  run_design(my_design)
 
   # default set
 
   diagnosis <- diagnose_design(my_design, sims = 2, bootstrap_sims = 2)
-  expect_equal(dim(diagnosis$diagnosands_df), c(2,23))
+  expect_equal(dim(diagnosis$diagnosands_df), c(2,19))
 
   expect_equal(dim(diagnosis$simulations_df), c(4, 14))
 })
