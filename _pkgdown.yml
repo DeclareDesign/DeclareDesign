@@ -40,7 +40,6 @@ reference:
   - declare_sampling
   - declare_assignment
   - declare_measurement
-  - reveal_outcomes
   - declare_estimator
   - declare_estimators
   - declare_test
