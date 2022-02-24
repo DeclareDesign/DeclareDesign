@@ -1,4 +1,6 @@
 #' Declare a reveal outcomes step
+#' 
+#' Deprecated. Please use the \code{reveal_outcomes} function within a \code{declare_measurement} declaration.
 #'
 #' Potential outcomes declarations indicate what outcomes would obtain for different possible values of assignment variables. 
 #' But realized outcomes need to be "revealed." 
@@ -8,9 +10,9 @@
 #' Revelation steps are usefully included after declaration of all assignments of conditions required to determine the realized outcome.
 #' If a revelation is not declared, DeclareDesign will try to guess appropriate revelations. Explicit revelation is recommended however.
 #' 
-#' This function was previously called \code{declare_reveal}. You can still use either one.
-#'
 #' @inheritParams declare_internal_inherit_params
+#' 
+#' @keywords internal
 #'
 #' @export
 declare_reveal <- make_declarations(declare_reveal_handler, "reveal")

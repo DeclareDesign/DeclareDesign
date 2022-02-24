@@ -8,53 +8,9 @@
 #'
 #' @export
 #'
-#' @details
-#'
-#' A \code{declare_potential_outcomes} function is used to create outcomes that each unit would express in each possible treatment condition. 
-#'
-#' @examples
+#' @keywords internal
 #' 
-#' # Potential outcomes can be declared in two ways: 
-#' # by using a formula or as separate variables.
-#' 
-#' 
-#' # Using a formula
-#' declare_model(N = 100, U = rnorm(N)) +
-#'   declare_potential_outcomes(Y ~ 0.5*Z + U)
-#'   
-#' # As separate variables
-#' declare_model(N = 100, U = rnorm(N)) +
-#'   declare_potential_outcomes(Y_Z_0 = U,
-#'                              Y_Z_1 = U + 0.5)
-#' # (notice the naming structure: outcome_assignment_condition: Y_Z_1)  
-#' 
-#'   
-#' # You can change the name of the outcome
-#' declare_model(N = 100, U = rnorm(N)) +
-#'   declare_potential_outcomes(Y2 ~ 0.5*Z + U)
-#'   
-#' # You can change the name of the assignment_variable
-#' declare_model(N = 100, U = rnorm(N)) +
-#'   declare_potential_outcomes(Y ~ 0.5*D + U, assignment_variable = "D")
-#'   
-#'
-#' # `conditions` defines the "range" of the potential outcomes function
-#' declare_model(N = 100, age = sample(18:65, N, replace = TRUE)) +
-#'   declare_potential_outcomes(formula = Y ~ .05 + .25 * Z + .01 * age * Z,
-#'                              conditions = 1:4)
-#'
-#' # Multiple assignment variables can be specified in `conditions`. For example,
-#' # in a 2x2 factorial potential outcome:
-#'
-#' declare_model(N = 100, age = sample(18:65, N, replace = TRUE)) +
-#'   declare_potential_outcomes(formula = Y ~ .05 + .25 * Z1 + .01 * age * Z2,
-#'                              conditions = list(Z1 = 0:1, Z2 = 0:1))
-#'
 declare_potential_outcomes <- make_declarations(potential_outcomes_handler, "potential_outcomes")
-### Default handler calls either the formula handler or non-formula handler
-### this can be determind at declare time in the validation_fn, and the correct function returned instead
-### If possible, we do so, even though much of the logic is essentially duplicated
-### this makes tracing the execution in run_design much simpler
 
 potential_outcomes_handler <- function(..., data, level) {
   (function(formula, ...) UseMethod("potential_outcomes_internal"))(..., data = data, level = level)

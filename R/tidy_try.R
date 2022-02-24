@@ -8,7 +8,7 @@
 #' @return A data.frame with coefficient estimates and associated statistics.
 #' 
 #' @export
-#'
+#' 
 #' @examples
 #' 
 #' fit <- lm(mpg ~ hp + disp + cyl, data = mtcars)

@@ -31,6 +31,9 @@ declare_reveal_handler(
 \item{attrition_variables}{Unquoted name of the attrition variable.}
 }
 \description{
+Deprecated. Please use the \code{reveal_outcomes} function within a \code{declare_measurement} declaration.
+}
+\details{
 Potential outcomes declarations indicate what outcomes would obtain for different possible values of assignment variables. 
 But realized outcomes need to be "revealed." 
 \code{declare_reveal} generates these realized outcomes using information on 
@@ -38,9 +41,6 @@ potential outcomes  (for instance generated via \code{declare_potential_outcomes
 assignment variables (for example created by \code{declare_assignment}). 
 Revelation steps are usefully included after declaration of all assignments of conditions required to determine the realized outcome.
 If a revelation is not declared, DeclareDesign will try to guess appropriate revelations. Explicit revelation is recommended however.
-}
-\details{
-This function was previously called \code{declare_reveal}. You can still use either one.
 
 \code{declare_reveal} declares how outcomes should be realized.  
 A "revelation" uses the random assignment to pluck out the correct potential outcomes (Gerber and Green 2012, Chapter 2).
@@ -85,3 +85,4 @@ design <-
                       Y = reveal_outcomes(Y ~ Z),
                       Y = ifelse(R == 1, Y, NA))
 }
+\keyword{internal}

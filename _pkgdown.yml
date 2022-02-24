@@ -47,6 +47,7 @@ reference:
   - set_citation
   - label_estimator
   - label_test
+  - tidy_try
   - "`+.dd`"
 
 - title: Post-declaration functions
@@ -74,7 +75,8 @@ reference:
   - simulate_designs
   - set_diagnosands
   - reshape_diagnosis
-  - tidy
+  - tidy.diagnosis
+  - pop.var
 
 - title: Redesign
   description: These functions modify declared designs
@@ -94,5 +96,5 @@ reference:
   - compare_design_summaries
   - compare_design_data
   - compare_design_estimates
-  - compare_design_estimands
+  - compare_design_inquiries
 
