@@ -28,25 +28,61 @@ Declare sampling procedure
 }
 \examples{
 
-design <- declare_model(
 
-  classrooms = add_level(10),
-  individuals = add_level(20, female = rbinom(N, 1, 0.5))
+ 
+# declare_sampling in use
+## Two-arm randomized experiment
+design <-
+  declare_model(
+    N = 500,
+    X = rep(c(0, 1), each = N / 2),
+    U = rnorm(N, sd = 0.25),
+    potential_outcomes(Y ~ 0.2 * Z + X + U)
+  ) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_sampling(S = complete_rs(N = N, n = 200)) +
+  declare_assignment(Z = complete_ra(N = N, m = 100)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, inquiry = "ATE")
 
-) + NULL
+# Set up population to sample from
+model <- declare_model(
+  villages = add_level(
+    N = 30, 
+    N_households = sample(c(50:100), N, replace = TRUE)
+  ),
+  households = add_level(
+    N = N_households, 
+    N_members = sample(c(1, 2, 3, 4), N, 
+                       prob = c(0.2, 0.3, 0.25, 0.25), replace = TRUE)
+  ),
+  individuals = add_level(
+    N = N_members, 
+    age = sample(18:90, N, replace = TRUE),
+    gender = rbinom(n = N, size = 1, prob = .5)
+  )
+)
 
-# Complete random sampling
+# Sampling procedures
+## Complete random sampling
+design <- model +
+  declare_sampling(S = complete_rs(N = N, n = 1000))
 
-design + declare_sampling(
-  S = complete_rs(N = N, n = 50), 
-  filter = S == 1)
+## Cluster random sampling
+design <- model +
+  declare_sampling(S = cluster_rs(clusters = villages, 
+                                  n = 15))
 
-# equivalently, by default filter is set to S == 1
-design + declare_sampling(S = complete_rs(N = N, n = 50), 
-                          legacy = FALSE)
+## Strata and cluster random sampling
+design <- model +
+  declare_sampling(S  = strata_and_cluster_rs(
+    strata = villages,
+    clusters = households,
+    strata_n = rep(20, 30)))
 
-# Stratified random sampling
+## Stratified random sampling
+design <- model +
+  declare_sampling(S = strata_rs(strata = gender, n = 100))
 
-design + declare_sampling(S = strata_rs(strata = female), 
-                          legacy = FALSE)
+
 }
