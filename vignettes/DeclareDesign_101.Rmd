@@ -413,7 +413,7 @@ The default model summary function is `tidy`:
 
 ```{r, eval = FALSE}
 declare_estimator(
-  Y ~ Z, method = lm_robust, model_summary = tidy
+  Y ~ Z, method = lm_robust, summary = tidy
 )
 ```
 
@@ -421,7 +421,7 @@ You could also use `glance` to get model fit statistics like $R^2$.
 
 ```{r, eval = FALSE}
 declare_estimator(
-  Y ~ Z, method = lm_robust, model_summary = glance
+  Y ~ Z, method = lm_robust, summary = glance
 )
 ```
 
@@ -436,7 +436,7 @@ declare_estimator(
   Y ~ Z + X,
   method = glm,
   family = binomial("logit"),
-  model_summary = tidy_margins,
+  summary = tidy_margins,
   term = "Z"
 ) 
 ```
