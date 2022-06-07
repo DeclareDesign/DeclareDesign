@@ -84,5 +84,5 @@ test_that("summary, estimator formula print formula", {
 
 test_that("summary, estimator print model", {
   d <- declare_model(sleep) + declare_estimator(extra ~ group, method = lm)
-  expect_output(print(d), "Model:\\s*lm")
+  expect_output(print(d), "Method:\\s*lm")
 })

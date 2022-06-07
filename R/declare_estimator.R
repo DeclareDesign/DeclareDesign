@@ -283,7 +283,7 @@ method_handler <-
         coefs_in_output <- coefficient_names %in% results$term
         if (!all(coefs_in_output)) {
           stop(
-            "Not all of the terms declared in your estimator are present in the method output, including ",
+              "Not all of the terms declared in your estimator are present in the estimator's output, including ",
             paste(coefficient_names[!coefs_in_output], collapse = ", "),
             ".",
             call. = FALSE
