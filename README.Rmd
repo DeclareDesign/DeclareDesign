@@ -44,7 +44,7 @@ design <-
   declare_inquiry(ATE = 0.05) +
   declare_assignment(Z = complete_ra(N, m = 50)) +
   declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
-  declare_estimator(Y ~ Z, model = lm_robust, inquiry = "ATE")
+  declare_estimator(Y ~ Z, method = lm_robust, inquiry = "ATE")
 
 diagnosands <-
   declare_diagnosands(bias = mean(estimate - estimand),

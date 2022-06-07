@@ -378,7 +378,7 @@ simple_design <-
   declare_sampling(S = complete_rs(N, n = 50)) +
   declare_assignment(Z = complete_ra(N, prob = 0.5)) +
   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-  declare_estimator(Y ~ Z, model = difference_in_means, estimand = "PATE")
+  declare_estimator(Y ~ Z, method = difference_in_means, estimand = "PATE")
 
 simple_design_data <- draw_data(simple_design)
 simple_design_data %>% head(5) %>% kable(digits = 3, caption = "Data with revealed outcomes.", booktabs = TRUE)%>% 
@@ -401,7 +401,7 @@ Now, in order to *declare* our estimator, we can send the name of a modeling fun
 
 ```{r, eval = FALSE}
 declare_estimator(
-  Y ~ Z, model = difference_in_means, estimand = "PATE"
+  Y ~ Z, method = difference_in_means, estimand = "PATE"
 )
 ```
 
@@ -413,7 +413,7 @@ The default model summary function is `tidy`:
 
 ```{r, eval = FALSE}
 declare_estimator(
-  Y ~ Z, model = lm_robust, model_summary = tidy
+  Y ~ Z, method = lm_robust, model_summary = tidy
 )
 ```
 
@@ -421,7 +421,7 @@ You could also use `glance` to get model fit statistics like $R^2$.
 
 ```{r, eval = FALSE}
 declare_estimator(
-  Y ~ Z, model = lm_robust, model_summary = glance
+  Y ~ Z, method = lm_robust, model_summary = glance
 )
 ```
 
@@ -434,7 +434,7 @@ tidy_margins <- function(x) {
 
 declare_estimator(
   Y ~ Z + X,
-  model = glm,
+  method = glm,
   family = binomial("logit"),
   model_summary = tidy_margins,
   term = "Z"
@@ -505,7 +505,7 @@ measurement <-
 
 estimator <- 
   declare_estimator(
-    Y ~ Z, model = difference_in_means, estimand = "PATE"
+    Y ~ Z, method = difference_in_means, estimand = "PATE"
   )
 ```
 
@@ -529,7 +529,7 @@ design <-
   declare_sampling(S = complete_rs(N, n = 50)) +
   declare_assignment(Z = complete_ra(N, prob = 0.5)) +
   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-  declare_estimator(Y ~ Z, model = difference_in_means, estimand = "PATE")
+  declare_estimator(Y ~ Z, method = difference_in_means, estimand = "PATE")
 ```
 
 ### Order matters
@@ -653,7 +653,7 @@ simple_designer <- function(sample_size, effect_size) {
   declare_sampling(S = complete_rs(N, n = 50)) +
   declare_assignment(Z = complete_ra(N, prob = 0.5)) +
   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-  declare_estimator(Y ~ Z, model = difference_in_means, estimand = "PATE")
+  declare_estimator(Y ~ Z, method = difference_in_means, estimand = "PATE")
 }
 ```
 

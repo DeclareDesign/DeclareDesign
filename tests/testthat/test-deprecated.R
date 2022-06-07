@@ -12,7 +12,7 @@ test_that("estimand = is deprecated", {
   des <- 
     declare_model(N = 5, Y = rnorm(N)) +
     declare_inquiry(ybar = mean(Y)) +
-    declare_estimator(Y ~ 1, model = lm_robust, estimand = "ybar")
+    declare_estimator(Y ~ 1, method = lm_robust, estimand = "ybar")
   
   expect_warning(draw_estimates(des), "The argument 'estimand = ' is deprecated. Please use 'inquiry = ' instead.")
   
