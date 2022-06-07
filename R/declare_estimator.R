@@ -257,11 +257,11 @@ method_handler <-
     
     if(!missing(model)) {
       method <- model
-      warning("The model argument is deprecated. Please switch model to method.")
+      warning("The argument 'model = ' is deprecated. Please use 'method = ' instead.")
     }
     if(!missing(model_summary)) {
       summary <- model_summary
-      warning("The model_summary argument is deprecated. Please switch model_summary to summary.")
+      warning("The argument 'model_summary = ' is deprecated. Please use 'summary = ' instead.")
     }
     
     coefficient_names <-
