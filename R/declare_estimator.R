@@ -251,7 +251,19 @@ method_handler <-
              ...,
              method = estimatr::lm_robust,
              summary = tidy_try,
+             model,
+             model_summary,
              term = FALSE) {
+    
+    if(!missing(model)) {
+      method <- model
+      warning("The model argument is deprecated. Please switch model to method.")
+    }
+    if(!missing(model_summary)) {
+      summary <- model_summary
+      warning("The model_summary argument is deprecated. Please switch model_summary to summary.")
+    }
+    
     coefficient_names <-
       enquo(term) # forces evaluation of quosure
     coefficient_names <- reveal_nse_helper(coefficient_names)

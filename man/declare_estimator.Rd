@@ -26,6 +26,8 @@ method_handler(
   ...,
   method = estimatr::lm_robust,
   summary = tidy_try,
+  model,
+  model_summary,
   term = FALSE
 )
 }
