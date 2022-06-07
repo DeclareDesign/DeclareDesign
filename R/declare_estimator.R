@@ -274,7 +274,7 @@ method_handler <-
 
     results <- eval_tidy(quo(method(!!!args, data = data)))
     
-    summary_fn <- interpret_method_summary(method_summary)
+    summary_fn <- interpret_summary(summary)
     
     results <- eval_tidy(summary_fn(results))
     
@@ -301,7 +301,7 @@ method_handler <-
 
 # this is an internal function that is a helper to allow users to provide the summary arg in a variety of formats
 #' @importFrom rlang is_formula expr_interp as_function expr quo eval_bare is_character is_function
-interpret_method_summary <- function(summary_fn) {
+interpret_summary <- function(summary_fn) {
   # parts copied from dplyr:::as_inlined_function and dplyr:::as_fun_list
   
   if(is_formula(summary_fn)) {
@@ -343,6 +343,11 @@ validation_fn(model_handler) <- function(ret, dots, label) {
 
 validation_fn(method_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
+  
+  if ("model" %in% names(dots)) {
+    dots$method <- dots$model
+    dots$model <- NULL
+  }
   
   if ("method" %in% names(dots)) {
     method <- eval_tidy(dots$method)
