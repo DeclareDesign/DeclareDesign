@@ -256,11 +256,11 @@ method_handler <-
              term = FALSE) {
     
     if(!missing(model)) {
-      method <- model
+      .method <- model
       warning("The argument 'model = ' is deprecated. Please use '.method = ' instead.")
     }
     if(!missing(model_summary)) {
-      summary <- model_summary
+      .summary <- model_summary
       warning("The argument 'model_summary = ' is deprecated. Please use '.summary = ' instead.")
     }
     
@@ -272,9 +272,9 @@ method_handler <-
 
     # todo special case weights offsets for glm etc?
 
-    results <- eval_tidy(quo(method(!!!args, data = data)))
+    results <- eval_tidy(quo(.method(!!!args, data = data)))
     
-    summary_fn <- interpret_summary(summary)
+    summary_fn <- interpret_summary(.summary)
     
     results <- eval_tidy(summary_fn(results))
     
@@ -345,12 +345,12 @@ validation_fn(method_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
   
   if ("model" %in% names(dots)) {
-    dots$method <- dots$model
+    dots$.method <- dots$model
     dots$model <- NULL
   }
   
-  if ("method" %in% names(dots)) {
-    method <- eval_tidy(dots$method)
+  if (".method" %in% names(dots)) {
+    method <- eval_tidy(dots$.method)
     if (!is.function(method) || !"data" %in% names(formals(method))) {
       declare_time_error(
         "Must provide a function for `method` that takes a `data` argument.",
@@ -359,7 +359,7 @@ validation_fn(method_handler) <- function(ret, dots, label) {
     }
     
     attr(ret, "extra_summary") <-
-      sprintf("Method:\t%s", as.character(f_rhs(dots$method)))
+      sprintf("Method:\t%s", as.character(f_rhs(dots$.method)))
   }
   ret
 }

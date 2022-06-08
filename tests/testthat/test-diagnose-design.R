@@ -257,7 +257,7 @@ test_that("diagnose_design works when simulations_df lacking parameters attr", {
 
   design <- declare_model(N = 100, X = rnorm(N), Y = rnorm(N, X)) +
     declare_inquiry(true_effect = 1) +
-    declare_estimator(Y ~ X, method=lm_robust, inquiry = "true_effect", label = "Y on X") 
+    declare_estimator(Y ~ X, .method = lm_robust, inquiry = "true_effect", label = "Y on X") 
   
   simulations <-  simulate_design(design, sims = 20) 
   
