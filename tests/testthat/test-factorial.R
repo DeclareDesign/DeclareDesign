@@ -15,7 +15,7 @@ test_that("Factorial", {
   my_inquiry <- declare_inquiry(interaction = mean(Y_Z_T4 - Y_Z_T3) - mean(Y_Z_T2 - Y_Z_T1))
 
   my_estimator <- declare_estimator(Y ~ Z1 + Z2 + Z1 * Z2,
-    method = lm_robust,
+    .method = lm_robust,
     term = "Z1:Z2"
   )
 

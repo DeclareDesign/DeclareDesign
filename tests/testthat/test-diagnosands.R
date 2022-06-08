@@ -147,7 +147,7 @@ test_that("diagnosis, list of designs", {
 test_that("diagnosis, unlinked estimator", {
   d <- declare_model(sleep) +
     declare_inquiry(foo = 2, bar = 3) +
-    declare_estimator(extra ~ group, method = lm, term = TRUE)
+    declare_estimator(extra ~ group, .method = lm, term = TRUE)
   expect_warning(diagnose_design(d, sims = 5, bootstrap_sims = FALSE), "Estimators lack inquiry/term labels for matching, a many-to-many merge was performed.")
 })
 
@@ -200,7 +200,7 @@ test_that("Overriding join conditions", {
 
   design <- declare_model(data=sleep, handler = fabricatr::resample_data) +
     declare_inquiry(group1 = 1, group2 = 2, term = TRUE, label = "e") +
-    declare_estimator(extra ~ group + 0, term = TRUE, inquiry = "e", method = lm, label = "my_estimator")
+    declare_estimator(extra ~ group + 0, term = TRUE, inquiry = "e", .method = lm, label = "my_estimator")
 
   diagnosands <- get_diagnosands(diagnose_design(design, diagnosands = custom, sims = 5, bootstrap_sims = FALSE))
 

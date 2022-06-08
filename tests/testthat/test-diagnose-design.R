@@ -185,7 +185,7 @@ test_that("more term",{
   
   estimators_regression <- declare_estimator(Y ~ Z,
                                              inquiry = inquiries_regression,
-                                             method = lm_robust,
+                                             .method = lm_robust,
                                              term = TRUE)
   
   inquiry_2  <- declare_inquiry(ATE = 2,   label = "2")

@@ -24,7 +24,7 @@
 #'     cov3 = rnorm(N)
 #'   ) +
 #'   declare_assignment(Z = complete_ra(N, prob = 0.2)) +
-#'   declare_test(Z ~ cov1 + cov2 + cov3, method = lm_robust, summary = glance)
+#'   declare_test(Z ~ cov1 + cov2 + cov3, .method = lm_robust, .summary = glance)
 #'   
 #' \dontrun{
 #' diagnosis <- diagnose_design(

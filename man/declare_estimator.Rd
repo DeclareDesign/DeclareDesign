@@ -24,8 +24,8 @@ label_estimator(fn)
 method_handler(
   data,
   ...,
-  method = estimatr::lm_robust,
-  summary = tidy_try,
+  .method = estimatr::lm_robust,
+  .summary = tidy_try,
   model,
   model_summary,
   term = FALSE
@@ -42,11 +42,11 @@ method_handler(
 
 \item{data}{a data.frame}
 
+\item{term}{Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.}
+
 \item{method}{A method function, e.g. lm or glm. By default, the method is the \code{\link{lm_robust}} function from the \link{estimatr} package, which fits OLS regression and calculates robust and cluster-robust standard errors.}
 
 \item{summary}{A method-in data-out function to extract coefficient estimates or method summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} method summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the method object sent to \code{method}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the method object, it fails.}
-
-\item{term}{Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.}
 }
 \value{
 A function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimator and associated statistics.
@@ -65,7 +65,7 @@ The first is through \code{label_estimator(method_handler)}, which is the defaul
 
 An example of this approach is:
 
-\code{declare_estimator(Y ~ Z + X, method = lm_robust, summary = tidy, term = "Z", inquiry = "ATE")}
+\code{declare_estimator(Y ~ Z + X, .method = lm_robust, .summary = tidy, term = "Z", inquiry = "ATE")}
 
 The second approach is using a custom data-in, data-out function, usually first passed to \code{label_estimator}. The reason to pass the custom function to \code{label_estimator} first is to enable clean labeling and linking to inquiries.
 
@@ -101,22 +101,22 @@ design <-
 design + declare_estimator(Y ~ Z, inquiry = "ATE")
 
 # lm from base R (classical standard errors assuming homoskedasticity)
-design + declare_estimator(Y ~ Z, method = lm, inquiry = "ATE")
+design + declare_estimator(Y ~ Z, .method = lm, inquiry = "ATE")
 
 # Use lm_robust (linear regression with heteroskedasticity-robust standard errors) 
 # from `estimatr` package
 
-design + declare_estimator(Y ~ Z, method = lm_robust, inquiry = "ATE")
+design + declare_estimator(Y ~ Z, .method = lm_robust, inquiry = "ATE")
 
 # use `term` to select particular coefficients
-design + declare_estimator(Y ~ Z*female, term = "Z:female", method = lm_robust)
+design + declare_estimator(Y ~ Z*female, term = "Z:female", .method = lm_robust)
 
 # Use glm from base R
 design + declare_estimator(
   Y ~ Z + female,
   family = "gaussian",
   inquiry = "ATE",
-  method = glm
+  .method = glm
 )
 
 # If we use logit, we'll need to estimate the average marginal effect with 
@@ -132,9 +132,9 @@ tidy_margins <- function(x) {
 design +
   declare_estimator(
     Y ~ Z + female,
-    method = glm,
+    .method = glm,
     family = binomial("logit"),
-    summary = tidy_margins,
+    .summary = tidy_margins,
     term = "Z"
   ) 
 
@@ -143,14 +143,14 @@ design +
 two_estimators <-
   design +
   declare_estimator(Y ~ Z,
-                    method = lm_robust,
+                    .method = lm_robust,
                     inquiry = "ATE",
                     label = "OLS") +
   declare_estimator(
     Y ~ Z + female,
-    method = glm,
+    .method = glm,
     family = binomial("logit"),
-    summary = tidy_margins,
+    .summary = tidy_margins,
     inquiry = "ATE",
     term = "Z",
     label = "logit"
