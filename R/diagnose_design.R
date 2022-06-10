@@ -6,7 +6,7 @@
 #' @param ... A design or set of designs typically created using the + operator, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the inquiry(s).
 #' @param make_groups Add group variables within which diagnosand values will be calculated. New variables can be created or variables already in the simulations data frame selected. Type name-value pairs within the function \code{vars}, i.e. \code{vars(significant = p.value <= 0.05)}.
-#' @param add_grouping_variables Deprecated. Please use make_groups instead. Variables used to generate groups of simulations for diagnosis. Added to default list: c("design", "estimand_label", "estimator", "term")
+#' @param add_grouping_variables Deprecated. Please use make_groups instead. Variables used to generate groups of simulations for diagnosis. Added to default list: c("design", "estimand_label", "estimator", "outcome", "term")
 #' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}
 #' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.
 #' @return a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
@@ -165,7 +165,7 @@ diagnose_design <- function(...,
   }
 
   group_by_set <- 
-    c("design", "inquiry", "estimator", "term", add_grouping_variables, make_groups_names) %icn% 
+    c("design", "inquiry", "estimator", "outcome", "term", add_grouping_variables, make_groups_names) %icn% 
     simulations_df
   
   # Actually calculate diagnosands ------------------------------------------
@@ -396,7 +396,7 @@ bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, d
   diagnosands_df <- diagnosands_df[, i, drop = FALSE]
 
   # Reordering columns
-  dim_cols <- c("estimator", "term", "inquiry") %i% group_by_set
+  dim_cols <- c("estimator", "outcome", "term", "inquiry") %i% group_by_set
   ix <- sort(match(dim_cols, colnames(diagnosands_df)))
   diagnosands_df[ix] <- diagnosands_df[dim_cols]
   names(diagnosands_df)[ix] <- dim_cols

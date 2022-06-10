@@ -282,7 +282,7 @@ cite_design <- function(design, ...) {
   check_design_class_single(design)
   
   citation <- attr(design, "citation")
-  if (class(citation) == "bibentry") {
+  if (inherits(citation, "bibentry")) {
     print(citation, style = "bibtex", ... = ...)
   } else {
     print(citation, style = "text", ... = ...)

@@ -218,7 +218,7 @@ print.summary.design <- function(x, ...) {
       }
       
       if (!is.null(x$quantities_added[[i]])) {
-        if (class(x$quantities_added[[i]]) == "data.frame") {
+        if (inherits(x$quantities_added[[i]], "data.frame")) {
           cat("A single draw of the ", x$function_types[[i]], ":\n", sep = "")
           print(x$quantities_added[[i]], row.names = FALSE)
           cat("\n")
