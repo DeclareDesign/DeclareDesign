@@ -112,13 +112,13 @@ validation_fn(assignment_handler) <- function(ret, dots, label) {
     
     if (!"declaration" %in% names(dots)) {
       if ("blocks" %in% names(dots)) {
-        if (class(f_rhs(dots[["blocks"]])) == "character") {
+        if (inherits(f_rhs(dots[["blocks"]]), "character")) {
           declare_time_error("Must provide the bare (unquoted) block variable name to blocks.", ret)
         }
       }
       
       if ("clusters" %in% names(dots)) {
-        if (class(f_rhs(dots[["clusters"]])) == "character") {
+        if (inherits(f_rhs(dots[["clusters"]]), "character")) {
           declare_time_error("Must provide the bare (unquoted) cluster variable name to clusters.", ret)
         }
       }
@@ -140,7 +140,7 @@ validation_fn(assignment_handler) <- function(ret, dots, label) {
     }
     
     if ("assignment_variable" %in% names(dots)) {
-      if (class(f_rhs(dots[["assignment_variable"]])) == "NULL") {
+      if (inherits(f_rhs(dots[["assignment_variable"]]), "NULL")) {
         declare_time_error("Must provide assignment_variable.", ret)
       }
       assignment_variable <- reveal_nse_helper(dots$assignment_variable)

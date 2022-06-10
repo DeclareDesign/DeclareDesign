@@ -86,7 +86,7 @@ test_that("test diagnosands without inquiries", {
   diagnosis <- diagnose_design(my_design2, sims = 2, diagnosands = my_dig, bootstrap_sims = FALSE)
 
 
-  expect_equal(dim(diagnosis$diagnosands_df), c(1,6))
+  expect_equal(dim(diagnosis$diagnosands_df), c(1, 7))
 
 })
 
@@ -212,12 +212,13 @@ test_that("diagnosis, NAs if no inquiry", {
   d <- declare_model(sleep) + ols
   
   sleep_ols <- structure(list(design = structure(1L, .Label = "d", class = "factor"), 
-                              estimator = "estimator", term = "group2", mean_estimand = NA_real_, 
-                              `se(mean_estimand)` = NA_real_, mean_estimate = 1.58, `se(mean_estimate)` = 0, 
-                              bias = NA_real_, `se(bias)` = NA_real_, sd_estimate = 0, 
-                              `se(sd_estimate)` = 0, rmse = NA_real_, `se(rmse)` = NA_real_, 
-                              power = 0, `se(power)` = 0, coverage = NA_real_, `se(coverage)` = NA_real_, 
-                              n_sims = 4L), row.names = c(NA, -1L), class = "data.frame")
+                              estimator = "estimator", outcome = "extra", term = "group2", 
+                              mean_estimand = NA_real_, `se(mean_estimand)` = NA_real_, 
+                              mean_estimate = 1.58, `se(mean_estimate)` = 0, bias = NA_real_, 
+                              `se(bias)` = NA_real_, sd_estimate = 0, `se(sd_estimate)` = 0, 
+                              rmse = NA_real_, `se(rmse)` = NA_real_, power = 0, `se(power)` = 0, 
+                              coverage = NA_real_, `se(coverage)` = NA_real_, n_sims = 4L), row.names = c(NA, -1L),
+                         class = "data.frame")
   
 expect_equivalent(diagnose_design(d, sims = 4, bootstrap_sims = 5)$diagnosands_df, sleep_ols)
   
