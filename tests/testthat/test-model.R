@@ -19,8 +19,8 @@ dat <- draw_data(my_design)
 test_that("test default term Z, lm", {
   # lm
   estimator_lm <-
-    declare_estimator(Y ~ Z, model = lm, term = "Z")
-  estimator_lm_nocoef <- declare_estimator(Y ~ Z, model = lm)
+    declare_estimator(Y ~ Z, .method = lm, term = "Z")
+  estimator_lm_nocoef <- declare_estimator(Y ~ Z, .method = lm)
 
   expect_equal(
     estimator_lm(dat),
@@ -29,7 +29,7 @@ test_that("test default term Z, lm", {
 
   estimator_lm_robust <-
     declare_estimator(Y ~ Z,
-      model = lm_robust,
+      .method = lm_robust,
       term = "Z"
     )
   expect_equivalent(
@@ -41,12 +41,12 @@ test_that("test default term Z, lm", {
 test_that("test estimators, labels, quoted Z", {
   estimator_lm <-
     declare_estimator(Y ~ Z,
-      model = lm,
+      .method = lm,
       term = "Z",
       label = "my_lm"
     )
   estimator_lm_nocoef <-
-    declare_estimator(Y ~ Z, model = lm, label = "my_lm")
+    declare_estimator(Y ~ Z, .method = lm, label = "my_lm")
 
   expect_identical(
     estimator_lm(dat),
@@ -56,9 +56,9 @@ test_that("test estimators, labels, quoted Z", {
 
 test_that("test GLM estimators, default vs explicit Z", {
   estimator_glm <-
-    declare_estimator(Y ~ Z, model = glm, term = "Z")
+    declare_estimator(Y ~ Z, .method = glm, term = "Z")
 
-  estimator_glm_nocoef <- declare_estimator(Y ~ Z, model = glm)
+  estimator_glm_nocoef <- declare_estimator(Y ~ Z, .method = glm)
 
   expect_identical(
     estimator_glm(dat),
@@ -69,12 +69,12 @@ test_that("test GLM estimators, default vs explicit Z", {
 test_that("test GLM estimators with label", {
   estimator_glm <-
     declare_estimator(Y ~ Z,
-      model = glm,
+      .method = glm,
       term = "Z",
       label = "my_glm"
     )
   estimator_glm_nocoef <-
-    declare_estimator(Y ~ Z, model = glm, label = "my_glm")
+    declare_estimator(Y ~ Z, .method = glm, label = "my_glm")
 
   expect_identical(
     estimator_glm(dat),
@@ -87,12 +87,12 @@ test_that("test logit default vs explicit Z", {
   # logit
   estimator_logit <-
     declare_estimator(Y ~ Z,
-      model = glm,
+      .method = glm,
       family = binomial,
       term = "Z"
     )
   estimator_logit_nocoef <-
-    declare_estimator(Y ~ Z, model = glm, family = binomial)
+    declare_estimator(Y ~ Z, .method = glm, family = binomial)
 
   expect_identical(
     estimator_logit(dat),
@@ -102,14 +102,14 @@ test_that("test logit default vs explicit Z", {
   estimator_logit <-
     declare_estimator(
       Y ~ Z,
-      model = glm,
+      .method = glm,
       family = binomial,
       term = "Z",
       label = "my_logit"
     )
   estimator_logit_nocoef <-
     declare_estimator(Y ~ Z,
-      model = glm,
+      .method = glm,
       family = binomial,
       label = "my_logit"
     )
@@ -123,12 +123,12 @@ test_that("test logit default vs explicit Z", {
   estimator_probit <-
     declare_estimator(
       Y ~ Z,
-      model = glm,
+      .method = glm,
       family = binomial(link = "probit"),
       term = "Z"
     )
   estimator_probit_nocoef <-
-    declare_estimator(Y ~ Z, model = glm, family = binomial(link = "probit"))
+    declare_estimator(Y ~ Z, .method = glm, family = binomial(link = "probit"))
 
   expect_identical(
     estimator_probit(dat),
@@ -138,7 +138,7 @@ test_that("test logit default vs explicit Z", {
   estimator_probit <-
     declare_estimator(
       Y ~ Z,
-      model = glm,
+      .method = glm,
       family = binomial(link = "probit"),
       term = "Z",
       label = "my_probit"
@@ -146,7 +146,7 @@ test_that("test logit default vs explicit Z", {
   estimator_probit_nocoef <-
     declare_estimator(
       Y ~ Z,
-      model = glm,
+      .method = glm,
       family = binomial(link = "probit"),
       label = "my_probit"
     )
@@ -178,7 +178,7 @@ test_that("custom tidy method", {
     return(structure(list(est = 1), class = "my_modelr"))
   }
   
-  des <- pop + declare_estimator(model = model_function)
+  des <- pop + declare_estimator(.method = model_function)
   
   expect_error(draw_estimates(des), "We were unable to tidy the output")
 
@@ -189,7 +189,7 @@ test_that("custom tidy method", {
   # this is an ugly hack per https://github.com/r-lib/testthat/issues/720
   assign("tidy.my_modelr", tidy.my_modelr, envir = .GlobalEnv)
   
-  des <- pop + declare_estimator(model = model_function)
+  des <- pop + declare_estimator(.method = model_function)
   
   expect_equal(draw_estimates(des), structure(list(estimator = "estimator", term = structure(1L, .Label = "my-term", class = "factor"), 
                                                    est = 1), row.names = c(NA, -1L), class = "data.frame"))
@@ -201,26 +201,26 @@ library(broom)
 test_that("AER", {
   skip_if_not_installed(c("AER", "broom"))
   library(broom)
-  des <- pop + declare_estimator(Y ~ D | Z, model = AER::ivreg)
+  des <- pop + declare_estimator(Y ~ D | Z, .method = AER::ivreg)
   expect_equal(ncol(draw_estimates(des)), 8)
 })
 
 test_that("lm", {
-  des <- pop + declare_estimator(Y ~ Z, model = lm)
+  des <- pop + declare_estimator(Y ~ Z, .method = lm)
   expect_equal(ncol(draw_estimates(des)), 8)
 })
 
 test_that("glm", {
-  des <- pop + declare_estimator(D ~ Z, model = glm, family = binomial(link = "probit"))
+  des <- pop + declare_estimator(D ~ Z, .method = glm, family = binomial(link = "probit"))
   expect_equal(ncol(draw_estimates(des)), 8)
-  des <- pop + declare_estimator(D ~ Z, model = glm, family = binomial(link = "logit"))
+  des <- pop + declare_estimator(D ~ Z, .method = glm, family = binomial(link = "logit"))
   expect_equal(ncol(draw_estimates(des)), 8)
 })
 
 
 test_that("betareg", {
   skip_if_not_installed(c("betareg", "broom"))
-  des <- pop + declare_estimator(D2 ~ Z, model = betareg::betareg)
+  des <- pop + declare_estimator(D2 ~ Z, .method = betareg::betareg)
   if(packageVersion("broom") <= "0.5.0") {
     expect_error(draw_estimates(des))
   } else {
@@ -230,7 +230,7 @@ test_that("betareg", {
 
 test_that("biglm", {
   skip_if_not_installed(c("biglm", "broom"))
-  des <- pop + declare_estimator(Y ~ Z, model = biglm::biglm)
+  des <- pop + declare_estimator(Y ~ Z, .method = biglm::biglm)
   if(packageVersion("broom") <= "0.5.0") {
     expect_error(draw_estimates(des))
   } else {
@@ -240,7 +240,7 @@ test_that("biglm", {
 
 test_that("gam", {
   skip_if_not_installed(c("gam", "broom"))
-  des <- pop + declare_estimator(Y ~ Z, model = gam::gam)
+  des <- pop + declare_estimator(Y ~ Z, .method = gam::gam)
   if(packageVersion("broom") <= "0.5.0") {
     expect_error(draw_estimates(des))
   } else if(packageVersion("gam") < "1.16") {
@@ -255,7 +255,7 @@ test_that("gam", {
 
 test_that("polr", {
   skip_if_not_installed(c("MASS", "broom"))
-  des <- pop + declare_estimator(Y_fac ~ Z, model = MASS::polr)
+  des <- pop + declare_estimator(Y_fac ~ Z, .method = MASS::polr)
   suppressWarnings(expect_error(draw_estimates(des)))
 })
 

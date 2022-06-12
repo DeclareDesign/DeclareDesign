@@ -31,7 +31,7 @@ test_that("merge_by_estimator working in compare_diagnoses", {
         Y ~  Z + X,
         inquiry =  "ATE",
         term = "Z",
-        model = lm_robust,
+        .method = lm_robust,
         label = "est2"
       ),
       after = "est1"

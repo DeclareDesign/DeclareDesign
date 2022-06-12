@@ -121,7 +121,7 @@ design_3 <-
                   slope = mean(Y_Z_1 - Y_Z_0)) +
   declare_estimator(
     Y ~ Z,
-    model = lm_robust,
+    .method = lm_robust,
     term = TRUE,
     inquiry = c("intercept", "slope")
   )

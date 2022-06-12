@@ -81,11 +81,11 @@ test_that("names are correct", {
   processing <- declare_step(handler = fabricate, q = 5)
 
   linear <- declare_estimator(Y ~ Z,
-    model = lm_robust,
+    .method = lm_robust,
     label = "linear"
   )
 
-  saturated <- declare_estimator(Y ~ Z, label = "saturated", model = lm_robust)
+  saturated <- declare_estimator(Y ~ Z, label = "saturated", .method = lm_robust)
 
   neighbors_design <- insert_step(design, after = 3, processing)
 

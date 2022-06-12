@@ -14,7 +14,7 @@ test_that("get_estimates works", {
   
   design <- my_population +
     my_estimator + 
-    declare_estimator(extra ~ group, model = lm_robust, label = "est2")
+    declare_estimator(extra ~ group, .method = lm_robust, label = "est2")
   
   expect_equal(draw_estimates(design),
                structure(list(estimator = c("estimator", "est2"), term = c("group2", 

@@ -75,20 +75,20 @@ test_that("glance works", {
     declare_model(data = sleep) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = ~ glance(.),
+      .method = lm_robust,
+      .summary = ~ glance(.),
       label = "formula call"
     ) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = glance,
+      .method = lm_robust,
+      .summary = glance,
       label = "bare function"
     ) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = "glance",
+      .method = lm_robust,
+      .summary = "glance",
       label = "string"
     )
   
@@ -122,7 +122,7 @@ test_that("tidy works", {
   # default term
   des <-
     declare_model(data = sleep) +
-    declare_estimator(extra ~ group, model = lm_robust, label = "formula")
+    declare_estimator(extra ~ group, .method = lm_robust, label = "formula")
   est <- draw_estimates(des)
   expect_equal(est, structure(
     list(
@@ -146,20 +146,20 @@ test_that("tidy works", {
     declare_model(data = sleep) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = ~ tidy_try(.),
+      .method = lm_robust,
+      .summary = ~ tidy_try(.),
       label = "formula"
     ) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = tidy_try,
+      .method = lm_robust,
+      .summary = tidy_try,
       label = "bare"
     ) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = "tidy_try",
+      .method = lm_robust,
+      .summary = "tidy_try",
       label = "string"
     )
   
@@ -192,22 +192,22 @@ test_that("tidy works", {
     declare_model(data = sleep) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = ~ tidy_try(.),
+      .method = lm_robust,
+      .summary = ~ tidy_try(.),
       term = FALSE,
       label = "formula1"
     ) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = tidy_try,
+      .method = lm_robust,
+      .summary = tidy_try,
       term = FALSE,
       label = "bare"
     ) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = "tidy_try",
+      .method = lm_robust,
+      .summary = "tidy_try",
       term = FALSE,
       label = "string"
     )
@@ -241,22 +241,22 @@ test_that("tidy works", {
     declare_model(data = sleep) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = ~ tidy_try(.),
+      .method = lm_robust,
+      .summary = ~ tidy_try(.),
       term = TRUE,
       label = "formula2"
     ) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = tidy_try,
+      .method = lm_robust,
+      .summary = tidy_try,
       term = TRUE,
       label = "bare"
     ) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = "tidy_try",
+      .method = lm_robust,
+      .summary = "tidy_try",
       term = TRUE,
       label = "string"
     )
@@ -327,22 +327,22 @@ test_that("tidy works", {
     declare_model(data = sleep) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = ~ tidy_try(.),
+      .method = lm_robust,
+      .summary = ~ tidy_try(.),
       term = "group2",
       label = "formula2"
     ) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = tidy_try,
+      .method = lm_robust,
+      .summary = tidy_try,
       term = "group2",
       label = "bare"
     ) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = "tidy_try",
+      .method = lm_robust,
+      .summary = "tidy_try",
       term = "group2",
       label = "string"
     )
@@ -378,28 +378,28 @@ test_that("tidy works", {
     # does not work (intentionally)
     # declare_estimator(
     #   extra ~ group,
-    #   model = lm_robust,
-    #   model_summary = ~ tidy_try(., term = group2),
+    #   .method = lm_robust,
+    #   .summary = ~ tidy_try(., term = group2),
     #   label = "formula1"
     # ) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = ~ tidy_try(.),
+      .method = lm_robust,
+      .summary = ~ tidy_try(.),
       term = group2,
       label = "formula2"
     ) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = tidy_try,
+      .method = lm_robust,
+      .summary = tidy_try,
       term = group2,
       label = "bare"
     ) +
     declare_estimator(
       extra ~ group,
-      model = lm_robust,
-      model_summary = "tidy_try",
+      .method = lm_robust,
+      .summary = "tidy_try",
       term = group2,
       label = "string"
     )

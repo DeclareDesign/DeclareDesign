@@ -102,7 +102,7 @@ design2 <- declare_model(N = 200, U = rnorm(N),
   declare_sampling(S = complete_rs(N, n = 100)) +
   declare_assignment(Z = complete_ra(N, m = 25)) +
   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-  declare_estimator(Y ~ Z, model = lm_robust, inquiry = "ATE")
+  declare_estimator(Y ~ Z, .method = lm_robust, inquiry = "ATE")
  
  compare_designs(design1, design2)
  compare_design_code(design1, design2)

@@ -98,7 +98,7 @@ test_that("demo runs", {
   ## ------------------------------------------------------------------------
   my_estimator_lm <-
     declare_estimator(Y ~ Z,
-      model = estimatr::lm_robust,
+      .method = estimatr::lm_robust,
       term = "Z",
       inquiry = my_inquiry
     )

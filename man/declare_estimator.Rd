@@ -4,28 +4,30 @@
 \alias{declare_estimator}
 \alias{declare_estimators}
 \alias{label_estimator}
-\alias{model_handler}
+\alias{method_handler}
 \title{Declare estimator}
 \usage{
 declare_estimator(
   ...,
-  handler = label_estimator(model_handler),
+  handler = label_estimator(method_handler),
   label = "estimator"
 )
 
 declare_estimators(
   ...,
-  handler = label_estimator(model_handler),
+  handler = label_estimator(method_handler),
   label = "estimator"
 )
 
 label_estimator(fn)
 
-model_handler(
+method_handler(
   data,
   ...,
-  model = estimatr::lm_robust,
-  model_summary = tidy_try,
+  .method = estimatr::lm_robust,
+  .summary = tidy_try,
+  model,
+  model_summary,
   term = FALSE
 )
 }
@@ -40,9 +42,13 @@ model_handler(
 
 \item{data}{a data.frame}
 
-\item{model}{A model function, e.g. lm or glm. By default, the model is the \code{\link{lm_robust}} function from the \link{estimatr} package, which fits OLS regression and calculates robust and cluster-robust standard errors.}
+\item{.method}{A method function, e.g. lm or glm. By default, the method is the \code{\link{lm_robust}} function from the \link{estimatr} package, which fits OLS regression and calculates robust and cluster-robust standard errors.}
 
-\item{model_summary}{A model-in data-out function to extract coefficient estimates or model summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} model summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the model object sent to \code{model}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the model object, it fails.}
+\item{.summary}{A method-in data-out function to extract coefficient estimates or method summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} method summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the method object sent to \code{method}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the method object, it fails.}
+
+\item{model}{Deprecated argument. Use \code{.method} instead.}
+
+\item{model_summary}{Deprecated argument. Use \code{.summary} instead.}
 
 \item{term}{Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.}
 }
@@ -59,11 +65,11 @@ Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}
 
 In \code{declare_estimator}, you can optionally provide the name of an inquiry or an objected created by \code{\link{declare_inquiry}} to connect your estimate(s) to inquiry(s).
 
-The first is through \code{label_estimator(model_handler)}, which is the default value of the \code{handler} argument. Users can use standard modeling functions like lm, glm, or iv_robust. The models are summarized using the function passed to the \code{model_summary} argument. This will usually be a "tidier" like \code{broom::tidy}. The default \code{model_summary} function is \code{tidy_try}, which applies a tidy method if available, and if not, tries to make one on the fly.
+The first is through \code{label_estimator(method_handler)}, which is the default value of the \code{handler} argument. Users can use standard method functions like lm, glm, or iv_robust. The methods are summarized using the function passed to the \code{summary} argument. This will usually be a "tidier" like \code{broom::tidy}. The default \code{summary} function is \code{tidy_try}, which applies a tidy method if available, and if not, tries to make one on the fly.
 
 An example of this approach is:
 
-\code{declare_estimator(Y ~ Z + X, model = lm_robust, model_summary = tidy, term = "Z", inquiry = "ATE")}
+\code{declare_estimator(Y ~ Z + X, .method = lm_robust, .summary = tidy, term = "Z", inquiry = "ATE")}
 
 The second approach is using a custom data-in, data-out function, usually first passed to \code{label_estimator}. The reason to pass the custom function to \code{label_estimator} first is to enable clean labeling and linking to inquiries.
 
@@ -107,9 +113,9 @@ run_design(design_0)
 design_1 <-
   design +
   declare_estimator(
-    model = lm_robust,
     formula = Y ~ Z,
-    model_summary = tidy,
+    .method = lm_robust,
+    .summary = tidy,
     term = "Z",
     inquiry = "ATE",
     label = "lm_no_controls"
@@ -120,9 +126,9 @@ run_design(design_1)
 # Use glance summary function to view model fit statistics
 design_2 <-
   design +
-  declare_estimator(model = lm_robust,
+  declare_estimator(.method = lm_robust,
                     formula = Y ~ Z,
-                    model_summary = glance)
+                    .summary = glance)
 
 run_design(design_2)
 
@@ -148,7 +154,7 @@ design_4 <-
   declare_estimator(Y ~ Z * gender,
                     term = "Z:gender",
                     inquiry = "difference_in_cates",
-                    model = lm_robust)
+                    .method = lm_robust)
 
 run_design(design_4)
 
@@ -158,7 +164,7 @@ design_5 <-
   declare_estimator(Y ~ Z + gender,
                     family = "gaussian",
                     inquiry = "ATE",
-                    model = glm)
+                    .method = glm)
 
 run_design(design_5)
 
@@ -176,9 +182,9 @@ design_6 <-
   design +
   declare_estimator(
     Y ~ Z + gender,
-    model = glm,
+    .method = glm,
     family = binomial("logit"),
-    model_summary = tidy_margins,
+    .summary = tidy_margins,
     term = "Z"
   )
 
@@ -189,14 +195,14 @@ run_design(design_6)
 design_7 <-
   design +
   declare_estimator(Y ~ Z,
-                    model = lm_robust,
+                    .method = lm_robust,
                     inquiry = "ATE",
                     label = "OLS") +
   declare_estimator(
     Y ~ Z + gender,
-    model = glm,
+    .method = glm,
     family = binomial("logit"),
-    model_summary = tidy_margins,
+    .summary = tidy_margins,
     inquiry = "ATE",
     term = "Z",
     label = "logit"

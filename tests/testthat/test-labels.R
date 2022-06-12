@@ -23,7 +23,7 @@ test_that("error if more than one label is sent to any step", {
   
   expect_error(declare_estimator(
     Y ~ A + B,
-    model = lm_robust,
+    .method = lm_robust,
     label = c("lbl1", "lbl2")), "Please provide only one label.")
   
   expect_error(declare_inquiry(

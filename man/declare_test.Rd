@@ -5,7 +5,7 @@
 \alias{label_test}
 \title{Declare test}
 \usage{
-declare_test(..., handler = label_test(model_handler), label = "test")
+declare_test(..., handler = label_test(method_handler), label = "test")
 
 label_test(fn)
 }
@@ -26,7 +26,7 @@ Declares an test which generates a test statistic and associated inferential sta
 
 Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific inquiry in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an inquiry. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
 
-See \code{\link{declare_estimator}} help for an explanation of how to use \code{model_handler}, which is used identically in both \code{declare_estimator} and \code{declare_test}. The main difference between \code{declare_estimator} and \code{declare_test} is that \code{declare_test} does not link with an explicit inquiry.
+See \code{\link{declare_estimator}} help for an explanation of how to use \code{method_handler}, which is used identically in both \code{declare_estimator} and \code{declare_test}. The main difference between \code{declare_estimator} and \code{declare_test} is that \code{declare_test} does not link with an explicit inquiry.
 }
 \details{
 \code{label_test} takes a data-in-data out function to \code{fn}, and returns a data-in-data-out function that first runs the provided test function \code{fn} and then appends a label for the test.
@@ -43,7 +43,7 @@ balance_test_design <-
     cov3 = rnorm(N)
   ) +
   declare_assignment(Z = complete_ra(N, prob = 0.2)) +
-  declare_test(Z ~ cov1 + cov2 + cov3, model = lm_robust, model_summary = glance)
+  declare_test(Z ~ cov1 + cov2 + cov3, .method = lm_robust, .summary = glance)
   
 \dontrun{
 diagnosis <- diagnose_design(
@@ -107,5 +107,5 @@ diagnosis <- diagnose_design(
 
 }
 \seealso{
-See \code{\link{declare_estimator}} for documentation of the \code{model_handler} function.
+See \code{\link{declare_estimator}} for documentation of the \code{method_handler} function.
 }

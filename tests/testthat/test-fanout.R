@@ -49,7 +49,7 @@ test_that("Diagnosing a fanout", {
   estimator <-
     declare_estimator(
       noise ~ 1,
-      model = lm,
+      .method = lm,
       inquiry = inquiry,
       label = "ha",
       term = TRUE
@@ -113,7 +113,7 @@ test_that("fanout warnings", {
   estimator <-
     declare_estimator(
       noise ~ 1,
-      model = lm,
+      .method = lm,
       inquiry = inquiry,
       label = "ha",
       term = TRUE

@@ -73,7 +73,7 @@ test_that("Hooke's law", {
       rnorm(N, sd = .1)
   )
 
-  estimator <- declare_estimator(length ~ force, model = lm, term = TRUE)
+  estimator <- declare_estimator(length ~ force, .method = lm, term = TRUE)
 
   design <- pop + inquiry + sampling + assignment + reveal + estimator
 

@@ -22,7 +22,7 @@ test_that("Multiple inquiries can be mapped to one estimator", {
 
   lmc <- declare_estimator(
     Y ~ X,
-    model = estimatr::lm_robust,
+    .method = estimatr::lm_robust,
     se_type = "classical",
     inquiry = c(dgp_se, obs_se),
     term = "X"

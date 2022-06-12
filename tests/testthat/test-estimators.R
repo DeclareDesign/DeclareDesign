@@ -21,13 +21,13 @@ test_that("difference in means", {
 })
 
 test_that("lm with robust ses", {
-  my_estimator <- declare_estimator(Y ~ Z, model = lm_robust)
+  my_estimator <- declare_estimator(Y ~ Z, .method = lm_robust)
   my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_measurement() %>% my_estimator() %>% expect_estimates()
 })
 
 
 test_that("lm with HC3 robust ses", {
-  my_estimator <- declare_estimator(Y ~ Z, model = lm_robust, se_type = "HC3")
+  my_estimator <- declare_estimator(Y ~ Z, .method = lm_robust, se_type = "HC3")
   my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_measurement() %>% my_estimator() %>% expect_estimates()
 })
 
@@ -46,7 +46,7 @@ test_that("check blocked d-i-m estimator", {
   my_assignment <- declare_assignment(Z = block_ra(blocks = blocks))
 
   ## lm with HC3 robust ses
-  my_estimator_blocked <- declare_estimator(Y ~ Z, model = difference_in_means, blocks = `blocks`)
+  my_estimator_blocked <- declare_estimator(Y ~ Z, .method = difference_in_means, blocks = `blocks`)
   df <- my_population() %>% my_potential_outcomes() %>% my_assignment() %>% my_measurement()
   my_estimator_notblocked <- declare_estimator(Y ~ Z)
 
@@ -62,7 +62,7 @@ test_that("regression from estimatr works as an estimator", {
   my_assignment <- declare_assignment(Z = complete_ra(N, m = 100))
   pate <- declare_inquiry(mean(Y_Z_1 - Y_Z_0), label = "pate")
   pate_estimator <- declare_estimator(Y ~ Z + noise,
-    model = lm_robust,
+    .method = lm_robust,
     term = "noise",
     inquiry = pate, label = "pate_hat"
   )
@@ -99,7 +99,7 @@ test_that("multiple estimator declarations work", {
   estimator_1 <-
     declare_estimator(
       formula = Y ~ Z,
-      model = estimatr::lm_robust,
+      .method = estimatr::lm_robust,
       inquiry = sate,
       label = "estimator_1"
     )
@@ -107,7 +107,7 @@ test_that("multiple estimator declarations work", {
   estimator_2 <-
     declare_estimator(
       formula = Y ~ Z,
-      model = estimatr::lm_robust,
+      .method = estimatr::lm_robust,
       inquiry = sate,
       label = "estimator_2"
     )
@@ -130,7 +130,7 @@ test_that("multiple estimator declarations work", {
   estimator_3 <-
     declare_estimator(
       formula = Y ~ Z,
-      model = estimatr::lm_robust,
+      .method = estimatr::lm_robust,
       inquiry = sate,
       label = "estimator_3"
     )
@@ -138,7 +138,7 @@ test_that("multiple estimator declarations work", {
   estimator_4 <-
     declare_estimator(
       formula = Y ~ Z,
-      model = estimatr::lm_robust,
+      .method = estimatr::lm_robust,
       inquiry = sate,
       label = "estimator_4"
     )
@@ -161,14 +161,14 @@ test_that("multiple estimator declarations work", {
   estimator_5 <-
     declare_estimator(
       formula = Y ~ Z,
-      model = estimatr::lm_robust,
+      .method = estimatr::lm_robust,
       inquiry = sate
     )
 
   estimator_6 <-
     declare_estimator(
       formula = Y ~ Z,
-      model = estimatr::lm_robust,
+      .method = estimatr::lm_robust,
       inquiry = sate
     )
 
@@ -251,7 +251,7 @@ test_that("coefficient_names = TRUE returns all term", {
     y ~ x + as.factor(clust),
     clusters = clust,
     weights = wt,
-    model = lm_robust,
+    .method = lm_robust,
     term = TRUE
   )
 
@@ -262,21 +262,21 @@ test_that("coefficient_names = TRUE returns all term", {
 
 
 test_that("default estimator handler validation fn", {
-  expect_error(declare_estimator(model = "Test"))
-  expect_error(declare_estimator(model = I))
+  expect_error(declare_estimator(.method = "Test"))
+  expect_error(declare_estimator(.method = I))
 })
 
 test_that("label_estimator, handler does not take data", {
   expect_error(label_estimator(I), "function with a data argument")
 })
 
-test_that("model_handler runs directly", {
+test_that("method_handler runs directly", {
   lm_out <- structure(list(term = "group2", estimate = 1.58, std.error = 0.849091017238762, 
                            statistic = 1.86081346748685, p.value = 0.0791867142159382, 
                            conf.low = -0.203874032287599, conf.high = 3.3638740322876), row.names = c(NA, 
                                                                                                       -1L), class = c("tbl_df", "tbl", "data.frame"))
 
-  result <- model_handler(sleep, extra ~ group, model = lm, term = "group2")
+  result <- method_handler(sleep, extra ~ group, .method = lm, term = "group2")
   expect_equivalent(as.data.frame(result), as.data.frame(lm_out))
 })
 
@@ -340,9 +340,9 @@ test_that("when a term is missing from a model there is an informative error", {
     Y = rbinom(N, 1, .5),
     Z = rbinom(N, 1, .5)
   )
-  ols <- declare_estimator(Y ~ Z, model = lm_robust, term = "X")
+  ols <- declare_estimator(Y ~ Z, .method = lm_robust, term = "X")
 
-  expect_error(ols(data), "Not all of the terms declared in your estimator are present in the model output, including X.")
+  expect_error(ols(data), "Not all of the terms declared in your estimator are present in the estimator's output, including X.")
 })
 
 test_that("estimators and estimands are in the correct order when specified", {
@@ -358,7 +358,7 @@ test_that("estimators and estimands are in the correct order when specified", {
       x1 = 1, 
       x2 = -1, 
       interaction = 0) +
-    declare_estimator(Y ~ X1*X2, model = lm_robust, 
+    declare_estimator(Y ~ X1*X2, .method = lm_robust, 
                       term = c("X1:X2", "X1", "X2"),
                       inquiry = c("interaction", "x1", "x2"))
   

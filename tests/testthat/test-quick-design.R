@@ -40,7 +40,7 @@ test_that("expand_design works some more", {
     my_inquiry <- declare_inquiry(mean(Y))
     my_estimator <-
       declare_estimator(Y ~ Z,
-        model = lm_robust,
+        .method = lm_robust,
         term = "Z",
         inquiry = my_inquiry
       )
