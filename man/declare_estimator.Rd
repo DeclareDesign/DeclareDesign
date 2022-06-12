@@ -42,11 +42,15 @@ method_handler(
 
 \item{data}{a data.frame}
 
+\item{.method}{A method function, e.g. lm or glm. By default, the method is the \code{\link{lm_robust}} function from the \link{estimatr} package, which fits OLS regression and calculates robust and cluster-robust standard errors.}
+
+\item{.summary}{A method-in data-out function to extract coefficient estimates or method summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} method summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the method object sent to \code{method}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the method object, it fails.}
+
+\item{model}{Deprecated argument. Use \code{.method} instead.}
+
+\item{model_summary}{Deprecated argument. Use \code{.summary} instead.}
+
 \item{term}{Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.}
-
-\item{method}{A method function, e.g. lm or glm. By default, the method is the \code{\link{lm_robust}} function from the \link{estimatr} package, which fits OLS regression and calculates robust and cluster-robust standard errors.}
-
-\item{summary}{A method-in data-out function to extract coefficient estimates or method summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} method summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the method object sent to \code{method}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the method object, it fails.}
 }
 \value{
 A function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimator and associated statistics.
@@ -109,9 +113,9 @@ run_design(design_0)
 design_1 <-
   design +
   declare_estimator(
-    model = lm_robust,
     formula = Y ~ Z,
-    model_summary = tidy,
+    .method = lm_robust,
+    .summary = tidy,
     term = "Z",
     inquiry = "ATE",
     label = "lm_no_controls"
@@ -122,9 +126,9 @@ run_design(design_1)
 # Use glance summary function to view model fit statistics
 design_2 <-
   design +
-  declare_estimator(model = lm_robust,
+  declare_estimator(.method = lm_robust,
                     formula = Y ~ Z,
-                    model_summary = glance)
+                    .summary = glance)
 
 run_design(design_2)
 
@@ -150,7 +154,7 @@ design_4 <-
   declare_estimator(Y ~ Z * gender,
                     term = "Z:gender",
                     inquiry = "difference_in_cates",
-                    model = lm_robust)
+                    .method = lm_robust)
 
 run_design(design_4)
 
@@ -160,7 +164,7 @@ design_5 <-
   declare_estimator(Y ~ Z + gender,
                     family = "gaussian",
                     inquiry = "ATE",
-                    model = glm)
+                    .method = glm)
 
 run_design(design_5)
 
@@ -177,7 +181,7 @@ tidy_margins <- function(x) {
 design_6 <-
   design +
   declare_estimator(
-    Y ~ Z + female,
+    Y ~ Z + gender,
     .method = glm,
     family = binomial("logit"),
     .summary = tidy_margins,
@@ -195,7 +199,7 @@ design_7 <-
                     inquiry = "ATE",
                     label = "OLS") +
   declare_estimator(
-    Y ~ Z + female,
+    Y ~ Z + gender,
     .method = glm,
     family = binomial("logit"),
     .summary = tidy_margins,
