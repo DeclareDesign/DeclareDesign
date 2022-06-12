@@ -13,32 +13,65 @@
 #' @export
 #'
 #' @examples
-#'
+#' 
+#' 
 #' # Set up a design for use in examples:
-#'
+#' ## Two-arm randomized experiment
 #' design <-
-#'   declare_model(N = 100,
-#'                 X = rnorm(N),
-#'                 potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N))) +
-#'   declare_assignment(Z = complete_ra(N, m = 50)) +
+#'   declare_model(
+#'     N = 500,
+#'     X = rep(c(0, 1), each = N / 2),
+#'     U = rnorm(N, sd = 0.25),
+#'     potential_outcomes(Y ~ 0.2 * Z + X + U)
+#'   ) +
+#'   declare_assignment(Z = complete_ra(N = N, m = 250)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #' 
-#' design + declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+#' # Some common inquiries
+#' design +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 #' 
+#' design +
+#'   declare_inquiry(difference_in_var = var(Y_Z_1) - var(Y_Z_0))
 #' 
-#' design + declare_inquiry(ATT = mean(Y_Z_1 - Y_Z_0),
-#'                          subset = (Z == 1))
+#' design +
+#'   declare_inquiry(mean_Y = mean(Y))
 #' 
-#' # Add inquirys to a design along with estimators that reference them
+#' # Inquiries among a subset
+#' design +
+#'   declare_inquiry(ATT = mean(Y_Z_1 - Y_Z_0),
+#'                   subset = (Z == 1))
+#' 
+#' design +
+#'   declare_inquiry(CATE = mean(Y_Z_1 - Y_Z_0),
+#'                   subset = X == 1)
+#' # equivalently
+#' design +
+#'   declare_inquiry(CATE = mean(Y_Z_1[X == 1] - Y_Z_0[X == 1]))
+#' 
+#' # Add inquiries to a design along with estimators that
+#' # reference them
+#' diff_in_variances <-
+#'   function(data) {
+#'     data.frame(estimate = with(data, var(Y[Z == 1]) - var(Y[Z == 0])))
+#'   }
 #' 
 #' design_1 <-
 #'   design +
-#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_estimator(Y ~ Z, inquiry = "ATE")
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0),
+#'                   difference_in_var = var(Y_Z_1) - var(Y_Z_0)) +
+#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+#'   declare_estimator(Y ~ Z, 
+#'                     inquiry = "ATE",
+#'                     label = "DIM") +
+#'   declare_estimator(handler =
+#'                       label_estimator(diff_in_variances),
+#'                     inquiry = "difference_in_var",
+#'                     label = "DIV")
 #' 
 #' run_design(design_1)
 #' 
-#' # Two inquirys, one estimator
+#' # Two inquiries using one estimator
 #' 
 #' design_2 <-
 #'   design +
@@ -48,7 +81,7 @@
 #' 
 #' run_design(design_2)
 #' 
-#' # Two inquirys, two coefficients from one estimator
+#' # Two inquiries using different coefficients from one estimator
 #' 
 #' design_3 <-
 #'   design +
@@ -62,6 +95,18 @@
 #'   )
 #' 
 #' run_design(design_3)
+#' 
+#' 
+#' # declare_inquiries usage
+#' design_4 <- design +
+#'   declare_inquiries(
+#'     ATE = mean(Y_Z_1[X == 1] - Y_Z_0[X == 1]),
+#'     CATE_X0 = mean(Y_Z_1[X == 0] - Y_Z_0[X == 0]),
+#'     CATE_X1 = mean(Y_Z_1[X == 1] - Y_Z_0[X == 1]),
+#'     Difference_in_CATEs = CATE_X1 - CATE_X0,
+#'     mean_Y = mean(Y))
+#' 
+#' 
 declare_inquiry <- make_declarations(inquiry_handler, "inquiry",
                                       causal_type = "inquiry", 
                                       default_label = "inquiry"

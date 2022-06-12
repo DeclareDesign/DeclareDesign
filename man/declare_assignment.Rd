@@ -27,41 +27,81 @@ A function that takes a data.frame as an argument and returns a data.frame with 
 Declare Data Strategy: Assignment
 }
 \examples{
+# declare_assignment in use
+## Two-arm randomized experiment
+design <-
+  declare_model(
+    N = 500,
+    X = rep(c(0, 1), each = N / 2),
+    U = rnorm(N, sd = 0.25),
+    potential_outcomes(Y ~ 0.2 * Z + X + U)
+  ) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_sampling(S = complete_rs(N = N, n = 200)) +
+  declare_assignment(Z = complete_ra(N = N, m = 100)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, inquiry = "ATE")
 
-# setting up a design stub
-design <- declare_model(
-  classrooms = add_level(10),
-  individuals = add_level(20, female = rbinom(N, 1, 0.5))
-) + NULL
+# Set up population to assign
+model <- declare_model(
+  villages = add_level(
+    N = 30, 
+    N_households = sample(c(50:100), N, replace = TRUE)
+  ),
+  households = add_level(
+    N = N_households, 
+    N_members = sample(c(1, 2, 3, 4), N, 
+                       prob = c(0.2, 0.3, 0.25, 0.25), replace = TRUE)
+  ),
+  individuals = add_level(
+    N = N_members, 
+    age = sample(18:90, N, replace = TRUE),
+    gender = rbinom(n = N, size = 1, prob = .5)
+  )
+)
 
-# Declare assignment of m units to treatment
-design + declare_assignment(Z = complete_ra(N = N, m = 100))
+# Assignment procedures
+## Complete random assignment
+design <-
+  model +
+  declare_assignment(Z = complete_ra(N = N, m = 1000))
 
-# Declare assignment specifying varying block probabilities
-design + 
-  declare_assignment(Z = block_ra(blocks = female, 
-                                  block_prob = c(1/3, 2/3)))
+## Cluster random assignment
+design <-
+  model +
+  declare_assignment(Z = cluster_ra(clusters = villages,
+                                    n = 15))
 
-# Declare assignment of clusters with probability 1/4
-design + declare_assignment(
-  Z = cluster_ra(prob = 1/4, clusters = classrooms))
- 
-# Declare factorial assignment (Approach 1): 
-#   Use complete random assignment to assign Z1 
-#   then block on Z1 to assign Z2. 
-design + 
-   declare_assignment(Z1 = complete_ra(N = N, m = 100),
-                      Z2 = block_ra(blocks = Z1))
-   
-# Declare factorial assignment (Approach 2): 
-#   Assign to four conditions and then split into Z1 and Z2 
-design +  
-  declare_assignment(Z = complete_ra(N = N, conditions = 1:4),
-                     Z1 = as.numeric(Z \%in\% 2:3), 
-                     Z2 = as.numeric(Z \%in\% 3:4))
-   
-# Declare assignment using functions outside randomizr package:
-design + 
+## Block and cluster random assignment
+design <-
+  model +
+  declare_assignment(Z  = block_and_cluster_ra(
+    blocks = villages,
+    clusters = households,
+    block_m = rep(20, 30)
+  ))
+
+## Block random assignment
+design <-
+  model +
+  declare_assignment(Z = block_ra(blocks = gender, m = 100))
+
+## Block random assignment using probabilities
+design <-
+  model +
+  declare_assignment(Z = block_ra(blocks = gender,
+                                  block_prob = c(1 / 3, 2 / 3)))
+
+## Factorial assignment
+design <-
+  model +
+  declare_assignment(Z1 = complete_ra(N = N, m = 100),
+                     Z2 = block_ra(blocks = Z1))
+
+## Assignment using functions outside of randomizr
+design <-
+  model +
   declare_assignment(Z = rbinom(n = N, size = 1, prob = 0.35))
+
 
 }

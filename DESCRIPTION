@@ -46,4 +46,5 @@ Suggests:
     reshape2,
     DesignLibrary,
     coin,
-    margins
+    margins,
+    psych
