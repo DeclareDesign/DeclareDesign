@@ -149,13 +149,13 @@ validation_fn(sampling_handler) <- function(ret, dots, label) {
     
     if (!"declaration" %in% names(dots)) {
       if ("strata" %in% names(dots)) {
-        if (class(f_rhs(dots[["strata"]])) == "character") {
+        if (inherits(f_rhs(dots[["strata"]]), "character")) {
           declare_time_error("Must provide the bare (unquoted) strata variable name to strata.", ret)
         }
       }
       
       if ("clusters" %in% names(dots)) {
-        if (class(f_rhs(dots[["clusters"]])) == "character") {
+        if (inherits(f_rhs(dots[["clusters"]]), "character")) {
           declare_time_error("Must provide the bare (unquoted) cluster variable name to clusters.", ret)
         }
       }
