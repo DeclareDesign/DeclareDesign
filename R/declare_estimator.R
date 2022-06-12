@@ -36,44 +36,89 @@
 #' @return A function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimator and associated statistics.
 #'
 #' @examples
-#' # base design
+#'
+#' # Setup for examples
 #' design <-
 #'   declare_model(
-#'     N = 100,
-#'     female = rbinom(N, 1, 0.5),
-#'     U = rnorm(N),
-#'     potential_outcomes(
-#'      Y ~ rbinom(N, 1, prob = pnorm(0.2 * Z + 0.2 * female + 0.1 * Z * female + U)))
+#'     N = 500,
+#'     gender = rbinom(N, 1, 0.5),
+#'     U = rnorm(N, sd = 0.25),
+#'     potential_outcomes(Y ~ rbinom(
+#'       N, 1, prob = pnorm(0.2 * Z + 0.2 * gender + 0.1 * Z * gender + U)
+#'     ))
 #'   ) +
-#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-#'   declare_assignment(Z = complete_ra(N, m = 50)) + 
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_sampling(S = complete_rs(N = N, n = 200)) +
+#'   declare_assignment(Z = complete_ra(N = N, m = 100)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z))
 #' 
-#' # Most estimators are modeling functions like lm or glm.
-#'   
-#' # Default statistical model is estimatr::difference_in_means
-#' design + declare_estimator(Y ~ Z, inquiry = "ATE")
+#' # default estimator is lm_robust with tidy summary
+#' design_0 <-
+#'   design +
+#'   declare_estimator(Y ~ Z, inquiry = "ATE")
 #' 
-#' # lm from base R (classical standard errors assuming homoskedasticity)
-#' design + declare_estimator(Y ~ Z, model = lm, inquiry = "ATE")
+#' run_design(design_0)
 #' 
-#' # Use lm_robust (linear regression with heteroskedasticity-robust standard errors) 
-#' # from `estimatr` package
+#' # Linear regression using lm_robust and tidy summary
+#' design_1 <-
+#'   design +
+#'   declare_estimator(
+#'     model = lm_robust,
+#'     formula = Y ~ Z,
+#'     model_summary = tidy,
+#'     term = "Z",
+#'     inquiry = "ATE",
+#'     label = "lm_no_controls"
+#'   )
 #' 
-#' design + declare_estimator(Y ~ Z, model = lm_robust, inquiry = "ATE")
+#' run_design(design_1)
 #' 
-#' # use `term` to select particular coefficients
-#' design + declare_estimator(Y ~ Z*female, term = "Z:female", model = lm_robust)
+#' # Use glance summary function to view model fit statistics
+#' design_2 <-
+#'   design +
+#'   declare_estimator(model = lm_robust,
+#'                     formula = Y ~ Z,
+#'                     model_summary = glance)
+#' 
+#' run_design(design_2)
+#' 
+#' # Use declare_estimator to implement custom answer strategies
+#' my_estimator <- function(data) {
+#'   data.frame(estimate = mean(data$Y))
+#' }
+#' 
+#' design_3 <-
+#'   design +
+#'   declare_inquiry(Y_bar = mean(Y)) +
+#'   declare_estimator(handler = label_estimator(my_estimator),
+#'                     label = "mean",
+#'                     inquiry = "Y_bar")
+#' 
+#' run_design(design_3)
+#' 
+#' # Use `term` to select particular coefficients
+#' design_4 <-
+#'   design +
+#'   declare_inquiry(difference_in_cates = mean(Y_Z_1[gender == 1] - Y_Z_0[gender == 1]) -
+#'                     mean(Y_Z_1[gender == 0] - Y_Z_0[gender == 0])) +
+#'   declare_estimator(Y ~ Z * gender,
+#'                     term = "Z:gender",
+#'                     inquiry = "difference_in_cates",
+#'                     model = lm_robust)
+#' 
+#' run_design(design_4)
 #' 
 #' # Use glm from base R
-#' design + declare_estimator(
-#'   Y ~ Z + female,
-#'   family = "gaussian",
-#'   inquiry = "ATE",
-#'   model = glm
-#' )
+#' design_5 <-
+#'   design +
+#'   declare_estimator(Y ~ Z + gender,
+#'                     family = "gaussian",
+#'                     inquiry = "ATE",
+#'                     model = glm)
 #' 
-#' # If we use logit, we'll need to estimate the average marginal effect with 
+#' run_design(design_5)
+#' 
+#' # If we use logit, we'll need to estimate the average marginal effect with
 #' # margins::margins. We wrap this up in function we'll pass to model_summary
 #' 
 #' library(margins) # for margins
@@ -83,25 +128,28 @@
 #'   tidy(margins(x, data = x$data), conf.int = TRUE)
 #' }
 #' 
-#' design +
+#' design_6 <-
+#'   design +
 #'   declare_estimator(
-#'     Y ~ Z + female,
+#'     Y ~ Z + gender,
 #'     model = glm,
 #'     family = binomial("logit"),
 #'     model_summary = tidy_margins,
 #'     term = "Z"
-#'   ) 
+#'   )
+#' 
+#' run_design(design_6)
 #' 
 #' # Multiple estimators for one inquiry
 #' 
-#' two_estimators <-
+#' design_7 <-
 #'   design +
 #'   declare_estimator(Y ~ Z,
 #'                     model = lm_robust,
 #'                     inquiry = "ATE",
 #'                     label = "OLS") +
 #'   declare_estimator(
-#'     Y ~ Z + female,
+#'     Y ~ Z + gender,
 #'     model = glm,
 #'     family = binomial("logit"),
 #'     model_summary = tidy_margins,
@@ -110,20 +158,11 @@
 #'     label = "logit"
 #'   )
 #' 
-#' run_design(two_estimators)
+#' run_design(design_7)
 #' 
-#' # Declare estimator using a custom handler
 #' 
-#' # Define your own estimator and use the `label_estimator` function for labeling
-#' # Must have `data` argument that is a data.frame
-#' my_dim_function <- function(data){
-#'   data.frame(estimate = with(data, mean(Y[Z == 1]) - mean(Y[Z == 0])))
-#' }
-#' 
-#' design + declare_estimator(
-#'   handler = label_estimator(my_dim_function),
-#'   inquiry = "ATE"
-#' )
+#'
+#'
 #' 
 declare_estimator <-
   make_declarations(
