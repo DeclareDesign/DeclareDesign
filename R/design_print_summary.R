@@ -3,8 +3,12 @@
 #' @param x a design object, typically created using the + operator
 #' @rdname post_design
 #' @export
-print.design <- function(x, verbose = TRUE, ...) {
+print.design <- function(x, verbose = FALSE, ...) {
   print(summary(x, verbose = verbose, ... = ...))
+  
+  cat("Run of the design:\n\n")
+  print(run_design(x), digits = 3, row.names = FALSE)
+  cat("\n")
 }
 
 #' @param object a design object created using the + operator
@@ -162,9 +166,14 @@ summary.design <- function(object, verbose = TRUE, ...) {
   )
 }
 
+chr_squish <- function(txt) {
+  txt <- paste0(txt, collapse = " ")
+  gsub("^ *|(?<= ) | *$", "", txt, perl = TRUE)
+}
+
 #' @export
 print.summary.design <- function(x, ...) {
-  cat("\nDesign Summary\n\n")
+  cat("\nResearch design declaration summary\n\n")
   
   if (!is.null(x$title)) {
     cat("Study title: ", x$title, ifelse(is.null(x$authors), "\n\n", ""), sep = "")
@@ -181,7 +190,7 @@ print.summary.design <- function(x, ...) {
   }
   
   for (i in 1:max(length(x$variables_added), length(x$quantities_added))) {
-    step_name <- if (is.null(x$call[[i]])) "" else deparse(x$call[[i]])
+    step_name <- if (is.null(x$call[[i]])) "" else chr_squish(deparse(x$call[[i]]))
     step_class <-
       ifelse(
         x$function_types[[i]] != "unknown",
@@ -211,7 +220,7 @@ print.summary.design <- function(x, ...) {
       }
       
       if (!is.null(x$formulae[[i]])) {
-        cat("Formula:", deparse(x$formula[[i]]), "\n\n")
+        cat("Formula:", chr_squish(deparse(x$formula[[i]])), "\n\n")
       }
       if (is.character(x$extra_summary[[i]])) {
         cat(x$extra_summary[[i]], "\n\n")
