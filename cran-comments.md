@@ -1,6 +1,6 @@
 ## Submission
 
-Thanks for reviewing this new version including a small number of deprecations of old functionality, bug fixes, and one new helper function.
+Thanks for reviewing this new version including a small number of minor features changes. 
 
 ## Test environments
 * local OS X install (release)

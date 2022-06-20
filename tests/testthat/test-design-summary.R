@@ -53,12 +53,12 @@ test_that("Add Quantitites and Alter Variables", {
 
   # Adding Quantitites
   expect_output(
-    print(design), "A single draw of the"
+    print(design, verbose = TRUE), "A single draw of the"
   )
 
   # Altering variables
   expect_output(
-    print(design), "Altered variable: noise "
+    print(design, verbose = TRUE), "Altered variable: noise "
   )
 })
 
@@ -73,7 +73,7 @@ test_that("summary, custom estimator handler, numeric value", {
   )
   d <- declare_model(sleep) + extra
 
-  expect_output(print(d), "1.54")
+  expect_output(print(d, verbose = TRUE), "1.54")
 })
 
 test_that("summary, estimator formula print formula", {
@@ -84,5 +84,5 @@ test_that("summary, estimator formula print formula", {
 
 test_that("summary, estimator print model", {
   d <- declare_model(sleep) + declare_estimator(extra ~ group, .method = lm)
-  expect_output(print(d), "Method:\\s*lm")
+  expect_output(print(d, verbose = TRUE), "Method:\\s*lm")
 })

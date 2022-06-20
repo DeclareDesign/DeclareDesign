@@ -7,7 +7,10 @@ print.design <- function(x, verbose = FALSE, ...) {
   print(summary(x, verbose = verbose, ... = ...))
   
   cat("Run of the design:\n\n")
-  print(run_design(x), digits = 3, row.names = FALSE)
+  run <- try({run_design(x)})
+  if(!inherits(run, "try-error")) {
+    print(run_design(x), digits = 3, row.names = FALSE)
+  }
   cat("\n")
 }
 

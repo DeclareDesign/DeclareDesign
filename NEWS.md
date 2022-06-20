@@ -1,6 +1,8 @@
-# DeclareDesign 0.31.0
+# DeclareDesign 1.0.0
 
 * Allow diagnoses to group by outcomes. 
+* Simplify print(design).
+* Launch version 1.
 
 # DeclareDesign 0.30.0
 

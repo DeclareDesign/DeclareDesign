@@ -48,7 +48,7 @@ test_that("Describle Variable", {
 })
 
 
-test_that("Describle Variable", {
+test_that("Describe Variable", {
   test <- data.frame(
     d = seq(from = as.POSIXct("2018-01-01"),
             to = as.POSIXct("2018-05-01"),
@@ -56,5 +56,5 @@ test_that("Describle Variable", {
   # Different ways of bringing data into DD
   pop1 <- declare_model(data = test)
   dsgn <- pop1 + NULL 
-  expect_output(print(dsgn), "2018-01-01")
+  expect_output(print(dsgn, verbose = TRUE), "2018-01-01")
 })
