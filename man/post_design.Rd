@@ -10,7 +10,7 @@
 \usage{
 print_code(design)
 
-\method{print}{design}(x, verbose = TRUE, ...)
+\method{print}{design}(x, verbose = FALSE, ...)
 
 \method{summary}{design}(object, verbose = TRUE, ...)
 }
