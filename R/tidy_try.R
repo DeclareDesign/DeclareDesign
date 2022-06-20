@@ -66,7 +66,7 @@ hasS3Method <- function(f, obj) {
   o_classes <- if(isS4(obj)) extends(class(obj)) else class(obj)
   for(i in o_classes) {
     get_function <- try(getS3method(f, i), silent = TRUE)
-    if(class(get_function) != "try-error" && is.function(get_function)) return(TRUE)
+    if(!inherits(get_function, "try-error") && is.function(get_function)) return(TRUE)
   }
   FALSE
 }

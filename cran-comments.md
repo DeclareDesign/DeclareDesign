@@ -1,6 +1,6 @@
 ## Submission
 
-Thanks for reviewing this new version including a small number of minor features changes. 
+Thanks for reviewing this new version including a small number of minor features changes. The maintainer changed emails from graeme.blair@ucla.edu to graeme.blair@gmail.com.
 
 ## Test environments
 * local OS X install (release)
@@ -15,7 +15,7 @@ Thanks for reviewing this new version including a small number of minor features
 
 ## Reverse dependencies
 
-No changes to reverse. 
+No changes to worse. 
 
 ---
   
