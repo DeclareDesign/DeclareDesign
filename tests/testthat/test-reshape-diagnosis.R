@@ -72,6 +72,19 @@ test_that("capitalization of parameter names are retained", {
   expect_equal(names(reshape)[2:3], c("N", "n"))
 })
 
+test_that("reshaping without estimators", {
+  design <- 
+    declare_model(N = 2) + 
+    declare_inquiry(Q = 1) 
+  
+  expect_error(
+    design |>
+    diagnose_design(sims = 2) |>
+    reshape_diagnosis(),
+    NA)
+  
+})
+
 
 
 test_that("select", {

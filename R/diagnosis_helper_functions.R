@@ -140,6 +140,8 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL, exclude = NU
   for(i in c(parameter_names, "design")) {
     levels(return_df[[i]]) <- c(levels(return_df[[i]]), "")
   }
+
+  if(!is.null(return_df$estimator)) 
   return_df$estimator <- as.character(return_df$estimator)
   
   for(j in c(sort_by_list, parameter_names)) if(is.factor(return_df[[j]]) && !"" %in% levels(return_df[[j]]))
