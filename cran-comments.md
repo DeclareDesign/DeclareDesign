@@ -1,6 +1,6 @@
 ## Submission
 
-Thanks for reviewing this new version including a small number of minor features changes. The maintainer changed emails from graeme.blair@ucla.edu to graeme.blair@gmail.com.
+Fixing a bug from December 9 email from CRAN. Thank you for reviewing!
 
 ## Test environments
 * local OS X install (release)

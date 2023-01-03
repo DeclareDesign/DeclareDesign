@@ -1,4 +1,4 @@
-# DeclareDesign 1.0.1
+# DeclareDesign 1.0.2
 
 * Bug fixes.
 
