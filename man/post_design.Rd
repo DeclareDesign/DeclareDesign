@@ -32,35 +32,48 @@ Print code to recreate a design
 }
 \examples{
 
+# Two-arm randomized experiment
 design <-
   declare_model(
-    N = 500, 
-    U = rnorm(N),
-    potential_outcomes(Y ~ U + Z * rnorm(N, 2, 2))
+    N = 500,
+    gender = rbinom(N, 1, 0.5),
+    X = rep(c(0, 1), each = N / 2),
+    U = rnorm(N, sd = 0.25),
+    potential_outcomes(Y ~ 0.2 * Z + X + U)
   ) +
-  declare_sampling(S = complete_rs(N, n = 250)) +
   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-  declare_assignment(Z = complete_ra(N, m = 25)) +
+  declare_sampling(S = complete_rs(N = N, n = 200)) +
+  declare_assignment(Z = complete_ra(N = N, m = 100)) +
   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-  declare_estimator(Y ~ Z, inquiry = "my_inquiry")
+  declare_estimator(Y ~ Z, inquiry = "ATE")
 
-design
+# Use draw_data to create a dataset using a design
+dat <- draw_data(design)
 
-df <- draw_data(design)
+draw_data(design, data = dat, start = 2)
 
-estimates <- draw_estimates(design)
-inquiries <- draw_estimands(design)
+# Apply get_estimates
+get_estimates(design, data = dat)
+
+
+# Two-arm randomized experiment
+design <-
+  declare_model(
+    N = 500,
+    gender = rbinom(N, 1, 0.5),
+    X = rep(c(0, 1), each = N / 2),
+    U = rnorm(N, sd = 0.25),
+    potential_outcomes(Y ~ 0.2 * Z + X + U)
+  ) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_sampling(S = complete_rs(N = N, n = 200)) +
+  declare_assignment(Z = complete_ra(N = N, m = 100)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, inquiry = "ATE")
 
 print_code(design)
 
-
-my_population <- declare_model(N = 100)
-
-my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
-
-my_design <- my_population + my_assignment
-
-print_code(my_design)
+summary(design)
 
 
 my_model <- 

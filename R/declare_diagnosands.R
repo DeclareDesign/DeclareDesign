@@ -80,40 +80,40 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #'
 #' @examples
 #'
-#' design <- 
+#' # Two-arm randomized experiment
+#' design <-
 #'   declare_model(
-#'     N = 500, 
-#'     U = rnorm(N),
-#'     Y_Z_0 = U, 
-#'     Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
-#'   ) + 
-#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-#'   declare_assignment(Z = complete_ra(N)) + 
-#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
-#'   declare_estimator(Y ~ Z, inquiry = "ATE") 
-#'   
-#' run_design(design)
-#'
-#' \dontrun{
+#'     N = 500,
+#'     gender = rbinom(N, 1, 0.5),
+#'     X = rep(c(0, 1), each = N / 2),
+#'     U = rnorm(N, sd = 0.25),
+#'     potential_outcomes(Y ~ 0.2 * Z + X + U)
+#'   ) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_sampling(S = complete_rs(N = N, n = 200)) +
+#'   declare_assignment(Z = complete_ra(N = N, m = 100)) +
+#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+#'   declare_estimator(Y ~ Z, inquiry = "ATE")
+#' 
 #' # using built-in defaults:
 #' diagnosis <- diagnose_design(design)
 #' diagnosis
-#' }
-#'
-#' # You can choose your own diagnosands instead of the defaults e.g.,
-#'
+#' 
+#' # You can choose your own diagnosands instead of the defaults:
+#' 
 #' my_diagnosands <-
 #'   declare_diagnosands(median_bias = median(estimate - estimand))
-#' \dontrun{
+#' 
+#' ## You can set diagnosands within the diagnose_design function
+#' ## using the 'diagnosands =' argument
 #' diagnosis <- diagnose_design(design, diagnosands = my_diagnosands)
 #' diagnosis
-#' }
-#' \dontrun{
+#' 
+#' ## You can also set diagnosands with set_diagnosands 
 #' design <- set_diagnosands(design, diagnosands = my_diagnosands)
 #' diagnosis <- diagnose_design(design)
 #' diagnosis
-#' }
-#'
+#' 
 #' # If you do not specify diagnosands in diagnose_design, 
 #' #   the function default_diagnosands() is used, 
 #' #   which is reproduced below.
@@ -122,13 +122,13 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #' 
 #' default_diagnosands <- 
 #'   declare_diagnosands(
-#'    mean_estimand = mean(estimand),
-#'    mean_estimate = mean(estimate),
-#'    bias = mean(estimate - estimand),
-#'    sd_estimate = sqrt(pop.var(estimate)),
-#'    rmse = sqrt(mean((estimate - estimand) ^ 2)),
-#'    power = mean(p.value <= alpha),
-#'    coverage = mean(estimand <= conf.high & estimand >= conf.low)
+#'     mean_estimand = mean(estimand),
+#'     mean_estimate = mean(estimate),
+#'     bias = mean(estimate - estimand),
+#'     sd_estimate = sqrt(pop.var(estimate)),
+#'     rmse = sqrt(mean((estimate - estimand) ^ 2)),
+#'     power = mean(p.value <= alpha),
+#'     coverage = mean(estimand <= conf.high & estimand >= conf.low)
 #'   )
 #' 
 #' # A longer list of potentially useful diagnosands might include:
