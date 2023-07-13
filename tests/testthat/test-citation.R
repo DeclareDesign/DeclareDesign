@@ -1,7 +1,7 @@
 context("add design citation")
 
 test_that("test with generated citation", {
-  debugonce(DeclareDesign:::sampling_handler)
+
   design <- declare_model(data = sleep) + declare_sampling(S = complete_rs(N, n = 10))
   design
 
