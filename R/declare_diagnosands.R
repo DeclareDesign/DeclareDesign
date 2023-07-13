@@ -95,6 +95,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
 #'   declare_estimator(Y ~ Z, inquiry = "ATE")
 #' 
+#' \dontrun{
 #' # using built-in defaults:
 #' diagnosis <- diagnose_design(design)
 #' diagnosis
@@ -150,7 +151,7 @@ validation_fn(diagnosand_handler) <- function(ret, dots, label) {
 #'     prop_pos_sig = estimate > 0 & p.value <= alpha,
 #'     mean_ci_length = mean(conf.high - conf.low)
 #'   )
-#' 
+#' }
 declare_diagnosands <- make_declarations(diagnosand_handler, "diagnosand", "diagnosands")
 
 #' @importFrom stats na.omit

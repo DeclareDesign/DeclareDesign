@@ -173,9 +173,18 @@
 #'   mutate(significant = if_else(p.value <= 0.05, 1, 0))
 #' 
 #' ggplot(simulations_df) + 
-#'   stat_smooth(aes(estimand, significant), method = 'loess', color = "#3564ED", fill = "#72B4F3", formula = 'y ~ x') +
-#'   geom_hline(yintercept = 0.8, color = "#C6227F", linetype = "dashed") +
-#'   annotate("text", x = 0, y = 0.85, label = "Conventional power threshold = 0.8", hjust = 0, color = "#C6227F") + 
+#'   stat_smooth(
+#'     aes(estimand, significant), 
+#'     method = 'loess', 
+#'     color = "#3564ED", 
+#'     fill = "#72B4F3", 
+#'     formula = 'y ~ x'
+#'   ) +
+#'   geom_hline(
+#'   yintercept = 0.8, color = "#C6227F", linetype = "dashed") +
+#'   annotate("text", x = 0, y = 0.85, 
+#'     label = "Conventional power threshold = 0.8", 
+#'     hjust = 0, color = "#C6227F") + 
 #'   scale_y_continuous(breaks = seq(0, 1, 0.2)) +
 #'   coord_cartesian(ylim = c(0, 1)) +
 #'   theme(legend.position = "none") +
