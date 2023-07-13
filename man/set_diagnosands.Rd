@@ -27,7 +27,7 @@ declare_model(data = sleep) +
      term = '(Intercept)', .method = lm_robust)
 
 diagnosands <- declare_diagnosands(
-  median_bias = median(estimate - inquiry))
+  median_bias = median(estimate - estimand))
 
 design <- set_diagnosands(design, diagnosands)
 
