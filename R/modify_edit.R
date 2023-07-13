@@ -45,18 +45,6 @@ clone_step_edit <- function(step, ..., to_replace = list(...)) {
 
 #' @rdname edit
 #' @keywords internal
-#' @examples
-#' N <- 50
-#'
-#' \dontrun{
-#'
-#' my_design <- declare_model(N=N, noise=rnorm(N)) + NULL
-#' my_design2 <- DeclareDesign:::clone_design_edit(my_design, N=100)
-#'
-#' nrow(draw_data(my_design))
-#' nrow(draw_data(my_design2))
-#'
-#' }
 clone_design_edit <- function(design, ..., to_replace = list(...)) {
   design[] <- lapply(design, clone_step_edit, to_replace = to_replace)
 

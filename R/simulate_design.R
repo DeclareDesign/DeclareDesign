@@ -11,36 +11,26 @@
 #' @importFrom utils head type.convert
 #' @export
 #' @examples
-#' my_model <- 
+#' design <- 
 #'   declare_model(
 #'     N = 500, 
 #'     U = rnorm(N),
 #'     Y_Z_0 = U, 
 #'     Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
-#'   )
-#'
-#' my_assignment <- declare_assignment(Z = complete_ra(N))
-#'
-#' my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-#'
-#' my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
-#'
-#' my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
-#'
-#' design <- my_model +
-#'   my_inquiry +
-#'   my_assignment +
-#'   my_reveal +
-#'   my_estimator
+#'   ) + 
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+#'   declare_assignment(Z = complete_ra(N)) + 
+#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
+#'   declare_estimator(Y ~ Z, inquiry = "ATE") 
 #'
 #' \dontrun{
-#' simulations <- simulate_design(designs, sims = 2)
+#' simulations <- simulate_design(design, sims = 500)
 #' diagnosis <- diagnose_design(simulations_df = simulations)
 #' }
 #'
 #' \dontrun{
 #' # A fixed population with simulations over assignment only
-#' head(simulate_design(design, sims = c(1, 1, 1, 100, 1)))
+#' head(simulate_design(design, sims = c(1, 1, 100, 1, 1)))
 #' }
 #'
 #' @details

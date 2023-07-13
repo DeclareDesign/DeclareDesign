@@ -37,6 +37,9 @@
 #' \dontrun{
 #' # using built-in defaults:
 #' diagnosis <- diagnose_design(design)
+#' 
+#' tidy(diagnosis)
+#' 
 #' reshape_diagnosis(diagnosis, select = "Power")
 #' }
 #' 
@@ -70,9 +73,10 @@
 #' }
 #' # Using an existing data frame of simulations
 #' \dontrun{
-#' simulations <- simulate_design(designs, sims = 2)
+#' simulations_df <- simulate_design(design, sims = 500)
 #' diagnosis   <- diagnose_design(simulations_df = simulations_df)
-#'
+#' 
+#' tidy(diagnosis)
 #' }
 #' 
 #' # If you do not specify diagnosands, the function default_diagnosands() is used, 

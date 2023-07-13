@@ -43,10 +43,12 @@ design <-
     Y_Z_0 = U, 
     Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
   ) + 
-  declare_assignment(Z = complete_ra(N)) + 
   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-  declare_estimator(Y ~ Z, inquiry = my_inquiry) + 
-  declare_measurement(Y = reveal_outcomes(Y ~ Z))
+  declare_assignment(Z = complete_ra(N)) + 
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
+  declare_estimator(Y ~ Z, inquiry = "ATE") 
+  
+run_design(design)
 
 \dontrun{
 # using built-in defaults:
@@ -57,7 +59,7 @@ diagnosis
 # You can choose your own diagnosands instead of the defaults e.g.,
 
 my_diagnosands <-
-  declare_diagnosands(median_bias = median(estimate - inquiry))
+  declare_diagnosands(median_bias = median(estimate - estimand))
 \dontrun{
 diagnosis <- diagnose_design(design, diagnosands = my_diagnosands)
 diagnosis

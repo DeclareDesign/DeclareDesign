@@ -14,8 +14,7 @@
 #'
 #' n <- 500
 #' population <- declare_model(N = 1000)
-#' sampling <- declare_sampling(S = complete_rs(N, n = n), 
-#'                              legacy = FALSE)
+#' sampling <- declare_sampling(S = complete_rs(N, n = n))
 #' design <- population + sampling
 #'
 #' # returns a single, modified design
@@ -31,8 +30,7 @@
 #' prob_each <- c(.1, .5, .4)
 #'
 #' assignment <- declare_assignment(
-#'   Z = complete_ra(prob_each = prob_each), 
-#'   legacy = FALSE)
+#'   Z = complete_ra(prob_each = prob_each))
 #'
 #' design <- population + assignment
 #'
