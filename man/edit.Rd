@@ -20,8 +20,8 @@ Override environment via shim
 here_i_am <- "foo"
 dot <- quo(here_i_am)
 dot2 <- DeclareDesign:::clone_dot_edit_env(dot, here_i_am = "some_message", xyxyx = "bar")
-eval_tidy(dot)
-eval_tidy(dot2)
+rlang::eval_tidy(dot)
+rlang::eval_tidy(dot2)
 }
 \dontrun{
 N <- 50
