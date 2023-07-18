@@ -20,6 +20,8 @@
 #'   declare_assignment(Z = complete_ra(N = N, m = 100)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
 #'   declare_estimator(Y ~ Z, inquiry = "ATE")
+#'   
+#' run_design(design)
 #' 
 #' # Set up population to assign
 #' model <- declare_model(
@@ -44,12 +46,16 @@
 #' design <-
 #'   model +
 #'   declare_assignment(Z = complete_ra(N = N, m = 1000))
+#'   
+#' head(draw_data(design))
 #' 
 #' ## Cluster random assignment
 #' design <-
 #'   model +
 #'   declare_assignment(Z = cluster_ra(clusters = villages,
 #'                                     n = 15))
+#'                                     
+#' head(draw_data(design))
 #' 
 #' ## Block and cluster random assignment
 #' design <-
@@ -60,10 +66,14 @@
 #'     block_m = rep(20, 30)
 #'   ))
 #' 
+#' head(draw_data(design))
+#' 
 #' ## Block random assignment
 #' design <-
 #'   model +
 #'   declare_assignment(Z = block_ra(blocks = gender, m = 100))
+#'   
+#' head(draw_data(design))
 #' 
 #' ## Block random assignment using probabilities
 #' design <-
@@ -71,17 +81,22 @@
 #'   declare_assignment(Z = block_ra(blocks = gender,
 #'                                   block_prob = c(1 / 3, 2 / 3)))
 #' 
+#' head(draw_data(design))
+#' 
 #' ## Factorial assignment
 #' design <-
 #'   model +
 #'   declare_assignment(Z1 = complete_ra(N = N, m = 100),
 #'                      Z2 = block_ra(blocks = Z1))
 #' 
+#' head(draw_data(design))
+#' 
 #' ## Assignment using functions outside of randomizr
 #' design <-
 #'   model +
 #'   declare_assignment(Z = rbinom(n = N, size = 1, prob = 0.35))
 #' 
+#' head(draw_data(design))
 #' 
 declare_assignment <- make_declarations(assignment_handler, "assignment")
 

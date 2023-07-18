@@ -68,6 +68,11 @@ default_diagnosands <-
     power = mean(p.value <= alpha),
     coverage = mean(estimand <= conf.high & estimand >= conf.low)
   )
+  
+diagnose_design(
+  simulations_df,
+  diagnosands = default_diagnosands
+)
 
 # A longer list of potentially useful diagnosands might include:
 
@@ -85,9 +90,14 @@ extended_diagnosands <-
     exaggeration_ratio = mean((estimate/estimand)[p.value <= alpha]),
     var_estimate = pop.var(estimate),
     mean_var_hat = mean(std.error^2),
-    prop_pos_sig = estimate > 0 & p.value <= alpha,
+    prop_pos_sig = mean(estimate > 0 & p.value <= alpha),
     mean_ci_length = mean(conf.high - conf.low)
   )
+  
+diagnose_design(
+  simulations_df,
+  diagnosands = extended_diagnosands
+)
 
 }
 }

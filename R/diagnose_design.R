@@ -95,6 +95,11 @@
 #'     power = mean(p.value <= alpha),
 #'     coverage = mean(estimand <= conf.high & estimand >= conf.low)
 #'   )
+#'   
+#' diagnose_design(
+#'   design, 
+#'   diagnosands = default_diagnosands
+#' )
 #' 
 #' # A longer list of useful diagnosands might include:
 #' 
@@ -112,9 +117,14 @@
 #'     exaggeration_ratio = mean((estimate/estimand)[p.value <= alpha]),
 #'     var_estimate = pop.var(estimate),
 #'     mean_var_hat = mean(std.error^2),
-#'     prop_pos_sig = estimate > 0 & p.value <= alpha,
+#'     prop_pos_sig = mean(estimate > 0 & p.value <= alpha),
 #'     mean_ci_length = mean(conf.high - conf.low)
 #'   )
+#'   
+#' diagnose_design(
+#'   design, 
+#'   diagnosands = extended_diagnosands
+#' )
 #' 
 #' \dontrun{
 #' # Adding a group for within group diagnosis:
@@ -150,7 +160,6 @@
 #' # to optimize the design for specific diagnosands
 #' design_vary_N <- redesign(design, n = c(100, 500, 900))
 #' diagnose_designs(design_vary_N)
-#'
 #' 
 #' # Calculate and plot the power of a design over a range of 
 #' # effect sizes

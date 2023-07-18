@@ -31,6 +31,8 @@ library(DesignLibrary)
 
 designs <- expand_design(multi_arm_designer, outcome_means = list(c(3,2,4), c(1,4,1)))
 
+diagnose_design(designs)
+
 # with a custom designer function
 
 designer <- function(N) {

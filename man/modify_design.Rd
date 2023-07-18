@@ -86,6 +86,6 @@ See \code{\link{modify_design}} for details.
  }
 
 
- delete_step(design, my_assignment)
- replace_step(design, my_assignment, declare_step(dplyr::mutate, words = "income"))
+ delete_step(design, 3)
+ replace_step(design, 3, declare_step(dplyr::mutate, words = "income"))
 }

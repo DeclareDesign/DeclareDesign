@@ -123,7 +123,7 @@ insert_step_ <- function(design, new_step, before = NULL, after = NULL, new_step
 #' @rdname modify_design
 #' @examples
 #'
-#'  delete_step(design, my_assignment)
+#'  delete_step(design, 3)
 delete_step <- function(design, step) {
   check_design_class_single(design)
   
@@ -134,7 +134,7 @@ delete_step <- function(design, step) {
 #' @export
 #' @rdname modify_design
 #' @examples
-#'  replace_step(design, my_assignment, declare_step(dplyr::mutate, words = "income"))
+#'  replace_step(design, 3, declare_step(dplyr::mutate, words = "income"))
 replace_step <- function(design, step, new_step) {
   check_design_class_single(design)
   

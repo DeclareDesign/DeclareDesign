@@ -101,6 +101,8 @@ design <-
   declare_sampling(S = complete_rs(N = N, n = 200)) +
   declare_assignment(Z = complete_ra(N = N, m = 100)) +
   declare_measurement(Y = reveal_outcomes(Y ~ Z))
+  
+run_design(design)
 
 # default estimator is lm_robust with tidy summary
 design_0 <-
@@ -209,9 +211,4 @@ design_7 <-
   )
 
 run_design(design_7)
-
-
-
-
-
 }

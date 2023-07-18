@@ -46,6 +46,8 @@ declare_reveal <- make_declarations(declare_reveal_handler, "reveal")
 #'   ) + 
 #'   declare_assignment(Z = complete_ra(N, m = 50)) + 
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z))
+#'   
+#' head(draw_data(design))
 #'
 #' # Declaring multiple assignment variables or multiple outcome variables
 #'
@@ -61,6 +63,8 @@ declare_reveal <- make_declarations(declare_reveal_handler, "reveal")
 #'   declare_measurement(Y1 = reveal_outcomes(Y1 ~ Z), 
 #'                       Y2 = reveal_outcomes(Y2 ~ Z),
 #'                       Y3 = reveal_outcomes(Y3 ~ X + Z))
+#'                       
+#' head(draw_data(design))
 #' 
 #' design <- 
 #'   declare_model(
@@ -73,6 +77,8 @@ declare_reveal <- make_declarations(declare_reveal_handler, "reveal")
 #'   declare_measurement(R = reveal_outcomes(R ~ Z),
 #'                       Y = reveal_outcomes(Y ~ Z),
 #'                       Y = ifelse(R == 1, Y, NA))
+#'                       
+#' head(draw_data(design))
 declare_reveal_handler <- function(data = NULL,
                                     outcome_variables = Y,
                                     assignment_variables = Z,

@@ -25,6 +25,8 @@
 #'   declare_assignment(Z = complete_ra(N = N, m = 100)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
 #'   declare_estimator(Y ~ Z, inquiry = "ATE")
+#'   
+#' run_design(design)
 #' 
 #' # Reveal potential outcomes according to treatment assignment
 #' design <-
@@ -34,11 +36,15 @@
 #'                 ))) +
 #'   declare_assignment(Z = complete_ra(N, m = 50)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z))
+#'   
+#' head(draw_data(design))
 #' 
 #' # Generate observed measurement from a latent value
 #' design <- 
 #'   declare_model(N = 100, latent = runif(N)) +
 #'   declare_measurement(observed = rbinom(N, 1, prob = latent))
+#'   
+#' head(draw_data(design))
 #' 
 #' # Index creation
 #' library(psych)
@@ -59,10 +65,6 @@
 #'   )
 #' 
 #' draw_data(design)
-#' 
-#' 
-#' 
-#'
 declare_measurement <- make_declarations(measurement_handler, "measurement")
 
 #' @param data A data.frame.
