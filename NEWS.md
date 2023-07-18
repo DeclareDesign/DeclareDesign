@@ -1,3 +1,8 @@
+# DeclareDesign 1.0.4
+
+* Documentation improvements.
+* Citation updates.
+
 # DeclareDesign 1.0.2
 
 * Bug fixes.

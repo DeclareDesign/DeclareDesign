@@ -62,7 +62,7 @@ M <- declare_model(
 M <-
 declare_model(
   draw_multivariate(c(X1, X2) ~ MASS::mvrnorm(
-    N = 1000,
+    n = 1000,
     mu = c(0, 0),
     Sigma = matrix(c(1, 0.3, 0.3, 1), nrow = 2)
   )))

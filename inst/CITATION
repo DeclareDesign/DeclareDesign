@@ -1,6 +1,7 @@
-citHeader("To cite list in publications use:")
+citHeader("To cite DeclareDesign in publications use:")
 
-citEntry(entry = "book",
+bibentry(
+  bibtype      = "book",
 	title        = "Research Design in the Social Sciences: Declaration, Diagnosis, and Redesign",
   author       = c(person("Graeme", "Blair"), 
                    person("Alexander", "Coppock"), 
@@ -18,7 +19,8 @@ citEntry(entry = "book",
         "URL https://book.declaredesign.org")
 )
 
-citEntry(entry = "article",
+bibentry(
+  bibtype      = "article",
   title        = "Declaring and Diagnosing Research Designs",
   author       = c(person("Graeme", "Blair"), person("Jasper", "Cooper"),
                    person("Alexander", "Coppock"), person("Macartan", "Humphreys")),
