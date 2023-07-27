@@ -1,12 +1,29 @@
-template:
-  package: ddpkgdowntemplate
-
 url: https://declaredesign.org/r/declaredesign
+
+home:
+  title: Declaring and diagnosing research designs
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#0054AD"
+    border-radius: 0.5rem
+    btn-border-radius: 0.25rem
+
+development:
+  mode: auto
 
 navbar:
   left:
+  - text: Getting started
+    href: https://declaredesign.org/getting-started/
+  - text: Reference
+    href: reference/index.html
+  right:
   - text: "Software"
     menu:
+      - text: DeclareDesign
+        href: https://declaredesign.org/r/DeclareDesign/
       - text: randomizr
         href: https://declaredesign.org/r/randomizr/
       - text: fabricatr
@@ -15,20 +32,8 @@ navbar:
         href: https://declaredesign.org/r/estimatr/
       - text: DesignLibrary
         href: https://declaredesign.org/r/designlibrary/
-  - text: "Help"
-    href: http://discuss.declaredesign.org
-  right:
-  - text: Get started
-    href: articles/DeclareDesign_101.html 
-  - text: Reference
-    href: reference/index.html
   - text: DeclareDesign home
-    href: https://declaredesign.org/r/declaredesign/
-  # - text: Articles
-  #   menu:
-  #   - text: DeclareDesign 101
-  #     href: articles/DeclareDesign_101.html 
-
+    href: https://declaredesign.org
 
 reference:
 - title: Declare
@@ -98,3 +103,7 @@ reference:
   - compare_design_estimates
   - compare_design_inquiries
 
+- title: Package
+  description: Package description
+  contents:
+  - DeclareDesign
