@@ -1,6 +1,6 @@
 #' Simulate a design
 #'
-#' Runs many simulations of a design and returns a simulations data.frame.
+#' Runs many simulations of a design and returns a simulations data.frame. Speed gains can be achieved by running simulate_design in parallel, see Examples.
 #'
 #' @param ... A design created using the + operator, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.
 #'
@@ -39,6 +39,17 @@
 #' # Simulate one part of the design for a fixed population
 #' # (The 100 simulates different assignments)
 #' head(simulate_design(design, sims = c(1, 1, 1, 100, 1, 1)))
+#' 
+#' # You may also run simulate_design in parallel using 
+#' #   the future package on a personal computer with multiple
+#' #   cores or on high performance computing clusters. 
+#' 
+#' library(future)
+#' options(parallelly.fork.enable = TRUE) # required for use in RStudio
+#' plan(multicore) # note other plans are possible, see future
+#' 
+#' simulate_design(design, sims = 500)
+#' 
 #' }
 #'
 #' @details

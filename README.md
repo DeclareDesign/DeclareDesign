@@ -16,7 +16,8 @@ DeclareDesign is a system for describing research designs in code and
 simulating them in order to understand their properties. Because
 DeclareDesign employs a consistent grammar of designs, you can focus on
 the intellectually challenging part – designing good research studies –
-without having to code up simulations from scratch.
+without having to code up simulations from scratch. For more, see
+[declaredesign.org](https://declaredesign.org).
 
 ## Installation
 
@@ -61,9 +62,9 @@ diagnosis <- diagnose_design(design, diagnosands = diagnosands)
 diagnosis
 ```
 
-| Inquiry | Estimator |   Bias | SE(Bias) | Power | SE(Power) | n sims |
-|:--------|:----------|-------:|---------:|------:|----------:|-------:|
-| ATE     | estimator | -0.004 |    0.004 | 0.076 |     0.011 |    500 |
+| Inquiry | Estimator | Outcome |   Bias | SE(Bias) | Power | SE(Power) | n sims |
+|:--------|:----------|:--------|-------:|---------:|------:|----------:|-------:|
+| ATE     | estimator | Y       | -0.004 |    0.004 | 0.076 |     0.011 |    500 |
 
 ## Companion software
 
@@ -82,17 +83,16 @@ of which is useful in its own right.
 ## Learning DeclareDesign
 
 1.  To get started, have a look at this vignette on [the idea behind
-    DeclareDesign](https://declaredesign.org/getting-started.html),
-    which covers the main functionality of the software.
+    DeclareDesign](https://declaredesign.org/getting-started/), which
+    covers the main functionality of the software.
 
-2.  You can also browse a
-    [library](https://declaredesign.org/r/designlibrary/) of already
-    declared designs, which relies on the `DesignLibrary` package. The
-    library includes canonical designs that you can download, modify,
-    and deploy.
-
-3.  A fuller description of the philosophy underlying the software is
-    described in this [paper](https://declaredesign.org/declare.pdf).
+2.  For an explanation of the philosophy behind DeclareDesign, examples
+    in code and words of declaring and diagnosing common research
+    designs in the social sciences, as well as examples of how to
+    incorporate DeclareDesign into your own research, see the book
+    [Research Design in the Social
+    Sciences](https://book.declaredesign.org) (Blair, Coppock,
+    Humphreys, 2023).
 
 ## Package structure
 

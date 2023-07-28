@@ -1,6 +1,7 @@
 citHeader("To cite DeclareDesign in publications use:")
 
 bibentry(
+  key          = "blair_coppock_humphreys_2023",
   bibtype      = "book",
 	title        = "Research Design in the Social Sciences: Declaration, Diagnosis, and Redesign",
   author       = c(person("Graeme", "Blair"), 
@@ -20,6 +21,7 @@ bibentry(
 )
 
 bibentry(
+  key          = "blair_cooper_coppock_humphreys_2019",
   bibtype      = "article",
   title        = "Declaring and Diagnosing Research Designs",
   author       = c(person("Graeme", "Blair"), person("Jasper", "Cooper"),

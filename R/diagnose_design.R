@@ -1,7 +1,7 @@
 
 #' Diagnose the design
 #'
-#' Generates diagnosands from a design or simulations of a design.
+#' Generates diagnosands from a design or simulations of a design. Speed gains can be achieved by running diagnose_design in parallel, see Examples.
 #'
 #' @param ... A design or set of designs typically created using the + operator, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.
 #' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the inquiry(s).
@@ -57,6 +57,16 @@
 #'                              sims = 500,
 #'                              bootstrap_sims = 150)
 #' tidy(diagnosis)
+#' 
+#' # You may also run diagnose_design in parallel using 
+#' #   the future package on a personal computer with multiple
+#' #   cores or on high performance computing clusters. 
+#' 
+#' library(future)
+#' options(parallelly.fork.enable = TRUE) # required for use in RStudio
+#' plan(multicore) # note other plans are possible, see future
+#' 
+#' diagnose_design(design, sims = 500)
 #' 
 #' # Select specific diagnosands
 #' reshape_diagnosis(diagnosis, select = "Power")
