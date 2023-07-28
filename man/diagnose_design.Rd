@@ -152,12 +152,12 @@ extended_diagnosands <-
     mean_ci_length = mean(conf.high - conf.low)
   )
   
+\dontrun{
 diagnose_design(
   design, 
   diagnosands = extended_diagnosands
 )
 
-\dontrun{
 # Adding a group for within group diagnosis:
 diagnosis <- diagnose_design(design, 
                              make_groups = vars(significant = p.value <= 0.05),
