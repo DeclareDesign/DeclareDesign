@@ -1,6 +1,6 @@
 ## Submission
 
-Fixing documentation issues and r-devel notes. Thank you for your review!
+Fixing documentation issues and r-devel notes. Thank you for your review! (We have reviewed an issue when we submitted earlier this month.)
 
 ## Test environments
 * local OS X install (release)
