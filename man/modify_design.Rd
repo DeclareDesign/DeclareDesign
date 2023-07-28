@@ -86,6 +86,32 @@ See \code{\link{modify_design}} for details.
  }
 
 
- delete_step(design, 3)
- replace_step(design, 3, declare_step(dplyr::mutate, words = "income"))
+design <- 
+  declare_model(
+    N = 100,
+    U = rnorm(N),
+    potential_outcomes(Y ~ 0.20 * Z + U)
+  ) + 
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+    declare_assignment(Z = complete_ra(N, m = N/2)) + 
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
+    declare_estimator(Y ~ Z, inquiry = "ATE")
+delete_step(design, step = 5)
+
+
+design <- 
+  declare_model(
+    N = 100,
+    U = rnorm(N),
+    potential_outcomes(Y ~ 0.20 * Z + U)
+  ) + 
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+    declare_assignment(Z = complete_ra(N, m = N/2)) + 
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
+    declare_estimator(Y ~ Z, inquiry = "ATE")
+
+replace_step(
+  design, 
+  step = 3, 
+  new_step = declare_assignment(Z = simple_ra(N, prob = 0.5)))
 }
