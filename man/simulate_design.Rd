@@ -23,36 +23,34 @@ structure of simulations is recorded in the dataset using a set of variables nam
 will be two distinct draws of step 1, indicated in variable "step_1_draw" (with values 1 and 2) and there will be three draws for step 4 within each of the step 1 draws, recorded in "step_4_draw" (with values 1 to 6).
 }
 \examples{
-my_model <- 
+
+# Two-arm randomized experiment
+design <-
   declare_model(
-    N = 500, 
-    U = rnorm(N),
-    Y_Z_0 = U, 
-    Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
-  )
-
-my_assignment <- declare_assignment(Z = complete_ra(N))
-
-my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-
-my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
-
-my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
-
-design <- my_model +
-  my_inquiry +
-  my_assignment +
-  my_reveal +
-  my_estimator
+    N = 500,
+    gender = rbinom(N, 1, 0.5),
+    X = rep(c(0, 1), each = N / 2),
+    U = rnorm(N, sd = 0.25),
+    potential_outcomes(Y ~ 0.2 * Z + X + U)
+  ) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_sampling(S = complete_rs(N = N, n = 200)) +
+  declare_assignment(Z = complete_ra(N = N, m = 100)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, inquiry = "ATE")
 
 \dontrun{
-simulations <- simulate_design(designs, sims = 2)
+# Simulate design
+simulations <- simulate_design(design, sims = 100)
+simulations
+
+# Diagnose design using simulations
 diagnosis <- diagnose_design(simulations_df = simulations)
-}
+diagnosis
 
-\dontrun{
-# A fixed population with simulations over assignment only
-head(simulate_design(design, sims = c(1, 1, 1, 100, 1)))
+# Simulate one part of the design for a fixed population
+# (The 100 simulates different assignments)
+head(simulate_design(design, sims = c(1, 1, 1, 100, 1, 1)))
 }
 
 }

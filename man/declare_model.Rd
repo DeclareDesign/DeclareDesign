@@ -42,9 +42,11 @@ M()
 
 # Declare a population from existing data
 M <- declare_model(data = mtcars)
+M()
 
 # Resample from existing data
 M <- declare_model(N = 100, data = mtcars, handler = resample_data)
+M()
 
 # Declare a model with covariates: 
 # observed covariates X1 and X2 and 
@@ -57,16 +59,18 @@ M <- declare_model(
   X2 = X1 + rnorm(N),
   Y = 0.1 * X1 + 0.2 * X2 + 0.1 * X1 * X2 + U
 )
+M()
 
 # We can draw correlated variables using draw_multivariate
 M <-
 declare_model(
   draw_multivariate(c(X1, X2) ~ MASS::mvrnorm(
-    N = 1000,
+    n = 1000,
     mu = c(0, 0),
     Sigma = matrix(c(1, 0.3, 0.3, 1), nrow = 2)
   )))
-  
+M()
+
 # Declare potential outcomes model dependent on assignment Z
 ## Manually
 M <- 
@@ -74,32 +78,34 @@ M <-
                 Y_Z_0 = rbinom(N, size = 1, prob = 0.5),
                 Y_Z_1 = rbinom(N, size = 1, prob = 0.6)
   )
+M()
 
 ## Using potential_outcomes
 M <- 
   declare_model(N = 100, 
                 potential_outcomes(Y ~ rbinom(N, size = 1, prob = 0.1 * Z + 0.5))
   )
-  
+M()
  
 ## we can draw from a distribution of effect sizes 
- M <-
-declare_model(
-  N = 100, 
-  tau = runif(1, min = 0, max = 1), 
-  U = rnorm(N), 
-  potential_outcomes(Y ~ tau * Z + U)
-)
+M <-
+  declare_model(
+    N = 100, 
+    tau = runif(1, min = 0, max = 1), 
+    U = rnorm(N), 
+    potential_outcomes(Y ~ tau * Z + U)
+  )
+M()
 
 ## we can simulate treatment-by-covariate effect heterogeneity:
 M <- 
-declare_model(
-  N = 100, 
-  U = rnorm(N), 
-  X = rbinom(N, 1, prob = 0.5),
-  potential_outcomes(Y ~  0.3 * Z + 0.2*X + 0.1*Z*X + U)
-)
-
+  declare_model(
+    N = 100, 
+    U = rnorm(N), 
+    X = rbinom(N, 1, prob = 0.5),
+    potential_outcomes(Y ~  0.3 * Z + 0.2*X + 0.1*Z*X + U)
+  )
+M()
 
 ## potential outcomes can respond to two treatments:
 M <- declare_model(
@@ -107,6 +113,8 @@ M <- declare_model(
   U = rnorm(N),
   potential_outcomes(Y ~ Z1 + Z2 + U, 
                      conditions = list(Z1 = c(0, 1), Z2 = c(0, 1))))
+
+M()
 
 # Declare a two-level hierarchical population
 # containing varying numbers of individuals within
@@ -124,29 +132,28 @@ M <- declare_model(
     age = sample(18:90, N, replace = TRUE)
   )
 )
-
+M()
 
 ## Panel data have a more complex structure:
-M <- declare_model(
-countries = add_level(
-  N = 196, 
-  country_shock = rnorm(N)
-),
-years = add_level(
-  N = 100, 
-  time_trend = 1:N,
-  year_shock = runif(N, 1, 10), 
-  nest = FALSE
-),
-observation = cross_levels(
-  by = join_using(countries, years),
-  observation_shock = rnorm(N),
-  Y = 0.01 * time_trend + country_shock + year_shock + observation_shock 
-)
-)
-
-
-
+M <- 
+  declare_model(
+    countries = add_level(
+      N = 196, 
+      country_shock = rnorm(N)
+    ),
+    years = add_level(
+      N = 100, 
+      time_trend = 1:N,
+      year_shock = runif(N, 1, 10), 
+      nest = FALSE
+    ),
+    observation = cross_levels(
+      by = join_using(countries, years),
+      observation_shock = rnorm(N),
+      Y = 0.01 * time_trend + country_shock + year_shock + observation_shock 
+    )
+  )
+M()
 
 # Declare a population using a custom function
 # the default handler is fabricatr::fabricate,
@@ -156,4 +163,6 @@ my_model_function <- function(N) {
 }
 
 M <- declare_model(N = 10, handler = my_model_function)
+M()
+
 }

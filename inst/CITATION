@@ -1,9 +1,31 @@
-citHeader("To cite list in publications use:")
+citHeader("To cite DeclareDesign in publications use:")
 
-citEntry(entry = "article",
+bibentry(
+  key          = "blair_coppock_humphreys_2023",
+  bibtype      = "book",
+	title        = "Research Design in the Social Sciences: Declaration, Diagnosis, and Redesign",
+  author       = c(person("Graeme", "Blair"), 
+                   person("Alexander", "Coppock"), 
+                   person("Macartan", "Humphreys")),
+	publisher    = "Princeton University Press",
+  address      = "Princeton",
+	
+  year         = "2023",
+  url          = "https://book.declaredesign.org",
+
+  textVersion  =
+  paste("Graeme Blair, Alexander Coppock, and Macartan Humphreys (2023).",
+        "Research Design in the Social Sciences: Declaration, Diagnosis, and Redesign.",
+        "Princeton University Press.",
+        "URL https://book.declaredesign.org")
+)
+
+bibentry(
+  key          = "blair_cooper_coppock_humphreys_2019",
+  bibtype      = "article",
   title        = "Declaring and Diagnosing Research Designs",
-  author       = personList(as.person("Graeme Blair"), as.person("Jasper Cooper"),
-                            as.person("Alexander Coppock"), as.person("Macartan Humphreys")),
+  author       = c(person("Graeme", "Blair"), person("Jasper", "Cooper"),
+                   person("Alexander", "Coppock"), person("Macartan", "Humphreys")),
   journal      = "American Political Science Review",
   volume       = "113",
   issue        = "3",
@@ -13,8 +35,8 @@ citEntry(entry = "article",
 
   textVersion  =
   paste("Graeme Blair, Jasper Cooper, Alexander Coppock, and Macartan Humphreys (2019).",
-        "``Declaring and Diagnosing Research Designs.''",
+        '"Declaring and Diagnosing Research Designs."',
         "American Political Science Review 113(3): 838-859.",
-        "URL http://declaredesign.org/declare.pdf")
+        "URL https://declaredesign.org/paper.pdf")
 )
 

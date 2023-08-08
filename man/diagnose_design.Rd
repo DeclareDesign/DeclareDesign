@@ -53,56 +53,61 @@ If \code{sims} is named, or longer than one element, a fan-out strategy is creat
 If the packages \code{future} and \code{future.apply} are installed, you can set \code{\link[future]{plan}} to run multiple simulations in parallel.
 }
 \examples{
-design <- 
+
+# Two-arm randomized experiment
+n <- 500
+
+design <-
   declare_model(
-    N = 500, 
-    U = rnorm(N),
-    Y_Z_0 = U, 
-    Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
-  ) + 
-  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-  declare_assignment(Z = complete_ra(N)) +
-  declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
+    N = 1000,
+    gender = rbinom(N, 1, 0.5),
+    X = rep(c(0, 1), each = N / 2),
+    U = rnorm(N, sd = 0.25),
+    potential_outcomes(Y ~ 0.2 * Z + X + U)
+  ) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_sampling(S = complete_rs(N = N, n = n)) +
+  declare_assignment(Z = complete_ra(N = N, m = n/2)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
   declare_estimator(Y ~ Z, inquiry = "ATE")
 
 \dontrun{
-# using built-in defaults:
+# Diagnose design using default diagnosands
 diagnosis <- diagnose_design(design)
+diagnosis
+
+# Use tidy to produce data.frame with bootstrapped standard 
+# errors and confidence intervals for each diagnosand
+diagnosis_df <- tidy(diagnosis)
+diagnosis_df
+
+# Use sims argument to change the number of simulations used 
+# to calculate diagnosands, and bootstrap_sims to change how
+# many bootstraps are uses to calculate standard errors.
+diagnosis <- diagnose_design(design,
+                             sims = 500,
+                             bootstrap_sims = 150)
+tidy(diagnosis)
+
+# Select specific diagnosands
 reshape_diagnosis(diagnosis, select = "Power")
-}
 
-\dontrun{
-# Adding a group for within group diagnosis:
-diagnosis <- diagnose_design(design, 
-  make_groups = vars(significant = p.value <= 0.05),
-  )
-diagnosis
+# Use your own diagnosands
+my_diagnosands <-
+  declare_diagnosands(median_bias = median(estimate - estimand),
+                      absolute_error = mean(abs(estimate - estimand)))
 
-diagnosis <- diagnose_design(design, 
-  make_groups = 
-    vars(effect_size = 
-      cut(estimand, quantile(estimand, (0:4)/4), 
-          include.lowest = TRUE)),
-  )
-diagnosis
-}
-
-# using a user-defined diagnosand
-my_diagnosand <- declare_diagnosands(absolute_error = mean(abs(estimate - estimand)))
-
-\dontrun{
-diagnosis <- diagnose_design(design, diagnosands = my_diagnosand)
+diagnosis <- diagnose_design(design, diagnosands = my_diagnosands)
 diagnosis
 
 get_diagnosands(diagnosis)
 
 get_simulations(diagnosis)
 
-}
-# Using an existing data frame of simulations
-\dontrun{
-simulations <- simulate_design(designs, sims = 2)
-diagnosis   <- diagnose_design(simulations_df = simulations_df)
+# Diagnose using an existing data frame of simulations
+simulations <- simulate_design(design, sims = 500)
+diagnosis   <- diagnose_design(simulations_df = simulations)
+diagnosis
 
 }
 
@@ -113,14 +118,19 @@ alpha <- 0.05
 
 default_diagnosands <- 
   declare_diagnosands(
-   mean_estimand = mean(estimand),
-   mean_estimate = mean(estimate),
-   bias = mean(estimate - estimand),
-   sd_estimate = sqrt(pop.var(estimate)),
-   rmse = sqrt(mean((estimate - estimand) ^ 2)),
-   power = mean(p.value <= alpha),
-   coverage = mean(estimand <= conf.high & estimand >= conf.low)
+    mean_estimand = mean(estimand),
+    mean_estimate = mean(estimate),
+    bias = mean(estimate - estimand),
+    sd_estimate = sqrt(pop.var(estimate)),
+    rmse = sqrt(mean((estimate - estimand) ^ 2)),
+    power = mean(p.value <= alpha),
+    coverage = mean(estimand <= conf.high & estimand >= conf.low)
   )
+  
+diagnose_design(
+  design, 
+  diagnosands = default_diagnosands
+)
 
 # A longer list of useful diagnosands might include:
 
@@ -138,8 +148,89 @@ extended_diagnosands <-
     exaggeration_ratio = mean((estimate/estimand)[p.value <= alpha]),
     var_estimate = pop.var(estimate),
     mean_var_hat = mean(std.error^2),
-    prop_pos_sig = estimate > 0 & p.value <= alpha,
+    prop_pos_sig = mean(estimate > 0 & p.value <= alpha),
     mean_ci_length = mean(conf.high - conf.low)
   )
   
+\dontrun{
+diagnose_design(
+  design, 
+  diagnosands = extended_diagnosands
+)
+
+# Adding a group for within group diagnosis:
+diagnosis <- diagnose_design(design, 
+                             make_groups = vars(significant = p.value <= 0.05),
+)
+diagnosis
+
+n <- 500
+design <-
+  declare_model(
+    N = 1000,
+    gender = rbinom(N, 1, 0.5),
+    X = rep(c(0, 1), each = N / 2),
+    U = rnorm(N, sd = 0.25),
+    potential_outcomes(Y ~ rnorm(1) * Z + X + U)
+  ) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_sampling(S = complete_rs(N = N, n = n)) +
+  declare_assignment(Z = complete_ra(N = N, m = n/2)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, inquiry = "ATE")
+
+diagnosis <- diagnose_design(design, 
+                             make_groups = 
+                               vars(effect_size = 
+                                      cut(estimand, quantile(estimand, (0:4)/4), 
+                                          include.lowest = TRUE)),
+)
+diagnosis
+
+# redesign can be used in conjunction with diagnose_designs
+# to optimize the design for specific diagnosands
+design_vary_N <- redesign(design, n = c(100, 500, 900))
+diagnose_designs(design_vary_N)
+
+# Calculate and plot the power of a design over a range of 
+# effect sizes
+design <-
+  declare_model(
+    N = 200,
+    U = rnorm(N),
+    potential_outcomes(Y ~ runif(1, 0.0, 0.5) * Z + U)
+  ) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_assignment(Z = complete_ra(N)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, inquiry = "ATE") 
+
+library(tidyverse)
+
+simulations_df <- 
+  diagnose_design(design) |> 
+  get_simulations() |> 
+  mutate(significant = if_else(p.value <= 0.05, 1, 0))
+
+ggplot(simulations_df) + 
+  stat_smooth(
+    aes(estimand, significant), 
+    method = 'loess', 
+    color = "#3564ED", 
+    fill = "#72B4F3", 
+    formula = 'y ~ x'
+  ) +
+  geom_hline(
+  yintercept = 0.8, color = "#C6227F", linetype = "dashed") +
+  annotate("text", x = 0, y = 0.85, 
+    label = "Conventional power threshold = 0.8", 
+    hjust = 0, color = "#C6227F") + 
+  scale_y_continuous(breaks = seq(0, 1, 0.2)) +
+  coord_cartesian(ylim = c(0, 1)) +
+  theme(legend.position = "none") +
+  labs(x = "Model parameter: true effect size",
+       y = "Diagnosand: statistical power") +
+  theme_minimal()
+}
+
 }

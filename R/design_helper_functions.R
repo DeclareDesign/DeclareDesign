@@ -3,27 +3,29 @@
 #' @param design A design object, typically created using the + operator
 #'
 #' @examples
-#'
+#' 
+#' # Two-arm randomized experiment
 #' design <-
 #'   declare_model(
-#'     N = 500, 
-#'     U = rnorm(N),
-#'     potential_outcomes(Y ~ U + Z * rnorm(N, 2, 2))
+#'     N = 500,
+#'     gender = rbinom(N, 1, 0.5),
+#'     X = rep(c(0, 1), each = N / 2),
+#'     U = rnorm(N, sd = 0.25),
+#'     potential_outcomes(Y ~ 0.2 * Z + X + U)
 #'   ) +
-#'   declare_sampling(S = complete_rs(N, n = 250)) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_assignment(Z = complete_ra(N, m = 25)) +
+#'   declare_sampling(S = complete_rs(N = N, n = 200)) +
+#'   declare_assignment(Z = complete_ra(N = N, m = 100)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-#'   declare_estimator(Y ~ Z, inquiry = "my_inquiry")
-#'
-#' design
-#'
-#' df <- draw_data(design)
-#'
-#' estimates <- draw_estimates(design)
-#' inquiries <- draw_estimands(design)
+#'   declare_estimator(Y ~ Z, inquiry = "ATE")
 #' 
-#' print_code(design)
+#' # Use draw_data to create a dataset using a design
+#' dat <- draw_data(design)
+#' 
+#' draw_data(design, data = dat, start = 2)
+#' 
+#' # Apply get_estimates
+#' get_estimates(design, data = dat)
 #'
 #' @name post_design
 NULL
@@ -74,18 +76,24 @@ check_sims <- function(design, sims) {
 #' @param design a DeclareDesign object
 #'
 #' @examples 
+#'
+#' # Two-arm randomized experiment
 #' design <-
 #'   declare_model(
-#'     N = 100, X = rnorm(N),
-#'     potential_outcomes(Y ~ (.25 + X) * Z + rnorm(N))
+#'     N = 500,
+#'     gender = rbinom(N, 1, 0.5),
+#'     X = rep(c(0, 1), each = N / 2),
+#'     U = rnorm(N, sd = 0.25),
+#'     potential_outcomes(Y ~ 0.2 * Z + X + U)
 #'   ) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_assignment(Z = complete_ra(N, m = 50)) +
-#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
+#'   declare_sampling(S = complete_rs(N = N, n = 200)) +
+#'   declare_assignment(Z = complete_ra(N = N, m = 100)) +
+#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
 #'   declare_estimator(Y ~ Z, inquiry = "ATE")
 #' 
+#' # Use run_design to run a design object
 #' run_design(design)
-#' 
 #'
 #' @export
 run_design <- function(design){
@@ -106,7 +114,7 @@ next_step <- function(step, current_df, i) {
   nxt
 }
 
-run_design_internal.default <- function(design) {
+run_design_internal.default <- function(design, ...) {
   stop("Please only send design objects to run_design.")
 }
 
@@ -230,13 +238,24 @@ dots_to_list_of_designs <- function(...) {
 #'
 #' @examples
 #'
-#' my_population <- declare_model(N = 100)
-#'
-#' my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
-#'
-#' my_design <- my_population + my_assignment
-#'
-#' print_code(my_design)
+#' # Two-arm randomized experiment
+#' design <-
+#'   declare_model(
+#'     N = 500,
+#'     gender = rbinom(N, 1, 0.5),
+#'     X = rep(c(0, 1), each = N / 2),
+#'     U = rnorm(N, sd = 0.25),
+#'     potential_outcomes(Y ~ 0.2 * Z + X + U)
+#'   ) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_sampling(S = complete_rs(N = N, n = 200)) +
+#'   declare_assignment(Z = complete_ra(N = N, m = 100)) +
+#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+#'   declare_estimator(Y ~ Z, inquiry = "ATE")
+#' 
+#' print_code(design)
+#' 
+#' summary(design)
 #'
 #' @rdname post_design
 #'

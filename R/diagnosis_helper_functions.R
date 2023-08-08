@@ -3,38 +3,49 @@
 #' @param diagnosis A design diagnosis created by \code{\link{diagnose_design}}.
 #'
 #' @examples
-#' design <- 
+#' 
+#' # Two-arm randomized experiment
+#' design <-
 #'   declare_model(
-#'     N = 500, 
-#'     U = rnorm(N),
-#'     Y_Z_0 = U, 
-#'     Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
-#'   ) + 
-#'   declare_assignment(Z = complete_ra(N)) + 
-#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+#'     N = 500,
+#'     gender = rbinom(N, 1, 0.5),
+#'     X = rep(c(0, 1), each = N / 2),
+#'     U = rnorm(N, sd = 0.25),
+#'     potential_outcomes(Y ~ 0.2 * Z + X + U)
+#'   ) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_sampling(S = complete_rs(N = N, n = 200)) +
+#'   declare_assignment(Z = complete_ra(N = N, m = 100)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-#'   declare_estimator(Y ~ Z, inquiry = "ATE") 
-#'
+#'   declare_estimator(Y ~ Z, inquiry = "ATE")
+#' 
 #' \dontrun{
-#' # using built-in defaults:
+#' # Diagnose design using default diagnosands
 #' diagnosis <- diagnose_design(design)
 #' diagnosis
-#' }
-#'
-#' # using a user-defined diagnosand
-#' my_diagnosand <- declare_diagnosands(
-#'   absolute_error = mean(abs(estimate - estimand)))
-#'
-#' \dontrun{
-#' diagnosis <- diagnose_design(design, diagnosands = my_diagnosand)
-#' diagnosis
-#'
+#' 
+#' # Use get_diagnosands to explore diagnosands:
 #' get_diagnosands(diagnosis)
-#'
+#' 
+#' # Use get_simulations to explore simulations
 #' get_simulations(diagnosis)
-#'
+#' 
+#' # Exploring user-defined diagnosis your own diagnosands
+#' my_diagnosands <-
+#'   declare_diagnosands(median_bias = median(estimate - estimand),
+#'                       absolute_error = mean(abs(estimate - estimand)))
+#' 
+#' diagnosis <- diagnose_design(design, diagnosands = my_diagnosands)
+#' diagnosis
+#' 
+#' tidy(diagnosis)
+#' 
 #' reshape_diagnosis(diagnosis)
-#'
+#' 
+#' get_diagnosands(diagnosis)
+#' 
+#' get_simulations(diagnosis)
+#' 
 #' }
 #'
 #' @name diagnosis_helpers
@@ -85,29 +96,55 @@ print_summary_diagnosis <- function(x, digits = 2, select = NULL, exclude = NULL
 #' @param select List of columns to include in output. Defaults to all.
 #' @param exclude Set of columns to exclude from output. Defaults to none.
 #' @return A formatted text table with bootstrapped standard errors in parentheses.
-#' @export
 #'
 #' @examples
 #' 
-#' effect_size <- 0.1
+#' # Two-arm randomized experiment
 #' design <-
 #'   declare_model(
-#'     N = 100,
-#'     U = rnorm(N),
-#'     X = rnorm(N),
-#'     potential_outcomes(Y ~ effect_size * Z + X + U)
+#'     N = 500,
+#'     gender = rbinom(N, 1, 0.5),
+#'     X = rep(c(0, 1), each = N / 2),
+#'     U = rnorm(N, sd = 0.25),
+#'     potential_outcomes(Y ~ 0.2 * Z + X + U)
 #'   ) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_assignment(Z = complete_ra(N)) +
+#'   declare_sampling(S = complete_rs(N = N, n = 200)) +
+#'   declare_assignment(Z = complete_ra(N = N, m = 100)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-#'   declare_estimator(Y ~ Z, inquiry = "ATE", label = "unadjusted") + 
-#'   declare_estimator(Y ~ Z + X, inquiry = "ATE", label = "adjusted")
+#'   declare_estimator(Y ~ Z, inquiry = "ATE")
 #' 
-#' diagnosis <- diagnose_design(design, sims = 100)
+#' \dontrun{
+#' # Diagnose design using default diagnosands
+#' diagnosis <- diagnose_design(design)
+#' diagnosis
+#' 
+#' # Return diagnosis output table
+#' reshape_diagnosis(diagnosis)
+#' 
+#' # Return table with subset of diagnosands
+#' reshape_diagnosis(diagnosis, select = c("Bias", "Power"))
+#' 
+#' # With user-defined diagnosands
+#' my_diagnosands <-
+#'   declare_diagnosands(median_bias = median(estimate - estimand),
+#'                       absolute_error = mean(abs(estimate - estimand)))
+#' 
+#' diagnosis <- diagnose_design(design, diagnosands = my_diagnosands)
+#' diagnosis
 #' 
 #' reshape_diagnosis(diagnosis)
 #' 
-#' reshape_diagnosis(diagnosis, select = c("Bias", "Power"))
+#' reshape_diagnosis(diagnosis, select = "Absolute Error")
+#' 
+#' # Alternative: Use tidy to produce data.frame with results of 
+#' # diagnosis including bootstrapped standard errors and 
+#' # confidence intervals for each diagnosand
+#' diagnosis_df <- tidy(diagnosis)
+#' diagnosis_df
+#'
+#' }
+#' @export
 reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL, exclude = NULL) {
   diagnosand_columns <- diagnosis$diagnosand_names
 

@@ -9,8 +9,6 @@
 #' @importFrom randomizr declare_rs
 #'
 #' @examples
-#'
-#'
 #'  
 #' # declare_sampling in use
 #' ## Two-arm randomized experiment
@@ -26,6 +24,8 @@
 #'   declare_assignment(Z = complete_ra(N = N, m = 100)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
 #'   declare_estimator(Y ~ Z, inquiry = "ATE")
+#'   
+#' run_design(design)
 #' 
 #' # Set up population to sample from
 #' model <- declare_model(
@@ -49,11 +49,15 @@
 #' ## Complete random sampling
 #' design <- model +
 #'   declare_sampling(S = complete_rs(N = N, n = 1000))
+#'   
+#' head(draw_data(design))
 #' 
 #' ## Cluster random sampling
 #' design <- model +
 #'   declare_sampling(S = cluster_rs(clusters = villages, 
 #'                                   n = 15))
+#' 
+#' head(draw_data(design))
 #' 
 #' ## Strata and cluster random sampling
 #' design <- model +
@@ -61,11 +65,14 @@
 #'     strata = villages,
 #'     clusters = households,
 #'     strata_n = rep(20, 30)))
+#'     
+#' head(draw_data(design))
 #' 
 #' ## Stratified random sampling
 #' design <- model +
 #'   declare_sampling(S = strata_rs(strata = gender, n = 100))
 #' 
+#' head(draw_data(design))
 #'
 declare_sampling <- make_declarations(sampling_handler, "sampling")
 

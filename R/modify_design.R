@@ -42,7 +42,11 @@ find_step <- function(design, step, verb) {
 #'
 #'  design <- my_model + my_assignment
 #'
-#'  design
+#'  draw_data(design)
+#'  
+#'  design_modified <- replace_step(design, 2, my_assignment_2)
+#'  
+#'  draw_data(design)
 NULL
 
 #' @param before The step before which to add steps.
@@ -54,23 +58,34 @@ NULL
 #' @examples
 #'  
 #'  \dontrun{
-#'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), 
-#'              after = my_assignment)
-#'  insert_step(design, declare_step(dplyr::mutate, income = noise^2), 
-#'              before = my_assignment)
 #'  
+#'  design <- 
+#'    declare_model(
+#'      N = 100,
+#'      U = rnorm(N),
+#'      potential_outcomes(Y ~ 0.20 * Z + U)
+#'    ) + 
+#'      declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+#'      declare_assignment(Z = complete_ra(N, m = N/2)) + 
+#'      declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
+#'      declare_estimator(Y ~ Z, inquiry = "ATE")
+#'  
+#'  insert_step(design, declare_sampling(S = complete_rs(N, n = 50)),
+#'              after = 1)
 #'
 #'  # If you are using a design created by a designer, for example from
 #'  #   the DesignLibrary package, you will not have access to the step
 #'  #   objects. Instead, you can always use the label of the step.
 #'  
+#'  design <- DesignLibrary::two_arm_designer()
+#'  
 #'  # get the labels for the steps
 #'  names(design)
 #'  
 #'  insert_step(design, 
-#'    declare_sampling(S = complete_rs(N, n = 50), 
-#'    legacy = FALSE),
-#'    after = "my_pop")
+#'    declare_sampling(S = complete_rs(N, n = 50)),
+#'    after = "potential_outcomes")
+#'    
 #'  }
 #'
 #' @export
@@ -107,8 +122,20 @@ insert_step_ <- function(design, new_step, before = NULL, after = NULL, new_step
 #' @export
 #' @rdname modify_design
 #' @examples
-#'
-#'  delete_step(design, my_assignment)
+#' 
+#' design <- 
+#'   declare_model(
+#'     N = 100,
+#'     U = rnorm(N),
+#'     potential_outcomes(Y ~ 0.20 * Z + U)
+#'   ) + 
+#'     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+#'     declare_assignment(Z = complete_ra(N, m = N/2)) + 
+#'     declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
+#'     declare_estimator(Y ~ Z, inquiry = "ATE")
+#
+#' delete_step(design, step = 5)
+#' 
 delete_step <- function(design, step) {
   check_design_class_single(design)
   
@@ -119,7 +146,22 @@ delete_step <- function(design, step) {
 #' @export
 #' @rdname modify_design
 #' @examples
-#'  replace_step(design, my_assignment, declare_step(dplyr::mutate, words = "income"))
+#' 
+#' design <- 
+#'   declare_model(
+#'     N = 100,
+#'     U = rnorm(N),
+#'     potential_outcomes(Y ~ 0.20 * Z + U)
+#'   ) + 
+#'     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+#'     declare_assignment(Z = complete_ra(N, m = N/2)) + 
+#'     declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
+#'     declare_estimator(Y ~ Z, inquiry = "ATE")
+#' 
+#' replace_step(
+#'   design, 
+#'   step = 3, 
+#'   new_step = declare_assignment(Z = simple_ra(N, prob = 0.5)))
 replace_step <- function(design, step, new_step) {
   check_design_class_single(design)
   

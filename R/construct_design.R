@@ -33,12 +33,9 @@
 #' # You may wish to have a design with only one step:
 #' 
 #' design <- declare_model(N = 500, noise = rnorm(N)) + NULL
-#'
-#' \dontrun{
-#' diagnosis <- diagnose_design(design)
-#'
-#' summary(diagnosis)
-#' }
+#' 
+#' dat <- draw_data(design)
+#' head(dat)
 #'
 #' @importFrom rlang enexpr expr_deparse is_null is_missing enquos f_rhs
 #'

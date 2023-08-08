@@ -34,17 +34,21 @@ Set the citation of a design
 }
 \examples{
 
+# Setup for example
 design <-
-declare_model(data = sleep) +
+  declare_model(data = sleep) +
   declare_sampling(S = complete_rs(N, n = 10))
 
+# Set citation using set_citation
 design <-
   set_citation(design,
                author = "Lovelace, Ada",
                title = "Notes",
                year = 1953,
-               description = "This is a text description of a design")
+               description = 
+                 "This is a text description of a design")
 
+# View citation information using cite_design
 cite_design(design)
 
 }

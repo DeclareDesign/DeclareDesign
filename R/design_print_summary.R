@@ -20,30 +20,18 @@ print.design <- function(x, verbose = FALSE, ...) {
 #'
 #' @examples
 #'
-#' my_model <- 
+#' design <- 
 #'   declare_model(
 #'     N = 500, 
 #'     noise = rnorm(N),
 #'     Y_Z_0 = noise, 
 #'     Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2)
-#'   )
-#'
-#' my_sampling <- declare_sampling(S = complete_rs(N, n = 250))
-#'
-#' my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
-#'
-#' my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-#'
-#' my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
-#'
-#' my_reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
-#'
-#' design <- my_model +
-#'   my_sampling +
-#'   my_inquiry +
-#'   my_assignment +
-#'   my_reveal +
-#'   my_estimator
+#'   ) + 
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+#'   declare_sampling(S = complete_rs(N, n = 250)) + 
+#'   declare_assignment(Z = complete_ra(N, m = 25)) +
+#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
+#'   declare_estimator(Y ~ Z, inquiry = "ATE") 
 #'
 #' summary(design)
 #' @rdname post_design

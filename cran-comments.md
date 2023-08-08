@@ -1,6 +1,6 @@
 ## Submission
 
-Fixing a bug from December 9 email from CRAN. Thank you for reviewing!
+Fixing documentation issues and r-devel notes. Thank you for your review! (We have reviewed an issue when we submitted earlier this month.)
 
 ## Test environments
 * local OS X install (release)

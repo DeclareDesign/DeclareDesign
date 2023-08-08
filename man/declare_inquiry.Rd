@@ -58,6 +58,8 @@ design <-
   ) +
   declare_assignment(Z = complete_ra(N = N, m = 250)) +
   declare_measurement(Y = reveal_outcomes(Y ~ Z))
+  
+head(draw_data(design))
 
 # Some common inquiries
 design +
@@ -77,6 +79,7 @@ design +
 design +
   declare_inquiry(CATE = mean(Y_Z_1 - Y_Z_0),
                   subset = X == 1)
+                  
 # equivalently
 design +
   declare_inquiry(CATE = mean(Y_Z_1[X == 1] - Y_Z_0[X == 1]))
@@ -137,6 +140,8 @@ design_4 <- design +
     CATE_X1 = mean(Y_Z_1[X == 1] - Y_Z_0[X == 1]),
     Difference_in_CATEs = CATE_X1 - CATE_X0,
     mean_Y = mean(Y))
+    
+run_design(design_4)
 
 
 }

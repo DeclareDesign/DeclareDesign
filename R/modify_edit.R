@@ -6,9 +6,9 @@
 #' \dontrun{
 #' here_i_am <- "foo"
 #' dot <- quo(here_i_am)
-#' dot2 <- clone_dot_edit_env(dot, here_i_am = "some_message", xyxyx = "bar")
-#' eval_tidy(dot)
-#' eval_tidy(dot2)
+#' dot2 <- DeclareDesign:::clone_dot_edit_env(dot, here_i_am = "some_message", xyxyx = "bar")
+#' rlang::eval_tidy(dot)
+#' rlang::eval_tidy(dot2)
 #' }
 clone_dot_edit_env <- function(dot, ..., to_replace = list(...)) {
   if (is.null(environment(dot))) {
@@ -45,18 +45,6 @@ clone_step_edit <- function(step, ..., to_replace = list(...)) {
 
 #' @rdname edit
 #' @keywords internal
-#' @examples
-#' N <- 50
-#'
-#' \dontrun{
-#'
-#' my_design <- declare_model(N=N, noise=rnorm(N)) + NULL
-#' my_design2 <- DeclareDesign:::clone_design_edit(my_design, N=100)
-#'
-#' nrow(draw_data(my_design))
-#' nrow(draw_data(my_design2))
-#'
-#' }
 clone_design_edit <- function(design, ..., to_replace = list(...)) {
   design[] <- lapply(design, clone_step_edit, to_replace = to_replace)
 

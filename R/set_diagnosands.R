@@ -8,30 +8,88 @@
 #' @return a design object with a diagnosand attribute
 #'
 #' @examples
-#'
-#' design <-
-#' declare_model(data = sleep) +
-#'   declare_inquiry(mean_outcome = mean(extra)) +
-#'   declare_sampling(S = complete_rs(N, n = 10)) +
-#'   declare_estimator(extra ~ 1, inquiry = "mean_outcome",
-#'      term = '(Intercept)', .method = lm_robust)
-#'
-#' diagnosands <- declare_diagnosands(
-#'   median_bias = median(estimate - estimand))
-#'
-#' design <- set_diagnosands(design, diagnosands)
-#'
-#' \dontrun{
-#' diagnose_design(design)
 #' 
+#' # Two-arm randomized experiment
+#' design <-
+#'   declare_model(
+#'     N = 500,
+#'     gender = rbinom(N, 1, 0.5),
+#'     X = rep(c(0, 1), each = N / 2),
+#'     U = rnorm(N, sd = 0.25),
+#'     potential_outcomes(Y ~ 0.2 * Z + X + U)
+#'   ) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_sampling(S = complete_rs(N = N, n = 200)) +
+#'   declare_assignment(Z = complete_ra(N = N, m = 100)) +
+#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+#'   declare_estimator(Y ~ Z, inquiry = "ATE")
+#' 
+#' # You can choose your own diagnosands instead of the defaults:
+#' 
+#' my_diagnosands <-
+#'   declare_diagnosands(median_bias = median(estimate - estimand))
+#' 
+#' \dontrun{
+#' ## You can set diagnosands with set_diagnosands 
+#' design <- set_diagnosands(design, diagnosands = my_diagnosands)
+#' diagnosis <- diagnose_design(design)
+#' diagnosis
+#' 
+#' ## Using set_diagnosands to diagnose simulated data
 #' simulations_df <- simulate_design(design)
 #' 
-#' simulations_df <- set_diagnosands(simulations_df, design)
+#' simulations_df <- set_diagnosands(simulations_df, my_diagnosands)
 #' 
 #' diagnose_design(simulations_df)
 #' 
-#' }
+#' # If you do not specify diagnosands in diagnose_design, 
+#' #   the function default_diagnosands() is used, 
+#' #   which is reproduced below.
+#' 
+#' alpha <- 0.05
+#' 
+#' default_diagnosands <- 
+#'   declare_diagnosands(
+#'     mean_estimand = mean(estimand),
+#'     mean_estimate = mean(estimate),
+#'     bias = mean(estimate - estimand),
+#'     sd_estimate = sqrt(pop.var(estimate)),
+#'     rmse = sqrt(mean((estimate - estimand) ^ 2)),
+#'     power = mean(p.value <= alpha),
+#'     coverage = mean(estimand <= conf.high & estimand >= conf.low)
+#'   )
+#'   
+#' diagnose_design(
+#'   simulations_df,
+#'   diagnosands = default_diagnosands
+#' )
+#' 
+#' # A longer list of potentially useful diagnosands might include:
+#' 
+#' extended_diagnosands <- 
+#'   declare_diagnosands(
+#'     mean_estimand = mean(estimand),
+#'     mean_estimate = mean(estimate),
+#'     bias = mean(estimate - estimand),
+#'     sd_estimate = sd(estimate),
+#'     rmse = sqrt(mean((estimate - estimand) ^ 2)),
+#'     power = mean(p.value <= alpha),
+#'     coverage = mean(estimand <= conf.high & estimand >= conf.low),
+#'     mean_se = mean(std.error),
+#'     type_s_rate = mean((sign(estimate) != sign(estimand))[p.value <= alpha]),
+#'     exaggeration_ratio = mean((estimate/estimand)[p.value <= alpha]),
+#'     var_estimate = pop.var(estimate),
+#'     mean_var_hat = mean(std.error^2),
+#'     prop_pos_sig = mean(estimate > 0 & p.value <= alpha),
+#'     mean_ci_length = mean(conf.high - conf.low)
+#'   )
+#'   
+#' diagnose_design(
+#'   simulations_df,
+#'   diagnosands = extended_diagnosands
+#' )
 #'
+#' }
 #' @export
 set_diagnosands <- function(x, diagnosands = default_diagnosands) {
   

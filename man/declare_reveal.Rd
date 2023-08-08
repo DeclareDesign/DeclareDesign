@@ -57,6 +57,8 @@ design <-
   ) + 
   declare_assignment(Z = complete_ra(N, m = 50)) + 
   declare_measurement(Y = reveal_outcomes(Y ~ Z))
+  
+head(draw_data(design))
 
 # Declaring multiple assignment variables or multiple outcome variables
 
@@ -72,6 +74,8 @@ design   <-
   declare_measurement(Y1 = reveal_outcomes(Y1 ~ Z), 
                       Y2 = reveal_outcomes(Y2 ~ Z),
                       Y3 = reveal_outcomes(Y3 ~ X + Z))
+                      
+head(draw_data(design))
 
 design <- 
   declare_model(
@@ -84,5 +88,7 @@ design <-
   declare_measurement(R = reveal_outcomes(R ~ Z),
                       Y = reveal_outcomes(Y ~ Z),
                       Y = ifelse(R == 1, Y, NA))
+                      
+head(draw_data(design))
 }
 \keyword{internal}
