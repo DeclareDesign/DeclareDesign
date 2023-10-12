@@ -9,6 +9,7 @@
 #' @param add_grouping_variables Deprecated. Please use make_groups instead. Variables used to generate groups of simulations for diagnosis. Added to default list: c("design", "estimand_label", "estimator", "outcome", "term")
 #' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}
 #' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.
+#' @param duration Logical, if \code{TRUE}, save running time of all simulations and bootstraps.
 #' @return a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
 #'
 #'
@@ -220,7 +221,8 @@ diagnose_design <- function(...,
                             sims = 500,
                             bootstrap_sims = 100,
                             make_groups = NULL,
-                            add_grouping_variables = NULL) {
+                            add_grouping_variables = NULL,
+                            duration = TRUE) {
   
   start_time <- Sys.time()
   
@@ -315,8 +317,12 @@ diagnose_design <- function(...,
     out$bootstrap_replicates <- merge_param_df(bootout$diagnosand_replicates, parameters_df)
   }
   out$bootstrap_sims <- bootstrap_sims
-  
-  out$duration <- Sys.time() - start_time
+
+  if (duration == TRUE) {
+    out$duration <- Sys.time() - start_time
+  } else {
+    out$duration <- as.difftime(NA_character_)
+  }
 
   structure(out, class = "diagnosis")
 }
