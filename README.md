@@ -11,6 +11,7 @@ downloads](https://cranlogs.r-pkg.org/badges/grand-total/DeclareDesign?color=gre
 status](https://github.com/DeclareDesign/DeclareDesign/workflows/R-CMD-check/badge.svg)](https://github.com/DeclareDesign/DeclareDesign/actions)
 [![Code
 coverage](https://codecov.io/gh/DeclareDesign/DeclareDesign/branch/master/graph/badge.svg?token=3WzOK9Glc2)](https://codecov.io/gh/DeclareDesign/DeclareDesign)
+[![Replications](https://softwarecite.com/badge/DeclareDesign)](https://softwarecite.com/package/DeclareDesign)
 
 DeclareDesign is a system for describing research designs in code and
 simulating them in order to understand their properties. Because
@@ -64,7 +65,7 @@ diagnosis
 
 | Inquiry | Estimator | Outcome |   Bias | SE(Bias) | Power | SE(Power) | n sims |
 |:--------|:----------|:--------|-------:|---------:|------:|----------:|-------:|
-| ATE     | estimator | Y       | -0.004 |    0.004 | 0.076 |     0.011 |    500 |
+| ATE     | estimator | Y       | -0.004 |    0.004 | 0.076 |      0.01 |    500 |
 
 ## Companion software
 

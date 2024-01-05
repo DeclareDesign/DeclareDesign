@@ -18,6 +18,7 @@ knitr::opts_chunk$set(warning = FALSE, error = FALSE, message = FALSE)
 [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/grand-total/DeclareDesign?color=green)](https://r-pkg.org/pkg/DeclareDesign)
 [![Build status](https://github.com/DeclareDesign/DeclareDesign/workflows/R-CMD-check/badge.svg)](https://github.com/DeclareDesign/DeclareDesign/actions)
 [![Code coverage](https://codecov.io/gh/DeclareDesign/DeclareDesign/branch/master/graph/badge.svg?token=3WzOK9Glc2)](https://codecov.io/gh/DeclareDesign/DeclareDesign)
+[![Replications](https://softwarecite.com/badge/DeclareDesign)](https://softwarecite.com/package/DeclareDesign)
 
 DeclareDesign is a system for describing research designs in code and simulating them in order to understand their properties. Because DeclareDesign employs a consistent grammar of designs, you can focus on the intellectually challenging part -- designing good research studies -- without having to code up simulations from scratch. For more, see [declaredesign.org](https://declaredesign.org).
 
