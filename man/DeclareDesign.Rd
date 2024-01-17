@@ -3,6 +3,7 @@
 \docType{package}
 \name{DeclareDesign}
 \alias{DeclareDesign}
+\alias{DeclareDesign-package}
 \title{DeclareDesign package}
 \description{
 The four main types of functions are to declare a step, to combine steps into designs,
@@ -49,3 +50,24 @@ and to manipulate designs and designers (functions that return designs).
 }
 }
 
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://declaredesign.org/r/declaredesign/}
+  \item \url{https://github.com/DeclareDesign/DeclareDesign}
+  \item Report bugs at \url{https://github.com/DeclareDesign/DeclareDesign/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Graeme Blair \email{graeme.blair@gmail.com} (\href{https://orcid.org/0000-0001-9164-2102}{ORCID})
+
+Authors:
+\itemize{
+  \item Jasper Cooper \email{jaspercooper@gmail.com} (\href{https://orcid.org/0000-0002-8639-3188}{ORCID})
+  \item Alexander Coppock \email{acoppock@gmail.com} (\href{https://orcid.org/0000-0002-5733-2386}{ORCID})
+  \item Macartan Humphreys \email{macartan@gmail.com} (\href{https://orcid.org/0000-0001-7029-2326}{ORCID})
+  \item Neal Fultz \email{nfultz@gmail.com}
+}
+
+}

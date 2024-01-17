@@ -1,3 +1,7 @@
+# DeclareDesign 1.0.6
+
+* Documentation update to stay current on CRAN.
+
 # DeclareDesign 1.0.4
 
 * Documentation improvements.
