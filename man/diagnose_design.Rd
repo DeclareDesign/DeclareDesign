@@ -43,7 +43,7 @@ vars(...)
 a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
 }
 \description{
-Generates diagnosands from a design or simulations of a design.
+Generates diagnosands from a design or simulations of a design. Speed gains can be achieved by running diagnose_design in parallel, see Examples.
 }
 \details{
 If the diagnosand function contains a \code{group_by} attribute, it will be used to split-apply-combine diagnosands rather than the intersecting column names.
@@ -88,6 +88,16 @@ diagnosis <- diagnose_design(design,
                              sims = 500,
                              bootstrap_sims = 150)
 tidy(diagnosis)
+
+# You may also run diagnose_design in parallel using 
+#   the future package on a personal computer with multiple
+#   cores or on high performance computing clusters. 
+
+library(future)
+options(parallelly.fork.enable = TRUE) # required for use in RStudio
+plan(multicore) # note other plans are possible, see future
+
+diagnose_design(design, sims = 500)
 
 # Select specific diagnosands
 reshape_diagnosis(diagnosis, select = "Power")

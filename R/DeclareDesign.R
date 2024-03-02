@@ -43,6 +43,6 @@
 #' @importFrom stats glm lm var vcov sd aggregate anova aov as.formula confint coef df.residual pt qt rbinom rnorm rmultinom update.formula
 #' @importFrom utils data capture.output
 #' @name DeclareDesign
-NULL
+"_PACKAGE"
 
 utils::globalVariables(c("Y", "Z", "S", "N", "conf.low", "conf.high", "estimate", "inquiry", "p.value", "std.error", "term"))

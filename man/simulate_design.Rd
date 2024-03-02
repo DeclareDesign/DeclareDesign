@@ -15,7 +15,7 @@ simulate_designs(..., sims = 500)
 \item{sims}{The number of simulations, defaulting to 500. If sims is a vector of the form c(10, 1, 2, 1) then different steps of a design will be simulated different numbers of times.}
 }
 \description{
-Runs many simulations of a design and returns a simulations data.frame.
+Runs many simulations of a design and returns a simulations data.frame. Speed gains can be achieved by running simulate_design in parallel, see Examples.
 }
 \details{
 Different steps of a design may each be simulated different a number of times, as specified by sims. In this case simulations are grouped into "fans". The nested 
@@ -51,6 +51,17 @@ diagnosis
 # Simulate one part of the design for a fixed population
 # (The 100 simulates different assignments)
 head(simulate_design(design, sims = c(1, 1, 1, 100, 1, 1)))
+
+# You may also run simulate_design in parallel using 
+#   the future package on a personal computer with multiple
+#   cores or on high performance computing clusters. 
+
+library(future)
+options(parallelly.fork.enable = TRUE) # required for use in RStudio
+plan(multicore) # note other plans are possible, see future
+
+simulate_design(design, sims = 500)
+
 }
 
 }
