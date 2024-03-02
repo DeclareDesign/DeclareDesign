@@ -219,6 +219,7 @@ diagnose_design <- function(...,
                             diagnosands = NULL,
                             sims = 500,
                             bootstrap_sims = 100,
+                            future.seed = TRUE,
                             make_groups = NULL,
                             add_grouping_variables = NULL) {
   
@@ -244,7 +245,7 @@ diagnose_design <- function(...,
     diagnosands <- diagnosands %||% attr(simulations_df, "diagnosands") %||% default_diagnosands
   } else {
     # simulate if needed ------------------------------------------------------
-    simulations_df <- simulate_design(!!!dots, sims = sims)
+    simulations_df <- simulate_design(!!!dots, sims = sims, future.seed = future.seed)
     diagnosands <- setup_diagnosands(!!!dots, diagnosands = diagnosands)
   }
 
@@ -287,6 +288,7 @@ diagnose_design <- function(...,
   if (bootstrap_sims > 0) {
     bootout <- bootstrap_diagnosands(
       bootstrap_sims = bootstrap_sims,
+      future.seed = future.seed,
       diagnosands = diagnosands,
       simulations_df = simulations_df,
       diagnosands_df = diagnosands_df,
@@ -435,7 +437,7 @@ calculate_sims <- function(simulations_df, group_by_set) {
 }
 
 
-bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, diagnosands_df, group_by_set) {
+bootstrap_diagnosands <- function(bootstrap_sims, future.seed = TRUE, simulations_df, diagnosands, diagnosands_df, group_by_set) {
   bootstrap_level <- if ("step_1_draw" %in% names(simulations_df)) "step_1_draw" else "sim_ID"
 
   boot_indicies_by_id <- split(seq_len(nrow(simulations_df)), simulations_df[, bootstrap_level])
@@ -454,7 +456,7 @@ bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, d
   # Make a list of diagnosand replicates
   diagnosand_replicates <- future_lapply(seq_len(bootstrap_sims),
     function(i) cbind(bootstrap_id = i, boot_function()), # Add bootstrap ID
-    future.seed = NA,
+    future.seed = future.seed,
     future.globals = "boot_function"
   )
 
