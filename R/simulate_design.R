@@ -5,6 +5,7 @@
 #' @param ... A design created using the + operator, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.
 #'
 #' @param sims The number of simulations, defaulting to 500. If sims is a vector of the form c(10, 1, 2, 1) then different steps of a design will be simulated different numbers of times.
+#' @param future.seed Option for parallel diagnosis via the function future_lapply. A logical or an integer (of length one or seven), or a list of length(X) with pre-generated random seeds. For details, see ?future_lapply.
 #'
 #' @importFrom stats setNames
 #' @importFrom rlang is_list is_bare_integerish
