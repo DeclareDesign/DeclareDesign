@@ -1,6 +1,6 @@
 Package: DeclareDesign
 Title: Declare and Diagnose Research Designs
-Version: 1.0.6
+Version: 1.0.8
 Authors@R: c(person("Graeme", "Blair", email = "graeme.blair@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9164-2102")),
              person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = c("aut"), comment = c(ORCID = "0000-0002-8639-3188")),
              person("Alexander", "Coppock", email = "acoppock@gmail.com", role = c("aut"), comment = c(ORCID = "0000-0002-5733-2386")),
@@ -24,7 +24,7 @@ License: MIT + file LICENSE
 URL: https://declaredesign.org/r/declaredesign/, https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues
 Encoding: UTF-8
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Suggests:
     testthat,
     knitr,

@@ -5,6 +5,7 @@
 #' @param ... A design created using the + operator, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.
 #'
 #' @param sims The number of simulations, defaulting to 500. If sims is a vector of the form c(10, 1, 2, 1) then different steps of a design will be simulated different numbers of times.
+#' @param future.seed Option for parallel diagnosis via the function future_lapply. A logical or an integer (of length one or seven), or a list of length(X) with pre-generated random seeds. For details, see ?future_lapply.
 #'
 #' @importFrom stats setNames
 #' @importFrom rlang is_list is_bare_integerish
@@ -58,7 +59,7 @@
 #' structure of simulations is recorded in the dataset using a set of variables named "step_x_draw." For example if sims = c(2,1,1,3) is passed to simulate_design, then there
 #' will be two distinct draws of step 1, indicated in variable "step_1_draw" (with values 1 and 2) and there will be three draws for step 4 within each of the step 1 draws, recorded in "step_4_draw" (with values 1 to 6).
 #'    
-simulate_design <- function(..., sims = 500) {
+simulate_design <- function(..., sims = 500, future.seed = TRUE) {
   designs <- dots_to_list_of_designs(...)
   
   # if you provide a list of sims for each design, i.e.
@@ -72,6 +73,7 @@ simulate_design <- function(..., sims = 500) {
   simulations_list <- mapply(
     design = designs,
     sims = sims,
+    future.seed = future.seed,
     FUN = simulate_single_design,
     SIMPLIFY = FALSE
   )
@@ -111,7 +113,7 @@ simulate_designs <- simulate_design
 
 
 #' @importFrom rlang as_list
-simulate_single_design <- function(design, sims, low_simulations_warning = TRUE) {
+simulate_single_design <- function(design, sims, future.seed = TRUE, low_simulations_warning = TRUE) {
   if (!is_bare_integerish(sims) || (length(design) != length(sims) & length(sims) != 1)) {
     stop("Please provide sims a scalar or a numeric vector of length the number of steps in designs.", call. = FALSE)
   }
@@ -137,7 +139,7 @@ simulate_single_design <- function(design, sims, low_simulations_warning = TRUE)
     results_list <- future_lapply(seq_len(sims),
                                   function(i)
                                     run_design_internal(design),
-                                  future.seed = NA, future.globals = "design"
+                                  future.seed = future.seed, future.globals = "design"
     )
   } else {
     sims <- check_sims(design, sims)

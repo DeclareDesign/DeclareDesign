@@ -5,14 +5,16 @@
 \alias{simulate_designs}
 \title{Simulate a design}
 \usage{
-simulate_design(..., sims = 500)
+simulate_design(..., sims = 500, future.seed = TRUE)
 
-simulate_designs(..., sims = 500)
+simulate_designs(..., sims = 500, future.seed = TRUE)
 }
 \arguments{
 \item{...}{A design created using the + operator, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.}
 
 \item{sims}{The number of simulations, defaulting to 500. If sims is a vector of the form c(10, 1, 2, 1) then different steps of a design will be simulated different numbers of times.}
+
+\item{future.seed}{Option for parallel diagnosis via the function future_lapply. A logical or an integer (of length one or seven), or a list of length(X) with pre-generated random seeds. For details, see ?future_lapply.}
 }
 \description{
 Runs many simulations of a design and returns a simulations data.frame. Speed gains can be achieved by running simulate_design in parallel, see Examples.

@@ -2,8 +2,8 @@
 % Please edit documentation in R/DeclareDesign.R
 \docType{package}
 \name{DeclareDesign}
-\alias{DeclareDesign}
 \alias{DeclareDesign-package}
+\alias{DeclareDesign}
 \title{DeclareDesign package}
 \description{
 The four main types of functions are to declare a step, to combine steps into designs,

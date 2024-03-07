@@ -96,12 +96,12 @@ my_design_4 <- my_population +
   sate_estimator
 
 test_that("compare works", {
-  a <- compare_design_code(my_design_3, my_design_4)
-  b <- compare_design_summaries(my_design_3, my_design_4)
-  c <- compare_design_data(my_design_3, my_design_4)
-  d <- compare_design_inquiries(my_design_3, my_design_4)
-  e <- compare_design_estimates(my_design_3, my_design_4)
-  f <- compare_designs(my_design_3, my_design_4)
+  expect_no_error(compare_design_code(my_design_3, my_design_4))
+  expect_no_error(compare_design_summaries(my_design_3, my_design_4))
+  expect_no_error(compare_design_data(my_design_3, my_design_4))
+  expect_no_error(compare_design_inquiries(my_design_3, my_design_4))
+  expect_no_error(compare_design_estimates(my_design_3, my_design_4))
+  expect_no_error(compare_designs(my_design_3, my_design_4))
 })
 
 
