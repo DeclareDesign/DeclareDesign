@@ -123,11 +123,11 @@
 #' # If we use logit, we'll need to estimate the average marginal effect with
 #' # margins::margins. We wrap this up in function we'll pass to model_summary
 #' 
-#' library(margins) # for margins
+#' library(marginaleffects) # for predictions
 #' library(broom) # for tidy
 #' 
-#' tidy_margins <- function(x) {
-#'   tidy(margins(x, data = x$data), conf.int = TRUE)
+#' tidy_avg_slopes <- function(x) {
+#'   tidy(avg_slopes(x))
 #' }
 #' 
 #' design_6 <-
@@ -136,7 +136,7 @@
 #'     Y ~ Z + gender,
 #'     .method = glm,
 #'     family = binomial("logit"),
-#'     .summary = tidy_margins,
+#'     .summary = tidy_avg_slopes,
 #'     term = "Z"
 #'   )
 #' 
