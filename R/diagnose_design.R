@@ -8,6 +8,7 @@
 #' @param make_groups Add group variables within which diagnosand values will be calculated. New variables can be created or variables already in the simulations data frame selected. Type name-value pairs within the function \code{vars}, i.e. \code{vars(significant = p.value <= 0.05)}.
 #' @param add_grouping_variables Deprecated. Please use make_groups instead. Variables used to generate groups of simulations for diagnosis. Added to default list: c("design", "estimand_label", "estimator", "outcome", "term")
 #' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}
+#' @param future.seed Option for parallel diagnosis via the function future_lapply. A logical or an integer (of length one or seven), or a list of length(X) with pre-generated random seeds. For details, see ?future_lapply.
 #' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.
 #' @return a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
 #'
@@ -219,6 +220,7 @@ diagnose_design <- function(...,
                             diagnosands = NULL,
                             sims = 500,
                             bootstrap_sims = 100,
+                            future.seed = TRUE,
                             make_groups = NULL,
                             add_grouping_variables = NULL) {
   
@@ -244,7 +246,7 @@ diagnose_design <- function(...,
     diagnosands <- diagnosands %||% attr(simulations_df, "diagnosands") %||% default_diagnosands
   } else {
     # simulate if needed ------------------------------------------------------
-    simulations_df <- simulate_design(!!!dots, sims = sims)
+    simulations_df <- simulate_design(!!!dots, sims = sims, future.seed = future.seed)
     diagnosands <- setup_diagnosands(!!!dots, diagnosands = diagnosands)
   }
 
@@ -287,6 +289,7 @@ diagnose_design <- function(...,
   if (bootstrap_sims > 0) {
     bootout <- bootstrap_diagnosands(
       bootstrap_sims = bootstrap_sims,
+      future.seed = future.seed,
       diagnosands = diagnosands,
       simulations_df = simulations_df,
       diagnosands_df = diagnosands_df,
@@ -435,7 +438,7 @@ calculate_sims <- function(simulations_df, group_by_set) {
 }
 
 
-bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, diagnosands_df, group_by_set) {
+bootstrap_diagnosands <- function(bootstrap_sims, future.seed = TRUE, simulations_df, diagnosands, diagnosands_df, group_by_set) {
   bootstrap_level <- if ("step_1_draw" %in% names(simulations_df)) "step_1_draw" else "sim_ID"
 
   boot_indicies_by_id <- split(seq_len(nrow(simulations_df)), simulations_df[, bootstrap_level])
@@ -454,7 +457,7 @@ bootstrap_diagnosands <- function(bootstrap_sims, simulations_df, diagnosands, d
   # Make a list of diagnosand replicates
   diagnosand_replicates <- future_lapply(seq_len(bootstrap_sims),
     function(i) cbind(bootstrap_id = i, boot_function()), # Add bootstrap ID
-    future.seed = NA,
+    future.seed = future.seed,
     future.globals = "boot_function"
   )
 
