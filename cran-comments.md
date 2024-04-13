@@ -1,6 +1,8 @@
 ## Submission
 
-Small bug fix of parallel processing.
+Responding to Ripley email re the margins package being removed from CRAN. 
+This suggests dependency was entirely removed. Thanks!
+
 
 ## Test environments
 * local OS X install (release)
