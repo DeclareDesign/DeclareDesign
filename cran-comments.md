@@ -3,6 +3,7 @@
 Responding to Ripley email re the margins package being removed from CRAN. 
 This suggests dependency was entirely removed. Thanks!
 
+Also addresses failed precheck due to long duration example.
 
 ## Test environments
 * local OS X install (release)
