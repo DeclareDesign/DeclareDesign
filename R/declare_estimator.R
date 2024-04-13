@@ -122,7 +122,7 @@
 #' 
 #' # If we use logit, we'll need to estimate the average marginal effect with
 #' # marginaleffects::avg_slopes. We wrap this up in a function we'll pass to 
-#' .summary.
+#' # .summary.
 #' 
 #' library(marginaleffects) # for predictions
 #' library(broom) # for tidy
@@ -155,7 +155,7 @@
 #'     Y ~ Z + gender,
 #'     .method = glm,
 #'     family = binomial("logit"),
-#'     .summary = tidy_margins,
+#'     .summary = tidy_avg_slopes,
 #'     inquiry = "ATE",
 #'     term = "Z",
 #'     label = "logit"

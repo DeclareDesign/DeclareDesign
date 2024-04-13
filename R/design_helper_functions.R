@@ -114,10 +114,12 @@ next_step <- function(step, current_df, i) {
   nxt
 }
 
+#' @noRd
 run_design_internal.default <- function(design, ...) {
   stop("Please only send design objects to run_design.")
 }
 
+#' @noRd
 run_design_internal.design <- function(design, current_df = NULL, results = NULL, start = 1, end = length(design), ...) {
   if (!is.list(results)) {
     results <- list(
@@ -168,6 +170,7 @@ run_design_internal.design <- function(design, current_df = NULL, results = NULL
   }
 }
 
+#' @noRd
 run_design_internal.execution_st <- function(design, ...) do.call(run_design_internal.design, design)
 
 # Build an execution strategy object
