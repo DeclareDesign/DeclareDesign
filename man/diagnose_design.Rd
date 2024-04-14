@@ -89,8 +89,8 @@ diagnosis_df
 # to calculate diagnosands, and bootstrap_sims to change how
 # many bootstraps are uses to calculate standard errors.
 diagnosis <- diagnose_design(design,
-                             sims = 500,
-                             bootstrap_sims = 150)
+                             sims = 100,
+                             bootstrap_sims = 100)
 tidy(diagnosis)
 
 # You may also run diagnose_design in parallel using 
@@ -101,7 +101,7 @@ library(future)
 options(parallelly.fork.enable = TRUE) # required for use in RStudio
 plan(multicore) # note other plans are possible, see future
 
-diagnose_design(design, sims = 500)
+diagnose_design(design)
 
 # Select specific diagnosands
 reshape_diagnosis(diagnosis, select = "Power")
@@ -119,7 +119,7 @@ get_diagnosands(diagnosis)
 get_simulations(diagnosis)
 
 # Diagnose using an existing data frame of simulations
-simulations <- simulate_design(design, sims = 500)
+simulations <- simulate_design(design, sims = 100)
 diagnosis   <- diagnose_design(simulations_df = simulations)
 diagnosis
 
