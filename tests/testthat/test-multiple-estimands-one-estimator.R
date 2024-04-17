@@ -52,6 +52,7 @@ test_that("Multiple inquiries can be mapped to one estimator", {
 
 
 test_that("More multiple inquiries", {
+  set.seed(5)
   my_smp_fun <- function(data) {
     S <- rbinom(n = nrow(data), size = 1, prob = pnorm(data$noise))
     return(data[S == 1, , drop = FALSE])

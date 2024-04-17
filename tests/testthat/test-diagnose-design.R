@@ -8,6 +8,8 @@ test_that("error when you send other objects to diagnose", {
 
 
 test_that("default diagnosands work", {
+  skip_if_not_installed("broom")
+  
   my_designer <- function(N = 10) {
     my_population <- declare_population(N = N, noise = rnorm(N))
 
@@ -290,6 +292,8 @@ test_that("diagnose_design stops when a zero-row simulations_df is sent", {
 
 test_that("diagnose_design can generate and use grouping variables", {
   
+  skip_if_not_installed("broom")
+  
   set.seed(5)
   
   design <- 
@@ -376,6 +380,8 @@ test_that("diagnose_design can generate and use grouping variables", {
 
 test_that("tidy.diagnosis handles NAs", {
   
+  skip_if_not_installed("dplyr")
+  
   design <- 
     declare_model(N = 10, Y = rnorm(N)) +
     declare_estimator(Y ~ 1, label = "normal") +
@@ -413,7 +419,7 @@ test_that("tidy.diagnosis handles NAs", {
     )
   
   # checks a bug involved in sorting that led to NAs in mean estimate (possibly related to the case where you have parameters?)
-  expect_equal(sum(is.na(tidy(diagnosis) %>% dplyr::filter(diagnosand == "mean_estimate", estimator == "estimator") %>% dplyr::pull(estimate))), 0)
+  expect_equal(sum(is.na(tidy(diagnosis) |> dplyr::filter(diagnosand == "mean_estimate", estimator == "estimator") |> dplyr::pull(estimate))), 0)
   
 })
 

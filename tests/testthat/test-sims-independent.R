@@ -9,7 +9,7 @@ test_that("diagnose_design when setting seed they are identical, when not settin
   
   expect_equal(sims_a$estimand, sims_b$estimand) # exactly 1
   
-  set.seed(5)
+  set.seed(20)
   
   sims_a <- design |> diagnose_design(sims = 10) |> get_simulations()
   sims_b <- design |> diagnose_design(sims = 10) |> get_simulations()

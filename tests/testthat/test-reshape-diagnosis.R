@@ -21,7 +21,7 @@ design <- my_population +
   my_potential_outcomes +
   my_sampling +
   my_inquiry +
-  declare_step(dplyr::mutate, q = 5) +
+  declare_step(fabricate, q = 5) +
   my_assignment +
   my_measurement +
   my_estimator

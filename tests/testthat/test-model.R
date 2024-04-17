@@ -55,6 +55,7 @@ test_that("test estimators, labels, quoted Z", {
 })
 
 test_that("test GLM estimators, default vs explicit Z", {
+  skip_if_not_installed("broom")
   estimator_glm <-
     declare_estimator(Y ~ Z, .method = glm, term = "Z")
 
@@ -67,6 +68,8 @@ test_that("test GLM estimators, default vs explicit Z", {
 })
 
 test_that("test GLM estimators with label", {
+  
+  skip_if_not_installed("broom")
   estimator_glm <-
     declare_estimator(Y ~ Z,
       .method = glm,
@@ -83,6 +86,8 @@ test_that("test GLM estimators with label", {
 })
 
 test_that("test logit default vs explicit Z", {
+  
+  skip_if_not_installed("broom")
 
   # logit
   estimator_logit <-
@@ -196,8 +201,6 @@ test_that("custom tidy method", {
   
 })
 
-library(broom)
-
 test_that("AER", {
   skip_if_not_installed(c("AER", "broom"))
   library(broom)
@@ -211,6 +214,7 @@ test_that("lm", {
 })
 
 test_that("glm", {
+  skip_if_not_installed("broom")
   des <- pop + declare_estimator(D ~ Z, .method = glm, family = binomial(link = "probit"))
   expect_equal(ncol(draw_estimates(des)), 8)
   des <- pop + declare_estimator(D ~ Z, .method = glm, family = binomial(link = "logit"))

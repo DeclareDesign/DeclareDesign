@@ -109,7 +109,6 @@ test_that("demo runs", {
   design <- my_population +
     my_potential_outcomes +
     my_inquiry +
-    declare_step(dplyr::mutate, big_income = 5 * income) +
     my_sampling +
     my_assignment +
     my_measurement +

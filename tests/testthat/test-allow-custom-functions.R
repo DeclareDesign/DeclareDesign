@@ -24,13 +24,13 @@ test_that("a dplyr pipeline can be used in a design", {
   library(dplyr)
 
   # include without parens
-  des <- my_pop + . %>% mutate(my_var = 5)
+  des <- my_pop + . |> mutate(my_var = 5)
   dat <- draw_data(des)
 
   expect_equal(names(dat), c("ID", "my_var"))
 
   # include with parens
-  des <- my_pop + (. %>% mutate(my_var = 5))
+  des <- my_pop + (. |> mutate(my_var = 5))
   dat <- draw_data(des)
 
   expect_equal(names(dat), c("ID", "my_var"))
