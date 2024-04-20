@@ -1,6 +1,7 @@
 # DeclareDesign 1.0.10
 
 * Swapped margins for marginaleffects. 
+* Changes to tests and examples to not depend on suggested packages.
 
 # DeclareDesign 1.0.8
 
