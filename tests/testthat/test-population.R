@@ -11,7 +11,7 @@ test_that("declare_model multilevel N=2", {
     cities = add_level(N = sample(1:2), subways = rnorm(N, mean = gdp))
   )
 
-  expect_equal(pop() %>% colnames(), c("regions", "gdp", "cities", "subways"))
+  expect_equal(pop() |> colnames(), c("regions", "gdp", "cities", "subways"))
 })
 
 test_that("declare_population multilevel N=5", {
@@ -20,7 +20,7 @@ test_that("declare_population multilevel N=5", {
     cities = add_level(N = sample(1:5), subways = rnorm(N, mean = 5))
   )
 
-  expect_equal(pop() %>% with(unique(regions)), as.character(1:5))
+  expect_equal(pop() |> with(unique(regions)), as.character(1:5))
 })
 
 test_that("declare_model multilevel 3 levels", {
@@ -33,7 +33,7 @@ test_that("declare_model multilevel 3 levels", {
     )
   )
 
-  expect_length(pop() %>% with(unique(individuals)), 25 * 10 * 10)
+  expect_length(pop() |> with(unique(individuals)), 25 * 10 * 10)
 })
 
 test_that("custom declare", {

@@ -1,3 +1,8 @@
+# DeclareDesign 1.0.10
+
+* Swapped margins for marginaleffects. 
+* Changes to tests and examples to not depend on suggested packages.
+
 # DeclareDesign 1.0.8
 
 * Bug fix of parallel processing that caused in rare cases simulations to be identical across multiple calls to simulate_design or diagnose_design.

@@ -1,21 +1,24 @@
 context("declare design")
 
+N <- 500
+
+my_population <- declare_model(N = N, noise = rnorm(N))
+
+my_potential_outcomes <-
+  declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+
+my_sampling <- declare_sampling(S = complete_rs(N, n = 250))
+
+my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
+
+my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+
+my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
+
 test_that(
-  "test the full declare design setup", {
-    N <- 500
-
-    my_population <- declare_model(N = N, noise = rnorm(N))
-
-    my_potential_outcomes <-
-      declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
-
-    my_sampling <- declare_sampling(S = complete_rs(N, n = 250))
-
-    my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
-
-    my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-
-    my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
+  "test the full declare design setup w/ dplyr", {
+    
+    skip_if_not_installed("dplyr")
 
     my_mutate <- declare_step(dplyr::mutate, noise_sq = noise^2)
 
@@ -38,6 +41,27 @@ test_that(
   }
 )
 
+test_that(
+  "test the full declare design setup w/o dplyr", {
+    N <- 500
+    
+    my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
+    
+    design <- my_population +
+      my_potential_outcomes +
+      my_sampling +
+      my_inquiry +
+      my_assignment +
+      my_measurement +
+      my_estimator
+    
+    df <- (draw_data(design))
+    expect_equal(dim(df), c(250, 7))
+    
+    output <- run_design(design)
+    expect_equal(dim(output), c(1, 12))
+  }
+)
 
 test_that("No estimators / inquiries", {
   design <-

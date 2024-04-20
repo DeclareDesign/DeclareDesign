@@ -1,7 +1,6 @@
 context("modify design")
 
 test_that("test modify declare design ", {
-  library(dplyr)
   N <- 500
 
   my_population <- declare_model(N = N, noise = rnorm(N))
@@ -12,7 +11,7 @@ test_that("test modify declare design ", {
 
   design <- my_population +
     my_potential_outcomes +
-    declare_step(dplyr::mutate, q = 5) +
+    declare_step(fabricate, q = 5) +
     my_assignment
 
   my_assignment_2 <- declare_assignment(Z2 = complete_ra(N, m = 25))
@@ -25,11 +24,11 @@ test_that("test modify declare design ", {
 
   expect_equal(names(redesigned), c("my_population", "my_potential_outcomes", "custom", "my_assignment_2"))
 
-  expect_length(insert_step(design, declare_step(mutate, blah = 6), before = my_potential_outcomes), 5)
+  expect_length(insert_step(design, declare_step(fabricate, blah = 6), before = my_potential_outcomes), 5)
 
-  expect_length(insert_step(design, declare_step(mutate, blah = 6), after = my_potential_outcomes), 5)
+  expect_length(insert_step(design, declare_step(fabricate, blah = 6), after = my_potential_outcomes), 5)
 
-  expect_length(replace_step(design, declare_step(mutate, blah = 10), step = my_population), 4)
+  expect_length(replace_step(design, declare_step(fabricate, blah = 10), step = my_population), 4)
 
   expect_length(delete_step(design, 3), 3)
 })
@@ -55,13 +54,13 @@ test_that("placement doesn't matter", {
 
   design <- my_population + my_potential_outcomes + my_assignment
 
-  expect_length(insert_step(design, declare_step(mutate, income = noise^2), after = my_assignment), 4)
-  expect_length(insert_step(design, declare_step(mutate, income = noise^2), before = my_assignment), 4)
+  expect_length(insert_step(design, declare_step(fabricate, income = noise^2), after = my_assignment), 4)
+  expect_length(insert_step(design, declare_step(fabricate, income = noise^2), before = my_assignment), 4)
 
-  expect_length(insert_step(design, declare_step(mutate, income = noise^2), before = "mypop"), 4)
+  expect_length(insert_step(design, declare_step(fabricate, income = noise^2), before = "mypop"), 4)
 
-  expect_error(insert_step(design, declare_step(mutate, income = noise^2), before = "notfound"))
-  expect_error(insert_step(design, declare_step(mutate, income = noise^2)))
+  expect_error(insert_step(design, declare_step(fabricate, income = noise^2), before = "notfound"))
+  expect_error(insert_step(design, declare_step(fabricate, income = noise^2)))
 })
 
 

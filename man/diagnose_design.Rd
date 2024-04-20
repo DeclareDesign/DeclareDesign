@@ -11,7 +11,7 @@ diagnose_design(
   diagnosands = NULL,
   sims = 500,
   bootstrap_sims = 100,
-  future.seed = TRUE,
+  future.seed = requireNamespace("future", quietly = TRUE),
   make_groups = NULL,
   add_grouping_variables = NULL
 )
@@ -21,7 +21,7 @@ diagnose_designs(
   diagnosands = NULL,
   sims = 500,
   bootstrap_sims = 100,
-  future.seed = TRUE,
+  future.seed = requireNamespace("future", quietly = TRUE),
   make_groups = NULL,
   add_grouping_variables = NULL
 )
@@ -37,7 +37,7 @@ vars(...)
 
 \item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.}
 
-\item{future.seed}{Option for parallel diagnosis via the function future_lapply. A logical or an integer (of length one or seven), or a list of length(X) with pre-generated random seeds. For details, see ?future_lapply.}
+\item{future.seed}{Option for parallel diagnosis via the function future_lapply. A logical or an integer (of length one or seven), or a list of length(X) with pre-generated random seeds. By default, this is set to TRUE if the \code{future} and \code{future.apply} packages are installed, and FALSE if not. For details, see ?future_lapply.}
 
 \item{make_groups}{Add group variables within which diagnosand values will be calculated. New variables can be created or variables already in the simulations data frame selected. Type name-value pairs within the function \code{vars}, i.e. \code{vars(significant = p.value <= 0.05)}.}
 
@@ -89,8 +89,8 @@ diagnosis_df
 # to calculate diagnosands, and bootstrap_sims to change how
 # many bootstraps are uses to calculate standard errors.
 diagnosis <- diagnose_design(design,
-                             sims = 500,
-                             bootstrap_sims = 150)
+                             sims = 100,
+                             bootstrap_sims = 100)
 tidy(diagnosis)
 
 # You may also run diagnose_design in parallel using 
@@ -101,7 +101,7 @@ library(future)
 options(parallelly.fork.enable = TRUE) # required for use in RStudio
 plan(multicore) # note other plans are possible, see future
 
-diagnose_design(design, sims = 500)
+diagnose_design(design)
 
 # Select specific diagnosands
 reshape_diagnosis(diagnosis, select = "Power")
@@ -119,7 +119,7 @@ get_diagnosands(diagnosis)
 get_simulations(diagnosis)
 
 # Diagnose using an existing data frame of simulations
-simulations <- simulate_design(design, sims = 500)
+simulations <- simulate_design(design, sims = 100)
 diagnosis   <- diagnose_design(simulations_df = simulations)
 diagnosis
 
