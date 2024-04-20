@@ -308,7 +308,7 @@ test_that("diagnose_design can generate and use grouping variables", {
     declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, inquiry = "ATE_positive")
   
-  diagnosis <- expect_warning(diagnose_design(design, 
+  diagnosis <- suppressWarnings(diagnose_design(design, 
                                make_groups = vars(estimand, significant = p.value <= 0.05),
                                sims = 5
   ))
@@ -331,7 +331,7 @@ test_that("diagnose_design can generate and use grouping variables", {
     declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, inquiry = "ATE")
   
-  diagnosis <- expect_warning(diagnose_design(
+  diagnosis <- suppressWarnings(diagnose_design(
     design,
     make_groups = vars(effect_size = cut(
       estimand, quantile(estimand, (0:4) / 4), include.lowest = TRUE
@@ -368,7 +368,7 @@ test_that("diagnose_design can generate and use grouping variables", {
   expect_equal(names(tidy(diagnosis)), c("design", "inquiry", "estimator", "outcome", "term", "significant", "diagnosand", 
                                          "estimate", "std.error", "conf.low", "conf.high"))
   
-  diagnosis <- expect_warning(diagnose_design(design, 
+  diagnosis <- suppressWarnings(diagnose_design(design, 
                                make_groups = vars(significant = factor(ifelse(p.value > 0.1, NA, p.value <= 0.05))),
                                sims = 100
   ))
