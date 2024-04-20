@@ -6,7 +6,7 @@ test_that("design library dependency works",{
   skip_on_cran()
   design_1 <- DesignLibrary::two_by_two_designer(N = 500, outcome_means = c(0,0,1,2), weight_A = 0, weight_B = 0)
   design_2 <- DesignLibrary::multi_arm_designer(N = 500, m_arms = 3, outcome_means = c(0, 0, 1))
-  dx <- diagnose_design(design_1, design_2, sims = 3, bootstrap_sims = FALSE)
+  dx <- expect_warning(diagnose_design(design_1, design_2, sims = 3, bootstrap_sims = FALSE), ".model")
   
   expect_true(all(c("design_1", "design_2") %in% dx$diagnosands_df$design))
   

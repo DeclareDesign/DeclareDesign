@@ -202,7 +202,8 @@ test_that("custom tidy method", {
 })
 
 test_that("AER", {
-  skip_if_not_installed(c("AER", "broom"))
+  skip_if_not_installed("AER")
+  skip_if_not_installed("broom")
   library(broom)
   des <- pop + declare_estimator(Y ~ D | Z, .method = AER::ivreg)
   expect_equal(ncol(draw_estimates(des)), 8)

@@ -4,6 +4,9 @@ design <- declare_model(N = 100, U = rnorm(N)) + declare_inquiry(Q = mean(U))
 
 test_that("diagnose_design when setting seed they are identical, when not setting seed they are independent", {
   
+  skip_if_not_installed("future.apply")
+  skip_if_not_installed("future")
+  
   sims_a <- design |> diagnose_design(sims = 10, future.seed = 5) |> get_simulations()
   sims_b <- design |> diagnose_design(sims = 10, future.seed = 5) |> get_simulations()
   
@@ -27,6 +30,9 @@ test_that("diagnose_design when setting seed they are identical, when not settin
 
 test_that("diagnose_design focused on bootstrapping - when setting seed they are identical, when not setting seed they are independent", {
   
+  skip_if_not_installed("future.apply")
+  skip_if_not_installed("future")
+  
   sims_a <- design |> diagnose_design(sims = 10, bootstrap_sims = 5, future.seed = 5) 
   sims_b <- design |> diagnose_design(sims = 10, bootstrap_sims = 5, future.seed = 5) 
   
@@ -49,6 +55,9 @@ test_that("diagnose_design focused on bootstrapping - when setting seed they are
 })
 
 test_that("simulate_design when setting seed they are identical, when not setting seed they are independent", {
+  
+  skip_if_not_installed("future.apply")
+  skip_if_not_installed("future")
   
   sims_a <- design |> simulate_design(sims = 10, future.seed = 5)
   sims_b <- design |> simulate_design(sims = 10, future.seed = 5)

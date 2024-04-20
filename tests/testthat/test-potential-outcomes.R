@@ -72,16 +72,15 @@ test_that("PO as a formula works", {
   )
 })
 
+set.seed(5)
+my_population <- declare_model(
+  villages = add_level(N = 3, elevation = rnorm(N)),
+  citizens = add_level(N = 4, income = runif(N))
+)
+
+pop <- my_population()
 
 test_that("POs at a higher level", {
-  set.seed(5)
-  my_population <- declare_model(
-    villages = add_level(N = 3, elevation = rnorm(N)),
-    citizens = add_level(N = 4, income = runif(N))
-  )
-
-  pop <- my_population()
-
   # Four ways of doing the same thing
 
   # with "level" argument in a "formula" version
