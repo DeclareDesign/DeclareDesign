@@ -160,55 +160,64 @@ design_4 <-
 
 run_design(design_4)
 
-# Use glm from base R
-design_5 <-
-  design +
-  declare_estimator(Y ~ Z + gender,
-                    family = "gaussian",
-                    inquiry = "ATE",
-                    .method = glm)
+if(require("broom")) {
 
-run_design(design_5)
+  # Use glm from base R
+  design_5 <-
+    design +
+    declare_estimator(Y ~ Z + gender,
+                      family = "gaussian",
+                      inquiry = "ATE",
+                      .method = glm)
+  
+  run_design(design_5)
+  
+  # If we use logit, we'll need to estimate the average marginal effect with
+  # marginaleffects::avg_slopes. We wrap this up in a function we'll pass to 
+  # .summary.
+  
+  if(require("marginaleffects")) {
+  
+    library(marginaleffects) # for predictions
+    library(broom) # for tidy
+    
+    tidy_avg_slopes <- function(x) {
+      tidy(avg_slopes(x))
+    }
+    
+    design_6 <-
+      design +
+      declare_estimator(
+        Y ~ Z + gender,
+        .method = glm,
+        family = binomial("logit"),
+        .summary = tidy_avg_slopes,
+        term = "Z"
+      )
+    
+    run_design(design_6)
+    
+    # Multiple estimators for one inquiry
+    
+    design_7 <-
+      design +
+      declare_estimator(Y ~ Z,
+                        .method = lm_robust,
+                        inquiry = "ATE",
+                        label = "OLS") +
+      declare_estimator(
+        Y ~ Z + gender,
+        .method = glm,
+        family = binomial("logit"),
+        .summary = tidy_avg_slopes,
+        inquiry = "ATE",
+        term = "Z",
+        label = "logit"
+      )
+    
+    run_design(design_7)
+    
+  }
 
-# If we use logit, we'll need to estimate the average marginal effect with
-# margins::margins. We wrap this up in function we'll pass to model_summary
-
-library(margins) # for margins
-library(broom) # for tidy
-
-tidy_margins <- function(x) {
-  tidy(margins(x, data = x$data), conf.int = TRUE)
 }
-
-design_6 <-
-  design +
-  declare_estimator(
-    Y ~ Z + gender,
-    .method = glm,
-    family = binomial("logit"),
-    .summary = tidy_margins,
-    term = "Z"
-  )
-
-run_design(design_6)
-
-# Multiple estimators for one inquiry
-
-design_7 <-
-  design +
-  declare_estimator(Y ~ Z,
-                    .method = lm_robust,
-                    inquiry = "ATE",
-                    label = "OLS") +
-  declare_estimator(
-    Y ~ Z + gender,
-    .method = glm,
-    family = binomial("logit"),
-    .summary = tidy_margins,
-    inquiry = "ATE",
-    term = "Z",
-    label = "logit"
-  )
-
-run_design(design_7)
 }

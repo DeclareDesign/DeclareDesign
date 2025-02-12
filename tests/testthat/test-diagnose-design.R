@@ -8,6 +8,8 @@ test_that("error when you send other objects to diagnose", {
 
 
 test_that("default diagnosands work", {
+  skip_if_not_installed("broom")
+  
   my_designer <- function(N = 10) {
     my_population <- declare_population(N = N, noise = rnorm(N))
 
@@ -290,7 +292,11 @@ test_that("diagnose_design stops when a zero-row simulations_df is sent", {
 
 test_that("diagnose_design can generate and use grouping variables", {
   
-  set.seed(5)
+  skip_if_not_installed("broom")
+  skip_if_not_installed("future") # hard to get the seed right; this test works with future just because of the seed
+  skip_if_not_installed("future.apply")
+  
+  set.seed(8)
   
   design <- 
     declare_model(N = 100, u = rnorm(N),
@@ -302,10 +308,10 @@ test_that("diagnose_design can generate and use grouping variables", {
     declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, inquiry = "ATE_positive")
   
-  diagnosis <- diagnose_design(design, 
+  diagnosis <- suppressWarnings(diagnose_design(design, 
                                make_groups = vars(estimand, significant = p.value <= 0.05),
                                sims = 5
-  )
+  ))
   expect_equivalent(diagnosis$diagnosands_df$significant,  c(FALSE, FALSE))
   expect_equivalent(diagnosis$diagnosands_df$estimand,  c(FALSE, TRUE))
   
@@ -314,8 +320,9 @@ test_that("diagnose_design can generate and use grouping variables", {
   expect_equal(names(tidy(diagnosis)), c("design", "inquiry", "estimator", "outcome", "term", "estimand", "significant", "diagnosand", "estimate", 
                                          "std.error", "conf.low", "conf.high"))
   
+  set.seed(5)
   design <- 
-    declare_model(N = 100, u = rnorm(N),
+    declare_model(N = 50, u = rnorm(N),
       Y_Z_0 = 0, 
       Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u
     ) +
@@ -324,13 +331,13 @@ test_that("diagnose_design can generate and use grouping variables", {
     declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, inquiry = "ATE")
   
-  diagnosis <- diagnose_design(
+  diagnosis <- suppressWarnings(diagnose_design(
     design,
     make_groups = vars(effect_size = cut(
       estimand, quantile(estimand, (0:4) / 4), include.lowest = TRUE
     )),
     sims = 5
-  )
+  ))
   
   expect_equivalent(nrow(diagnosis$diagnosands_df),  4)
   
@@ -339,9 +346,10 @@ test_that("diagnose_design can generate and use grouping variables", {
   expect_equal(names(tidy(diagnosis)), c("design", "inquiry", "estimator", "outcome", "term", "effect_size", "diagnosand", 
                                          "estimate", "std.error", "conf.low", "conf.high"))
   
+  set.seed(50)
   
   design <- 
-    declare_model(N = 100, u = rnorm(N),
+    declare_model(N = 50, u = rnorm(N),
       Y_Z_0 = 0, 
       Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u
     ) +
@@ -360,10 +368,10 @@ test_that("diagnose_design can generate and use grouping variables", {
   expect_equal(names(tidy(diagnosis)), c("design", "inquiry", "estimator", "outcome", "term", "significant", "diagnosand", 
                                          "estimate", "std.error", "conf.low", "conf.high"))
   
-  diagnosis <- diagnose_design(design, 
+  diagnosis <- suppressWarnings(diagnose_design(design, 
                                make_groups = vars(significant = factor(ifelse(p.value > 0.1, NA, p.value <= 0.05))),
                                sims = 100
-  )
+  ))
   
   # test tidy.diagnosis
   expect_equal(dim(tidy(diagnosis)), c(21, 11))
@@ -375,6 +383,8 @@ test_that("diagnose_design can generate and use grouping variables", {
 
 
 test_that("tidy.diagnosis handles NAs", {
+  
+  skip_if_not_installed("dplyr")
   
   design <- 
     declare_model(N = 10, Y = rnorm(N)) +
@@ -413,7 +423,7 @@ test_that("tidy.diagnosis handles NAs", {
     )
   
   # checks a bug involved in sorting that led to NAs in mean estimate (possibly related to the case where you have parameters?)
-  expect_equal(sum(is.na(tidy(diagnosis) %>% dplyr::filter(diagnosand == "mean_estimate", estimator == "estimator") %>% dplyr::pull(estimate))), 0)
+  expect_equal(sum(is.na(tidy(diagnosis) |> dplyr::filter(diagnosand == "mean_estimate", estimator == "estimator") |> dplyr::pull(estimate))), 0)
   
 })
 

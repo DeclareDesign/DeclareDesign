@@ -1,20 +1,23 @@
 context("Design summary")
 
-test_that("Basic design summary", {
-  my_population <- declare_model(N = 500, noise = rnorm(N))
+my_population <- declare_model(N = 500, noise = rnorm(N))
 
-  my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
+my_potential_outcomes <- declare_potential_outcomes(Y_Z_0 = noise, Y_Z_1 = noise + rnorm(N, mean = 2, sd = 2))
 
-  my_sampling <- declare_sampling(S = complete_rs(N, n = 250))
+my_sampling <- declare_sampling(S = complete_rs(N, n = 250))
 
-  my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
+my_assignment <- declare_assignment(Z = complete_ra(N, m = 25))
 
-  my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
-  my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
+my_estimator <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
 
-  my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
+my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
 
+test_that("Basic design summary w dplyr", {
+  
+  skip_if_not_installed("dplyr")
+  
   design <- my_population +
     my_potential_outcomes +
     my_sampling +
@@ -35,6 +38,30 @@ test_that("Basic design summary", {
 
   s_short <- summary(design, verbose = FALSE)
 
+  expect_failure(expect_output(print(summary(design, verbose = FALSE)), "Formula"))
+})
+
+test_that("Basic design summary w/o dplyr", {
+  
+  design <- my_population +
+    my_potential_outcomes +
+    my_sampling +
+    my_inquiry +
+    my_assignment +
+    my_measurement +
+    my_estimator
+  
+  s <- summary(design)
+  
+  # First step
+  expect_equal(s$N[[1]], "N = 500")
+  expect_equal(s$call[[1]], attr(my_population, "call"))
+  
+  # Last step
+  expect_equal(s$formulae[[7]], Y ~ Z)
+  
+  s_short <- summary(design, verbose = FALSE)
+  
   expect_failure(expect_output(print(summary(design, verbose = FALSE)), "Formula"))
 })
 
@@ -86,3 +113,4 @@ test_that("summary, estimator print model", {
   d <- declare_model(sleep) + declare_estimator(extra ~ group, .method = lm)
   expect_output(print(d, verbose = TRUE), "Method:\\s*lm")
 })
+

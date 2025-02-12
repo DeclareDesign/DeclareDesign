@@ -72,16 +72,15 @@ test_that("PO as a formula works", {
   )
 })
 
+set.seed(5)
+my_population <- declare_model(
+  villages = add_level(N = 3, elevation = rnorm(N)),
+  citizens = add_level(N = 4, income = runif(N))
+)
+
+pop <- my_population()
 
 test_that("POs at a higher level", {
-  library(dplyr)
-  my_population <- declare_model(
-    villages = add_level(N = 3, elevation = rnorm(N)),
-    citizens = add_level(N = 4, income = runif(N))
-  )
-
-  pop <- my_population()
-
   # Four ways of doing the same thing
 
   # with "level" argument in a "formula" version
@@ -109,12 +108,30 @@ test_that("POs at a higher level", {
       level = villages
     )
 
-  my_potential_outcomes_discrete(pop)
+  expect_equal(
+    my_potential_outcomes_discrete(pop) |> head(),
+    structure(list(villages = c("1", "1", "1", "1", "2", "2"), elevation = c(-0.840855480786298, 
+                                                                             -0.840855480786298, -0.840855480786298, -0.840855480786298, 1.38435934347858, 
+                                                                             1.38435934347858), citizens = c("01", "02", "03", "04", "05", 
+                                                                                                             "06"), income = c(0.527959984261543, 0.807935200864449, 0.9565001251176, 
+                                                                                                                               0.110453018685803, 0.273284949595109, 0.490513201802969), Y_vil_Z_0 = c(4.1591445192137, 
+                                                                                                                                                                                                       4.1591445192137, 4.1591445192137, 4.1591445192137, 6.38435934347858, 
+                                                                                                                                                                                                       6.38435934347858), Y_vil_Z_1 = c(6.1591445192137, 6.1591445192137, 
+                                                                                                                                                                                                                                        6.1591445192137, 6.1591445192137, 8.38435934347858, 8.38435934347858
+                                                                                                                                                                                                       )), row.names = c(NA, 6L), class = "data.frame")
+  )
+  
+})
 
+test_that("pos at a higher level with dplyr", {
+  
+  skip_if_not_installed("dplyr")
+  library(dplyr)
+  
   # with custom function
   my_custom_PO <- function(data) {
-    data %>%
-      group_by(villages) %>%
+    data |>
+      group_by(villages) |>
       mutate(
         Y_vil_Z_0 = elevation + 5,
         Y_vil_Z_1 = elevation + 5 + 2

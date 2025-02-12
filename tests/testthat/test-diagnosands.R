@@ -181,18 +181,18 @@ test_that("Overriding join conditions", {
   alpha <- .05
 
   custom <- declare_diagnosands(handler = function(data) {
-    data %>%
-      group_by(sim_ID) %>%
+    data |>
+      group_by(sim_ID) |>
       summarize(
         any_significant = any(p.value < alpha),
         num_significant = sum(p.value < alpha),
         all_significant = all(p.value < alpha)
-      ) %>%
+      ) |>
       summarize(
         any_significant = mean(any_significant),
         num_significant = mean(num_significant),
         all_significant = mean(all_significant)
-      ) %>%
+      ) |>
       reshape2::melt(id.vars = NULL, variable.name = "inquiry", value.name = "inquiry")
   })
 

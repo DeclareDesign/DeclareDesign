@@ -69,7 +69,7 @@ compare_partial <- function(FUN, DIFFFUN, is_data = FALSE){
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
 #'   declare_estimator(Y ~ Z, inquiry = "ATE")
 #' 
-#' design2 <- declare_model(N = 200, U = rnorm(N),
+#'   design2 <- declare_model(N = 200, U = rnorm(N),
 #'                          potential_outcomes(Y ~ 0.5*Z + U)) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_sampling(S = complete_rs(N, n = 100)) +
@@ -77,12 +77,16 @@ compare_partial <- function(FUN, DIFFFUN, is_data = FALSE){
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
 #'   declare_estimator(Y ~ Z, .method = lm_robust, inquiry = "ATE")
 #'  
-#'  compare_designs(design1, design2)
-#'  compare_design_code(design1, design2)
-#'  compare_design_summaries(design1, design2)
-#'  compare_design_data(design1, design2)
-#'  compare_design_estimates(design1, design2)
-#'  compare_design_inquiries(design1, design2)
+#'  if (require("diffobj")) {
+#'  
+#'    compare_designs(design1, design2)
+#'    compare_design_code(design1, design2)
+#'    compare_design_summaries(design1, design2)
+#'    compare_design_data(design1, design2)
+#'    compare_design_estimates(design1, design2)
+#'    compare_design_inquiries(design1, design2)
+#'  
+#'  }
 #' 
 #' @name compare_functions
 

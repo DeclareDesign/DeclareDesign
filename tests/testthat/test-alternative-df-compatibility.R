@@ -32,13 +32,15 @@ test_that("tibble", {
 
 test_that("tibble more", {
   
+  skip_if_not_installed("tibble")
+  
   population <- declare_model(N = 100, u = rnorm(N))
   potential_outcomes <- declare_potential_outcomes(Y ~ Z)
   assignment <- declare_assignment(Z = complete_ra(N, m = 50))
   reveal_Y <- declare_reveal(Y,Z)
   
   my_func <- function(data){
-    data %>% (tibble::as_tibble)
+    tibble::as_tibble(data)
   }
   
   design <- population + potential_outcomes + assignment + declare_step(handler = my_func)
