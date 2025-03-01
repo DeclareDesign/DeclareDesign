@@ -557,9 +557,12 @@ declare_named_diagnosands <- function(x, alpha = 0.05, subset = NULL) {
   
   # Filter `
   selected_diagnosands <- all_diagnosands[x]
-  if(is.null(selected_diagnosands)) return(NULL)
+  if(any(is.na(names(selected_diagnosands)))) {
+    message("unknown diagnosand names provided; default diagnosands calculated")
+    return(NULL)
+  } 
   
-  # Use inject() to pass the arguments correctly
+  # pass arguments
   inject(declare_diagnosands(!!!selected_diagnosands, alpha = alpha, subset = subset))
   
 }
