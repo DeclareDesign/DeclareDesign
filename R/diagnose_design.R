@@ -535,7 +535,7 @@ vars <- function(...) {
 
 #' Helper to declare a set of named diagnosands, x
 #' @example
-#' declare_named_diagnosands(bias)
+#' declare_named_diagnosands("bias")
 declare_named_diagnosands <- function(x, alpha = 0.05, subset = NULL) {
   
   all_diagnosands <- list(
