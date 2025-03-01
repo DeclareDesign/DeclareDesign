@@ -13,7 +13,9 @@ diagnose_design(
   bootstrap_sims = 100,
   future.seed = TRUE,
   make_groups = NULL,
-  add_grouping_variables = NULL
+  add_grouping_variables = NULL,
+  alpha = 0.05,
+  subset = NULL
 )
 
 diagnose_designs(
@@ -23,7 +25,9 @@ diagnose_designs(
   bootstrap_sims = 100,
   future.seed = TRUE,
   make_groups = NULL,
-  add_grouping_variables = NULL
+  add_grouping_variables = NULL,
+  alpha = 0.05,
+  subset = NULL
 )
 
 vars(...)
@@ -31,7 +35,7 @@ vars(...)
 \arguments{
 \item{...}{A design or set of designs typically created using the + operator, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.}
 
-\item{diagnosands}{A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the inquiry(s).}
+\item{diagnosands}{A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the inquiry(s). Users can alternatively provide names of diagnosands from the extended diagnosand list.}
 
 \item{sims}{The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}}
 
@@ -146,7 +150,7 @@ diagnose_design(
   diagnosands = default_diagnosands
 )
 
-# A longer list of useful diagnosands might include:
+# Here is a longer list of useful diagnosands:
 
 extended_diagnosands <- 
   declare_diagnosands(
@@ -165,6 +169,9 @@ extended_diagnosands <-
     prop_pos_sig = mean(estimate > 0 & p.value <= alpha),
     mean_ci_length = mean(conf.high - conf.low)
   )
+  
+# Users can pull from this list by providing diagnosand names in the diagnosand argument.
+diagnose_design(design, diagnosands = c("prop_pos_sig", "mean_se"))
   
 \dontrun{
 diagnose_design(

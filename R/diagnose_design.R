@@ -4,12 +4,14 @@
 #' Generates diagnosands from a design or simulations of a design. Speed gains can be achieved by running diagnose_design in parallel, see Examples.
 #'
 #' @param ... A design or set of designs typically created using the + operator, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.
-#' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the inquiry(s).
+#' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the inquiry(s). Users can alternatively provide names of diagnosands from the extended diagnosand list. 
 #' @param make_groups Add group variables within which diagnosand values will be calculated. New variables can be created or variables already in the simulations data frame selected. Type name-value pairs within the function \code{vars}, i.e. \code{vars(significant = p.value <= 0.05)}.
 #' @param add_grouping_variables Deprecated. Please use make_groups instead. Variables used to generate groups of simulations for diagnosis. Added to default list: c("design", "estimand_label", "estimator", "outcome", "term")
 #' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}
 #' @param future.seed Option for parallel diagnosis via the function future_lapply. A logical or an integer (of length one or seven), or a list of length(X) with pre-generated random seeds. For details, see ?future_lapply.
 #' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.
+#' @param alpha Significance level, passed to declare_diagnosands
+#' @param subset Subset indicator, passed to declare_diagnosands
 #' @return a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
 #'
 #'
@@ -112,7 +114,7 @@
 #'   diagnosands = default_diagnosands
 #' )
 #' 
-#' # A longer list of useful diagnosands might include:
+#' # Here is a longer list of useful diagnosands:
 #' 
 #' extended_diagnosands <- 
 #'   declare_diagnosands(
@@ -131,6 +133,10 @@
 #'     prop_pos_sig = mean(estimate > 0 & p.value <= alpha),
 #'     mean_ci_length = mean(conf.high - conf.low)
 #'   )
+#'   
+#'# Users can pull from this list by providing diagnosand names in the diagnosand argument.
+#'diagnose_design(design, diagnosands = c("prop_pos_sig", "mean_se"), sims = 100)
+#'diagnose_design(design, diagnosands = c("prop_pos_sig", "mean_se"), alpha = .001, sims = 100)
 #'   
 #' \dontrun{
 #' diagnose_design(
@@ -222,9 +228,17 @@ diagnose_design <- function(...,
                             bootstrap_sims = 100,
                             future.seed = TRUE,
                             make_groups = NULL,
-                            add_grouping_variables = NULL) {
+                            add_grouping_variables = NULL,
+                            alpha = 0.05,
+                            subset = NULL) {
   
   start_time <- Sys.time()
+  
+  # if diagnosands are called by name then select from extended list:
+  if("character" %in% class(diagnosands)){
+    diagnosands <- 
+      declare_named_diagnosands(diagnosands, alpha = alpha, subset = subset)     
+    }
   
   dots <- quos(...)
   
@@ -516,4 +530,36 @@ bootstrap_diagnosands <- function(bootstrap_sims, future.seed = TRUE, simulation
 #' @export
 vars <- function(...) {
   quos(...)
+}
+
+
+#' Helper to declare a set of named diagnosands, x
+#' @example
+#' declare_named_diagnosands(bias)
+declare_named_diagnosands <- function(x, alpha = 0.05, subset = NULL) {
+  
+  all_diagnosands <- list(
+    mean_estimand = expr(mean(estimand)),
+    mean_estimate = expr(mean(estimate)),
+    bias = expr(mean(estimate - estimand)),
+    sd_estimate = expr(sd(estimate)),
+    rmse = expr(sqrt(mean((estimate - estimand) ^ 2))),
+    power = expr(mean(p.value <= alpha)),
+    coverage = expr(mean(estimand <= conf.high & estimand >= conf.low)),
+    mean_se = expr(mean(std.error)),
+    type_s_rate = expr(mean((sign(estimate) != sign(estimand))[p.value <= alpha])),
+    exaggeration_ratio = expr(mean((estimate/estimand)[p.value <= alpha])),
+    var_estimate = expr(pop.var(estimate)),
+    mean_var_hat = expr(mean(std.error^2)),
+    prop_pos_sig = expr(mean(estimate > 0 & p.value <= alpha)),
+    mean_ci_length = expr(mean(conf.high - conf.low))
+  )
+  
+  # Filter `
+  selected_diagnosands <- all_diagnosands[x]
+  if(is.null(selected_diagnosands)) return(NULL)
+  
+  # Use inject() to pass the arguments correctly
+  inject(declare_diagnosands(!!!selected_diagnosands, alpha = alpha, subset = subset))
+  
 }
