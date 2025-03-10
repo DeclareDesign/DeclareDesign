@@ -10,8 +10,6 @@
 #' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}
 #' @param future.seed Option for parallel diagnosis via the function future_lapply. A logical or an integer (of length one or seven), or a list of length(X) with pre-generated random seeds. For details, see ?future_lapply.
 #' @param bootstrap_sims Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{100}. Set to FALSE to turn off bootstrapping.
-#' @param alpha Significance level, passed to declare_diagnosands
-#' @param subset Subset indicator, passed to declare_diagnosands
 #' @return a list with a data frame of simulations, a data frame of diagnosands, a vector of diagnosand names, and if calculated, a data frame of bootstrap replicates.
 #'
 #'
@@ -23,7 +21,7 @@
 #'
 #' If the packages \code{future} and \code{future.apply} are installed, you can set \code{\link[future]{plan}} to run multiple simulations in parallel.
 #'
-#'
+#' @importFrom rlang inject
 #' @examples
 #' 
 #' # Two-arm randomized experiment
@@ -134,9 +132,13 @@
 #'     mean_ci_length = mean(conf.high - conf.low)
 #'   )
 #'   
-#'# Users can pull from this list by providing diagnosand names in the diagnosand argument.
-#'diagnose_design(design, diagnosands = c("prop_pos_sig", "mean_se"), sims = 100)
-#'diagnose_design(design, diagnosands = c("prop_pos_sig", "mean_se"), alpha = .001, sims = 100)
+#'# Users can use select_diagnosands to quickly select diagnosands of interest.
+#'diagnose_design(design, 
+#'    diagnosands = select_diagnosands("prop_pos_sig", "mean_se"), 
+#'    sims = 100)
+#'diagnose_design(design, 
+#'    diagnosands = select_diagnosands("prop_pos_sig", "mean_se", alpha = .001), 
+#'    sims = 100)
 #'   
 #' \dontrun{
 #' diagnose_design(
@@ -228,17 +230,9 @@ diagnose_design <- function(...,
                             bootstrap_sims = 100,
                             future.seed = TRUE,
                             make_groups = NULL,
-                            add_grouping_variables = NULL,
-                            alpha = 0.05,
-                            subset = NULL) {
+                            add_grouping_variables = NULL) {
   
   start_time <- Sys.time()
-  
-  # if diagnosands are called by name then select from extended list:
-  if("character" %in% class(diagnosands)){
-    diagnosands <- 
-      declare_named_diagnosands(diagnosands, alpha = alpha, subset = subset)     
-    }
   
   dots <- quos(...)
   
@@ -532,37 +526,3 @@ vars <- function(...) {
   quos(...)
 }
 
-
-#' Helper to declare a set of named diagnosands, x
-#' @example
-#' declare_named_diagnosands("bias")
-declare_named_diagnosands <- function(x, alpha = 0.05, subset = NULL) {
-  
-  all_diagnosands <- list(
-    mean_estimand = expr(mean(estimand)),
-    mean_estimate = expr(mean(estimate)),
-    bias = expr(mean(estimate - estimand)),
-    sd_estimate = expr(sd(estimate)),
-    rmse = expr(sqrt(mean((estimate - estimand) ^ 2))),
-    power = expr(mean(p.value <= alpha)),
-    coverage = expr(mean(estimand <= conf.high & estimand >= conf.low)),
-    mean_se = expr(mean(std.error)),
-    type_s_rate = expr(mean((sign(estimate) != sign(estimand))[p.value <= alpha])),
-    exaggeration_ratio = expr(mean((estimate/estimand)[p.value <= alpha])),
-    var_estimate = expr(pop.var(estimate)),
-    mean_var_hat = expr(mean(std.error^2)),
-    prop_pos_sig = expr(mean(estimate > 0 & p.value <= alpha)),
-    mean_ci_length = expr(mean(conf.high - conf.low))
-  )
-  
-  # Filter `
-  selected_diagnosands <- all_diagnosands[x]
-  if(any(is.na(names(selected_diagnosands)))) {
-    message("unknown diagnosand names provided; default diagnosands calculated")
-    return(NULL)
-  } 
-  
-  # pass arguments
-  inject(declare_diagnosands(!!!selected_diagnosands, alpha = alpha, subset = subset))
-  
-}

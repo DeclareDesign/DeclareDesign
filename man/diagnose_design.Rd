@@ -13,9 +13,7 @@ diagnose_design(
   bootstrap_sims = 100,
   future.seed = TRUE,
   make_groups = NULL,
-  add_grouping_variables = NULL,
-  alpha = 0.05,
-  subset = NULL
+  add_grouping_variables = NULL
 )
 
 diagnose_designs(
@@ -25,9 +23,7 @@ diagnose_designs(
   bootstrap_sims = 100,
   future.seed = TRUE,
   make_groups = NULL,
-  add_grouping_variables = NULL,
-  alpha = 0.05,
-  subset = NULL
+  add_grouping_variables = NULL
 )
 
 vars(...)
@@ -170,8 +166,13 @@ extended_diagnosands <-
     mean_ci_length = mean(conf.high - conf.low)
   )
   
-# Users can pull from this list by providing diagnosand names in the diagnosand argument.
-diagnose_design(design, diagnosands = c("prop_pos_sig", "mean_se"))
+# Users can use select_diagnosands to quickly select diagnosands of interest.
+diagnose_design(design, 
+   diagnosands = select_diagnosands("prop_pos_sig", "mean_se"), 
+   sims = 100)
+diagnose_design(design, 
+   diagnosands = select_diagnosands("prop_pos_sig", "mean_se", alpha = .001), 
+   sims = 100)
   
 \dontrun{
 diagnose_design(
