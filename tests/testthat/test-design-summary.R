@@ -71,7 +71,7 @@ test_that("summary, custom estimator handler, numeric value", {
     handler = function(data)
       mean(data$extra)
   )
-  d <- declare_model(sleep) + extra
+  d <- declare_model(sleep) + extra + declare_inquiry(Q = 1) 
 
   expect_output(print(d, verbose = TRUE), "1.54")
 })

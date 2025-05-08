@@ -136,12 +136,21 @@ simulate_single_design <- function(design, sims, future.seed = TRUE, low_simulat
   # If sims is set correctly, fan out
   
   if (length(sims) == 1 && is.null(names(sims))) {
-    results_list <- future_lapply(seq_len(sims),
-                                  function(i)
-                                    run_design_internal(design),
-                                  future.seed = future.seed, future.globals = "design"
+    results_list <- withCallingHandlers(
+      {
+        future_lapply(seq_len(sims),
+                      function(i) run_design_internal(design),
+                      future.seed = future.seed,
+                      future.globals = "design") |> suppressWarnings()
+      },
+      warning = function(w) {
+        # Suppress warnings coming from `future_lapply` itself
+        if (grepl("may not be available", conditionMessage(w))) {
+          invokeRestart("muffleWarning")
+        }
+      }
     )
-  } else {
+      } else {
     sims <- check_sims(design, sims)
     results_list <- fan_out(design, sims)
     

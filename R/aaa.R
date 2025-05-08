@@ -1,18 +1,35 @@
 ###############################################################################
 # Copies an environment chain
 #' @importFrom rlang env_clone
+# env_deep_copy <- function(e) {
+#   # Cloning the CheckExEnv causes examples to autofail, it has delayedAssign("F", stop())
+#   if (environmentName(e) == "CheckExEnv") {
+#     e
+#   } else if (identical(e, emptyenv())) {
+#     emptyenv()
+#   } else if (identical(e, globalenv())) {
+#     env_clone(e)
+#   } else {
+#     env_clone(e, Recall(parent.env(e)))
+#   }
+#   # don't clone attached packages
+# }
+
+
 env_deep_copy <- function(e) {
-  # Cloning the CheckExEnv causes examples to autofail, it has delayedAssign("F", stop())
-  if (environmentName(e) == "CheckExEnv") {
+  env_name <- environmentName(e)
+  
+  if (env_name == "CheckExEnv") {
     e
   } else if (identical(e, emptyenv())) {
     emptyenv()
+  } else if (grepl("^(package|namespace):", env_name)) {
+    e  # Don't clone attached package/namespace environments
   } else if (identical(e, globalenv())) {
     env_clone(e)
   } else {
     env_clone(e, Recall(parent.env(e)))
   }
-  # don't clone attached packages
 }
 
 ###############################################################################

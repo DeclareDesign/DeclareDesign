@@ -2,7 +2,7 @@ context("add design citation")
 
 test_that("test with generated citation", {
 
-  design <- declare_model(data = sleep) + declare_sampling(S = complete_rs(N, n = 10))
+  design <- declare_model(data = sleep) + declare_sampling(S = complete_rs(N, n = 10)) + declare_inquiry(Q = 1) 
   design
 
   design <- set_citation(design,
@@ -41,7 +41,7 @@ test_that("test with generated citation", {
 test_that("test with user-specified text citation", {
   text <- "Set of authors (2017). My custom design."
 
-  design <- declare_model(data = sleep) + NULL
+  design <- declare_model(data = sleep) +  declare_inquiry(Q = 1) 
 
   design <- set_citation(design, citation = text)
 

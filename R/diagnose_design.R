@@ -459,7 +459,7 @@ bootstrap_diagnosands <- function(bootstrap_sims, future.seed = TRUE, simulation
     function(i) cbind(bootstrap_id = i, boot_function()), # Add bootstrap ID
     future.seed = future.seed,
     future.globals = "boot_function"
-  )
+  )  |> suppressWarnings()
 
   # Make a data.frame of diagnosand replicates
   diagnosand_replicates <- do.call(rbind.data.frame, diagnosand_replicates)

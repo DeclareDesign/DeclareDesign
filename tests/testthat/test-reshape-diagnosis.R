@@ -130,20 +130,20 @@ test_that("groups with factors", {
     declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, inquiry = "ATE_positive")
   
-  expect_warning(expect_equal(
+  expect_equal(
     diagnose_design(design, 
                     make_groups = vars(significant = ifelse(p.value > 0.5, NA, p.value <= 0.05)),
                     sims = 5
     )$diagnosands_df$significant,
     c(FALSE, NA)
-  ))
+  )
     
-  expect_warning(expect_equal(
+expect_equal(
     diagnose_design(design, 
                     make_groups = vars(significant = factor(ifelse(p.value > 0.5, NA, p.value <= 0.05))),
                     sims = 5
     )$diagnosands_df$significant,
     structure(c(1L, NA), .Label = "FALSE", class = "factor")
-  ))
+  )
   
 })

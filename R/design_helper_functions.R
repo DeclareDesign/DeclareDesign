@@ -341,7 +341,8 @@ fan_out <- function(design, fan) {
       st[[j]]$fan[i] <- j
     
     
-    st <- future_lapply(seq_along(st), function(j) run_design_internal(st[[j]]), future.seed = NA, future.globals = "st")
+    st <- future_lapply(seq_along(st), function(j) run_design_internal(st[[j]]), future.seed = NA, future.globals = "st") |>
+      suppressWarnings()
   }
   
   st <- lapply(st, function(x){
