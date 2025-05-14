@@ -4,7 +4,7 @@
 \alias{declare_population}
 \title{Declare the size and features of the population}
 \usage{
-declare_population(..., handler = fabricate, label = NULL)
+declare_population(..., handler = fabricate, label = NULL, pars = NULL)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}

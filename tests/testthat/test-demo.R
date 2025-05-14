@@ -135,7 +135,7 @@ test_that("demo runs", {
   pop_custom <- my_population_custom()
 
   head(pop_custom)
-
+  
   ## ------------------------------------------------------------------------
   my_potential_outcomes_function <-
     function(data) {
@@ -168,7 +168,7 @@ test_that("demo runs", {
   smp_custom <- my_sampling_custom(pop_pos)
 
   nrow(smp_custom)
-
+  
   ## ------------------------------------------------------------------------
   my_assignment_function <- function(data) {
     data$Z <- rbinom(
@@ -230,6 +230,7 @@ test_that("demo runs", {
     return(my_design)
   }
 
+  
   my_1000_design <- expand_design(designer = m_arm_trial, numb = 1000)
   head(draw_data(my_1000_design))
 
@@ -273,7 +274,10 @@ test_that("demo runs", {
   )
 
   ## ------------------------------------------------------------------------
+})
 
+test_that("demo runs 2", {
+  
   my_population_function <- function(N) {
     data.frame(u = rnorm(N))
   }

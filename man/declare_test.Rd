@@ -5,7 +5,12 @@
 \alias{label_test}
 \title{Declare test}
 \usage{
-declare_test(..., handler = label_test(method_handler), label = "test")
+declare_test(
+  ...,
+  handler = label_test(method_handler),
+  label = "test",
+  pars = NULL
+)
 
 label_test(fn)
 }

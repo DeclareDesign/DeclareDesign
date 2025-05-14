@@ -1,57 +1,3 @@
-###############################################################################
-# Copies an environment chain
-#' @importFrom rlang env_clone
-# env_deep_copy <- function(e) {
-#   # Cloning the CheckExEnv causes examples to autofail, it has delayedAssign("F", stop())
-#   if (environmentName(e) == "CheckExEnv") {
-#     e
-#   } else if (identical(e, emptyenv())) {
-#     emptyenv()
-#   } else if (identical(e, globalenv())) {
-#     env_clone(e)
-#   } else {
-#     env_clone(e, Recall(parent.env(e)))
-#   }
-#   # don't clone attached packages
-# }
-
-
-env_deep_copy <- function(e) {
-  env_name <- environmentName(e)
-  
-  if (env_name == "CheckExEnv") {
-    e
-  } else if (identical(e, emptyenv())) {
-    emptyenv()
-  } else if (grepl("^(package|namespace):", env_name)) {
-    e  # Don't clone attached package/namespace environments
-  } else if (identical(e, globalenv())) {
-    env_clone(e)
-  } else {
-    env_clone(e, Recall(parent.env(e)))
-  }
-}
-
-###############################################################################
-# For set of dots, copy environment chain, reusing the new env if possible
-# to save memory
-#' @importFrom rlang env_clone
-
-dots_env_copy <- function(dots) {
-  eprev <- NULL
-  for (i in seq_along(dots)) {
-    ecurrent <- environment(dots[[i]])
-    if (!is.null(ecurrent)) {
-      if (!identical(ecurrent, eprev)) {
-        eprev <- ecurrent
-        eclone <- env_deep_copy(ecurrent)
-      }
-      environment(dots[[i]]) <- eclone
-    }
-  }
-  dots
-}
-
 
 # Given a function and dots, rename dots based on how things will positionally match
 #' @importFrom rlang is_empty is_scalar_character get_expr
@@ -118,24 +64,167 @@ currydata <- function(FUN, dots) {
   }
 }
 
-# Implementation for declarations
-# captures the dots and handler, and returns a function that calls the handler with dots
-# also deals with labeling and can trigger step validation
-#' @importFrom rlang enquo
-declaration_template <- function(..., handler, label = NULL) {
-  # message("Declared")
 
-  dots <- as.list(quos(..., label = !!label))
+
+# Helper to find all symbols recursively in an expression
+find_symbols_recursive <- function(expr) {
+  if (is.null(expr)) return(character())
+  symbols <- character()
+  if (is.symbol(expr)) {
+    symbols <- as.character(expr)
+  } else if (is.call(expr) || is.pairlist(expr)) {
+    for (e in as.list(expr)) {
+      symbols <- c(symbols, find_symbols_recursive(e))
+    }
+  }
+  unique(symbols)
+}
+
+# Helper to capture globals for functions, recursively
+is_available_from_loaded_package <- function(name) {
+  if (!is.character(name) || length(name) != 1) return(FALSE)
+  ga <- utils::getAnywhere(name)
+  any(startsWith(ga$where, "package:"))
+}
+
+capture_function_dependencies <- function(fun, envir = globalenv(), fallback_env = parent.frame()) {
+  if (!is.function(fun)) return(fun)
+  body_expr <- body(fun)
+  
+  # Find all symbols used in the body
+  find_symbols_recursive <- function(expr) {
+    if (is.null(expr)) return(character())
+    if (is.symbol(expr)) return(as.character(expr))
+    if (is.call(expr) || is.pairlist(expr)) {
+      return(unique(unlist(lapply(as.list(expr), find_symbols_recursive))))
+    }
+    character()
+  }
+  
+  symbols <- find_symbols_recursive(body_expr)
+  needed <- setdiff(symbols, c(names(formals(fun)), "..."))
+  
+  # Create new environment for function, inheriting from its original env
+  old_env <- environment(fun)
+  new_env <- new.env(parent = old_env)
+  
+  for (name in needed) {
+    # Skip package-available functions
+    if (is_available_from_loaded_package(name)) next
+    
+    obj <- tryCatch(
+      get(name, envir = old_env, inherits = TRUE),
+      error = function(e) tryCatch(
+        get(name, envir = envir, inherits = TRUE),
+        error = function(e2) tryCatch(
+          get(name, envir = fallback_env, inherits = TRUE),
+          error = function(e3) NULL
+        )
+      )
+    )
+    
+    # Recursively capture dependencies of functions
+    if (is.function(obj)) {
+      obj <- capture_function_dependencies(obj, envir = envir, fallback_env = fallback_env)
+    }
+    
+    if (!is.null(obj)) {
+      assign(name, obj, envir = new_env)
+    }
+  }
+  
+  environment(fun) <- new_env
+  fun
+}
+
+
+# Main function to capture globals for quosures
+capture_globals_quosure <- 
+  
+  function(q, envir = globalenv(), skip = c("N"), fallback_env = parent.frame()) {
+    
+  if (!inherits(q, "quosure")) stop("Input must be a quosure.")
+  
+  expr <- rlang::quo_get_expr(q)
+  old_env <- rlang::quo_get_env(q)
+  
+  needed <- setdiff(find_symbols_recursive(expr), skip)
+  new_env <- new.env(parent = old_env)
+  
+  for (name in needed) {
+    # Skip symbols that are from loaded packages
+    if (is_available_from_loaded_package(name)) next
+    
+    obj <- tryCatch(
+      get(name, envir = old_env, inherits = TRUE),
+      error = function(e) tryCatch(
+        get(name, envir = envir, inherits = TRUE),
+        error = function(e2) tryCatch(
+          get(name, envir = fallback_env, inherits = TRUE),
+          error = function(e3) NULL
+        )
+      )
+    )
+    
+    if (!is.null(obj)) {
+      if (is.function(obj)) {
+        obj <- capture_function_dependencies(obj, envir = envir, fallback_env = fallback_env)
+      }
+      assign(name, obj, envir = new_env)
+    }
+
+  }
+  
+  rlang::new_quosure(expr, new_env)
+}
+
+
+# Wrap each quosure in dots using the updated capture
+# dots_add_args_quosure <- function(dots) {
+#   for (i in seq_along(dots)) {
+#     obj <- dots[[i]]
+#     if (inherits(obj, "quosure")) {
+#       dots[[i]] <- capture_globals_quosure(obj)
+#     }
+#   }
+#   dots
+# }
+
+dots_add_args_quosure <- function(dots) {
+  for (i in seq_along(dots)) {
+    obj <- dots[[i]]
+    
+    if (inherits(obj, "quosure")) {
+      dots[[i]] <- capture_globals_quosure(obj)
+    } else if (is.function(obj)) {
+      dots[[i]] <- capture_function_dependencies(obj)
+    }
+  }
+  
+  dots
+}
+
+# Declaration template used for all declare_* functions
+declaration_template <- function(..., handler, label = NULL, pars = NULL) {
+  dots <- as.list(rlang::quos(..., label = !!label))
   this <- attributes(sys.function())
-
+  
   if (!"label" %in% names(formals(handler))) {
     dots$label <- NULL
   }
-
+  
+# Edge case: capture_function_dependencies if handler is user-defined
+  if (is.function(handler)) {
+    handler_env <- environment(handler)
+    # if the environment is a package namespace, skip capture
+    if (!isNamespace(handler_env)) {
+      handler <- capture_function_dependencies(handler)
+    }
+  }
+  
   dots <- rename_dots(handler, dots)
-  dots <- dots_env_copy(dots)
-
-
+  dots <- dots_add_args_quosure(dots)
+  
   ret <- build_step(currydata(handler, dots),
                     handler = handler,
                     dots = dots,

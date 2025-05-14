@@ -5,7 +5,12 @@
 \alias{measurement_handler}
 \title{Declare measurement procedure}
 \usage{
-declare_measurement(..., handler = measurement_handler, label = NULL)
+declare_measurement(
+  ...,
+  handler = measurement_handler,
+  label = NULL,
+  pars = NULL
+)
 
 measurement_handler(data, ...)
 }

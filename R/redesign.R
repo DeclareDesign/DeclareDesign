@@ -86,8 +86,16 @@
 #' 
 #' @export
 redesign <- function(design, ..., expand = TRUE) {
-  check_design_class_single(design)
-  
+   check_design_class_single(design)
+
+  # if(! is.null(attr(design, "parameters"))) {
+  #   altered <- names(list(...))
+  #   missing <- !(altered %in% attr(design, "parameters"))
+  #   if(any(missing)) 
+  #     warning(paste(
+  #       "These variables are not listed in the design attributes:", paste(altered[missing], sep = ","), "\n"))
+  # }
+    
   f <- function(...) {
     clone_design_edit(design, ...)
   }
