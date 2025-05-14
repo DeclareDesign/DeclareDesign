@@ -81,11 +81,12 @@ find_symbols_recursive <- function(expr) {
 }
 
 # Helper to capture globals for functions, recursively
-is_available_from_loaded_package <- function(name) {
-  if (!is.character(name) || length(name) != 1) return(FALSE)
-  ga <- utils::getAnywhere(name)
-  any(startsWith(ga$where, "package:"))
-}
+ is_available_from_loaded_package <- function(name) {
+   if (!is.character(name) || length(name) != 1) return(FALSE)
+   ga <- utils::getAnywhere(name)
+   any(startsWith(ga$where, "package:"))
+ }
+
 
 capture_function_dependencies <- function(fun, envir = globalenv(), fallback_env = parent.frame()) {
   if (!is.function(fun)) return(fun)
@@ -109,6 +110,7 @@ capture_function_dependencies <- function(fun, envir = globalenv(), fallback_env
   new_env <- new.env(parent = old_env)
   
   for (name in needed) {
+
     # Skip package-available functions
     if (is_available_from_loaded_package(name)) next
     
@@ -148,10 +150,12 @@ capture_globals_quosure <-
   expr <- rlang::quo_get_expr(q)
   old_env <- rlang::quo_get_env(q)
   
-  needed <- setdiff(find_symbols_recursive(expr), skip)
+  # needed <- setdiff(find_symbols_recursive(expr), skip)
+  needed <- find_symbols_recursive(expr)
   new_env <- new.env(parent = old_env)
   
   for (name in needed) {
+    if (name %in% skip) next
     # Skip symbols that are from loaded packages
     if (is_available_from_loaded_package(name)) next
     
@@ -204,37 +208,47 @@ dots_add_args_quosure <- function(dots) {
   dots
 }
 
+
+
 # Declaration template used for all declare_* functions
-declaration_template <- function(..., handler, label = NULL, pars = NULL) {
+
+declaration_template <- function(..., handler, label = NULL, handler_environment = TRUE) {
   dots <- as.list(rlang::quos(..., label = !!label))
   this <- attributes(sys.function())
   
   if (!"label" %in% names(formals(handler))) {
     dots$label <- NULL
   }
+
+    
+  # Edge case: capture_function_dependencies if handler is in global
+  # Estimator steps excluded because of label_estimator(method_handler) behavior  
   
-# Edge case: capture_function_dependencies if handler is user-defined
-  if (is.function(handler)) {
+  if (is.function(handler) & handler_environment) {
     handler_env <- environment(handler)
-    # if the environment is a package namespace, skip capture
+    
     if (!isNamespace(handler_env)) {
-      handler <- capture_function_dependencies(handler)
+        handler <- capture_function_dependencies(handler)
     }
   }
   
   dots <- rename_dots(handler, dots)
   dots <- dots_add_args_quosure(dots)
   
-  ret <- build_step(currydata(handler, dots),
-                    handler = handler,
-                    dots = dots,
-                    label = label,
-                    step_type = this$step_type,
-                    causal_type = this$causal_type,
-                    call = match.call())
+  dots <<- dots
   
-  validate(handler, ret,  dots, label)
-}
+  ret <- build_step(
+    currydata(handler, dots),
+    handler = handler,
+    dots = dots,
+    label = label,
+    step_type = this$step_type,
+    causal_type = this$causal_type,
+    call = match.call()
+  )
+  
+  validate(handler, ret, dots, label)
+} 
 
 # data structure for steps
 build_step <- function(curried_fn, handler, dots, label, step_type, causal_type, call) {
@@ -251,10 +265,13 @@ build_step <- function(curried_fn, handler, dots, label, step_type, causal_type,
 }
 
 # generate declaration steps (eg declare_model) by setting the default handler and metadata
-make_declarations <- function(default_handler, step_type, causal_type = "dgp", default_label, strictDataParam = TRUE) {
+make_declarations <- function(default_handler, step_type, causal_type = "dgp", 
+                              default_label, strictDataParam = TRUE,
+                              handler_environment = TRUE) {
   declaration <- declaration_template
 
   formals(declaration)$handler <- substitute(default_handler)
+  formals(declaration)$handler_environment <- substitute(handler_environment)
   if (!missing(default_label)) {
     formals(declaration)$label <- default_label
   }

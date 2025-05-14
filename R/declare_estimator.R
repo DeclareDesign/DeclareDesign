@@ -166,7 +166,8 @@ declare_estimator <-
     label_estimator(method_handler),
     step_type = "estimator",
     causal_type = "estimator",
-    default_label = "estimator"
+    default_label = "estimator",
+    handler_environment = FALSE
   )
 
 #' @rdname declare_estimator
