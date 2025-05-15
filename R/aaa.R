@@ -88,7 +88,8 @@ find_symbols_recursive <- function(expr) {
  }
 
 
-capture_function_dependencies <- function(fun, envir = globalenv(), fallback_env = parent.frame()) {
+capture_function_dependencies <- 
+  function(fun, envir = globalenv(), fallback_env = parent.frame()) {
   if (!is.function(fun)) return(fun)
   body_expr <- body(fun)
   
@@ -156,9 +157,23 @@ capture_globals_quosure <-
   
   for (name in needed) {
     if (name %in% skip) next
+
     # Skip symbols that are from loaded packages
-    if (is_available_from_loaded_package(name)) next
+    safe_exists <- function(name, envir) {
+      if (!exists(name, envir = envir, inherits = TRUE)) return(FALSE)
+      obj <- get(name, envir = envir, inherits = TRUE)
+      !is.primitive(obj)
+    }
     
+    obj_exists <-
+      safe_exists(name, old_env) ||
+      safe_exists(name, envir) ||
+      safe_exists(name, fallback_env)
+    
+    if (!obj_exists && is_available_from_loaded_package(name)) {
+      next
+    }
+  
     obj <- tryCatch(
       get(name, envir = old_env, inherits = TRUE),
       error = function(e) tryCatch(
@@ -220,22 +235,25 @@ declaration_template <- function(..., handler, label = NULL, handler_environment
     dots$label <- NULL
   }
 
-    
   # Edge case: capture_function_dependencies if handler is in global
   # Estimator steps excluded because of label_estimator(method_handler) behavior  
+  hander_1 <<- handler
+  dots_1 <<- dots
   
   if (is.function(handler) & handler_environment) {
+  
     handler_env <- environment(handler)
-    
     if (!isNamespace(handler_env)) {
         handler <- capture_function_dependencies(handler)
     }
+    handler_2 <<- handler
+    
   }
   
   dots <- rename_dots(handler, dots)
   dots <- dots_add_args_quosure(dots)
   
-  dots <<- dots
+  dots_2 <<- dots
   
   ret <- build_step(
     currydata(handler, dots),
@@ -246,6 +264,8 @@ declaration_template <- function(..., handler, label = NULL, handler_environment
     causal_type = this$causal_type,
     call = match.call()
   )
+  
+  ret <<- ret
   
   validate(handler, ret, dots, label)
 } 

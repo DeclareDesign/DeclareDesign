@@ -5,7 +5,8 @@ test_that(" pars are saved", {
   n <- 5
   b <- 2
   f <- function(x, b) b*x
-  design <- declare_model(N = n, x = runif(N)) +
+  design <- 
+    declare_model(N = n, x = runif(N)) +
     declare_model(y = f(x, b)) 
   design
   rm(b, f)
@@ -13,7 +14,7 @@ test_that(" pars are saved", {
   expect_equal(nrow(draw_data(design)),5)
 })
 
-test_that(" n is saved", {
+test_that("n is saved", {
   n <- 5
   b <- 2
   f <- function(x, b) b*x
@@ -23,4 +24,48 @@ test_that(" n is saved", {
   expect_true(  nrow(step()) == 5)
 })
 
+
+test_that("deeper arguments  saved", {
+  n <- 5
+  b <- 0
+  f <- function(x) b*x
+  step <- declare_model(N = n, x = runif(N), y = f(x))
+  expect_true(  mean(step()$y) == 0)
+  rm(b)
+  expect_true(  mean(step()$y) == 0)
+})
+
+
+test_that("data saved", {
+  ddf <- data.frame(X = runif(5))
+  step <- declare_model(data = ddf)
+  step()
+  rm(ddf)
+  expect_true(nrow(step()) == 5)
+})
+
+
+# edge case: 
+test_that("data called 'df' (or other function name)", {
+  df <- data.frame(X = runif(5))
+  step <- declare_model(data = df)
+  step()
+  rm(df)
+  expect_true(nrow(step()) == 5)
+})
+
+test_that("estimator steps", {
+  n <- 100
+  b <- B <- .2
+
+  d <- 
+    declare_model(N = n, Y = runif(N)) + 
+    declare_estimator(Y ~ 1, subset = Y < b)
+  
+  expect_true(draw_estimates(d)$estimate < B)
+
+  rm(b)
+
+  expect_true(draw_estimates(d)$estimate < B)
+})
 
