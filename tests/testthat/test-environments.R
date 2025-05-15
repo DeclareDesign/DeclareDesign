@@ -69,3 +69,56 @@ test_that("estimator steps", {
   expect_true(draw_estimates(d)$estimate < B)
 })
 
+test_that("multiple steps", {
+  n <- 1000
+  b <- .2
+  
+  d <- 
+    declare_model(N = n, Y = rnorm(N, b)) + 
+    declare_estimator(Y ~ 1) +
+    declare_inquiry(Q = b)
+  
+  expect_true(run_design(d)$estimand == .2)
+  
+  rm(b)
+  
+  expect_true(run_design(d)$estimand == .2)
+
+    d <- redesign(d, b = .4)
+    x <- run_design(d)
+    expect_true(x$estimand == .4)
+    expect_true(abs(x$estimand - x$estimate) < .1)
+
+    d <- redesign(d, b = 10)
+    x <- run_design(d)
+    expect_true(x$estimand == 10)
+    expect_true(abs(x$estimand - x$estimate) < .1)
+    
+})
+
+
+test_that("custom estimator", {
+
+  my_estimator <- function(data) {
+    data.frame(estimate = mean(data$Y))
+  }
+
+
+  design <-
+    declare_model(
+      N = 500,
+      Y = rnorm(N, sd = 0.25)
+    ) +
+    declare_inquiry(Y_bar = mean(Y)) +
+    declare_estimator(handler = label_estimator(my_estimator),
+                      label = "mean",
+                      inquiry = "Y_bar")
+  
+  run_design(design)
+  
+  rm(my_estimator)
+
+  run_design(design)
+  
+})
+
