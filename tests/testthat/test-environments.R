@@ -114,11 +114,80 @@ test_that("custom estimator", {
                       label = "mean",
                       inquiry = "Y_bar")
   
-  run_design(design)
+  expect_true(nrow(run_design(design)) ==1)
   
   rm(my_estimator)
 
-  run_design(design)
+  expect_true(nrow(run_design(design)) ==1)
+
+
+})
+
+
+
+test_that("potential outcomes environment", {
+  
+  a <- .2
+  b <- 2
+  m <- 
+    declare_model(
+      N = 5,
+      U = rnorm(N, sd = a),
+      potential_outcomes(Y ~ b)
+      )
+  
+  expect_true(nrow(m()) ==5)
+  
+  expect_true(environment(environment(m)$dots$U)$a ==a)
+  expect_true(environment(environment(m)$dots[[4]])$b ==b)
+  rm(a,b)
+  expect_true(nrow(m()) ==5)
+  
+  # Some mad self referencing?
+  #   environment(environment(environment(m)$quoData)$quoData)$quoData
+  # f<- function(x)   environment(x)$quoData
+  # f(m) 
+  # f(f(m))
+  # environment(m)$dots$U
+  # environment(environment(m)$dots$U)$a
   
 })
 
+
+
+test_that("check not overriding pipe", {
+  
+  U <- 1:5
+  m <- 
+    declare_model(
+      N = 5,
+      U = rnorm(N),
+      Y = U
+    )
+
+  # Global U is scooped up but not actually required  or used
+  expect_true(all(environment(environment(m)$dots$Y)$U == U))
+  
+  expect_true(m()$Y[1] !=1)
+  
+})
+
+
+# Issue here
+test_that("check not overriding pipe", {
+  
+n1 <- 3
+n2 <- 4
+
+m <-   
+  declare_model(
+    classrooms = add_level(n1),
+    individuals = add_level(n2)
+  ) 
+
+rm(n1, n2)
+
+expect_true(m() |> nrow() ==12)
+
+
+})

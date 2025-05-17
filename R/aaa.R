@@ -84,62 +84,75 @@ find_symbols_recursive <- function(expr) {
  is_available_from_loaded_package <- function(name) {
    if (!is.character(name) || length(name) != 1) return(FALSE)
    ga <- utils::getAnywhere(name)
-   any(startsWith(ga$where, "package:"))
+   any(startsWith(ga$where, "package:") | startsWith(ga$where, "namespace:"))
  }
 
 
+ 
 capture_function_dependencies <- 
   function(fun, envir = globalenv(), fallback_env = parent.frame()) {
-  if (!is.function(fun)) return(fun)
-  body_expr <- body(fun)
-  
-  # Find all symbols used in the body
-  find_symbols_recursive <- function(expr) {
-    if (is.null(expr)) return(character())
-    if (is.symbol(expr)) return(as.character(expr))
-    if (is.call(expr) || is.pairlist(expr)) {
-      return(unique(unlist(lapply(as.list(expr), find_symbols_recursive))))
-    }
-    character()
-  }
-  
-  symbols <- find_symbols_recursive(body_expr)
-  needed <- setdiff(symbols, c(names(formals(fun)), "..."))
-  
-  # Create new environment for function, inheriting from its original env
-  old_env <- environment(fun)
-  new_env <- new.env(parent = old_env)
-  
-  for (name in needed) {
-
-    # Skip package-available functions
-    if (is_available_from_loaded_package(name)) next
+    if (!is.function(fun)) return(fun)
+    body_expr <- body(fun)
     
-    obj <- tryCatch(
-      get(name, envir = old_env, inherits = TRUE),
-      error = function(e) tryCatch(
-        get(name, envir = envir, inherits = TRUE),
-        error = function(e2) tryCatch(
-          get(name, envir = fallback_env, inherits = TRUE),
-          error = function(e3) NULL
+    # Find all symbols used in the body
+    find_symbols_recursive <- function(expr) {
+      if (is.null(expr)) return(character())
+      if (is.symbol(expr)) return(as.character(expr))
+      if (is.call(expr) || is.pairlist(expr)) {
+        return(unique(unlist(lapply(as.list(expr), find_symbols_recursive))))
+      }
+      character()
+    }
+    
+    symbols <- find_symbols_recursive(body_expr)
+    needed <- setdiff(symbols, c(names(formals(fun)), "..."))
+    
+    # fun <<- fun  
+    # needed <<- needed
+    
+    # Create new environment for function, inheriting from its original env
+    old_env <- environment(fun)
+    if (is.null(old_env)) old_env <- globalenv()
+    new_env <- new.env(parent = old_env)
+    
+    for (name in needed) {
+      # Skip package-available functions
+      # if (name %in% defined) next
+      if (name == "") next
+      if (name == "f_lhs") next
+      if (is_available_from_loaded_package(name)) next
+      
+      obj <- tryCatch(
+        get(name, envir = old_env, inherits = TRUE),
+        error = function(e) tryCatch(
+          get(name, envir = envir, inherits = TRUE),
+          error = function(e2) tryCatch(
+            get(name, envir = fallback_env, inherits = TRUE),
+            error = function(e3) NULL
+          )
         )
       )
-    )
-    
-    # Recursively capture dependencies of functions
-    if (is.function(obj)) {
-      obj <- capture_function_dependencies(obj, envir = envir, fallback_env = fallback_env)
+      
+      # print(name)
+      
+      # Recursively capture dependencies of functions, but only if:
+      # - it's not primitive
+      # - and it's not from a package namespace (i.e. user-defined)
+      if (is.function(obj) &&
+          !is.primitive(obj) &&
+          !isNamespace(environment(obj)) &&
+          environment(obj) %in% list(globalenv(), envir, fallback_env)) {
+        obj <- capture_function_dependencies(obj, envir = envir, fallback_env = fallback_env)
+      }
+      
+      if (!is.null(obj)) {
+        assign(name, obj, envir = new_env)
+      }
     }
     
-    if (!is.null(obj)) {
-      assign(name, obj, envir = new_env)
-    }
+    environment(fun) <- new_env
+    fun
   }
-  
-  environment(fun) <- new_env
-  fun
-}
-
 
 # Main function to capture globals for quosures
 capture_globals_quosure <- 
@@ -156,7 +169,8 @@ capture_globals_quosure <-
   new_env <- new.env(parent = old_env)
   
   for (name in needed) {
-    if (name %in% skip) next
+  
+      if (name %in% skip) next
 
     # Skip symbols that are from loaded packages
     safe_exists <- function(name, envir) {
@@ -169,11 +183,11 @@ capture_globals_quosure <-
       safe_exists(name, old_env) ||
       safe_exists(name, envir) ||
       safe_exists(name, fallback_env)
-    
+
     if (!obj_exists && is_available_from_loaded_package(name)) {
       next
     }
-  
+
     obj <- tryCatch(
       get(name, envir = old_env, inherits = TRUE),
       error = function(e) tryCatch(
@@ -185,9 +199,12 @@ capture_globals_quosure <-
       )
     )
     
+    
     if (!is.null(obj)) {
       if (is.function(obj)) {
+
         obj <- capture_function_dependencies(obj, envir = envir, fallback_env = fallback_env)
+
       }
       assign(name, obj, envir = new_env)
     }
@@ -237,8 +254,7 @@ declaration_template <- function(..., handler, label = NULL, handler_environment
 
   # Edge case: capture_function_dependencies if handler is in global
   # Estimator steps excluded because of label_estimator(method_handler) behavior  
-  hander_1 <<- handler
-  dots_1 <<- dots
+  # dots_1 <<- dots
   
   if (is.function(handler) & handler_environment) {
   
@@ -246,14 +262,10 @@ declaration_template <- function(..., handler, label = NULL, handler_environment
     if (!isNamespace(handler_env)) {
         handler <- capture_function_dependencies(handler)
     }
-    handler_2 <<- handler
-    
   }
   
   dots <- rename_dots(handler, dots)
   dots <- dots_add_args_quosure(dots)
-  
-  dots_2 <<- dots
   
   ret <- build_step(
     currydata(handler, dots),
@@ -265,7 +277,7 @@ declaration_template <- function(..., handler, label = NULL, handler_environment
     call = match.call()
   )
   
-  ret <<- ret
+  # ret <<- ret
   
   validate(handler, ret, dots, label)
 } 
