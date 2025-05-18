@@ -143,6 +143,8 @@ find_symbols_recursive <- function(expr) {
          safe_exists(name, old_env) ||
          safe_exists(name, envir) ||
          safe_exists(name, fallback_env)
+
+       
        
        if (!obj_exists && is_available_from_loaded_package(name)) {
          next
@@ -185,8 +187,12 @@ capture_globals_quosure <-
     
   if (!inherits(q, "quosure")) stop("Input must be a quosure.")
   
+  # Check if quosure is for N
+  is_N <-  (rlang::is_symbol(rlang::quo_get_expr(q), "N"))  
+
   expr <- rlang::quo_get_expr(q)
   old_env <- rlang::quo_get_env(q)
+  
   
   # needed <- setdiff(find_symbols_recursive(expr), skip)
   needed <- find_symbols_recursive(expr)
@@ -194,18 +200,23 @@ capture_globals_quosure <-
   
   for (name in needed) {
   
-
     obj_exists <-
       safe_exists(name, old_env) ||
       safe_exists(name, envir) ||
       safe_exists(name, fallback_env)
 
 
+  #  print("***************")
+  #  print(name)
 
+    # N is special
+    if (name == "N" && ! is_N) next
+    
     if (!obj_exists && is_available_from_loaded_package(name)) {
       next
     }
     
+  #  print(name)
     
 
 obj <- tryCatch(
@@ -233,7 +244,6 @@ if (
 ) {
   next
 }
-    
     
     if (!is.null(obj)) {
       if (is.function(obj)) {

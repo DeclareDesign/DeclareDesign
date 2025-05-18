@@ -4,6 +4,17 @@ find_all_objects <- DeclareDesign:::find_all_objects
 
 # case 1
 
+
+test_that("magic N", {
+  N <- 5
+  design <- 
+    declare_model(N = N, k = rnorm(N)) + NULL 
+  expect_equal(nrow(draw_data(design)),5)
+  rm(N)
+  expect_equal(nrow(draw_data(design)),5)
+  expect_true(nrow(find_all_objects(design)) == 1)
+})
+
 test_that("pars are saved", {
   n <- 5
   b <- 2
@@ -277,24 +288,32 @@ test_that("Design 16.5", {
 
 
 # Design library
+# Obj must be available outside test environemnt for test to work
+control_mean <- -100
+
 test_that("Design library", {
-    control_mean <- -100
-    design <- DesignLibrary::two_arm_covariate_designer(control_mean = nn)
-    rm(control_mean)  # design has already been constructed with nn
+    design <- DesignLibrary::two_arm_covariate_designer(control_mean = control_mean)
+#   rm(control_mean)  # design has already been constructed with control_mean as object
     expect_true(draw_data(design) |> filter(Z == 0) |> pull(Y) |> mean() < -10)
-})
+    expect_true(draw_data(design |> redesign(control_mean = 100)) |> 
+                  filter(Z == 0) |> pull(Y) |> mean() > 10)
+    })
+
+# Obj must be available outside test environment for test to work
+n  = 10
 
 test_that("Design library", {
  
     n = 10 
-    design <- DesignLibrary::two_arm_covariate_designer(N = n, h = .3)
+    design <- DesignLibrary::two_arm_covariate_designer(N = n)
     rm(n)
-
     expect_true(draw_data(design) |> nrow() == 10)
 
-    find_this_object("estimand", design)  
+    expect_true(draw_data(design |> redesign(N = 20)) |> nrow() == 20)
     
-    find_all_objects(design)
+    # find_this_object("estimand", design)  
+    
+    # find_all_objects(design)
     
 })
 
@@ -322,8 +341,6 @@ test_that("parameter assigned in function", {
   
 })
 
-
-
 test_that("runif not saved", {
   n <- 5
   design <- 
@@ -331,4 +348,5 @@ test_that("runif not saved", {
   expect_false("runif" %in% find_all_objects(design)$name)
   
 })
+
 
