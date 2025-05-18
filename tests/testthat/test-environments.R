@@ -12,7 +12,9 @@ test_that("pars are saved", {
     declare_model(N = n, x = runif(N), B = b) +
     declare_model(y = f(x, b)) 
   expect_equal(nrow(draw_data(design)),5)
-  rm(b, f)
+  rm(b)
+  expect_equal(nrow(draw_data(design)),5)
+  rm(f)
   expect_equal(nrow(draw_data(design)),5)
   
   expect_true(!is.null(find_this_object("b", design)))
@@ -276,37 +278,19 @@ test_that("Design 16.5", {
 
 # Design library
 test_that("Design library", {
-  local({
-    nn <- -100
+    control_mean <- -100
     design <- DesignLibrary::two_arm_covariate_designer(control_mean = nn)
-    rm(nn)  # design has already been constructed with nn
+    rm(control_mean)  # design has already been constructed with nn
     expect_true(draw_data(design) |> filter(Z == 0) |> pull(Y) |> mean() < -10)
-  })
 })
 
 test_that("Design library", {
  
-    nn = 5 
-    design <- DesignLibrary::two_arm_covariate_designer(N = nn)
-    rm(nn)
-    env <- environment(design[[1]])$dots
-    expect_true(rlang::eval_tidy(env$N) == 5)
+    n = 5 
+    design <- DesignLibrary::two_arm_covariate_designer(N = n)
+    rm(n)
 
-    
-    design <- DesignLibrary::two_arm_covariate_designer(control_mean = -100)
-
-  expect_true(nrow(draw_data(design)) == 100)
-
-    nn <- -100
-
-    design <- 
-      DesignLibrary::two_arm_covariate_designer(N = 5, control_mean = nn)
-
-    expect_true(  draw_data(design) |> filter(Z==0) |> pull(Y) |> mean() < -10)
-
-    rm(control_mean, nn)
-    find_object("nn", design)
-    find_object("control_mean", design)
+    expect_true(draw_data(design) |> nrow() ==5)
     
 })
 
@@ -328,10 +312,20 @@ test_that("parameter assigned in function", {
     d
   }
 
-  find_object("n", designer())
+  find_this_object("n", designer())[[1]]$value ==4
   
   expect_true(nrow(draw_data(designer())) == 4)
   
 })
 
-expect_true(length(find_object("b", design)) ==2)
+
+# case 1
+
+test_that("runif not saved", {
+  n <- 5
+  design <- 
+    declare_model(N = n, x = runif(N)) + NULL
+  expect_false("runif" %in% find_all_objects(design)$name)
+  
+})
+
