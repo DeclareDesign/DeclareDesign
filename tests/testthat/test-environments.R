@@ -286,11 +286,15 @@ test_that("Design library", {
 
 test_that("Design library", {
  
-    n = 5 
-    design <- DesignLibrary::two_arm_covariate_designer(N = n)
+    n = 10 
+    design <- DesignLibrary::two_arm_covariate_designer(N = n, h = .3)
     rm(n)
 
-    expect_true(draw_data(design) |> nrow() ==5)
+    expect_true(draw_data(design) |> nrow() == 10)
+
+    find_this_object("estimand", design)  
+    
+    find_all_objects(design)
     
 })
 
@@ -313,13 +317,12 @@ test_that("parameter assigned in function", {
   }
 
   find_this_object("n", designer())[[1]]$value ==4
-  
+
   expect_true(nrow(draw_data(designer())) == 4)
   
 })
 
 
-# case 1
 
 test_that("runif not saved", {
   n <- 5

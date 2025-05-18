@@ -131,21 +131,13 @@ find_symbols_recursive <- function(expr) {
      )
      
      needed <- setdiff(symbols, excluded_symbols)     
-     # fun <<- fun  
-     # needed <<- needed
-     
+
      # Create new environment for function, inheriting from its original env
      old_env <- environment(fun)
      if (is.null(old_env)) old_env <- globalenv()
      new_env <- new.env(parent = old_env)
      
      for (name in needed) {
-       # Skip package-available functions
-       # if (name %in% defined) next
-       if (name == "") next
-       if (name == "f_lhs") next
-      #  print(paste("before check: ", name))
-       
 
        obj_exists <-
          safe_exists(name, old_env) ||
@@ -157,8 +149,7 @@ find_symbols_recursive <- function(expr) {
        }
        
        
-      #  print(paste("after check: ", name))      
-       
+
        obj <- tryCatch(
          get(name, envir = old_env, inherits = TRUE),
          error = function(e) tryCatch(
@@ -190,8 +181,6 @@ find_symbols_recursive <- function(expr) {
 capture_globals_quosure <- 
   
   function(q, envir = globalenv(), 
-           skip = c(), 
-           # skip = c("N"), 
            fallback_env = parent.frame()) {
     
   if (!inherits(q, "quosure")) stop("Input must be a quosure.")
@@ -205,61 +194,45 @@ capture_globals_quosure <-
   
   for (name in needed) {
   
-    if (name %in% skip) next
-    
-    print("-------")
-    print(paste("before check: ", name))
-    
-    
+
     obj_exists <-
       safe_exists(name, old_env) ||
       safe_exists(name, envir) ||
       safe_exists(name, fallback_env)
 
-    print("env")
-    print(safe_exists(name, old_env))
-    print(safe_exists(name, envir))
-    print(safe_exists(name, fallback_env))
 
-    
-    print(is_available_from_loaded_package(name))
-    print(paste("obj exists", obj_exists))
-    
-    print(paste("skip here", !obj_exists && is_available_from_loaded_package(name)))
-    
+
     if (!obj_exists && is_available_from_loaded_package(name)) {
       next
     }
     
     
-      print(paste("after check: ", name))      
-    
-  
-      obj <- tryCatch(
-        get(name, envir = old_env, inherits = TRUE),
-        error = function(e) tryCatch(
-          get(name, envir = envir, inherits = TRUE),
-          error = function(e2) tryCatch(
-            get(name, envir = fallback_env, inherits = TRUE),
-            error = function(e3) NULL
-          )
-        )
-      )
-      
-      # If obj is a function AND:
-      # - its environment is a namespace (a package),
-      # - AND the symbol was not found in any local env (old_env, envir, fallback_env),
-      # then skip it.
-      obj_env <- environment(obj)
-      if (
-        is.function(obj) &&
-        (isNamespace(obj_env) || (is.environment(obj_env) && startsWith(environmentName(obj_env), "namespace:"))) &&
-        !(exists(name, envir = old_env, inherits = FALSE) ||
-          exists(name, envir = envir, inherits = FALSE) ||
-          exists(name, envir = fallback_env, inherits = FALSE))
-      ) {
-        next
-      }
+
+obj <- tryCatch(
+  get(name, envir = old_env, inherits = TRUE),
+  error = function(e) tryCatch(
+    get(name, envir = envir, inherits = TRUE),
+    error = function(e2) tryCatch(
+      get(name, envir = fallback_env, inherits = TRUE),
+      error = function(e3) NULL
+    )
+  )
+)
+
+# If obj is a function AND:
+# - its environment is a namespace (a package),
+# - AND the symbol was not found in any local env (old_env, envir, fallback_env),
+# then skip it.
+obj_env <- environment(obj)
+if (
+  is.function(obj) &&
+  (isNamespace(obj_env) || (is.environment(obj_env) && startsWith(environmentName(obj_env), "namespace:"))) &&
+  !(exists(name, envir = old_env, inherits = FALSE) ||
+    exists(name, envir = envir, inherits = FALSE) ||
+    exists(name, envir = fallback_env, inherits = FALSE))
+) {
+  next
+}
     
     
     if (!is.null(obj)) {
@@ -306,8 +279,7 @@ declaration_template <- function(..., handler, label = NULL, handler_environment
 
   # Edge case: capture_function_dependencies if handler is in global
   # Estimator steps excluded because of label_estimator(method_handler) behavior  
-  # dots_1 <<- dots
-  
+
   if (is.function(handler) & handler_environment) {
   
     handler_env <- environment(handler)
@@ -328,8 +300,6 @@ declaration_template <- function(..., handler, label = NULL, handler_environment
     causal_type = this$causal_type,
     call = match.call()
   )
-  
-  # ret <<- ret
   
   validate(handler, ret, dots, label)
 } 
