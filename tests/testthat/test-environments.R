@@ -1,17 +1,28 @@
 
+find_this_object <- DeclareDesign:::find_this_object
+find_all_objects <- DeclareDesign:::find_all_objects
+
 # case 1
 
-test_that(" pars are saved", {
+test_that("pars are saved", {
   n <- 5
   b <- 2
   f <- function(x, b) b*x
   design <- 
-    declare_model(N = n, x = runif(N)) +
+    declare_model(N = n, x = runif(N), B = b) +
     declare_model(y = f(x, b)) 
-  design
-  rm(b, f)
-  design
   expect_equal(nrow(draw_data(design)),5)
+  rm(b, f)
+  expect_equal(nrow(draw_data(design)),5)
+  
+  expect_true(!is.null(find_this_object("b", design)))
+  expect_true(length(find_this_object("b", design)) ==2)
+  expect_true(length(find_this_object("f", design)) ==1)
+  expect_true(!is.null(find_this_object("f", design)))
+  expect_true(is.null(find_this_object("z", design)))
+  
+  find_all_objects(design)
+  
 })
 
 test_that("n is saved", {
@@ -143,14 +154,6 @@ test_that("potential outcomes environment", {
   rm(a,b)
   expect_true(nrow(m()) ==5)
   
-  # Some mad self referencing?
-  #   environment(environment(environment(m)$quoData)$quoData)$quoData
-  # f<- function(x)   environment(x)$quoData
-  # f(m) 
-  # f(f(m))
-  # environment(m)$dots$U
-  # environment(environment(m)$dots$U)$a
-  
 })
 
 
@@ -193,7 +196,7 @@ expect_true(m() |> nrow() ==12)
 })
 
 
-# Issue here
+# Design 16.1
 test_that("Design 16.1", {
   
   library(rdss) # for helper functions
@@ -225,8 +228,110 @@ test_that("Design 16.1", {
   
   rm(causal_model, strategies)
   
-  draw_data(declaration_16.1)
+  expect_true(nrow(draw_data(declaration_16.1)) == 1)
   
 })
 
 
+
+# Design 16.5
+test_that("Design 16.5", {
+  
+  library(rdss) # for helper functions
+  library(rdrobust)
+  
+  cutoff <- 0.5
+  control <- function(X) {
+    as.vector(poly(X - cutoff, 4, raw = TRUE) %*% c(.7, -.8, .5, 1))}
+  treatment <- function(X) {
+    as.vector(poly(X - cutoff, 4, raw = TRUE) %*% c(0, -1.5, .5, .8)) + .15}
+  
+  declaration_16.5 <-
+    declare_model(
+      N = 500,
+      U = rnorm(N, 0, 0.1),
+      X = runif(N, 0, 1) + U,
+      D = 1 * (X > cutoff),
+      Y_D_0 = control(X) + U,
+      Y_D_1 = treatment(X) + U
+    ) +
+    declare_inquiry(LATE = treatment(cutoff) - control(cutoff)) +
+    declare_measurement(Y = reveal_outcomes(Y ~ D)) +
+    declare_estimator(
+      Y, X, c = cutoff,
+      term = "Bias-Corrected",
+      .method = rdrobust_helper,
+      inquiry = "LATE",
+      label = "optimal"
+    )  
+
+  rm(cutoff, control, treatment)
+  
+  expect_true(nrow(draw_data(declaration_16.5)) == 500)
+  
+})
+
+
+
+
+# Design library
+test_that("Design library", {
+  local({
+    nn <- -100
+    design <- DesignLibrary::two_arm_covariate_designer(control_mean = nn)
+    rm(nn)  # design has already been constructed with nn
+    expect_true(draw_data(design) |> filter(Z == 0) |> pull(Y) |> mean() < -10)
+  })
+})
+
+test_that("Design library", {
+ 
+    nn = 5 
+    design <- DesignLibrary::two_arm_covariate_designer(N = nn)
+    rm(nn)
+    env <- environment(design[[1]])$dots
+    expect_true(rlang::eval_tidy(env$N) == 5)
+
+    
+    design <- DesignLibrary::two_arm_covariate_designer(control_mean = -100)
+
+  expect_true(nrow(draw_data(design)) == 100)
+
+    nn <- -100
+
+    design <- 
+      DesignLibrary::two_arm_covariate_designer(N = 5, control_mean = nn)
+
+    expect_true(  draw_data(design) |> filter(Z==0) |> pull(Y) |> mean() < -10)
+
+    rm(control_mean, nn)
+    find_object("nn", design)
+    find_object("control_mean", design)
+    
+})
+
+
+
+# Inside function
+
+test_that("parameter assigned in function", {
+  
+  designer <- function(n = 1) 
+      declare_model(N = n) + NULL 
+  
+  expect_true(nrow(draw_data(designer(3))) == 3)
+  
+  designer <- function() {
+    n = 4
+    d <- declare_model(N = n) + NULL
+    rm(n)
+    d
+  }
+
+  find_object("n", designer())
+  
+  expect_true(nrow(draw_data(designer())) == 4)
+  
+})
+
+expect_true(length(find_object("b", design)) ==2)

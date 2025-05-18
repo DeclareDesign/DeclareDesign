@@ -149,11 +149,11 @@ find_symbols_recursive <- function(expr) {
        # if (name %in% defined) next
        if (name == "") next
        if (name == "f_lhs") next
-       print(paste("before check: ", name))
+      #  print(paste("before check: ", name))
        
        if (is_available_from_loaded_package(name)) next
        
-       print(paste("after check: ", name))      
+      # print(paste("after check: ", name))      
        
        obj <- tryCatch(
          get(name, envir = old_env, inherits = TRUE),
@@ -187,7 +187,10 @@ find_symbols_recursive <- function(expr) {
 # Main function to capture globals for quosures
 capture_globals_quosure <- 
   
-  function(q, envir = globalenv(), skip = c("N"), fallback_env = parent.frame()) {
+  function(q, envir = globalenv(), 
+           skip = c(), 
+           # skip = c("N"), 
+           fallback_env = parent.frame()) {
     
   if (!inherits(q, "quosure")) stop("Input must be a quosure.")
   
@@ -387,3 +390,167 @@ validate <- function(handler, ret, dots, label) {
 #' @param label    a string describing the step
 #' @keywords internal
 declare_internal_inherit_params <- make_declarations(function(data, ...) data.frame(BLNK = "MSG", stringsAsFactors = TRUE), step_type = "BLNKMSG")
+
+
+
+# Environment helpers
+
+# Find a given object
+find_this_object <- function(objname, design_or_step) {
+  # Helper to check and return object from env chain
+  check_env <- function(env, visited = list()) {
+    while (!identical(env, emptyenv())) {
+      if (exists(objname, envir = env, inherits = FALSE)) {
+        return(list(value = get(objname, envir = env), env = env))
+      }
+      env_label <- capture.output(print(env))
+      if (any(env_label %in% visited)) break
+      visited <- c(visited, env_label)
+      env <- parent.env(env)
+    }
+    NULL
+  }
+  
+  steps <- if ("design" %in% class(design_or_step)) design_or_step else list(design_or_step)
+  
+  results <- list()
+  
+  for (i in seq_along(steps)) {
+    step <- steps[[i]]
+    if (!is.null(attr(step, "dots"))) {
+      dots <- attr(step, "dots")
+      for (dotname in names(dots)) {
+        dot <- dots[[dotname]]
+        if (rlang::is_quosure(dot)) {
+          res <- check_env(rlang::get_env(dot))
+          if (!is.null(res)) {
+            results[[length(results) + 1]] <- list(
+              step = i,
+              quosure = dotname,
+              value = res$value,
+              environment = res$env
+            )
+          }
+        }
+      }
+    }
+  }
+  
+  if (length(results) == 0) {
+    cat(glue::glue("❌ Object '{objname}' not found in any step.\n"))
+    return(invisible(NULL))
+  }
+  
+  # Create and print a results table
+  df <- tibble::tibble(
+    step = vapply(results, function(x) x$step, integer(1)),
+    quosure = vapply(results, function(x) x$quosure, character(1)),
+    value = vapply(results, function(x) paste0(capture.output(str(x$value)), collapse = "\n"), character(1)),
+    environment = vapply(results, function(x) format(x$environment), character(1))
+  )
+  
+  print(df)
+  
+  invisible(results)
+}
+
+
+# Find all objects saved to a design environment
+
+find_all_objects <- function(design) {
+  
+  # Collect all environments from quosures with step/quosure metadata
+  env_info <- list()
+  
+  for (step_i in seq_along(design)) {
+    step <- design[[step_i]]
+    dots <- attr(step, "dots")
+    if (is.null(dots)) next
+    
+    for (quosure_name in names(dots)) {
+      dot <- dots[[quosure_name]]
+      if (!is_quosure(dot)) next
+      
+      env <- rlang::get_env(dot)
+      env_id <- format(env)  # stringify environment
+      
+      env_info[[length(env_info) + 1]] <- list(
+        step = step_i,
+        quosure = quosure_name,
+        env_id = env_id
+      )
+    }
+  }
+  
+  env_df <- bind_rows(env_info)
+  
+  # Unique environments
+  unique_envs <- env_df %>% distinct(env_id)
+  
+  # Map from env_id to actual env
+  env_map <- list()
+  for (e in unique_envs$env_id) {
+    # parse env_id back to environment is tricky, so:
+    # instead, find the first quosure with this env_id and get env from it
+    env_map[[e]] <- NULL  # placeholder
+  }
+  
+  # Build env_map properly by scanning design again
+  for (step_i in seq_along(design)) {
+    step <- design[[step_i]]
+    dots <- attr(step, "dots")
+    if (is.null(dots)) next
+    
+    for (quosure_name in names(dots)) {
+      dot <- dots[[quosure_name]]
+      if (!is_quosure(dot)) next
+      
+      env <- rlang::get_env(dot)
+      env_id <- format(env)
+      if (is.null(env_map[[env_id]])) {
+        env_map[[env_id]] <- env
+      }
+    }
+  }
+  
+  # For each environment, get all objects inside it
+  env_objects <- map(unique_envs$env_id, function(env_id) {
+    env <- env_map[[env_id]]
+    objs <- ls(env, all.names = TRUE)
+    vals <- map(objs, ~ get(.x, envir = env))
+    names(vals) <- objs
+    
+    # Stringify value for printing - show class and first few chars
+    vals_str <- map_chr(vals, function(x) {
+      val_class <- class(x)[1]
+      val_str <- tryCatch({
+        if (is.atomic(x) && length(x) <= 5) {
+          paste0(deparse(x), collapse = "")
+        } else if (is.function(x)) {
+          "function"
+        } else {
+          paste0("<", val_class, ">")
+        }
+      }, error = function(e) "<error>")
+      val_str
+    })
+    
+    tibble(
+      name = objs,
+      value_str = vals_str,
+      env_id = env_id
+    )
+  })
+  
+  all_objs_df <- bind_rows(env_objects)
+  
+  # Join back with env_df to get step/quosure info for each env_id
+  # One env can appear in multiple steps/quosures, so expand join to multiple rows
+  joined <- left_join(all_objs_df, env_df, by = "env_id") %>%
+    select(name, value_str, env_id, step, quosure) %>%
+    arrange(step, name)
+  
+  # Return tibble with: object name, value string, environment address, step, quosure
+  joined
+}
+

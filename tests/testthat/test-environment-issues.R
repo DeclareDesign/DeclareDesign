@@ -32,3 +32,5 @@ test_that("send inquiry to estimator works", {
   expect_equal(nrow(diag$diagnosands_df), 1)
   expect_equal(nrow(diag$bootstrap_replicates), 3)
 })
+
+
