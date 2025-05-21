@@ -85,7 +85,8 @@ test_that("find object after redesign", {
   b <- 2
   r <- 2
   f <- function(x, b) b*x + r
-  design <- declare_model(N = n, x = runif(N), w = f(x, b)) + NULL
+  design <- declare_model(N = n, x = runif(N), w = f(x, b), s = 2*w) + NULL
+  rm(n,b,r, f)
   # needs to find r
   DeclareDesign:::find_all_objects(design)
   
@@ -94,8 +95,11 @@ test_that("find object after redesign", {
   
   design <- DeclareDesign:::par_edit(design, n = 3)
   expect_true(draw_data(design) |> nrow() ==3)
+  DeclareDesign:::find_all_objects(design)
   
-  design <- redesign(design, k = 1, n = 3)
+  design <- redesign(design, n = 7)
+  expect_true(draw_data(design) |> nrow() ==7)
+  
   DeclareDesign:::find_all_objects(design)
   find_this_object("k", design)
   find_this_object("f", design)
@@ -103,7 +107,7 @@ test_that("find object after redesign", {
 
 
 test_that("formula OK", {
-  b = 2
+  b = 2; n  = 2
   step <- declare_model(N = n, potential_outcomes( Y ~ b*Z))
   rm(b)
   expect_true( all(step()[1, 2:3] == c(0,2)))
@@ -358,34 +362,20 @@ test_that("Design 16.5", {
 
 
 # Design library
-# Obj must be available outside test environemnt for test to work
-control_mean <- -100
-
-test_that("Design library", {
-    design <- DesignLibrary::two_arm_covariate_designer(control_mean = control_mean)
-#   rm(control_mean)  # design has already been constructed with control_mean as object
-    expect_true(draw_data(design) |> filter(Z == 0) |> pull(Y) |> mean() < -10)
-    expect_true(draw_data(design |> redesign(control_mean = 100)) |> 
-                  filter(Z == 0) |> pull(Y) |> mean() > 10)
-    })
-
 # Obj must be available outside test environment for test to work
-n  = 10
-
+# Without this test still works but not inside test environment
+n = 20
 test_that("Design library", {
- 
-    n = 10 
-    design <- DesignLibrary::two_arm_covariate_designer(N = n)
-    rm(n)
-    expect_true(draw_data(design) |> nrow() == 10)
-
-    expect_true(draw_data(design |> redesign(N = 20)) |> nrow() == 20)
+  n = 20
+  design <- DesignLibrary::two_arm_covariate_designer(N = n)
+    DeclareDesign:::find_all_objects(design)
+    rm(n)  # design has already been constructed with n used for N
+    expect_true(draw_data(design) |> nrow() == 20)
     
-    # find_this_object("estimand", design)  
-    
-    # find_all_objects(design)
-    
+    design <- design |> redesign(N = 30)
+    expect_true(draw_data(design) |> nrow() == 30)
 })
+
 
 
 
@@ -415,6 +405,22 @@ test_that("runif not saved", {
   n <- 5
   design <- 
     declare_model(N = n, x = runif(N)) + NULL
+  expect_false("runif" %in% find_all_objects(design)$name)
+  
+})
+
+
+test_that("environment sharing", {
+  N <- 5
+  design <- 
+    declare_model(N = N, x = runif(N)) + NULL
+
+  design_2 <- DeclareDesign:::clone_design_edit(design, N = 6)
+  design_3 <- DeclareDesign:::clone_design_edit(design, N = 7)
+  
+  find_all_objects(design_2)
+  find_all_objects(design_3)
+  
   expect_false("runif" %in% find_all_objects(design)$name)
   
 })

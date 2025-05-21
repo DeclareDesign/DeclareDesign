@@ -86,21 +86,13 @@
 #' 
 #' @export
 redesign <- function(design, ..., expand = TRUE) {
-   check_design_class_single(design)
-   check_dots_in_design(design, list(...))
+  
+  check_design_class_single(design)
 
-  # if(! is.null(attr(design, "parameters"))) {
-  #   altered <- names(list(...))
-  #   missing <- !(altered %in% attr(design, "parameters"))
-  #   if(any(missing)) 
-  #     warning(paste(
-  #       "These variables are not listed in the design attributes:", paste(altered[missing], sep = ","), "\n"))
-  # }
-    
-  f <- function(...) {
-    clone_design_edit(design, ...)
-  }
-  design <- expand_design(f, ..., expand = expand)
+  designer <- function(...) clone_design_edit(design, ...)
+
+  design <- expand_design(designer, ..., expand = expand)
+  
   structure(design, code = NULL)
 }
 
@@ -168,25 +160,46 @@ check_dots_in_design <- function(design, dots) {
   
 }
 
-  
 
-par_edit <- function(design, ...) {
-  dots <- rlang::list2(...)
-  all_objs <- find_all_objects(design)
+# env_clone <- function(env) {
+#   new_env <- new.env(parent = parent.env(env))
+#   
+#   for (name in ls(env, all.names = TRUE)) {
+#     val <- get(name, envir = env)
+#     assign(name, val, envir = new_env)
+#   }
+#   
+#   new_env
+# }
+
+# MH function to clone environments
+clone_design_envs <- function(design) {
+  new_design <- design
   
-  for (name in names(dots)) {
-    matches <- dplyr::filter(all_objs, .data$name == !!name)
+  for (step_i in seq_along(new_design)) {
+    step <- new_design[[step_i]]
+    dots <- attr(step, "dots")
     
-    if (nrow(matches) == 0) {
-      warning(glue::glue("No match found for '{name}' in design environments"))
-      next
+    if (is.null(dots)) next
+    
+    new_dots <- list()
+    for (name in names(dots)) {
+      quo <- dots[[name]]
+      if (!rlang::is_quosure(quo)) {
+        new_dots[[name]] <- quo
+        next
+      }
+      
+      old_env <- rlang::get_env(quo)
+      new_env <- rlang::env_clone(old_env)
+      
+      # Reassign the quosure with the new environment
+      new_dots[[name]] <- rlang::new_quosure(rlang::get_expr(quo), env = new_env)
     }
     
-    for (i in seq_len(nrow(matches))) {
-      env <- matches$env[[i]]
-      assign(name, dots[[name]], envir = env)
-    }
+    attr(step, "dots") <- new_dots
+    new_design[[step_i]] <- step
   }
   
-  design
+  new_design
 }

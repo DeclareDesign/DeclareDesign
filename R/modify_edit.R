@@ -45,8 +45,62 @@ clone_step_edit <- function(step, ..., to_replace = list(...)) {
 
 #' @rdname edit
 #' @keywords internal
-clone_design_edit <- function(design, ..., to_replace = list(...)) {
+clone_design_edit_old <- function(design, ..., to_replace = list(...)) {
   design[] <- lapply(design, clone_step_edit, to_replace = to_replace)
 
   design
+}
+
+# takes ... and puts values into appropriate place in design environments
+# clones environments before exporting to avoid sharing issues
+clone_design_edit <- function(design, ...) {
+  
+  dots <- rlang::list2(...)
+  
+  # Clone first
+  cloned_design <- clone_design_envs(design)
+  
+  # Update environments
+  all_objs <- find_all_objects(cloned_design)
+  
+  for (name in names(dots)) {
+    matches <- dplyr::filter(all_objs, .data$name == !!name)
+    
+    if (nrow(matches) == 0) {
+      warning(glue::glue("No match found for '{name}' in design environments"))
+      next
+    }
+    
+    for (i in seq_len(nrow(matches))) {
+      env <- matches$env[[i]]
+      assign(name, dots[[name]], envir = env)
+    }
+  }
+  
+  # Now re-evaluate steps that have modified environments
+  modified_steps <- unique(dplyr::filter(all_objs, name %in% names(dots))$step)
+  
+  for (step_i in modified_steps) {
+    step <- cloned_design[[step_i]]
+    
+    # Retrieve and re-evaluate the step using its constructor
+    step_type <- attr(step, "step_type")
+    dots <- attr(step, "dots")
+    call <- attr(step, "call")
+    
+    # Re-evaluate call in the correct environment
+    eval_env <- environment(call)
+    
+    # Reconstruct the step
+    rebuilt <- eval(call, envir = eval_env)
+    
+    # Preserve attributes that are not overwritten
+    attributes(rebuilt)$call <- call
+    attributes(rebuilt)$step_type <- step_type
+    attributes(rebuilt)$dots <- dots
+    
+    cloned_design[[step_i]] <- rebuilt
+  }
+  
+  cloned_design
 }

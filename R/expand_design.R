@@ -70,7 +70,10 @@ expand_design <- function(designer, ..., expand = TRUE, prefix = "design") {
   ix <- lapply(args, seq_along)
   ix <- if(expand) expand.grid(ix) else data.frame(ix)
   
-  designs <- lapply(transp(args, ix), do.call, what = designer)
+  # designs <- lapply(transp(args, ix), do.call, what = designer)
+  jobs <- transp(args, ix)
+  
+  designs <- lapply(jobs, function(dots) {do.call(designer, dots)})
 
   args_names <- lapply(dots_quos, expand_args_names)
   
