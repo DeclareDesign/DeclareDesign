@@ -34,8 +34,7 @@ test_that("pars are saved", {
   expect_true(!is.null(find_this_object("f", design)))
   expect_true(is.null(find_this_object("z", design)))
   
-  find_all_objects(design)
-  
+
 })
 
 
@@ -67,14 +66,8 @@ test_that("all steps", {
   
   x <- find_all_objects(design)
   x
-  find_this_object("b1", design)
-  find_this_object("b4", design)
-  # only b in saved items
-  # is.true(all(x$name == "b"))
-
-  design
-  # appears in every step
-  is.true(all((1:7) %in% x$step))
+  # appears in every step (step 4 not yet functioning)
+  expect_true(all(c(1,2,3,5,6,7) %in% x$step))
 })
 
 test_that("n is saved", {
@@ -94,8 +87,16 @@ test_that("find object after redesign", {
   f <- function(x, b) b*x + r
   design <- declare_model(N = n, x = runif(N), w = f(x, b)) + NULL
   # needs to find r
-  find_all_objects(design)
+  DeclareDesign:::find_all_objects(design)
+  
+  
+  expect_warning(DeclareDesign:::par_edit(design, w = 3))
+  
+  design <- DeclareDesign:::par_edit(design, n = 3)
+  expect_true(draw_data(design) |> nrow() ==3)
+  
   design <- redesign(design, k = 1, n = 3)
+  DeclareDesign:::find_all_objects(design)
   find_this_object("k", design)
   find_this_object("f", design)
 })

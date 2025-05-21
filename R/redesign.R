@@ -104,6 +104,55 @@ redesign <- function(design, ..., expand = TRUE) {
   structure(design, code = NULL)
 }
 
+
+
+
+find_all_objects <- function(design) {
+  library(rlang)
+  library(purrr)
+  library(dplyr)
+  library(tibble)
+  
+  results <- list()
+  
+  for (step_i in seq_along(design)) {
+    step <- design[[step_i]]
+    dots <- attr(step, "dots")
+    if (is.null(dots)) next
+    
+    for (quosure_name in names(dots)) {
+      q <- dots[[quosure_name]]
+      if (!is_quosure(q)) next
+      
+      q <- as_quosure(q)
+      env <- get_env(q)
+      
+      for (name in ls(env, all.names = TRUE)) {
+        val <- tryCatch(get(name, envir = env), error = function(e) "<error>")
+        val_str <- tryCatch({
+          if (is.atomic(val) && length(val) <= 5) {
+            paste0(deparse(val), collapse = "")
+          } else if (is.function(val)) {
+            "function"
+          } else {
+            paste0("<", class(val)[1], ">")
+          }
+        }, error = function(e) "<error>")
+        
+        results[[length(results) + 1]] <- tibble(
+          name = name,
+          value_str = val_str,
+          step = step_i,
+          quosure = quosure_name,
+          env = list(env)  # actual environment
+        )
+      }
+    }
+  }
+  
+  bind_rows(results)
+}
+
 check_dots_in_design <- function(design, dots) {
   
   missing <- setdiff(names(dots), find_all_objects(design)$name)
@@ -122,28 +171,22 @@ check_dots_in_design <- function(design, dots) {
   
 
 par_edit <- function(design, ...) {
-  # Capture named arguments
-  dots <- rlang::dots_list(..., .named = TRUE)
+  dots <- rlang::list2(...)
+  all_objs <- find_all_objects(design)
   
-  # Find all objects in the design
-  object_info <- find_all_objects(design)
-  
-  # Loop over each name in ...
   for (name in names(dots)) {
-    # Find the rows in object_info where this name appears
-    matches <- object_info[object_info$name == name, ]
+    matches <- dplyr::filter(all_objs, .data$name == !!name)
     
     if (nrow(matches) == 0) {
-      message("No object named '", name, "' found in the design.")
+      warning(glue::glue("No match found for '{name}' in design environments"))
       next
     }
     
-    # Assign new value in all matching environments
     for (i in seq_len(nrow(matches))) {
-      env <- matches$env_id[[i]]
+      env <- matches$env[[i]]
       assign(name, dots[[name]], envir = env)
     }
   }
   
-  invisible(design)
+  design
 }

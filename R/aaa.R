@@ -467,7 +467,7 @@ find_this_object <- function(objname, design_or_step) {
 
 # Find all objects saved to a design environment
 # Need to keep searching even after redesign creates new environments
-find_all_objects <- function(design) {
+find_all_objects_old <- function(design) {
   
   # Collect all environments from quosures with step/quosure metadata
   env_info <- list()
