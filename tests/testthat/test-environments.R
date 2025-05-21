@@ -38,6 +38,45 @@ test_that("pars are saved", {
   
 })
 
+
+test_that("all steps", {
+  
+  find_this_object <- DeclareDesign:::find_this_object
+  find_all_objects <- DeclareDesign:::find_all_objects
+  
+  b1 <- 1
+  b2 <- 2
+  b3 <- 3
+  b4 <- 4
+  b5 <- 5
+  b6 <- 6
+  b7 <- 7
+  b8 <- 8
+  
+  design <- 
+    declare_model(N = 20, Y = rnorm(N), B = b1) +
+    declare_inquiry(Q = b2) +
+    declare_assignment(Z = simple_ra(N, prob = b3/b3)) +
+    declare_potential_outcomes(Y ~ Z + b4) +
+    declare_sampling(S = complete_rs(N = N, n = b5)) +
+    declare_measurement(K = b6) +
+    declare_estimator(Y ~ 1, subset = Y < b7) +
+    declare_model(D = 1)
+  
+  rm(b1, b2, b3, b4, b5, b6, b7, b8)
+  
+  x <- find_all_objects(design)
+  x
+  find_this_object("b1", design)
+  find_this_object("b4", design)
+  # only b in saved items
+  # is.true(all(x$name == "b"))
+
+  design
+  # appears in every step
+  is.true(all((1:7) %in% x$step))
+})
+
 test_that("n is saved", {
   n <- 5
   b <- 2
@@ -46,6 +85,36 @@ test_that("n is saved", {
   expect_true(  nrow(step()) == 5)
   rm(n)
   expect_true(  nrow(step()) == 5)
+})
+
+test_that("find object after redesign", {
+  n <- 5
+  b <- 2
+  r <- 2
+  f <- function(x, b) b*x + r
+  design <- declare_model(N = n, x = runif(N), w = f(x, b)) + NULL
+  # needs to find r
+  find_all_objects(design)
+  design <- redesign(design, k = 1, n = 3)
+  find_this_object("k", design)
+  find_this_object("f", design)
+})
+
+
+test_that("formula OK", {
+  b = 2
+  step <- declare_model(N = n, potential_outcomes( Y ~ b*Z))
+  rm(b)
+  expect_true( all(step()[1, 2:3] == c(0,2)))
+})
+
+
+test_that("potential outcomes OK", {
+  b = 2
+  d <- declare_model(N = 2, B = b) + declare_potential_outcomes( Y ~ b*Z)
+  rm(b)
+  expect_true(all( draw_data(d)[1, 3:4] == c(0,2)))
+  # find_this_object("b", d)
 })
 
 

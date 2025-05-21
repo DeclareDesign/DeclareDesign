@@ -87,6 +87,7 @@
 #' @export
 redesign <- function(design, ..., expand = TRUE) {
    check_design_class_single(design)
+   check_dots_in_design(design, list(...))
 
   # if(! is.null(attr(design, "parameters"))) {
   #   altered <- names(list(...))
@@ -101,4 +102,48 @@ redesign <- function(design, ..., expand = TRUE) {
   }
   design <- expand_design(f, ..., expand = expand)
   structure(design, code = NULL)
+}
+
+check_dots_in_design <- function(design, dots) {
+  
+  missing <- setdiff(names(dots), find_all_objects(design)$name)
+  
+  if (length(missing) == 1) 
+  message(paste("You requested a change to", 
+          paste(missing, collapse = ","), 
+          "but",  paste(missing, collapse = ","), "is not found in the design"))
+  if (length(missing) > 1) 
+    message(paste("You requested a change to", 
+                  paste(missing, collapse = ","), 
+                  "but",  paste(missing, collapse = ","), "are not found in the design"))
+  
+}
+
+  
+
+par_edit <- function(design, ...) {
+  # Capture named arguments
+  dots <- rlang::dots_list(..., .named = TRUE)
+  
+  # Find all objects in the design
+  object_info <- find_all_objects(design)
+  
+  # Loop over each name in ...
+  for (name in names(dots)) {
+    # Find the rows in object_info where this name appears
+    matches <- object_info[object_info$name == name, ]
+    
+    if (nrow(matches) == 0) {
+      message("No object named '", name, "' found in the design.")
+      next
+    }
+    
+    # Assign new value in all matching environments
+    for (i in seq_len(nrow(matches))) {
+      env <- matches$env_id[[i]]
+      assign(name, dots[[name]], envir = env)
+    }
+  }
+  
+  invisible(design)
 }

@@ -10,11 +10,31 @@
 #'
 #' @keywords internal
 #' 
-declare_potential_outcomes <- make_declarations(potential_outcomes_handler, "potential_outcomes")
+ declare_potential_outcomes <- 
+  make_declarations(potential_outcomes_handler, "potential_outcomes")
 
-potential_outcomes_handler <- function(..., data, level) {
-  (function(formula, ...) UseMethod("potential_outcomes_internal"))(..., data = data, level = level)
-}
+# declare_potential_outcomes <- make_declarations(
+#  default_handler = potential_outcomes_handler,
+#  step_type = "potential_outcomes",
+#  default_label = "potential_outcomes"
+# )
+
+ potential_outcomes_handler <- 
+   function(..., data, level) {
+     (function(formula, ...) UseMethod("potential_outcomes_internal"))(..., data = data, level = level)
+   }
+ 
+# potential_outcomes_handler <- function(..., data, level) {
+#   dots <- rlang::enquos(...)
+#   data_quo <- rlang::enquo(data)
+#   level_quo <- rlang::enquo(level)
+   
+#   function(data) {
+#     eval_data <- rlang::eval_tidy(data_quo)
+#     eval_level <- rlang::eval_tidy(level_quo)
+#     (function(formula, ...) UseMethod("potential_outcomes_internal"))(!!!dots, data = eval_data, level = eval_level)
+#   }
+# }
 
 validation_fn(potential_outcomes_handler) <- function(ret, dots, label) {
   declare_time_error_if_data(ret)
@@ -38,6 +58,9 @@ validation_fn(potential_outcomes_handler) <- function(ret, dots, label) {
     dots$level <- reveal_nse_helper(dots$level)
   }
 
+  # Adding environment vars
+  dots <- rename_dots(potential_outcomes_handler, dots)
+  dots <- dots_add_args_quosure(dots)
 
   ret <- build_step(
     currydata(s3method, dots),
@@ -147,9 +170,13 @@ validation_fn(potential_outcomes_internal.formula) <- function(ret, dots, label)
   dots$conditions <- eval_tidy(quo(expand_conditions(!!!dots)))
   dots$assignment_variables <- names(dots$conditions)
 
-  ret <- build_step(currydata(potential_outcomes_internal.formula,
-    dots),
-  handler = potential_outcomes_internal.formula,
+  # Adding environment vars
+  dots <- rename_dots(potential_outcomes_handler, dots)
+  dots <- dots_add_args_quosure(dots)
+
+  ret <- build_step(
+    currydata(potential_outcomes_internal.formula, dots),
+    handler = potential_outcomes_internal.formula,
   dots = dots,
   label = label,
   step_type = attr(ret, "step_type"),

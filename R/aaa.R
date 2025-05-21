@@ -179,87 +179,94 @@ find_symbols_recursive <- function(expr) {
      fun
    }
  
-# Main function to capture globals for quosures
-capture_globals_quosure <- 
-  
-  function(q, envir = globalenv(), 
-           fallback_env = parent.frame()) {
-    
-  if (!inherits(q, "quosure")) stop("Input must be a quosure.")
-  
-  # Check if quosure is for N
-  is_N <-  (rlang::is_symbol(rlang::quo_get_expr(q), "N"))  
-
-  expr <- rlang::quo_get_expr(q)
-  old_env <- rlang::quo_get_env(q)
-  
-  
-  # needed <- setdiff(find_symbols_recursive(expr), skip)
-  needed <- find_symbols_recursive(expr)
-  new_env <- new.env(parent = old_env)
-  
-  for (name in needed) {
-  
-    obj_exists <-
-      safe_exists(name, old_env) ||
-      safe_exists(name, envir) ||
-      safe_exists(name, fallback_env)
-
-
-  #  print("***************")
-  #  print(name)
-
-    # N is special
-    if (name == "N" && ! is_N) next
-    
-    if (!obj_exists && is_available_from_loaded_package(name)) {
-      next
-    }
-    
-  #  print(name)
-    
-
-obj <- tryCatch(
-  get(name, envir = old_env, inherits = TRUE),
-  error = function(e) tryCatch(
-    get(name, envir = envir, inherits = TRUE),
-    error = function(e2) tryCatch(
-      get(name, envir = fallback_env, inherits = TRUE),
-      error = function(e3) NULL
-    )
-  )
-)
-
-# If obj is a function AND:
-# - its environment is a namespace (a package),
-# - AND the symbol was not found in any local env (old_env, envir, fallback_env),
-# then skip it.
-obj_env <- environment(obj)
-if (
-  is.function(obj) &&
-  (isNamespace(obj_env) || (is.environment(obj_env) && startsWith(environmentName(obj_env), "namespace:"))) &&
-  !(exists(name, envir = old_env, inherits = FALSE) ||
-    exists(name, envir = envir, inherits = FALSE) ||
-    exists(name, envir = fallback_env, inherits = FALSE))
-) {
-  next
-}
-    
-    if (!is.null(obj)) {
-      if (is.function(obj)) {
-        obj <- capture_function_dependencies(
-          obj, envir = envir, fallback_env = fallback_env)
-
-      }
-      assign(name, obj, envir = new_env)
-    }
-
-  }
-  
-  rlang::new_quosure(expr, new_env)
-  
-}
-
+ # Main function to capture globals for quosures
+ capture_globals_quosure <-
+   
+   function(q,
+            envir = globalenv(),
+            fallback_env = parent.frame()) {
+     if (!inherits(q, "quosure"))
+       stop("Input must be a quosure.")
+     
+     # Check if quosure is for N
+     is_N <-  (rlang::is_symbol(rlang::quo_get_expr(q), "N"))
+     
+     expr <- rlang::quo_get_expr(q)
+     old_env <- rlang::quo_get_env(q)
+     
+     
+     # needed <- setdiff(find_symbols_recursive(expr), skip)
+     needed <- find_symbols_recursive(expr)
+     new_env <- new.env(parent = old_env)
+     
+     for (name in needed) {
+       obj_exists <-
+         safe_exists(name, old_env) ||
+         safe_exists(name, envir) ||
+         safe_exists(name, fallback_env)
+       
+       
+       #  print("***************")
+       #  print(name)
+       
+       # N is special
+       if (name == "N" && !is_N)
+         next
+       
+       if (!obj_exists && is_available_from_loaded_package(name)) {
+         next
+       }
+       
+       #  print(name)
+       
+       
+       obj <- tryCatch(
+         get(name, envir = old_env, inherits = TRUE),
+         error = function(e)
+           tryCatch(
+             get(name, envir = envir, inherits = TRUE),
+             error = function(e2)
+               tryCatch(
+                 get(name, envir = fallback_env, inherits = TRUE),
+                 error = function(e3)
+                   NULL
+               )
+           )
+       )
+       
+       # If obj is a function AND:
+       # - its environment is a namespace (a package),
+       # - AND the symbol was not found in any local env (old_env, envir, fallback_env),
+       # then skip it.
+       obj_env <- environment(obj)
+       if (is.function(obj) &&
+           (isNamespace(obj_env) ||
+            (
+              is.environment(obj_env) &&
+              startsWith(environmentName(obj_env), "namespace:")
+            )) &&
+           !(
+             exists(name, envir = old_env, inherits = FALSE) ||
+             exists(name, envir = envir, inherits = FALSE) ||
+             exists(name, envir = fallback_env, inherits = FALSE)
+           )) {
+         next
+       }
+       
+       if (!is.null(obj)) {
+         if (is.function(obj)) {
+           obj <- capture_function_dependencies(obj, envir = envir, fallback_env = fallback_env)
+           
+         }
+         assign(name, obj, envir = new_env)
+       }
+       
+     }
+     
+     rlang::new_quosure(expr, new_env)
+     
+   }
+ 
 
 dots_add_args_quosure <- function(dots) {
   for (i in seq_along(dots)) {
@@ -332,10 +339,12 @@ build_step <- function(curried_fn, handler, dots, label, step_type, causal_type,
 make_declarations <- function(default_handler, step_type, causal_type = "dgp", 
                               default_label, strictDataParam = TRUE,
                               handler_environment = TRUE) {
+  
   declaration <- declaration_template
 
   formals(declaration)$handler <- substitute(default_handler)
   formals(declaration)$handler_environment <- substitute(handler_environment)
+  
   if (!missing(default_label)) {
     formals(declaration)$label <- default_label
   }
@@ -393,7 +402,9 @@ declare_internal_inherit_params <- make_declarations(function(data, ...) data.fr
 
 
 # Environment helpers
-
+# Need to abbreviate returns under value; eg for funcitons
+# Need to not search global environments
+# Maybe include step name / label
 # Find a given object
 find_this_object <- function(objname, design_or_step) {
   # Helper to check and return object from env chain
@@ -455,7 +466,7 @@ find_this_object <- function(objname, design_or_step) {
 
 
 # Find all objects saved to a design environment
-
+# Need to keep searching even after redesign creates new environments
 find_all_objects <- function(design) {
   
   # Collect all environments from quosures with step/quosure metadata
@@ -463,12 +474,21 @@ find_all_objects <- function(design) {
   
   for (step_i in seq_along(design)) {
     step <- design[[step_i]]
+    
+    # is_po <- attr(step, "step_type") == "potential_outcomes" 
+    
     dots <- attr(step, "dots")
+    
     if (is.null(dots)) next
     
+  
     for (quosure_name in names(dots)) {
       dot <- dots[[quosure_name]]
-      if (!is_quosure(dot)) next
+      
+      if (!(is_quosure(dot))) next
+      
+      if(!is_quosure(dot)) 
+        dot <- rlang::as_quosure(dot, env = environment(dot))
       
       env <- rlang::get_env(dot)
       env_id <- format(env)  # stringify environment
@@ -478,16 +498,21 @@ find_all_objects <- function(design) {
         quosure = quosure_name,
         env_id = env_id
       )
+      
     }
   }
   
+
   env_df <- bind_rows(env_info)
   
   # Unique environments
   unique_envs <- env_df %>% distinct(env_id)
   
+
   # Map from env_id to actual env
   env_map <- list()
+  
+
   for (e in unique_envs$env_id) {
     # parse env_id back to environment is tricky, so:
     # instead, find the first quosure with this env_id and get env from it
@@ -497,14 +522,20 @@ find_all_objects <- function(design) {
   # Build env_map properly by scanning design again
   for (step_i in seq_along(design)) {
     step <- design[[step_i]]
+
+    # is_po <- attr(step, "step_type") == "potential_outcomes" 
+
     dots <- attr(step, "dots")
+    
     if (is.null(dots)) next
     
     for (quosure_name in names(dots)) {
       dot <- dots[[quosure_name]]
-      if (!is_quosure(dot)) next
-      
+
+      if (!(is_quosure(dot) )) next
+
       env <- rlang::get_env(dot)
+
       env_id <- format(env)
       if (is.null(env_map[[env_id]])) {
         env_map[[env_id]] <- env
@@ -552,4 +583,5 @@ find_all_objects <- function(design) {
   # Return tibble with: object name, value string, environment address, step, quosure
   joined
 }
+
 
