@@ -1,58 +1,27 @@
-#' Override environment via shim
+#' Modify internal variables in a design
 #'
-#' @rdname edit
+#' Internal helper for `redesign()`. Updates variable values inside quosure environments
+#' of a design object so that rerunning the design reflects new inputs.
+#'
+#' @param design A design object created by DeclareDesign.
+#' @param ... Named variable updates (e.g., `N = 20`, `b = 0.5`).
+#'
+#' @return A design with updated variables.
 #' @keywords internal
+#'
 #' @examples
-#' \dontrun{
-#' here_i_am <- "foo"
-#' dot <- quo(here_i_am)
-#' dot2 <- DeclareDesign:::clone_dot_edit_env(dot, here_i_am = "some_message", xyxyx = "bar")
-#' rlang::eval_tidy(dot)
-#' rlang::eval_tidy(dot2)
-#' }
-clone_dot_edit_env <- function(dot, ..., to_replace = list(...)) {
-  if (is.null(environment(dot))) {
-    return(dot)
-  }
-  environment(dot) <- list2env(to_replace, parent = environment(dot))
+#' d <- declare_model(N = n, Y = rnorm(N, b)) + declare_inquiry(Q = b)
+#' d2 <- redesign(d, n = 3, b = 0.2)
+#' draw_data(d2)
 
-  dot
-}
-
-#' @rdname edit
-#' @keywords internal
-#' @examples
-#' \dontrun{
-#' N <- 50
-#'
-#' pop50 <- declare_model(N=N, noise=rnorm(N))
-#' nrow(pop50())
-#'
-#' pop100 <- DeclareDesign:::clone_step_edit(pop50, N=100)
-#' nrow(pop100())
-#' nrow(pop50())
-#'
-#' }
-clone_step_edit <- function(step, ..., to_replace = list(...)) {
-  step_attributes <- attributes(step)
-
-  step_attributes$dots[] <- lapply(step_attributes$dots, clone_dot_edit_env, to_replace = to_replace)
-
-  f <- with(step_attributes, currydata(handler, dots))
-  attributes(f) <- step_attributes
-  f
-}
-
-#' @rdname edit
-#' @keywords internal
-# takes ... and puts values into appropriate place in design environments
-# clones environments before exporting to avoid sharing issues
-par_edit <- function(design, ...) {
+modify_edit <- function(design, ...) {
+  
   updates <- list(...)
   meta <- DeclareDesign:::find_all_objects(design)
   
   steps_to_rebuild <- integer()
   
+  # Going through each parameter
   for (varname in names(updates)) {
     new_val <- updates[[varname]]
     matches <- meta[meta$name == varname, ]
@@ -78,18 +47,95 @@ par_edit <- function(design, ...) {
   # Rebuild only affected steps using currydata
   for (i in steps_to_rebuild) {
     step <- design[[i]]
-    step_attributes <- attributes(step)
-    # keeps implicity data data
-
-    # Rename dots and mark as using implicit data
-    dots <- DeclareDesign:::rename_dots(step_attributes$handler, step_attributes$dots)
-    # attr(dots, "implicit_data_arg") <- TRUE  # 
     
-    new_step <- DeclareDesign:::currydata(step_attributes$handler, dots)
+    step_attributes <- attributes(step)
+
+    step_attributes$dots[] <- 
+      DeclareDesign:::rename_dots(step_attributes$handler, step_attributes$dots)
+    new_step <- with(step_attributes, currydata(handler, dots))
+
     attributes(new_step) <- step_attributes
+
+    design[[i]] <- new_step
+    
+  }
+  
+  design
+}
+
+
+
+
+
+x_modify_edit <- function(design, ...) {
+  updates <- list(...)
+  meta <- DeclareDesign:::find_all_objects(design)
+  
+  # Map: step number -> list( quosure index -> list of varnames to update )
+  step_quosure_updates <- list()
+  
+  # Group updates per quosure
+  for (varname in names(updates)) {
+    matches <- meta[meta$name == varname, ]
+    if (nrow(matches) == 0) next
+    
+    for (i in seq_len(nrow(matches))) {
+      step_i <- matches$step[i]
+      quo_i <- matches$quosure[i]
+      
+      if (is.null(step_quosure_updates[[as.character(step_i)]])) {
+        step_quosure_updates[[as.character(step_i)]] <- list()
+      }
+      
+      step_entry <- step_quosure_updates[[as.character(step_i)]]
+      if (is.null(step_entry[[quo_i]])) {
+        step_entry[[quo_i]] <- character()
+      }
+      
+      step_entry[[quo_i]] <- union(step_entry[[quo_i]], varname)
+      step_quosure_updates[[as.character(step_i)]] <- step_entry
+    }
+  }
+  
+  # Apply updates once per quosure
+  for (step_str in names(step_quosure_updates)) {
+    i <- as.integer(step_str)
+    step <- design[[i]]
+    step_attributes <- attributes(step)
+    
+    for (quo_i in names(step_quosure_updates[[step_str]])) {
+      quo_idx <- as.integer(quo_i)
+      varnames <- step_quosure_updates[[step_str]][[quo_i]]
+      
+      old_quosure <- attr(step, "dots")[[quo_idx]]
+      old_env <- rlang::get_env(old_quosure)
+      
+      # Clone and modify env only once
+      new_env <- new.env(parent = parent.env(old_env))
+      list2env(as.list(old_env, all.names = TRUE), envir = new_env)
+      for (varname in varnames) {
+        assign(varname, updates[[varname]], envir = new_env)
+      }
+      
+      attr(step, "dots")[[quo_idx]] <- rlang::new_quosure(
+        rlang::get_expr(old_quosure), env = new_env
+      )
+    }
+    
+    # Rebuild the step with new dots
+    dots <- DeclareDesign:::rename_dots(step_attributes$handler, attr(step, "dots"))
+    new_step <- DeclareDesign:::currydata(step_attributes$handler, dots)
+    
+    # Only reattach safe attributes
+    attributes(new_step)$label <- step_attributes$label
+    attributes(new_step)$step_type <- step_attributes$step_type
+    attributes(new_step)$handler <- step_attributes$handler
+    attributes(new_step)$dots <- dots
+    
     design[[i]] <- new_step
   }
   
   design
 }
+
 

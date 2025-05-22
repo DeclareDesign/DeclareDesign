@@ -91,7 +91,7 @@ redesign <- function(design, ..., expand = TRUE) {
   
   check_design_class_single(design)
 
-  designer <- function(...) par_edit(design, ...)
+  designer <- function(...) modify_edit(design, ...)
 
   design <- expand_design(designer, ..., expand = expand)
   
@@ -99,13 +99,20 @@ redesign <- function(design, ..., expand = TRUE) {
 }
 
 
-
+#' Find all objects used in quosures in a design
+#'
+#' Traverses each step in a DeclareDesign object and finds the names and environments
+#' of all objects captured inside quosures.
+#'
+#' @param design A DeclareDesign design object
+#'
+#' @return A tibble with columns: name, value_str, step, quosure, env
+#' @importFrom rlang is_quosure as_quosure get_env
+#' @importFrom purrr map_chr
+#' @importFrom tibble tibble
+#' @importFrom dplyr bind_rows
+#' @internal
 find_all_objects <- function(design) {
-  library(rlang)
-  library(purrr)
-  library(dplyr)
-  library(tibble)
-  
   results <- list()
   
   for (step_i in seq_along(design)) {
@@ -115,10 +122,10 @@ find_all_objects <- function(design) {
     
     for (quosure_name in names(dots)) {
       q <- dots[[quosure_name]]
-      if (!is_quosure(q)) next
+      if (!rlang::is_quosure(q)) next
       
-      q <- as_quosure(q)
-      env <- get_env(q)
+      q <- rlang::as_quosure(q)
+      env <- rlang::get_env(q)
       
       for (name in ls(env, all.names = TRUE)) {
         val <- tryCatch(get(name, envir = env), error = function(e) "<error>")
@@ -132,18 +139,18 @@ find_all_objects <- function(design) {
           }
         }, error = function(e) "<error>")
         
-        results[[length(results) + 1]] <- tibble(
+        results[[length(results) + 1]] <- tibble::tibble(
           name = name,
           value_str = val_str,
           step = step_i,
           quosure = quosure_name,
-          env = list(env)  # actual environment
+          env = list(env)
         )
       }
     }
   }
   
-  bind_rows(results)
+  dplyr::bind_rows(results)
 }
 
 check_dots_in_design <- function(design, dots) {
@@ -160,49 +167,4 @@ check_dots_in_design <- function(design, dots) {
                   "but",  paste(missing, collapse = ","), "are not found in the design"))
   
 }
-
-
-# env_clone <- function(env) {
-#   new_env <- new.env(parent = parent.env(env))
-#   
-#   for (name in ls(env, all.names = TRUE)) {
-#     val <- get(name, envir = env)
-#     assign(name, val, envir = new_env)
-#   }
-#   
-#   new_env
-# }
-
-# MH function to clone environments
-clone_design_envs <- function(design) {
-  new_design <- design
-  
-  for (step_i in seq_along(new_design)) {
-    step <- new_design[[step_i]]
-    dots <- attr(step, "dots")
-    
-    if (is.null(dots)) next
-    
-    new_dots <- list()
-    for (name in names(dots)) {
-      quo <- dots[[name]]
-      if (!rlang::is_quosure(quo)) {
-        new_dots[[name]] <- quo
-        next
-      }
-      
-      old_env <- rlang::get_env(quo)
-      new_env <- rlang::env_clone(old_env)
-      
-      # Reassign the quosure with the new environment
-      new_dots[[name]] <- rlang::new_quosure(rlang::get_expr(quo), env = new_env)
-    }
-    
-    attr(step, "dots") <- new_dots
-    new_design[[step_i]] <- step
-  }
-  
-  new_design
-}
-
 

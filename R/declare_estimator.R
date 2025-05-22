@@ -304,7 +304,7 @@ method_handler <-
     }
     
     coefficient_names <-
-      enquo(term) # forces evaluation of quosure
+      rlang::enquo(term) # forces evaluation of quosure
     coefficient_names <- reveal_nse_helper(coefficient_names)
 
     args <- quos(...)

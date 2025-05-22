@@ -1,7 +1,8 @@
 
 # Given a function and dots, rename dots based on how things will positionally match
 #' @importFrom rlang is_empty is_scalar_character get_expr
-#' # DeclareDesign:::rename_dots(fabricate, list(N = 3, X = 1))
+#' @example 
+#' DeclareDesign:::rename_dots(fabricatr::fabricate, list(N = 3, X = 1))
 rename_dots <- function(handler, dots) {
   
   initial_call <- match.call(handler, as.call(get_expr(quo(handler(!!!dots)))))
@@ -61,6 +62,19 @@ currydata <- function(FUN, dots) {
     # used for declare_model with no seed data provided, in which case null is not the same as missing.
     # Unfortunately, steps do not know at time of declaration if they are in first position or not; 
     # combining steps into design happens after.
+    if(FALSE){
+
+    sw <- (is.null(data) & is_implicit_data_arg(dots))
+    print(c(sw, "because:", (is.null(data)), is_implicit_data_arg(dots)))
+    print("-----------------------------------")
+    if(sw) print("Quo no data:")
+    if(sw) print(quoNoData)
+    if(sw) print(eval_tidy(quoNoData, list(data = NULL)))
+    
+    if(!sw) print("Quo data:")
+    if(!sw) print(quoData)
+    if(!sw) print(eval_tidy(quoData, list(data = data)))
+    }
 
     eval_tidy(if (is.null(data) & is_implicit_data_arg(dots)) quoNoData else quoData, data = list(data = data))
   }

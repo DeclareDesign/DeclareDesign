@@ -24,7 +24,7 @@ diagnosand_handler <- function(data, ...,
     
     # subsetting the data -----------------------------------------------------
     
-    subset <- enquo(subset)
+    subset <- rlang::enquo(subset)
     idx <- eval_tidy(subset, data = data)
     if (!is.null(idx)) {
       data <- data[idx, , drop = FALSE]

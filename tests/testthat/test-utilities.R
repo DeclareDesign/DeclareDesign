@@ -25,7 +25,7 @@ test_that("fallback to lapply", {
 
 test_that("names from quos", {
   blank_fun <- function(select) {
-    reveal_nse_helper(enquo(select))
+    reveal_nse_helper(rlang::enquo(select))
   }
   
   expect_equal("bias", blank_fun(select = bias))
@@ -33,11 +33,3 @@ test_that("names from quos", {
 })
 
 
-test_that("clone_dot_edit_env", {
-  dot <- quo(test_obj)
-  environment(dot) <- NULL
-  expect_s3_class(clone_dot_edit_env(dot,
-                                     here_i_am = "some_message", 
-                                     xyxyx = "bar"),
-                  "quosure")
-})

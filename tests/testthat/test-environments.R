@@ -81,9 +81,9 @@ test_that("find object after redesign", {
   # needs to find r
   DeclareDesign:::find_all_objects(design)
   
-  # expect_warning(DeclareDesign:::par_edit(design, w = 3))
+  # expect_warning(DeclareDesign:::modify_edit(design, w = 3))
   
-  design <- DeclareDesign:::par_edit(design, n = 3)
+  design <- DeclareDesign:::modify_edit(design, n = 3)
   expect_true(draw_data(design) |> nrow() ==3)
   DeclareDesign:::find_all_objects(design)
   
@@ -374,8 +374,8 @@ test_that("environment sharing", {
   design <- 
     declare_model(N = N, x = runif(N)) + NULL
 
-  design_2 <- DeclareDesign:::par_edit(design, N = 6)
-  design_3 <- DeclareDesign:::par_edit(design, N = 7)
+  design_2 <- DeclareDesign:::modify_edit(design, N = 6)
+  design_3 <- DeclareDesign:::modify_edit(design, N = 7)
   
   find_all_objects(design_2)
   find_all_objects(design_3)
