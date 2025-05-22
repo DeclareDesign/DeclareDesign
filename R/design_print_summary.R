@@ -12,6 +12,13 @@ print.design <- function(x, verbose = FALSE, ...) {
     print(run_design(x), digits = 3, row.names = FALSE)
   }
   cat("\n")
+  
+  p <- DeclareDesign:::find_all_objects(design)
+  if(nrow(p) >0) {
+    cat("Parameters saved in design environments:")
+    print(p)
+    cat("\n")
+  }
 }
 
 #' @param object a design object created using the + operator

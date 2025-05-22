@@ -113,6 +113,14 @@ redesign <- function(design, ..., expand = TRUE) {
 #' @importFrom dplyr bind_rows
 #' @internal
 find_all_objects <- function(design) {
+  
+  # allow step also
+  if(!any(c("design_step", "design") %in% class(design))) 
+    stop("Please pass a design object")   
+  
+  if("design_step" %in% class(design)) 
+    design <- design + NULL
+  
   results <- list()
   
   for (step_i in seq_along(design)) {
