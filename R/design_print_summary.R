@@ -13,7 +13,8 @@ print.design <- function(x, verbose = FALSE, ...) {
   }
   cat("\n")
   
-  p <- DeclareDesign:::find_all_objects(design)
+  p <- DeclareDesign:::find_all_objects(x)
+  
   if(nrow(p) >0) {
     cat("Parameters saved in design environments:")
     print(p)

@@ -369,6 +369,16 @@ test_that("runif not saved", {
 })
 
 
+test_that("functions saved", {
+  
+  f <- runif
+  n <- 5
+  design <- 
+    declare_model(N = n, x = f(N)) + NULL
+  expect_true("f" %in% DeclareDesign:::find_all_objects(design)$name)
+  
+})
+
 test_that("environment sharing", {
   N <- 5
   design <- 

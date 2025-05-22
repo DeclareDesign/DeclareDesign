@@ -148,14 +148,12 @@ test_that("data_step throwing error", {
   n <- 2000
   b <- .2
 
-  # OK
   d <- 
     declare_model(N = n) + 
     declare_inquiry(Q = b)
   
   redesign(d, b = .4)
   
-  # Not OK
   d <- 
     declare_model(N = n, Y = rnorm(N, b)) + 
     declare_inquiry(Q = b)
@@ -167,5 +165,39 @@ test_that("data_step throwing error", {
   
   expect_error(d2[[1]](), NA)
 
-    
+})
+
+
+test_that("to do: changes inside functions", {
+
+  b = -1
+  a = .1
+  f = function(x, a) a*x + b
+
+  design <- 
+    declare_model(N = 2, x = runif(N)) + 
+    declare_measurement(Y = f(x, a))
+  
+  DeclareDesign:::find_all_objects(design)
+  
+  rm(b, a, f)
+  
+  design |> draw_data()
+})
+
+
+test_that("to do: changing handlers", {
+  
+  my_handler <- fabricate
+  
+  design <-
+    declare_model(
+      handler = my_handler,
+      N = 5,
+      Y = rnorm(N, sd = 0.25)
+    ) +
+    declare_inquiry(Y_bar = mean(Y)) 
+
+  DeclareDesign:::find_all_objects(design)
+  
 })
