@@ -45,62 +45,51 @@ clone_step_edit <- function(step, ..., to_replace = list(...)) {
 
 #' @rdname edit
 #' @keywords internal
-clone_design_edit_old <- function(design, ..., to_replace = list(...)) {
-  design[] <- lapply(design, clone_step_edit, to_replace = to_replace)
+# takes ... and puts values into appropriate place in design environments
+# clones environments before exporting to avoid sharing issues
+par_edit <- function(design, ...) {
+  updates <- list(...)
+  meta <- DeclareDesign:::find_all_objects(design)
+  
+  steps_to_rebuild <- integer()
+  
+  for (varname in names(updates)) {
+    new_val <- updates[[varname]]
+    matches <- meta[meta$name == varname, ]
+    if (nrow(matches) == 0) next
+    
+    for (i in seq_len(nrow(matches))) {
+      row <- matches[i, ]
+      steps_to_rebuild <- union(steps_to_rebuild, row$step)
+      
+      old_quosure <- attr(design[[row$step]], "dots")[[row$quosure]]
+      old_env <- rlang::get_env(old_quosure)
+      
+      # Clone and update the quosure's environment
+      new_env <- new.env(parent = parent.env(old_env))
+      list2env(as.list(old_env, all.names = TRUE), envir = new_env)
+      assign(varname, new_val, envir = new_env)
+      
+      attr(design[[row$step]], "dots")[[row$quosure]] <-
+        rlang::new_quosure(rlang::get_expr(old_quosure), env = new_env)
+    }
+  }
+  
+  # Rebuild only affected steps using currydata
+  for (i in steps_to_rebuild) {
+    step <- design[[i]]
+    step_attributes <- attributes(step)
+    # keeps implicity data data
 
+    # Rename dots and mark as using implicit data
+    dots <- DeclareDesign:::rename_dots(step_attributes$handler, step_attributes$dots)
+    # attr(dots, "implicit_data_arg") <- TRUE  # 
+    
+    new_step <- DeclareDesign:::currydata(step_attributes$handler, dots)
+    attributes(new_step) <- step_attributes
+    design[[i]] <- new_step
+  }
+  
   design
 }
 
-# takes ... and puts values into appropriate place in design environments
-# clones environments before exporting to avoid sharing issues
-clone_design_edit <- function(design, ...) {
-  
-  dots <- rlang::list2(...)
-  
-  # Clone first
-  cloned_design <- clone_design_envs(design)
-  
-  # Update environments
-  all_objs <- find_all_objects(cloned_design)
-  
-  for (name in names(dots)) {
-    matches <- dplyr::filter(all_objs, .data$name == !!name)
-    
-    if (nrow(matches) == 0) {
-      warning(glue::glue("No match found for '{name}' in design environments"))
-      next
-    }
-    
-    for (i in seq_len(nrow(matches))) {
-      env <- matches$env[[i]]
-      assign(name, dots[[name]], envir = env)
-    }
-  }
-  
-  # Now re-evaluate steps that have modified environments
-  modified_steps <- unique(dplyr::filter(all_objs, name %in% names(dots))$step)
-  
-  for (step_i in modified_steps) {
-    step <- cloned_design[[step_i]]
-    
-    # Retrieve and re-evaluate the step using its constructor
-    step_type <- attr(step, "step_type")
-    dots <- attr(step, "dots")
-    call <- attr(step, "call")
-    
-    # Re-evaluate call in the correct environment
-    eval_env <- environment(call)
-    
-    # Reconstruct the step
-    rebuilt <- eval(call, envir = eval_env)
-    
-    # Preserve attributes that are not overwritten
-    attributes(rebuilt)$call <- call
-    attributes(rebuilt)$step_type <- step_type
-    attributes(rebuilt)$dots <- dots
-    
-    cloned_design[[step_i]] <- rebuilt
-  }
-  
-  cloned_design
-}

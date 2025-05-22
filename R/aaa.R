@@ -1,6 +1,7 @@
 
 # Given a function and dots, rename dots based on how things will positionally match
 #' @importFrom rlang is_empty is_scalar_character get_expr
+#' # DeclareDesign:::rename_dots(fabricate, list(N = 3, X = 1))
 rename_dots <- function(handler, dots) {
   
   initial_call <- match.call(handler, as.call(get_expr(quo(handler(!!!dots)))))
@@ -48,9 +49,11 @@ rename_dots <- function(handler, dots) {
 }
 
 # Returns a new function(data) which calls FUN(data, dots)
+#' # DeclareDesign:::currydata(fabricate, list(N = 3, X = 1))
 currydata <- function(FUN, dots) {
 
   quoData <- quo((FUN)(!!!dots))
+  
   quoNoData <- quo((FUN)(!!!(dots[names(dots) != 'data'])))
   
   function(data = NULL) {
@@ -58,13 +61,12 @@ currydata <- function(FUN, dots) {
     # used for declare_model with no seed data provided, in which case null is not the same as missing.
     # Unfortunately, steps do not know at time of declaration if they are in first position or not; 
     # combining steps into design happens after.
-    # This could in theory be caught be a design validation function for declare_model.
 
     eval_tidy(if (is.null(data) & is_implicit_data_arg(dots)) quoNoData else quoData, data = list(data = data))
   }
 }
 
-# identify whether a function is from a package or is otherwise available
+# Helper to identify whether a function is from a package or is otherwise available
 is_user_defined_function <- function(f) {
   if (!is.function(f)) return(FALSE)
   if (is.primitive(f)) return(FALSE)
@@ -83,7 +85,7 @@ is_user_defined_function <- function(f) {
 }
 
 # Helper to find all symbols recursively in an expression
-# Find all symbols used in the body
+
 find_symbols_recursive <- function(expr) {
   if (is.null(expr)) return(character())
   if (is.symbol(expr)) return(as.character(expr))
@@ -94,7 +96,6 @@ find_symbols_recursive <- function(expr) {
 }
 
 # Helper to capture globals for functions, recursively
- 
  is_available_from_loaded_package <- function(name) {
    for (ns in loadedNamespaces()) {
      if (exists(name, envir = asNamespace(ns), inherits = FALSE)) return(TRUE)
@@ -102,12 +103,15 @@ find_symbols_recursive <- function(expr) {
    FALSE
  }
  
- # Skip symbols that are from loaded packages
+ # helper to skip symbols that are from loaded packages
  safe_exists <- function(name, envir) {
    if (!exists(name, envir = envir, inherits = TRUE)) return(FALSE)
    obj <- get(name, envir = envir, inherits = TRUE)
    !is.primitive(obj)
  }
+
+ # helper to identify function dependencies
+ # DeclareDesign:::capture_function_dependencies(fun = function(x) a*x)
  
  capture_function_dependencies <- 
    
@@ -267,7 +271,7 @@ find_symbols_recursive <- function(expr) {
      
    }
  
-
+# helper to add arguments to quosures for dots
 dots_add_args_quosure <- function(dots) {
   for (i in seq_along(dots)) {
     obj <- dots[[i]]
@@ -283,7 +287,6 @@ dots_add_args_quosure <- function(dots) {
 }
 
 
-
 # Declaration template used for all declare_* functions
 
 declaration_template <- function(..., handler, label = NULL, handler_environment = TRUE) {
@@ -294,8 +297,9 @@ declaration_template <- function(..., handler, label = NULL, handler_environment
     dots$label <- NULL
   }
 
-  # Edge case: capture_function_dependencies if handler is in global
-  # Estimator steps excluded because of label_estimator(method_handler) behavior  
+  # Capture_function_dependencies if handler is in global
+  # Note estimator steps excluded via handler_environment
+  # because of label_estimator(method_handler) behavior  
 
   if (is.function(handler) & handler_environment) {
   
@@ -398,190 +402,4 @@ validate <- function(handler, ret, dots, label) {
 #' @param label    a string describing the step
 #' @keywords internal
 declare_internal_inherit_params <- make_declarations(function(data, ...) data.frame(BLNK = "MSG", stringsAsFactors = TRUE), step_type = "BLNKMSG")
-
-
-
-# Environment helpers
-# Need to abbreviate returns under value; eg for funcitons
-# Need to not search global environments
-# Maybe include step name / label
-# Find a given object
-find_this_object <- function(objname, design_or_step) {
-  # Helper to check and return object from env chain
-  check_env <- function(env, visited = list()) {
-    while (!identical(env, emptyenv())) {
-      if (exists(objname, envir = env, inherits = FALSE)) {
-        return(list(value = get(objname, envir = env), env = env))
-      }
-      env_label <- capture.output(print(env))
-      if (any(env_label %in% visited)) break
-      visited <- c(visited, env_label)
-      env <- parent.env(env)
-    }
-    NULL
-  }
-  
-  steps <- if ("design" %in% class(design_or_step)) design_or_step else list(design_or_step)
-  
-  results <- list()
-  
-  for (i in seq_along(steps)) {
-    step <- steps[[i]]
-    if (!is.null(attr(step, "dots"))) {
-      dots <- attr(step, "dots")
-      for (dotname in names(dots)) {
-        dot <- dots[[dotname]]
-        if (rlang::is_quosure(dot)) {
-          res <- check_env(rlang::get_env(dot))
-          if (!is.null(res)) {
-            results[[length(results) + 1]] <- list(
-              step = i,
-              quosure = dotname,
-              value = res$value,
-              environment = res$env
-            )
-          }
-        }
-      }
-    }
-  }
-  
-  if (length(results) == 0) {
-    cat(glue::glue("❌ Object '{objname}' not found in any step.\n"))
-    return(invisible(NULL))
-  }
-  
-  # Create and print a results table
-  df <- tibble::tibble(
-    step = vapply(results, function(x) x$step, integer(1)),
-    quosure = vapply(results, function(x) x$quosure, character(1)),
-    value = vapply(results, function(x) paste0(capture.output(str(x$value)), collapse = "\n"), character(1)),
-    environment = vapply(results, function(x) format(x$environment), character(1))
-  )
-  
-  print(df)
-  
-  invisible(results)
-}
-
-
-# Find all objects saved to a design environment
-# Need to keep searching even after redesign creates new environments
-find_all_objects_old <- function(design) {
-  
-  # Collect all environments from quosures with step/quosure metadata
-  env_info <- list()
-  
-  for (step_i in seq_along(design)) {
-    step <- design[[step_i]]
-    
-    # is_po <- attr(step, "step_type") == "potential_outcomes" 
-    
-    dots <- attr(step, "dots")
-    
-    if (is.null(dots)) next
-    
-  
-    for (quosure_name in names(dots)) {
-      dot <- dots[[quosure_name]]
-      
-      if (!(is_quosure(dot))) next
-      
-      if(!is_quosure(dot)) 
-        dot <- rlang::as_quosure(dot, env = environment(dot))
-      
-      env <- rlang::get_env(dot)
-      env_id <- format(env)  # stringify environment
-      
-      env_info[[length(env_info) + 1]] <- list(
-        step = step_i,
-        quosure = quosure_name,
-        env_id = env_id
-      )
-      
-    }
-  }
-  
-
-  env_df <- bind_rows(env_info)
-  
-  # Unique environments
-  unique_envs <- env_df %>% distinct(env_id)
-  
-
-  # Map from env_id to actual env
-  env_map <- list()
-  
-
-  for (e in unique_envs$env_id) {
-    # parse env_id back to environment is tricky, so:
-    # instead, find the first quosure with this env_id and get env from it
-    env_map[[e]] <- NULL  # placeholder
-  }
-  
-  # Build env_map properly by scanning design again
-  for (step_i in seq_along(design)) {
-    step <- design[[step_i]]
-
-    # is_po <- attr(step, "step_type") == "potential_outcomes" 
-
-    dots <- attr(step, "dots")
-    
-    if (is.null(dots)) next
-    
-    for (quosure_name in names(dots)) {
-      dot <- dots[[quosure_name]]
-
-      if (!(is_quosure(dot) )) next
-
-      env <- rlang::get_env(dot)
-
-      env_id <- format(env)
-      if (is.null(env_map[[env_id]])) {
-        env_map[[env_id]] <- env
-      }
-    }
-  }
-  
-  # For each environment, get all objects inside it
-  env_objects <- map(unique_envs$env_id, function(env_id) {
-    env <- env_map[[env_id]]
-    objs <- ls(env, all.names = TRUE)
-    vals <- map(objs, ~ get(.x, envir = env))
-    names(vals) <- objs
-    
-    # Stringify value for printing - show class and first few chars
-    vals_str <- map_chr(vals, function(x) {
-      val_class <- class(x)[1]
-      val_str <- tryCatch({
-        if (is.atomic(x) && length(x) <= 5) {
-          paste0(deparse(x), collapse = "")
-        } else if (is.function(x)) {
-          "function"
-        } else {
-          paste0("<", val_class, ">")
-        }
-      }, error = function(e) "<error>")
-      val_str
-    })
-    
-    tibble(
-      name = objs,
-      value_str = vals_str,
-      env_id = env_id
-    )
-  })
-  
-  all_objs_df <- bind_rows(env_objects)
-  
-  # Join back with env_df to get step/quosure info for each env_id
-  # One env can appear in multiple steps/quosures, so expand join to multiple rows
-  joined <- left_join(all_objs_df, env_df, by = "env_id") %>%
-    select(name, value_str, env_id, step, quosure) %>%
-    arrange(step, name)
-  
-  # Return tibble with: object name, value string, environment address, step, quosure
-  joined
-}
-
 

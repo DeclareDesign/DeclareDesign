@@ -9,7 +9,7 @@ declare_measurement(
   ...,
   handler = measurement_handler,
   label = NULL,
-  pars = NULL
+  handler_environment = TRUE
 )
 
 measurement_handler(data, ...)

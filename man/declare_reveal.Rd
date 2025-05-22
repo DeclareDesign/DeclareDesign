@@ -9,7 +9,7 @@ declare_reveal(
   ...,
   handler = declare_reveal_handler,
   label = NULL,
-  pars = NULL
+  handler_environment = TRUE
 )
 
 declare_reveal_handler(

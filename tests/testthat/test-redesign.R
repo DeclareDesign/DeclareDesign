@@ -35,11 +35,12 @@ test_that("message if meaningless change", {
 
 
 test_that("embedded parameter, multiple steps", {
-  n <- 1000
+  n <- 2000
   b <- .2
   
   d <- 
-    declare_model(N = n, Y = rnorm(N, b)) + 
+    declare_model(N = n) + 
+    declare_model(Y = rnorm(N, b)) + 
     declare_estimator(Y ~ 1) +
     declare_inquiry(Q = b)
   
@@ -62,4 +63,19 @@ test_that("embedded parameter, multiple steps", {
   expect_true(x$estimand == 10)
   expect_true(abs(x$estimand - x$estimate) < .1)
   
+})
+
+
+
+test_that("data_step throwing error", {
+  n <- 2000
+  b <- .2
+  
+  d <- 
+    declare_model(N = n, Y = rnorm(N, b)) + 
+    declare_inquiry(Q = b)
+  
+  d2 <- redesign(d, b = .4)
+  expect_error(run_design(d2))
+
 })

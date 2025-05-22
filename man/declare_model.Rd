@@ -4,7 +4,12 @@
 \alias{declare_model}
 \title{Declare the size and features of the population}
 \usage{
-declare_model(..., handler = fabricate, label = NULL, pars = NULL)
+declare_model(
+  ...,
+  handler = fabricate,
+  label = NULL,
+  handler_environment = TRUE
+)
 }
 \arguments{
 \item{...}{arguments to be captured, and later passed to the handler}

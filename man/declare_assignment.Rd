@@ -9,7 +9,7 @@ declare_assignment(
   ...,
   handler = assignment_handler,
   label = NULL,
-  pars = NULL
+  handler_environment = TRUE
 )
 
 assignment_handler(data, ..., legacy = FALSE)

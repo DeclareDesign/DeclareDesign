@@ -9,7 +9,7 @@ declare_test(
   ...,
   handler = label_test(method_handler),
   label = "test",
-  pars = NULL
+  handler_environment = TRUE
 )
 
 label_test(fn)

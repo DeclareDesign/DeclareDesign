@@ -10,7 +10,7 @@ declare_potential_outcomes(
   ...,
   handler = potential_outcomes_handler,
   label = NULL,
-  pars = NULL
+  handler_environment = TRUE
 )
 
 potential_outcomes_internal.formula(

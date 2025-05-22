@@ -3,14 +3,14 @@
 \name{clone_dot_edit_env}
 \alias{clone_dot_edit_env}
 \alias{clone_step_edit}
-\alias{clone_design_edit}
+\alias{par_edit}
 \title{Override environment via shim}
 \usage{
 clone_dot_edit_env(dot, ..., to_replace = list(...))
 
 clone_step_edit(step, ..., to_replace = list(...))
 
-clone_design_edit(design, ..., to_replace = list(...))
+par_edit(design, ...)
 }
 \description{
 Override environment via shim

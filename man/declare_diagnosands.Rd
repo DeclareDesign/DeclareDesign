@@ -11,7 +11,7 @@ declare_diagnosands(
   ...,
   handler = diagnosand_handler,
   label = NULL,
-  pars = NULL
+  handler_environment = TRUE
 )
 }
 \arguments{

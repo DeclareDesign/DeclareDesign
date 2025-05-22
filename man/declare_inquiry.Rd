@@ -8,13 +8,18 @@
 \alias{inquiry_handler}
 \title{Declare inquiry}
 \usage{
-declare_inquiry(..., handler = inquiry_handler, label = "inquiry", pars = NULL)
+declare_inquiry(
+  ...,
+  handler = inquiry_handler,
+  label = "inquiry",
+  handler_environment = TRUE
+)
 
 declare_inquiries(
   ...,
   handler = inquiry_handler,
   label = "inquiry",
-  pars = NULL
+  handler_environment = TRUE
 )
 
 declare_estimand(...)

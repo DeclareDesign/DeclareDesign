@@ -87,15 +87,16 @@
 #' @export
 redesign <- function(design, ..., expand = TRUE) {
   
+  check_dots_in_design(design, list(...))
+  
   check_design_class_single(design)
 
-  designer <- function(...) clone_design_edit(design, ...)
+  designer <- function(...) par_edit(design, ...)
 
   design <- expand_design(designer, ..., expand = expand)
   
   structure(design, code = NULL)
 }
-
 
 
 
@@ -203,3 +204,5 @@ clone_design_envs <- function(design) {
   
   new_design
 }
+
+

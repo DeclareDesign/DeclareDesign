@@ -8,7 +8,7 @@ declare_step(
   ...,
   handler = function(data, ...f, ...) ...f(data, ...),
   label = NULL,
-  pars = NULL
+  handler_environment = TRUE
 )
 }
 \arguments{

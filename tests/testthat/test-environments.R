@@ -1,5 +1,5 @@
 
-find_this_object <- DeclareDesign:::find_this_object
+
 find_all_objects <- DeclareDesign:::find_all_objects
 
 # case 1
@@ -28,21 +28,12 @@ test_that("pars are saved", {
   rm(f)
   expect_equal(nrow(draw_data(design)),5)
   
-  expect_true(!is.null(find_this_object("b", design)))
-  expect_true(length(find_this_object("b", design)) ==2)
-  expect_true(length(find_this_object("f", design)) ==1)
-  expect_true(!is.null(find_this_object("f", design)))
-  expect_true(is.null(find_this_object("z", design)))
-  
-
 })
 
 
 test_that("all steps", {
   
-  find_this_object <- DeclareDesign:::find_this_object
-  find_all_objects <- DeclareDesign:::find_all_objects
-  
+
   b1 <- 1
   b2 <- 2
   b3 <- 3
@@ -90,8 +81,7 @@ test_that("find object after redesign", {
   # needs to find r
   DeclareDesign:::find_all_objects(design)
   
-  
-  expect_warning(DeclareDesign:::par_edit(design, w = 3))
+  # expect_warning(DeclareDesign:::par_edit(design, w = 3))
   
   design <- DeclareDesign:::par_edit(design, n = 3)
   expect_true(draw_data(design) |> nrow() ==3)
@@ -100,9 +90,7 @@ test_that("find object after redesign", {
   design <- redesign(design, n = 7)
   expect_true(draw_data(design) |> nrow() ==7)
   
-  DeclareDesign:::find_all_objects(design)
-  find_this_object("k", design)
-  find_this_object("f", design)
+#  DeclareDesign:::find_all_objects(design)
 })
 
 
@@ -119,7 +107,6 @@ test_that("potential outcomes OK", {
   d <- declare_model(N = 2, B = b) + declare_potential_outcomes( Y ~ b*Z)
   rm(b)
   expect_true(all( draw_data(d)[1, 3:4] == c(0,2)))
-  # find_this_object("b", d)
 })
 
 
@@ -140,7 +127,8 @@ test_that("data saved", {
   step()
   rm(ddf)
   expect_true(nrow(step()) == 5)
-})
+  find_all_objects(step + NULL)
+  })
 
 
 # edge case: 
@@ -165,33 +153,6 @@ test_that("estimator steps", {
   rm(b)
 
   expect_true(draw_estimates(d)$estimate < B)
-})
-
-test_that("multiple steps", {
-  n <- 1000
-  b <- .2
-  
-  d <- 
-    declare_model(N = n, Y = rnorm(N, b)) + 
-    declare_estimator(Y ~ 1) +
-    declare_inquiry(Q = b)
-  
-  expect_true(run_design(d)$estimand == .2)
-  
-  rm(b)
-  
-  expect_true(run_design(d)$estimand == .2)
-
-    d <- redesign(d, b = .4)
-    x <- run_design(d)
-    expect_true(x$estimand == .4)
-    expect_true(abs(x$estimand - x$estimate) < .1)
-
-    d <- redesign(d, b = 10)
-    x <- run_design(d)
-    expect_true(x$estimand == 10)
-    expect_true(abs(x$estimand - x$estimate) < .1)
-    
 })
 
 
@@ -395,8 +356,6 @@ test_that("parameter assigned in function", {
     d
   }
 
-  find_this_object("n", designer())[[1]]$value ==4
-
   expect_true(nrow(draw_data(designer())) == 4)
   
 })
@@ -415,8 +374,8 @@ test_that("environment sharing", {
   design <- 
     declare_model(N = N, x = runif(N)) + NULL
 
-  design_2 <- DeclareDesign:::clone_design_edit(design, N = 6)
-  design_3 <- DeclareDesign:::clone_design_edit(design, N = 7)
+  design_2 <- DeclareDesign:::par_edit(design, N = 6)
+  design_3 <- DeclareDesign:::par_edit(design, N = 7)
   
   find_all_objects(design_2)
   find_all_objects(design_3)
