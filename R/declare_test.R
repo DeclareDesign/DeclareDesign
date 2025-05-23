@@ -89,7 +89,7 @@
 #' @seealso See \code{\link{declare_estimator}} for documentation of the \code{method_handler} function.
 #' 
 declare_test <- 
-  make_declarations(
+  DeclareDesign:::make_declarations(
     label_test(method_handler),
     step_type = "estimator",
     causal_type = "estimator",

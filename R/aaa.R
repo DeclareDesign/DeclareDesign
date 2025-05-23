@@ -133,7 +133,7 @@ find_symbols_recursive <- function(expr) {
      if (!is.function(fun)) return(fun)
      body_expr <- body(fun)
      
-     symbols <- find_symbols_recursive(body_expr)
+     symbols <- DeclareDesign:::find_symbols_recursive(body_expr)
      
      language_tokens <- c(
        "{", "<-", "=", "(", ")", "[", "]", "$", "&&", "||", "+", "-", "*", "/", "^", "!"
@@ -155,8 +155,14 @@ find_symbols_recursive <- function(expr) {
      if (is.null(old_env)) old_env <- globalenv()
      new_env <- new.env(parent = old_env)
      
+     # print(needed)
+     
      for (name in needed) {
 
+       if(all(name == "")) next
+       
+      #  print(name)
+  
        obj_exists <-
          safe_exists(name, old_env) ||
          safe_exists(name, envir) ||
@@ -300,11 +306,48 @@ dots_add_args_quosure <- function(dots) {
   dots
 }
 
+# helper to name handlers
+#' a <- function(x) x
+#' b <- function(x) -x
+#'
+#' f <- function(handler = a, x) {
+#'  # Capture expressions from *inside* f()
+#'  handler_names <- handler_identification(quote(a), substitute(handler))
+#'  
+#'  print(handler_names)
+#'  
+#'  handler(x)
+#'  
+#'}
+#'
+#' f(b, x)
+
+handler_identification <- function(default_expr, actual_expr) {
+  default_handler_name <- if (is.symbol(default_expr)) {
+    as.character(default_expr)
+  } else {
+    "default_handler"
+  }
+  
+  actual_handler_name <- if (is.symbol(actual_expr)) {
+    as.character(actual_expr)
+  } else {
+    "user_handler"
+  }
+  
+  c(default_handler = default_handler_name,
+    user_handler = actual_handler_name)
+}
+
 
 # Declaration template used for all declare_* functions
 
-declaration_template <- function(..., handler, label = NULL, handler_environment = TRUE) {
+declaration_template <- function(..., handler, label = NULL, 
+                                 handler_environment = TRUE) {
+  
+
   dots <- as.list(rlang::quos(..., label = !!label))
+  # print(dots)
   this <- attributes(sys.function())
   
   if (!"label" %in% names(formals(handler))) {
@@ -314,6 +357,10 @@ declaration_template <- function(..., handler, label = NULL, handler_environment
   # Capture_function_dependencies if handler is in global
   # Note estimator steps excluded via handler_environment
   # because of label_estimator(method_handler) behavior  
+  handler_names <- 
+    handler_identification(quote(default_handler), substitute(handler))
+  print(handler_names[[2]])
+  
 
   if (is.function(handler) & handler_environment) {
   
@@ -357,7 +404,8 @@ build_step <- function(curried_fn, handler, dots, label, step_type, causal_type,
 make_declarations <- function(default_handler, step_type, causal_type = "dgp", 
                               default_label, strictDataParam = TRUE,
                               handler_environment = TRUE) {
-  
+
+
   declaration <- declaration_template
 
   formals(declaration)$handler <- substitute(default_handler)
@@ -367,6 +415,8 @@ make_declarations <- function(default_handler, step_type, causal_type = "dgp",
     formals(declaration)$label <- default_label
   }
 
+  # attr(declaration, "default_handler") <- substitute(default_handler)
+  
   structure(
     declaration,
     class = c("declaration", "function"),

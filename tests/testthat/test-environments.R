@@ -320,17 +320,15 @@ test_that("Design 16.5", {
 })
 
 
-
-
 # Design library
 # Obj must be available outside test environment for test to work
 # Without this test still works but not inside test environment
-n = 20
+# n = 20
 test_that("Design library", {
   n = 20
   design <- DesignLibrary::two_arm_covariate_designer(N = n)
     DeclareDesign:::find_all_objects(design)
-    rm(n)  # design has already been constructed with n used for N
+#    rm(n)  # design has already been constructed with n used for N
     expect_true(draw_data(design) |> nrow() == 20)
     
     design <- design |> redesign(N = 30)

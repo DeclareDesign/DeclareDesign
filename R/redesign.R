@@ -94,7 +94,7 @@ redesign <- function(design, ..., expand = TRUE) {
   designer <- function(...) modify_edit(design, ...)
 
   design <- expand_design(designer, ..., expand = expand)
-  
+
   structure(design, code = NULL)
 }
 
@@ -125,6 +125,7 @@ find_all_objects <- function(design) {
   
   for (step_i in seq_along(design)) {
     step <- design[[step_i]]
+    # handler <- attr(step, "handler")
     dots <- attr(step, "dots")
     if (is.null(dots)) next
     

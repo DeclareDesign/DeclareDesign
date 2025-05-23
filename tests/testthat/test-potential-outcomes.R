@@ -252,17 +252,24 @@ test_that("Multiple assignment variables in PO", {
 
 
 test_that("handler dispatches correctly", {
-  po <-
-    potential_outcomes_handler(
+  expect_error(
+    DeclareDesign:::potential_outcomes_handler(
       Y ~ Z1 + Z2,
       conditions = expand.grid(Z1 = 0:1, Z2 = 0:1),
       assignment_variables = c("Z1", "Z2"),
       data = sleep,
       level = NULL
-    )
+    ))
 
+  po <-
+    DeclareDesign:::potential_outcomes_handler(
+      Y ~ Z1 + Z2,
+      conditions = expand.grid(Z1 = 0:1, Z2 = 0:1),
+      data = sleep
+    )
+  
   po2 <-
-    potential_outcomes_handler(
+    DeclareDesign:::potential_outcomes_handler(
       NULL,
       Y_Z1_0_Z2_0 = 0,
       Y_Z1_0_Z2_1 = 1,

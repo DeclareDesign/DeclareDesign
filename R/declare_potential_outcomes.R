@@ -1,3 +1,30 @@
+
+
+#' @param data A data.frame.
+#' @importFrom rlang quos !!!
+#' @importFrom fabricatr fabricate
+#' @rdname declare_measurement
+potential_outcomes_handler <- function(data, ...) {
+  args <- list(...)
+  
+  # Check if any argument is a formula
+  is_formula <- vapply(args, function(x) inherits(x, "formula"), logical(1))
+
+  if ("assignment_variables" %in% names(args)) {
+    stop("assignment_variables is deprecated")
+  }
+  if ("level" %in% names(args)  & any(is_formula)) {
+    stop("level is deprecated")
+  }
+
+  
+  if (!any(is_formula)) {
+    do.call(fabricate, c(list(data = data, ID_label = NA), args))
+  } else {
+    fabricate(data = data, ID_label = NA, do.call(potential_outcomes, args))
+  }}
+
+
 #' Declare potential outcomes
 #'
 #' Deprecated. Please use the potential_outcomes function within a declare_model declaration.
@@ -19,7 +46,7 @@
 #  default_label = "potential_outcomes"
 # )
 
- potential_outcomes_handler <- 
+ old_potential_outcomes_handler <- 
    function(..., data, level) {
      (function(formula, ...) UseMethod("potential_outcomes_internal"))(..., data = data, level = level)
    }

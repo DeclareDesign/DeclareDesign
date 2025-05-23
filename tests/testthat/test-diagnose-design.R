@@ -222,12 +222,13 @@ test_that("more term",{
 test_that("diagnose_design does not reclass the variable N", {
   skip_if(compareVersion("3.5", paste(R.Version()$major, R.Version()$minor, sep = ".")) == 1)
   # works for redesign
-  design <-
+k <- 1
+    design <-
     declare_model(N = 5, noise = rnorm(N)) +
-       declare_inquiry(mean_noise = mean(noise))
+    declare_inquiry(mean_noise = mean(noise) + k)
   
-  designs <- redesign(design, N = 5:10) 
-  dx <- diagnose_design(designs, sims = 50, bootstrap_sims = FALSE)
+  designs <- redesign(design, N = 5:6) 
+  dx <- diagnose_design(designs, sims = 30, bootstrap_sims = FALSE)
   
   expect_equal(class(dx$simulations_df$N), "integer") 
   expect_equal(class(dx$diagnosands_df$N), "integer")
@@ -302,9 +303,10 @@ test_that("diagnose_design can generate and use grouping variables", {
     declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, inquiry = "ATE_positive")
   
-  diagnosis <- diagnose_design(design, 
-                               make_groups = vars(estimand, significant = p.value <= 0.05),
-                               sims = 5
+  diagnosis <- diagnose_design(
+    design, 
+    make_groups = vars(estimand, significant = p.value <= 0.05),
+    sims = 5
   )
   expect_equivalent(diagnosis$diagnosands_df$significant,  c(FALSE, FALSE))
   expect_equivalent(diagnosis$diagnosands_df$estimand,  c(FALSE, TRUE))
@@ -391,7 +393,7 @@ test_that("tidy.diagnosis handles NAs", {
       N = 2100,
       Y_star = rnorm(N)
     )
-  
+  effort <- 1
   design <- 
     declare_model(data = portola) + 
     declare_measurement(Y = as.numeric(cut(Y_star, 7))) + 

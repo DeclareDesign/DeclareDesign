@@ -34,3 +34,15 @@ test_that("send inquiry to estimator works", {
 })
 
 
+# To do: address warning
+test_that("no pars summary", {
+
+    design <-
+    declare_model(N = 5, noise = rnorm(N)) +
+    declare_inquiry(mean_noise = mean(noise))
+
+    DeclareDesign:::find_all_objects(design)
+    
+    expect_warning(redesign(design, N = 6)) 
+
+})    
