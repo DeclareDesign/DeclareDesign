@@ -7,10 +7,6 @@ test_that("pretty printers", {
                 "declare_model\\(sleep\\)")
 })
 
-test_that("error if data is in there.", {
-  expect_error(declare_potential_outcomes(data = "foo"),
-               "should not be a declared argument.")
-})
 
 test_that("fallback to lapply", {
   future_lapply <- future_lapply

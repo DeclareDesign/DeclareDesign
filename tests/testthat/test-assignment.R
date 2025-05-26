@@ -71,7 +71,7 @@ test_that("randomizr works through declare_assignment", {
 
 
 
-test_that("test assignment and probability functions", {
+test_that("test assignment and probability functions 2", {
   
   # here we want at least one of each ideo st there aren't random failures in assn 9
   draw_ideo <- function(N) {
@@ -92,12 +92,12 @@ test_that("test assignment and probability functions", {
   sampling <- declare_sampling(n = 10, clusters = villages, legacy = TRUE)
   
   potential_outcomes <- declare_potential_outcomes(
-    formula = Y ~ 5 + .5 * (Z == 1) + .9 * (Z == 2) + .2 * Z * elevation + noise,
-    conditions = c(0, 1, 2),
-    assignment_variable = "Z"
+    formula = Y ~ 5 + .5 * (Z == 1) + .9 * (Z == 2) + 
+      .2 * Z * elevation + noise ,
+    conditions = list(Z = c(0, 1, 2))
   )
   
-  
+
   
   smp_draw <- population() %>% sampling() %>% potential_outcomes()
   

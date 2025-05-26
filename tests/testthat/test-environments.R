@@ -323,10 +323,12 @@ test_that("Design 16.5", {
 # Design library
 # Obj must be available outside test environment for test to work
 # Without this test still works but not inside test environment
-# n = 20
+n = 20
 test_that("Design library", {
-  n = 20
+  # n = 20
   design <- DesignLibrary::two_arm_covariate_designer(N = n)
+  # DesignLibrary::get_design_code(design)
+  
     DeclareDesign:::find_all_objects(design)
 #    rm(n)  # design has already been constructed with n used for N
     expect_true(draw_data(design) |> nrow() == 20)
@@ -334,7 +336,7 @@ test_that("Design library", {
     design <- design |> redesign(N = 30)
     expect_true(draw_data(design) |> nrow() == 30)
 })
-
+rm(n)
 
 
 
@@ -393,3 +395,119 @@ test_that("environment sharing", {
 })
 
 
+# Test with formula
+
+
+test_that("param in po formula quosure", {
+  N <- 2
+  b <- .2
+  design <- 
+    declare_model(N = N, U = rnorm(N)) + 
+    declare_potential_outcomes(Y ~ b*N*Z)
+  rm(N, b)
+  draw_data(design)
+
+  obs <- DeclareDesign:::find_all_objects(design)
+  
+  expect_true(all(obs$name == c("N", "b")))
+  
+  design <- redesign(design, N = 4, b =.1)
+  
+  expect_true(all(DeclareDesign:::find_all_objects(design) |> dplyr::pull(value_str) == c(4, .1)))
+
+})
+
+
+# Currently failing (saving OK, but recovery not)
+# to do: remove N from handlr environment
+
+test_that("param in handler", {
+  N <- 2
+  b <- .2
+  f <- function(...) fabricate(...)
+  hdl <- function(...) f(..., extra = rnorm(N, b))
+
+  hdl
+  ls(environment(hdl))
+  hdl <- DeclareDesign:::capture_function_dependencies(hdl)
+  rm(N, b, f)
+  
+  expect_true(all(ls(environment(hdl)) == c("b", "f")))
+})
+
+
+test_that("change param in handler 2", {
+  
+  m <- 2
+  b <- 100
+  N <- pi
+  f <- function(...) fabricate(...)
+  hdl <- function(...) f(..., extra = rnorm(N, b))
+  design <- 
+    declare_model(N = m, U = rnorm(N)) + 
+    declare_measurement(handler = hdl)
+
+  rm(N, b, f, hdl)
+
+  obs <- DeclareDesign:::find_all_objects(design)
+  # Rm N
+  expect_true(all(obs$name == c("m", "b", "f")))
+  expect_true(mean(draw_data(design)$extra) > 50)
+  
+ design <- design|> redesign(b = -100)
+  
+ expect_true(mean(draw_data(design)$extra) < -50)
+ 
+})
+
+
+
+
+test_that("behavior when packaged used and removed", {
+  
+  library(CausalQueries)
+  model_handler <- function(N) make_model() |> make_data(N)
+  n <- 2
+  
+  design <- 
+    declare_model(handler = model_handler, N = n) +  NULL
+
+  rm(n)
+  
+  obs <- DeclareDesign:::find_all_objects(design)
+  obs
+  
+  expect_true(nrow(draw_data(design)) ==2)
+  
+  detach("package:CausalQueries", unload = TRUE)
+
+  # Object can be inspected
+  expect_error(DeclareDesign:::find_all_objects(design), NA)
+  
+  # But does not run without a path to the functions used
+  expect_error(draw_data(design))
+  
+})
+
+
+
+test_that("variables confused for arguments", {
+  
+n <- 1
+  design <- 
+    declare_model(N = n, A = 1) +
+    declare_model(B = A) +
+    declare_potential_outcomes(Y ~ Z + A) 
+  
+  expect_true(DeclareDesign:::find_all_objects(design) |> nrow() ==1)
+  
+  n <- 1
+  step_1 <-  declare_model(N = n, A = 1) 
+  step_2 <-  declare_model(B = A) 
+  step_3 <-  declare_potential_outcomes(Y ~ Z + A) 
+  design <- step_1 + step_2 + step_3
+    
+  expect_true(DeclareDesign:::find_all_objects(design) |> nrow() ==1)
+  
+  
+})

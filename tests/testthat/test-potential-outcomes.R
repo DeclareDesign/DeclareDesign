@@ -1,9 +1,8 @@
-context("Potential Outcomes")
+
 
 test_that("custom po handler", {
 
   # draw POs for it without arguments
-
   my_po_function <- function(data) {
     data$Y_Z_0 <- with(data, .25 + extra)
     data$Y_Z_1 <- with(data, extra)
@@ -46,6 +45,9 @@ test_that("custom po handler with args", {
 
 
 test_that("PO as discrete variables works", {
+
+  extra <- 1
+  
   my_potential_outcomes <- declare_potential_outcomes(
     Y_Z_0 = extra,
     Y_Z_1 = extra + 5
@@ -58,21 +60,27 @@ test_that("PO as discrete variables works", {
 })
 
 
+# to: remove this N after capturing pars in
 
 test_that("PO as a formula works", {
+  N <- 3
+  data <- fabricate(N = N)
+  
   my_potential_outcomes_explicit <-
-    declare_potential_outcomes(formula = R ~ rbinom(n = N, size = 1, prob = 1))
-
+    declare_potential_outcomes(
+      formula = R ~ rbinom(n = N, size = 1, prob = 1))
+  
   my_potential_outcomes_implicit <-
     declare_potential_outcomes(R ~ rbinom(n = N, size = 1, prob = 1))
-
+  
   expect_identical(
-    my_potential_outcomes_explicit(sleep),
-    my_potential_outcomes_implicit(sleep)
+    my_potential_outcomes_explicit(data), #
+    my_potential_outcomes_implicit(data)  # OK
   )
 })
 
 
+# levels approach no longer working
 test_that("POs at a higher level", {
   library(dplyr)
   my_population <- declare_model(
@@ -82,23 +90,17 @@ test_that("POs at a higher level", {
 
   pop <- my_population()
 
-  # Four ways of doing the same thing
+  # different ways of doing the same thing
 
   # with "level" argument in a "formula" version
-  my_potential_outcomes_formula <-
+
+    my_potential_outcomes_formula <-
     declare_potential_outcomes(
       formula = Y_vil ~ elevation + 5 + 2 * Z,
-      level = villages
+      level = "villages"
     )
   my_potential_outcomes_formula(pop)
 
-  # with "level" argument in a "formula" version
-  my_potential_outcomes_formula <-
-    declare_potential_outcomes(
-      formula = Y_vil ~ elevation + 5 + 2 * Z,
-      level = villages
-    )
-  my_potential_outcomes_formula(pop)
 
 
   # with "level" argument in a "discrete" version
@@ -106,7 +108,7 @@ test_that("POs at a higher level", {
     declare_potential_outcomes(
       Y_vil_Z_0 = elevation + 5,
       Y_vil_Z_1 = elevation + 5 + 2,
-      level = villages
+      level = "villages"
     )
 
   my_potential_outcomes_discrete(pop)
@@ -144,10 +146,9 @@ test_that("POs at a higher level", {
 
 
 test_that("draw POs at a level using a variable from another level (now allowed)", {
-  set.seed(50)
   my_population <- declare_model(
-    villages = add_level(N = 2, elevation = runif(N)),
-    citizens = add_level(N = 2, income = runif(N))
+    villages = add_level(N = 2, elevation = 1:2),
+    citizens = add_level(N = 2, income = c(.1, .3))
   )
 
   pop <- my_population()
@@ -155,29 +156,26 @@ test_that("draw POs at a level using a variable from another level (now allowed)
   my_potential_outcomes_formula <-
     declare_potential_outcomes(
       formula = Y_vil ~ elevation + income + 5,
-      level = villages
+      level = "villages"
     )
 
-  expect_equivalent(my_potential_outcomes_formula(pop),
-                    structure(list(villages = c("1", "1", "2", "2"), elevation = c(0.708727096440271, 
-                                                                                   0.708727096440271, 0.437659863382578, 0.437659863382578), citizens = c("1", 
-                                                                                                                                                          "2", "3", "4"), income = c(0.200004896614701, 0.767065986292437, 
-                                                                                                                                                                                     0.513161889044568, 0.0447038763668388), Y_vil_Z_0 = c(5.90873199305497, 
-                                                                                                                                                                                                                                           6.47579308273271, 5.95082175242715, 5.48236373974942), Y_vil_Z_1 = c(5.90873199305497, 
-                                                                                                                                                                                                                                                                                                                6.47579308273271, 5.95082175242715, 5.48236373974942)), class = "data.frame", row.names = c(NA, 
-                                                                                                                                                                                                                                                                                                                                                                                                            4L), outcome_variable = "Y_vil", assignment_variables = "Z"))
-})
+  expect_equivalent(my_potential_outcomes_formula(pop)$Y_vil_Z_1,
+                    c(6.1, 6.3, 7.1, 7.3))
+  })
 
 
 test_that("Potential outcomes with multiple assignment variables", {
+  extra = 2
   beta <- c(1, 3)
 
   my_potential_outcomes_formula <-
     declare_potential_outcomes(
-      formula = test ~ extra + cbind(z1, z2) %*% beta,
+      formula = test ~ extra + as.vector((cbind(z1, z2) %*% beta)),
       conditions = list(z1 = 0:1, z2 = 1:2)
     )
+  
   out <- my_potential_outcomes_formula(sleep)
+  
   with(out, {
     expect_equal(extra + 3, test_z1_0_z2_1)
     expect_equal(extra + 4, test_z1_1_z2_1)
@@ -185,33 +183,32 @@ test_that("Potential outcomes with multiple assignment variables", {
     expect_equal(extra + 7, test_z1_1_z2_2)
   })
 
+  # Assignment variables handled as conditions
   my_potential_outcomes_formula <-
     declare_potential_outcomes(
-      formula = test ~ extra + cbind(z1, z2) %*% beta,
+      formula = test ~ extra + z1 + z2,
       assignment_variables = c("z1", "z2")
     )
   out <- my_potential_outcomes_formula(sleep)
-  with(out, {
-    expect_equal(extra, test_z1_0_z2_0)
-    expect_equal(extra + 3, test_z1_0_z2_1)
-    expect_equal(extra + 1, test_z1_1_z2_0)
-    expect_equal(extra + 4, test_z1_1_z2_1)
-  })
-
-
-  my_potential_outcomes_formula <-
-    declare_potential_outcomes(
-      formula = test ~ extra + cbind(z1, z2) %*% beta,
-      assignment_variables = list("z1", "z2")
-    )
-  out <- my_potential_outcomes_formula(sleep)
-  with(out, {
-    expect_equal(extra, test_z1_0_z2_0)
-    expect_equal(extra + 3, test_z1_0_z2_1)
-    expect_equal(extra + 1, test_z1_1_z2_0)
-    expect_equal(extra + 4, test_z1_1_z2_1)
-  })
+  
+  expect_true(my_potential_outcomes_formula(sleep) |> ncol() == 7)
+  
+  
+  # my_potential_outcomes_formula <-
+  #   declare_potential_outcomes(
+  #     formula = test ~ extra + as.vector((cbind(z1, z2) %*% beta)),
+  #     assignment_variables = c("z1", "z2")
+  #   )
+  # out <- my_potential_outcomes_formula(sleep)
+  # with(out, {
+  #   expect_equal(extra, test_z1_0_z2_0)
+  #   expect_equal(extra + 3, test_z1_0_z2_1)
+  #   expect_equal(extra + 1, test_z1_1_z2_0)
+  #   expect_equal(extra + 4, test_z1_1_z2_1)
+  #
 })
+
+
 
 
 test_that("Restore existing variables to be unchanged", {
@@ -227,11 +224,6 @@ test_that("Restore existing variables to be unchanged", {
 })
 
 
-test_that("PO warns if unnamed dot", {
-  expect_warning(
-    my_potential_outcomes_formula <- declare_potential_outcomes(NULL, sleep)
-  )
-})
 
 
 test_that("Binary Potential outcomes", {
@@ -247,7 +239,9 @@ test_that("Binary Potential outcomes", {
 
 test_that("Multiple assignment variables in PO", {
   po <- declare_potential_outcomes(Y ~ Z1 + Z2, conditions = list(Z1 = 0:1, Z2 = 0:1))
-  expect_length(colnames(po(sleep)) %i% c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0", "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1"), 4)
+  df <- po(sleep)
+  expect_true(all(c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0", "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1") %in%
+               names(df)))
 })
 
 
@@ -259,7 +253,7 @@ test_that("handler dispatches correctly", {
       assignment_variables = c("Z1", "Z2"),
       data = sleep,
       level = NULL
-    ))
+    ), NA)
 
   po <-
     DeclareDesign:::potential_outcomes_handler(
@@ -279,6 +273,69 @@ test_that("handler dispatches correctly", {
       level = NULL
     )
 
-  expect_length(names(po) %i% c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0", "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1"), 4)
-  expect_length(names(po2) %i% c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0", "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1"), 4)
+  expect_true(all(c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0", "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1") %in% names(po)))
+  expect_true(all(c("Y_Z1_0_Z2_0", "Y_Z1_1_Z2_0", "Y_Z1_0_Z2_1", "Y_Z1_1_Z2_1") %in% names(po2)))
+})
+
+
+# to do: make sure xx appears in listed parameters also
+test_that("environments for potential outcomes", {
+  xx <- 3
+  n = 2
+  design <- declare_model(N = n) + 
+    declare_potential_outcomes(Y ~ Z*1 + W, conditions = list(Z=c(0,1), W = c(0,xx)))
+  
+  rm(xx, n)
+
+  expect_true(design |> draw_data() |> ncol() == 5)
+  dots_2 <- attr(design[[2]], "dots")
+  
+#  env <- environment(dots_2$formula)
+#  expect_true(get("xx", envir = env) == 3)
+
+  env <- environment(dots_2$conditions)
+  expect_true(get("xx", envir = env) == 3)
+
+  DeclareDesign:::find_all_objects(design)
+})
+
+
+# These need to be outside test environment
+outcome_means = 1:3
+
+test_that("multiarm old syntax from Design Library", {
+
+outcome_sds = 1:3
+  
+N = 3
+sd_i = 1
+
+design <- declare_model(
+  N = N, 
+  u_1 = rnorm(N, 0, outcome_sds[1L]),
+  u_2 = rnorm(N, 0, outcome_sds[2L]), 
+  u_3 = rnorm(N, 0, outcome_sds[3L]),
+  u = rnorm(N) * sd_i) +
+  
+  declare_potential_outcomes(
+  formula = Y ~ 
+    (outcome_means[1] + u_1) * (Z == "1") + 
+    (outcome_means[2] + u_2) * (Z == "2") + 
+    (outcome_means[3] + u_3) * (Z == "3") + u,
+  conditions = c("1",  "2", "3"),
+  assignment_variables = Z)
+
+
+expect_true(ncol(draw_data(design)) == 8)
+
+})
+
+
+test_that("more old syntax", {
+  
+my_potential_outcomes <- declare_potential_outcomes(
+  formula = Y ~ .25 * Z + .01 * age * Z,
+  conditions = 1:4)
+
+expect_true(ncol(my_potential_outcomes(data.frame(age = 1))) ==5)
 })

@@ -62,19 +62,6 @@ currydata <- function(FUN, dots) {
     # used for declare_model with no seed data provided, in which case null is not the same as missing.
     # Unfortunately, steps do not know at time of declaration if they are in first position or not; 
     # combining steps into design happens after.
-    if(FALSE){
-
-    sw <- (is.null(data) & is_implicit_data_arg(dots))
-    print(c(sw, "because:", (is.null(data)), is_implicit_data_arg(dots)))
-    print("-----------------------------------")
-    if(sw) print("Quo no data:")
-    if(sw) print(quoNoData)
-    if(sw) print(eval_tidy(quoNoData, list(data = NULL)))
-    
-    if(!sw) print("Quo data:")
-    if(!sw) print(quoData)
-    if(!sw) print(eval_tidy(quoData, list(data = data)))
-    }
 
     eval_tidy(if (is.null(data) & is_implicit_data_arg(dots)) quoNoData else quoData, data = list(data = data))
   }
@@ -127,82 +114,61 @@ find_symbols_recursive <- function(expr) {
  # helper to identify function dependencies
  # DeclareDesign:::capture_function_dependencies(fun = function(x) a*x)
  
- capture_function_dependencies <- 
+ capture_function_dependencies <- function(fun, envir = globalenv(), fallback_env = parent.frame()) {
+   if (!is.function(fun)) return(fun)
    
-   function(fun, envir = globalenv(), fallback_env = parent.frame()) {
-     if (!is.function(fun)) return(fun)
-     body_expr <- body(fun)
+   body_expr <- body(fun)
+   symbols <- DeclareDesign:::find_symbols_recursive(body_expr)
+   
+   excluded_symbols <- c(
+     names(formals(fun)), "...",
+     "{", "<-", "=", "(", ")", "[", "]", "$", "&&", "||", "+", "-", "*", "/", "^", "!",
+     ".Call", ".External", ".Primitive", ".Internal",
+     grep("^C_", symbols, value = TRUE)
+   )
+   
+   needed <- setdiff(symbols, excluded_symbols)
+   
+   old_env <- environment(fun) %||% globalenv()
+   new_env <- new.env(parent = old_env)
+   
+   for (name in needed) {
+     if (name == "") next
+     if (name == "N") next # N is special and should not be 
+                           # saved as a par in functions
      
-     symbols <- DeclareDesign:::find_symbols_recursive(body_expr)
-     
-     language_tokens <- c(
-       "{", "<-", "=", "(", ")", "[", "]", "$", "&&", "||", "+", "-", "*", "/", "^", "!"
-     )
-     
-     # Also ignore base/native interface symbols and C-level symbols
-     excluded_symbols <- c(
-       names(formals(fun)),
-       "...",
-       language_tokens,
-       ".Call", ".External", ".Primitive", ".Internal",
-       grep("^C_", symbols, value = TRUE)
-     )
-     
-     needed <- setdiff(symbols, excluded_symbols)     
-
-     # Create new environment for function, inheriting from its original env
-     old_env <- environment(fun)
-     if (is.null(old_env)) old_env <- globalenv()
-     new_env <- new.env(parent = old_env)
-     
-     # print(needed)
-     
-     for (name in needed) {
-
-       if(all(name == "")) next
-       
-      #  print(name)
-  
-       obj_exists <-
-         safe_exists(name, old_env) ||
-         safe_exists(name, envir) ||
-         safe_exists(name, fallback_env)
-
-       
-       
-       if (!obj_exists && is_available_from_loaded_package(name)) {
-         next
-       }
-       
-       
-
-       obj <- tryCatch(
-         get(name, envir = old_env, inherits = TRUE),
-         error = function(e) tryCatch(
-           get(name, envir = envir, inherits = TRUE),
-           error = function(e2) tryCatch(
-             get(name, envir = fallback_env, inherits = TRUE),
-             error = function(e3) NULL
-           )
+     # Try to get object
+     obj <- tryCatch(
+       get(name, envir = old_env, inherits = TRUE),
+       error = function(e) tryCatch(
+         get(name, envir = envir, inherits = TRUE),
+         error = function(e2) tryCatch(
+           get(name, envir = fallback_env, inherits = TRUE),
+           error = function(e3) NULL
          )
        )
-       
-       # Recursively capture dependencies of functions, but only if:
-       # - it's not primitive
-       # - and it's not from a package namespace (i.e. user-defined)
-       if (is_user_defined_function(obj)) {
-         obj <- capture_function_dependencies(obj, envir = envir, fallback_env = fallback_env)
+     )
+     
+     # Skip primitives and package-defined functions
+     if (is.function(obj)) {
+       obj_env <- environment(obj)
+       if (isNamespace(obj_env) || is.null(obj_env) || 
+           startsWith(environmentName(obj_env), "namespace:")) {
+         next
        }
-       
-       if (!is.null(obj)) {
-         assign(name, obj, envir = new_env)
-       }
+       obj <- capture_function_dependencies(obj, envir = envir, fallback_env = fallback_env)
      }
      
-     environment(fun) <- new_env
-     fun
+     if (!is.null(obj)) {
+       assign(name, obj, envir = new_env)
+     }
    }
+   
+   environment(fun) <- new_env
+   fun
+ }
  
+
  # Main function to capture globals for quosures
  capture_globals_quosure <-
    
@@ -284,7 +250,6 @@ find_symbols_recursive <- function(expr) {
          }
          assign(name, obj, envir = new_env)
        }
-       
      }
      
      rlang::new_quosure(expr, new_env)
@@ -357,19 +322,20 @@ declaration_template <- function(..., handler, label = NULL,
   # Capture_function_dependencies if handler is in global
   # Note estimator steps excluded via handler_environment
   # because of label_estimator(method_handler) behavior  
-  handler_names <- 
-    handler_identification(quote(default_handler), substitute(handler))
-  print(handler_names[[2]])
   
-
-  if (is.function(handler) & handler_environment) {
   
+  handler_names <- handler_identification(quote(default_handler), substitute(handler))
+  attr(handler, "tag") <- handler_names[[2]]
+  
+  if (is.function(handler) && handler_environment) {
     handler_env <- environment(handler)
-    if (!isNamespace(handler_env)) {
-        handler <- capture_function_dependencies(handler)
+    
+    # Only apply capture if not from namespace or package
+    if (!isNamespace(handler_env) &&
+        !startsWith(environmentName(handler_env), "namespace:")) {
+      handler <- capture_function_dependencies(handler)
     }
   }
-  
   dots <- rename_dots(handler, dots)
   dots <- dots_add_args_quosure(dots)
   
@@ -382,6 +348,8 @@ declaration_template <- function(..., handler, label = NULL,
     causal_type = this$causal_type,
     call = match.call()
   )
+  
+  ret <<- ret
   
   validate(handler, ret, dots, label)
 } 

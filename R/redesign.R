@@ -112,7 +112,7 @@ redesign <- function(design, ..., expand = TRUE) {
 #' @importFrom tibble tibble
 #' @importFrom dplyr bind_rows
 #' @internal
-find_all_objects <- function(design) {
+old_find_all_objects <- function(design) {
   
   # allow step also
   if(!any(c("design_step", "design") %in% class(design))) 
@@ -125,10 +125,15 @@ find_all_objects <- function(design) {
   
   for (step_i in seq_along(design)) {
     step <- design[[step_i]]
-    # handler <- attr(step, "handler")
+    
     dots <- attr(step, "dots")
     if (is.null(dots)) next
-    
+
+    if(length(names(dots)[names(dots) == ""]) >1)
+       stop(paste("More than one unnamed quosure in step", step_i))
+       
+    names(dots)[names(dots) == ""] <- "formula"
+      
     for (quosure_name in names(dots)) {
       q <- dots[[quosure_name]]
       if (!rlang::is_quosure(q)) next
@@ -177,3 +182,89 @@ check_dots_in_design <- function(design, dots) {
   
 }
 
+
+
+find_all_objects <- function(design) {
+  
+  if (!any(c("design_step", "design") %in% class(design))) 
+    stop("Please pass a design object")   
+  
+  if ("design_step" %in% class(design)) 
+    design <- design + NULL
+  
+  results <- list()
+  
+  for (step_i in seq_along(design)) {
+    step <- design[[step_i]]
+    
+    jobs <- list()
+    
+    # --- Extract quosures from dots
+    dots <- attr(step, "dots")
+    if (!is.null(dots)) {
+      if (length(names(dots)[names(dots) == ""]) > 1)
+        stop(paste("More than one unnamed quosure in step", step_i))
+      
+      names(dots)[names(dots) == ""] <- "formula"
+      
+      for (quosure_name in names(dots)) {
+        q <- dots[[quosure_name]]
+        if (rlang::is_quosure(q)) {
+          q <- rlang::as_quosure(q)
+          env <- rlang::get_env(q)
+          jobs[[length(jobs) + 1]] <- list(
+            name = quosure_name,
+            env = env,
+            step = step_i
+          )
+        }
+      }
+    }
+    
+    # --- Add handler environment
+    handler <- attr(step, "handler")
+    
+    if (!is.null(handler)) {
+      handler_env <- rlang::get_env(handler)
+      
+      # skip known internal handlers or package-defined handlers
+      if (
+        !attr(handler, "tag") %in% c("fabricate", "potential_outcomes_handler", "assignment_handler") &&
+        !isNamespace(handler_env) &&
+        !startsWith(environmentName(handler_env), "namespace:")
+      ) {
+        handler_name <- if (!is.null(attr(handler, "name"))) attr(handler, "name") else "handler"
+        jobs[[length(jobs) + 1]] <- list(
+          name = handler_name,
+          env = handler_env,
+          step = step_i
+        )
+      }
+  }
+    # --- Process all jobs (quosures + handler)
+    for (job in jobs) {
+      for (name in ls(job$env, all.names = TRUE)) {
+        val <- tryCatch(get(name, envir = job$env), error = function(e) "<error>")
+        val_str <- tryCatch({
+          if (is.atomic(val) && length(val) <= 5) {
+            paste0(deparse(val), collapse = "")
+          } else if (is.function(val)) {
+            "function"
+          } else {
+            paste0("<", class(val)[1], ">")
+          }
+        }, error = function(e) "<error>")
+        
+        results[[length(results) + 1]] <- tibble::tibble(
+          name = name,
+          value_str = val_str,
+          step = job$step,
+          quosure = job$name,
+          env = list(job$env)
+        )
+      }
+    }
+  }
+  
+  dplyr::bind_rows(results)
+}
