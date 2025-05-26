@@ -7,12 +7,7 @@
 \usage{
 diagnosand_handler(data, ..., subset = NULL, alpha = 0.05, label)
 
-declare_diagnosands(
-  ...,
-  handler = diagnosand_handler,
-  label = NULL,
-  handler_environment = TRUE
-)
+declare_diagnosands(..., handler = diagnosand_handler, label = NULL)
 }
 \arguments{
 \item{data}{A data.frame.}

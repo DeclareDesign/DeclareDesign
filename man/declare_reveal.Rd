@@ -5,12 +5,7 @@
 \alias{declare_reveal_handler}
 \title{Declare a reveal outcomes step}
 \usage{
-declare_reveal(
-  ...,
-  handler = declare_reveal_handler,
-  label = NULL,
-  handler_environment = TRUE
-)
+declare_reveal(..., handler = declare_reveal_handler, label = NULL)
 
 declare_reveal_handler(
   data = NULL,

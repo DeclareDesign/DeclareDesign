@@ -5,12 +5,7 @@
 \alias{assignment_handler}
 \title{Declare Data Strategy: Assignment}
 \usage{
-declare_assignment(
-  ...,
-  handler = assignment_handler,
-  label = NULL,
-  handler_environment = TRUE
-)
+declare_assignment(..., handler = assignment_handler, label = NULL)
 
 assignment_handler(data, ..., legacy = FALSE)
 }

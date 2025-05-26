@@ -5,12 +5,7 @@
 \alias{sampling_handler}
 \title{Declare sampling procedure}
 \usage{
-declare_sampling(
-  ...,
-  handler = sampling_handler,
-  label = NULL,
-  handler_environment = TRUE
-)
+declare_sampling(..., handler = sampling_handler, label = NULL)
 
 sampling_handler(data, ..., legacy = FALSE)
 }

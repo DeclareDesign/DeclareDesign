@@ -307,8 +307,7 @@ handler_identification <- function(default_expr, actual_expr) {
 
 # Declaration template used for all declare_* functions
 
-declaration_template <- function(..., handler, label = NULL, 
-                                 handler_environment = TRUE) {
+declaration_template <- function(..., handler, label = NULL) {
   
 
   dots <- as.list(rlang::quos(..., label = !!label))
@@ -320,14 +319,12 @@ declaration_template <- function(..., handler, label = NULL,
   }
 
   # Capture_function_dependencies if handler is in global
-  # Note estimator steps excluded via handler_environment
-  # because of label_estimator(method_handler) behavior  
-  
+
   
   handler_names <- handler_identification(quote(default_handler), substitute(handler))
   attr(handler, "tag") <- handler_names[[2]]
   
-  if (is.function(handler) && handler_environment) {
+  if (is.function(handler)) {
     handler_env <- environment(handler)
     
     # Only apply capture if not from namespace or package
@@ -370,15 +367,13 @@ build_step <- function(curried_fn, handler, dots, label, step_type, causal_type,
 
 # generate declaration steps (eg declare_model) by setting the default handler and metadata
 make_declarations <- function(default_handler, step_type, causal_type = "dgp", 
-                              default_label, strictDataParam = TRUE,
-                              handler_environment = TRUE) {
+                              default_label, strictDataParam = TRUE) {
 
 
   declaration <- declaration_template
 
   formals(declaration)$handler <- substitute(default_handler)
-  formals(declaration)$handler_environment <- substitute(handler_environment)
-  
+
   if (!missing(default_label)) {
     formals(declaration)$label <- default_label
   }

@@ -5,12 +5,7 @@
 \alias{label_test}
 \title{Declare test}
 \usage{
-declare_test(
-  ...,
-  handler = label_test(method_handler),
-  label = "test",
-  handler_environment = TRUE
-)
+declare_test(..., handler = label_test(method_handler), label = "test")
 
 label_test(fn)
 }

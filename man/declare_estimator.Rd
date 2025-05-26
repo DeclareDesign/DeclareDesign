@@ -10,15 +10,13 @@
 declare_estimator(
   ...,
   handler = label_estimator(method_handler),
-  label = "estimator",
-  handler_environment = FALSE
+  label = "estimator"
 )
 
 declare_estimators(
   ...,
   handler = label_estimator(method_handler),
-  label = "estimator",
-  handler_environment = FALSE
+  label = "estimator"
 )
 
 label_estimator(fn)
