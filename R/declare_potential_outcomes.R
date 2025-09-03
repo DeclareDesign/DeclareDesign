@@ -92,39 +92,37 @@ potential_outcomes_handler <- function(data,  ...) {
     } else {   # With formula (usual case)
       
       
-      # Evaluate args (formula becomes a formula object with an overscope env)
+      # evaluate args
       args_eval <- lapply(args, rlang::eval_tidy, data = mask)
       
-      # find the formula
+      # find the formula arg
       is_form <- vapply(args, function(q) rlang::is_formula(rlang::quo_squash(q)), logical(1))
       f_idx   <- which(is_form)[1L]
       
-      # evaluated formula and its overscope (sees data columns + N)
+      # evaluated formula + overscope that sees DATA + N
       f  <- args_eval[[f_idx]]; stopifnot(rlang::is_formula(f))
       fe <- rlang::f_env(f)
       
-      # original quosure env (captures `a` etc.)
+      # original quosure env (captures globals like a, your scalar sd, etc.)
       f_quo <- args[[f_idx]]
       qe    <- rlang::quo_get_env(f_quo)
       
-      # make a writable env for fabricatr; parent = fe so columns stay visible
+      # writable env for fabricatr (it will write Z here); parent=fe keeps columns visible
       safe_env <- new.env(parent = fe)
       
-      # if your RHS ever uses N (fabricatr doesn’t pass a data mask), seed it
+      # if RHS uses N, make sure it's here (fabricatr doesn't pass a mask)
       if (!is.null(mask$N)) assign("N", mask$N, envir = safe_env)
       
-      # ---- seed external globals used on RHS from the quosure env (e.g., `a`) ----
+      # ---- seed captured globals used on RHS, but DON'T override columns ----
       rhs <- rlang::f_rhs(f)
-      rhs_syms <- setdiff(all.vars(rhs), c(names(data), "N"))  # not columns/known
+      rhs_syms <- setdiff(all.vars(rhs), c(names(data), "N"))  # columns win
       for (nm in rhs_syms) {
-        if (!exists(nm, envir = safe_env, inherits = TRUE)) {
-          val <- get0(nm, envir = qe, inherits = TRUE)
-          if (!is.null(val)) assign(nm, val, envir = safe_env)
-        }
+        val <- get0(nm, envir = qe, inherits = TRUE)
+        if (!is.null(val)) assign(nm, val, envir = safe_env)
       }
-      # ---------------------------------------------------------------------------
+      # ----------------------------------------------------------------------
       
-      # attach and call fabricatr
+      # attach safe env and call fabricatr
       rlang::f_env(f) <- safe_env
       args_eval[[f_idx]] <- f
       
@@ -132,8 +130,7 @@ potential_outcomes_handler <- function(data,  ...) {
         data = data,
         ID_label = NA,
         do.call(fabricatr::potential_outcomes, args_eval)
-      )
-      
+      )      
     }
     
     out
