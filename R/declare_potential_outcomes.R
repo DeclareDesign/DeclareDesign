@@ -38,6 +38,7 @@ potential_outcomes_handler <- function(data,  ...) {
       }
     }
     
+#    print(args)
     
     # Ignore assignment_variables and create conditions if needed
     if ("assignment_variables" %in% names(args)) {
@@ -61,8 +62,9 @@ potential_outcomes_handler <- function(data,  ...) {
         conditions <- setNames(list(condition_value), var)
         args$conditions <- rlang::quo(conditions)
       }    
-      
-      
+
+
+
       if(is.null(args$conditions)){
         vars <- eval_tidy(args$assignment_variables)
         conditions <- setNames(rep(list(0:1), length(vars)), vars)
@@ -73,19 +75,17 @@ potential_outcomes_handler <- function(data,  ...) {
       
     }
     
+
     # default conditions argument
-    if (is.null(args$conditions)) {
+    if (is.null(args$conditions)  & has_formula) {
       args$conditions <- rlang::quo(list(Z = c(0, 1)))
     }
-    
-    x <<- args
     
     mask <- rlang::as_data_mask(data)
     mask$N <- nrow(data)
     
     # implementation
     if (!has_formula) {   # No formula
-      
       out <-   rlang::expr(fabricate(data = data, ID_label = NA, !!!args)) |>  
         rlang::eval_tidy()
       
@@ -103,11 +103,11 @@ potential_outcomes_handler <- function(data,  ...) {
       f  <- args_eval[[f_idx]]; stopifnot(rlang::is_formula(f))
       fe <- rlang::f_env(f)
       
-      # original quosure env (captures globals like a, your scalar sd, etc.)
+      # original quosure env (captures globals like a, scalars like sd, etc.)
       f_quo <- args[[f_idx]]
       qe    <- rlang::quo_get_env(f_quo)
       
-      # writable env for fabricatr (it will write Z here); parent=fe keeps columns visible
+      # writable env for fabricatr; parent=fe keeps columns visible
       safe_env <- new.env(parent = fe)
       
       # if RHS uses N, make sure it's here (fabricatr doesn't pass a mask)

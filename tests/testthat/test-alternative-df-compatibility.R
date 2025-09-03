@@ -5,6 +5,8 @@ test_that("data.frame", {
 
   pos <- declare_potential_outcomes(Y_Z_0 = y * 5, Y_Z_1 = y * 5 + 3)
 
+  # pos <- declare_potential_outcomes(Y~1)
+  
   design <- declare_model(dat) + pos
 
   df <- draw_data(design)

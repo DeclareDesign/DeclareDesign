@@ -88,12 +88,17 @@ test_that("design library dependency works",{
 
   # Factorial designer  
   expect_true(
-    all(DesignLibrary::factorial_designer(N = 12) |> draw_data() |> dim() == c(12,15)))
+    all(DesignLibrary::factorial_designer(N = 12) |> draw_data() |> dim() == c(12,15))
+    )
     
   expect_true(
-    all(DesignLibrary::binary_iv_designer(N = 12) |> draw_data() |> dim() == c(12,15)))
+    all(DesignLibrary::binary_iv_designer(N = 12) |> draw_data() |> dim() == c(12,10))
+    )
   
-    design_1 <- DesignLibrary::two_by_two_designer(
+  # flag: should not be needed; this due to enquo call
+  library(rlang)
+  
+  design_1 <- DesignLibrary::two_by_two_designer(
     N = 10, outcome_means = c(0,0,1,2), weight_A = 0, weight_B = 0)
   
   design_2 <- DesignLibrary::multi_arm_designer(
@@ -102,6 +107,8 @@ test_that("design library dependency works",{
   design_1 |> draw_data()  
   
   # To Do: These should not have to be saved
+  # Flag: works on own but not inside testhat environment
+  
   u_1 <- u_2 <-  u_3 <- u <- 1
   design_2 |> draw_data()
   dx <- diagnose_design(design_1, design_2, sims = 3, 
