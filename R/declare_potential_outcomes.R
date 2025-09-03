@@ -10,93 +10,135 @@
 #' 
 potential_outcomes_handler <- function(data,  ...) {
   
-  args <- quos(...)
-
-  # Remove quosures where the expression is exactly NULL
-  args <- args[!vapply(args, function(q) is.null(quo_get_expr(q)), logical(1))]
-  
-  
-  # Check if any argument is a formula
-  is_formula <- lapply(args, function(q) is_formula(quo_squash(q))) |> 
-    unlist()
-
-  #  explicit and implicit formula arguments treated identically
-  names(args)[is_formula] <- ""
-  if(any(names(args)[!is_formula] == ""))  
-    stop("Provide names to all non formula arguments")
-  
-  has_formula <- any(is_formula)
+    args <- quos(...)
     
-  # Deal with levels if supplied
-  level <- args$level
-  args$level <- NULL
-
-  # If degenerate conditions are provided without an assignment var
-  if(!is.null(args$conditions )){
-    if(!is.list(rlang::eval_tidy(args$conditions)) & is.null(args$assignment_variables ))
-      args$assignment_variables  <- rlang::quo(Z)
-  }
+    # Remove quosures where the expression is exactly NULL
+    args <- args[!vapply(args, function(q) is.null(quo_get_expr(q)), logical(1))]
     
     
-  # Ignore assignment_variables and create conditions if needed
-  if ("assignment_variables" %in% names(args)) {
-    # message("assignment_variables is deprecated")
+    # Check if any argument is a formula
+    is_formula <- lapply(args, function(q) is_formula(quo_squash(q))) |> 
+      unlist()
     
-    # cases like:  conditions = c(1,2,3) and assignment_variables = "Z"
-    assignment_quo <- args$assignment_variables
-    conditions_quo <- args$conditions
+    #  explicit and implicit formula arguments treated identically
+    names(args)[is_formula] <- ""
+    if(any(names(args)[!is_formula] == ""))  
+      stop("Provide names to all non formula arguments")
     
-
-    # Check whether conditions is NOT a list
-    is_not_list <- !is.list(rlang::eval_tidy(conditions_quo))
+    has_formula <- any(is_formula)
     
-    if (!is.null(conditions_quo) &&
-        is_not_list &&
-        rlang::is_symbol(rlang::quo_squash(assignment_quo))) {
-      
-      var <- rlang::as_label(rlang::quo_squash(assignment_quo))
-      condition_value <- rlang::eval_tidy(conditions_quo)
-      
-      conditions <- setNames(list(condition_value), var)
-      args$conditions <- rlang::quo(conditions)
-    }    
-      
-
-    if(is.null(args$conditions)){
-      vars <- eval_tidy(args$assignment_variables)
-      conditions <- setNames(rep(list(0:1), length(vars)), vars)
-      args$conditions <- rlang::quo(conditions)
-      is_formula$conditions <- FALSE
+    # Deal with levels if supplied
+    level <- args$level
+    args$level <- NULL
+    
+    # If degenerate conditions are provided without an assignment var
+    if(!is.null(args$conditions )){
+      if(!is.list(rlang::eval_tidy(args$conditions)) & is.null(args$assignment_variables )){
+        args$assignment_variables  <- rlang::quo(Z)
+      }
     }
-   
-    args$assignment_variables <- NULL
     
+    
+    # Ignore assignment_variables and create conditions if needed
+    if ("assignment_variables" %in% names(args)) {
+      # message("assignment_variables is deprecated")
+      
+      # cases like:  conditions = c(1,2,3) and assignment_variables = "Z"
+      assignment_quo <- args$assignment_variables
+      conditions_quo <- args$conditions
+      
+      
+      # Check whether conditions is NOT a list
+      is_not_list <- !is.list(rlang::eval_tidy(conditions_quo))
+      
+      if (!is.null(conditions_quo) &&
+          is_not_list &&
+          rlang::is_symbol(rlang::quo_squash(assignment_quo))) {
+        
+        var <- rlang::as_label(rlang::quo_squash(assignment_quo))
+        condition_value <- rlang::eval_tidy(conditions_quo)
+        
+        conditions <- setNames(list(condition_value), var)
+        args$conditions <- rlang::quo(conditions)
+      }    
+      
+      
+      if(is.null(args$conditions)){
+        vars <- eval_tidy(args$assignment_variables)
+        conditions <- setNames(rep(list(0:1), length(vars)), vars)
+        args$conditions <- rlang::quo(conditions)
+      }
+      
+      args$assignment_variables <- NULL
+      
+    }
+    
+    # default conditions argument
+    if (is.null(args$conditions)) {
+      args$conditions <- rlang::quo(list(Z = c(0, 1)))
+    }
+    
+    x <<- args
+    
+    mask <- rlang::as_data_mask(data)
+    mask$N <- nrow(data)
+    
+    # implementation
+    if (!has_formula) {   # No formula
+      
+      out <-   rlang::expr(fabricate(data = data, ID_label = NA, !!!args)) |>  
+        rlang::eval_tidy()
+      
+    } else {   # With formula (usual case)
+      
+      
+      # Evaluate args (formula becomes a formula object with an overscope env)
+      args_eval <- lapply(args, rlang::eval_tidy, data = mask)
+      
+      # find the formula
+      is_form <- vapply(args, function(q) rlang::is_formula(rlang::quo_squash(q)), logical(1))
+      f_idx   <- which(is_form)[1L]
+      
+      # evaluated formula and its overscope (sees data columns + N)
+      f  <- args_eval[[f_idx]]; stopifnot(rlang::is_formula(f))
+      fe <- rlang::f_env(f)
+      
+      # original quosure env (captures `a` etc.)
+      f_quo <- args[[f_idx]]
+      qe    <- rlang::quo_get_env(f_quo)
+      
+      # make a writable env for fabricatr; parent = fe so columns stay visible
+      safe_env <- new.env(parent = fe)
+      
+      # if your RHS ever uses N (fabricatr doesn’t pass a data mask), seed it
+      if (!is.null(mask$N)) assign("N", mask$N, envir = safe_env)
+      
+      # ---- seed external globals used on RHS from the quosure env (e.g., `a`) ----
+      rhs <- rlang::f_rhs(f)
+      rhs_syms <- setdiff(all.vars(rhs), c(names(data), "N"))  # not columns/known
+      for (nm in rhs_syms) {
+        if (!exists(nm, envir = safe_env, inherits = TRUE)) {
+          val <- get0(nm, envir = qe, inherits = TRUE)
+          if (!is.null(val)) assign(nm, val, envir = safe_env)
+        }
+      }
+      # ---------------------------------------------------------------------------
+      
+      # attach and call fabricatr
+      rlang::f_env(f) <- safe_env
+      args_eval[[f_idx]] <- f
+      
+      out <- fabricate(
+        data = data,
+        ID_label = NA,
+        do.call(fabricatr::potential_outcomes, args_eval)
+      )
+      
+    }
+    
+    out
   }
   
-  # print(names(args))
-  # print(names(is_formula))
-  
-  
-  mask <- rlang::as_data_mask(data)
-  mask$N <- nrow(data)
-  
-  # implementation
-  if (!has_formula) {   # No formula
-    
-    rlang::expr(fabricate(data = data, 
-                          ID_label = NA, !!!args)) |>  
-      rlang::eval_tidy()
-    
-  } else {   # With formula (usual case)
-
-    fabricate(data = data, ID_label = NA,
-            do.call(fabricatr::potential_outcomes, 
-                    lapply(args, 
-                           rlang::eval_tidy, 
-                           data = mask)))
-  }
-}
-
 
 #' Declare potential outcomes
 #'
@@ -118,5 +160,4 @@ potential_outcomes_handler <- function(data,  ...) {
 #   ret
 #   }
  
-
 

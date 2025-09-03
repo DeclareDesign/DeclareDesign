@@ -33,7 +33,7 @@ population <- declare_population(
   u = rnorm(N) * sd_i
 )
 
-potential_outcomes <- declare_potential_outcomes(
+potentials <- declare_potential_outcomes(
   formula = Y ~ (outcome_means[1] + u_1) * (Z == "1") +
     (outcome_means[2] + u_2) * (Z == "2") +
     (outcome_means[3] + u_3) * (Z == "3") + u,
@@ -56,8 +56,9 @@ reveal_Y <- declare_reveal(assignment_variables = Z)
 estimator <- declare_estimator(handler = estimator_handler)
 
 # Combine design
-multi_arm_design <- population +
-  potential_outcomes +
+multi_arm_design <- 
+  population +
+  potentials +
   assignment +
   reveal_Y +
   estimand +
@@ -84,8 +85,15 @@ u_1 <- u_2 <-  u_3 <- u <- 1
 test_that("design library dependency works",{
   skip_if_not_installed("DesignLibrary")
   skip_on_cran()
+
+  # Factorial designer  
+  expect_true(
+    all(DesignLibrary::factorial_designer(N = 12) |> draw_data() |> dim() == c(12,15)))
+    
+  expect_true(
+    all(DesignLibrary::binary_iv_designer(N = 12) |> draw_data() |> dim() == c(12,15)))
   
-  design_1 <- DesignLibrary::two_by_two_designer(
+    design_1 <- DesignLibrary::two_by_two_designer(
     N = 10, outcome_means = c(0,0,1,2), weight_A = 0, weight_B = 0)
   
   design_2 <- DesignLibrary::multi_arm_designer(

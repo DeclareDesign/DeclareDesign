@@ -266,5 +266,18 @@ find_all_objects <- function(design) {
     }
   }
   
-  dplyr::bind_rows(results)
+  x <- dplyr::bind_rows(results)
+  class(x) <- c("objects", class(x))
+  
+  x
+}
+
+
+print.objects <- function(x) {
+  x |>
+    dplyr::select(name, value_str, step) |>
+    dplyr::distinct() |>
+    dplyr::group_by(name, value_str) |>
+    dplyr::summarise(steps = paste(sort(unique(step)), collapse = ", "), 
+                     .groups = "drop")
 }

@@ -188,8 +188,11 @@ find_symbols_recursive <- function(expr) {
      # needed <- setdiff(find_symbols_recursive(expr), skip)
      needed <- find_symbols_recursive(expr)
      new_env <- new.env(parent = old_env)
+
      
      for (name in needed) {
+       if (name == "")  next
+       
        obj_exists <-
          safe_exists(name, old_env) ||
          safe_exists(name, envir) ||
@@ -346,7 +349,7 @@ declaration_template <- function(..., handler, label = NULL) {
     call = match.call()
   )
   
-  ret <<- ret
+  # ret <<- ret
   
   validate(handler, ret, dots, label)
 } 

@@ -329,7 +329,6 @@ test_that("Design library", {
   design <- DesignLibrary::two_arm_covariate_designer(N = n)
   # DesignLibrary::get_design_code(design)
   
-    DeclareDesign:::find_all_objects(design)
 #    rm(n)  # design has already been constructed with n used for N
     expect_true(draw_data(design) |> nrow() == 20)
     
@@ -393,6 +392,8 @@ test_that("environment sharing", {
   expect_false("runif" %in% find_all_objects(design)$name)
   
 })
+
+
 
 
 # Test with formula
@@ -511,3 +512,60 @@ n <- 1
   
   
 })
+
+
+test_that("disappearing environments", {
+  
+  # 1 OK
+  
+  a <- 1 
+
+  XX <-
+    declare_population(N = 5, u_1 = rnorm(N), 
+                       u_2 = rnorm(N)) +
+    declare_potential_outcomes(formula = Y ~ a)  
+  XX
+  rm(a)
+  XX
+  x
+  
+  # Fail: Still requires work
+  
+  a <- 1.1 
+  
+  XX <-
+    declare_population(N = 5, u_1 = rnorm(N), 
+                       u_2 = rnorm(N)) +
+    declare_potential_outcomes(formula = Y ~ a + (Z=="1") + rnorm(N)/100, 
+                               conditions = list(Z = c("1", "2")))  
+  
+  rm(a)
+  draw_data(XX)
+  
+  a <- 1.1 
+  XX <-
+    declare_population(N = 5, u_1 = 1.3, 
+                       u_2 = rnorm(N)) +
+    declare_potential_outcomes(formula = Y ~ a + u_1, 
+                               conditions = list(Z = c("1", "2")))  
+  
+  rm(a)
+  draw_data(XX)
+
+  # This works
+  a <- 1
+  XX <-
+    declare_model(N = 5, u_W = rnorm(N), 
+                  u_Y = rnorm(n = N, mean = .5 * u_W, sd = sqrt(1 - .5^2))) +
+    declare_potential_outcomes(Y ~ (u_Y * a ))
+XX
+
+# This doesn't because, I am guessing, it is first taking sd the function'
+sd <- 1
+XX <-
+  declare_model(N = 5, u_W = rnorm(N), 
+                u_Y = rnorm(n = N, mean = .5 * u_W, sd = sqrt(1 - .5^2))) +
+  declare_potential_outcomes(Y ~ (u_Y * sd ))
+XX
+
+  })
