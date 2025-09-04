@@ -1,10 +1,8 @@
-
-
 #' @importFrom rlang f_text f_env
 maybe_add_names_qs <- function(quotations) {
   namer <- function(quotation) {
     cx <- quotation[[2]]
-
+    
     if (is.call(cx) && is.symbol(cx[[1]])) {
       f <- get0(as.character(cx[[1]]), f_env(quotation), "function") # match.fun does not repect quosures environment, doing get manually
       if ("declaration" %in% class(f)) {
@@ -28,13 +26,13 @@ maybe_add_names_qs <- function(quotations) {
       }
     }
   }
-
+  
   for (i in seq_along(quotations)) {
     if (names(quotations)[i] == "") {
       names(quotations)[i] <- namer(quotations[[i]])
     }
   }
-
+  
   quotations
 }
 
@@ -80,13 +78,13 @@ future_lapply <- function(..., future.seed = TRUE, future.globals = TRUE) {
 # If <= 5 uniques, table it, ow descriptives if numeric-ish, ow number of levels.
 describe_variable <- function(x) {
   num_unique <- length(unique(x))
-
+  
   if (num_unique > 5) {
     return(describe_variable_impl(x, num_unique))
   }
-
+  
   tab <- table(x, exclude = NULL)
-
+  
   rbind.data.frame(
     Frequency = data.frame(as.list(tab), check.names = FALSE),
     Proportion = sprintf("%.2f", prop.table(tab))
@@ -95,6 +93,9 @@ describe_variable <- function(x) {
 
 describe_variable_impl <- function(x, num_unique) UseMethod("describe_variable_impl")
 
+#' @keywords internal
+#' @method describe_variable_impl factor
+#' @export
 describe_variable_impl.factor <- function(x, num_unique) {
   data.frame(
     as.list(summary.factor(x, 5)),
@@ -103,6 +104,9 @@ describe_variable_impl.factor <- function(x, num_unique) {
   )
 }
 
+#' @keywords internal
+#' @method describe_variable_impl POSIXct
+#' @export
 describe_variable_impl.POSIXct <- function(x, num_unique) {
   data.frame(
     as.list(as.character(summary(x))),
@@ -111,7 +115,9 @@ describe_variable_impl.POSIXct <- function(x, num_unique) {
   )
 }
 
-
+#' @keywords internal
+#' @method describe_variable_impl character
+#' @export
 describe_variable_impl.character <- function(x, num_unique) {
   data.frame(
     N_missing = sum(is.na(x)),
@@ -148,13 +154,13 @@ describe_variable_impl.default <- function(x, num_unique) {
 rbind_disjoint <- function(list_of_df, infill = NA) {
   list_of_df <- Filter(is.data.frame, list_of_df)
   all_columns <- Reduce(union, lapply(list_of_df, colnames))
-
+  
   for (i in seq_along(list_of_df)) {
     list_of_df[[i]][setdiff(all_columns, colnames(list_of_df[[i]]))] <- infill
   }
-
+  
   list_of_df <- lapply(list_of_df, `[`, all_columns)
-
+  
   do.call(rbind.data.frame, append(list_of_df, list(make.row.names = FALSE, stringsAsFactors = FALSE)))
 }
 
@@ -179,7 +185,7 @@ get_added_variables <- function(last_df = NULL, current_df) {
 get_modified_variables <- function(last_df = NULL, current_df) {
   is_modified <- function(j) !isTRUE(all.equal(last_df[[j]], current_df[[j]]))
   shared <- intersect(names(current_df), names(last_df))
-
+  
   Filter(is_modified, shared)
 }
 
@@ -207,16 +213,25 @@ reveal_nse_helper_dots <- function(dots, what, handler) {
   } else if (!is.null(formals(handler)[[what]])) {
     dots[[what]] <- as.character(formals(handler)[[what]])
   }
-
+  
   dots
 }
 
 step_type <- function(x) UseMethod("step_type", x)
 
+#' @keywords internal
+#' @method step_type design_step
+#' @export
 step_type.design_step <- function(x) attr(x, "step_type")
 
+#' @keywords internal
+#' @method step_type function
+#' @export
 step_type.function <- function(x) "unknown"
 
+#' @keywords internal
+#' @method step_type default
+#' @export
 step_type.default <- function(x) "unknown"
 
 #' @importFrom rlang is_symbol expr_name
