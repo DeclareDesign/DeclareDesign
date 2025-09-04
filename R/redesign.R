@@ -99,74 +99,6 @@ redesign <- function(design, ..., expand = TRUE) {
 }
 
 
-#' Find all objects used in quosures in a design
-#'
-#' Traverses each step in a DeclareDesign object and finds the names and environments
-#' of all objects captured inside quosures.
-#'
-#' @param design A DeclareDesign design object
-#'
-#' @return A tibble with columns: name, value_str, step, quosure, env
-#' @importFrom rlang is_quosure as_quosure get_env
-#' @importFrom purrr map_chr
-#' @importFrom tibble tibble
-#' @importFrom dplyr bind_rows
-#' @internal
-old_find_all_objects <- function(design) {
-  
-  # allow step also
-  if(!any(c("design_step", "design") %in% class(design))) 
-    stop("Please pass a design object")   
-  
-  if("design_step" %in% class(design)) 
-    design <- design + NULL
-  
-  results <- list()
-  
-  for (step_i in seq_along(design)) {
-    step <- design[[step_i]]
-    
-    dots <- attr(step, "dots")
-    if (is.null(dots)) next
-
-    if(length(names(dots)[names(dots) == ""]) >1)
-       stop(paste("More than one unnamed quosure in step", step_i))
-       
-    names(dots)[names(dots) == ""] <- "formula"
-      
-    for (quosure_name in names(dots)) {
-      q <- dots[[quosure_name]]
-      if (!rlang::is_quosure(q)) next
-      
-      q <- rlang::as_quosure(q)
-      env <- rlang::get_env(q)
-      
-      for (name in ls(env, all.names = TRUE)) {
-        val <- tryCatch(get(name, envir = env), error = function(e) "<error>")
-        val_str <- tryCatch({
-          if (is.atomic(val) && length(val) <= 5) {
-            paste0(deparse(val), collapse = "")
-          } else if (is.function(val)) {
-            "function"
-          } else {
-            paste0("<", class(val)[1], ">")
-          }
-        }, error = function(e) "<error>")
-        
-        results[[length(results) + 1]] <- tibble::tibble(
-          name = name,
-          value_str = val_str,
-          step = step_i,
-          quosure = quosure_name,
-          env = list(env)
-        )
-      }
-    }
-  }
-  
-  dplyr::bind_rows(results)
-}
-
 check_dots_in_design <- function(design, dots) {
   
   missing <- setdiff(names(dots), find_all_objects(design)$name)
@@ -202,7 +134,7 @@ find_all_objects <- function(design) {
     # --- Extract quosures from dots
     dots <- attr(step, "dots")
     if (!is.null(dots)) {
-      if (length(names(dots)[names(dots) == ""]) > 1)
+      if ((length(names(dots)[names(dots) == ""]) > 1) & (attributes(step)$step_type != "model"))
         stop(paste("More than one unnamed quosure in step", step_i))
       
       names(dots)[names(dots) == ""] <- "formula"

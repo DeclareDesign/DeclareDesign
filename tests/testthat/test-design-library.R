@@ -1,6 +1,7 @@
 
 context("design library")
 
+library(rlang)
 
 test_that("Design library basic", {
   q = .6
@@ -20,7 +21,11 @@ test_that("Design library basic", {
     N = 10, outcome_means = c(0,0,1,2), weight_A = 0, weight_B = 0)
 
   expect_true(draw_data(design_22) |> ncol() == 9)
-    
+
+  design <- DesignLibrary::multi_arm_designer(
+    N = 10, m_arms = 3, outcome_means = c(0, 0, 1))
+  expect_true(draw_data(design) |> nrow() == 10)
+  
 })
 
 # Errors thrown when N argument provided to designer inside test environment
@@ -35,14 +40,6 @@ test_that("Design error addressed using do.call  with N from test env", {
   design <- do.call(DesignLibrary::two_arm_covariate_designer,
                     list(N = n))
   expect_equal(nrow(draw_data(design)), 20L)
-})
-
-
-# flag: Error here as u_* not found
-test_that("Design library basic", {
-  design <- DesignLibrary::multi_arm_designer(
-    N = 10, m_arms = 3, outcome_means = c(0, 0, 1))
-  expect_error(draw_data(design) |> nrow() == 10)
 })
 
 
@@ -125,64 +122,27 @@ expect_true(DeclareDesign:::find_all_objects(multi_arm_design_2)$value_str[1] ==
 
 
 
-test_that("design library dependency works",{
-  skip_if_not_installed("DesignLibrary")
-  skip_on_cran()
-  # flag: should not be needed; this due to enquo call
-  library(rlang)
-
-  design_2 <- DesignLibrary::multi_arm_designer(
-    N = 10, m_arms = 3, outcome_means = c(0, 0, 1))
-
-  DesignLibrary::get_design_code(design_2)
-
-  DeclareDesign:::find_all_objects(design_2)  
-  
-})
-
-# Flag: These should not have to be saved
-u_1 <- u_2 <-  u_3 <- u <- 1
 
 test_that("design library dependency works",{
   skip_if_not_installed("DesignLibrary")
   skip_on_cran()
-  
-  # To Do: These should not have to be saved
-  # Flag: works on own but not inside testthat environment
-  
-  
+
+  outcome_means = 1:3
+
   design_2 <- DesignLibrary::multi_arm_designer(
     N = 10, m_arms = 3, outcome_means = c(0, 0, 1))
 
   df <- design_2[[1]]()
-  
+  po_lib <- design_2[[2]]
   po <- declare_potential_outcomes(
     formula = Y ~ 
       (outcome_means[1] + u_1) * (Z == "1") + 
       (outcome_means[2] + u_2) * (Z == "2") + 
       (outcome_means[3] + u_3) * (Z == "3") + u, 
     conditions = c("1", "2", "3"), assignment_variables = Z) 
-  po(df)
 
-  outcome_means = 1:3
-  outcome_sds = 1:3
-  N = 3
-  sd_i = 1
-  
-  po_lib <- design_2[[2]]
-  po_lib(df)
+  expect_true(all((po(df) |> dim()) == dim(po_lib(df))))
 
-    po_new <-  declare_potential_outcomes(
-      formula = Y ~ 
-        (outcome_means[1] + u_1) * (Z == "1") + 
-        (outcome_means[2] + u_2) * (Z == "2") + 
-        (outcome_means[3] + u_3) * (Z == "3") + u,
-      conditions = c("1",  "2", "3"),
-      assignment_variables = Z)
-
-  po_lib(df)
-  po_new(df)  
-  
 })
 
 

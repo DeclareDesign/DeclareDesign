@@ -198,10 +198,6 @@ find_symbols_recursive <- function(expr) {
          safe_exists(name, envir) ||
          safe_exists(name, fallback_env)
        
-       
-       #  print("***************")
-       #  print(name)
-       
        # N is special
        if (name == "N" && !is_N)
          next
@@ -274,21 +270,6 @@ dots_add_args_quosure <- function(dots) {
   dots
 }
 
-# helper to name handlers
-#' a <- function(x) x
-#' b <- function(x) -x
-#'
-#' f <- function(handler = a, x) {
-#'  # Capture expressions from *inside* f()
-#'  handler_names <- handler_identification(quote(a), substitute(handler))
-#'  
-#'  print(handler_names)
-#'  
-#'  handler(x)
-#'  
-#'}
-#'
-#' f(b, x)
 
 handler_identification <- function(default_expr, actual_expr) {
   default_handler_name <- if (is.symbol(default_expr)) {
@@ -349,8 +330,6 @@ declaration_template <- function(..., handler, label = NULL) {
     call = match.call()
   )
   
-  # ret <<- ret
-  
   validate(handler, ret, dots, label)
 } 
 
@@ -381,8 +360,6 @@ make_declarations <- function(default_handler, step_type, causal_type = "dgp",
     formals(declaration)$label <- default_label
   }
 
-  # attr(declaration, "default_handler") <- substitute(default_handler)
-  
   structure(
     declaration,
     class = c("declaration", "function"),

@@ -157,11 +157,13 @@ test_that("correct fan out", {
   e2 <- declare_inquiry(b = f2())
   e3 <- declare_inquiry(c = f3())
   
+  design <- declare_model(sleep) + e1 + e2 + e3
   out <-
-    simulate_design(declare_model(sleep) + e1 + e2 + e3, sims = c(30, 1, 5, 2))
+    simulate_design(design, sims = c(30, 1, 5, 2))
   
   expect_equivalent(apply(out[,c(5:7)], 2, max), c(30, 150, 300))
   expect_equivalent(tapply(out$estimand, INDEX = out$inquiry, max), c(30, 150, 300))
+  draw_estimands(design)
   
 })
 
