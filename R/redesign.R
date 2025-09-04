@@ -209,6 +209,8 @@ find_all_objects <- function(design) {
 }
 
 
+#' @keywords internal
+#' @exportS3Method print objects
 print.objects <- function(x) {
   x |>
     dplyr::select(name, value_str, step) |>

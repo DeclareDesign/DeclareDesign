@@ -120,6 +120,8 @@ run_design_internal.default <- function(design, ...) {
   stop("Please only send design objects to run_design.")
 }
 
+#' @keywords internal
+#' @exportS3Method run_design_internal design
 run_design_internal.design <- function(design, current_df = NULL, results = NULL, start = 1, end = length(design), ...) {
   if (!is.list(results)) {
     results <- list(
@@ -170,6 +172,8 @@ run_design_internal.design <- function(design, current_df = NULL, results = NULL
   }
 }
 
+#' @keywords internal
+#' @exportS3Method run_design_internal execution_st
 run_design_internal.execution_st <- function(design, ...) do.call(run_design_internal.design, design)
 
 # Build an execution strategy object
