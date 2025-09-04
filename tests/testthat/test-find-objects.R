@@ -13,9 +13,23 @@ test_that("Steps and designs", {
   DeclareDesign:::find_all_objects(step_2)  
   DeclareDesign:::find_all_objects(design)
 
-  
 })
 
+
+test_that("Right objects", {
+  x = 10
+  b = 2
+  design <-
+    declare_model(N = x, Y = runif(N)) +
+    declare_inquiry(ATE = b) +
+    declare_estimator(Y ~1)
+  
+  ob <- DeclareDesign:::find_all_objects(design)
+  expect_true(all(ob$name == c("x", "b")))
+  expect_true(all(ob$step == 1:2))
+  
+
+})
 
 
 # there is a minor issue that an object might get saved even if it is irrelevant if it has

@@ -214,7 +214,9 @@ reveal_nse_helper_dots <- function(dots, what, handler) {
 step_type <- function(x) UseMethod("step_type", x)
 
 step_type.design_step <- function(x) attr(x, "step_type")
+
 step_type.function <- function(x) "unknown"
+
 step_type.default <- function(x) "unknown"
 
 #' @importFrom rlang is_symbol expr_name

@@ -176,6 +176,10 @@ find_all_objects <- function(design) {
     # --- Process all jobs (quosures + handler)
     for (job in jobs) {
       for (name in ls(job$env, all.names = TRUE)) {
+        
+        # hide currydata internals
+        if (name %in% c("dots", "quoData", "quoNoData")) next
+        
         val <- tryCatch(get(name, envir = job$env), error = function(e) "<error>")
         val_str <- tryCatch({
           if (is.atomic(val) && length(val) <= 5) {

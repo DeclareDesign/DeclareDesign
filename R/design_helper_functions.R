@@ -114,6 +114,8 @@ next_step <- function(step, current_df, i) {
   nxt
 }
 
+#' @keywords internal
+#' @exportS3Method run_design_internal default
 run_design_internal.default <- function(design, ...) {
   stop("Please only send design objects to run_design.")
 }

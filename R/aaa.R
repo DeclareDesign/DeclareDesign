@@ -1,7 +1,13 @@
 
-# Given a function and dots, rename dots based on how things will positionally match
+#' Rename dots to match a handler’s formals
+#'
+#' @description Given a function and dots, rename dots based on how things will positionally match
+#' @param handler A function whose formals to match.
+#' @param dots A list of quosures/args.
+#' @return The `dots` list with names adjusted (may add a `data` symbol).
+#' @keywords internal
 #' @importFrom rlang is_empty is_scalar_character get_expr
-#' @example 
+#' @examples 
 #' DeclareDesign:::rename_dots(fabricatr::fabricate, list(N = 3, X = 1))
 rename_dots <- function(handler, dots) {
   
