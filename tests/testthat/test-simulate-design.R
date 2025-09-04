@@ -122,11 +122,11 @@ test_that("Check new sim ids", {
   design <- DesignLibrary::two_arm_designer()
   
   Sys.setenv(TESTTHAT='m')
-  sx <- expect_warning(simulate_design(design, sims = c(2, 1, 1, 1, 1, 2)))
+  sx <- expect_warning(simulate_design(design, sims = c(2,  1, 1, 2)))
   Sys.setenv(TESTTHAT='true')
   
   expect_equal(sx$step_1_draw, c(1L, 1L, 2L, 2L))
-  expect_equal(sx$step_6_draw, c(1L, 2L, 3L, 4L))
+  expect_equal(sx$step_4_draw, c(1L, 2L, 3L, 4L))
   expect_equal(sx$estimate[1], sx$estimate[2])
   expect_equal(sx$estimate[3], sx$estimate[4])
 })
@@ -137,10 +137,10 @@ test_that("fan out IDs are correct", {
   skip_if_not_installed("DesignLibrary")
   skip_on_cran()
   
-  sims <- c(30, 1, 2, 1, 1, 2)
+  sims <- c(30, 1, 2, 2)
   design <- DesignLibrary::two_arm_designer(rho = 0)
   
   sx <- simulate_design(design, sims = sims)
   
-  expect_equivalent(vapply(sx[c("step_1_draw", "step_3_draw", "step_6_draw")], max, 0), c(30, 60, 120))
+  expect_equivalent(vapply(sx[c("step_1_draw", "step_3_draw", "step_4_draw")], max, 0), c(30, 60, 120))
 })

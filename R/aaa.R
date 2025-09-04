@@ -408,8 +408,8 @@ validate <- function(handler, ret, dots, label) {
 
 
 ###############################################################################
-# used to inherit roxygen docs
-
+#' Used to inherit roxygen docs
+#' 
 #' @param ...      arguments to be captured, and later passed to the handler
 #' @param handler  a tidy-in, tidy-out function
 #' @param label    a string describing the step
