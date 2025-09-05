@@ -223,8 +223,10 @@ test_that("diagnose_design does not reclass the variable N", {
   skip_if(compareVersion("3.5", paste(R.Version()$major, R.Version()$minor, sep = ".")) == 1)
   # works for redesign
 k <- 1
+N = 3
+
     design <-
-    declare_model(N = 5, noise = rnorm(N)) +
+    declare_model(N = N, noise = rnorm(N)) +
     declare_inquiry(mean_noise = mean(noise) + k)
   
   designs <- redesign(design, N = 5:6) 

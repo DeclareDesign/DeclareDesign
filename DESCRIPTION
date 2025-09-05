@@ -19,7 +19,7 @@ Depends:
     fabricatr (>= 0.10.0),
     estimatr (>= 0.20.0)
 Imports:
-    rlang, generics, methods, dplyr, purrr, tibble
+    rlang, generics, methods, tibble
 License: MIT + file LICENSE
 URL: https://declaredesign.org/r/declaredesign/, https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues

@@ -9,7 +9,7 @@ redesign(design, ..., expand = TRUE)
 \arguments{
 \item{design}{An object of class design.}
 
-\item{...}{Arguments to redesign e.g., \code{n = 100.} If redesigning multiple arguments, they must be specified as a named list.}
+\item{...}{Arguments to redesign e.g., \code{n = 100.} If redesigning multiple arguments, they must be specified as a named list. lists should also be used if redesigning with respect to a dataset or with respect to a vector. For instance, redesign(design, df = list(new_df)).}
 
 \item{expand}{If TRUE, redesign using the crossproduct of \code{...}, otherwise recycle them.}
 }
@@ -20,9 +20,7 @@ A design, or, in the case of multiple values being passed onto \code{...}, a `by
 \code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters in a step's environment (Advanced).
 }
 \details{
-Warning: \code{redesign} will edit any symbol in your design, but if the symbol you attempt to change does not exist in a step's environment no changes will be made and no error or warning will be issued. 
-
-Please note that \code{redesign} functionality is experimental and may be changed in future versions.
+If you attempt to change a parameter that is not saved into a design you will receive a message but not an error.
 }
 \examples{
 

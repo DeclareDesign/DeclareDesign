@@ -15,9 +15,13 @@ print.design <- function(x, verbose = FALSE, ...) {
   
   p <- DeclareDesign:::find_all_objects(x)
   
-  if(nrow(p) >0) {
-    cat("Parameters saved in design environments:\n")
-    print(print.objects(p))
+  if(nrow(p) == 0){
+    cat("No parameters saved in design \n")
+    
+  } else {
+    cat("Parameters saved in design environments:\n\n")
+    #print(print.objects(p))
+    print.objects(p)
     cat("\n")
   }
 }

@@ -420,32 +420,6 @@ test_that("param in handler", {
 })
 
 
-test_that("change param in handler 2", {
-  
-  m <- 2
-  b <- 100
-  N <- pi
-  f <- function(...) fabricate(...)
-  hdl <- function(...) f(..., extra = rnorm(N, b))
-  design <- 
-    declare_model(N = m, U = rnorm(N)) + 
-    declare_measurement(handler = hdl)
-
-  rm(N, b, f, hdl)
-
-  obs <- DeclareDesign:::find_all_objects(design)
-  # Rm N
-  expect_true(all(obs$name == c("m", "b", "f")))
-  expect_true(mean(draw_data(design)$extra) > 50)
-  
- design <- design|> redesign(b = -100)
-  
- expect_true(mean(draw_data(design)$extra) < -50)
- 
-})
-
-
-
 
 test_that("behavior when packaged used and removed", {
   

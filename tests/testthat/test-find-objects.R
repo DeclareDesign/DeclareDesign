@@ -59,7 +59,8 @@ test_that("promises", {
  expect_true(all(DeclareDesign:::find_all_objects(design) |> dim() == c(1,5)))
  expect_error(draw_data(design))
  design <- redesign(design, x2 = 1) 
- expect_message(design <- redesign(design, x1 = 1), "You requested a change to x1 but x1 is not found in the design") 
+ expect_warning(design <- redesign(design, x1 = 1), 
+                "You requested a change to x1 but x1 is not found in the design") 
 })
 
 test_that("No mix ups", {
@@ -76,7 +77,7 @@ test_that("No mix ups", {
   # sd2 should be 4 not 2 since data should be prioritized
   expect_true(draw_data(design)$sd2 == 4)
   
-  # there should NOT be a quosure for sd2 (containing sd)
+  # future: ideally there should NOT be a quosure for sd2 (containing sd)
   # expect_true(!any(DeclareDesign:::find_all_objects(design)$quosure == "sd2"))
 
   

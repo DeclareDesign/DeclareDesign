@@ -56,7 +56,8 @@ expand_design <- function(designer, ..., expand = TRUE, prefix = "design") {
   dots_quos <- quos(...)
 
   if (length(dots_quos) == 0) return(designer())
-    
+  
+
   # transpose
   transp <- function(zx,ix) do.call(mapply, 
                                append(mapply(`[`, zx, ix, SIMPLIFY = FALSE), 
@@ -75,6 +76,8 @@ expand_design <- function(designer, ..., expand = TRUE, prefix = "design") {
   
   designs <- lapply(jobs, function(dots) {do.call(designer, dots)})
 
+  x <<- dots_quos
+  
   args_names <- lapply(dots_quos, expand_args_names)
   
   designs <- mapply(structure, 
@@ -93,15 +96,21 @@ expand_design <- function(designer, ..., expand = TRUE, prefix = "design") {
 }
 
 
-
+# used for redesign to get names for arguments; handles characters, data frames, functions
+# but may need robust alternative for other objects
 #' @importFrom rlang quo_squash is_call call_args
 expand_args_names <- function(x) {
   x_expr <- quo_squash(x)
   is_list_c <- expr_text(as.list(x_expr)[[1]]) %in% c("c", "list")
   x <- if (is_list_c) call_args(x_expr) 
-       else if (is_call(x_expr)) eval_tidy(x) 
-       else x_expr
-  as.character(x)
+  else if (is_call(x_expr)) eval_tidy(x) 
+  else x_expr
+  if (is.function(x)) {
+    paste(deparse(x), collapse = "\n")
+  } else if (is.data.frame(x)) {
+    colnames(x)
+  } else {
+    as.character(x)
+  }
 }
-
 

@@ -298,7 +298,6 @@ handler_identification <- function(default_expr, actual_expr) {
 # Declaration template used for all declare_* functions
 
 declaration_template <- function(..., handler, label = NULL) {
-  
 
   dots <- as.list(rlang::quos(..., label = !!label))
   # print(dots)
@@ -309,20 +308,22 @@ declaration_template <- function(..., handler, label = NULL) {
   }
 
   # Capture_function_dependencies if handler is in global
-
+  handler_names <- handler_identification(
+    quote(default_handler), substitute(handler))
   
-  handler_names <- handler_identification(quote(default_handler), substitute(handler))
   attr(handler, "tag") <- handler_names[[2]]
-  
+
   if (is.function(handler)) {
     handler_env <- environment(handler)
+
     
-    # Only apply capture if not from namespace or package
+  # Only apply capture if not from namespace or package
     if (!isNamespace(handler_env) &&
         !startsWith(environmentName(handler_env), "namespace:")) {
       handler <- capture_function_dependencies(handler)
     }
   }
+  
   dots <- rename_dots(handler, dots)
   dots <- dots_add_args_quosure(dots)
   

@@ -1,5 +1,15 @@
 library(testthat)
 library(DeclareDesign)
 
-pacman::p_load(AER, betareg, biglm, coin, future.apply, gam, Matching, reshape2, sf, tidyr, purrr, glue)
+library(AER)
+library(betareg)
+library(biglm)
+library(coin)
+library(future.apply)
+library(gam)
+library(Matching)
+library(reshape2)
+library(sf)
+library(tidyr)
+
 test_check("DeclareDesign")

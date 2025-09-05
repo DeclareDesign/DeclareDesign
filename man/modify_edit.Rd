@@ -19,6 +19,8 @@ Internal helper for `redesign()`. Updates variable values inside quosure environ
 of a design object so that rerunning the design reflects new inputs.
 }
 \examples{
+n <- 2
+b <- 1
 d <- declare_model(N = n, Y = rnorm(N, b)) + declare_inquiry(Q = b)
 d2 <- redesign(d, n = 3, b = 0.2)
 draw_data(d2)

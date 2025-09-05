@@ -1,3 +1,9 @@
+# DeclareDesign 1.1
+
+* Environment objects now saved in relevant quosures only; only relevant objects saved
+* Redesign based on listing of saved objects only
+* 
+
 # DeclareDesign 1.0.8
 
 * Bug fix of parallel processing that caused in rare cases simulations to be identical across multiple calls to simulate_design or diagnose_design.

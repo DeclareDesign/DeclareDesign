@@ -10,6 +10,8 @@
 #' @keywords internal
 #'
 #' @examples
+#' n <- 2
+#' b <- 1
 #' d <- declare_model(N = n, Y = rnorm(N, b)) + declare_inquiry(Q = b)
 #' d2 <- redesign(d, n = 3, b = 0.2)
 #' draw_data(d2)
@@ -17,7 +19,8 @@
 modify_edit <- function(design, ...) {
   
   updates <- list(...)
-  meta <- DeclareDesign:::find_all_objects(design)
+  
+  meta <- DeclareDesign:::find_all_objects(design = design)
   
   steps_to_rebuild <- integer()
   
@@ -31,7 +34,13 @@ modify_edit <- function(design, ...) {
       row <- matches[i, ]
       steps_to_rebuild <- union(steps_to_rebuild, row$step)
       
-      
+      # Handle handlers
+      if(row$value_str == "handler") {
+        new_handler <- updates[row$name][[1]]
+        attr(new_handler ,"tag") <- "my_handler"
+        attr(design[[row$step]], "handler") <- new_handler
+      }
+        
       # Treat parameters in quosures in dots and parameters in handlers separately
       par_in_handler = row$quosure == "handler"
       
@@ -48,11 +57,13 @@ modify_edit <- function(design, ...) {
         body_expr <- body(h)
         formals_expr <- formals(h)
         new_handler <- eval(call("function", formals_expr, body_expr), envir = new_env)
-        
+        attr(new_handler, "tag")  <- "user_handler"
         attr(design[[row$step]], "handler") <- new_handler
       }      
 
-      if(!par_in_handler) {
+      # Need here handling when handler itself is changed
+      
+      if(!par_in_handler & !(row$value_str == "handler")) {
         row_dots <-   attr(design[[row$step]], "dots")
       
         # Figure the position of the quosure to change; whether names or not
@@ -89,7 +100,7 @@ modify_edit <- function(design, ...) {
 
     step_attributes$dots[] <- 
       DeclareDesign:::rename_dots(step_attributes$handler, step_attributes$dots)
-    new_step <- with(step_attributes, currydata(handler, dots))
+    new_step <- with(step_attributes, DeclareDesign:::currydata(handler, dots))
 
     attributes(new_step) <- step_attributes
 
