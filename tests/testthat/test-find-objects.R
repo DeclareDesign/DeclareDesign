@@ -4,14 +4,16 @@ test_that("Steps and designs", {
 
   x <- 2
   y  <- 3
+  k <- 6
+  
   step_1 <- declare_model(N = x)
   step_2 <- declare_model(X = 2*x, Y = y)
 
   design <- step_1 + step_2
   
-  DeclareDesign:::find_all_objects(step_1)
-  DeclareDesign:::find_all_objects(step_2)  
-  DeclareDesign:::find_all_objects(design)
+  expect_true(DeclareDesign:::find_all_objects(step_1) |> nrow() ==1)
+  expect_true(DeclareDesign:::find_all_objects(step_2) |> nrow()  ==2)
+  expect_true(DeclareDesign:::find_all_objects(design)|> nrow() ==3)
 
 })
 

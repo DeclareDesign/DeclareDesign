@@ -74,22 +74,22 @@ currydata <- function(FUN, dots) {
 }
 
 # Helper to identify whether a function is from a package or is otherwise available
-is_user_defined_function <- function(f) {
-  if (!is.function(f)) return(FALSE)
-  if (is.primitive(f)) return(FALSE)
-  
-  f_env <- environment(f)
-  
-  # Detect package namespace
-  if (isNamespace(f_env)) return(FALSE)
-  
-  # Also rule out functions whose environment *name* starts with "namespace:"
-  env_name <- tryCatch(environmentName(f_env), error = function(e) "")
-  if (startsWith(env_name, "namespace:")) return(FALSE)
-  
-  # Otherwise treat as user-defined
-  TRUE
-}
+# is_user_defined_function <- function(f) {
+#   if (!is.function(f)) return(FALSE)
+#   if (is.primitive(f)) return(FALSE)
+#   
+#   f_env <- environment(f)
+#   
+#   # Detect package namespace
+#   if (isNamespace(f_env)) return(FALSE)
+#   
+#   # Also rule out functions whose environment *name* starts with "namespace:"
+#   env_name <- tryCatch(environmentName(f_env), error = function(e) "")
+#   if (startsWith(env_name, "namespace:")) return(FALSE)
+#   
+#   # Otherwise treat as user-defined
+#   TRUE
+# }
 
 # Helper to find all symbols recursively in an expression
 

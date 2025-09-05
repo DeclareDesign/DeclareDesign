@@ -283,7 +283,7 @@ test_that("demo runs 2", {
   }
 
   ## set a variable used in the declaration
-  my_N <- 1000
+  my_N <- 10
   my_population_custom <- declare_model(
     handler = my_population_function, N = my_N
   )
@@ -303,5 +303,6 @@ test_that("demo runs 2", {
 
   pop_pos_custom <- my_potential_outcomes_custom(my_population_custom())
 
-  head(pop_pos_custom[, c("u", "Y_Z_0", "Y_Z_1")])
+  expect_true(all(dim(pop_pos_custom) == c(10, 3)))
+
 })

@@ -36,4 +36,5 @@ test_that("multiple potential outcomes without quosure names", {
     potential_outcomes(B ~ 1)
   ) + NULL
 
+  expect_true(all(design |> draw_data() |> dim() == c(10, 5)))
 })
