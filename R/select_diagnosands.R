@@ -1,6 +1,6 @@
 #' Select diagnosands
 #'
-#' Helper to declare a set of named diagnosands
+#' Helper to select (and adjust) a set of named diagnosands
 #' @param ... Requested diagnosands from the extended diagnosand list
 #' @param alpha Significance level, passed to declare_diagnosands
 #' @param subset Subset indicator, passed to declare_diagnosands
@@ -28,6 +28,9 @@
 #' | mean_ci_length    | The expected length of the confidence interval   | `mean(conf.high - conf.low)`                                |
 #' } 
 #' 
+#' The alpha argument can be used to adjust significance levels, and the subset argument can be used for further conditioning. 
+#' The output is a function that can be applied directly to a simulations dataframe.
+#' 
 #' @importFrom rlang inject
 #' @export
 #' @examples
@@ -36,6 +39,24 @@
 #' select_diagnosands("bias")(data.frame(estimate = 2, estimand = 3))
 #' select_diagnosands("bias")(data.frame(estimate = 1:2, estimand = c(NA, 2)))
 #' select_diagnosands("bias", na.rm = TRUE)(data.frame(estimate = 1:2, estimand = c(NA, 2)))
+#' 
+#' # Example of use with diagnose_design
+#' design <- 
+#'   declare_model(N = 100, u = rnorm(N),
+#'                 Y_Z_0 = 0, 
+#'                 Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u
+#'   ) +
+#'   declare_assignment(Z = complete_ra(N)) + 
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+#'   declare_estimator(Y ~ Z, inquiry = "ATE")
+#' 
+#' # Compare the average se and the sd of the sampling distribution of the estimate
+#' diagnose_design(design,
+#'                 diagnosands = select_diagnosands("sd_estimate", "mean_se"),
+#'                 sims = 100)
+
+
 
 
 select_diagnosands <- function(..., alpha = 0.05, subset = NULL, na.rm = FALSE) {

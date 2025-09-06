@@ -1,8 +1,10 @@
 # DeclareDesign 1.1
 
 * Environment objects now saved in relevant quosures only; only relevant objects saved
-* Redesign based on listing of saved objects only
-* 
+* Redesign based on listing of saved objects only. Saved objects now reported
+* as part of design summary.
+* New function select_diagnosands lets you select and adjust diagnosands quickly
+* diagnose_design(design, diagnosands = select_diagnosands(...)
 
 # DeclareDesign 1.0.8
 

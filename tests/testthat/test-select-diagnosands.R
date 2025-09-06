@@ -21,14 +21,15 @@ test_that("select diagnosands works", {
   
   # alpha argument works
   expect_true(
-    diagnosands_1(sims)$diagnosand[2] >   diagnosands_2(sims)$diagnosand[2])
+    diagnosands_1(sims)$diagnosand[2] > diagnosands_2(sims)$diagnosand[2])
    
   # error works
   expect_message(select_diagnosands("artichokes"))
   expect_true(is.null(select_diagnosands("artichokes")))
 
   # NA works
-    x <-     select_diagnosands("bias", na.rm = TRUE)(data.frame(estimate = 1:2, estimand = c(NA, 2)))
+    x <-
+      select_diagnosands("bias", na.rm = TRUE)(data.frame(estimate = 1:2, estimand = c(NA, 2)))
   
   expect_true(!is.na(x$diagnosand[1]))
 

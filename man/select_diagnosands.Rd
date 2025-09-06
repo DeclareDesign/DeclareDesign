@@ -16,7 +16,7 @@ select_diagnosands(..., alpha = 0.05, subset = NULL, na.rm = FALSE)
 \item{na.rm}{Logical for handling NAs when calculating diagnosands}
 }
 \description{
-Helper to declare a set of named diagnosands
+Helper to select (and adjust) a set of named diagnosands
 }
 \details{
 The diagnosands available from the extended diagnosand list are:
@@ -38,7 +38,10 @@ The diagnosands available from the extended diagnosand list are:
 | mean_var_hat      | Expected estimate of the 'true' var of estimate  | `mean(std.error^2)`                                         |
 | prop_pos_sig      | Probability of a positive estimate given sig.    | `mean(estimate > 0 & p.value <= alpha)`                     |
 | mean_ci_length    | The expected length of the confidence interval   | `mean(conf.high - conf.low)`                                |
-}
+} 
+
+The alpha argument can be used to adjust significance levels, and the subset argument can be used for further conditioning. 
+The output is a function that can be applied directly to a simulations dataframe.
 }
 \examples{
 select_diagnosands("bias")
@@ -46,4 +49,20 @@ select_diagnosands("prop_pos_sig", "mean_se", alpha = .001)
 select_diagnosands("bias")(data.frame(estimate = 2, estimand = 3))
 select_diagnosands("bias")(data.frame(estimate = 1:2, estimand = c(NA, 2)))
 select_diagnosands("bias", na.rm = TRUE)(data.frame(estimate = 1:2, estimand = c(NA, 2)))
+
+# Example of use with diagnose_design
+design <- 
+  declare_model(N = 100, u = rnorm(N),
+                Y_Z_0 = 0, 
+                Y_Z_1 = ifelse(rbinom(N, 1, prob = 0.5), 0.1, -0.1) + u
+  ) +
+  declare_assignment(Z = complete_ra(N)) + 
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, inquiry = "ATE")
+
+# Compare the average se and the sd of the sampling distribution of the estimate
+diagnose_design(design,
+                diagnosands = select_diagnosands("sd_estimate", "mean_se"),
+                sims = 100)
 }
