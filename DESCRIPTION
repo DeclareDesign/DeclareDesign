@@ -19,7 +19,7 @@ Depends:
     fabricatr (>= 0.10.0),
     estimatr (>= 0.20.0)
 Imports:
-    rlang, generics, methods, tibble
+    rlang, generics, methods
 License: MIT + file LICENSE
 URL: https://declaredesign.org/r/declaredesign/, https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues
@@ -33,7 +33,6 @@ Suggests:
     diffobj,
     dplyr,
     data.table,
-    tibble,
     ggplot2,
     future,
     future.apply,

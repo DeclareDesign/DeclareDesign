@@ -1,4 +1,3 @@
-#' @importFrom tibble tibble
 find_all_objects <- function(design) {
 
   if (!any(c("design_step", "design") %in% class(design))) 
@@ -94,12 +93,13 @@ find_all_objects <- function(design) {
         }, error = function(e) "<error>")
       
 
-        results[[length(results) + 1]] <- tibble::tibble(
+        results[[length(results) + 1]] <- data.frame(
           name = name,
           value_str = val_str,
           step = job$step,
           quosure = job$name,
-          env = list(job$env)
+          env = I(list(job$env)),
+          stringsAsFactors = FALSE
         )
 
       }
@@ -120,24 +120,26 @@ find_all_objects <- function(design) {
       }, error = function(e) "<error>")
 
             
-      results[[length(results) + 1]] <- tibble::tibble(
+      results[[length(results) + 1]] <- data.frame(
         name = job$name,
         value_str = val_str,
         step = job$step,
         quosure = "handler",
-        env = list(job$env)
+        env = I(list(job$env)),
+        stringsAsFactors = FALSE
       )
       
     }    
     # should be only one handler per step
     for (job in handler_jobs) {
 
-        results[[length(results) + 1]] <- tibble::tibble(
+        results[[length(results) + 1]] <- data.frame(
           name = job$name,
           value_str = "handler",
           step = job$step,
           quosure = job$name,
-          env = list(job$env)
+          env = I(list(job$env)),
+          stringsAsFactors = FALSE
         )
         
     }
