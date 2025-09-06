@@ -4,7 +4,7 @@
 #' Generates diagnosands from a design or simulations of a design. Speed gains can be achieved by running diagnose_design in parallel, see Examples.
 #'
 #' @param ... A design or set of designs typically created using the + operator, or a \code{data.frame} of simulations, typically created by \code{\link{simulate_design}}.
-#' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the inquiry(s).
+#' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}. By default, these include bias, root mean-squared error, power, frequentist coverage, the mean and standard deviation of the estimate(s), the "type S" error rate (Gelman and Carlin 2014), and the mean of the inquiry(s). Users can alternatively provide names of diagnosands from the extended diagnosand list. 
 #' @param make_groups Add group variables within which diagnosand values will be calculated. New variables can be created or variables already in the simulations data frame selected. Type name-value pairs within the function \code{vars}, i.e. \code{vars(significant = p.value <= 0.05)}.
 #' @param add_grouping_variables Deprecated. Please use make_groups instead. Variables used to generate groups of simulations for diagnosis. Added to default list: c("design", "estimand_label", "estimator", "outcome", "term")
 #' @param sims The number of simulations, defaulting to 500. sims may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}
@@ -21,7 +21,7 @@
 #'
 #' If the packages \code{future} and \code{future.apply} are installed, you can set \code{\link[future]{plan}} to run multiple simulations in parallel.
 #'
-#'
+#' @importFrom rlang inject
 #' @examples
 #' 
 #' # Two-arm randomized experiment
@@ -112,7 +112,7 @@
 #'   diagnosands = default_diagnosands
 #' )
 #' 
-#' # A longer list of useful diagnosands might include:
+#' # Here is a longer list of useful diagnosands:
 #' 
 #' extended_diagnosands <- 
 #'   declare_diagnosands(
@@ -131,6 +131,14 @@
 #'     prop_pos_sig = mean(estimate > 0 & p.value <= alpha),
 #'     mean_ci_length = mean(conf.high - conf.low)
 #'   )
+#'   
+#'# Users can use select_diagnosands to quickly select diagnosands of interest.
+#'diagnose_design(design, 
+#'    diagnosands = select_diagnosands("prop_pos_sig", "mean_se"), 
+#'    sims = 100)
+#'diagnose_design(design, 
+#'    diagnosands = select_diagnosands("prop_pos_sig", "mean_se", alpha = .001), 
+#'    sims = 100)
 #'   
 #' \dontrun{
 #' diagnose_design(
@@ -517,3 +525,4 @@ bootstrap_diagnosands <- function(bootstrap_sims, future.seed = TRUE, simulation
 vars <- function(...) {
   quos(...)
 }
+
