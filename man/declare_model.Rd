@@ -2,7 +2,7 @@
 % Please edit documentation in R/declare_model.R
 \name{declare_model}
 \alias{declare_model}
-\title{Declare the size and features of the population}
+\title{Declare the size and features of the population.}
 \usage{
 declare_model(..., handler = fabricate, label = NULL)
 }
@@ -17,7 +17,11 @@ declare_model(..., handler = fabricate, label = NULL)
 A function that returns a data.frame.
 }
 \description{
-Declare the size and features of the population
+The model component of a research design captures background beliefs about 
+the world in which a study is implemented, the variables of interest, and 
+how these respond to each other. The \code{declare_model} function writes functions 
+that themselves create databases that represent these features of possible 
+worlds.
 }
 \examples{
 # declare_model is usually used when concatenating
@@ -40,20 +44,19 @@ design <-
 M <- declare_model(N = 100)
 M()
 
-# Declare a population from existing data
+# You can also declare a population from existing data
 M <- declare_model(data = mtcars)
 M()
 
-# Resample from existing data
+# You can resample from existing data
 M <- declare_model(N = 100, data = mtcars, handler = resample_data)
 M()
 
-# Declare a model with covariates: 
-# observed covariates X1 and X2 and 
-# unobserved heterogeneity U that each affect 
-# outcome Y
+# You can build up more variables using any predefined variables.
+# For instance you can declare a model with observed covariates X1 
+# and X2 and unobserved heterogeneity U that each affect outcome Y
 M <- declare_model(
-  N = 100,
+  N = 5,
   U = rnorm(N),
   X1 = rbinom(N, size = 1, prob = 0.5),
   X2 = X1 + rnorm(N),
@@ -61,6 +64,19 @@ M <- declare_model(
 )
 M()
 
+# You can build up a model over multiple design steps 
+# Once steps are concatendated they become a design
+M1 <- declare_model(
+  N = 5,
+  U = rnorm(N))
+M2 <-  declare_model(
+  X1 = rbinom(N, size = 1, prob = 0.5),
+  X2 = X1 + rnorm(N))
+M2(M1())
+design <- M1 + M2
+draw_data(design)
+
+# More eleboate data types.
 # We can draw correlated variables using draw_multivariate
 M <-
 declare_model(
@@ -80,7 +96,7 @@ M <-
   )
 M()
 
-## Using potential_outcomes
+## Using the potential_outcomes function from fabricatr
 M <- 
   declare_model(N = 100, 
                 potential_outcomes(Y ~ rbinom(N, size = 1, prob = 0.1 * Z + 0.5))

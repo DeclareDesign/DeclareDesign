@@ -63,7 +63,7 @@ Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}
 \details{
 \code{declare_estimator} is designed to handle two main ways of generating parameter estimates from data.
 
-In \code{declare_estimator}, you can optionally provide the name of an inquiry or an objected created by \code{\link{declare_inquiry}} to connect your estimate(s) to inquiry(s).
+In \code{declare_estimator}, you can optionally provide the name of an inquiry or an object created by \code{\link{declare_inquiry}} to connect your estimate(s) to inquiry(s).
 
 The first is through \code{label_estimator(method_handler)}, which is the default value of the \code{handler} argument. Users can use standard method functions like lm, glm, or iv_robust. The methods are summarized using the function passed to the \code{summary} argument. This will usually be a "tidier" like \code{broom::tidy}. The default \code{summary} function is \code{tidy_try}, which applies a tidy method if available, and if not, tries to make one on the fly.
 

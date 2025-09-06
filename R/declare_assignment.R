@@ -1,5 +1,6 @@
 #' Declare Data Strategy: Assignment
-#'
+#' 
+#' @description Add a step to a design that assigns units to different treatment conditions. Assignment is part of the data strategy component of a research design.
 #' @inheritParams declare_internal_inherit_params
 #'
 #' @return A function that takes a data.frame as an argument and returns a data.frame with assignment columns appended.
