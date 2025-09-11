@@ -118,6 +118,7 @@ test_that("designs with some estimators that don't have p.values return the p.va
 # fan out
 test_that("Check new sim ids", {
   skip_if_not_installed("DesignLibrary")
+  testthat::skip("test requires updated DesignLbrary")    
   skip_on_cran()
   design <- DesignLibrary::two_arm_designer()
   
@@ -133,7 +134,7 @@ test_that("Check new sim ids", {
 
 
 test_that("fan out IDs are correct", {
-  
+  testthat::skip("test requires updated DesignLbrary")    
   skip_if_not_installed("DesignLibrary")
   skip_on_cran()
   

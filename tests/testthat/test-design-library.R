@@ -4,6 +4,7 @@ context("design library")
 library(rlang)
 
 test_that("Design library basic", {
+  testthat::skip("test requires updated DesignLbrary")    
   skip_if_not_installed("DesignLibrary")
   
   q = .6
@@ -33,6 +34,8 @@ test_that("Design library basic", {
 # Errors thrown when N argument provided to designer inside test environment
 test_that("Design library error with N from test env", {
   skip_if_not_installed("DesignLibrary")
+  testthat::skip("test requires updated DesignLbrary")    
+  
     n <- 20
   expect_error(design <- DesignLibrary::two_arm_covariate_designer(N = n))
 })
@@ -40,6 +43,7 @@ test_that("Design library error with N from test env", {
 
 test_that("Design error addressed using do.call  with N from test env", {
   skip_if_not_installed("DesignLibrary")
+  testthat::skip("test requires updated DesignLbrary")    
   n <- 20
   design <- do.call(DesignLibrary::two_arm_covariate_designer,
                     list(N = n))
@@ -129,7 +133,8 @@ expect_true(find_all_objects(multi_arm_design_2)$value_str[1] == "8")
 
 test_that("design library dependency works",{
   skip_if_not_installed("DesignLibrary")
-  skip_on_cran()
+  testthat::skip("test requires updated DesignLbrary")    
+    skip_on_cran()
 
   outcome_means = 1:3
 
