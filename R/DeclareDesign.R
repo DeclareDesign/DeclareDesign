@@ -45,4 +45,4 @@
 #' @name DeclareDesign
 "_PACKAGE"
 
-utils::globalVariables(c("Y", "Z", "S", "N", "conf.low", "conf.high", "estimate", "inquiry", "p.value", "std.error", "term"))
+utils::globalVariables(c("Y", "Z", "S", "N", "conf.low", "conf.high", "estimate", "inquiry", "p.value", "std.error", "term", "estimand"))

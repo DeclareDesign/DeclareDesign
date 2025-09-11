@@ -2,10 +2,20 @@
 % Please edit documentation in R/aaa.R
 \name{currydata}
 \alias{currydata}
-\title{DeclareDesign:::currydata(fabricate, list(N = 3, X = 1))}
+\title{Curry data arguments into a handler function}
 \usage{
 currydata(FUN, dots)
 }
-\description{
-DeclareDesign:::currydata(fabricate, list(N = 3, X = 1))
+\arguments{
+\item{FUN}{A function that will be called with \code{data} and the arguments in \code{dots}.}
+
+\item{dots}{A list of quosures/arguments to be spliced into \code{FUN} when invoked.}
 }
+\description{
+Returns a function of one argument \code{data} that, when called,
+evaluates \code{FUN} with the captured \code{dots} and with \code{data} supplied as needed.
+}
+\examples{
+# DeclareDesign:::currydata(fabricatr::fabricate, list(N = 3, X = 1))
+}
+\keyword{internal}

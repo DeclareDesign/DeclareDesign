@@ -56,7 +56,18 @@ rename_dots <- function(handler, dots) {
 }
 
 # Returns a new function(data) which calls FUN(data, dots)
-#' # DeclareDesign:::currydata(fabricate, list(N = 3, X = 1))
+#' Curry data arguments into a handler function
+#'
+#' @description Returns a function of one argument `data` that, when called,
+#' evaluates `FUN` with the captured `dots` and with `data` supplied as needed.
+#'
+#' @param FUN A function that will be called with `data` and the arguments in `dots`.
+#' @param dots A list of quosures/arguments to be spliced into `FUN` when invoked.
+#'
+#' @keywords internal
+#'
+#' @examples
+#' # DeclareDesign:::currydata(fabricatr::fabricate, list(N = 3, X = 1))
 currydata <- function(FUN, dots) {
 
   quoData <- quo((FUN)(!!!dots))

@@ -42,9 +42,9 @@ method_handler(
 
 \item{data}{a data.frame}
 
-\item{.method}{A method function, e.g. lm or glm. By default, the method is the \code{\link{lm_robust}} function from the \link{estimatr} package, which fits OLS regression and calculates robust and cluster-robust standard errors.}
+\item{.method}{A method function, e.g. lm or glm. By default, the method is the \code{\link[estimatr:lm_robust]{lm_robust}} function from the \pkg{estimatr} package, which fits OLS regression and calculates robust and cluster-robust standard errors.}
 
-\item{.summary}{A method-in data-out function to extract coefficient estimates or method summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} method summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the method object sent to \code{method}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the method object, it fails.}
+\item{.summary}{A method-in data-out function to extract coefficient estimates or method summary statistics, such as \code{\link[broom:tidy]{tidy}} or \code{\link[broom:glance]{glance}}. By default, the \code{DeclareDesign} method summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the method object sent to \code{method}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the method object, it fails.}
 
 \item{model}{Deprecated argument. Use \code{.method} instead.}
 

@@ -279,8 +279,8 @@ model_handler <- function(...) {
 }
 
 #' @param data a data.frame
-#' @param .method A method function, e.g. lm or glm. By default, the method is the \code{\link{lm_robust}} function from the \link{estimatr} package, which fits OLS regression and calculates robust and cluster-robust standard errors.
-#' @param .summary A method-in data-out function to extract coefficient estimates or method summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} method summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the method object sent to \code{method}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the method object, it fails.
+#' @param .method A method function, e.g. lm or glm. By default, the method is the \code{\link[estimatr:lm_robust]{lm_robust}} function from the \pkg{estimatr} package, which fits OLS regression and calculates robust and cluster-robust standard errors.
+#' @param .summary A method-in data-out function to extract coefficient estimates or method summary statistics, such as \code{\link[broom:tidy]{tidy}} or \code{\link[broom:glance]{glance}}. By default, the \code{DeclareDesign} method summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the method object sent to \code{method}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the method object, it fails.
 #' @param model Deprecated argument. Use \code{.method} instead.
 #' @param model_summary Deprecated argument. Use \code{.summary} instead.
 #' @param term Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.
