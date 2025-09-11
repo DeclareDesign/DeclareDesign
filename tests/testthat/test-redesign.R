@@ -37,14 +37,14 @@ test_that("changing handlers", {
       handler = my_handler) +
     declare_model(X = x)
   
-  DeclareDesign:::find_all_objects(design)
+  find_all_objects(design)
   
   my_handler_2 <- function(N) data.frame(X = 1:3)
   
-  design_2 <- DeclareDesign:::modify_edit(design, my_handler = my_handler_2)
+  design_2 <- modify_edit(design, my_handler = my_handler_2)
   
   expect_true(
-    draw_data(DeclareDesign:::redesign(design, my_handler = my_handler_2)) |> nrow() == 3
+    draw_data(redesign(design, my_handler = my_handler_2)) |> nrow() == 3
   )
   
 })
@@ -75,7 +75,7 @@ test_that("modify data", {
     declare_model(data = df) + 
     declare_measurement(Y = 2 * X)
 
-  design_2 <- DeclareDesign:::modify_edit(design, df = data.frame(X = 1:2, Z = 3))
+  design_2 <- modify_edit(design, df = data.frame(X = 1:2, Z = 3))
   expect_true(design_2 |> draw_data() |> nrow() == 2)
 
   design_2 <- redesign(design, df = list(data.frame(X = 1:2, Z = 3)))
@@ -90,13 +90,13 @@ test_that("N changing", {
   expect_equal(N, 100)
   rm(N)  
 
-  expect_true(DeclareDesign:::find_all_objects(design)$value_str == 100)
+  expect_true(find_all_objects(design)$value_str == 100)
   expect_length(draw_data(design)$ID, 100)
   
   design2 <- redesign(design, N = 20)
   expect_length(draw_data(design2)$ID, 20)
 
-  DeclareDesign:::find_all_objects(design2)
+  find_all_objects(design2)
   draw_data(design2) |> nrow()
   
   others <- c(50, 100, 200, 99)
@@ -124,7 +124,7 @@ test_that("modify inside a handler", {
   
   rm(N, b, f, hdl)
   
-  obs <- DeclareDesign:::find_all_objects(design)
+  obs <- find_all_objects(design)
   # Rm N
   expect_true(all(obs$name == c("m", "b", "f", "hdl")))
   expect_true(mean(draw_data(design)$extra) == 100)
@@ -132,8 +132,8 @@ test_that("modify inside a handler", {
   
   design <- design|> redesign(b = -100)
 
-  design_2 <- DeclareDesign:::modify_edit(design, b = -100)
-  obs <- DeclareDesign:::find_all_objects(design_2)
+  design_2 <- modify_edit(design, b = -100)
+  obs <- find_all_objects(design_2)
   
   expect_true(mean(draw_data(design_2)$extra) == -100)
   
@@ -203,7 +203,7 @@ test_that("future: changes inside functions", {
     declare_model(N = 1, x = 0) + 
     declare_measurement(Y = f(x, a))
   
-  DeclareDesign:::find_all_objects(design)
+  find_all_objects(design)
   
   rm(b, a, f)
   
@@ -221,7 +221,7 @@ test_that("future: modify d; avoid partial matching problems", {
   design <- 
     declare_model(N = 1, D = d) + NULL
 
-  expect_error(DeclareDesign:::modify_edit(design = design, d=2), NA) 
+  expect_error(modify_edit(design = design, d=2), NA) 
   expect_error(redesign(design = design, d=2)) 
   
 

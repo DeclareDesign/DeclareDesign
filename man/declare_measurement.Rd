@@ -26,13 +26,13 @@ potential_outcomes_handler(data, ...)
 A function that returns a data.frame.
 }
 \description{
-Add a step to a design that explicitly indicates what variables are measured by a design.  
-It is always possible to include measured variables directly in your declare_model calls or using declare_step. 
+Add a step to a design that explicitly indicates what variables are measured by a design.
+It is always possible to include measured variables directly in your declare_model calls or using declare_step.
 However, putting latent variables in declare_model and variables-as-measured in declare_measurement helps communicate which parts of your research design are in the model and which parts are in the data strategy.
 }
 \examples{
 
-# declare_measurement in use
+# declare_measurement a in use a
 ## Two-arm randomized experiment
 design <-
   declare_model(

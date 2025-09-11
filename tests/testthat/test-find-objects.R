@@ -11,9 +11,9 @@ test_that("Steps and designs", {
 
   design <- step_1 + step_2
   
-  expect_true(DeclareDesign:::find_all_objects(step_1) |> nrow() ==1)
-  expect_true(DeclareDesign:::find_all_objects(step_2) |> nrow()  ==2)
-  expect_true(DeclareDesign:::find_all_objects(design)|> nrow() ==3)
+  expect_true(find_all_objects(step_1) |> nrow() ==1)
+  expect_true(find_all_objects(step_2) |> nrow()  ==2)
+  expect_true(find_all_objects(design)|> nrow() ==3)
 
 })
 
@@ -26,7 +26,7 @@ test_that("Right objects", {
     declare_inquiry(ATE = b) +
     declare_estimator(Y ~1)
   
-  ob <- DeclareDesign:::find_all_objects(design)
+  ob <- find_all_objects(design)
   expect_true(all(ob$name == c("x", "b")))
   expect_true(all(ob$step == 1:2))
   
@@ -58,7 +58,7 @@ test_that("promises", {
  # if not there, it cannot be added through redesign  
  design <- declare_model(N = x1, x2 = x2) + NULL
  # design formed even though objects missing
- expect_true(all(DeclareDesign:::find_all_objects(design) |> dim() == c(1,5)))
+ expect_true(all(find_all_objects(design) |> dim() == c(1,5)))
  expect_error(draw_data(design))
  design <- redesign(design, x2 = 1) 
  expect_warning(design <- redesign(design, x1 = 1), 
@@ -80,7 +80,7 @@ test_that("No mix ups", {
   expect_true(draw_data(design)$sd2 == 4)
   
   # future: ideally there should NOT be a quosure for sd2 (containing sd)
-  # expect_true(!any(DeclareDesign:::find_all_objects(design)$quosure == "sd2"))
+  # expect_true(!any(find_all_objects(design)$quosure == "sd2"))
 
   
 })

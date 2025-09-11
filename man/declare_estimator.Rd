@@ -212,3 +212,6 @@ design_7 <-
 
 run_design(design_7)
 }
+\seealso{
+\code{\link[estimatr:lm_robust]{estimatr::lm_robust()}}, \code{\link[broom:reexports]{broom::glance()}}
+}

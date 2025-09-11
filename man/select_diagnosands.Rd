@@ -38,9 +38,9 @@ The diagnosands available from the extended diagnosand list are:
 | mean_var_hat      | Expected estimate of the 'true' var of estimate  | `mean(std.error^2)`                                         |
 | prop_pos_sig      | Probability of a positive estimate given sig.    | `mean(estimate > 0 & p.value <= alpha)`                     |
 | mean_ci_length    | The expected length of the confidence interval   | `mean(conf.high - conf.low)`                                |
-} 
+}
 
-The alpha argument can be used to adjust significance levels, and the subset argument can be used for further conditioning. 
+The alpha argument can be used to adjust significance levels, and the subset argument can be used for further conditioning.
 The output is a function that can be applied directly to a simulations dataframe.
 }
 \examples{

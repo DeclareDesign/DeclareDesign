@@ -1,6 +1,6 @@
 
 
-find_all_objects <- DeclareDesign:::find_all_objects
+find_all_objects <- find_all_objects
 
 # case 1
 
@@ -78,19 +78,16 @@ test_that("find object after redesign", {
   f <- function(x, b) b*x + r
   design <- declare_model(N = n, x = runif(N), w = f(x, b), s = 2*w) + NULL
   rm(n,b,r, f)
-  # needs to find r
-  DeclareDesign:::find_all_objects(design)
+
+  find_all_objects(design)
   
-  # expect_warning(DeclareDesign:::modify_edit(design, w = 3))
-  
-  design <- DeclareDesign:::modify_edit(design, n = 3)
+  design <- modify_edit(design, n = 3)
   expect_true(draw_data(design) |> nrow() ==3)
-  DeclareDesign:::find_all_objects(design)
+  find_all_objects(design)
   
   design <- redesign(design, n = 7)
   expect_true(draw_data(design) |> nrow() ==7)
   
-#  DeclareDesign:::find_all_objects(design)
 })
 
 
@@ -246,7 +243,7 @@ expect_true(m() |> nrow() ==12)
 
 # Design 16.1
 test_that("Design 16.1", {
-  
+  skip_if_not_installed("CausalQueries")
   library(rdss) # for helper functions
   library(CausalQueries)
   
@@ -284,6 +281,9 @@ test_that("Design 16.1", {
 
 # Design 16.5
 test_that("Design 16.5", {
+
+  skip_if_not_installed("rdss")
+  skip_if_not_installed("rdrobust")
   
   library(rdss) # for helper functions
   library(rdrobust)
@@ -346,7 +346,7 @@ test_that("runif not saved", {
   n <- 5
   design <- 
     declare_model(N = n, x = runif(N)) + NULL
-  expect_false("runif" %in% DeclareDesign:::find_all_objects(design)$name)
+  expect_false("runif" %in% find_all_objects(design)$name)
   
 })
 
@@ -357,7 +357,7 @@ test_that("functions saved", {
   n <- 5
   design <- 
     declare_model(N = n, x = f(N)) + NULL
-  expect_true("f" %in% DeclareDesign:::find_all_objects(design)$name)
+  expect_true("f" %in% find_all_objects(design)$name)
   
 })
 
@@ -366,8 +366,8 @@ test_that("environment sharing", {
   design <- 
     declare_model(N = N, x = runif(N)) + NULL
 
-  design_2 <- DeclareDesign:::modify_edit(design, N = 6)
-  design_3 <- DeclareDesign:::modify_edit(design, N = 7)
+  design_2 <- modify_edit(design, N = 6)
+  design_3 <- modify_edit(design, N = 7)
   
   find_all_objects(design_2)
   find_all_objects(design_3)
@@ -391,13 +391,13 @@ test_that("param in po formula quosure", {
   rm(N, b)
   draw_data(design)
 
-  obs <- DeclareDesign:::find_all_objects(design)
+  obs <- find_all_objects(design)
   
   expect_true(all(obs$name == c("N", "b")))
   
   design <- redesign(design, N = 4, b =.1)
   
-  expect_true(all(DeclareDesign:::find_all_objects(design) |> dplyr::pull(value_str) == c(4, .1)))
+  expect_true(all(find_all_objects(design) |> dplyr::pull(value_str) == c(4, .1)))
 
 })
 
@@ -413,7 +413,7 @@ test_that("param in handler", {
 
   hdl
   ls(environment(hdl))
-  hdl <- DeclareDesign:::capture_function_dependencies(hdl)
+  hdl <- capture_function_dependencies(hdl)
   rm(N, b, f)
   
   expect_true(all(ls(environment(hdl)) == c("b", "f")))
@@ -422,6 +422,7 @@ test_that("param in handler", {
 
 
 test_that("behavior when packaged used and removed", {
+  skip_if_not_installed("CausalQueries")
   
   library(CausalQueries)
   model_handler <- function(N) make_model() |> make_data(N)
@@ -432,7 +433,7 @@ test_that("behavior when packaged used and removed", {
 
   rm(n)
   
-  obs <- DeclareDesign:::find_all_objects(design)
+  obs <- find_all_objects(design)
   obs
   
   expect_true(nrow(draw_data(design)) ==2)
@@ -440,7 +441,7 @@ test_that("behavior when packaged used and removed", {
   detach("package:CausalQueries", unload = TRUE)
 
   # Object can be inspected
-  expect_error(DeclareDesign:::find_all_objects(design), NA)
+  expect_error(find_all_objects(design), NA)
   
   # But does not run without a path to the functions used
   expect_error(draw_data(design))
@@ -457,7 +458,7 @@ n <- 1
     declare_model(B = A) +
     declare_potential_outcomes(Y ~ Z + A) 
   
-  expect_true(DeclareDesign:::find_all_objects(design) |> nrow() ==1)
+  expect_true(find_all_objects(design) |> nrow() ==1)
   
   n <- 1
   step_1 <-  declare_model(N = n, A = 1) 
@@ -465,7 +466,7 @@ n <- 1
   step_3 <-  declare_potential_outcomes(Y ~ Z + A) 
   design <- step_1 + step_2 + step_3
     
-  expect_true(DeclareDesign:::find_all_objects(design) |> nrow() ==1)
+  expect_true(find_all_objects(design) |> nrow() ==1)
   
   
 })

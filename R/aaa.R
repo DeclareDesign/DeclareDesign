@@ -124,7 +124,7 @@ find_symbols_recursive <- function(expr) {
    if (!is.function(fun)) return(fun)
    
    body_expr <- body(fun)
-   symbols <- DeclareDesign:::find_symbols_recursive(body_expr)
+   symbols <- find_symbols_recursive(body_expr)
    
    excluded_symbols <- c(
      names(formals(fun)), "...",
@@ -212,9 +212,7 @@ find_symbols_recursive <- function(expr) {
          next
        }
        
-       #  print(name)
-       
-       
+
        obj <- tryCatch(
          get(name, envir = old_env, inherits = TRUE),
          error = function(e)
@@ -300,7 +298,7 @@ handler_identification <- function(default_expr, actual_expr) {
 declaration_template <- function(..., handler, label = NULL) {
 
   dots <- as.list(rlang::quos(..., label = !!label))
-  # print(dots)
+
   this <- attributes(sys.function())
   
   if (!"label" %in% names(formals(handler))) {

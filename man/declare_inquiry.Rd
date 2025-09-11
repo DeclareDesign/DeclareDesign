@@ -35,13 +35,13 @@ inquiry_handler(data, ..., subset = NULL, term = FALSE, label)
 a function, I(), that accepts a data.frame as an argument and returns a data.frame containing the value of the inquiry,  a^m.
 }
 \description{
-Declares inquiries. 
-A research design typically seeks to find answers to questions. The questions 
-are the inquiries and the correct answer to questions (in fact, or under a 
-model) are the estimands. 
-The answers you generate from data, which may or may not be correct, are the estimates. 
-\code{declare_inquiry} is used to make research questions explicit and to 
-calculate estimands. 
+Declares inquiries.
+A research design typically seeks to find answers to questions. The questions
+are the inquiries and the correct answer to questions (in fact, or under a
+model) are the estimands.
+The answers you generate from data, which may or may not be correct, are the estimates.
+\code{declare_inquiry} is used to make research questions explicit and to
+calculate estimands.
 All inquiries should be answerable under the model.
 }
 \details{

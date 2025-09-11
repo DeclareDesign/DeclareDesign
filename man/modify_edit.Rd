@@ -9,13 +9,13 @@ modify_edit(design, ...)
 \arguments{
 \item{design}{A design object created by DeclareDesign.}
 
-\item{...}{Named variable updates (e.g., `N = 20`, `b = 0.5`).}
+\item{...}{Named variable updates (e.g., \code{N = 20}, \code{b = 0.5}).}
 }
 \value{
 A design with updated variables.
 }
 \description{
-Internal helper for `redesign()`. Updates variable values inside quosure environments
+Internal helper for \code{redesign()}. Updates variable values inside quosure environments
 of a design object so that rerunning the design reflects new inputs.
 }
 \examples{

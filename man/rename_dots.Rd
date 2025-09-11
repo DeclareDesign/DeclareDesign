@@ -12,7 +12,7 @@ rename_dots(handler, dots)
 \item{dots}{A list of quosures/args.}
 }
 \value{
-The `dots` list with names adjusted (may add a `data` symbol).
+The \code{dots} list with names adjusted (may add a \code{data} symbol).
 }
 \description{
 Given a function and dots, rename dots based on how things will positionally match

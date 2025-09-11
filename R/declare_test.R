@@ -89,7 +89,7 @@
 #' @seealso See \code{\link{declare_estimator}} for documentation of the \code{method_handler} function.
 #' 
 declare_test <- 
-  DeclareDesign:::make_declarations(
+  make_declarations(
     label_test(method_handler),
     step_type = "estimator",
     causal_type = "estimator",
@@ -124,7 +124,7 @@ label_test <- function(fn) {
     
     for (e in calling_args) {
       dots[[e]] <-
-        do.call(enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. IDK
+        do.call(rlang::enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. 
     }
     
     ret <- eval_tidy(quo(fn(data, !!!dots)))

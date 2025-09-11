@@ -40,7 +40,7 @@ test_that("no parameters output", {
     declare_model(N = 5, noise = rnorm(N)) +
     declare_inquiry(mean_noise = mean(noise))
 
-    txt <- capture.output(print(DeclareDesign:::find_all_objects(design)))
+    txt <- capture.output(print(find_all_objects(design)))
     expect_true(any(grepl("No parameters", txt, fixed = TRUE)))
     
     expect_warning(redesign(design, N = 6), 

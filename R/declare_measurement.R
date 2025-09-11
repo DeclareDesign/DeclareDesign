@@ -11,7 +11,7 @@
 #'
 #' @examples
 #' 
-#' # declare_measurement in use
+#' # declare_measurement a in use a
 #' ## Two-arm randomized experiment
 #' design <-
 #'   declare_model(

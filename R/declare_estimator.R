@@ -35,6 +35,8 @@
 #'
 #' @return A function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimator and associated statistics.
 #'
+#' @seealso [estimatr::lm_robust()], [broom::glance()]
+#' 
 #' @examples
 #'
 #' # Setup for examples
@@ -199,7 +201,7 @@ label_estimator <- function(fn) {
 
     for (e in calling_args) {
       dots[[e]] <-
-        do.call(enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. IDK
+        do.call(rlang::enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. IDK
     }
 
     ret <- eval_tidy(quo(fn(data, !!!dots)))
@@ -308,7 +310,7 @@ method_handler <-
 
     args <- quos(...)
 
-    # todo special case weights offsets for glm etc?
+    # TODO: special case weights offsets for glm etc?
 
     results <- eval_tidy(quo(.method(!!!args, data = data)))
     

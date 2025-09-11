@@ -4,6 +4,8 @@ context("design library")
 library(rlang)
 
 test_that("Design library basic", {
+  skip_if_not_installed("DesignLibrary")
+  
   q = .6
   design <- DesignLibrary::two_arm_covariate_designer(prob = q, N = 15)
   design[[1]]
@@ -30,12 +32,14 @@ test_that("Design library basic", {
 
 # Errors thrown when N argument provided to designer inside test environment
 test_that("Design library error with N from test env", {
-  n <- 20
+  skip_if_not_installed("DesignLibrary")
+    n <- 20
   expect_error(design <- DesignLibrary::two_arm_covariate_designer(N = n))
 })
 
 
 test_that("Design error addressed using do.call  with N from test env", {
+  skip_if_not_installed("DesignLibrary")
   n <- 20
   design <- do.call(DesignLibrary::two_arm_covariate_designer,
                     list(N = n))
@@ -115,8 +119,8 @@ multi_arm_design_2 <-
          outcome_means = list(c(2, 0, 1))
          )
 
-expect_true(DeclareDesign:::find_all_objects(multi_arm_design)$value_str[1] == "10")
-expect_true(DeclareDesign:::find_all_objects(multi_arm_design_2)$value_str[1] == "8")
+expect_true(find_all_objects(multi_arm_design)$value_str[1] == "10")
+expect_true(find_all_objects(multi_arm_design_2)$value_str[1] == "8")
 
 })
 

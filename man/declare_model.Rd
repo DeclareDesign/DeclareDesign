@@ -17,10 +17,10 @@ declare_model(..., handler = fabricate, label = NULL)
 A function that returns a data.frame.
 }
 \description{
-The model component of a research design captures background beliefs about 
-the world in which a study is implemented, the variables of interest, and 
-how these respond to each other. The \code{declare_model} function writes functions 
-that themselves create databases that represent these features of possible 
+The model component of a research design captures background beliefs about
+the world in which a study is implemented, the variables of interest, and
+how these respond to each other. The \code{declare_model} function writes functions
+that themselves create databases that represent these features of possible
 worlds.
 }
 \examples{

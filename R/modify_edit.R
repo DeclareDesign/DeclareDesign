@@ -20,7 +20,7 @@ modify_edit <- function(design, ...) {
   
   updates <- list(...)
   
-  meta <- DeclareDesign:::find_all_objects(design = design)
+  meta <- find_all_objects(design = design)
   
   steps_to_rebuild <- integer()
   
@@ -99,8 +99,8 @@ modify_edit <- function(design, ...) {
     step_attributes <- attributes(step)
 
     step_attributes$dots[] <- 
-      DeclareDesign:::rename_dots(step_attributes$handler, step_attributes$dots)
-    new_step <- with(step_attributes, DeclareDesign:::currydata(handler, dots))
+      rename_dots(step_attributes$handler, step_attributes$dots)
+    new_step <- with(step_attributes, currydata(handler, dots))
 
     attributes(new_step) <- step_attributes
 

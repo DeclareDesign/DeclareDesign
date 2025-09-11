@@ -2,10 +2,10 @@
 % Please edit documentation in R/aaa.R
 \name{currydata}
 \alias{currydata}
-\title{# DeclareDesign:::currydata(fabricate, list(N = 3, X = 1))}
+\title{DeclareDesign:::currydata(fabricate, list(N = 3, X = 1))}
 \usage{
 currydata(FUN, dots)
 }
 \description{
-# DeclareDesign:::currydata(fabricate, list(N = 3, X = 1))
+DeclareDesign:::currydata(fabricate, list(N = 3, X = 1))
 }

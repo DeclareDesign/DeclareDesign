@@ -103,6 +103,7 @@ declare_assignment <- make_declarations(assignment_handler, "assignment")
 
 #' @importFrom rlang quos !!! call_modify eval_tidy quo f_rhs 
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities declare_ra
+#' @importFrom rlang :=
 #' @param legacy Use the legacy randomizr functionality. This will be disabled in future; please use legacy = FALSE.
 #' @param data A data.frame.
 #' @rdname declare_assignment

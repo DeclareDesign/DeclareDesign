@@ -10,6 +10,5 @@ library(gam)
 library(Matching)
 library(reshape2)
 library(sf)
-library(tidyr)
 
 test_check("DeclareDesign")

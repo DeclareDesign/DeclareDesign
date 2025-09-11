@@ -22,7 +22,7 @@ label_test(fn)
 A function that accepts a data.frame as an argument and returns a data.frame containing the value of the test statistic and other inferential statistics.
 }
 \description{
-Declares a test which generates a test statistic and associated inferential statistics. 
+Declares a test which generates a test statistic and associated inferential statistics.
 
 Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific inquiry in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an inquiry. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
 

@@ -9,7 +9,7 @@ test_that("Fanout does something", {
   D <- pop + pop2 + inquiry
 
   fan_strategy <- data.frame(end = 2:3, n = c(1, 100))
-  out <- DeclareDesign:::fan_out(D, fan_strategy)
+  out <- fan_out(D, fan_strategy)
 
   inquiries_out <- do.call(rbind, lapply(out, `[[`, "inquiries_df"))
   expect_equal(length(unique(inquiries_out$estimand)), 1)

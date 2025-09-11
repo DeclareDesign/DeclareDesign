@@ -76,8 +76,6 @@ expand_design <- function(designer, ..., expand = TRUE, prefix = "design") {
   
   designs <- lapply(jobs, function(dots) {do.call(designer, dots)})
 
-  x <<- dots_quos
-  
   args_names <- lapply(dots_quos, expand_args_names)
   
   designs <- mapply(structure, 

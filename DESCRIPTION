@@ -1,6 +1,6 @@
 Package: DeclareDesign
 Title: Declare and Diagnose Research Designs
-Version: 1.0.8
+Version: 1.1
 Authors@R: c(person("Graeme", "Blair", email = "graeme.blair@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9164-2102")),
              person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = c("aut"), comment = c(ORCID = "0000-0002-8639-3188")),
              person("Alexander", "Coppock", email = "acoppock@gmail.com", role = c("aut"), comment = c(ORCID = "0000-0002-5733-2386")),
@@ -14,7 +14,7 @@ Description: Researchers can characterize and learn about the properties of
     to implementation and without access to results. It can also make it
     easier for designs to be shared, replicated, and critiqued.
 Depends:
-    R (>= 3.5.0),
+    R (>= 4.1.0),
     randomizr (>= 0.20.0),
     fabricatr (>= 0.10.0),
     estimatr (>= 0.20.0)
@@ -24,27 +24,32 @@ License: MIT + file LICENSE
 URL: https://declaredesign.org/r/declaredesign/, https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues
 Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Suggests:
-    testthat,
-    knitr,
-    rmarkdown,
-    AER,
-    diffobj,
-    dplyr,
-    data.table,
-    ggplot2,
-    future,
-    future.apply,
-    broom,
-    MASS,
-    Matching,
-    betareg,
-    biglm,
-    gam,
-    sf,
-    reshape2,
-    DesignLibrary,
-    coin,
-    margins,
-    psych
+  AER,
+  betareg,
+  biglm,
+  broom,
+  CausalQueries,
+  coin,
+  data.table,
+  DesignLibrary,
+  diffobj,
+  dplyr,
+  future,
+  future.apply,
+  gam,
+  ggplot2,
+  knitr,
+  margins,
+  MASS,
+  Matching,
+  psych,
+  rdrobust,
+  rdss,
+  reshape2,
+  rmarkdown,
+  sf,
+  testthat,
+  tidyr

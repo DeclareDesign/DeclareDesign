@@ -14,7 +14,7 @@ redesign(design, ..., expand = TRUE)
 \item{expand}{If TRUE, redesign using the crossproduct of \code{...}, otherwise recycle them.}
 }
 \value{
-A design, or, in the case of multiple values being passed onto \code{...}, a `by`-list of designs.
+A design, or, in the case of multiple values being passed onto \code{...}, a \code{by}-list of designs.
 }
 \description{
 \code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters in a step's environment (Advanced).
