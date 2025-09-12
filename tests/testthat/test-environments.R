@@ -472,6 +472,40 @@ n <- 1
 })
 
 
+test_that("multiple appearances", {
+
+# Two different values for a parameter can be saved in different steps
+# But redesign replaces all values
+  
+a <- 2
+step_1 <- declare_model(N = 1, A1 = a)
+
+a <- 1
+step_2 <- declare_model(A2 = a)
+
+rm(a)
+
+design <- step_1 + step_2
+
+expect_true(all(find_all_objects(design)$value_str == 2:1))
+
+design <- design |> redesign(a = 3)
+expect_true(all(find_all_objects(design)$value_str == 3))
+
+  
+})
+
+test_that("many parameters", {
+  
+a = 1; b = 2; c = 3; d= 4; e = 5; f = 6; g = 7; h = 8; i = 9; j = 10
+
+design <- declare_model(N = 1, A1 = a + b + c + d + e + f + g + h + i + j) + NULL
+  
+out <- capture.output(DeclareDesign:::print.design(design))
+expect_true(any(grepl("a, b, c, d, e, f, g, h, i, j", out)))
+
+})
+
 test_that("declare_population handles environments OK", {
   
   # 1 simple
