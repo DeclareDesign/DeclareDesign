@@ -1,3 +1,25 @@
+#' Find all objects and variables used in a design or design step
+#'
+#' @description This internal function analyzes a DeclareDesign object to find all variables,
+#' functions, and objects that are saved within the design steps. It identifies objects
+#' from quosures, handler environments, and other design components to provide a comprehensive
+#' view of objects the design depends on.
+#'
+#' This function is primarily used internally for design analysis and debugging purposes.
+#' It helps identify dependencies and understand what objects a design relies on.
+#'
+#' @param design A design object or design step created using DeclareDesign functions
+#'
+#' @return A data.frame with columns:
+#' \describe{
+#'   \item{name}{The name of the object/variable}
+#'   \item{value_str}{String representation of the object's value or type}
+#'   \item{step}{The step number where the object was found}
+#'   \item{quosure}{The name of the quosure or "handler" where the object was found}
+#'   \item{env}{The environment object where the variable was found}
+#' }
+#'
+#' @keywords internal
 find_all_objects <- function(design) {
 
   if (!any(c("design_step", "design") %in% class(design))) 
