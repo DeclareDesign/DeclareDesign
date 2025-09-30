@@ -5,7 +5,6 @@
 * New function select_diagnosands lets you select and adjust diagnosands quickly
 * diagnose_design(design, diagnosands = select_diagnosands(...))
 
-
 # DeclareDesign 1.0.10
 
 * Swapped margins for marginaleffects. 
