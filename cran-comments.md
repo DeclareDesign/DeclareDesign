@@ -1,6 +1,6 @@
 ## Submission
 
-Changes to internals. Add small feature.
+Changes to internals. Add small feature. Changed package maintaner to one of the other package authors.
 
 ## Test environments
 * local OS X install (release)
