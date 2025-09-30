@@ -25,3 +25,4 @@ vignettes
 ^\.github$
 ^pkgdown$
 ^CRAN-SUBMISSION$
+^codecov\.yml$
