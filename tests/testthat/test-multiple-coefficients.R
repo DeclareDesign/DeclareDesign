@@ -27,7 +27,7 @@ test_that("Multiple Coefficients", {
   my_design <- my_pop + theta + OLS
   diagnosis <- diagnose_design(my_design, sims = 2, bootstrap_sims = FALSE)
 
-  expect_equal(diagnosis %>% get_simulations %>% dim, c(4, 12))
+  expect_equal(diagnosis |> get_simulations() |> dim(), c(4, 12))
 
-  expect_equal(diagnosis %>% get_diagnosands %>% dim, c(2, 12))
+  expect_equal(diagnosis |> get_diagnosands() |> dim(), c(2, 12))
 })

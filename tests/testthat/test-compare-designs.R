@@ -31,6 +31,7 @@ my_design_2 <- my_population +
 
 test_that("compare_designs works", {
   
+  skip_if_not_installed("diffobj")
   
   diagnosis_1 <- diagnose_design(my_design_1, sims = 2, bootstrap_sims = FALSE)
   diagnosis_2 <- diagnose_design(my_design_2, sims = 2, bootstrap_sims = FALSE)
@@ -96,6 +97,7 @@ my_design_4 <- my_population +
   sate_estimator
 
 test_that("compare works", {
+  skip_if_not_installed("diffobj")
   expect_no_error(compare_design_code(my_design_3, my_design_4))
   expect_no_error(compare_design_summaries(my_design_3, my_design_4))
   expect_no_error(compare_design_data(my_design_3, my_design_4))

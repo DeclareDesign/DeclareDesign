@@ -46,25 +46,29 @@
 #'   
 #' head(draw_data(design))
 #' 
-#' # Index creation
-#' library(psych)
+#' if(require("psych")) {
 #' 
-#' design <-
-#'   declare_model(
-#'     N = 500,
-#'     X = rep(c(0, 1), each = N / 2),
-#'     Y_1 = 0.2 * X + rnorm(N, sd = 0.25),
-#'     Y_2 = 0.3 * X + 0.5 * rnorm(N, sd = 0.50),
-#'     Y_3 = 0.1 * X + 0.4 * rnorm(N, sd = 0.75)) +
-#'   declare_measurement(
-#'     index = fa(
-#'       r = cbind(Y_1, Y_2, Y_3),
-#'       nfactors = 1,
-#'       rotate = "varimax"
-#'     )$scores
-#'   )
-#' 
-#' draw_data(design)
+#'   # Index creation
+#'   
+#'   library(psych)
+#'   
+#'   design <-
+#'     declare_model(
+#'       N = 500,
+#'       X = rep(c(0, 1), each = N / 2),
+#'       Y_1 = 0.2 * X + rnorm(N, sd = 0.25),
+#'       Y_2 = 0.3 * X + 0.5 * rnorm(N, sd = 0.50),
+#'       Y_3 = 0.1 * X + 0.4 * rnorm(N, sd = 0.75)) +
+#'     declare_measurement(
+#'       index = fa(
+#'         r = cbind(Y_1, Y_2, Y_3),
+#'         nfactors = 1,
+#'         rotate = "varimax"
+#'       )$scores
+#'     )
+#'   
+#'   draw_data(design)
+#' }
 declare_measurement <- make_declarations(measurement_handler, "measurement")
 
 #' @param data A data.frame.

@@ -93,8 +93,11 @@ test_that("demo runs", {
   my_measurement <- declare_measurement(Y = reveal_outcomes(Y ~ Z)) 
   smp <- my_measurement(smp)
   my_estimator_dim <- declare_estimator(Y ~ Z, inquiry = my_inquiry)
-  my_estimator_dim(smp)
-
+  est <- my_estimator_dim(smp)
+  expect_equal(dim(est), c(1, 11))
+  expect_equal(colnames(est), c("estimator", "term", "estimate", "std.error", "statistic", 
+                                "p.value", "conf.low", "conf.high", "df", "outcome", "inquiry"))
+  
   ## ------------------------------------------------------------------------
   my_estimator_lm <-
     declare_estimator(Y ~ Z,
@@ -103,13 +106,15 @@ test_that("demo runs", {
       inquiry = my_inquiry
     )
 
-  my_estimator_lm(smp)
+  est <- my_estimator_lm(smp)
+  expect_equal(dim(est), c(1, 11))
+  expect_equal(colnames(est), c("term", "estimator", "estimate", "std.error", "statistic", 
+                                "p.value", "conf.low", "conf.high", "df", "outcome", "inquiry"))
 
   ## ------------------------------------------------------------------------
   design <- my_population +
     my_potential_outcomes +
     my_inquiry +
-    declare_step(dplyr::mutate, big_income = 5 * income) +
     my_sampling +
     my_assignment +
     my_measurement +
@@ -301,3 +306,4 @@ test_that("demo runs", {
 
   head(pop_pos_custom[, c("u", "Y_Z_0", "Y_Z_1")])
 })
+

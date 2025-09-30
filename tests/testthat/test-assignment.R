@@ -99,9 +99,9 @@ test_that("test assignment and probability functions", {
   
   
   
-  smp_draw <- population() %>% sampling() %>% potential_outcomes()
+  smp_draw <- population() |> sampling() |> potential_outcomes()
   
-  #  population() %>% sampling() %>% potential_outcomes()
+  #  population() |> sampling() |> potential_outcomes()
   
   expect_assignment <- function(assn) {
     df <- assn(smp_draw)
@@ -110,48 +110,48 @@ test_that("test assignment and probability functions", {
   
   
   # Complete Random Assignment assignments
-  assignment_0 <- declare_assignment(legacy = TRUE) %>% expect_assignment() # blug
-  assignment_1 <- declare_assignment(legacy = TRUE, conditions = c(0, 1)) %>% expect_assignment()
-  assignment_2 <- declare_assignment(legacy = TRUE, m = 60, conditions = c(0, 1)) %>% expect_assignment()
-  assignment_3 <- declare_assignment(legacy = TRUE, m_each = c(20, 30, 50)) %>% expect_assignment()
-  assignment_4 <- declare_assignment(legacy = TRUE, m_each = c(20, 80), conditions = c(0, 1)) %>% expect_assignment()
-  assignment_5 <- declare_assignment(legacy = TRUE, prob_each = c(.2, .3, .5)) %>% expect_assignment()
+  assignment_0 <- declare_assignment(legacy = TRUE) |> expect_assignment() # blug
+  assignment_1 <- declare_assignment(legacy = TRUE, conditions = c(0, 1)) |> expect_assignment()
+  assignment_2 <- declare_assignment(legacy = TRUE, m = 60, conditions = c(0, 1)) |> expect_assignment()
+  assignment_3 <- declare_assignment(legacy = TRUE, m_each = c(20, 30, 50)) |> expect_assignment()
+  assignment_4 <- declare_assignment(legacy = TRUE, m_each = c(20, 80), conditions = c(0, 1)) |> expect_assignment()
+  assignment_5 <- declare_assignment(legacy = TRUE, prob_each = c(.2, .3, .5)) |> expect_assignment()
   
   # Blocked assignments
-  assignment_6 <- declare_assignment(legacy = TRUE, blocks = ideo_3) %>% expect_assignment()
-  assignment_7 <- declare_assignment(legacy = TRUE, blocks = ideo_3, prob_each = c(.3, .6, .1)) %>% expect_assignment()
-  assignment_8 <- declare_assignment(legacy = TRUE, blocks = ideo_3, conditions = c(0, 1)) %>% expect_assignment()
+  assignment_6 <- declare_assignment(legacy = TRUE, blocks = ideo_3) |> expect_assignment()
+  assignment_7 <- declare_assignment(legacy = TRUE, blocks = ideo_3, prob_each = c(.3, .6, .1)) |> expect_assignment()
+  assignment_8 <- declare_assignment(legacy = TRUE, blocks = ideo_3, conditions = c(0, 1)) |> expect_assignment()
   
   assignment_9 <- declare_assignment(
     blocks = ideo_3,
     conditions = c(0, 1),
     block_m = c(10, 10, 10),
     legacy = TRUE
-  ) %>% expect_assignment()
+  ) |> expect_assignment()
   
   
   # Clustered assignments
-  assignment_10 <- declare_assignment(legacy = TRUE, clusters = villages) %>% expect_assignment()
-  assignment_11 <- declare_assignment(legacy = TRUE, clusters = villages, conditions = c(0, 1)) %>% expect_assignment()
-  assignment_12 <- declare_assignment(legacy = TRUE, clusters = villages, prob_each = c(.1, .3, .6)) %>% expect_assignment()
+  assignment_10 <- declare_assignment(legacy = TRUE, clusters = villages) |> expect_assignment()
+  assignment_11 <- declare_assignment(legacy = TRUE, clusters = villages, conditions = c(0, 1)) |> expect_assignment()
+  assignment_12 <- declare_assignment(legacy = TRUE, clusters = villages, prob_each = c(.1, .3, .6)) |> expect_assignment()
   
   # Blocked and Clustered assignments
   assignment_13 <- declare_assignment(
     clusters = villages,
     blocks = high_elevation,
     legacy = TRUE
-  ) %>% expect_assignment()
+  ) |> expect_assignment()
   
   assignment_14 <- declare_assignment(
     clusters = villages,
     blocks = high_elevation, conditions = c(0, 1),
     legacy = TRUE
-  ) %>% expect_assignment()
+  ) |> expect_assignment()
   assignment_15 <- declare_assignment(
     clusters = villages,
     blocks = high_elevation, prob_each = c(.1, .3, .6),
     legacy = TRUE
-  ) %>% expect_assignment()
+  ) |> expect_assignment()
   
 })
 

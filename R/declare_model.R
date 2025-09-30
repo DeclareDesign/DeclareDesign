@@ -47,15 +47,19 @@
 #' )
 #' M()
 #' 
-#' # We can draw correlated variables using draw_multivariate
-#' M <-
-#' declare_model(
-#'   draw_multivariate(c(X1, X2) ~ MASS::mvrnorm(
-#'     n = 1000,
-#'     mu = c(0, 0),
-#'     Sigma = matrix(c(1, 0.3, 0.3, 1), nrow = 2)
-#'   )))
-#' M()
+#' if(require("MASS")) {
+#' 
+#'   # We can draw correlated variables using draw_multivariate
+#'   M <-
+#'   declare_model(
+#'     draw_multivariate(c(X1, X2) ~ MASS::mvrnorm(
+#'       n = 1000,
+#'       mu = c(0, 0),
+#'       Sigma = matrix(c(1, 0.3, 0.3, 1), nrow = 2)
+#'     )))
+#'   M()
+#'   
+#' }
 #' 
 #' # Declare potential outcomes model dependent on assignment Z
 #' ## Manually

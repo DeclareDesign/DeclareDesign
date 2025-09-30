@@ -95,6 +95,7 @@ describe_variable <- function(x) {
 
 describe_variable_impl <- function(x, num_unique) UseMethod("describe_variable_impl")
 
+#' @noRd
 describe_variable_impl.factor <- function(x, num_unique) {
   data.frame(
     as.list(summary.factor(x, 5)),
@@ -103,6 +104,7 @@ describe_variable_impl.factor <- function(x, num_unique) {
   )
 }
 
+#' @noRd
 describe_variable_impl.POSIXct <- function(x, num_unique) {
   data.frame(
     as.list(as.character(summary(x))),
@@ -111,7 +113,7 @@ describe_variable_impl.POSIXct <- function(x, num_unique) {
   )
 }
 
-
+#' @noRd
 describe_variable_impl.character <- function(x, num_unique) {
   data.frame(
     N_missing = sum(is.na(x)),
@@ -211,10 +213,16 @@ reveal_nse_helper_dots <- function(dots, what, handler) {
   dots
 }
 
+#' @noRd
 step_type <- function(x) UseMethod("step_type", x)
 
+#' @noRd
 step_type.design_step <- function(x) attr(x, "step_type")
+
+#' @noRd
 step_type.function <- function(x) "unknown"
+
+#' @noRd
 step_type.default <- function(x) "unknown"
 
 #' @importFrom rlang is_symbol expr_name
