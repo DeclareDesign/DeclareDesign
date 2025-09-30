@@ -102,13 +102,15 @@ sampling_handler <- function(data, ..., legacy = FALSE) {
   
 }
 
+
+#' @importFrom rlang enquo
 sampling_handler_internal_fabricatr <- function(data, ..., filter = S == 1) {
   
   options <- quos(...)
   
   data <- fabricate(data = data, !!!options, ID_label = NA)
   
-  rows <- rlang::enquo(filter)
+  rows <- enquo(filter)
   rows_val <- eval_tidy(rows, data)
   # rows_val <- rows_val && !is.na(rows_val)
   rows_val[is.na(rows_val)] <- FALSE

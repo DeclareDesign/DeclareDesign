@@ -222,6 +222,7 @@
 #' }
 #' 
 #' @importFrom stats setNames
+#' @importFrom rlang is_empty
 #' @importFrom utils head
 #' @export
 diagnose_design <- function(...,

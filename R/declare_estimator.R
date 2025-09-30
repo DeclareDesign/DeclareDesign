@@ -186,6 +186,7 @@ declare_estimators <- declare_estimator
 #' @param fn A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval), and a term column for labeling coefficient estimates.
 #' 
 #' @rdname declare_estimator
+#' @importFrom rlang enquo
 #' @export
 label_estimator <- function(fn) {
   if (!("data" %in% names(formals(fn)))) {
@@ -206,7 +207,7 @@ label_estimator <- function(fn) {
 
     for (e in calling_args) {
       dots[[e]] <-
-        do.call(rlang::enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. IDK
+        do.call(enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. IDK
     }
 
     ret <- eval_tidy(quo(fn(data, !!!dots)))
@@ -290,7 +291,7 @@ model_handler <- function(...) {
 #' @param model_summary Deprecated argument. Use \code{.summary} instead.
 #' @param term Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.
 #' @rdname declare_estimator 
-#' @importFrom rlang eval_tidy
+#' @importFrom rlang eval_tidy enquo
 method_handler <-
   function(data,
              ...,
@@ -310,7 +311,7 @@ method_handler <-
     }
     
     coefficient_names <-
-      rlang::enquo(term) # forces evaluation of quosure
+		enquo(term) # forces evaluation of quosure
     coefficient_names <- reveal_nse_helper(coefficient_names)
 
     args <- quos(...)

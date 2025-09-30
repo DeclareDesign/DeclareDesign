@@ -103,6 +103,7 @@ declare_tests <- declare_test
 #'
 #' @param fn A function that takes a data.frame as an argument and returns a data.frame with test statistics as columns.
 #' @rdname declare_test
+#' @importFrom rlang enquo
 #' @export
 label_test <- function(fn) {
   if (!("data" %in% names(formals(fn)))) {
@@ -124,7 +125,7 @@ label_test <- function(fn) {
     
     for (e in calling_args) {
       dots[[e]] <-
-        do.call(rlang::enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. 
+        do.call(enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. 
     }
     
     ret <- eval_tidy(quo(fn(data, !!!dots)))

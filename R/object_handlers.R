@@ -18,6 +18,8 @@
 #'   \item{quosure}{The name of the quosure or "handler" where the object was found}
 #'   \item{env}{The environment object where the variable was found}
 #' }
+#' 
+#' @importFrom rlang is_quosure as_quosure get_env env_label
 #'
 #' @keywords internal
 find_all_objects <- function(design) {
@@ -48,9 +50,9 @@ find_all_objects <- function(design) {
       
       for (quosure_name in names(dots)) {
         q <- dots[[quosure_name]]
-        if (rlang::is_quosure(q)) {
-          q <- rlang::as_quosure(q)
-          env <- rlang::get_env(q)
+        if (is_quosure(q)) {
+          q <- as_quosure(q)
+          env <- get_env(q)
           jobs[[length(jobs) + 1]] <- list(
             name = quosure_name,
             env = env,
@@ -65,7 +67,7 @@ find_all_objects <- function(design) {
     handler <- attr(step, "handler")
 
     if (!is.null(handler)) {
-      handler_env <- rlang::get_env(handler)
+      handler_env <- get_env(handler)
       
 
       # skip known internal handlers or package-defined handlers

@@ -134,10 +134,15 @@ design_2 <-
 
 run_design(design_2)
 
-# Use declare_estimator to implement custom answer strategies
+# Custom answer strategies
+# A custom estimator should take data as an argument and return a data.frame
+# with columns such as "estimate", "std.error", "p.value", "conf.low", "conf.high"
 my_estimator <- function(data) {
   data.frame(estimate = mean(data$Y))
 }
+
+# Add a custom estimator to the design, wrapping it in `label_estimator()`
+# in order to pass label and inquiry arguments
 
 design_3 <-
   design +

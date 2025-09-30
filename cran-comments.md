@@ -1,6 +1,6 @@
 ## Submission
 
-Small bug fix of parallel processing.
+Changes to internals. Add small feature.
 
 ## Test environments
 * local OS X install (release)
@@ -12,7 +12,7 @@ Small bug fix of parallel processing.
 
 ## Reverse dependencies
 
-No changes to worse. 
+Reverse dependency DesignLibrary is broken by this update. A fixed version of DesignLibrary is ready and will be submitted immediately after this update to DeclareDesign.
 
 ---
   

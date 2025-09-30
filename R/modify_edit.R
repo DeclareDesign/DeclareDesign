@@ -8,6 +8,8 @@
 #'
 #' @return A design with updated variables.
 #' @keywords internal
+#' 
+#' @importFrom rlang get_env new_quosure get_expr
 #'
 #' @examples
 #' n <- 2
@@ -77,7 +79,7 @@ modify_edit <- function(design, ...) {
   
         old_quosure <- row_dots[[positn]] 
       
-        old_env <- rlang::get_env(old_quosure)
+        old_env <- get_env(old_quosure)
         
         # Clone and update the quosure's environment
         new_env <- new.env(parent = parent.env(old_env))
@@ -85,7 +87,7 @@ modify_edit <- function(design, ...) {
         assign(varname, new_val, envir = new_env)
         
         attr(design[[row$step]], "dots")[[positn]] <-
-          rlang::new_quosure(rlang::get_expr(old_quosure), env = new_env)
+          new_quosure(get_expr(old_quosure), env = new_env)
         
       }
       

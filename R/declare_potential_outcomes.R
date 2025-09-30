@@ -1,8 +1,8 @@
 #' uses fabricatr::potential_outcomes
 #. but also allows deprecated case where values are provided directly
 #' @param data A data.frame.
-#' @importFrom rlang quos !!!
-#' @importFrom fabricatr fabricate
+#' @importFrom rlang quos !!! quo eval_tidy is_symbol as_data_mask as_label quo_squash expr is_formula quo_get_env f_env
+#' @importFrom fabricatr fabricate potential_outcomes
 #' @rdname declare_measurement
 #'
 #'
@@ -34,9 +34,9 @@ potential_outcomes_handler <- function(data, ...) {
   
   # If degenerate conditions are provided without an assignment var
   if (!is.null(args$conditions)) {
-    if (!is.list(rlang::eval_tidy(args$conditions)) &
+    if (!is.list(eval_tidy(args$conditions)) &
         is.null(args$assignment_variables)) {
-      args$assignment_variables  <- rlang::quo(Z)
+      args$assignment_variables  <- quo(Z)
     }
   }
   
@@ -51,23 +51,23 @@ potential_outcomes_handler <- function(data, ...) {
     
     
     # Check whether conditions is NOT a list
-    is_not_list <- !is.list(rlang::eval_tidy(conditions_quo))
+    is_not_list <- !is.list(eval_tidy(conditions_quo))
     
     if (!is.null(conditions_quo) &&
         is_not_list &&
-        rlang::is_symbol(rlang::quo_squash(assignment_quo))) {
-      var <- rlang::as_label(rlang::quo_squash(assignment_quo))
-      condition_value <- rlang::eval_tidy(conditions_quo)
+        is_symbol(quo_squash(assignment_quo))) {
+      var <- as_label(quo_squash(assignment_quo))
+      condition_value <-  eval_tidy(conditions_quo)
       
       conditions <- setNames(list(condition_value), var)
-      args$conditions <- rlang::quo(conditions)
+      args$conditions <- quo(conditions)
     }
     
     
     if (is.null(args$conditions)) {
       vars <- eval_tidy(args$assignment_variables)
       conditions <- setNames(rep(list(0:1), length(vars)), vars)
-      args$conditions <- rlang::quo(conditions)
+      args$conditions <- quo(conditions)
     }
     
     args$assignment_variables <- NULL
@@ -77,17 +77,17 @@ potential_outcomes_handler <- function(data, ...) {
   
   # default conditions argument
   if (is.null(args$conditions)  & has_formula) {
-    args$conditions <- rlang::quo(list(Z = c(0, 1)))
+    args$conditions <- quo(list(Z = c(0, 1)))
   }
   
-  mask <- rlang::as_data_mask(data)
+  mask <- as_data_mask(data)
   mask$N <- nrow(data)
   
   # implementation
   if (!has_formula) {
     # No formula
-    out <-   rlang::expr(fabricate(data = data, ID_label = NA, !!!args)) |>
-      rlang::eval_tidy()
+    out <-   expr(fabricate(data = data, ID_label = NA, !!!args)) |>
+      eval_tidy()
     
   } else {
     # With formula (usual case)
@@ -96,20 +96,20 @@ potential_outcomes_handler <- function(data, ...) {
     # the nondeprecaated  declare_ functions
     
     # evaluate args
-    args_eval <- lapply(args, rlang::eval_tidy, data = mask)
+    args_eval <- lapply(args, eval_tidy, data = mask)
     
     # find the formula arg
     is_form <- vapply(args, function(q)
-      rlang::is_formula(rlang::quo_squash(q)), logical(1))
+      is_formula(quo_squash(q)), logical(1))
     f_idx   <- which(is_form)[1L]
     
     # evaluated formula
     f  <- args_eval[[f_idx]]
-    stopifnot(rlang::is_formula(f))
+    stopifnot(is_formula(f))
     
     # original quosure env (captured globals like outcome_means, sd, etc.)
     f_quo <- args[[f_idx]]
-    qe    <- rlang::quo_get_env(f_quo)
+    qe    <- quo_get_env(f_quo)
     
     # 1) Build a plain environment that contains DATA columns (and N)
     data_env <- list2env(c(as.list(data), list(N = nrow(data))), parent = qe)
@@ -124,7 +124,7 @@ potential_outcomes_handler <- function(data, ...) {
     out <- fabricate(
       data = data,
       ID_label = NA,
-      do.call(fabricatr::potential_outcomes, args_eval)
+      do.call(potential_outcomes, args_eval)
     )
   }
   

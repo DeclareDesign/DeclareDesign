@@ -25,7 +25,7 @@ URL: https://declaredesign.org/r/declaredesign/, https://github.com/DeclareDesig
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 VignetteBuilder: knitr
 Suggests:
     AER,
