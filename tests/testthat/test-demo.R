@@ -140,7 +140,7 @@ test_that("demo runs", {
   pop_custom <- my_population_custom()
 
   head(pop_custom)
-
+  
   ## ------------------------------------------------------------------------
   my_potential_outcomes_function <-
     function(data) {
@@ -173,7 +173,7 @@ test_that("demo runs", {
   smp_custom <- my_sampling_custom(pop_pos)
 
   nrow(smp_custom)
-
+  
   ## ------------------------------------------------------------------------
   my_assignment_function <- function(data) {
     data$Z <- rbinom(
@@ -235,6 +235,7 @@ test_that("demo runs", {
     return(my_design)
   }
 
+  
   my_1000_design <- expand_design(designer = m_arm_trial, numb = 1000)
   head(draw_data(my_1000_design))
 
@@ -278,13 +279,16 @@ test_that("demo runs", {
   )
 
   ## ------------------------------------------------------------------------
+})
 
+test_that("demo runs 2", {
+  
   my_population_function <- function(N) {
     data.frame(u = rnorm(N))
   }
 
   ## set a variable used in the declaration
-  my_N <- 1000
+  my_N <- 10
   my_population_custom <- declare_model(
     handler = my_population_function, N = my_N
   )
@@ -304,6 +308,7 @@ test_that("demo runs", {
 
   pop_pos_custom <- my_potential_outcomes_custom(my_population_custom())
 
-  head(pop_pos_custom[, c("u", "Y_Z_0", "Y_Z_1")])
+  expect_true(all(dim(pop_pos_custom) == c(10, 3)))
+
 })
 

@@ -71,8 +71,8 @@ See \code{\link{modify_design}} for details.
              after = 1)
 
  # If you are using a design created by a designer, for example from
- #   the DesignLibrary package, you will not have access to the step
- #   objects. Instead, you can always use the label of the step.
+ # the DesignLibrary package, you will not have access to the step
+ # objects. Instead, you can always use the label of the step.
  
  design <- DesignLibrary::two_arm_designer()
  

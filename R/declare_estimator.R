@@ -10,7 +10,7 @@
 #' 
 #' \code{declare_estimator} is designed to handle two main ways of generating parameter estimates from data.
 #' 
-#' In \code{declare_estimator}, you can optionally provide the name of an inquiry or an objected created by \code{\link{declare_inquiry}} to connect your estimate(s) to inquiry(s).
+#' In \code{declare_estimator}, you can optionally provide the name of an inquiry or an object created by \code{\link{declare_inquiry}} to connect your estimate(s) to inquiry(s).
 #' 
 #' The first is through \code{label_estimator(method_handler)}, which is the default value of the \code{handler} argument. Users can use standard method functions like lm, glm, or iv_robust. The methods are summarized using the function passed to the \code{summary} argument. This will usually be a "tidier" like \code{broom::tidy}. The default \code{summary} function is \code{tidy_try}, which applies a tidy method if available, and if not, tries to make one on the fly.
 #' 
@@ -35,6 +35,8 @@
 #'
 #' @return A function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimator and associated statistics.
 #'
+#' @seealso [estimatr::lm_robust()], [broom::glance()]
+#' 
 #' @examples
 #'
 #' # Setup for examples
@@ -84,10 +86,15 @@
 #' 
 #' run_design(design_2)
 #' 
-#' # Use declare_estimator to implement custom answer strategies
+#' # Custom answer strategies
+#' # A custom estimator should take data as an argument and return a data.frame
+#' # with columns such as "estimate", "std.error", "p.value", "conf.low", "conf.high"
 #' my_estimator <- function(data) {
 #'   data.frame(estimate = mean(data$Y))
 #' }
+#' 
+#' # Add a custom estimator to the design, wrapping it in `label_estimator()`
+#' # in order to pass label and inquiry arguments
 #' 
 #' design_3 <-
 #'   design +
@@ -188,6 +195,7 @@ declare_estimators <- declare_estimator
 #' @param fn A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval), and a term column for labeling coefficient estimates.
 #' 
 #' @rdname declare_estimator
+#' @importFrom rlang enquo
 #' @export
 label_estimator <- function(fn) {
   if (!("data" %in% names(formals(fn)))) {
@@ -286,13 +294,13 @@ model_handler <- function(...) {
 }
 
 #' @param data a data.frame
-#' @param .method A method function, e.g. lm or glm. By default, the method is the \code{\link{lm_robust}} function from the \link{estimatr} package, which fits OLS regression and calculates robust and cluster-robust standard errors.
-#' @param .summary A method-in data-out function to extract coefficient estimates or method summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} method summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the method object sent to \code{method}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the method object, it fails.
+#' @param .method A method function, e.g. lm or glm. By default, the method is the \code{\link[estimatr:lm_robust]{lm_robust}} function from the \pkg{estimatr} package, which fits OLS regression and calculates robust and cluster-robust standard errors.
+#' @param .summary A method-in data-out function to extract coefficient estimates or method summary statistics, such as \code{\link[broom:tidy]{tidy}} or \code{\link[broom:glance]{glance}}. By default, the \code{DeclareDesign} method summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the method object sent to \code{method}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the method object, it fails.
 #' @param model Deprecated argument. Use \code{.method} instead.
 #' @param model_summary Deprecated argument. Use \code{.summary} instead.
 #' @param term Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.
 #' @rdname declare_estimator 
-#' @importFrom rlang eval_tidy
+#' @importFrom rlang eval_tidy enquo
 method_handler <-
   function(data,
              ...,
@@ -312,12 +320,12 @@ method_handler <-
     }
     
     coefficient_names <-
-      enquo(term) # forces evaluation of quosure
+		enquo(term) # forces evaluation of quosure
     coefficient_names <- reveal_nse_helper(coefficient_names)
 
     args <- quos(...)
 
-    # todo special case weights offsets for glm etc?
+    # TODO: special case weights offsets for glm etc?
 
     results <- eval_tidy(quo(.method(!!!args, data = data)))
     

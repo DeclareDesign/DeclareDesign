@@ -24,7 +24,7 @@ assignment_handler(data, ..., legacy = FALSE)
 A function that takes a data.frame as an argument and returns a data.frame with assignment columns appended.
 }
 \description{
-Declare Data Strategy: Assignment
+Add a step to a design that assigns units to different treatment conditions. Assignment is part of the data strategy component of a research design.
 }
 \examples{
 # declare_assignment in use

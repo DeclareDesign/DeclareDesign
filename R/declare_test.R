@@ -1,6 +1,6 @@
 #' Declare test
 #'
-#' @description Declares an test which generates a test statistic and associated inferential statistics. 
+#' @description Declares a test which generates a test statistic and associated inferential statistics. 
 #' 
 #' Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific inquiry in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an inquiry. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
 #' 
@@ -107,6 +107,7 @@ declare_tests <- declare_test
 #'
 #' @param fn A function that takes a data.frame as an argument and returns a data.frame with test statistics as columns.
 #' @rdname declare_test
+#' @importFrom rlang enquo
 #' @export
 label_test <- function(fn) {
   if (!("data" %in% names(formals(fn)))) {
@@ -128,7 +129,7 @@ label_test <- function(fn) {
     
     for (e in calling_args) {
       dots[[e]] <-
-        do.call(enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. IDK
+        do.call(enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. 
     }
     
     ret <- eval_tidy(quo(fn(data, !!!dots)))

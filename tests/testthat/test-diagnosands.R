@@ -53,23 +53,8 @@ test_that("s3 dispatch works", {
   expect_equal(nrow(diagnosis$diagnosands_df), 2)
 })
 
-test_that("parallel works.", {
-  # TODO use future
-
-  skip_if_not_installed("future.apply")
-  skip_on_cran()
-
-  suppressWarnings(
-    diag <- diagnose_design(my_design, sims = 2, bootstrap_sims = FALSE)
-  )
-
-  expect_output(print(diag), regexp = "Research design diagnosis")
-})
-
 test_that("Diagnosis prints ok", {
   diag <- diagnose_design(my_design, sims = 2, bootstrap_sims = FALSE)
-
-  ## diagnose_design(my_design, sims = 2, bootstrap_sims = FALSE, parallel = TRUE)
 
   expect_output(print(diag), regexp = "Research design diagnosis")
 })

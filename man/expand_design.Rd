@@ -16,7 +16,7 @@ expand_design(designer, ..., expand = TRUE, prefix = "design")
 \item{prefix}{prefix for the names of the designs, i.e. if you create two designs they would be named prefix_1, prefix_2}
 }
 \value{
-if set of designs is size one, the design, otherwise a `by`-list of designs. Designs are given a parameters attribute with the values of parameters assigned by expand_design.
+if set of designs is size one, the design, otherwise a \code{by}-list of designs. Designs are given a parameters attribute with the values of parameters assigned by expand_design.
 }
 \description{
 \code{expand_design} easily generates a set of design from a designer function.

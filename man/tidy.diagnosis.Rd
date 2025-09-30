@@ -20,7 +20,7 @@ interval.}
 \item{...}{extra arguments (not used)}
 }
 \value{
-A data.frame with columns for diagnosand names, estimated diagnosand values, 
+A data.frame with columns for diagnosand names, estimated diagnosand values,
 bootstrapped standard errors and confidence intervals
 }
 \description{

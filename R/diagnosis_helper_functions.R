@@ -146,6 +146,7 @@ print_summary_diagnosis <- function(x, digits = 2, select = NULL, exclude = NULL
 #' }
 #' @export
 reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL, exclude = NULL) {
+
   diagnosand_columns <- diagnosis$diagnosand_names
 
   diagnosands_df <- diagnosis$diagnosands
@@ -169,7 +170,7 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL, exclude = NU
   }
 
   # Reorder rows
-  sort_by_list <- diagnosis$group_by_set %icn% return_df
+  sort_by_list <- c(diagnosis$group_by_set %icn% return_df, parameter_names)
 
   return_df <- return_df[do.call(order, as.list(return_df[, sort_by_list])), , drop = FALSE]
 
@@ -181,10 +182,10 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL, exclude = NU
   if(!is.null(return_df$estimator)) 
   return_df$estimator <- as.character(return_df$estimator)
   
-  for(j in c(sort_by_list, parameter_names)) if(is.factor(return_df[[j]]) && !"" %in% levels(return_df[[j]]))
+  for(j in sort_by_list) if(is.factor(return_df[[j]]) && !"" %in% levels(return_df[[j]]))
     return_df[[j]] <- factor(return_df[[j]], levels = c(levels(return_df[[j]]), ""))
   
-  return_df[return_df$statistic == "SE", c(sort_by_list, parameter_names, "n_sims")] <- ""
+  return_df[return_df$statistic == "SE", c(sort_by_list, "n_sims")] <- ""
   return_df$statistic <- NULL
 
   # Make names nicer

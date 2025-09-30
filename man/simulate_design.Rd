@@ -28,7 +28,7 @@ simulate_designs(
 Runs many simulations of a design and returns a simulations data.frame. Speed gains can be achieved by running simulate_design in parallel, see Examples.
 }
 \details{
-Different steps of a design may each be simulated different a number of times, as specified by sims. In this case simulations are grouped into "fans". The nested 
+Different steps of a design may each be simulated different a number of times, as specified by sims. In this case simulations are grouped into "fans". The nested
 structure of simulations is recorded in the dataset using a set of variables named "step_x_draw." For example if sims = c(2,1,1,3) is passed to simulate_design, then there
 will be two distinct draws of step 1, indicated in variable "step_1_draw" (with values 1 and 2) and there will be three draws for step 4 within each of the step 1 draws, recorded in "step_4_draw" (with values 1 to 6).
 }
