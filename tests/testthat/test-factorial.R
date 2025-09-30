@@ -26,22 +26,22 @@ test_that("Factorial", {
     my_potential_outcomes +
     my_inquiry +
     my_assignment +
-    declare_step(dplyr::mutate,
+    declare_step(fabricate,
       Z1 = as.numeric(Z %in% c("T2", "T4")),
       Z2 = as.numeric(Z %in% c("T3", "T4"))
     ) +
     my_measurement +
     my_estimator
 
-  expect_equal(my_design %>% draw_data() %>% nrow(), 2000)
-  expect_equal(my_design %>% run_design() %>% names(), c("inquiry", "estimand", "estimator", "term", "estimate", 
+  expect_equal(my_design |> draw_data() |> nrow(), 2000)
+  expect_equal(my_design |> run_design() |> names(), c("inquiry", "estimand", "estimator", "term", "estimate", 
                                                          "std.error", "statistic", "p.value", "conf.low", "conf.high", 
                                                          "df", "outcome"))
 
   diagnosis <- diagnose_design(my_design, sims = 2, bootstrap_sims = FALSE)
 
-  expect_equal(diagnosis %>% get_simulations %>% dim, c(2, 14))
+  expect_equal(diagnosis |> get_simulations() |> dim(), c(2, 14))
 
-  expect_equal(diagnosis %>%  get_diagnosands %>% dim, c(1, 13))
+  expect_equal(diagnosis |> get_diagnosands() |> dim(), c(1, 13))
 
 })

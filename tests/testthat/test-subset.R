@@ -21,7 +21,7 @@ test_that("Test Subsetting on default inquiry handler", {
 
   design <- my_population + my_potential_outcomes + my_sampling + my_inquiry + my_inquiry2
 
-  expect_true(design %>% draw_estimands() %>% with(estimand[1] > 2 && estimand[2] < 0))
+  expect_true(design |> draw_estimands() |> with(estimand[1] > 2 && estimand[2] < 0))
   # > z <- replicate(10000, design  %>%  draw_estimands() %>% with(inquiry[[1]] > 2 && inquiry[2] < 0)) %>% table
   # > z
   # .

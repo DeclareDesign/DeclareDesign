@@ -60,30 +60,34 @@
 #' 
 #' # Thanks to Jake Bowers for this example
 #' 
-#' library(coin) 
+#' if(require("coin")) {
 #' 
-#' our_ttest <- function(data) {
-#'   res <- coin::oneway_test(
-#'     outcome ~ factor(Xclus),
-#'     data = data,
-#'     distribution = "asymptotic"
-#'   )
-#'   data.frame(p.value = pvalue(res)[[1]])
-#' }
-#' 
-#' ttest_design <- 
-#'   declare_model(
-#'     N = 100, 
-#'     Xclus = rbinom(n = N, size = 1, prob = 0.2), 
-#'     outcome = 3 + rnorm(N)) +
-#'   declare_test(handler = label_test(our_ttest), label = "t-test")
+#'   library(coin) 
 #'   
-#' \dontrun{
-#' diagnosis <- diagnose_design(
-#'   design = ttest_design,
-#'   diagnosands = declare_diagnosands(
-#'     false_positive_rate = mean(p.value <= 0.05))
-#' )
+#'   our_ttest <- function(data) {
+#'     res <- coin::oneway_test(
+#'       outcome ~ factor(Xclus),
+#'       data = data,
+#'       distribution = "asymptotic"
+#'     )
+#'     data.frame(p.value = pvalue(res)[[1]])
+#'   }
+#'   
+#'   ttest_design <- 
+#'     declare_model(
+#'       N = 100, 
+#'       Xclus = rbinom(n = N, size = 1, prob = 0.2), 
+#'       outcome = 3 + rnorm(N)) +
+#'     declare_test(handler = label_test(our_ttest), label = "t-test")
+#'     
+#'   \dontrun{
+#'   diagnosis <- diagnose_design(
+#'     design = ttest_design,
+#'     diagnosands = declare_diagnosands(
+#'       false_positive_rate = mean(p.value <= 0.05))
+#'   )
+#'   }
+#'   
 #' }
 #' 
 #' @seealso See \code{\link{declare_estimator}} for documentation of the \code{method_handler} function.

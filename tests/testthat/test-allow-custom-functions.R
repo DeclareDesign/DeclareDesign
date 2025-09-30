@@ -1,5 +1,3 @@
-library(dplyr)
-
 my_pop <- declare_model(N = 100)
 
 # case 1
@@ -20,15 +18,19 @@ test_that("a bare function can be used in a design", {
 # case 2
 
 test_that("a dplyr pipeline can be used in a design", {
+  
+  skip_if_not_installed("dplyr")
+  
+  library(dplyr)
 
   # include without parens
-  des <- my_pop + . %>% mutate(my_var = 5)
+  des <- my_pop + function(data) data |> mutate(my_var = 5)
   dat <- draw_data(des)
 
   expect_equal(names(dat), c("ID", "my_var"))
 
   # include with parens
-  des <- my_pop + (. %>% mutate(my_var = 5))
+  des <- my_pop + (function(data) data |> mutate(my_var = 5))
   dat <- draw_data(des)
 
   expect_equal(names(dat), c("ID", "my_var"))
@@ -37,6 +39,8 @@ test_that("a dplyr pipeline can be used in a design", {
 # Use dyplr functions as handlers ?
 
 test_that("dplyr::mutate can be handlers", {
+  
+  skip_if_not_installed("dplyr")
 
   design2 <- declare_model(N = 5, X = rnorm(N)) + declare_step(Y = 4, handler = mutate)
 
@@ -47,6 +51,8 @@ test_that("dplyr::mutate can be handlers", {
 
 test_that("dplyr filter can be handlers", {
   
+  skip_if_not_installed("dplyr")
+  
   design2 <- declare_model(N = 5, X = rnorm(N)) + declare_step(ID > 3, handler = filter)
   
   df <- draw_data(design2)
@@ -56,6 +62,8 @@ test_that("dplyr filter can be handlers", {
 })
 
 test_that("dplyr filter can be handlers with explicit .data", {
+  
+  skip_if_not_installed("dplyr")
   
   design2 <- declare_model(N = 5, X = rnorm(N)) + declare_step(.data=data, ID > 3, handler = filter)
   

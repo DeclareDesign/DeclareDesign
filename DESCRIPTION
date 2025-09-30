@@ -43,7 +43,6 @@ Suggests:
     gam,
     ggplot2,
     knitr,
-    margins,
     MASS,
     Matching,
     psych,
@@ -53,4 +52,5 @@ Suggests:
     rmarkdown,
     sf,
     testthat,
-    tidyr
+    tidyr,
+    marginaleffects

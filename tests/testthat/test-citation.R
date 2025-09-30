@@ -2,7 +2,7 @@ context("add design citation")
 
 test_that("test with generated citation", {
 
-  design <- declare_model(data = sleep) + declare_sampling(S = complete_rs(N, n = 10)) + declare_inquiry(Q = 1) 
+  design <- declare_model(data = sleep) + declare_sampling(S = complete_rs(N, n = 10)) + declare_inquiry(Q = mean(S))
   design
 
   design <- set_citation(design,
