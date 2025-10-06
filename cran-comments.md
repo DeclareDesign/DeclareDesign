@@ -1,8 +1,8 @@
 ## Submission
 
-Changes to internals. Add small feature. Changed package maintaner to one of the other package authors.
+Changes to internals. Add small feature. Changed package maintainer to one of the other package authors.
 
-Resubmit - fixed long example run and docs notes on the CRAN. 
+Resubmit - fixed long example run and docs notes on CRAN. 
 
 ## Test environments
 * local OS X install (release)
@@ -10,7 +10,7 @@ Resubmit - fixed long example run and docs notes on the CRAN.
 
 ## R CMD check results
 
-0 errors | 0 warnings | 0 notes
+0 errors | 0 warnings | 1 note (package maintainer change)
 
 ## Reverse dependencies
 
