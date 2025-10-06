@@ -12,6 +12,28 @@ print.design <- function(x, verbose = FALSE, ...) {
     print(run_design(x), digits = 3, row.names = FALSE)
   }
   cat("\n")
+  
+  p <- find_all_objects(x)
+  
+  if(nrow(p) == 0){
+    cat("No parameters saved in design \n")
+    
+  } else {
+    # print and return invisibly (only give names if there are many objects)
+    
+    cat("Parameters saved in design environments:\n\n")
+    
+    if(nrow(p) <= 7){
+      print.objects(p)
+      cat("\n")
+      
+    } else {
+      # Just names if there are many objects
+      cat(paste(p$name, collapse = ", "))
+      cat("\n")
+          }
+    
+  }
 }
 
 #' @param object a design object created using the + operator

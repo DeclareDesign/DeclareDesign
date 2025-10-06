@@ -55,6 +55,6 @@ test_that("Describe Variable", {
             by = "days"))
   # Different ways of bringing data into DD
   pop1 <- declare_model(data = test)
-  dsgn <- pop1 + NULL 
+  dsgn <- pop1 +  declare_inquiry(Q = 1)  
   expect_output(print(dsgn, verbose = TRUE), "2018-01-01")
 })

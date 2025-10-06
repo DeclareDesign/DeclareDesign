@@ -32,3 +32,18 @@ test_that("send inquiry to estimator works", {
   expect_equal(nrow(diag$diagnosands_df), 1)
   expect_equal(nrow(diag$bootstrap_replicates), 3)
 })
+
+
+test_that("no parameters output", {
+
+    design <-
+    declare_model(N = 5, noise = rnorm(N)) +
+    declare_inquiry(mean_noise = mean(noise))
+
+    txt <- capture.output(print(find_all_objects(design)))
+    expect_true(any(grepl("No parameters", txt, fixed = TRUE)))
+    
+    expect_warning(redesign(design, N = 6), 
+                   "You requested a change to N but N is not found in the design") 
+
+})    

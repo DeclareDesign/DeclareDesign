@@ -26,3 +26,15 @@ test_that("multiple potential outcomes", {
     c("R", "Y") %in% colnames(draw_data(my_design))
   ))
 })
+
+
+test_that("multiple potential outcomes without quosure names", {
+
+  design <- declare_model(
+    N = 10,
+    potential_outcomes(A ~ 1),
+    potential_outcomes(B ~ 1)
+  ) + NULL
+
+  expect_true(all(design |> draw_data() |> dim() == c(10, 5)))
+})

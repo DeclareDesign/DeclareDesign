@@ -1,10 +1,8 @@
 ## Submission
 
-Responding to Ripley email re the margins package being removed from CRAN. 
+Changes to internals. Add small feature. Changed package maintainer to one of the other package authors.
 
-This suggests dependency was entirely removed. Thanks!
-
-Also addresses failed precheck due to long duration example, and the second failed check due to packages in suggests.
+Resubmit - fixed long example run and docs notes on CRAN. 
 
 ## Test environments
 * local OS X install (release)
@@ -12,11 +10,11 @@ Also addresses failed precheck due to long duration example, and the second fail
 
 ## R CMD check results
 
-0 errors | 0 warnings | 0 notes
+0 errors | 0 warnings | 1 note (package maintainer change)
 
 ## Reverse dependencies
 
-No changes to worse. 
+Reverse dependency DesignLibrary is broken by this update. A fixed version of DesignLibrary is ready and will be submitted immediately after this update to DeclareDesign.
 
 ---
   

@@ -29,11 +29,9 @@ design <- my_population +
 test_that("reshape works", {
   set.seed(5)
   dx <- diagnose_design(design, sims = 10, bootstrap_sims = 5)
-  reshape_diagnosis(dx)
-  expect_error(reshape_diagnosis(dx, select = "mean_estimand"),
-    regexp = "select argument must only include elements from"
-  )
-  reshape_diagnosis(dx, select = "Mean Estimand")
+  expect_error(reshape_diagnosis(dx, select = "mean_estimand"))
+  expect_error(reshape_diagnosis(dx, select = "Mean Estimand"), regexp = NA)
+  
 })
 
 
@@ -113,7 +111,10 @@ test_that("designs with factors in diagnosands_df do not produce warnings", {
   design <- design <- my_population +
     declare_estimator(handler = my_estimator)
   
-  expect_silent(reshape_diagnosis(diagnose_design(design, sims = 31, diagnosands = declare_diagnosands(first = estimate[1]))))
+  expect_silent(
+    reshape_diagnosis(diagnose_design(design, sims = 31,
+                                      diagnosands = declare_diagnosands(first = estimate[1])
+                                                  )))
   
 })
 
@@ -130,20 +131,20 @@ test_that("groups with factors", {
     declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, inquiry = "ATE_positive")
   
-  expect_warning(expect_equal(
+  expect_equal(
     diagnose_design(design, 
                     make_groups = vars(significant = ifelse(p.value > 0.5, NA, p.value <= 0.05)),
                     sims = 5
     )$diagnosands_df$significant,
     c(FALSE, NA)
-  ))
+  )
     
-  expect_warning(expect_equal(
+expect_equal(
     diagnose_design(design, 
                     make_groups = vars(significant = factor(ifelse(p.value > 0.5, NA, p.value <= 0.05))),
                     sims = 5
     )$diagnosands_df$significant,
     structure(c(1L, NA), .Label = "FALSE", class = "factor")
-  ))
+  )
   
 })

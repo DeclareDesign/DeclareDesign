@@ -104,6 +104,7 @@ test_that("compare works", {
   expect_no_error(compare_design_inquiries(my_design_3, my_design_4))
   expect_no_error(compare_design_estimates(my_design_3, my_design_4))
   expect_no_error(compare_designs(my_design_3, my_design_4))
-})
+}
+)
 
 

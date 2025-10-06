@@ -9,7 +9,7 @@
 #' If term is TRUE, the names of ... will be returned in a \code{term} column, and \code{inquiry}
 #' will contain the step label. This can be used as an additional dimension for use in diagnosis.
 #'
-#' @importFrom rlang eval_tidy quos is_quosure quo_is_call %||%
+#' @importFrom rlang eval_tidy quos is_quosure quo_is_call %||% enquo
 #' @importFrom stats na.omit
 #' @rdname declare_diagnosands
 diagnosand_handler <- function(data, ...,

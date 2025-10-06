@@ -42,9 +42,9 @@ method_handler(
 
 \item{data}{a data.frame}
 
-\item{.method}{A method function, e.g. lm or glm. By default, the method is the \code{\link{lm_robust}} function from the \link{estimatr} package, which fits OLS regression and calculates robust and cluster-robust standard errors.}
+\item{.method}{A method function, e.g. lm or glm. By default, the method is the \code{\link[estimatr:lm_robust]{estimatr::lm_robust}} function from the estimatr package, which fits OLS regression and calculates robust and cluster-robust standard errors.}
 
-\item{.summary}{A method-in data-out function to extract coefficient estimates or method summary statistics, such as \code{\link{tidy}} or \code{\link{glance}}. By default, the \code{DeclareDesign} method summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the method object sent to \code{method}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the method object, it fails.}
+\item{.summary}{A method-in data-out function to extract coefficient estimates or method summary statistics, such as \code{\link[broom:tidy]{broom::tidy}} or \code{\link[broom:glance]{broom::glance}}. By default, the \code{DeclareDesign} method summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the method object sent to \code{method}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the method object, it fails.}
 
 \item{model}{Deprecated argument. Use \code{.method} instead.}
 
@@ -63,7 +63,7 @@ Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}
 \details{
 \code{declare_estimator} is designed to handle two main ways of generating parameter estimates from data.
 
-In \code{declare_estimator}, you can optionally provide the name of an inquiry or an objected created by \code{\link{declare_inquiry}} to connect your estimate(s) to inquiry(s).
+In \code{declare_estimator}, you can optionally provide the name of an inquiry or an object created by \code{\link{declare_inquiry}} to connect your estimate(s) to inquiry(s).
 
 The first is through \code{label_estimator(method_handler)}, which is the default value of the \code{handler} argument. Users can use standard method functions like lm, glm, or iv_robust. The methods are summarized using the function passed to the \code{summary} argument. This will usually be a "tidier" like \code{broom::tidy}. The default \code{summary} function is \code{tidy_try}, which applies a tidy method if available, and if not, tries to make one on the fly.
 
@@ -101,7 +101,7 @@ design <-
   declare_sampling(S = complete_rs(N = N, n = 200)) +
   declare_assignment(Z = complete_ra(N = N, m = 100)) +
   declare_measurement(Y = reveal_outcomes(Y ~ Z))
-  
+
 run_design(design)
 
 # default estimator is lm_robust with tidy summary
@@ -134,10 +134,15 @@ design_2 <-
 
 run_design(design_2)
 
-# Use declare_estimator to implement custom answer strategies
+# Custom answer strategies
+# A custom estimator should take data as an argument and return a data.frame
+# with columns such as "estimate", "std.error", "p.value", "conf.low", "conf.high"
 my_estimator <- function(data) {
   data.frame(estimate = mean(data$Y))
 }
+
+# Add a custom estimator to the design, wrapping it in `label_estimator()`
+# in order to pass label and inquiry arguments
 
 design_3 <-
   design +
@@ -169,22 +174,22 @@ if(require("broom")) {
                       family = "gaussian",
                       inquiry = "ATE",
                       .method = glm)
-  
+
   run_design(design_5)
-  
+
   # If we use logit, we'll need to estimate the average marginal effect with
-  # marginaleffects::avg_slopes. We wrap this up in a function we'll pass to 
+  # marginaleffects::avg_slopes. We wrap this up in a function we'll pass to
   # .summary.
-  
+
   if(require("marginaleffects")) {
-  
+
     library(marginaleffects) # for predictions
     library(broom) # for tidy
-    
+
     tidy_avg_slopes <- function(x) {
       tidy(avg_slopes(x))
     }
-    
+
     design_6 <-
       design +
       declare_estimator(
@@ -194,11 +199,11 @@ if(require("broom")) {
         .summary = tidy_avg_slopes,
         term = "Z"
       )
-    
+
     run_design(design_6)
-    
+
     # Multiple estimators for one inquiry
-    
+
     design_7 <-
       design +
       declare_estimator(Y ~ Z,
@@ -214,10 +219,13 @@ if(require("broom")) {
         term = "Z",
         label = "logit"
       )
-    
+
     run_design(design_7)
-    
+
   }
 
 }
+}
+\seealso{
+\code{\link[estimatr:lm_robust]{estimatr::lm_robust()}}, \code{\link[broom:reexports]{broom::glance()}}
 }
