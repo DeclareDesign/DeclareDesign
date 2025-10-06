@@ -106,10 +106,12 @@
 #'     coverage = mean(estimand <= conf.high & estimand >= conf.low)
 #'   )
 #'
+#' \dontrun{
 #' diagnose_design(
 #'   design,
 #'   diagnosands = default_diagnosands
 #' )
+#' }
 #'
 #' # Here is a longer list of useful diagnosands:
 #'

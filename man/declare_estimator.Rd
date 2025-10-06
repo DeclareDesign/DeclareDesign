@@ -42,9 +42,9 @@ method_handler(
 
 \item{data}{a data.frame}
 
-\item{.method}{A method function, e.g. lm or glm. By default, the method is the \code{\link[estimatr:lm_robust]{lm_robust}} function from the \pkg{estimatr} package, which fits OLS regression and calculates robust and cluster-robust standard errors.}
+\item{.method}{A method function, e.g. lm or glm. By default, the method is the \code{\link[estimatr:lm_robust]{estimatr::lm_robust}} function from the estimatr package, which fits OLS regression and calculates robust and cluster-robust standard errors.}
 
-\item{.summary}{A method-in data-out function to extract coefficient estimates or method summary statistics, such as \code{\link[broom:tidy]{tidy}} or \code{\link[broom:glance]{glance}}. By default, the \code{DeclareDesign} method summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the method object sent to \code{method}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the method object, it fails.}
+\item{.summary}{A method-in data-out function to extract coefficient estimates or method summary statistics, such as \code{\link[broom:tidy]{broom::tidy}} or \code{\link[broom:glance]{broom::glance}}. By default, the \code{DeclareDesign} method summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the method object sent to \code{method}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the method object, it fails.}
 
 \item{model}{Deprecated argument. Use \code{.method} instead.}
 
@@ -101,7 +101,7 @@ design <-
   declare_sampling(S = complete_rs(N = N, n = 200)) +
   declare_assignment(Z = complete_ra(N = N, m = 100)) +
   declare_measurement(Y = reveal_outcomes(Y ~ Z))
-  
+
 run_design(design)
 
 # default estimator is lm_robust with tidy summary
@@ -174,22 +174,22 @@ if(require("broom")) {
                       family = "gaussian",
                       inquiry = "ATE",
                       .method = glm)
-  
+
   run_design(design_5)
-  
+
   # If we use logit, we'll need to estimate the average marginal effect with
-  # marginaleffects::avg_slopes. We wrap this up in a function we'll pass to 
+  # marginaleffects::avg_slopes. We wrap this up in a function we'll pass to
   # .summary.
-  
+
   if(require("marginaleffects")) {
-  
+
     library(marginaleffects) # for predictions
     library(broom) # for tidy
-    
+
     tidy_avg_slopes <- function(x) {
       tidy(avg_slopes(x))
     }
-    
+
     design_6 <-
       design +
       declare_estimator(
@@ -199,11 +199,11 @@ if(require("broom")) {
         .summary = tidy_avg_slopes,
         term = "Z"
       )
-    
+
     run_design(design_6)
-    
+
     # Multiple estimators for one inquiry
-    
+
     design_7 <-
       design +
       declare_estimator(Y ~ Z,
@@ -219,9 +219,9 @@ if(require("broom")) {
         term = "Z",
         label = "logit"
       )
-    
+
     run_design(design_7)
-    
+
   }
 
 }
