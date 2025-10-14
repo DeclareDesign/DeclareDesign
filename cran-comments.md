@@ -2,7 +2,7 @@
 
 Changes to internals. Add small feature. Changed package maintainer to one of the other package authors.
 
-Resubmit - fixed long example run and docs notes on CRAN. 
+Resubmit - fixed vignettes issue. 
 
 ## Test environments
 * local OS X install (release)
