@@ -16,3 +16,5 @@ tests/testthat/*.pdf
 inst/doc
 *.tar.gz
 docs
+/doc/
+/Meta/
