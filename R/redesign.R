@@ -2,12 +2,10 @@
 #'
 #' \code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters in a step's environment (Advanced).
 #'
-#' Warning: \code{redesign} will edit any symbol in your design, but if the symbol you attempt to change does not exist in a step's environment no changes will be made and no error or warning will be issued. 
-#' 
-#' Please note that \code{redesign} functionality is experimental and may be changed in future versions.  
+#' If you attempt to change a parameter that is not saved into a design you will receive a message but not an error. 
 #'
 #' @param design An object of class design.
-#' @param ... Arguments to redesign e.g., \code{n = 100.} If redesigning multiple arguments, they must be specified as a named list.
+#' @param ... Arguments to redesign e.g., \code{n = 100.} If redesigning multiple arguments, they must be specified as a named list. lists should also be used if redesigning with respect to a dataset or with respect to a vector. For instance, redesign(design, df = list(new_df)).
 #' @param expand If TRUE, redesign using the crossproduct of \code{...}, otherwise recycle them.
 #' @return A design, or, in the case of multiple values being passed onto \code{...}, a `by`-list of designs.
 #' @examples
@@ -86,11 +84,31 @@
 #' 
 #' @export
 redesign <- function(design, ..., expand = TRUE) {
-  check_design_class_single(design)
   
-  f <- function(...) {
-    clone_design_edit(design, ...)
-  }
-  design <- expand_design(f, ..., expand = expand)
+  check_dots_in_design(design, list(...))
+  
+  check_design_class_single(design)
+
+  designer <- function(...) modify_edit(design, ...)
+
+  design <- expand_design(designer, ..., expand = expand)
+
   structure(design, code = NULL)
 }
+
+check_dots_in_design <- function(design, dots) {
+  
+  missing <- setdiff(names(dots), find_all_objects(design)$name)
+  
+  if (length(missing) == 1) 
+  warning(paste("You requested a change to", 
+          paste(missing, collapse = ","), 
+          "but",  paste(missing, collapse = ","), "is not found in the design"))
+  if (length(missing) > 1) 
+    warning(paste("You requested a change to", 
+                  paste(missing, collapse = ","), 
+                  "but",  paste(missing, collapse = ","), "are not found in the design"))
+  
+}
+
+

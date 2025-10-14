@@ -66,12 +66,18 @@ test_that("reveal multiple outcomes works", {
   N <- 25
 
   my_population <- declare_model(N = N, noise = 1:N)
-  my_potential_outcomes1 <- declare_potential_outcomes(formula = Y1 ~ Z * .25, conditions = c(0, 1))
-  my_potential_outcomes2 <- declare_potential_outcomes(formula = Y2 ~ Z * .5 + 3, conditions = c(0, 1))
+  my_potential_outcomes1 <- 
+    declare_potential_outcomes(formula = Y1 ~ Z * .25)
+  my_potential_outcomes2 <- 
+    declare_potential_outcomes(formula = Y2 ~ Z * .5 + 3)
   my_assignment <- declare_assignment(Z = complete_ra(N, prob = 1))
 
-  design <- my_population + my_potential_outcomes1 + my_potential_outcomes2 + my_assignment +
-    declare_measurement(Y1 = reveal_outcomes(Y1 ~ Z), Y2 = reveal_outcomes(Y2 ~ Z)) 
+  design <- my_population + 
+    my_potential_outcomes1 + 
+    my_potential_outcomes2 + 
+    my_assignment +
+    declare_measurement(Y1 = reveal_outcomes(Y1 ~ Z), 
+                        Y2 = reveal_outcomes(Y2 ~ Z)) 
   df1 <- draw_data(design)
 
   design <- my_population + my_potential_outcomes1 + my_potential_outcomes2 + my_assignment +

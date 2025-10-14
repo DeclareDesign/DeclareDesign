@@ -24,7 +24,7 @@ sampling_handler(data, ..., legacy = FALSE)
 A sampling declaration, which is a function that takes a data.frame as an argument and returns a data.frame subsetted to sampled observations and (optionally) augmented with inclusion probabilities and other quantities.
 }
 \description{
-Declare sampling procedure
+Add a step to a design that indicates which variables from a population get sampled and then passed on for estimation. Sampling is a part of the data strategy of a research design.
 }
 \examples{
  

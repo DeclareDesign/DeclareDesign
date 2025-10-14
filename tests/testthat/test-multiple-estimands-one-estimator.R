@@ -10,8 +10,6 @@ test_that("Multiple inquiries can be mapped to one estimator", {
   dat <- data.frame(X = x)
   sx <- sum((dat$X - mean(dat$X))^2)
 
-
-
   simp_pop <- declare_model(
     epsilon = rnorm(N, sd = 2),
     Y = X + epsilon

@@ -21,8 +21,9 @@ paper.pdf
 ^vignettes/.*\.RDS$
 ^DeclareDesign_.*\.tar\.gz$
 ^cran-comments\.md$
-vignettes
 ^\.github$
 ^pkgdown$
 ^CRAN-SUBMISSION$
 ^codecov\.yml$
+^doc$
+^Meta$

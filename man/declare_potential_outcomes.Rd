@@ -2,30 +2,12 @@
 % Please edit documentation in R/declare_potential_outcomes.R
 \name{declare_potential_outcomes}
 \alias{declare_potential_outcomes}
-\alias{potential_outcomes_internal.formula}
-\alias{potential_outcomes_internal.NULL}
 \title{Declare potential outcomes}
 \usage{
 declare_potential_outcomes(
   ...,
   handler = potential_outcomes_handler,
   label = NULL
-)
-
-potential_outcomes_internal.formula(
-  formula,
-  conditions = c(0, 1),
-  assignment_variables = "Z",
-  data,
-  level = NULL,
-  label = outcome_variable
-)
-
-potential_outcomes_internal.NULL(
-  formula = stop("Not provided"),
-  ...,
-  data,
-  level = NULL
 )
 }
 \arguments{
@@ -34,16 +16,6 @@ potential_outcomes_internal.NULL(
 \item{handler}{a tidy-in, tidy-out function}
 
 \item{label}{a string describing the step}
-
-\item{formula}{a formula to calculate potential outcomes as functions of assignment variables.}
-
-\item{conditions}{see \code{\link{expand_conditions}}. Provide values (e.g. \code{conditions = 1:4}) for a single assignment variable. If multiple assignment variables, provide named list (e.g. \code{conditions = list(Z1 = 0:1, Z2 = 0:1)}). Defaults to 0:1 if no conditions provided.}
-
-\item{assignment_variables}{The name of the assignment variable. Generally not required as names are taken from \code{conditions}.}
-
-\item{data}{a data.frame}
-
-\item{level}{a character specifying a level of hierarchy for fabricate to calculate at}
 }
 \value{
 a function that returns a data.frame

@@ -1,7 +1,14 @@
 #' Declare inquiry
 #'
-#' @description Declares inquiries, or the inferential target of interest. Conceptually very close to "estimand" or "quantity of interest".
-#'
+#' @description Declares inquiries. 
+#' A research design typically seeks to find answers to questions. The questions 
+#' are the inquiries and the correct answer to questions (in fact, or under a 
+#' model) are the estimands. 
+#' The answers you generate from data, which may or may not be correct, are the estimates. 
+#' \code{declare_inquiry} is used to make research questions explicit and to 
+#' calculate estimands. 
+#' All inquiries should be answerable under the model.
+#' 
 #' @inheritParams declare_internal_inherit_params
 #'
 #' @return a function, I(), that accepts a data.frame as an argument and returns a data.frame containing the value of the inquiry,  a^m. 
@@ -39,7 +46,7 @@
 #' design +
 #'   declare_inquiry(mean_Y = mean(Y))
 #' 
-#' # Inquiries among a subset
+#' # Inquiries among a subset of units
 #' design +
 #'   declare_inquiry(ATT = mean(Y_Z_1 - Y_Z_0),
 #'                   subset = (Z == 1))
@@ -113,8 +120,8 @@
 #' 
 #' 
 declare_inquiry <- make_declarations(inquiry_handler, "inquiry",
-                                      causal_type = "inquiry", 
-                                      default_label = "inquiry"
+                                     causal_type = "inquiry",
+                                     default_label = "inquiry"
 )
 
 #' @rdname declare_inquiry

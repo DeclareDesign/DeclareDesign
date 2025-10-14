@@ -1,5 +1,6 @@
 #' Declare Data Strategy: Assignment
-#'
+#' 
+#' @description Add a step to a design that assigns units to different treatment conditions. Assignment is part of the data strategy component of a research design.
 #' @inheritParams declare_internal_inherit_params
 #'
 #' @return A function that takes a data.frame as an argument and returns a data.frame with assignment columns appended.
@@ -102,6 +103,7 @@ declare_assignment <- make_declarations(assignment_handler, "assignment")
 
 #' @importFrom rlang quos !!! call_modify eval_tidy quo f_rhs 
 #' @importFrom randomizr conduct_ra obtain_condition_probabilities declare_ra
+#' @importFrom rlang :=
 #' @param legacy Use the legacy randomizr functionality. This will be disabled in future; please use legacy = FALSE.
 #' @param data A data.frame.
 #' @rdname declare_assignment

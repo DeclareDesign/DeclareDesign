@@ -34,15 +34,15 @@ declare_reveal_handler(
 Deprecated. Please use the \code{reveal_outcomes} function within a \code{declare_measurement} declaration.
 }
 \details{
-Potential outcomes declarations indicate what outcomes would obtain for different possible values of assignment variables. 
-But realized outcomes need to be "revealed." 
-\code{declare_reveal} generates these realized outcomes using information on 
-potential outcomes  (for instance generated via \code{declare_potential_outcomes})  and the relevant 
-assignment variables (for example created by \code{declare_assignment}). 
+Potential outcomes declarations indicate what outcomes would obtain for different possible values of assignment variables.
+But realized outcomes need to be "revealed."
+\code{declare_reveal} generates these realized outcomes using information on
+potential outcomes  (for instance generated via \code{declare_potential_outcomes})  and the relevant
+assignment variables (for example created by \code{declare_assignment}).
 Revelation steps are usefully included after declaration of all assignments of conditions required to determine the realized outcome.
 If a revelation is not declared, DeclareDesign will try to guess appropriate revelations. Explicit revelation is recommended however.
 
-\code{declare_reveal} declares how outcomes should be realized.  
+\code{declare_reveal} declares how outcomes should be realized.
 A "revelation" uses the random assignment to pluck out the correct potential outcomes (Gerber and Green 2012, Chapter 2).
 Revelation requires that every named outcome variable is a function of every named assignment variable within a step. Thus if multiple outcome variables depend on different assignment variables, multiple revelations are needed.
 }
