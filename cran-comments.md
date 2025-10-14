@@ -2,7 +2,7 @@
 
 Changes to internals. Add small feature. Changed package maintainer to one of the other package authors.
 
-Resubmit - fixed vignettes issue. 
+Resubmit - fixed vignettes issue and fixed urls.
 
 ## Test environments
 * local OS X install (release)
