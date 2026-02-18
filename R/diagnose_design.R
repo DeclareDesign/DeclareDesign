@@ -351,10 +351,22 @@ merge_param_df <- function(df, parameters_df) {
 }
 
 check_design_class <- function(designs) {
-  if (!all(sapply(designs, function(x) {
+  is_valid <- vapply(designs, function(x) {
     inherits(x, "design") || (inherits(x, "function") && is.null(formals(x)))
-  }))) {
-    stop("Please only send design objects or functions with no arguments.")
+  }, logical(1))
+  if (!all(is_valid)) {
+    bad_names <- names(designs)[!is_valid]
+    hint <- if (!is.null(bad_names) && any(nzchar(bad_names))) {
+      named <- bad_names[nzchar(bad_names)]
+      extra <- if ("alpha" %in% named) {
+        " To set alpha, use diagnosands = declare_diagnosands(power = mean(p.value <= alpha))."
+      } else ""
+      sprintf("Unexpected named argument(s) passed to `...`: %s.%s",
+              paste(named, collapse = ", "), extra)
+    } else {
+      "Please only send design objects or functions with no arguments to `...`."
+    }
+    stop(hint, call. = FALSE)
   }
 }
 
