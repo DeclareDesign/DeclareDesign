@@ -1,10 +1,12 @@
-context("tibble, sf compatibility")
+context("data.frame, sf compatibility")
 
 test_that("data.frame", {
   dat <- data.frame(y = rnorm(5), x = rnorm(5))
 
   pos <- declare_potential_outcomes(Y_Z_0 = y * 5, Y_Z_1 = y * 5 + 3)
 
+  # pos <- declare_potential_outcomes(Y~1)
+  
   design <- declare_model(dat) + pos
 
   df <- draw_data(design)
@@ -14,23 +16,7 @@ test_that("data.frame", {
   expect_identical(dim(df), 5:4)
 })
 
-test_that("tibble", {
-  skip_if_not_installed("dplyr")
-
-  dat <- dplyr::tibble(y = rnorm(5), x = rnorm(5))
-
-  pos <- declare_potential_outcomes(Y_Z_0 = y * 5, Y_Z_1 = y * 5 + 3)
-
-  design <- declare_model(dat) + pos
-
-  df <- draw_data(design)
-
-  expect_identical(colnames(df), c("y", "x", "Y_Z_0", "Y_Z_1"))
-
-  expect_identical(dim(df), 5:4)
-})
-
-test_that("tibble more", {
+test_that("data.frame more", {
   
   skip_if_not_installed("tibble")
   
@@ -45,7 +31,7 @@ test_that("tibble more", {
   
   design <- population + potential_outcomes + assignment + declare_step(handler = my_func)
   
-  expect_s3_class(draw_data(design), "tbl_df")
+  expect_s3_class(draw_data(design), "data.frame")
   
 })
 

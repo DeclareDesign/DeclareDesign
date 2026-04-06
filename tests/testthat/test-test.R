@@ -14,7 +14,7 @@ test_that("declare_test works", {
       data = data,
       distribution = "asymptotic"
     )
-    data.frame(p.value = pvalue(res)[[1]])
+    data.frame(p.value = coin::pvalue(res)[[1]])
   }
   
   des <- 
@@ -23,9 +23,12 @@ test_that("declare_test works", {
     declare_test(handler = our_ttest, label = "bare") + 
     declare_test(handler = label_test(our_ttest), label = "tidied")
   
+  # our_ttest(mtcars)
+  
   est <- draw_estimates(des)
   
-  expect_equal(est, structure(list(p.value = c(7.6397665500938e-05, 7.6397665500938e-05
+  expect_equal(est, 
+               structure(list(p.value = c(7.6397665500938e-05, 7.6397665500938e-05
   ), estimator = c(NA, "tidied")), row.names = c(NA, -2L), class = "data.frame"))
   
 })

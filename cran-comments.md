@@ -1,13 +1,9 @@
 ## Submission
 
-Responding to Ripley email re the margins package being removed from CRAN. 
-
-This suggests dependency was entirely removed. Thanks!
-
-Also addresses failed precheck due to long duration example, and the second failed check due to packages in suggests.
+Patch release fixing CRAN check failures in 1.1.0. Replaced the unexported rlang internal function `quo_get_env()` with the exported equivalent `get_env()` in two files (`R/aaa.R` and `R/declare_potential_outcomes.R`). This caused 9 test failures and runtime errors on CRAN when rlang updated its export list.
 
 ## Test environments
-* local OS X install (release)
+* local OS X install, R 4.5.2
 * win-builder (devel, release, oldrel)
 
 ## R CMD check results
@@ -16,7 +12,6 @@ Also addresses failed precheck due to long duration example, and the second fail
 
 ## Reverse dependencies
 
-No changes to worse. 
+No changes to worse.
 
 ---
-  

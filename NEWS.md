@@ -1,3 +1,13 @@
+# DeclareDesign 1.1.1
+
+* Bug fix: replaced unexported rlang internal `quo_get_env()` with the exported `get_env()` in `aaa.R` and `declare_potential_outcomes.R`. The unexported function caused test failures on CRAN when rlang updated its export list.
+
+# DeclareDesign 1.1.0
+
+* Added global variable capture for design steps to improve serialization and portability of declared designs.
+* Swapped margins for marginaleffects.
+* Changes to tests and examples to not depend on suggested packages.
+
 # DeclareDesign 1.0.10
 
 * Swapped margins for marginaleffects. 
