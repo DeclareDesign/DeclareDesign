@@ -243,6 +243,7 @@ expect_true(m() |> nrow() ==12)
 
 # Design 16.1
 test_that("Design 16.1", {
+  skip_if_not_installed("rdss")
   skip_if_not_installed("CausalQueries")
   library(rdss) # for helper functions
   library(CausalQueries)
