@@ -1,4 +1,4 @@
-#' Declare a design 
+#' Declare a design
 #'
 #' @param lhs A step in a research design, beginning with a function that defines the model. Steps are evaluated sequentially. With the exception of the first step, all steps must be functions that take a \code{data.frame} as an argument and return a \code{data.frame}. Steps are declared using the \code{declare_} functions, i.e., \code{\link{declare_model}}, \code{\link{declare_inquiry}}, \code{\link{declare_sampling}}, \code{\link{declare_assignment}}, \code{\link{declare_measurement}}, \code{\link{declare_estimator}}, and \code{\link{declare_test}}.
 #' @param rhs A second step in a research design
@@ -15,7 +15,7 @@
 #'
 #' design <-
 #'   declare_model(
-#'     N = 500, 
+#'     N = 500,
 #'     U = rnorm(N),
 #'     potential_outcomes(Y ~ Z + U)
 #'   ) +
@@ -23,17 +23,17 @@
 #'   declare_sampling(S = complete_rs(N, n = 250)) +
 #'   declare_assignment(Z = complete_ra(N, m = 25)) +
 #'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-#'   declare_estimator(Y ~ Z, inquiry = "ATE") 
-#' 
+#'   declare_estimator(Y ~ Z, inquiry = "ATE")
+#'
 #' dat <- draw_data(design)
 #' head(dat)
-#' 
+#'
 #' run_design(design)
-#' 
+#'
 #' # You may wish to have a design with only one step:
-#' 
+#'
 #' design <- declare_model(N = 500, noise = rnorm(N)) + NULL
-#' 
+#'
 #' dat <- draw_data(design)
 #' head(dat)
 #'
@@ -46,11 +46,14 @@
   # 1. lhs is a step
   # 2. lhs is a design
 
+  # Use substitute() to capture the original expressions because
+  # primitive S3 dispatch forces arguments, preventing enquos()
+  # from recovering the caller's expressions.
+  lhs_expr <- substitute(lhs)
+  rhs_expr <- substitute(rhs)
+
   if (missing(rhs)) {
     rhs <- NULL
-    qs <- enquos(lhs)
-  } else {
-    qs <- enquos(lhs, rhs)
   }
 
   if (!inherits(rhs, "dd") && !inherits(rhs, "function") && !is.null(rhs)) {
@@ -63,12 +66,12 @@
   lhs <- if (inherits(lhs, "design")) {
     lhs
   } else {
-    wrap_step(lhs, f_rhs(qs[[1]]))
+    wrap_step(lhs, lhs_expr)
   }
 
   rhs <- if (inherits(rhs, "design")) {
     rhs
-  } else if (!is.null(rhs)) wrap_step(rhs, f_rhs(qs[[2]]))
+  } else if (!is.null(rhs)) wrap_step(rhs, rhs_expr)
 
   unique_nms <- make.unique(c(names(lhs), names(rhs)), sep = "_")
 
