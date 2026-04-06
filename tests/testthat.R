@@ -1,14 +1,8 @@
 library(testthat)
 library(DeclareDesign)
 
-library(AER)
-library(betareg)
-library(biglm)
-library(coin)
-library(future.apply)
-library(gam)
-library(Matching)
-library(reshape2)
-library(sf)
+for (pkg in c("AER", "betareg", "biglm", "coin", "future.apply", "gam", "Matching", "reshape2", "sf")) {
+  if (requireNamespace(pkg, quietly = TRUE)) library(pkg, character.only = TRUE)
+}
 
 test_check("DeclareDesign")

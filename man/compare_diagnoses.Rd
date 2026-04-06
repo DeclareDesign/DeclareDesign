@@ -36,8 +36,8 @@ Diagnose and compare designs.
 The function \code{compare_diagnoses} runs a many-to-many merge matching by \code{inquiry} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
 }
 \examples{
-design_a <- 
-  declare_model(N  = 100, 
+design_a <-
+  declare_model(N  = 100,
                 U = rnorm(N),
                 Y_Z_0 = U,
                 Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)) +
@@ -47,9 +47,9 @@ design_a <-
   declare_estimator(Y ~ Z, inquiry = "ATE")
 
 design_b <- replace_step(
-  design_a, step = "assignment", 
+  design_a, step = "assignment",
   declare_assignment(Z = complete_ra(N, prob = 0.3)) )
-
+\dontrun{
 comparison <- compare_diagnoses(design_a, design_b, sims = 40)
-
+}
 }

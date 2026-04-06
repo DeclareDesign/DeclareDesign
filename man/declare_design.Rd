@@ -22,7 +22,7 @@ Declare a design
 
 design <-
   declare_model(
-    N = 500, 
+    N = 500,
     U = rnorm(N),
     potential_outcomes(Y ~ Z + U)
   ) +
@@ -30,7 +30,7 @@ design <-
   declare_sampling(S = complete_rs(N, n = 250)) +
   declare_assignment(Z = complete_ra(N, m = 25)) +
   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-  declare_estimator(Y ~ Z, inquiry = "ATE") 
+  declare_estimator(Y ~ Z, inquiry = "ATE")
 
 dat <- draw_data(design)
 head(dat)

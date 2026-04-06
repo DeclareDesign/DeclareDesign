@@ -1,6 +1,9 @@
 # DeclareDesign 1.1.1
 
 * Bug fix: replaced unexported rlang internal `quo_get_env()` with the exported `get_env()` in `aaa.R` and `declare_potential_outcomes.R`. The unexported function caused test failures on CRAN when rlang updated its export list.
+* Bug fix: replaced `enquo()` with `substitute()` in `+.dd` to correctly capture step expressions under the new rlang C API. Thanks to Lionel Henry (@lionel-) for the fix.
+* Added `CausalQueries`, `rdrobust`, and `rdss` to `Suggests` to satisfy CRAN dependency checks for tests that use those packages.
+* Made top-level test setup use soft package loads so checks pass when suggested packages are not locally installed.
 
 # DeclareDesign 1.1.0
 
