@@ -211,12 +211,21 @@ print.objects <- function(x, ...) {
   # ensure plain data.frame (no tibble class if it ever sneaks in)
   out <- as.data.frame(out, stringsAsFactors = FALSE, check.names = FALSE)
   # sort by name (case insensitive)
-  out <- out[order(tolower(out$name), na.last = TRUE), , drop = FALSE]
+  out_print <- out[order(tolower(out$name), na.last = TRUE), , drop = FALSE]
+  
+  out_print$value_str <- truncate_str(out_print$value_str, 15)
   
   # print and return invisibly
-  print(out, row.names = FALSE)
+  print(out_print, row.names = FALSE)
   invisible(out)
   
 }
 
 
+truncate_str <- function(x, width = 15) {
+  ifelse(
+    nchar(x) > width,
+    paste0(substr(x, 1, width), "..."),
+    x
+  )
+}

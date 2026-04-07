@@ -55,6 +55,9 @@
 #' diagnose_design(design,
 #'                 diagnosands = select_diagnosands("sd_estimate", "mean_se"),
 #'                 sims = 100)
+#' diagnose_design(design,
+#'                 diagnosands = select_diagnosands("power", alpha = .00001),
+#'                 sims = 100)
 
 
 

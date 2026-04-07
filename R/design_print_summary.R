@@ -16,22 +16,22 @@ print.design <- function(x, verbose = FALSE, ...) {
   p <- find_all_objects(x)
   
   if(nrow(p) == 0){
-    cat("No parameters saved in design \n")
+    cat("No modifiable parameters saved in design \n")
     
   } else {
     # print and return invisibly (only give names if there are many objects)
     
-    cat("Parameters saved in design environments:\n\n")
+    cat("Parameters or objects saved in design environments:\n\n")
     
-    if(nrow(p) <= 7){
+    if(length(p$name |> unique()) <= 7){
       print.objects(p)
       cat("\n")
       
     } else {
       # Just names if there are many objects
-      cat(paste(p$name, collapse = ", "))
+      cat(paste(unique(p$name), collapse = ", "))
       cat("\n")
-          }
+      }
     
   }
 }
