@@ -4,6 +4,8 @@
 * Bug fix: replaced `enquo()` with `substitute()` in `+.dd` to correctly capture step expressions under the new rlang C API. Thanks to Lionel Henry (@lionel-) for the fix.
 * Added `CausalQueries`, `rdrobust`, and `rdss` to `Suggests` to satisfy CRAN dependency checks for tests that use those packages.
 * Made top-level test setup use soft package loads so checks pass when suggested packages are not locally installed.
+* Improved `print.design()` output: clearer labels, deduplication of parameter names across environments, and truncation of long values in the printed parameter table.
+* Added example to `select_diagnosands()` documentation showing use of the `alpha` argument.
 
 # DeclareDesign 1.1.0
 

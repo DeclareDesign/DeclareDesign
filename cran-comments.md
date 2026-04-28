@@ -6,6 +6,9 @@ Patch release fixing CRAN check failures in 1.1.0.
 * Replaced `enquo()` with `substitute()` in `+.dd` (`R/construct_design.R`) for forward compatibility with the upcoming rlang release, which uses the new R C API to capture expressions. Fix contributed by Lionel Henry.
 * Added `CausalQueries`, `rdrobust`, and `rdss` to `Suggests` to resolve CRAN NOTE about undeclared test dependencies.
 * Made top-level test setup (`tests/testthat.R`) use soft package loads for suggested packages.
+* Improved `print.design()` output: clearer labels, deduplication of parameter names, truncation of long values.
+* Added example to `select_diagnosands()` documentation.
+* Updated `R (>= 4.1.0)` dependency to reflect use of the native pipe operator.
 
 ## Test environments
 * local OS X install, R 4.5.2
@@ -13,11 +16,7 @@ Patch release fixing CRAN check failures in 1.1.0.
 
 ## R CMD check results
 
-0 errors | 2 warnings | 0 notes
-
-The 2 warnings are pre-existing and unrelated to this patch:
-* Undocumented `select_diagnosands` (internal function exported without docs).
-* Rd/code mismatches for functions documented but no longer present in code.
+0 errors | 0 warnings | 0 notes
 
 ## Reverse dependencies
 
