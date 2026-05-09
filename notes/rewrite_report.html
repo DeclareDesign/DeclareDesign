@@ -2449,6 +2449,7 @@ border: 0;
   <li><a href="#fabricatrzero-1" id="toc-fabricatrzero-1" class="nav-link" data-scroll-target="#fabricatrzero-1">fabricatrZero</a></li>
   <li><a href="#declaredesignzero-3" id="toc-declaredesignzero-3" class="nav-link" data-scroll-target="#declaredesignzero-3">DeclareDesignZero</a></li>
   </ul></li>
+  <li><a href="#variance-decomposition" id="toc-variance-decomposition" class="nav-link" data-scroll-target="#variance-decomposition">Variance decomposition</a></li>
   <li><a href="#breaking-changes" id="toc-breaking-changes" class="nav-link" data-scroll-target="#breaking-changes">Breaking changes</a>
   <ul class="collapse">
   <li><a href="#fabricatrzero-2" id="toc-fabricatrzero-2" class="nav-link" data-scroll-target="#fabricatrzero-2">fabricatrZero</a></li>
@@ -2756,7 +2757,7 @@ border: 0;
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-striped table-hover caption-top table-sm small">
-<caption>Median wall time. Apple M-series, R 4.5.2. Clustered design: 30 villages × 20 citizens (N = 600), lm_robust with cluster SEs.</caption>
+<caption>Median wall time. Apple M-series, R 4.5.2.</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;" data-quarto-table-cell-role="th">Benchmark</th>
@@ -2768,35 +2769,28 @@ border: 0;
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Data generation (N = 600)</td>
-<td style="text-align: right;">127µs</td>
-<td style="text-align: right;">227µs</td>
-<td style="text-align: left;">1.8× slower</td>
+<td style="text-align: right;">128µs</td>
+<td style="text-align: right;">138µs</td>
+<td style="text-align: left;">≈ tied</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Simulation (500 sims)</td>
-<td style="text-align: right;">1.50s</td>
-<td style="text-align: right;">1.10s</td>
-<td style="text-align: left;">1.36× faster</td>
+<td style="text-align: left;">Total: simulate + diagnose (500 sims, B = 200)</td>
+<td style="text-align: right;">1.91s</td>
+<td style="text-align: right;">1.28s</td>
+<td style="text-align: left;">1.49× faster</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Bootstrap (500 sims, B = 200)</td>
-<td style="text-align: right;">1.80s</td>
-<td style="text-align: right;">1.27s</td>
-<td style="text-align: left;">1.41× faster</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Redesign × 3 ICC levels (500 sims each)</td>
-<td style="text-align: right;">5.40s</td>
-<td style="text-align: right;">3.60s</td>
-<td style="text-align: left;">1.50× faster</td>
+<td style="text-align: left;">Redesign × 3 ICC levels (500 sims, B = 200 each)</td>
+<td style="text-align: right;">5.72s</td>
+<td style="text-align: right;">3.73s</td>
+<td style="text-align: left;">1.53× faster</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>The data generation comparison shows a real cost: fabricatrZero is about <strong>1.8× slower</strong> than fabricatr for the hierarchical draw. fabricatr’s internal list operations (plain <code>data.frame</code> construction, base-R indexing) outperform fabricatrZero’s tibble-based <code>execute_nest_level</code>. This is the honest price of the cleaner architecture — the tidyverse objects add per-call overhead.</p>
-<p>That cost is recoverable in practice. Data generation is measured in hundreds of microseconds; simulation runs are measured in seconds. Across 500 simulations, the ~100µs per-call penalty is ~50ms total — negligible compared to the 400–700ms saved at the simulation and diagnosis layers.</p>
-<p>The simulation, bootstrap, and redesign wins come from structural changes in DeclareDesignZero’s runner. Simulation uses <code>purrr::map</code> rather than a custom loop, cutting per-simulation overhead. The bootstrap gain is larger and structural: instead of computing diagnosands separately for each of B resamples (B calls to <code>summarize</code>), DD0 stacks all B resampled datasets with a <code>.boot_id</code> column and runs one grouped <code>summarize</code>. At B = 200, this saves roughly 340ms (200 × 1.7ms dplyr NSE overhead per call). The redesign gain compounds all three effects across three ICC levels.</p>
+<p>Data generation is now essentially tied (128µs vs 138µs). The initial fabricatrZero implementation used tibble objects throughout, incurring per-call overhead in row subsetting and column construction at each level. Switching to plain named lists internally — converting to tibble only once at the final output — eliminated that overhead. The list-based implementation also replaces <code>dplyr::cross_join</code> with a pure-list Cartesian product, and replaces tibble row-indexing in <code>execute_nest_level</code> with direct vector indexing (<code>v[idx]</code>).</p>
+<p>The simulation and diagnosis gains (1.49–1.53×) come from three structural changes. First, <code>purrr::map</code> replaces a custom simulation loop. Second, the bootstrap stacks all B resampled datasets with a <code>.boot_id</code> column and runs a single <code>group_by |&gt; summarize</code>, saving roughly 340ms at B = 200 (200 × 1.7ms per <code>summarize</code> call). Third, <code>redesign()</code> works directly on a declared design — no designer function wrapper needed — so the overhead of rebuilding the design for each parameter value is eliminated.</p>
 </section>
 </section>
 <section id="rewrite-philosophy" class="level2">
@@ -2851,6 +2845,95 @@ border: 0;
 </section>
 </section>
 </section>
+<section id="variance-decomposition" class="level2">
+<h2 class="anchored" data-anchor-id="variance-decomposition">Variance decomposition</h2>
+<p>When steps have <code>draws &gt; 1</code>, the <code>$variance_decomposition</code> slot of the diagnosis object breaks the total variance of per-simulation quantities into one component per draw level plus a residual within-cell component. Labels come from the step names automatically — there are no hardcoded “world” or “design” categories.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(DeclareDesignZero)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(fabricatrZero)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(randomizr)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(estimatr)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(dplyr)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>icc <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>design_vd <span class="ot">&lt;-</span> <span class="fu">declare_model</span>(</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">villages =</span> <span class="fu">add_level</span>(<span class="at">N =</span> <span class="dv">20</span>,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>               <span class="at">u =</span> <span class="fu">draw_normal_icc</span>(<span class="at">clusters =</span> villages, <span class="at">ICC =</span> icc)),</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">citizens =</span> <span class="fu">nest_level</span>(<span class="at">N =</span> <span class="dv">10</span>,</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>               <span class="at">Y_Z_0 =</span> u <span class="sc">+</span> <span class="fu">rnorm</span>(N),</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>               <span class="at">Y_Z_1 =</span> <span class="fl">0.3</span> <span class="sc">+</span> u <span class="sc">+</span> <span class="fu">rnorm</span>(N)),</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">draws =</span> <span class="dv">100</span>   <span class="co"># 100 distinct worlds (model draws)</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">declare_inquiry</span>(<span class="at">ATE =</span> <span class="fu">mean</span>(Y_Z_1 <span class="sc">-</span> Y_Z_0)) <span class="sc">+</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">declare_assignment</span>(<span class="at">Z =</span> <span class="fu">cluster_ra</span>(<span class="at">clusters =</span> villages), <span class="at">draws =</span> <span class="dv">30</span>) <span class="sc">+</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">declare_measurement</span>(<span class="at">Y =</span> <span class="fu">reveal_outcomes</span>(Y <span class="sc">~</span> Z)) <span class="sc">+</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">declare_estimator</span>(Y <span class="sc">~</span> Z, <span class="at">.method =</span> lm_robust,</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>                    <span class="at">clusters =</span> villages, <span class="at">inquiry =</span> <span class="st">&quot;ATE&quot;</span>, <span class="at">label =</span> <span class="st">&quot;ols&quot;</span>)</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a><span class="co"># 100 × 30 = 3,000 simulation paths; draws= on the steps define the plan</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>diag_vd <span class="ot">&lt;-</span> <span class="fu">diagnose_design</span>(design_vd, <span class="at">bootstrap_sims =</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>The decomposition covers <code>estimate</code>, <code>p.value</code>, <code>std.error</code>, and <code>statistic</code> by default. For the clustered design above, power, bias, and RMSE can be derived:</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover caption-top table-sm small">
+<caption>Variance decomposition: 100 model draws × 30 assignment draws = 3,000 simulation paths. draw_levels = model &gt; assignment.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Quantity</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Var(total)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Var(model)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Var(assignment)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">% model</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">% assignment</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Estimate</td>
+<td style="text-align: right;">0.4453</td>
+<td style="text-align: right;">0.2095</td>
+<td style="text-align: right;">0.2459</td>
+<td style="text-align: right;">47.1%</td>
+<td style="text-align: right;">55.2%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bias (estimate − estimand)</td>
+<td style="text-align: right;">0.2452</td>
+<td style="text-align: right;">0.0075</td>
+<td style="text-align: right;">0.2459</td>
+<td style="text-align: right;">3.1%</td>
+<td style="text-align: right;">100.3%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Squared error</td>
+<td style="text-align: right;">0.1318</td>
+<td style="text-align: right;">0.0096</td>
+<td style="text-align: right;">0.1265</td>
+<td style="text-align: right;">7.3%</td>
+<td style="text-align: right;">96.0%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Power (p &lt; 0.05)</td>
+<td style="text-align: right;">0.1466</td>
+<td style="text-align: right;">0.0302</td>
+<td style="text-align: right;">0.1206</td>
+<td style="text-align: right;">20.6%</td>
+<td style="text-align: right;">82.3%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The <code>frac_model</code> column answers: “what fraction of this quantity’s variability comes from which world (population) we’re in, versus which randomization we drew?” For RMSE, most variability comes from the model draw — which world we’re analyzing matters more than which assignment was realized. For power, the balance is reversed: the randomization draw determines more of the variability than the underlying world.</p>
+</section>
 <section id="breaking-changes" class="level2">
 <h2 class="anchored" data-anchor-id="breaking-changes">Breaking changes</h2>
 <p>The following changes are the only ones that break code from the DeclareDesign book or the fabricatr documentation. Each is intentional.</p>
@@ -2859,48 +2942,48 @@ border: 0;
 <section id="add_levelnest-false-declare_level" class="level4">
 <h4 class="anchored" data-anchor-id="add_levelnest-false-declare_level"><code>add_level(nest = FALSE)</code> → <code>declare_level()</code></h4>
 <p><strong>Old syntax:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fabricate</span>(</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">countries =</span> <span class="fu">add_level</span>(<span class="at">N =</span> <span class="dv">20</span>, <span class="at">gdp =</span> <span class="fu">runif</span>(N, <span class="dv">1</span>, <span class="dv">10</span>)),</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">years     =</span> <span class="fu">add_level</span>(<span class="at">N =</span> <span class="dv">10</span>, <span class="at">shock =</span> <span class="fu">runif</span>(N, <span class="dv">0</span>, <span class="dv">1</span>), <span class="at">nest =</span> <span class="cn">FALSE</span>),</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">obs       =</span> <span class="fu">cross_levels</span>(<span class="at">by =</span> <span class="fu">join_using</span>(countries, years))</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>New syntax:</strong></p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fabricate</span>(</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">countries =</span> <span class="fu">declare_level</span>(<span class="at">N =</span> <span class="dv">20</span>, <span class="at">gdp =</span> <span class="fu">runif</span>(N, <span class="dv">1</span>, <span class="dv">10</span>)),</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">years     =</span> <span class="fu">declare_level</span>(<span class="at">N =</span> <span class="dv">10</span>, <span class="at">shock =</span> <span class="fu">runif</span>(N, <span class="dv">0</span>, <span class="dv">1</span>)),</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">obs       =</span> <span class="fu">cross_levels</span>(<span class="at">.by =</span> <span class="fu">c</span>(<span class="st">&quot;countries&quot;</span>, <span class="st">&quot;years&quot;</span>))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">countries =</span> <span class="fu">add_level</span>(<span class="at">N =</span> <span class="dv">20</span>, <span class="at">gdp =</span> <span class="fu">runif</span>(N, <span class="dv">1</span>, <span class="dv">10</span>)),</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">years     =</span> <span class="fu">add_level</span>(<span class="at">N =</span> <span class="dv">10</span>, <span class="at">shock =</span> <span class="fu">runif</span>(N, <span class="dv">0</span>, <span class="dv">1</span>), <span class="at">nest =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">obs       =</span> <span class="fu">cross_levels</span>(<span class="at">by =</span> <span class="fu">join_using</span>(countries, years))</span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>New syntax:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fabricate</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">countries =</span> <span class="fu">declare_level</span>(<span class="at">N =</span> <span class="dv">20</span>, <span class="at">gdp =</span> <span class="fu">runif</span>(N, <span class="dv">1</span>, <span class="dv">10</span>)),</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">years     =</span> <span class="fu">declare_level</span>(<span class="at">N =</span> <span class="dv">10</span>, <span class="at">shock =</span> <span class="fu">runif</span>(N, <span class="dv">0</span>, <span class="dv">1</span>)),</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">obs       =</span> <span class="fu">cross_levels</span>(<span class="at">.by =</span> <span class="fu">c</span>(<span class="st">&quot;countries&quot;</span>, <span class="st">&quot;years&quot;</span>))</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Reasoning.</strong> The <code>nest</code> argument on <code>add_level</code> is a mode switch that makes the same function do two completely different things. When you write two <code>add_level</code> calls in sequence, nesting is the only semantically natural outcome — and that is indeed what <code>add_level(nest = TRUE)</code> (the default) does. The <code>nest = FALSE</code> case is not adding a level to a hierarchy at all: it is declaring an independent population for later crossing. Naming it <code>declare_level</code> makes this intent explicit and mirrors the <code>declare_*</code> idiom already in the DeclareDesign ecosystem.</p>
 <p>The <code>join_using()</code> function in the original fabricatr is a fabricatr-internal convenience that mimics dplyr syntax without being dplyr. The <code>.by = c(&quot;names&quot;)</code> replacement is plain character specification, and the implementation uses <code>dplyr::cross_join()</code> (added in dplyr 1.1.0) — the correct primitive for Cartesian products.</p>
 </section>
 <section id="link_levelsby-join_using...-rho-r-link_levels.by-c...-rho-r" class="level4">
 <h4 class="anchored" data-anchor-id="link_levelsby-join_using...-rho-r-link_levels.by-c...-rho-r"><code>link_levels(by = join_using(..., rho = r))</code> → <code>link_levels(.by = c(...), rho = r)</code></h4>
 <p><strong>Old syntax:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>students <span class="ot">=</span> <span class="fu">link_levels</span>(<span class="at">N =</span> <span class="dv">500</span>,</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">by =</span> <span class="fu">join_using</span>(primary_school, secondary_school, <span class="at">rho =</span> <span class="fl">0.5</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>New syntax:</strong></p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>students <span class="ot">=</span> <span class="fu">link_levels</span>(<span class="at">N =</span> <span class="dv">500</span>,</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">.by =</span> <span class="fu">c</span>(<span class="st">&quot;primary_school&quot;</span>, <span class="st">&quot;secondary_school&quot;</span>), <span class="at">rho =</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">by =</span> <span class="fu">join_using</span>(primary_school, secondary_school, <span class="at">rho =</span> <span class="fl">0.5</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>New syntax:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>students <span class="ot">=</span> <span class="fu">link_levels</span>(<span class="at">N =</span> <span class="dv">500</span>,</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">.by =</span> <span class="fu">c</span>(<span class="st">&quot;primary_school&quot;</span>, <span class="st">&quot;secondary_school&quot;</span>), <span class="at">rho =</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Reasoning.</strong> Embedding <code>rho</code> inside <code>join_using()</code> conflates two separate concerns: which levels to link (structural) and how correlated the assignments should be (statistical). Separating them makes both independently readable and eliminates the need for a bespoke <code>join_using</code> function. The leading dot on <code>.by</code> visually distinguishes the control argument from column-generating expressions in the <code>...</code>.</p>
 </section>
 <section id="modify_levelby-col-modify_level.by-col" class="level4">
 <h4 class="anchored" data-anchor-id="modify_levelby-col-modify_level.by-col"><code>modify_level(by = &quot;col&quot;)</code> → <code>modify_level(.by = &quot;col&quot;)</code></h4>
 <p><strong>Old syntax:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">modify_level</span>(<span class="at">Y_centered =</span> Y <span class="sc">-</span> <span class="fu">mean</span>(Y), <span class="at">by =</span> <span class="st">&quot;cluster&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">modify_level</span>(<span class="at">Y_centered =</span> Y <span class="sc">-</span> <span class="fu">mean</span>(Y), <span class="at">by =</span> <span class="st">&quot;cluster&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>New syntax:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">modify_level</span>(<span class="at">Y_centered =</span> Y <span class="sc">-</span> <span class="fu">mean</span>(Y), <span class="at">.by =</span> <span class="st">&quot;cluster&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">modify_level</span>(<span class="at">Y_centered =</span> Y <span class="sc">-</span> <span class="fu">mean</span>(Y), <span class="at">.by =</span> <span class="st">&quot;cluster&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Reasoning.</strong> Minor. The leading dot on <code>.by</code> is consistent with the <code>.by</code> argument convention in dplyr (added in dplyr 1.1.0) and distinguishes grouping control from column expressions. The change is mechanical.</p>
 </section>
 <section id="n-is-not-in-the-output-data-frame" class="level4">
 <h4 class="anchored" data-anchor-id="n-is-not-in-the-output-data-frame"><code>N</code> is not in the output data frame</h4>
 <p>In fabricatr, <code>N</code> appears as a column in the output data frame when <code>fabricate(N = k, ...)</code> is called. In fabricatrZero, <code>N</code> is available in the data mask during column evaluation but is not written to the output.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fabricatr</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fabricate</span>(<span class="at">N =</span> <span class="dv">10</span>, <span class="at">Y =</span> <span class="fu">rnorm</span>(N))</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co"># → data frame with columns: ID, N, Y</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="co"># fabricatrZero</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>fabricatrZero<span class="sc">::</span><span class="fu">fabricate</span>(<span class="at">N =</span> <span class="dv">10</span>, <span class="at">Y =</span> <span class="fu">rnorm</span>(N))</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># → data frame with columns: Y</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fabricatr</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fabricate</span>(<span class="at">N =</span> <span class="dv">10</span>, <span class="at">Y =</span> <span class="fu">rnorm</span>(N))</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># → data frame with columns: ID, N, Y</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co"># fabricatrZero</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>fabricatrZero<span class="sc">::</span><span class="fu">fabricate</span>(<span class="at">N =</span> <span class="dv">10</span>, <span class="at">Y =</span> <span class="fu">rnorm</span>(N))</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co"># → data frame with columns: Y</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Reasoning.</strong> An N column in the output is redundant — it encodes <code>nrow(df)</code> as a repeated scalar. It causes concrete problems in cross-classification: when <code>cross_join</code> merges two level data frames that both have an N column, dplyr renames them <code>N...1</code> and <code>N...4</code>, breaking downstream column references. Removing it from the output is cleaner.</p>
 </section>
 </section>
@@ -2909,35 +2992,35 @@ border: 0;
 <section id="inquiry-in-declare_estimator-must-be-a-string-not-a-step-object" class="level4">
 <h4 class="anchored" data-anchor-id="inquiry-in-declare_estimator-must-be-a-string-not-a-step-object"><code>inquiry =</code> in <code>declare_estimator</code> must be a string, not a step object</h4>
 <p><strong>Old syntax (sometimes used):</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>my_inquiry <span class="ot">&lt;-</span> <span class="fu">declare_inquiry</span>(<span class="at">ATE =</span> <span class="fu">mean</span>(Y_Z_1 <span class="sc">-</span> Y_Z_0))</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">declare_estimator</span>(Y <span class="sc">~</span> Z, <span class="at">inquiry =</span> my_inquiry)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>my_inquiry <span class="ot">&lt;-</span> <span class="fu">declare_inquiry</span>(<span class="at">ATE =</span> <span class="fu">mean</span>(Y_Z_1 <span class="sc">-</span> Y_Z_0))</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">declare_estimator</span>(Y <span class="sc">~</span> Z, <span class="at">inquiry =</span> my_inquiry)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>New syntax:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">declare_estimator</span>(Y <span class="sc">~</span> Z, <span class="at">inquiry =</span> <span class="st">&quot;ATE&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">declare_estimator</span>(Y <span class="sc">~</span> Z, <span class="at">inquiry =</span> <span class="st">&quot;ATE&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Reasoning.</strong> The step object <code>my_inquiry</code> has an attribute <code>label = &quot;inquiry&quot;</code> (the step type), not <code>&quot;ATE&quot;</code> (the inquiry name). Passing the step object would silently link the estimator to a non-existent inquiry named <code>&quot;inquiry&quot;</code>, producing NA estimand columns with no error. Requiring a string makes the intent explicit and errors immediately if the inquiry name doesn’t match.</p>
 </section>
 <section id="make_groups-vars...-is-removed-use-group_by-diagnose_design" class="level4">
 <h4 class="anchored" data-anchor-id="make_groups-vars...-is-removed-use-group_by-diagnose_design"><code>make_groups = vars(...)</code> is removed; use <code>group_by() |&gt; diagnose_design()</code></h4>
 <p><strong>Old syntax:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">diagnose_design</span>(design, <span class="at">make_groups =</span> <span class="fu">vars</span>(N))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">diagnose_design</span>(design, <span class="at">make_groups =</span> <span class="fu">vars</span>(N))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>New syntax:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">simulate_design</span>(design, <span class="at">sims =</span> <span class="dv">500</span>) <span class="sc">|&gt;</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(N) <span class="sc">|&gt;</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">diagnose_design</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">simulate_design</span>(design, <span class="at">sims =</span> <span class="dv">500</span>) <span class="sc">|&gt;</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(N) <span class="sc">|&gt;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">diagnose_design</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Reasoning.</strong> <code>make_groups</code> required understanding a non-standard evaluation convention that differed from standard tidyverse grouping. The pipeline form is more composable: you can mutate derived grouping columns before <code>group_by</code>, combine simulations from multiple runs, or filter before diagnosis — none of which <code>make_groups</code> supported.</p>
 </section>
 <section id="insert_step-delete_step-replace_step-are-deprecated-still-work-with-a-warning" class="level4">
 <h4 class="anchored" data-anchor-id="insert_step-delete_step-replace_step-are-deprecated-still-work-with-a-warning"><code>insert_step</code>, <code>delete_step</code>, <code>replace_step</code> are deprecated (still work, with a warning)</h4>
 <p>The step-modification functions are retained for backward compatibility but emit a once-per-session warning pointing toward explicit reconstruction. The recommended replacement is simply to re-declare the design with the desired steps:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># instead of insert_step / replace_step, just rebuild:</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>design_v2 <span class="ot">&lt;-</span> design[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>] <span class="sc">+</span> new_step <span class="sc">+</span> design[<span class="dv">4</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># instead of insert_step / replace_step, just rebuild:</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>design_v2 <span class="ot">&lt;-</span> design[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>] <span class="sc">+</span> new_step <span class="sc">+</span> design[<span class="dv">4</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="declare_potential_outcomes-and-declare_reveal-are-not-implemented" class="level4">
 <h4 class="anchored" data-anchor-id="declare_potential_outcomes-and-declare_reveal-are-not-implemented"><code>declare_potential_outcomes</code> and <code>declare_reveal</code> are not implemented</h4>
 <p>These functions were deprecated in the original DeclareDesign before this rewrite. The replacement is fabricatrZero’s <code>potential_outcomes()</code> inside <code>declare_model</code>, which achieves the same result with cleaner syntax:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">declare_model</span>(</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">N =</span> <span class="dv">100</span>,</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">potential_outcomes</span>(Y <span class="sc">~</span> <span class="fl">0.3</span> <span class="sc">*</span> Z <span class="sc">+</span> <span class="fu">rnorm</span>(N))</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">declare_model</span>(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">N =</span> <span class="dv">100</span>,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">potential_outcomes</span>(Y <span class="sc">~</span> <span class="fl">0.3</span> <span class="sc">*</span> Z <span class="sc">+</span> <span class="fu">rnorm</span>(N))</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 </section>
 </section>

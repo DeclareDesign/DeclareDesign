@@ -292,33 +292,31 @@ bm_redesign <- bench::mark(
 
 ```{r speed-table}
 #| echo: false
-# Results from a standalone benchmark session (both packages loaded separately
-# to avoid namespace conflicts). Machine: Apple M-series, R 4.5.2.
-# Design: 30 villages × 20 citizens = 600 units, ICC = 0.2.
+# Results from a standalone benchmark session (packages loaded separately to
+# avoid namespace conflicts). Machine: Apple M-series, R 4.5.2.
+# Design: 30 villages × 20 citizens = 600 units, ICC = 0.2, lm_robust with cluster SEs.
+# "Total" = diagnose_design(design, sims = 500, bootstrap_sims = 200) end-to-end.
 
 results <- tibble::tibble(
   Benchmark = c(
     "Data generation (N = 600)",
-    "Simulation (500 sims)",
-    "Bootstrap (500 sims, B = 200)",
-    "Redesign × 3 ICC levels (500 sims each)"
+    "Total: simulate + diagnose (500 sims, B = 200)",
+    "Redesign × 3 ICC levels (500 sims, B = 200 each)"
   ),
-  `DD / fabricatr` = c("127µs", "1.50s", "1.80s", "5.40s"),
-  `DD0 / fabricatrZero` = c("227µs", "1.10s", "1.27s", "3.60s"),
-  Result = c("1.8× slower", "1.36× faster", "1.41× faster", "1.50× faster")
+  `DD / fabricatr` = c("128µs", "1.91s", "5.72s"),
+  `DD0 / fabricatrZero` = c("138µs", "1.28s", "3.73s"),
+  Result = c("≈ tied", "1.49× faster", "1.53× faster")
 )
 
 knitr::kable(results, align = c("l","r","r","l"),
-             caption = "Median wall time. Apple M-series, R 4.5.2. Clustered design: 30 villages × 20 citizens (N = 600), lm_robust with cluster SEs.") |>
+             caption = "Median wall time. Apple M-series, R 4.5.2.") |>
   kableExtra::kable_styling(bootstrap_options = c("striped","hover"),
                             full_width = FALSE)
 ```
 
-The data generation comparison shows a real cost: fabricatrZero is about **1.8× slower** than fabricatr for the hierarchical draw. fabricatr's internal list operations (plain `data.frame` construction, base-R indexing) outperform fabricatrZero's tibble-based `execute_nest_level`. This is the honest price of the cleaner architecture — the tidyverse objects add per-call overhead.
+Data generation is now essentially tied (128µs vs 138µs). The initial fabricatrZero implementation used tibble objects throughout, incurring per-call overhead in row subsetting and column construction at each level. Switching to plain named lists internally — converting to tibble only once at the final output — eliminated that overhead. The list-based implementation also replaces `dplyr::cross_join` with a pure-list Cartesian product, and replaces tibble row-indexing in `execute_nest_level` with direct vector indexing (`v[idx]`).
 
-That cost is recoverable in practice. Data generation is measured in hundreds of microseconds; simulation runs are measured in seconds. Across 500 simulations, the ~100µs per-call penalty is ~50ms total — negligible compared to the 400–700ms saved at the simulation and diagnosis layers.
-
-The simulation, bootstrap, and redesign wins come from structural changes in DeclareDesignZero's runner. Simulation uses `purrr::map` rather than a custom loop, cutting per-simulation overhead. The bootstrap gain is larger and structural: instead of computing diagnosands separately for each of B resamples (B calls to `summarize`), DD0 stacks all B resampled datasets with a `.boot_id` column and runs one grouped `summarize`. At B = 200, this saves roughly 340ms (200 × 1.7ms dplyr NSE overhead per call). The redesign gain compounds all three effects across three ICC levels.
+The simulation and diagnosis gains (1.49–1.53×) come from three structural changes. First, `purrr::map` replaces a custom simulation loop. Second, the bootstrap stacks all B resampled datasets with a `.boot_id` column and runs a single `group_by |> summarize`, saving roughly 340ms at B = 200 (200 × 1.7ms per `summarize` call). Third, `redesign()` works directly on a declared design — no designer function wrapper needed — so the overhead of rebuilding the design for each parameter value is eliminated.
 
 ## Rewrite philosophy
 
@@ -394,6 +392,91 @@ simulate_design(design, sims = 500) |>
 ```
 
 This generalizes cleanly to any derived column — you can `mutate(sig = p.value < 0.05)` before `group_by(sig)`.
+
+## Variance decomposition
+
+When steps have `draws > 1`, the `$variance_decomposition` slot of the diagnosis object breaks the total variance of per-simulation quantities into one component per draw level plus a residual within-cell component. Labels come from the step names automatically — there are no hardcoded "world" or "design" categories.
+
+```{r vardecomp}
+#| cache: true
+suppressPackageStartupMessages({
+  library(DeclareDesignZero)
+  library(fabricatrZero)
+  library(randomizr)
+  library(estimatr)
+  library(dplyr)
+})
+
+set.seed(123)
+icc <- 0.2
+
+design_vd <- declare_model(
+  villages = add_level(N = 20,
+               u = draw_normal_icc(clusters = villages, ICC = icc)),
+  citizens = nest_level(N = 10,
+               Y_Z_0 = u + rnorm(N),
+               Y_Z_1 = 0.3 + u + rnorm(N)),
+  draws = 100   # 100 distinct worlds (model draws)
+) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_assignment(Z = cluster_ra(clusters = villages), draws = 30) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, .method = lm_robust,
+                    clusters = villages, inquiry = "ATE", label = "ols")
+
+# 100 × 30 = 3,000 simulation paths; draws= on the steps define the plan
+diag_vd <- diagnose_design(design_vd, bootstrap_sims = 0)
+```
+
+The decomposition covers `estimate`, `p.value`, `std.error`, and `statistic` by default. For the clustered design above, power, bias, and RMSE can be derived:
+
+```{r vardecomp-table}
+#| echo: false
+vd <- diag_vd$variance_decomposition
+
+# Derive diagnosand-level quantities from the simulations
+sims_vd <- get_simulations(diag_vd) |>
+  dplyr::filter(!is.na(estimand)) |>
+  dplyr::mutate(
+    bias    = estimate - estimand,
+    sq_err  = (estimate - estimand)^2,
+    sig     = as.numeric(p.value < 0.05)
+  )
+
+# Re-run decomposition on the derived quantities
+draw_cols   <- grep("_draw$", names(sims_vd), value = TRUE)
+group_cols  <- intersect(c("inquiry","estimator","term","outcome"), names(sims_vd))
+vd_extended <- DeclareDesignZero:::compute_variance_decomposition(
+  sims_vd, draw_cols, group_cols,
+  target_cols = c("estimate", "bias", "sq_err", "sig")
+)
+
+tbl <- vd_extended |>
+  dplyr::select(quantity, var_total, var_model, var_assignment,
+                frac_model, frac_assignment) |>
+  dplyr::mutate(
+    quantity = dplyr::case_when(
+      quantity == "estimate" ~ "Estimate",
+      quantity == "bias"     ~ "Bias (estimate − estimand)",
+      quantity == "sq_err"   ~ "Squared error",
+      quantity == "sig"      ~ "Power (p < 0.05)"
+    ),
+    dplyr::across(dplyr::starts_with("var_"), ~ round(.x, 4)),
+    dplyr::across(dplyr::starts_with("frac_"), ~ scales::percent(.x, 0.1))
+  )
+
+knitr::kable(tbl, col.names = c("Quantity", "Var(total)", "Var(model)",
+                                "Var(assignment)", "% model", "% assignment"),
+             align = c("l","r","r","r","r","r"),
+             caption = paste0(
+               "Variance decomposition: 100 model draws × 30 assignment draws ",
+               "= 3,000 simulation paths. draw_levels = model > assignment."
+             )) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped","hover"),
+                            full_width = FALSE)
+```
+
+The `frac_model` column answers: "what fraction of this quantity's variability comes from which world (population) we're in, versus which randomization we drew?" For RMSE, most variability comes from the model draw — which world we're analyzing matters more than which assignment was realized. For power, the balance is reversed: the randomization draw determines more of the variability than the underlying world.
 
 ## Breaking changes
 

@@ -252,63 +252,119 @@ diagnose_simulations <- function(simulations_df,
   )
 }
 
-#' Decompose estimate variance by simulation draw level
+#' Decompose per-simulation quantity variance by draw level
 #'
-#' For nested simulations, splits the total variance of estimates into the
-#' part attributable to design-level fluctuation (within a single fixed world)
-#' and the part attributable to world-level fluctuation (variance of the
-#' average estimate across worlds). The split uses the law of total variance
-#' with the outermost step that has `draws > 1` as the world identifier.
+#' For nested simulations with K levels of draws, uses the law of total
+#' variance to attribute the variance of any per-simulation numeric column
+#' to each draw level. Level k's contribution is the variance of the
+#' conditional mean E[y | L1, ..., Lk], averaged over the outer (L1, ...,
+#' L(k-1)) draw. A final residual component captures within-cell variance
+#' (stochasticity inside the innermost draw).
 #'
-#' @param simulations_df A simulations table with `draw_cols` attached.
+#' Column names in the output use the step name extracted from the draw
+#' column name by stripping the trailing `_draw` suffix (e.g.
+#' `model_draw` -> `var_model`).
+#'
+#' @param simulations_df A simulations table with `draw_cols` present.
 #' @param draw_cols Character vector of draw-tracking columns, ordered
-#'   outermost to innermost.
-#' @param group_by_set Character vector of grouping columns.
-#' @return A tibble with one row per group containing variance components and
-#'   their fractions of the total.
+#'   outermost to innermost (e.g. `c("model_draw", "assignment_draw")`).
+#' @param group_by_set Character vector of grouping columns (estimator label,
+#'   inquiry, redesign parameters, etc.).
+#' @param target_cols Character vector of numeric columns in `simulations_df`
+#'   to decompose. Defaults to columns that look like per-simulation
+#'   quantities (`estimate`, `p.value`, etc.).
+#' @return A tibble in long form: one row per (group × target column) with
+#'   variance components and their fractions of the total variance.
 #' @keywords internal
 #' @noRd
 compute_variance_decomposition <- function(simulations_df, draw_cols,
-                                           group_by_set) {
-  if (!"estimate" %in% names(simulations_df)) return(NULL)
+                                           group_by_set,
+                                           target_cols = NULL) {
   if (length(draw_cols) == 0) return(NULL)
-  outer_draw <- draw_cols[1]
-  total <- simulations_df |>
-    dplyr::group_by(dplyr::across(dplyr::all_of(group_by_set))) |>
-    dplyr::summarize(
-      n_sims    = dplyr::n(),
-      var_total = stats::var(estimate, na.rm = TRUE),
-      .groups   = "drop"
-    )
-  design_var <- simulations_df |>
-    dplyr::group_by(dplyr::across(dplyr::all_of(c(group_by_set, outer_draw)))) |>
-    dplyr::summarize(within_var = stats::var(estimate, na.rm = TRUE),
-                     .groups = "drop") |>
-    dplyr::group_by(dplyr::across(dplyr::all_of(group_by_set))) |>
-    dplyr::summarize(var_design = mean(within_var, na.rm = TRUE),
-                     .groups = "drop")
-  world_var <- simulations_df |>
-    dplyr::group_by(dplyr::across(dplyr::all_of(c(group_by_set, outer_draw)))) |>
-    dplyr::summarize(world_mean = mean(estimate, na.rm = TRUE),
-                     .groups = "drop") |>
-    dplyr::group_by(dplyr::across(dplyr::all_of(group_by_set))) |>
-    dplyr::summarize(var_world = stats::var(world_mean, na.rm = TRUE),
-                     .groups = "drop")
-  if (length(group_by_set) == 0) {
-    result <- dplyr::bind_cols(total, design_var, world_var)
-  } else {
-    result <- total |>
-      dplyr::left_join(design_var, by = group_by_set) |>
-      dplyr::left_join(world_var,  by = group_by_set)
+
+  # Choose columns to decompose if not specified
+  if (is.null(target_cols)) {
+    candidate <- c("estimate", "p.value", "std.error", "statistic")
+    target_cols <- intersect(candidate, names(simulations_df))
   }
-  result <- dplyr::mutate(
-    result,
-    frac_design = var_design / var_total,
-    frac_world  = var_world  / var_total,
-    sd_design   = sqrt(var_design),
-    sd_world    = sqrt(var_world),
-    sd_total    = sqrt(var_total),
-    draw_levels = paste(draw_cols, collapse = " > ")
-  )
-  tibble::as_tibble(result)
+  if (length(target_cols) == 0) return(NULL)
+
+  step_names <- sub("_draw$", "", draw_cols)
+
+  join_by <- if (length(group_by_set) > 0) group_by_set else character(0)
+
+  decompose_one <- function(col_name) {
+    vals <- simulations_df[[col_name]]
+    if (!is.numeric(vals)) return(NULL)
+
+    df <- simulations_df[, c(group_by_set, draw_cols, col_name), drop = FALSE]
+    names(df)[ncol(df)] <- ".y"
+
+    # Total variance
+    total <- df |>
+      dplyr::group_by(dplyr::across(dplyr::all_of(group_by_set))) |>
+      dplyr::summarize(n_sims    = dplyr::n(),
+                       var_total = stats::var(.y, na.rm = TRUE),
+                       .groups   = "drop")
+
+    components <- list(total)
+
+    # Variance attributable to each draw level k
+    for (k in seq_along(draw_cols)) {
+      outer_k  <- draw_cols[seq_len(k)]
+      var_name <- paste0("var_", step_names[k])
+
+      level_means <- df |>
+        dplyr::group_by(dplyr::across(dplyr::all_of(c(group_by_set, outer_k)))) |>
+        dplyr::summarize(lm = mean(.y, na.rm = TRUE), .groups = "drop")
+
+      if (k == 1) {
+        comp <- level_means |>
+          dplyr::group_by(dplyr::across(dplyr::all_of(group_by_set))) |>
+          dplyr::summarize(!!var_name := stats::var(lm, na.rm = TRUE),
+                           .groups = "drop")
+      } else {
+        outer_prev <- draw_cols[seq_len(k - 1L)]
+        comp <- level_means |>
+          dplyr::group_by(dplyr::across(dplyr::all_of(c(group_by_set, outer_prev)))) |>
+          dplyr::summarize(wv = stats::var(lm, na.rm = TRUE), .groups = "drop") |>
+          dplyr::group_by(dplyr::across(dplyr::all_of(group_by_set))) |>
+          dplyr::summarize(!!var_name := mean(wv, na.rm = TRUE), .groups = "drop")
+      }
+      components[[length(components) + 1L]] <- comp
+    }
+
+    # Residual: within-innermost-cell variance
+    residual <- df |>
+      dplyr::group_by(dplyr::across(dplyr::all_of(c(group_by_set, draw_cols)))) |>
+      dplyr::summarize(wv = stats::var(.y, na.rm = TRUE), .groups = "drop") |>
+      dplyr::group_by(dplyr::across(dplyr::all_of(group_by_set))) |>
+      dplyr::summarize(var_residual = mean(wv, na.rm = TRUE), .groups = "drop")
+    components[[length(components) + 1L]] <- residual
+
+    # Join all components
+    result <- purrr::reduce(
+      components,
+      function(a, b) if (length(join_by) == 0) dplyr::bind_cols(a, b)
+                      else dplyr::left_join(a, b, by = join_by)
+    )
+
+    # Fractions
+    var_cols <- c(paste0("var_", step_names), "var_residual")
+    for (vc in var_cols) {
+      fc <- sub("^var_", "frac_", vc)
+      result[[fc]] <- result[[vc]] / result[["var_total"]]
+    }
+
+    result[["quantity"]] <- col_name
+    result[["draw_levels"]] <- paste(step_names, collapse = " > ")
+    result
+  }
+
+  out <- purrr::map(target_cols, decompose_one) |>
+    purrr::compact() |>
+    dplyr::bind_rows()
+
+  if (nrow(out) == 0) return(NULL)
+  tibble::as_tibble(out)
 }
