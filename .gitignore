@@ -1,0 +1,15 @@
+# R
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj.user/
+inst/doc/
+
+# Package build
+*.tar.gz
+*.zip
+/DeclareDesignZero.Rcheck/
+
+# Session / Claude
+notes/LOGFILE.md
+.claude/
