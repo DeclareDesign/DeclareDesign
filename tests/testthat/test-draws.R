@@ -68,7 +68,10 @@ test_that("warn when sims and draws both specified", {
     declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
     declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "mu",
                       label = "ols")
-  expect_warning(simulate_design(design, sims = 4), "flat simulation")
+  w <- expect_warning(simulate_design(design, sims = 4), "sims.*ignored|ignored.*sims")
+  # draws still win: result should be nested (5 x 3 = 15 paths), not 4 flat
+  sim <- suppressWarnings(simulate_design(design, sims = 4))
+  expect_equal(max(sim$sim_ID), 5L * 3L)
 })
 
 test_that("diagnose_design uses nested draws when sims is NULL", {

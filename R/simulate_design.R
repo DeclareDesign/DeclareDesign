@@ -34,21 +34,14 @@ simulate_design <- function(..., sims = NULL) {
   if (length(designs) == 0) {
     stop("simulate_design() requires at least one `design` object.")
   }
-  if (!is.null(sims)) {
-    for (design in designs) {
-      if (design_has_nested_draws(design)) {
-        warn_sims_draws_conflict(design, sims)
-      }
-    }
-  }
   multi <- length(designs) > 1L
   per_design <- purrr::imap(designs, function(design, design_label) {
-    if (is.null(sims) && design_has_nested_draws(design)) {
+    if (design_has_nested_draws(design)) {
+      if (!is.null(sims)) warn_sims_draws_conflict(design, sims)
       simulate_nested_single(design, design_label = design_label,
                              multi = multi)
     } else {
-      effective_sims <- sims %||% 500L
-      one_design_sims(design, sims = effective_sims,
+      one_design_sims(design, sims = sims %||% 500L,
                       design_label = design_label, multi = multi)
     }
   })
@@ -100,17 +93,15 @@ warn_sims_draws_conflict <- function(design, sims) {
   step_draws <- get_step_draws(design)
   total_nested <- prod(step_draws)
   lines <- purrr::imap_chr(step_draws, function(d, nm) {
-    flag <- if (d > 1L) paste0("  draws = ", d, "  -> ignored") else
-      paste0("  draws = ", d)
+    flag <- if (d > 1L) paste0("draws = ", d) else "draws = 1"
     sprintf("    %-20s %s", nm, flag)
   })
   rlang::warn(paste0(
-    "Both `sims` and step-level `draws` are set. ",
-    "Using `sims = ", sims, "` (flat simulation).\n",
-    "  Step-level draws declared but ignored:\n",
+    "`sims = ", sims, "` ignored: step-level `draws` are declared and take priority.\n",
+    "  Simulation plan:\n",
     paste(lines, collapse = "\n"), "\n",
-    "  Would have run: ", total_nested, " paths. ",
-    "Running: ", sims, " flat simulations instead."
+    "  Running: ", total_nested, " nested paths ",
+    "(", paste(step_draws[step_draws > 1L], collapse = " x "), ")."
   ))
 }
 
