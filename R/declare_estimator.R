@@ -60,12 +60,37 @@ normalize_inquiry <- function(inquiry) {
   as.character(inquiry)
 }
 
+#' Evaluate a list of quosures preserving formulas
+#'
+#' Splats a named list of quosures into ordinary argument values for
+#' `do.call()`. Quosures whose expressions are formulas are returned as
+#' formula objects so NSE-using methods (e.g., `lm_robust`, `lm_lin`) see the
+#' expected formula on their right-hand side.
+#'
+#' @keywords internal
+#' @noRd
+eval_dots <- function(dots, data = NULL) {
+  lapply(dots, function(q) {
+    e <- rlang::quo_get_expr(q)
+    # Detect a `~` call (which `rlang::is_formula()` treats as a formula even
+    # before evaluation). Evaluate it in the quosure's environment so the
+    # resulting formula object carries that environment with it.
+    if (rlang::is_formula(e)) {
+      env <- rlang::quo_get_env(q)
+      f <- eval(e, envir = env)
+      if (is.null(environment(f))) environment(f) <- env
+      return(f)
+    }
+    rlang::eval_tidy(q, data = data)
+  })
+}
+
 #' Build an estimator/test step closure
 #'
 #' @keywords internal
 #' @noRd
 make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
-                                add_inquiry) {
+                                add_inquiry, handler = NULL) {
   force(method)
   force(summary_fn)
   force(dots)
@@ -73,20 +98,36 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
   force(inquiry)
   force(term)
   force(add_inquiry)
+  force(handler)
   function(data) {
-    fit <- rlang::inject(method(!!!dots, data = data))
-    res <- summary_fn(fit)
-    res <- tibble::as_tibble(res)
-    res$estimator <- label
-    if (add_inquiry && !is.null(inquiry)) {
-      if (length(inquiry) == 1L || nrow(res) == length(inquiry)) {
-        res$inquiry <- inquiry
-      } else {
-        res$inquiry <- inquiry[1]
-      }
+    if (!is.null(handler)) {
+      args <- eval_dots(dots, data = data)
+      res <- do.call(handler, c(list(data), args))
+    } else {
+      args <- eval_dots(dots, data = data)
+      fit <- do.call(method, c(args, list(data = data)))
+      res <- summary_fn(fit)
     }
-    if (!is.null(term)) {
+    res <- tibble::as_tibble(res)
+    if (!"estimator" %in% names(res) || all(is.na(res$estimator))) {
+      res$estimator <- label
+    }
+    # If a term filter is given, apply it; otherwise drop the (Intercept) row
+    # by default so single-inquiry estimators map cleanly to a single estimate.
+    if (!is.null(term) && "term" %in% names(res)) {
       res <- res[res$term %in% term, , drop = FALSE]
+    } else if ("term" %in% names(res) && nrow(res) > 1L) {
+      keep <- res$term != "(Intercept)"
+      if (any(keep)) res <- res[keep, , drop = FALSE]
+    }
+    if (add_inquiry && !is.null(inquiry)) {
+      if (!"inquiry" %in% names(res)) {
+        if (length(inquiry) == 1L || nrow(res) == length(inquiry)) {
+          res$inquiry <- inquiry
+        } else {
+          res$inquiry <- inquiry[1]
+        }
+      }
     }
     res
   }
@@ -108,6 +149,9 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
 #' @param term Optional character vector restricting which model terms appear
 #'   in the result.
 #' @param label Step label. Defaults to `"estimator"`.
+#' @param handler Optional handler function. When supplied, the estimator
+#'   bypasses `.method`/`.summary` and instead calls
+#'   `handler(data, ...evaluated_dots...)`, which must return a tidy table.
 #' @return A `design_step`.
 #' @export
 #' @examples
@@ -117,7 +161,8 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
 #'                     inquiry = "mu", label = "ols")
 #' draw_estimates(design)
 declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
-                              inquiry = NULL, term = NULL, label = "estimator") {
+                              inquiry = NULL, term = NULL, label = "estimator",
+                              handler = NULL) {
   dots <- rlang::enquos(...)
   call <- sys.call()
   if (is.null(.method)) {
@@ -135,7 +180,8 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
     label       = label,
     inquiry     = inquiry_chr,
     term        = term,
-    add_inquiry = TRUE
+    add_inquiry = TRUE,
+    handler     = handler
   )
   build_step(
     fn           = fn,
@@ -148,7 +194,8 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
     method_arg   = .method,
     summary_arg  = .summary,
     inquiry_arg  = inquiry_chr,
-    term_arg     = term
+    term_arg     = term,
+    handler_fn   = handler
   )
 }
 
@@ -158,6 +205,9 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
 #' column; intended for tests not tied to an estimand.
 #'
 #' @inheritParams declare_estimator
+#' @param handler Optional handler function. When supplied, the test bypasses
+#'   `.method`/`.summary` and instead calls `handler(data, ...)` with the
+#'   evaluated dots, which must return a tidy table.
 #' @return A `design_step`.
 #' @export
 #' @examples
@@ -165,7 +215,7 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
 #'   declare_test(Y ~ Z, .method = lm, term = "Z", label = "diff")
 #' draw_estimates(design)
 declare_test <- function(..., .method = NULL, .summary = tidy_try,
-                         term = NULL, label = "test") {
+                         term = NULL, label = "test", handler = NULL) {
   dots <- rlang::enquos(...)
   call <- sys.call()
   if (is.null(.method)) .method <- stats::lm
@@ -176,7 +226,8 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
     label       = label,
     inquiry     = NULL,
     term        = term,
-    add_inquiry = FALSE
+    add_inquiry = FALSE,
+    handler     = handler
   )
   build_step(
     fn           = fn,
@@ -189,7 +240,8 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
     method_arg   = .method,
     summary_arg  = .summary,
     inquiry_arg  = NULL,
-    term_arg     = term
+    term_arg     = term,
+    handler_fn   = handler
   )
 }
 

@@ -9,7 +9,8 @@ declare_test(
   .method = NULL,
   .summary = tidy_try,
   term = NULL,
-  label = "test"
+  label = "test",
+  handler = NULL
 )
 }
 \arguments{
@@ -26,6 +27,10 @@ first (e.g., \code{Y ~ Z}).}
 in the result.}
 
 \item{label}{Step label. Defaults to \code{"estimator"}.}
+
+\item{handler}{Optional handler function. When supplied, the test bypasses
+\code{.method}/\code{.summary} and instead calls \code{handler(data, ...)} with the
+evaluated dots, which must return a tidy table.}
 }
 \value{
 A \code{design_step}.

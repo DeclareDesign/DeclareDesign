@@ -4,22 +4,34 @@
 #' call. Pulled out into its own helper so that [redesign()] can re-create
 #' steps after rebinding parameters in the captured environment.
 #'
+#' If the captured `dots` include a named `data` argument, that data frame is
+#' used as the starting state instead of (or in addition to) what is threaded
+#' in by the design.
+#'
 #' @param dots Named list of quosures.
 #' @param id_label_na Logical; if `TRUE`, pass `ID_label = NA` so fabricate
 #'   does not append a row id (used by measurement, assignment, sampling).
-#' @return A function of signature `function(data)`.
+#' @return A function of signature `function(data = NULL)`.
 #' @keywords internal
 #' @noRd
 make_fabricate_step <- function(dots, id_label_na = FALSE) {
   force(dots)
   force(id_label_na)
-  if (id_label_na) {
-    function(data) {
-      rlang::inject(fabricatr::fabricate(data = data, !!!dots, ID_label = NA))
+  function(data = NULL) {
+    nm <- names(dots) %||% rep("", length(dots))
+    is_data <- !is.na(nm) & nm == "data"
+    user_data_quo <- if (any(is_data)) dots[[which(is_data)[1]]] else NULL
+    rest <- dots[!is_data]
+    if (!is.null(user_data_quo)) {
+      user_data <- rlang::eval_tidy(user_data_quo)
+      if (is.null(data) || (is.data.frame(data) && nrow(data) == 0L)) {
+        data <- user_data
+      }
     }
-  } else {
-    function(data) {
-      rlang::inject(fabricatr::fabricate(data = data, !!!dots))
+    if (id_label_na) {
+      rlang::inject(fabricatr::fabricate(data = data, !!!rest, ID_label = NA))
+    } else {
+      rlang::inject(fabricatr::fabricate(data = data, !!!rest))
     }
   }
 }
@@ -115,9 +127,19 @@ declare_assignment <- function(..., label = "assignment") {
 make_sampling_step <- function(dots, filter_quo) {
   force(dots)
   force(filter_quo)
-  function(data) {
+  function(data = NULL) {
+    nm <- names(dots) %||% rep("", length(dots))
+    is_data <- !is.na(nm) & nm == "data"
+    user_data_quo <- if (any(is_data)) dots[[which(is_data)[1]]] else NULL
+    rest <- dots[!is_data]
+    if (!is.null(user_data_quo)) {
+      user_data <- rlang::eval_tidy(user_data_quo)
+      if (is.null(data) || (is.data.frame(data) && nrow(data) == 0L)) {
+        data <- user_data
+      }
+    }
     data <- rlang::inject(
-      fabricatr::fabricate(data = data, !!!dots, ID_label = NA)
+      fabricatr::fabricate(data = data, !!!rest, ID_label = NA)
     )
     if (!is.null(filter_quo)) {
       keep <- rlang::eval_tidy(filter_quo, data = data)

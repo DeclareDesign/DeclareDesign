@@ -7,13 +7,13 @@
 \alias{declare_estimands}
 \title{Declare an inquiry (estimand)}
 \usage{
-declare_inquiry(..., subset = NULL, label = "inquiry")
+declare_inquiry(..., subset = NULL, label = "inquiry", handler = NULL)
 
-declare_inquiries(..., subset = NULL, label = "inquiry")
+declare_inquiries(..., subset = NULL, label = "inquiry", handler = NULL)
 
-declare_estimand(..., subset = NULL, label = "inquiry")
+declare_estimand(..., subset = NULL, label = "inquiry", handler = NULL)
 
-declare_estimands(..., subset = NULL, label = "inquiry")
+declare_estimands(..., subset = NULL, label = "inquiry", handler = NULL)
 }
 \arguments{
 \item{...}{Named expressions. Each expression becomes an inquiry whose
@@ -23,6 +23,11 @@ numeric value is recorded in the simulation output.}
 estimands are computed.}
 
 \item{label}{Step label. Defaults to \code{"inquiry"}.}
+
+\item{handler}{Optional alternative handler. When supplied, \code{...} arguments
+are evaluated against the data and passed to \code{handler()} rather than
+being treated as named scalar inquiries; useful for vectorised inquiry
+sets (for example, \code{handler = tibble}).}
 }
 \value{
 A \code{design_step}.

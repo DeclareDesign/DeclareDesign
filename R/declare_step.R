@@ -21,7 +21,9 @@ declare_step <- function(handler, ..., label = "custom_step") {
   call <- sys.call()
   force(handler)
   fn <- function(data) {
-    args <- lapply(dots, function(q) rlang::eval_tidy(q, data = data))
+    args <- lapply(dots, function(q) {
+      rlang::eval_tidy(q, data = if (is.data.frame(data)) as.list(data) else NULL)
+    })
     do.call(handler, c(list(data), args))
   }
   build_step(

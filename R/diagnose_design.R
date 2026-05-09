@@ -38,13 +38,30 @@ compute_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
   if (is.null(dots)) {
     stop("`diagnosands` must be a declare_diagnosands() object.")
   }
+  # Wrap each diagnosand expression so a missing-column or evaluation error
+  # in a single diagnosand yields NA rather than aborting the whole table.
+  # Useful when the design has no inquiries (no `estimand` column) but the
+  # default diagnosands include bias / coverage.
+  safe_dots <- purrr::imap(dots, function(q, nm) {
+    expr <- rlang::quo_get_expr(q)
+    env  <- rlang::quo_get_env(q)
+    rlang::new_quosure(
+      rlang::call2(
+        "tryCatch",
+        rlang::call2("suppressWarnings", expr),
+        error   = rlang::call2("function", as.pairlist(alist(e = )),
+                                quote(NA_real_))
+      ),
+      env = env
+    )
+  })
   if (length(group_by_set) == 0) {
-    out <- dplyr::summarize(simulations_df, !!!dots)
+    out <- dplyr::summarize(simulations_df, !!!safe_dots)
     return(tibble::as_tibble(out))
   }
   out <- simulations_df |>
     dplyr::group_by(dplyr::across(dplyr::all_of(group_by_set))) |>
-    dplyr::summarize(!!!dots, .groups = "drop")
+    dplyr::summarize(!!!safe_dots, .groups = "drop")
   tibble::as_tibble(out)
 }
 
@@ -112,13 +129,8 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set, B) 
 #' diagnose_design(design, sims = 5, bootstrap_sims = 0)
 diagnose_design <- function(..., sims = 500, bootstrap_sims = 100,
                             diagnosands = NULL) {
-  designs <- rlang::dots_list(..., .named = TRUE)
-  designs <- lapply(designs, function(d) {
-    if (inherits(d, "design_step")) {
-      construct_design(wrap_step(d))
-    } else d
-  })
-  designs <- Filter(function(d) inherits(d, "design"), designs)
+  raw <- rlang::dots_list(..., .named = TRUE)
+  designs <- flatten_designs(raw)
   if (length(designs) == 0) {
     stop("diagnose_design() requires at least one `design` object.")
   }
@@ -127,7 +139,9 @@ diagnose_design <- function(..., sims = 500, bootstrap_sims = 100,
     user_diags <- Filter(Negate(is.null), user_diags)
     diagnosands <- if (length(user_diags) > 0) user_diags[[1]] else default_diagnosands()
   }
-  simulations_df <- simulate_design(!!!designs, sims = sims)
+  simulations_df <- rlang::inject(
+    simulate_design(!!!designs, sims = sims)
+  )
   diagnose_simulations(
     simulations_df,
     diagnosands    = diagnosands,
@@ -156,8 +170,9 @@ diagnose_designs <- diagnose_design
 diagnose_simulations <- function(simulations_df,
                                  diagnosands = default_diagnosands(),
                                  bootstrap_sims = 100) {
+  param_cols <- attr(simulations_df, "parameter_names")
   group_by_set <- intersect(
-    c("design", "inquiry", "estimator", "outcome", "term"),
+    c("design", param_cols, "inquiry", "estimator", "outcome", "term"),
     names(simulations_df)
   )
   diagnosands_df <- compute_diagnosands(simulations_df, diagnosands,

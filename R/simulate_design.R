@@ -15,13 +15,8 @@
 #'                     label = "ols")
 #' simulate_design(design, sims = 3)
 simulate_design <- function(..., sims = 500) {
-  designs <- rlang::dots_list(..., .named = TRUE)
-  designs <- lapply(designs, function(d) {
-    if (inherits(d, "design_step")) {
-      construct_design(wrap_step(d))
-    } else d
-  })
-  designs <- Filter(function(d) inherits(d, "design"), designs)
+  raw <- rlang::dots_list(..., .named = TRUE)
+  designs <- flatten_designs(raw)
   if (length(designs) == 0) {
     stop("simulate_design() requires at least one `design` object.")
   }
@@ -30,7 +25,61 @@ simulate_design <- function(..., sims = 500) {
     one_design_sims(design, sims = sims, design_label = design_label,
                     multi = multi)
   })
-  dplyr::bind_rows(per_design)
+  out <- dplyr::bind_rows(per_design)
+  param_names <- unique(unlist(lapply(designs, function(d) {
+    p <- attr(d, "parameters")
+    if (is.null(p)) character(0) else names(p)
+  })))
+  if (length(param_names) > 0) {
+    attr(out, "parameter_names") <- param_names
+  }
+  out
+}
+
+#' Flatten a list of designs / lists-of-designs / steps
+#'
+#' Accepts the raw `...` list passed by users to `simulate_design()` and
+#' `diagnose_design()`. Promotes bare design steps to single-step designs,
+#' recursively flattens lists (so the output of `redesign()` is accepted
+#' transparently), and preserves user-supplied names where available.
+#'
+#' @param raw A list of designs, design_steps, or lists thereof.
+#' @return A flat named list of `design` objects.
+#' @keywords internal
+#' @noRd
+flatten_designs <- function(raw) {
+  out <- list()
+  for (i in seq_along(raw)) {
+    item <- raw[[i]]
+    nm <- names(raw)[i]
+    if (inherits(item, "design")) {
+      label <- if (!is.null(nm) && nzchar(nm)) nm else
+        paste0("design_", length(out) + 1L)
+      out[[label]] <- item
+    } else if (inherits(item, "design_step")) {
+      label <- if (!is.null(nm) && nzchar(nm)) nm else
+        paste0("design_", length(out) + 1L)
+      out[[label]] <- construct_design(wrap_step(item))
+    } else if (is.list(item)) {
+      sub <- flatten_designs(item)
+      if (length(sub) > 0) {
+        sub_names <- names(sub)
+        if (!is.null(nm) && nzchar(nm) && length(sub) == 1L) {
+          names(sub) <- nm
+        } else if (!is.null(nm) && nzchar(nm)) {
+          names(sub) <- paste0(nm, "_", sub_names)
+        }
+        for (k in names(sub)) {
+          label <- k
+          if (label %in% names(out)) {
+            label <- make.unique(c(names(out), label))[length(out) + 1L]
+          }
+          out[[label]] <- sub[[k]]
+        }
+      }
+    }
+  }
+  out
 }
 
 #' @rdname simulate_design
@@ -65,6 +114,12 @@ one_design_sims <- function(design, sims, design_label = "design",
   if (multi && nrow(out) > 0) {
     out$design <- design_label
     out <- dplyr::relocate(out, "design")
+  }
+  params <- attr(design, "parameters")
+  if (!is.null(params) && nrow(out) > 0) {
+    for (nm in names(params)) {
+      if (!nm %in% names(out)) out[[nm]] <- params[[nm]]
+    }
   }
   out
 }

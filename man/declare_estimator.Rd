@@ -10,7 +10,8 @@ declare_estimator(
   .summary = tidy_try,
   inquiry = NULL,
   term = NULL,
-  label = "estimator"
+  label = "estimator",
+  handler = NULL
 )
 }
 \arguments{
@@ -30,6 +31,10 @@ list of these; used to join the estimate to its target estimand.}
 in the result.}
 
 \item{label}{Step label. Defaults to \code{"estimator"}.}
+
+\item{handler}{Optional handler function. When supplied, the estimator
+bypasses \code{.method}/\code{.summary} and instead calls
+\code{handler(data, ...evaluated_dots...)}, which must return a tidy table.}
 }
 \value{
 A \code{design_step}.

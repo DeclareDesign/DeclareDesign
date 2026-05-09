@@ -16,7 +16,8 @@ rebuild_step <- function(step, new_dots) {
     "measurement" = make_fabricate_step(new_dots, id_label_na = TRUE),
     "assignment"  = make_fabricate_step(new_dots, id_label_na = TRUE),
     "sampling"    = make_sampling_step(new_dots, attr(step, "filter_quo")),
-    "inquiry"     = make_inquiry_step(new_dots, attr(step, "subset_quo"), label),
+    "inquiry"     = make_inquiry_step(new_dots, attr(step, "subset_quo"), label,
+                                       handler = attr(step, "handler_fn")),
     "estimator"   = make_estimator_step(
       method      = attr(step, "method_arg"),
       summary_fn  = attr(step, "summary_arg"),
@@ -24,7 +25,8 @@ rebuild_step <- function(step, new_dots) {
       label       = label,
       inquiry     = attr(step, "inquiry_arg"),
       term        = attr(step, "term_arg"),
-      add_inquiry = TRUE
+      add_inquiry = TRUE,
+      handler     = attr(step, "handler_fn")
     ),
     "test"        = make_estimator_step(
       method      = attr(step, "method_arg"),
@@ -33,7 +35,8 @@ rebuild_step <- function(step, new_dots) {
       label       = label,
       inquiry     = NULL,
       term        = attr(step, "term_arg"),
-      add_inquiry = FALSE
+      add_inquiry = FALSE,
+      handler     = attr(step, "handler_fn")
     ),
     "diagnosand"  = {
       d <- new_dots
@@ -49,7 +52,9 @@ rebuild_step <- function(step, new_dots) {
       handler <- attr(step, "handler_fn")
       d <- new_dots
       function(data) {
-        args <- lapply(d, function(q) rlang::eval_tidy(q, data = data))
+        args <- lapply(d, function(q) {
+          rlang::eval_tidy(q, data = if (is.data.frame(data)) as.list(data) else NULL)
+        })
         do.call(handler, c(list(data), args))
       }
     },
@@ -102,13 +107,16 @@ modify_design_params <- function(design, params) {
             )
             changed <- TRUE
           } else {
-            # Case 2: parameter appears as a free symbol in another quosure's env
-            env <- rlang::quo_get_env(q)
-            if (env_has_var(env, param_name)) {
+            # Case 2: parameter appears as a free symbol in the quosure's expr
+            # or environment chain. In either case we clone the env and bind
+            # the new value so subsequent eval_tidy() resolves it.
+            expr <- rlang::quo_get_expr(q)
+            if (env_has_var(rlang::quo_get_env(q), param_name) ||
+                expr_has_symbol(expr, param_name)) {
+              env <- rlang::quo_get_env(q)
               new_env <- rlang::env_clone(env)
               rlang::env_bind(new_env, !!param_name := new_val)
-              new_dots[[j]] <- rlang::new_quosure(rlang::quo_get_expr(q),
-                                                  env = new_env)
+              new_dots[[j]] <- rlang::new_quosure(expr, env = new_env)
               changed <- TRUE
             }
           }
@@ -116,21 +124,21 @@ modify_design_params <- function(design, params) {
       }
       if (!is.null(new_filter)) {
         env <- rlang::quo_get_env(new_filter)
-        if (env_has_var(env, param_name)) {
+        expr <- rlang::quo_get_expr(new_filter)
+        if (env_has_var(env, param_name) || expr_has_symbol(expr, param_name)) {
           new_env <- rlang::env_clone(env)
           rlang::env_bind(new_env, !!param_name := new_val)
-          new_filter <- rlang::new_quosure(rlang::quo_get_expr(new_filter),
-                                            env = new_env)
+          new_filter <- rlang::new_quosure(expr, env = new_env)
           changed <- TRUE
         }
       }
       if (!is.null(new_subset)) {
         env <- rlang::quo_get_env(new_subset)
-        if (env_has_var(env, param_name)) {
+        expr <- rlang::quo_get_expr(new_subset)
+        if (env_has_var(env, param_name) || expr_has_symbol(expr, param_name)) {
           new_env <- rlang::env_clone(env)
           rlang::env_bind(new_env, !!param_name := new_val)
-          new_subset <- rlang::new_quosure(rlang::quo_get_expr(new_subset),
-                                            env = new_env)
+          new_subset <- rlang::new_quosure(expr, env = new_env)
           changed <- TRUE
         }
       }
@@ -157,14 +165,16 @@ modify_design_params <- function(design, params) {
     }
     if (identical(attr(step, "step_type"), "inquiry")) {
       out_step <- build_step(
-        fn = make_inquiry_step(new_dots, new_subset, attr(step, "label")),
+        fn = make_inquiry_step(new_dots, new_subset, attr(step, "label"),
+                                handler = attr(step, "handler_fn")),
         handler_expr = attr(step, "handler_expr"),
         dots = new_dots,
         step_type = "inquiry",
         causal_type = "inquiry",
         label = attr(step, "label"),
         call = attr(step, "call"),
-        subset_quo = new_subset
+        subset_quo = new_subset,
+        handler_fn = attr(step, "handler_fn")
       )
     }
     out_step
@@ -182,6 +192,24 @@ env_has_var <- function(env, name) {
     rlang::env_has(env, name, inherit = TRUE)[[1]],
     error = function(e) FALSE
   )
+}
+
+#' Test whether an expression mentions a symbol
+#'
+#' Walks the language tree of `expr` looking for the symbol `name`. Used by
+#' `redesign()` to decide whether a parameter is referenced inside a captured
+#' quosure even when no binding exists in the surrounding environment.
+#'
+#' @keywords internal
+#' @noRd
+expr_has_symbol <- function(expr, name) {
+  if (is.symbol(expr)) return(identical(as.character(expr), name))
+  if (is.call(expr)) {
+    for (i in seq_along(expr)) {
+      if (expr_has_symbol(expr[[i]], name)) return(TRUE)
+    }
+  }
+  FALSE
 }
 
 #' Re-parameterize a design
