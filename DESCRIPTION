@@ -22,6 +22,7 @@ Imports:
 Suggests:
     estimatr,
     furrr,
+    future,
     knitr,
     metafor,
     randomizr,

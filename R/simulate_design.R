@@ -4,6 +4,11 @@
 #' single long tibble suitable for diagnosis. When more than one design is
 #' supplied, a `design` column distinguishes them.
 #'
+#' Parallelism is handled transparently via the `future` ecosystem. Call
+#' `future::plan(multisession, workers = 4)` before `simulate_design()` and,
+#' if the `furrr` package is installed, simulations will run in parallel with
+#' no other changes required.
+#'
 #' @param ... One or more `design` objects.
 #' @param sims Number of simulations per design.
 #' @return A tibble of stacked simulation results.
@@ -92,7 +97,8 @@ simulate_designs <- simulate_design
 #' @noRd
 one_design_sims <- function(design, sims, design_label = "design",
                             multi = FALSE) {
-  results <- purrr::map(seq_len(sims), function(i) {
+  map_fn <- sim_map_fn()
+  results <- map_fn(seq_len(sims), function(i) {
     r <- run_design(design)
     list(inquiries = r$inquiries, estimates = r$estimates)
   })

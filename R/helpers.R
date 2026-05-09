@@ -10,6 +10,32 @@
 #' pop.var(c(1, 2, 3, 4, 5))
 pop.var <- function(x) mean((x - mean(x, na.rm = TRUE))^2, na.rm = TRUE)
 
+# Pick the best available map function for the simulation loop.
+# Only switches to furrr::future_map when (a) furrr is installed AND (b) the
+# active future plan is actually parallel. Under the default sequential plan,
+# furrr adds overhead with no benefit. With a parallel plan, furrr::future_map
+# is used with seed = TRUE for statistically valid parallel RNG (L'Ecuyer-CMRG).
+# Users enable parallelism with future::plan(multisession, workers = N) before
+# calling simulate_design() -- no other changes needed.
+sim_map_fn <- function() {
+  has_furrr <- requireNamespace("furrr", quietly = TRUE)
+  has_future <- requireNamespace("future", quietly = TRUE)
+  if (has_furrr && has_future &&
+      !inherits(future::plan(), "sequential")) {
+    # Snapshot attached packages so workers can load the same ones.
+    # This ensures functions like complete_ra(), lm_robust(), etc. referenced
+    # in quosure environments are available on each worker.
+    pkgs <- setdiff(
+      sub("^package:", "", grep("^package:", search(), value = TRUE)),
+      c("base", ".GlobalEnv", "Autoloads")
+    )
+    opts <- furrr::furrr_options(seed = TRUE, packages = pkgs)
+    function(x, f, ...) furrr::future_map(x, f, ..., .options = opts)
+  } else {
+    purrr::map
+  }
+}
+
 #' Capture variables as quosures
 #'
 #' Convenience alias for [rlang::quos()] used inside design declarations to

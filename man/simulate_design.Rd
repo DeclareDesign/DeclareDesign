@@ -22,6 +22,12 @@ Runs each design \code{sims} times, collecting estimands and estimates into a
 single long tibble suitable for diagnosis. When more than one design is
 supplied, a \code{design} column distinguishes them.
 }
+\details{
+Parallelism is handled transparently via the \code{future} ecosystem. Call
+\code{future::plan(multisession, workers = 4)} before \code{simulate_design()} and,
+if the \code{furrr} package is installed, simulations will run in parallel with
+no other changes required.
+}
 \examples{
 design <- declare_model(N = 30, U = rnorm(N), Z = rep(0:1, 15), Y = U + Z) +
   declare_inquiry(ATE = 1) +

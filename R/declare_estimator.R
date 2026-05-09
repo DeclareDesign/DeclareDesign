@@ -13,6 +13,10 @@
 #' fit <- lm(mpg ~ wt, data = mtcars)
 #' tidy_try(fit)
 tidy_try <- function(fit, ...) {
+  # If the handler already returned a tidy data frame, pass it through directly.
+  # broom::tidy.data.frame is deprecated (it computes column-level summary stats,
+  # not what we want) and will be removed; the right fix is to not call it at all.
+  if (is.data.frame(fit)) return(tibble::as_tibble(fit))
   out <- tryCatch(
     broom::tidy(fit, conf.int = TRUE, ...),
     error = function(e) NULL
@@ -99,12 +103,15 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
   force(term)
   force(add_inquiry)
   force(handler)
+  # Capture eval_dots by value so the closure is fully self-contained and works
+  # inside furrr workers without requiring the DeclareDesignZero namespace.
+  ed <- eval_dots
   function(data) {
     if (!is.null(handler)) {
-      args <- eval_dots(dots, data = data)
+      args <- ed(dots, data = data)
       res <- do.call(handler, c(list(data), args))
     } else {
-      args <- eval_dots(dots, data = data)
+      args <- ed(dots, data = data)
       fit <- do.call(method, c(args, list(data = data)))
       res <- summary_fn(fit)
     }
