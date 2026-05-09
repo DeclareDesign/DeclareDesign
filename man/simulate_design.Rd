@@ -5,14 +5,17 @@
 \alias{simulate_designs}
 \title{Simulate one or more designs}
 \usage{
-simulate_design(..., sims = 500)
+simulate_design(..., sims = NULL)
 
-simulate_designs(..., sims = 500)
+simulate_designs(..., sims = NULL)
 }
 \arguments{
 \item{...}{One or more \code{design} objects.}
 
-\item{sims}{Number of simulations per design.}
+\item{sims}{Number of simulations per design. Defaults to \code{NULL}. When
+\code{NULL} and the design has step-level \code{draws}, the design runs in nested
+mode; when \code{NULL} and the design has no step-level draws, defaults to
+\code{500}.}
 }
 \value{
 A tibble of stacked simulation results.
@@ -23,6 +26,12 @@ single long tibble suitable for diagnosis. When more than one design is
 supplied, a \code{design} column distinguishes them.
 }
 \details{
+If any step in a design has \code{draws > 1} and \code{sims} is not supplied, the
+simulation runs in nested mode: each step with \code{draws > 1} fans out, and
+the total simulation count equals the product of all \code{draws} values across
+steps. When \code{sims} is supplied alongside step-level \code{draws}, the flat
+\code{sims} simulation is used and a warning lists the ignored draw values.
+
 Parallelism is handled transparently via the \code{future} ecosystem. Call
 \code{future::plan(multisession, workers = 4)} before \code{simulate_design()} and,
 if the \code{furrr} package is installed, simulations will run in parallel with

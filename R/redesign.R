@@ -70,7 +70,7 @@ rebuild_step <- function(step, new_dots) {
     call         = call
   )
   carry <- c("filter_quo", "subset_quo", "method_arg", "summary_arg",
-             "inquiry_arg", "term_arg", "handler_fn")
+             "inquiry_arg", "term_arg", "handler_fn", "draws")
   for (nm in carry) {
     if (!is.null(attr(step, nm))) attr(out, nm) <- attr(step, nm)
   }
@@ -176,6 +176,9 @@ modify_design_params <- function(design, params) {
         subset_quo = new_subset,
         handler_fn = attr(step, "handler_fn")
       )
+    }
+    if (!is.null(attr(step, "draws"))) {
+      attr(out_step, "draws") <- attr(step, "draws")
     }
     out_step
   })

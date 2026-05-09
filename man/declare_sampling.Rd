@@ -4,7 +4,7 @@
 \alias{declare_sampling}
 \title{Declare a sampling procedure}
 \usage{
-declare_sampling(..., filter = NULL, label = "sampling")
+declare_sampling(..., filter = NULL, label = "sampling", draws = 1L)
 }
 \arguments{
 \item{...}{Named arguments forwarded to \code{\link[fabricatr:fabricate]{fabricatr::fabricate()}}. Unquoted
@@ -15,6 +15,9 @@ to the current data frame.}
 rows where the expression is \code{TRUE} are retained.}
 
 \item{label}{Step label. Defaults to \code{"model"}.}
+
+\item{draws}{Number of nested draws for this step. When \verb{> 1}, the step is
+re-executed \code{draws} times for each upstream draw during nested simulation.}
 }
 \value{
 A \code{design_step}.

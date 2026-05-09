@@ -4,7 +4,7 @@
 \alias{declare_assignment}
 \title{Declare an assignment procedure}
 \usage{
-declare_assignment(..., label = "assignment")
+declare_assignment(..., label = "assignment", draws = 1L)
 }
 \arguments{
 \item{...}{Named arguments forwarded to \code{\link[fabricatr:fabricate]{fabricatr::fabricate()}}. Unquoted
@@ -12,6 +12,9 @@ expressions are evaluated lazily in the caller's environment with access
 to the current data frame.}
 
 \item{label}{Step label. Defaults to \code{"model"}.}
+
+\item{draws}{Number of nested draws for this step. When \verb{> 1}, the step is
+re-executed \code{draws} times for each upstream draw during nested simulation.}
 }
 \value{
 A \code{design_step}.

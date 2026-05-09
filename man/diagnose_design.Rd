@@ -5,14 +5,17 @@
 \alias{diagnose_designs}
 \title{Diagnose a design}
 \usage{
-diagnose_design(..., sims = 500, bootstrap_sims = 100, diagnosands = NULL)
+diagnose_design(..., sims = NULL, bootstrap_sims = 100, diagnosands = NULL)
 
-diagnose_designs(..., sims = 500, bootstrap_sims = 100, diagnosands = NULL)
+diagnose_designs(..., sims = NULL, bootstrap_sims = 100, diagnosands = NULL)
 }
 \arguments{
 \item{...}{One or more \code{design} objects.}
 
-\item{sims}{Number of simulations.}
+\item{sims}{Number of simulations. Defaults to \code{NULL}. When \code{NULL}, designs
+with step-level \code{draws} run in nested mode; otherwise the design runs
+\code{500} flat simulations. When supplied alongside step-level \code{draws}, the
+\code{draws} are ignored and a warning is emitted.}
 
 \item{bootstrap_sims}{Number of bootstrap replicates for diagnosand SEs.}
 
@@ -20,7 +23,8 @@ diagnose_designs(..., sims = 500, bootstrap_sims = 100, diagnosands = NULL)
 \code{\link[=declare_diagnosands]{declare_diagnosands()}}). Defaults to \code{\link[=default_diagnosands]{default_diagnosands()}}.}
 }
 \value{
-A \code{diagnosis} object.
+A \code{diagnosis} object. When the simulation was nested, the result
+carries an additional \verb{$variance_decomposition} slot.
 }
 \description{
 Simulates the design and computes diagnosands (bias, RMSE, power, coverage,

@@ -11,7 +11,8 @@ declare_estimator(
   inquiry = NULL,
   term = NULL,
   label = "estimator",
-  handler = NULL
+  handler = NULL,
+  draws = 1L
 )
 }
 \arguments{
@@ -35,6 +36,9 @@ in the result.}
 \item{handler}{Optional handler function. When supplied, the estimator
 bypasses \code{.method}/\code{.summary} and instead calls
 \code{handler(data, ...evaluated_dots...)}, which must return a tidy table.}
+
+\item{draws}{Number of nested draws for this step. When \verb{> 1}, the step is
+re-executed \code{draws} times for each upstream draw during nested simulation.}
 }
 \value{
 A \code{design_step}.

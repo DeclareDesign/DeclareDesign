@@ -7,6 +7,8 @@
 #' @param ... Additional arguments forwarded (unevaluated, then evaluated in
 #'   the caller's environment) to `handler`.
 #' @param label Step label.
+#' @param draws Number of nested draws for this step. When `> 1`, the step is
+#'   re-executed `draws` times for each upstream draw during nested simulation.
 #' @return A `design_step`.
 #' @export
 #' @examples
@@ -16,7 +18,7 @@
 #' }, k = 2)
 #' df <- data.frame(X = 1:5)
 #' step(df)
-declare_step <- function(handler, ..., label = "custom_step") {
+declare_step <- function(handler, ..., label = "custom_step", draws = 1L) {
   dots <- rlang::enquos(...)
   call <- sys.call()
   force(handler)
@@ -26,7 +28,7 @@ declare_step <- function(handler, ..., label = "custom_step") {
     })
     do.call(handler, c(list(data), args))
   }
-  build_step(
+  step <- build_step(
     fn          = fn,
     handler_expr = rlang::enexpr(handler),
     dots        = dots,
@@ -36,4 +38,6 @@ declare_step <- function(handler, ..., label = "custom_step") {
     call        = call,
     handler_fn  = handler
   )
+  attr(step, "draws") <- as.integer(draws)
+  step
 }

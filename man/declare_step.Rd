@@ -4,7 +4,7 @@
 \alias{declare_step}
 \title{Declare a custom data-handling step}
 \usage{
-declare_step(handler, ..., label = "custom_step")
+declare_step(handler, ..., label = "custom_step", draws = 1L)
 }
 \arguments{
 \item{handler}{A function whose first argument is \code{data}.}
@@ -13,6 +13,9 @@ declare_step(handler, ..., label = "custom_step")
 the caller's environment) to \code{handler}.}
 
 \item{label}{Step label.}
+
+\item{draws}{Number of nested draws for this step. When \verb{> 1}, the step is
+re-executed \code{draws} times for each upstream draw during nested simulation.}
 }
 \value{
 A \code{design_step}.

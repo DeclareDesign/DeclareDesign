@@ -47,17 +47,19 @@ make_fabricate_step <- function(dots, id_label_na = FALSE) {
 #'   expressions are evaluated lazily in the caller's environment with access
 #'   to the current data frame.
 #' @param label Step label. Defaults to `"model"`.
+#' @param draws Number of nested draws for this step. When `> 1`, the step is
+#'   re-executed `draws` times for each upstream draw during nested simulation.
 #' @return A `design_step`.
 #' @export
 #' @examples
 #' step <- declare_model(N = 50, U = rnorm(N), Y = U + 1)
 #' df <- step(NULL)
 #' nrow(df)
-declare_model <- function(..., label = "model") {
+declare_model <- function(..., label = "model", draws = 1L) {
   dots <- rlang::enquos(...)
   call <- sys.call()
   fn <- make_fabricate_step(dots, id_label_na = FALSE)
-  build_step(
+  step <- build_step(
     fn          = fn,
     handler_expr = quote(fabricatr::fabricate),
     dots        = dots,
@@ -66,6 +68,8 @@ declare_model <- function(..., label = "model") {
     label       = label,
     call        = call
   )
+  attr(step, "draws") <- as.integer(draws)
+  step
 }
 
 #' Declare measurement
@@ -79,11 +83,11 @@ declare_model <- function(..., label = "model") {
 #' @examples
 #' step <- declare_measurement(Y = Y_Z_0 * (1 - Z) + Y_Z_1 * Z)
 #' attr(step, "step_type")
-declare_measurement <- function(..., label = "measurement") {
+declare_measurement <- function(..., label = "measurement", draws = 1L) {
   dots <- rlang::enquos(...)
   call <- sys.call()
   fn <- make_fabricate_step(dots, id_label_na = TRUE)
-  build_step(
+  step <- build_step(
     fn          = fn,
     handler_expr = quote(fabricatr::fabricate),
     dots        = dots,
@@ -92,6 +96,8 @@ declare_measurement <- function(..., label = "measurement") {
     label       = label,
     call        = call
   )
+  attr(step, "draws") <- as.integer(draws)
+  step
 }
 
 #' Declare an assignment procedure
@@ -105,11 +111,11 @@ declare_measurement <- function(..., label = "measurement") {
 #' @examples
 #' step <- declare_assignment(Z = sample(rep(0:1, length.out = N)))
 #' attr(step, "step_type")
-declare_assignment <- function(..., label = "assignment") {
+declare_assignment <- function(..., label = "assignment", draws = 1L) {
   dots <- rlang::enquos(...)
   call <- sys.call()
   fn <- make_fabricate_step(dots, id_label_na = TRUE)
-  build_step(
+  step <- build_step(
     fn          = fn,
     handler_expr = quote(fabricatr::fabricate),
     dots        = dots,
@@ -118,6 +124,8 @@ declare_assignment <- function(..., label = "assignment") {
     label       = label,
     call        = call
   )
+  attr(step, "draws") <- as.integer(draws)
+  step
 }
 
 #' Build a sampling step closure
@@ -166,13 +174,14 @@ make_sampling_step <- function(dots, filter_quo) {
 #' @examples
 #' step <- declare_sampling(S = sample(rep(0:1, length.out = N)))
 #' attr(step, "step_type")
-declare_sampling <- function(..., filter = NULL, label = "sampling") {
+declare_sampling <- function(..., filter = NULL, label = "sampling",
+                             draws = 1L) {
   dots <- rlang::enquos(...)
   filter_quo <- rlang::enquo(filter)
   if (rlang::quo_is_null(filter_quo)) filter_quo <- NULL
   call <- sys.call()
   fn <- make_sampling_step(dots, filter_quo)
-  build_step(
+  step <- build_step(
     fn           = fn,
     handler_expr = quote(fabricatr::fabricate),
     dots         = dots,
@@ -182,4 +191,6 @@ declare_sampling <- function(..., filter = NULL, label = "sampling") {
     call         = call,
     filter_quo   = filter_quo
   )
+  attr(step, "draws") <- as.integer(draws)
+  step
 }

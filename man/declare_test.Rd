@@ -10,7 +10,8 @@ declare_test(
   .summary = tidy_try,
   term = NULL,
   label = "test",
-  handler = NULL
+  handler = NULL,
+  draws = 1L
 )
 }
 \arguments{
@@ -31,6 +32,9 @@ in the result.}
 \item{handler}{Optional handler function. When supplied, the test bypasses
 \code{.method}/\code{.summary} and instead calls \code{handler(data, ...)} with the
 evaluated dots, which must return a tidy table.}
+
+\item{draws}{Number of nested draws for this step. When \verb{> 1}, the step is
+re-executed \code{draws} times for each upstream draw during nested simulation.}
 }
 \value{
 A \code{design_step}.

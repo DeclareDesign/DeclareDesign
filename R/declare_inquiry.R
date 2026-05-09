@@ -75,19 +75,21 @@ make_inquiry_step <- function(dots, subset_quo, label, handler = NULL) {
 #'   are evaluated against the data and passed to `handler()` rather than
 #'   being treated as named scalar inquiries; useful for vectorised inquiry
 #'   sets (for example, `handler = tibble`).
+#' @param draws Number of nested draws for this step. When `> 1`, the step is
+#'   re-executed `draws` times for each upstream draw during nested simulation.
 #' @return A `design_step`.
 #' @export
 #' @examples
 #' step <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 #' attr(step, "step_type")
 declare_inquiry <- function(..., subset = NULL, label = "inquiry",
-                            handler = NULL) {
+                            handler = NULL, draws = 1L) {
   dots <- rlang::enquos(...)
   subset_quo <- rlang::enquo(subset)
   if (rlang::quo_is_null(subset_quo)) subset_quo <- NULL
   call <- sys.call()
   fn <- make_inquiry_step(dots, subset_quo, label, handler = handler)
-  build_step(
+  step <- build_step(
     fn          = fn,
     handler_expr = quote(declare_inquiry),
     dots        = dots,
@@ -98,6 +100,8 @@ declare_inquiry <- function(..., subset = NULL, label = "inquiry",
     subset_quo  = subset_quo,
     handler_fn  = handler
   )
+  attr(step, "draws") <- as.integer(draws)
+  step
 }
 
 #' @rdname declare_inquiry

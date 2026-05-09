@@ -52,8 +52,28 @@ print.design_step <- function(x, ...) {
 #' d <- diagnose_design(design, sims = 5, bootstrap_sims = 0)
 #' print(d)
 print.diagnosis <- function(x, ...) {
-  cat("Research design diagnosis\n\n")
-  print(x$diagnosands_df)
+  cat("Research design diagnosis\n")
+  sims_df <- x$simulations_df
+  if (!is.null(sims_df) && "sim_ID" %in% names(sims_df) && nrow(sims_df) > 0) {
+    n <- suppressWarnings(max(sims_df$sim_ID, na.rm = TRUE))
+    if (is.finite(n)) {
+      msg <- sprintf("  %d simulations", n)
+      if (!is.null(x$variance_decomposition)) {
+        draw_levels <- x$variance_decomposition$draw_levels[1]
+        msg <- paste0(msg, sprintf(" [nested: %s]", draw_levels))
+      }
+      cat(msg, "\n", sep = "")
+    }
+  }
+  cat("\n")
+  cat("Diagnosands:\n")
+  print(x$diagnosands_df, ...)
+  if (!is.null(x$variance_decomposition)) {
+    cat("\nVariance decomposition:\n")
+    vd <- dplyr::select(x$variance_decomposition,
+                        -dplyr::any_of(c("n_sims", "draw_levels")))
+    print(vd, ...)
+  }
   invisible(x)
 }
 

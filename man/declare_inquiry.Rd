@@ -7,13 +7,37 @@
 \alias{declare_estimands}
 \title{Declare an inquiry (estimand)}
 \usage{
-declare_inquiry(..., subset = NULL, label = "inquiry", handler = NULL)
+declare_inquiry(
+  ...,
+  subset = NULL,
+  label = "inquiry",
+  handler = NULL,
+  draws = 1L
+)
 
-declare_inquiries(..., subset = NULL, label = "inquiry", handler = NULL)
+declare_inquiries(
+  ...,
+  subset = NULL,
+  label = "inquiry",
+  handler = NULL,
+  draws = 1L
+)
 
-declare_estimand(..., subset = NULL, label = "inquiry", handler = NULL)
+declare_estimand(
+  ...,
+  subset = NULL,
+  label = "inquiry",
+  handler = NULL,
+  draws = 1L
+)
 
-declare_estimands(..., subset = NULL, label = "inquiry", handler = NULL)
+declare_estimands(
+  ...,
+  subset = NULL,
+  label = "inquiry",
+  handler = NULL,
+  draws = 1L
+)
 }
 \arguments{
 \item{...}{Named expressions. Each expression becomes an inquiry whose
@@ -28,6 +52,9 @@ estimands are computed.}
 are evaluated against the data and passed to \code{handler()} rather than
 being treated as named scalar inquiries; useful for vectorised inquiry
 sets (for example, \code{handler = tibble}).}
+
+\item{draws}{Number of nested draws for this step. When \verb{> 1}, the step is
+re-executed \code{draws} times for each upstream draw during nested simulation.}
 }
 \value{
 A \code{design_step}.

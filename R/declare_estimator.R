@@ -159,6 +159,8 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
 #' @param handler Optional handler function. When supplied, the estimator
 #'   bypasses `.method`/`.summary` and instead calls
 #'   `handler(data, ...evaluated_dots...)`, which must return a tidy table.
+#' @param draws Number of nested draws for this step. When `> 1`, the step is
+#'   re-executed `draws` times for each upstream draw during nested simulation.
 #' @return A `design_step`.
 #' @export
 #' @examples
@@ -169,7 +171,7 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
 #' draw_estimates(design)
 declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
                               inquiry = NULL, term = NULL, label = "estimator",
-                              handler = NULL) {
+                              handler = NULL, draws = 1L) {
   dots <- rlang::enquos(...)
   call <- sys.call()
   if (is.null(.method)) {
@@ -190,7 +192,7 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
     add_inquiry = TRUE,
     handler     = handler
   )
-  build_step(
+  step <- build_step(
     fn           = fn,
     handler_expr = quote(declare_estimator),
     dots         = dots,
@@ -204,6 +206,8 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
     term_arg     = term,
     handler_fn   = handler
   )
+  attr(step, "draws") <- as.integer(draws)
+  step
 }
 
 #' Declare a hypothesis test
@@ -215,6 +219,8 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
 #' @param handler Optional handler function. When supplied, the test bypasses
 #'   `.method`/`.summary` and instead calls `handler(data, ...)` with the
 #'   evaluated dots, which must return a tidy table.
+#' @param draws Number of nested draws for this step. When `> 1`, the step is
+#'   re-executed `draws` times for each upstream draw during nested simulation.
 #' @return A `design_step`.
 #' @export
 #' @examples
@@ -222,7 +228,8 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
 #'   declare_test(Y ~ Z, .method = lm, term = "Z", label = "diff")
 #' draw_estimates(design)
 declare_test <- function(..., .method = NULL, .summary = tidy_try,
-                         term = NULL, label = "test", handler = NULL) {
+                         term = NULL, label = "test", handler = NULL,
+                         draws = 1L) {
   dots <- rlang::enquos(...)
   call <- sys.call()
   if (is.null(.method)) .method <- stats::lm
@@ -236,7 +243,7 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
     add_inquiry = FALSE,
     handler     = handler
   )
-  build_step(
+  step <- build_step(
     fn           = fn,
     handler_expr = quote(declare_test),
     dots         = dots,
@@ -250,6 +257,8 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
     term_arg     = term,
     handler_fn   = handler
   )
+  attr(step, "draws") <- as.integer(draws)
+  step
 }
 
 #' Wrap a custom function as a labeled estimator

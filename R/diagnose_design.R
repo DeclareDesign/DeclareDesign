@@ -115,11 +115,15 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set, B) 
 #' errors for each diagnosand are also reported.
 #'
 #' @param ... One or more `design` objects.
-#' @param sims Number of simulations.
+#' @param sims Number of simulations. Defaults to `NULL`. When `NULL`, designs
+#'   with step-level `draws` run in nested mode; otherwise the design runs
+#'   `500` flat simulations. When supplied alongside step-level `draws`, the
+#'   `draws` are ignored and a warning is emitted.
 #' @param bootstrap_sims Number of bootstrap replicates for diagnosand SEs.
 #' @param diagnosands A diagnosands `design_step` (e.g., from
 #'   [declare_diagnosands()]). Defaults to [default_diagnosands()].
-#' @return A `diagnosis` object.
+#' @return A `diagnosis` object. When the simulation was nested, the result
+#'   carries an additional `$variance_decomposition` slot.
 #' @export
 #' @examples
 #' design <- declare_model(N = 40, U = rnorm(N), Z = rep(0:1, 20), Y = U + Z) +
@@ -127,7 +131,7 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set, B) 
 #'   declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
 #'                     label = "ols")
 #' diagnose_design(design, sims = 5, bootstrap_sims = 0)
-diagnose_design <- function(..., sims = 500, bootstrap_sims = 100,
+diagnose_design <- function(..., sims = NULL, bootstrap_sims = 100,
                             diagnosands = NULL) {
   raw <- rlang::dots_list(..., .named = TRUE)
   designs <- flatten_designs(raw)
@@ -171,6 +175,8 @@ diagnose_simulations <- function(simulations_df,
                                  diagnosands = default_diagnosands(),
                                  bootstrap_sims = 100) {
   param_cols <- attr(simulations_df, "parameter_names")
+  draw_cols <- attr(simulations_df, "draw_cols")
+  nested <- isTRUE(attr(simulations_df, "nested")) && length(draw_cols) > 0
   group_by_set <- intersect(
     c("design", param_cols, "inquiry", "estimator", "outcome", "term"),
     names(simulations_df)
@@ -189,14 +195,82 @@ diagnose_simulations <- function(simulations_df,
       }
     }
   }
+  variance_decomposition <- NULL
+  if (nested) {
+    variance_decomposition <- compute_variance_decomposition(
+      simulations_df, draw_cols, group_by_set
+    )
+  }
   structure(
     list(
-      simulations_df  = simulations_df,
-      diagnosands_df  = diagnosands_df,
-      diagnosand_names = names(attr(diagnosands, "dots")),
-      group_by_set    = group_by_set,
-      bootstrap_sims  = bootstrap_sims
+      simulations_df         = simulations_df,
+      diagnosands_df         = diagnosands_df,
+      diagnosand_names       = names(attr(diagnosands, "dots")),
+      group_by_set           = group_by_set,
+      bootstrap_sims         = bootstrap_sims,
+      variance_decomposition = variance_decomposition
     ),
     class = "diagnosis"
   )
+}
+
+#' Decompose estimate variance by simulation draw level
+#'
+#' For nested simulations, splits the total variance of estimates into the
+#' part attributable to design-level fluctuation (within a single fixed world)
+#' and the part attributable to world-level fluctuation (variance of the
+#' average estimate across worlds). The split uses the law of total variance
+#' with the outermost step that has `draws > 1` as the world identifier.
+#'
+#' @param simulations_df A simulations table with `draw_cols` attached.
+#' @param draw_cols Character vector of draw-tracking columns, ordered
+#'   outermost to innermost.
+#' @param group_by_set Character vector of grouping columns.
+#' @return A tibble with one row per group containing variance components and
+#'   their fractions of the total.
+#' @keywords internal
+#' @noRd
+compute_variance_decomposition <- function(simulations_df, draw_cols,
+                                           group_by_set) {
+  if (!"estimate" %in% names(simulations_df)) return(NULL)
+  if (length(draw_cols) == 0) return(NULL)
+  outer_draw <- draw_cols[1]
+  total <- simulations_df |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(group_by_set))) |>
+    dplyr::summarize(
+      n_sims    = dplyr::n(),
+      var_total = stats::var(estimate, na.rm = TRUE),
+      .groups   = "drop"
+    )
+  design_var <- simulations_df |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(c(group_by_set, outer_draw)))) |>
+    dplyr::summarize(within_var = stats::var(estimate, na.rm = TRUE),
+                     .groups = "drop") |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(group_by_set))) |>
+    dplyr::summarize(var_design = mean(within_var, na.rm = TRUE),
+                     .groups = "drop")
+  world_var <- simulations_df |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(c(group_by_set, outer_draw)))) |>
+    dplyr::summarize(world_mean = mean(estimate, na.rm = TRUE),
+                     .groups = "drop") |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(group_by_set))) |>
+    dplyr::summarize(var_world = stats::var(world_mean, na.rm = TRUE),
+                     .groups = "drop")
+  if (length(group_by_set) == 0) {
+    result <- dplyr::bind_cols(total, design_var, world_var)
+  } else {
+    result <- total |>
+      dplyr::left_join(design_var, by = group_by_set) |>
+      dplyr::left_join(world_var,  by = group_by_set)
+  }
+  result <- dplyr::mutate(
+    result,
+    frac_design = var_design / var_total,
+    frac_world  = var_world  / var_total,
+    sd_design   = sqrt(var_design),
+    sd_world    = sqrt(var_world),
+    sd_total    = sqrt(var_total),
+    draw_levels = paste(draw_cols, collapse = " > ")
+  )
+  tibble::as_tibble(result)
 }
