@@ -59,6 +59,7 @@ build_step <- function(fn, handler_expr, dots, step_type, causal_type, label,
 #' @keywords internal
 #' @noRd
 construct_design <- function(steps) {
+  steps <- autolabel_estimators(steps)
   if (is.null(names(steps))) {
     names(steps) <- vapply(
       steps,
@@ -68,6 +69,147 @@ construct_design <- function(steps) {
   }
   names(steps) <- make.unique(names(steps), sep = "_")
   structure(steps, class = c("design", "dd"))
+}
+
+#' Infer a meaningful label for an estimator/test step
+#'
+#' Tier 1 uses the formula in the first quosure. Tier 2 appends the method
+#' name (e.g., `"Y~Z (lm_robust)"`) when needed. Returning the existing
+#' user-set label intact when no formula was supplied.
+#'
+#' @keywords internal
+#' @noRd
+infer_estimator_label <- function(step, include_method = FALSE) {
+  dots <- attr(step, "dots")
+  base <- attr(step, "label")
+  formula_label <- NULL
+  if (length(dots) > 0) {
+    expr <- rlang::quo_get_expr(dots[[1]])
+    if (rlang::is_formula(expr)) {
+      formula_label <- gsub("\\s+", "", deparse(expr))
+    }
+  }
+  if (is.null(formula_label)) return(base)
+  method_name <- attr(step, "method_name")
+  if (include_method && !is.null(method_name)) {
+    paste0(formula_label, " (", method_name, ")")
+  } else {
+    formula_label
+  }
+}
+
+#' Rebuild an estimator/test step with a new label
+#'
+#' Reconstructs the executor closure (which captures the label by value) so
+#' the `estimator` column in simulation output reflects the new label rather
+#' than the originally declared one.
+#'
+#' @keywords internal
+#' @noRd
+relabel_estimator_step <- function(step, new_label) {
+  step_type <- attr(step, "step_type")
+  add_inquiry <- identical(step_type, "estimator")
+  inquiry_arg <- if (add_inquiry) attr(step, "inquiry_arg") else NULL
+  fn <- make_estimator_step(
+    method      = attr(step, "method_arg"),
+    summary_fn  = attr(step, "summary_arg"),
+    dots        = attr(step, "dots"),
+    label       = new_label,
+    inquiry     = inquiry_arg,
+    term        = attr(step, "term_arg"),
+    add_inquiry = add_inquiry,
+    handler     = attr(step, "handler_fn")
+  )
+  out <- build_step(
+    fn           = fn,
+    handler_expr = attr(step, "handler_expr"),
+    dots         = attr(step, "dots"),
+    step_type    = step_type,
+    causal_type  = attr(step, "causal_type"),
+    label        = new_label,
+    call         = attr(step, "call"),
+    method_arg   = attr(step, "method_arg"),
+    summary_arg  = attr(step, "summary_arg"),
+    inquiry_arg  = inquiry_arg,
+    term_arg     = attr(step, "term_arg"),
+    handler_fn   = attr(step, "handler_fn"),
+    method_name  = attr(step, "method_name")
+  )
+  if (!is.null(attr(step, "draws"))) {
+    attr(out, "draws") <- attr(step, "draws")
+  }
+  out
+}
+
+#' Detect duplicate estimator labels and rename them
+#'
+#' Three-tier inference: (1) the formula expression, (2) formula plus method
+#' name in parens when formulas alone collide, (3) `.a`, `.b`, `.c` suffixes
+#' when truly identical estimators remain.
+#'
+#' @keywords internal
+#' @noRd
+autolabel_estimators <- function(steps) {
+  is_est <- vapply(steps, function(s) {
+    isTRUE(attr(s, "step_type") %in% c("estimator", "test"))
+  }, logical(1))
+  est_idx <- which(is_est)
+  if (length(est_idx) < 2L) return(steps)
+
+  original <- vapply(steps[est_idx], function(s) attr(s, "label"), character(1))
+  if (length(unique(original)) == length(original)) return(steps)
+
+  # Tier 1: formula-based label only when the original labels duplicate
+  inferred <- vapply(steps[est_idx], infer_estimator_label, character(1),
+                     include_method = FALSE)
+
+  # Tier 2: append method name where formulas still collide
+  if (any(duplicated(inferred))) {
+    for (lbl in unique(inferred[duplicated(inferred)])) {
+      idx <- which(inferred == lbl)
+      with_method <- vapply(steps[est_idx[idx]], infer_estimator_label,
+                            character(1), include_method = TRUE)
+      if (length(unique(with_method)) > 1L) {
+        inferred[idx] <- with_method
+      }
+    }
+  }
+
+  # Tier 3: append .a, .b, .c for any still-duplicate labels.
+  # When the user supplied an explicit non-default label, prefer it as the base
+  # so the suffixed labels look like `ols.a`, `ols.b` rather than `Y~Z.a`.
+  default_labels <- c("estimator", "test")
+  for (lbl in unique(inferred[duplicated(inferred)])) {
+    idx <- which(inferred == lbl)
+    base_for_suffix <- if (all(!original[idx] %in% default_labels) &&
+                           length(unique(original[idx])) == 1L) {
+      original[idx][1]
+    } else {
+      lbl
+    }
+    inferred[idx] <- paste0(base_for_suffix, ".", letters[seq_along(idx)])
+  }
+
+  changed <- inferred != original
+  if (any(changed)) {
+    pairs <- paste(
+      sprintf("'%s' -> '%s'", original[changed], inferred[changed]),
+      collapse = ", "
+    )
+    rlang::inform(paste0(
+      "Estimator steps auto-labeled to ensure unique labels: ", pairs, ".\n",
+      "Set `label =` explicitly to suppress this."
+    ))
+  }
+
+  for (k in seq_along(est_idx)) {
+    if (changed[k]) {
+      i <- est_idx[k]
+      steps[[i]] <- relabel_estimator_step(steps[[i]], inferred[k])
+      if (!is.null(names(steps))) names(steps)[i] <- inferred[k]
+    }
+  }
+  steps
 }
 
 #' Wrap a step in a named singleton list

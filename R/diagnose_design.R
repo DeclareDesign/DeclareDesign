@@ -67,22 +67,58 @@ compute_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
 
 #' Bootstrap standard errors for diagnosands
 #'
+#' Resamples the simulations table `B` times and recomputes diagnosands on each
+#' replicate to produce bootstrap standard errors.
+#'
+#' For flat simulations, the unit of resampling is `sim_ID`. For nested
+#' simulations (with `model_draw`, `assignment_draw`, etc.), the unit is the
+#' outermost draw column, so rows that share a population draw stay together.
+#' Resampling at `sim_ID` in the nested case is statistically wrong because
+#' rows within the same world are correlated.
+#'
+#' Uses `rsample::bootstraps()` when available for reproducible splits; falls
+#' back to manual cluster resampling otherwise.
+#'
 #' @keywords internal
 #' @noRd
-bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set, B) {
+bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set,
+                                   B, draw_cols = NULL) {
   if (!"sim_ID" %in% names(simulations_df)) return(NULL)
-  sim_ids <- unique(simulations_df$sim_ID)
-  if (length(sim_ids) < 2L) return(NULL)
+  outer_draw <- if (length(draw_cols) > 0) draw_cols[1] else NULL
+  key_col <- outer_draw %||% "sim_ID"
+  if (!key_col %in% names(simulations_df)) return(NULL)
+  unit_ids <- unique(simulations_df[[key_col]])
+  if (length(unit_ids) < 2L) return(NULL)
   diagnosand_names <- names(attr(diagnosands, "dots"))
-  replicates <- purrr::map(seq_len(B), function(i) {
-    drawn <- sample(sim_ids, length(sim_ids), replace = TRUE)
-    drawn_df <- tibble::tibble(sim_ID = drawn,
-                               .boot_id = seq_along(drawn))
-    resampled <- dplyr::inner_join(simulations_df, drawn_df,
-                                   by = "sim_ID",
-                                   relationship = "many-to-many")
-    compute_diagnosands(resampled, diagnosands, group_by_set)
-  })
+
+  resample_once <- function() {
+    drawn <- sample(unit_ids, length(unit_ids), replace = TRUE)
+    max_id <- max(simulations_df$sim_ID)
+    purrr::map(seq_along(drawn), function(i) {
+      sub <- simulations_df[simulations_df[[key_col]] == drawn[i], , drop = FALSE]
+      sub$sim_ID <- sub$sim_ID + (i - 1L) * max_id
+      sub
+    }) |> dplyr::bind_rows()
+  }
+
+  if (requireNamespace("rsample", quietly = TRUE)) {
+    unit_df <- tibble::tibble(.id = unit_ids)
+    splits <- rsample::bootstraps(unit_df, times = B)$splits
+    replicates <- purrr::map(splits, function(split) {
+      drawn <- rsample::analysis(split)$.id
+      max_id <- max(simulations_df$sim_ID)
+      resampled <- purrr::map(seq_along(drawn), function(i) {
+        sub <- simulations_df[simulations_df[[key_col]] == drawn[i], , drop = FALSE]
+        sub$sim_ID <- sub$sim_ID + (i - 1L) * max_id
+        sub
+      }) |> dplyr::bind_rows()
+      compute_diagnosands(resampled, diagnosands, group_by_set)
+    })
+  } else {
+    replicates <- purrr::map(seq_len(B), function(b) {
+      compute_diagnosands(resample_once(), diagnosands, group_by_set)
+    })
+  }
   replicate_df <- dplyr::bind_rows(replicates)
   if (length(group_by_set) == 0) {
     se_row <- dplyr::summarize(
@@ -133,8 +169,21 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set, B) 
 #' diagnose_design(design, sims = 5, bootstrap_sims = 0)
 diagnose_design <- function(..., sims = NULL, bootstrap_sims = 100,
                             diagnosands = NULL) {
-  raw <- rlang::dots_list(..., .named = TRUE)
-  designs <- flatten_designs(raw)
+  raw <- rlang::dots_list(..., .named = FALSE)
+
+  # If first argument is a data frame (pre-computed simulations piped in),
+  # skip simulation and go straight to diagnosis. Honours grouping carried by
+  # dplyr::group_by() and inherits class-based attrs (draw_cols, parameter_names).
+  if (length(raw) >= 1L && is.data.frame(raw[[1L]])) {
+    return(diagnose_simulations(
+      raw[[1L]],
+      bootstrap_sims = bootstrap_sims,
+      diagnosands    = diagnosands
+    ))
+  }
+
+  raw_named <- rlang::dots_list(..., .named = TRUE)
+  designs <- flatten_designs(raw_named)
   if (length(designs) == 0) {
     stop("diagnose_design() requires at least one `design` object.")
   }
@@ -172,20 +221,29 @@ diagnose_designs <- diagnose_design
 #' sims <- simulate_design(design, sims = 5)
 #' diagnose_simulations(sims, bootstrap_sims = 0)
 diagnose_simulations <- function(simulations_df,
-                                 diagnosands = default_diagnosands(),
+                                 diagnosands = NULL,
                                  bootstrap_sims = 100) {
+  # Honour group_by() applied upstream -- this is the make_groups replacement
+  extra_groups <- character(0)
+  if (inherits(simulations_df, "grouped_df")) {
+    extra_groups   <- dplyr::group_vars(simulations_df)
+    simulations_df <- dplyr::ungroup(simulations_df)
+  }
+  if (is.null(diagnosands)) diagnosands <- default_diagnosands()
   param_cols <- attr(simulations_df, "parameter_names")
   draw_cols <- attr(simulations_df, "draw_cols")
   nested <- isTRUE(attr(simulations_df, "nested")) && length(draw_cols) > 0
-  group_by_set <- intersect(
-    c("design", param_cols, "inquiry", "estimator", "outcome", "term"),
-    names(simulations_df)
+  standard_cols <- c("design", param_cols, "inquiry", "estimator", "outcome",
+                     "term")
+  group_by_set <- c(
+    intersect(standard_cols, names(simulations_df)),
+    setdiff(extra_groups, standard_cols)
   )
   diagnosands_df <- compute_diagnosands(simulations_df, diagnosands,
                                         group_by_set)
   if (bootstrap_sims > 0) {
     se_df <- bootstrap_diagnosands(simulations_df, diagnosands, group_by_set,
-                                   bootstrap_sims)
+                                   bootstrap_sims, draw_cols = draw_cols)
     if (!is.null(se_df)) {
       if (length(group_by_set) == 0) {
         diagnosands_df <- dplyr::bind_cols(diagnosands_df, se_df)

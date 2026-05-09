@@ -50,6 +50,27 @@ tidy_try <- function(fit, ...) {
   )
 }
 
+#' Render a captured `.method` expression as a short character label
+#'
+#' Strips any namespace prefix so `estimatr::lm_robust` becomes `"lm_robust"`.
+#' Anonymous or otherwise un-named methods fall back to `"custom"`.
+#'
+#' @keywords internal
+#' @noRd
+method_expr_label <- function(expr) {
+  if (is.null(expr)) return(NULL)
+  if (is.symbol(expr)) return(as.character(expr))
+  if (is.call(expr)) {
+    head <- expr[[1]]
+    if (is.symbol(head) && as.character(head) %in% c("::", ":::") &&
+        length(expr) >= 3L && is.symbol(expr[[3]])) {
+      return(as.character(expr[[3]]))
+    }
+  }
+  out <- tryCatch(deparse(expr, width.cutoff = 60L)[[1]], error = function(e) NA_character_)
+  if (is.na(out) || nchar(out) > 40L) "custom" else out
+}
+
 #' Normalize an `inquiry` argument to a character vector
 #'
 #' @keywords internal
@@ -174,12 +195,17 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
                               handler = NULL, draws = 1L) {
   dots <- rlang::enquos(...)
   call <- sys.call()
+  method_expr <- substitute(.method)
   if (is.null(.method)) {
     if (requireNamespace("estimatr", quietly = TRUE)) {
       .method <- estimatr::lm_robust
+      method_name <- "lm_robust"
     } else {
       .method <- stats::lm
+      method_name <- "lm"
     }
+  } else {
+    method_name <- method_expr_label(method_expr)
   }
   inquiry_chr <- normalize_inquiry(inquiry)
   fn <- make_estimator_step(
@@ -204,7 +230,8 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
     summary_arg  = .summary,
     inquiry_arg  = inquiry_chr,
     term_arg     = term,
-    handler_fn   = handler
+    handler_fn   = handler,
+    method_name  = method_name
   )
   attr(step, "draws") <- as.integer(draws)
   step
@@ -232,7 +259,13 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
                          draws = 1L) {
   dots <- rlang::enquos(...)
   call <- sys.call()
-  if (is.null(.method)) .method <- stats::lm
+  method_expr <- substitute(.method)
+  if (is.null(.method)) {
+    .method <- stats::lm
+    method_name <- "lm"
+  } else {
+    method_name <- method_expr_label(method_expr)
+  }
   fn <- make_estimator_step(
     method      = .method,
     summary_fn  = .summary,
@@ -255,7 +288,8 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
     summary_arg  = .summary,
     inquiry_arg  = NULL,
     term_arg     = term,
-    handler_fn   = handler
+    handler_fn   = handler,
+    method_name  = method_name
   )
   attr(step, "draws") <- as.integer(draws)
   step

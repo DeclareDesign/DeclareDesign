@@ -4,11 +4,7 @@
 \alias{diagnose_simulations}
 \title{Diagnose a precomputed simulations table}
 \usage{
-diagnose_simulations(
-  simulations_df,
-  diagnosands = default_diagnosands(),
-  bootstrap_sims = 100
-)
+diagnose_simulations(simulations_df, diagnosands = NULL, bootstrap_sims = 100)
 }
 \arguments{
 \item{simulations_df}{A tibble produced by \code{\link[=simulate_design]{simulate_design()}}.}

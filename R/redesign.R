@@ -70,7 +70,7 @@ rebuild_step <- function(step, new_dots) {
     call         = call
   )
   carry <- c("filter_quo", "subset_quo", "method_arg", "summary_arg",
-             "inquiry_arg", "term_arg", "handler_fn", "draws")
+             "inquiry_arg", "term_arg", "handler_fn", "draws", "method_name")
   for (nm in carry) {
     if (!is.null(attr(step, nm))) attr(out, nm) <- attr(step, nm)
   }
