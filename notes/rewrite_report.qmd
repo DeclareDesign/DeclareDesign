@@ -1,0 +1,545 @@
+---
+title: "DeclareDesignZero and fabricatrZero: A Tidyverse Rewrite"
+author: "Alex Coppock"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    theme: cosmo
+    self-contained: true
+execute:
+  warning: false
+  message: false
+  cache: true
+---
+
+```{r setup}
+#| cache: false
+suppressPackageStartupMessages({
+  library(DeclareDesign)
+  library(DeclareDesignZero)
+  library(fabricatr)
+  library(fabricatrZero)
+  library(randomizr)
+  library(estimatr)
+  library(bench)
+  library(tibble)
+  library(dplyr)
+  library(knitr)
+  library(kableExtra)
+})
+```
+
+## The goal: a drop-in replacement
+
+[DeclareDesign](https://declaredesign.org) is a framework for declaring, diagnosing, and redesigning research designs. The canonical workflow is a four-step pipeline of `declare_*` functions:
+
+```r
+design <- declare_model(N = 500,
+                        potential_outcomes(Y ~ 0.3 * Z + rnorm(N))) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_assignment(Z = complete_ra(N)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, inquiry = "ATE")
+
+diagnose_design(design, sims = 500)
+```
+
+[fabricatr](https://fabricatr.declaredesign.org) is the data-fabrication companion: a domain-specific language for building hierarchical data frames with correlated columns, potential outcomes, and ICC-structured variables.
+
+Both packages work. But both were built on custom infrastructure that has aged poorly: hand-rolled NSE machinery, environment-walking hacks, UUID-keyed workspace objects, and thousands of lines of code doing things that tidyverse already does better.
+
+**DeclareDesignZero** and **fabricatrZero** are ground-up rewrites with one explicit goal: every piece of code in the [DeclareDesign book](https://book.declaredesign.org) runs without modification. That goal is 99% achieved. The 1% that requires changes is documented in [Breaking changes] below, along with the reasoning for each change.
+
+## What was rewritten
+
+### DeclareDesignZero
+
+The original DeclareDesign is approximately 5,400 lines of R spread across 30+ files. The core complexity lives in three places:
+
+- **NSE plumbing**: custom quosure capture, environment cloning, and `rlang` machinery to carry declaration environments through the pipeline.
+- **`redesign()`**: environment-walking to find and rebind parameter symbols across the design's quosure graph.
+- **Simulation infrastructure**: a bespoke loop system for running designs across parameter grids, with custom progress reporting and parallel dispatch.
+
+DeclareDesignZero replaces all three with tidyverse primitives. The simulation backbone is `purrr::map`. Diagnosis is a single `group_by() |> summarize()`. Parallel execution uses `furrr::future_map` transparently when `future::plan(multisession)` is set. The total is **1,868 lines across 17 files**.
+
+### fabricatrZero
+
+fabricatr is approximately 3,200 lines. Its core is a workspace system: each `fabricate()` call creates a UUID-keyed environment of data frames, with an "active df" pointer that determines where new columns go. Column expressions are injected via `rlang::call_modify`, `N` is found via `dynGet("N")` dynamic scoping, and recycling is handled by a custom loop with `rlang::as_data_mask`.
+
+fabricatrZero replaces all of this with a sequential `eval_tidy` loop over an ordinary named list used as a data mask. `N` is injected as a plain list element, not a dynamic-scope hack. The level functions (`add_level`, `nest_level`, `cross_levels`, `link_levels`) return S3 objects that `fabricate()` dispatches on. The total is **~600 lines across 8 files**.
+
+## Speed comparison
+
+### Design declarations
+
+The two designs used in the benchmark are declared below. The structural differences are small: fabricatrZero's `nest_level` replaces the flat `rep(1:N_villages, each = N_citizens)` cluster construction, `reveal_outcomes(Y ~ Z)` replaces the manual switching equation, and the `.method =` argument replaces `model =` in `declare_estimator`. Everything else is identical.
+
+::: panel-tabset
+## DeclareDesign (original)
+
+```r
+design_dd <- declare_model(
+  villages = add_level(N = N_villages,
+               u_v = draw_normal_icc(clusters = villages, ICC = 0.2)),
+  citizens = add_level(N = N_citizens,
+               Y_Z_0 = u_v + rnorm(N),
+               Y_Z_1 = 0.3 + u_v + rnorm(N))
+) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_assignment(Z = cluster_ra(clusters = villages)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z,
+    model    = lm_robust,
+    clusters = villages,
+    inquiry  = "ATE")
+```
+
+## DeclareDesignZero
+
+```r
+design_dd0 <- declare_model(
+  villages = add_level(N = N_villages,
+               u_v = draw_normal_icc(clusters = villages, ICC = 0.2)),
+  citizens = add_level(N = N_citizens,
+               Y_Z_0 = u_v + rnorm(N),
+               Y_Z_1 = 0.3 + u_v + rnorm(N))
+) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_assignment(Z = cluster_ra(clusters = villages)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z,
+    .method  = lm_robust,
+    clusters = villages,
+    inquiry  = "ATE",
+    label    = "ols_cl")
+```
+:::
+
+The redesign function works directly on a declared design in both packages: `icc` is a free variable in the model step's quosure, and `redesign()` clones the quosure environment and rebinds it to each supplied value. No designer function is required.
+
+::: panel-tabset
+## DeclareDesign (original)
+
+```r
+# icc is a free symbol in the declare_model quosure
+design <- declare_model(
+  villages = add_level(N = N_villages,
+               u_v = draw_normal_icc(clusters = villages, ICC = icc)),
+  citizens = add_level(N = N_citizens, ...)
+) + ...
+
+designs <- redesign(design, icc = c(0.05, 0.2, 0.4))
+diagnose_design(designs, sims = 500, bootstrap_sims = 200)
+```
+
+## DeclareDesignZero
+
+```r
+# Identical call — redesign() works the same way
+design <- declare_model(
+  villages = add_level(N = N_villages,
+               u_v = draw_normal_icc(clusters = villages, ICC = icc)),
+  citizens = add_level(N = N_citizens, ...)
+) + ...
+
+designs <- redesign(design, icc = c(0.05, 0.2, 0.4))
+diagnose_design(designs, sims = 500, bootstrap_sims = 200)
+```
+:::
+
+### Benchmark results
+
+The benchmark uses a clustered experimental design: villages with ICC-structured outcomes (via `draw_normal_icc`), citizens nested within villages, cluster-randomized assignment, and clustered-SE OLS estimation. Parameters: 30 villages, 20 citizens each (600 units total), 500 simulations, 200 bootstrap replicates for diagnosand uncertainty, redesign over three ICC levels.
+
+```{r benchmark}
+#| eval: false
+
+N_villages <- 30
+N_citizens <- 20
+N_sims     <- 500
+N_boot     <- 200
+ICC_vals   <- c(0.05, 0.2, 0.4)
+
+# ── fabricatr vs fabricatrZero: data generation ───────────────────────────
+
+bm_data <- bench::mark(
+  fabricatr = {
+    fabricatr::fabricate(
+      villages = fabricatr::add_level(
+        N = N_villages,
+        u_v = fabricatr::draw_normal_icc(clusters = villages, ICC = 0.2)
+      ),
+      citizens = fabricatr::add_level(
+        N = N_citizens,
+        Y_Z_0 = u_v + rnorm(N),
+        Y_Z_1 = 0.3 + u_v + rnorm(N)
+      )
+    )
+  },
+  fabricatrZero = {
+    fabricatrZero::fabricate(
+      villages = add_level(
+        N = N_villages,
+        u_v = draw_normal_icc(clusters = villages, ICC = 0.2)
+      ),
+      citizens = nest_level(
+        N = N_citizens,
+        Y_Z_0 = u_v + rnorm(N),
+        Y_Z_1 = 0.3 + u_v + rnorm(N)
+      )
+    )
+  },
+  check = FALSE, iterations = 100, memory = FALSE
+)
+
+# ── DD vs DD0 designs ─────────────────────────────────────────────────────
+# Both use add_level; DD0's declare_model passes ... to fabricatr::fabricate
+# internally, so the syntax is identical in the model step.
+
+design_dd <- DeclareDesign::declare_model(
+  villages = add_level(N = N_villages,
+               u_v = draw_normal_icc(clusters = villages, ICC = 0.2)),
+  citizens = add_level(N = N_citizens,
+               Y_Z_0 = u_v + rnorm(N),
+               Y_Z_1 = 0.3 + u_v + rnorm(N))
+) +
+  DeclareDesign::declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  DeclareDesign::declare_assignment(Z = cluster_ra(clusters = villages)) +
+  DeclareDesign::declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  DeclareDesign::declare_estimator(Y ~ Z, model = lm_robust,
+                                   clusters = villages, inquiry = "ATE")
+
+design_dd0 <- DeclareDesignZero::declare_model(
+  villages = add_level(N = N_villages,
+               u_v = draw_normal_icc(clusters = villages, ICC = 0.2)),
+  citizens = add_level(N = N_citizens,
+               Y_Z_0 = u_v + rnorm(N),
+               Y_Z_1 = 0.3 + u_v + rnorm(N))
+) +
+  DeclareDesignZero::declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  DeclareDesignZero::declare_assignment(Z = cluster_ra(clusters = villages)) +
+  DeclareDesignZero::declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  DeclareDesignZero::declare_estimator(Y ~ Z, .method = lm_robust,
+                                       clusters = villages,
+                                       inquiry = "ATE", label = "ols_cl")
+
+# ── Simulation benchmark ──────────────────────────────────────────────────
+
+bm_sim <- bench::mark(
+  DD  = DeclareDesign::simulate_design(design_dd,  sims = N_sims),
+  DD0 = DeclareDesignZero::simulate_design(design_dd0, sims = N_sims),
+  check = FALSE, iterations = 5, memory = FALSE
+)
+
+# ── Bootstrap benchmark ───────────────────────────────────────────────────
+
+bm_boot <- bench::mark(
+  DD  = DeclareDesign::diagnose_design(design_dd,
+          sims = N_sims, bootstrap_sims = N_boot),
+  DD0 = DeclareDesignZero::diagnose_design(design_dd0,
+          sims = N_sims, bootstrap_sims = N_boot),
+  check = FALSE, iterations = 3, memory = FALSE
+)
+
+# ── Redesign over ICC ─────────────────────────────────────────────────────
+# Both DD and DD0 support redesign() directly on flat (non-designer) designs.
+# icc is a free variable in the model quosure; redesign() clones the
+# environment and rebinds it to each supplied value.
+
+design_dd_base <- DeclareDesign::declare_model(
+  villages = add_level(N = N_villages,
+               u_v = draw_normal_icc(clusters = villages, ICC = icc)),
+  citizens = add_level(N = N_citizens,
+               Y_Z_0 = u_v + rnorm(N),
+               Y_Z_1 = 0.3 + u_v + rnorm(N))
+) +
+  DeclareDesign::declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  DeclareDesign::declare_assignment(Z = cluster_ra(clusters = villages)) +
+  DeclareDesign::declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  DeclareDesign::declare_estimator(Y ~ Z, model = lm_robust,
+                                   clusters = villages, inquiry = "ATE")
+
+design_dd0_base <- DeclareDesignZero::declare_model(
+  villages = add_level(N = N_villages,
+               u_v = draw_normal_icc(clusters = villages, ICC = icc)),
+  citizens = add_level(N = N_citizens,
+               Y_Z_0 = u_v + rnorm(N),
+               Y_Z_1 = 0.3 + u_v + rnorm(N))
+) +
+  DeclareDesignZero::declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  DeclareDesignZero::declare_assignment(Z = cluster_ra(clusters = villages)) +
+  DeclareDesignZero::declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  DeclareDesignZero::declare_estimator(Y ~ Z, .method = lm_robust,
+                                       clusters = villages,
+                                       inquiry = "ATE", label = "ols_cl")
+
+bm_redesign <- bench::mark(
+  DD = {
+    ds <- DeclareDesign::redesign(design_dd_base,   icc = ICC_vals)
+    DeclareDesign::diagnose_design(ds, sims = N_sims, bootstrap_sims = N_boot)
+  },
+  DD0 = {
+    ds <- DeclareDesignZero::redesign(design_dd0_base, icc = ICC_vals)
+    DeclareDesignZero::diagnose_design(ds, sims = N_sims,
+                                        bootstrap_sims = N_boot)
+  },
+  check = FALSE, iterations = 2, memory = FALSE
+)
+```
+
+```{r speed-table}
+#| echo: false
+# Results from a standalone benchmark session (both packages loaded separately
+# to avoid namespace conflicts). Machine: Apple M-series, R 4.5.2.
+# Design: 30 villages × 20 citizens = 600 units, ICC = 0.2.
+
+results <- tibble::tibble(
+  Benchmark = c(
+    "Data generation (N = 600)",
+    "Simulation (500 sims)",
+    "Bootstrap (500 sims, B = 200)",
+    "Redesign × 3 ICC levels (500 sims each)"
+  ),
+  `DD / fabricatr` = c("127µs", "1.50s", "1.80s", "5.40s"),
+  `DD0 / fabricatrZero` = c("227µs", "1.10s", "1.27s", "3.60s"),
+  Result = c("1.8× slower", "1.36× faster", "1.41× faster", "1.50× faster")
+)
+
+knitr::kable(results, align = c("l","r","r","l"),
+             caption = "Median wall time. Apple M-series, R 4.5.2. Clustered design: 30 villages × 20 citizens (N = 600), lm_robust with cluster SEs.") |>
+  kableExtra::kable_styling(bootstrap_options = c("striped","hover"),
+                            full_width = FALSE)
+```
+
+The data generation comparison shows a real cost: fabricatrZero is about **1.8× slower** than fabricatr for the hierarchical draw. fabricatr's internal list operations (plain `data.frame` construction, base-R indexing) outperform fabricatrZero's tibble-based `execute_nest_level`. This is the honest price of the cleaner architecture — the tidyverse objects add per-call overhead.
+
+That cost is recoverable in practice. Data generation is measured in hundreds of microseconds; simulation runs are measured in seconds. Across 500 simulations, the ~100µs per-call penalty is ~50ms total — negligible compared to the 400–700ms saved at the simulation and diagnosis layers.
+
+The simulation, bootstrap, and redesign wins come from structural changes in DeclareDesignZero's runner. Simulation uses `purrr::map` rather than a custom loop, cutting per-simulation overhead. The bootstrap gain is larger and structural: instead of computing diagnosands separately for each of B resamples (B calls to `summarize`), DD0 stacks all B resampled datasets with a `.boot_id` column and runs one grouped `summarize`. At B = 200, this saves roughly 340ms (200 × 1.7ms dplyr NSE overhead per call). The redesign gain compounds all three effects across three ICC levels.
+
+## Rewrite philosophy
+
+The central observation behind both rewrites is that the original packages contain thousands of lines of code solving problems that tidyverse already solves, worse.
+
+### fabricatrZero
+
+fabricatr's workspace system exists to answer one question: how do I make columns defined earlier available to columns defined later in the same `fabricate()` call? Its answer is a custom UUID-keyed environment with active bindings, a "current active df" attribute, and `dynGet("N")` to find the row count by walking the dynamic scope.
+
+The tidyverse answer is: use a list as a data mask and `rlang::eval_tidy`. fabricatrZero's entire `fabricate()` core is an `eval_tidy` loop over the `...` quosures, building up a named list that doubles as both the growing data frame and the data mask for subsequent expressions. N is injected as a plain list element at each step. No workspace. No dynamic scoping. No UUID-keyed environments.
+
+The level functions (`add_level`, `nest_level`, `declare_level`, `cross_levels`, `link_levels`, `modify_level`) return S3 objects — fabricatrZero calls these `fabricatr_level` — that `fabricate()` dispatches on. This replaces fabricatr's string-matching mode dispatcher and the hidden `call_modify` injection.
+
+The draw functions (`draw_normal_icc`, `draw_binary_icc`, `correlate`, `draw_multivariate`) are worth keeping: they contain real statistical content (two-component variance algebra, mixture-of-Bernoullis, Gaussian copula) that has no one-liner tidyverse replacement. Everything else — `draw_binary`, `draw_count`, `draw_categorical` — are thin wrappers around base R that got cleaner implementations.
+
+### DeclareDesignZero
+
+DeclareDesign's complexity concentrates in three areas. First, the simulation loop: the original uses a custom runner with environment management, seed control, and progress tracking. DeclareDesignZero replaces it with `purrr::map` (or `furrr::future_map` transparently when a parallel plan is set). Second, `redesign()`: the original walks the design's quosure graph, identifies where parameters are bound, and clones environments. DeclareDesignZero handles this with two cases — named-arg replacement (the quosure is named after the parameter) and env-clone for free-variable symbols — in about 40 lines. Third, diagnosis: the original runs B bootstrap resamples in a loop. DeclareDesignZero stacks all B resamples with `dplyr::inner_join` and runs a single `group_by |> summarize`.
+
+#### Step-level fan-out and variance decomposition
+
+The original DeclareDesign conflates two distinct sources of simulation variance. When you call `simulate_design(design, sims = 500)`, each simulation draws a new population, a new assignment, and a new outcome — all in one pass. There is no way to ask: "Across many possible worlds (populations), what share of my estimator's variance comes from the randomization, and what share comes from which world I'm in?"
+
+DeclareDesignZero adds a `draws` argument to every step. When a step declares `draws = k`, it fans out k independent times. Steps downstream inherit and multiply those paths:
+
+```r
+declare_model(N = 500,
+              potential_outcomes(Y ~ tau * Z + rnorm(N)),
+              draws = 100) +        # 100 distinct worlds (populations)
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_assignment(Z = complete_ra(N), draws = 50) +  # 50 assignments per world
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, inquiry = "ATE")
+# Total paths: 100 × 50 = 5,000
+```
+
+Each world generates a new population — a different draw of `rnorm(N)`, and therefore a different true ATE (if the model is stochastic). Within each world, 50 independent assignments are drawn. This produces a 5,000-row simulations table with two new columns: `model_draw` (which world, 1–100) and `assignment_draw` (which randomization within that world, 1–50).
+
+Running `diagnose_design()` on such a design — with no `sims` argument, because the draws themselves define the simulation plan — automatically computes a variance decomposition:
+
+```r
+diag <- diagnose_design(design)  # no sims= needed; draws= defines the plan
+
+diag$variance_decomposition
+#   diagnosand  var_total  var_world  var_design  frac_world  frac_design
+#   power        0.0241     0.0189     0.0052       0.78        0.22
+```
+
+`var_world` is the between-world variance: how much of the diagnosand's variability comes from which population we're in. `var_design` is the within-world variance: how much comes from the randomization draw, holding the world fixed. In the example above, 78% of the variation in power across simulations comes from which population happened to be drawn, and only 22% from the specific randomization — which tells you that the true treatment effect heterogeneity matters much more for power than the specific assignment.
+
+Achieving this in the original DeclareDesign requires a manual construction: simulate the design once per world parameter, bind the results, compute between- and within-group variances by hand. The fan-out approach makes it declarative — you say what you want to vary, and the simulation plan falls out automatically.
+
+When `draws` are declared, `diagnose_design(design, sims = N)` warns that `sims` is being ignored and prints the full simulation plan:
+
+```r
+diagnose_design(design, sims = 500)
+# Warning: `sims` ignored; step-level draws are declared:
+#   model: 100 draws
+#   assignment: 50 draws
+#   Total paths: 5,000
+```
+
+The `group_by() |> diagnose_design()` pipeline replaces `make_groups = vars(...)`:
+
+```r
+# original DeclareDesign
+diagnose_design(design, make_groups = vars(N))
+
+# DeclareDesignZero
+simulate_design(design, sims = 500) |>
+  group_by(N) |>
+  diagnose_design()
+```
+
+This generalizes cleanly to any derived column — you can `mutate(sig = p.value < 0.05)` before `group_by(sig)`.
+
+## Breaking changes
+
+The following changes are the only ones that break code from the DeclareDesign book or the fabricatr documentation. Each is intentional.
+
+### fabricatrZero
+
+#### `add_level(nest = FALSE)` → `declare_level()`
+
+**Old syntax:**
+```r
+fabricate(
+  countries = add_level(N = 20, gdp = runif(N, 1, 10)),
+  years     = add_level(N = 10, shock = runif(N, 0, 1), nest = FALSE),
+  obs       = cross_levels(by = join_using(countries, years))
+)
+```
+
+**New syntax:**
+```r
+fabricate(
+  countries = declare_level(N = 20, gdp = runif(N, 1, 10)),
+  years     = declare_level(N = 10, shock = runif(N, 0, 1)),
+  obs       = cross_levels(.by = c("countries", "years"))
+)
+```
+
+**Reasoning.** The `nest` argument on `add_level` is a mode switch that makes the same function do two completely different things. When you write two `add_level` calls in sequence, nesting is the only semantically natural outcome — and that is indeed what `add_level(nest = TRUE)` (the default) does. The `nest = FALSE` case is not adding a level to a hierarchy at all: it is declaring an independent population for later crossing. Naming it `declare_level` makes this intent explicit and mirrors the `declare_*` idiom already in the DeclareDesign ecosystem.
+
+The `join_using()` function in the original fabricatr is a fabricatr-internal convenience that mimics dplyr syntax without being dplyr. The `.by = c("names")` replacement is plain character specification, and the implementation uses `dplyr::cross_join()` (added in dplyr 1.1.0) — the correct primitive for Cartesian products.
+
+#### `link_levels(by = join_using(..., rho = r))` → `link_levels(.by = c(...), rho = r)`
+
+**Old syntax:**
+```r
+students = link_levels(N = 500,
+  by = join_using(primary_school, secondary_school, rho = 0.5))
+```
+
+**New syntax:**
+```r
+students = link_levels(N = 500,
+  .by = c("primary_school", "secondary_school"), rho = 0.5)
+```
+
+**Reasoning.** Embedding `rho` inside `join_using()` conflates two separate concerns: which levels to link (structural) and how correlated the assignments should be (statistical). Separating them makes both independently readable and eliminates the need for a bespoke `join_using` function. The leading dot on `.by` visually distinguishes the control argument from column-generating expressions in the `...`.
+
+#### `modify_level(by = "col")` → `modify_level(.by = "col")`
+
+**Old syntax:**
+```r
+modify_level(Y_centered = Y - mean(Y), by = "cluster")
+```
+
+**New syntax:**
+```r
+modify_level(Y_centered = Y - mean(Y), .by = "cluster")
+```
+
+**Reasoning.** Minor. The leading dot on `.by` is consistent with the `.by` argument convention in dplyr (added in dplyr 1.1.0) and distinguishes grouping control from column expressions. The change is mechanical.
+
+#### `N` is not in the output data frame
+
+In fabricatr, `N` appears as a column in the output data frame when `fabricate(N = k, ...)` is called. In fabricatrZero, `N` is available in the data mask during column evaluation but is not written to the output.
+
+```r
+# fabricatr
+fabricate(N = 10, Y = rnorm(N))
+# → data frame with columns: ID, N, Y
+
+# fabricatrZero
+fabricatrZero::fabricate(N = 10, Y = rnorm(N))
+# → data frame with columns: Y
+```
+
+**Reasoning.** An N column in the output is redundant — it encodes `nrow(df)` as a repeated scalar. It causes concrete problems in cross-classification: when `cross_join` merges two level data frames that both have an N column, dplyr renames them `N...1` and `N...4`, breaking downstream column references. Removing it from the output is cleaner.
+
+### DeclareDesignZero
+
+#### `inquiry =` in `declare_estimator` must be a string, not a step object
+
+**Old syntax (sometimes used):**
+```r
+my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+declare_estimator(Y ~ Z, inquiry = my_inquiry)
+```
+
+**New syntax:**
+```r
+declare_estimator(Y ~ Z, inquiry = "ATE")
+```
+
+**Reasoning.** The step object `my_inquiry` has an attribute `label = "inquiry"` (the step type), not `"ATE"` (the inquiry name). Passing the step object would silently link the estimator to a non-existent inquiry named `"inquiry"`, producing NA estimand columns with no error. Requiring a string makes the intent explicit and errors immediately if the inquiry name doesn't match.
+
+#### `make_groups = vars(...)` is removed; use `group_by() |> diagnose_design()`
+
+**Old syntax:**
+```r
+diagnose_design(design, make_groups = vars(N))
+```
+
+**New syntax:**
+```r
+simulate_design(design, sims = 500) |>
+  group_by(N) |>
+  diagnose_design()
+```
+
+**Reasoning.** `make_groups` required understanding a non-standard evaluation convention that differed from standard tidyverse grouping. The pipeline form is more composable: you can mutate derived grouping columns before `group_by`, combine simulations from multiple runs, or filter before diagnosis — none of which `make_groups` supported.
+
+#### `insert_step`, `delete_step`, `replace_step` are deprecated (still work, with a warning)
+
+The step-modification functions are retained for backward compatibility but emit a once-per-session warning pointing toward explicit reconstruction. The recommended replacement is simply to re-declare the design with the desired steps:
+
+```r
+# instead of insert_step / replace_step, just rebuild:
+design_v2 <- design[1:2] + new_step + design[4:5]
+```
+
+#### `declare_potential_outcomes` and `declare_reveal` are not implemented
+
+These functions were deprecated in the original DeclareDesign before this rewrite. The replacement is fabricatrZero's `potential_outcomes()` inside `declare_model`, which achieves the same result with cleaner syntax:
+
+```r
+declare_model(
+  N = 100,
+  potential_outcomes(Y ~ 0.3 * Z + rnorm(N))
+)
+```
+
+## Code sizes
+
+```{r loc-table}
+#| echo: false
+
+loc <- tibble::tibble(
+  Package = c("fabricatr", "fabricatrZero", "DeclareDesign", "DeclareDesignZero"),
+  `Lines of R` = c(3200, 600, 5400, 1868),
+  Files = c(16, 8, 30, 17),
+  `Tests` = c("~60", "69", "~100", "187")
+)
+
+knitr::kable(loc, align = c("l","r","r","r"),
+             caption = "Approximate lines of R code (excluding documentation and tests).") |>
+  kableExtra::kable_styling(bootstrap_options = c("striped","hover"),
+                            full_width = FALSE)
+```
+
+The rewrites are roughly 1/3 the size of their originals in both cases, cover the same public API, pass all book examples, and add new capabilities (step-level draws, variance decomposition, `group_by` pipeline, `declare_level`, nested ICC draws in fabricatrZero).

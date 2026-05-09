@@ -22,12 +22,12 @@ declare_step <- function(handler, ..., label = "custom_step", draws = 1L) {
   dots <- rlang::enquos(...)
   call <- sys.call()
   force(handler)
-  # If the user supplied `fabricatr::fabricate` (or a function that wraps it
+  # If the user supplied `fabricatrZero::fabricate` (or a function that wraps it
   # and uses NSE on its dots), we must inject the dots as quosures rather than
   # pre-evaluating them. Otherwise the captured expressions are evaluated in
   # the closure environment without the data context fabricate provides.
   fn <- function(data) {
-    handler_uses_nse <- identical(handler, fabricatr::fabricate)
+    handler_uses_nse <- identical(handler, fabricatrZero::fabricate)
     if (handler_uses_nse) {
       rlang::inject(handler(data = data, !!!dots))
     } else {
