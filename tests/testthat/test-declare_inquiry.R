@@ -21,3 +21,22 @@ test_that("declare_inquiry aliases work", {
     expect_equal(attr(s, "step_type"), "inquiry")
   }
 })
+
+test_that("a single splat-name promotes to the step label", {
+  pate <- declare_inquiry(pate = mean(Y))
+  expect_equal(attr(pate, "label"), "pate")
+})
+
+test_that("multiple splats keep the default label", {
+  step <- declare_inquiry(mu = mean(Y), med = median(Y))
+  expect_equal(attr(step, "label"), "inquiry")
+})
+
+test_that("ATT-style subset = Z == 1 evaluates inquiry on subset", {
+  step <- declare_inquiry(ATT = mean(Y_Z_1 - Y_Z_0), subset = Z == 1)
+  df <- data.frame(Y_Z_0 = 1:10, Y_Z_1 = 3:12,
+                   Z = c(1, 0, 1, 0, 1, 0, 1, 0, 1, 0))
+  out <- step(df)
+  expect_equal(out$estimand, 2)
+  expect_equal(out$inquiry, "ATT")
+})

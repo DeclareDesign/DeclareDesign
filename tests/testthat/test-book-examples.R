@@ -157,10 +157,10 @@ test_that("insert_step / replace_step / delete_step round-trip", {
   d_added <- insert_step(d, declare_measurement(Y2 = Y * 2), after = "model")
   expect_length(d_added, 3L)
   expect_true("measurement" %in% names(d_added))
-  d_replaced <- replace_step(d, "inquiry",
+  d_replaced <- replace_step(d, "mu",
                               declare_inquiry(med = stats::median(Y)))
   expect_equal(draw_estimands(d_replaced)$inquiry, "med")
-  d_deleted <- delete_step(d, "inquiry")
+  d_deleted <- delete_step(d, "mu")
   expect_length(d_deleted, 1L)
 })
 

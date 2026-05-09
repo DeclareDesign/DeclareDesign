@@ -45,3 +45,46 @@ test_that("declare_test does not add an inquiry column", {
   expect_false("inquiry" %in% names(est))
   expect_equal(est$estimator, "diff")
 })
+
+test_that("term = TRUE returns all model rows including (Intercept)", {
+  d <- declare_model(N = 50, X = rnorm(N), Y = rnorm(N) + X) +
+    declare_estimator(Y ~ X, .method = lm, term = TRUE, label = "ols")
+  est <- draw_estimates(d)
+  expect_true(all(c("(Intercept)", "X") %in% est$term))
+  expect_equal(nrow(est), 2L)
+})
+
+test_that("term and inquiry vectors stay aligned in user-supplied order", {
+  d <- declare_model(N = 40, X1 = rnorm(N), X2 = rnorm(N),
+                     Y = X1 - X2 + rnorm(N)) +
+    declare_inquiry(x1 = 1, x2 = -1, interaction = 0) +
+    declare_estimator(Y ~ X1 * X2, .method = lm,
+                      term = c("X1:X2", "X1", "X2"),
+                      inquiry = c("interaction", "x1", "x2"),
+                      label = "ols")
+  ret <- run_design(d)
+  expect_equal(ret$estimates$term, c("X1:X2", "X1", "X2"))
+  expect_equal(ret$estimates$inquiry, c("interaction", "x1", "x2"))
+})
+
+test_that("a single estimate row replicates across multiple inquiries", {
+  pate <- declare_inquiry(pate = 1)
+  sate <- declare_inquiry(sate = 1)
+  est <- declare_estimator(Y ~ Z, .method = lm, term = "Z",
+                           inquiry = c(pate, sate), label = "ols")
+  d <- declare_model(N = 30, Z = rep(0:1, 15), Y = Z + rnorm(N)) +
+    pate + sate + est
+  e <- draw_estimates(d)
+  expect_equal(nrow(e), 2L)
+  expect_equal(sort(e$inquiry), c("pate", "sate"))
+})
+
+test_that("inquiry as a design_step object resolves to its label", {
+  pate <- declare_inquiry(pate = 1)
+  est <- declare_estimator(Y ~ Z, .method = lm, term = "Z",
+                           inquiry = pate, label = "ols")
+  d <- declare_model(N = 30, Z = rep(0:1, 15), Y = Z + rnorm(N)) +
+    pate + est
+  e <- draw_estimates(d)
+  expect_equal(e$inquiry, "pate")
+})

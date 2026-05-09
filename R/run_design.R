@@ -15,6 +15,9 @@ run_design <- function(design) {
   if (inherits(design, "design_step")) {
     design <- construct_design(wrap_step(design))
   }
+  if (!inherits(design, "design")) {
+    stop("`design` must be a `design` or `design_step` object.")
+  }
   data <- NULL
   inquiries <- list()
   estimates <- list()

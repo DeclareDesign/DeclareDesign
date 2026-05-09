@@ -8,6 +8,10 @@
 #' used as the starting state instead of (or in addition to) what is threaded
 #' in by the design.
 #'
+#' If `dots` includes a named `handler` argument that resolves to a function,
+#' the step calls `handler(...other_dots..., data = data)` (or omits `data`
+#' when the handler does not accept it) instead of going through fabricate.
+#'
 #' @param dots Named list of quosures.
 #' @param id_label_na Logical; if `TRUE`, pass `ID_label = NA` so fabricate
 #'   does not append a row id (used by measurement, assignment, sampling).
@@ -20,13 +24,27 @@ make_fabricate_step <- function(dots, id_label_na = FALSE) {
   function(data = NULL) {
     nm <- names(dots) %||% rep("", length(dots))
     is_data <- !is.na(nm) & nm == "data"
+    is_handler <- !is.na(nm) & nm == "handler"
     user_data_quo <- if (any(is_data)) dots[[which(is_data)[1]]] else NULL
-    rest <- dots[!is_data]
+    user_handler_quo <- if (any(is_handler)) dots[[which(is_handler)[1]]] else NULL
+    rest <- dots[!is_data & !is_handler]
     if (!is.null(user_data_quo)) {
       user_data <- rlang::eval_tidy(user_data_quo)
       if (is.null(data) || (is.data.frame(data) && nrow(data) == 0L)) {
         data <- user_data
       }
+    }
+    if (!is.null(user_handler_quo)) {
+      handler_fn <- rlang::eval_tidy(user_handler_quo)
+      args <- lapply(rest, rlang::eval_tidy,
+                     data = if (is.data.frame(data)) as.list(data) else NULL)
+      formal_names <- tryCatch(names(formals(handler_fn)),
+                               error = function(e) NULL)
+      if (!is.null(formal_names) && "data" %in% formal_names &&
+          !"data" %in% names(args)) {
+        args <- c(list(data = data), args)
+      }
+      return(do.call(handler_fn, args))
     }
     if (id_label_na) {
       rlang::inject(fabricatr::fabricate(data = data, !!!rest, ID_label = NA))

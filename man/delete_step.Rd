@@ -20,5 +20,5 @@ Delete a step from a design
 \examples{
 design <- declare_model(N = 30, Y = rnorm(N)) +
   declare_inquiry(mu = mean(Y))
-delete_step(design, "inquiry") |> names()
+delete_step(design, "mu") |> names()
 }

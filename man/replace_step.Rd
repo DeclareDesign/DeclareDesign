@@ -22,5 +22,5 @@ Replace a step in a design
 \examples{
 design <- declare_model(N = 30, Y = rnorm(N)) +
   declare_inquiry(mu = mean(Y))
-replace_step(design, "inquiry", declare_inquiry(med = median(Y)))
+replace_step(design, "mu", declare_inquiry(med = median(Y)))
 }

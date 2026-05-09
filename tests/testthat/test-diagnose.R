@@ -32,10 +32,10 @@ test_that("modify_design (insert/delete/replace) works", {
     after = "model")
   expect_equal(length(inserted), 3L)
 
-  deleted <- delete_step(design, "inquiry")
+  deleted <- delete_step(design, "mu")
   expect_equal(length(deleted), 1L)
 
-  replaced <- replace_step(design, "inquiry",
+  replaced <- replace_step(design, "mu",
     declare_inquiry(med = median(Y)))
   expect_equal(length(replaced), 2L)
 })

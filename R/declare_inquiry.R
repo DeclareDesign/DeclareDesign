@@ -27,7 +27,18 @@ make_inquiry_step <- function(dots, subset_quo, label, handler = NULL) {
         args[[i]] <- val
         if (!is.null(nm) && nzchar(nm)) eval_env[[nm]] <- val
       }
-      result <- do.call(handler, args)
+      # Forward the step `label` to the handler when it accepts a `label` formal
+      # and the user has not bound it explicitly via `...`.
+      handler_args <- tryCatch(names(formals(handler)), error = function(e) NULL)
+      pass_data <- "data" %in% handler_args
+      pass_label <- !is.null(handler_args) &&
+        "label" %in% handler_args && !"label" %in% names(args)
+      call_args <- args
+      if (pass_data && !"data" %in% names(call_args)) {
+        call_args <- c(list(data = data), call_args)
+      }
+      if (pass_label) call_args$label <- label
+      result <- do.call(handler, call_args)
       result <- tibble::as_tibble(result)
       if (!"inquiry" %in% names(result)) {
         result$inquiry <- label
@@ -43,9 +54,16 @@ make_inquiry_step <- function(dots, subset_quo, label, handler = NULL) {
       return(tibble::as_tibble(result))
     }
     nms <- names(dots)
-    if (is.null(nms) || any(nms == "")) {
-      missing <- which(is.null(nms) | nms == "")
-      nms[missing] <- paste0(label, "_", missing)
+    if (is.null(nms)) nms <- rep("", length(dots))
+    if (any(nms == "")) {
+      missing <- which(nms == "")
+      # Single unnamed inquiry: the inquiry name is the step's label.
+      # Multiple unnamed inquiries: disambiguate with a numeric suffix.
+      if (length(dots) == 1L) {
+        nms[missing] <- label
+      } else {
+        nms[missing] <- paste0(label, "_", missing)
+      }
       names(dots) <- nms
     }
     rows <- list()
@@ -88,6 +106,15 @@ declare_inquiry <- function(..., subset = NULL, label = "inquiry",
   subset_quo <- rlang::enquo(subset)
   if (rlang::quo_is_null(subset_quo)) subset_quo <- NULL
   call <- sys.call()
+  # When the user supplies exactly one named splat (e.g. `pate = mean(...)`),
+  # the splat name becomes the step's label so it doubles as a reference key
+  # in `declare_estimator(..., inquiry = pate_step)`. An explicit `label =`
+  # argument is overridden in that case (DD compatibility).
+  splat_names <- names(dots) %||% rep("", length(dots))
+  named_splats <- splat_names[nzchar(splat_names)]
+  if (length(dots) == 1L && length(named_splats) == 1L) {
+    label <- named_splats
+  }
   fn <- make_inquiry_step(dots, subset_quo, label, handler = handler)
   step <- build_step(
     fn          = fn,

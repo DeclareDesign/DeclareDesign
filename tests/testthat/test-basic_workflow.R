@@ -49,3 +49,16 @@ test_that("design + NULL returns the design unchanged", {
   expect_s3_class(d2, "design")
   expect_length(d2, 1L)
 })
+
+test_that("run_design rejects non-design input", {
+  expect_error(run_design(6), "must be a `design`")
+  expect_error(run_design("not a design"), "must be a `design`")
+})
+
+test_that("declare_step with handler = fabricate evaluates lazily", {
+  pop <- declare_model(N = 10, X = seq_len(N))
+  step <- declare_step(handler = fabricatr::fabricate, X2 = X * 2)
+  d <- pop + step
+  df <- draw_data(d)
+  expect_equal(df$X2, df$X * 2)
+})

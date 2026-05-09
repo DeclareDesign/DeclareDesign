@@ -58,7 +58,7 @@ insert_step <- function(design, new_step, after = NULL, before = NULL) {
 #' @examples
 #' design <- declare_model(N = 30, Y = rnorm(N)) +
 #'   declare_inquiry(mu = mean(Y))
-#' delete_step(design, "inquiry") |> names()
+#' delete_step(design, "mu") |> names()
 delete_step <- function(design, step) {
   steps <- unclass(design)
   idx <- resolve_step_index(design, step)
@@ -76,7 +76,7 @@ delete_step <- function(design, step) {
 #' @examples
 #' design <- declare_model(N = 30, Y = rnorm(N)) +
 #'   declare_inquiry(mu = mean(Y))
-#' replace_step(design, "inquiry", declare_inquiry(med = median(Y)))
+#' replace_step(design, "mu", declare_inquiry(med = median(Y)))
 replace_step <- function(design, step, new_step) {
   steps <- unclass(design)
   idx <- resolve_step_index(design, step)

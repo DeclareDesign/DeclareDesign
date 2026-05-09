@@ -140,17 +140,30 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
     if (!"estimator" %in% names(res) || all(is.na(res$estimator))) {
       res$estimator <- label
     }
-    # If a term filter is given, apply it; otherwise drop the (Intercept) row
-    # by default so single-inquiry estimators map cleanly to a single estimate.
-    if (!is.null(term) && "term" %in% names(res)) {
-      res <- res[res$term %in% term, , drop = FALSE]
-    } else if ("term" %in% names(res) && nrow(res) > 1L) {
-      keep <- res$term != "(Intercept)"
-      if (any(keep)) res <- res[keep, , drop = FALSE]
+    # Term filtering. `term = TRUE` (or any non-character truthy) means
+    # "return every term"; `term = FALSE` is treated as "no explicit filter".
+    # When term is a character vector, preserve the user's ordering so the
+    # output rows align with `inquiry =` if both are vectors.
+    if ("term" %in% names(res)) {
+      if (is.character(term)) {
+        ord <- match(term, res$term)
+        ord <- ord[!is.na(ord)]
+        res <- res[ord, , drop = FALSE]
+      } else if (isTRUE(term)) {
+        # keep all rows, do not drop (Intercept)
+      } else if (nrow(res) > 1L) {
+        keep <- res$term != "(Intercept)"
+        if (any(keep)) res <- res[keep, , drop = FALSE]
+      }
     }
     if (add_inquiry && !is.null(inquiry)) {
       if (!"inquiry" %in% names(res)) {
-        if (length(inquiry) == 1L || nrow(res) == length(inquiry)) {
+        if (nrow(res) == length(inquiry) || length(inquiry) == 1L) {
+          res$inquiry <- inquiry
+        } else if (nrow(res) == 1L && length(inquiry) > 1L) {
+          # Replicate the single estimate row once per inquiry so the merge
+          # can attach a different estimand to each.
+          res <- res[rep(1L, length(inquiry)), , drop = FALSE]
           res$inquiry <- inquiry
         } else {
           res$inquiry <- inquiry[1]

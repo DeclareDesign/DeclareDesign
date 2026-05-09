@@ -52,10 +52,14 @@ rebuild_step <- function(step, new_dots) {
       handler <- attr(step, "handler_fn")
       d <- new_dots
       function(data) {
-        args <- lapply(d, function(q) {
-          rlang::eval_tidy(q, data = if (is.data.frame(data)) as.list(data) else NULL)
-        })
-        do.call(handler, c(list(data), args))
+        if (identical(handler, fabricatr::fabricate)) {
+          rlang::inject(handler(data = data, !!!d))
+        } else {
+          args <- lapply(d, function(q) {
+            rlang::eval_tidy(q, data = if (is.data.frame(data)) as.list(data) else NULL)
+          })
+          do.call(handler, c(list(data), args))
+        }
       }
     },
     step
@@ -215,6 +219,39 @@ expr_has_symbol <- function(expr, name) {
   FALSE
 }
 
+#' Zip a named list of parameter vectors into a row-wise data frame
+#'
+#' Length-1 entries are recycled. Returns a data frame with one row per
+#' position. List columns are preserved (so functions, list-valued params,
+#' etc. survive).
+#'
+#' @keywords internal
+#' @noRd
+zip_params <- function(params) {
+  if (length(params) == 0L) return(data.frame())
+  lengths_v <- vapply(params, length, integer(1))
+  n <- max(lengths_v)
+  if (any(lengths_v != 1L & lengths_v != n)) {
+    stop("All parameter vectors must have length 1 or the same length when ",
+         "`expand = FALSE`.")
+  }
+  # Recycle scalars and store as list-cols for non-atomic cases.
+  cols <- lapply(params, function(v) {
+    if (length(v) == 1L) v <- rep(list(v[[1]]), n) else if (!is.list(v)) v <- as.list(v)
+    v
+  })
+  # Try to simplify obvious atomic cases back to vectors so users see plain df
+  cols <- lapply(cols, function(col) {
+    if (all(vapply(col, function(x) is.atomic(x) && length(x) == 1L, logical(1)))) {
+      unlist(col)
+    } else {
+      col
+    }
+  })
+  out <- tibble::as_tibble(cols)
+  out
+}
+
 #' Re-parameterize a design
 #'
 #' Replaces parameter values in the captured environments of a design's steps,
@@ -238,15 +275,21 @@ expr_has_symbol <- function(expr, name) {
 #' redesigned <- redesign(design, N = c(10, 20))
 #' length(redesigned)
 redesign <- function(design, ..., expand = TRUE) {
+  if (inherits(design, "design_step")) {
+    design <- construct_design(wrap_step(design))
+  }
+  if (!inherits(design, "design")) {
+    stop("`design` must be a `design` or `design_step` object.")
+  }
   new_params <- list(...)
   if (length(new_params) == 0) return(design)
   param_df <- if (expand) {
     expand.grid(new_params, stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE)
   } else {
-    as.data.frame(new_params, stringsAsFactors = FALSE)
+    zip_params(new_params)
   }
   designs <- purrr::map(seq_len(nrow(param_df)), function(i) {
-    params_i <- as.list(param_df[i, , drop = FALSE])
+    params_i <- extract_param_row(param_df, i)
     d <- modify_design_params(design, params_i)
     attr(d, "parameters") <- param_df[i, , drop = FALSE]
     d
@@ -254,6 +297,23 @@ redesign <- function(design, ..., expand = TRUE) {
   if (length(designs) == 1L) return(designs[[1]])
   names(designs) <- paste0("design_", seq_along(designs))
   designs
+}
+
+#' Extract a single row of a parameter data frame as a clean named list
+#'
+#' Atomic columns are returned as scalar values; list-columns have their
+#' singleton element unwrapped, so a row whose `fn` is a list of one
+#' function appears as a function (not a 1-element list).
+#'
+#' @keywords internal
+#' @noRd
+extract_param_row <- function(param_df, i) {
+  out <- list()
+  for (nm in names(param_df)) {
+    col <- param_df[[nm]]
+    if (is.list(col)) out[[nm]] <- col[[i]] else out[[nm]] <- col[i]
+  }
+  out
 }
 
 #' Build a family of designs from a designer function
@@ -271,10 +331,10 @@ expand_design <- function(designer, ..., expand = TRUE) {
   param_df <- if (expand) {
     expand.grid(new_params, stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE)
   } else {
-    as.data.frame(new_params, stringsAsFactors = FALSE)
+    zip_params(new_params)
   }
   designs <- purrr::map(seq_len(nrow(param_df)), function(i) {
-    params_i <- as.list(param_df[i, , drop = FALSE])
+    params_i <- extract_param_row(param_df, i)
     d <- do.call(designer, params_i)
     attr(d, "parameters") <- param_df[i, , drop = FALSE]
     d
