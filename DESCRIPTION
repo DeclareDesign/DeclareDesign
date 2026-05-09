@@ -1,0 +1,32 @@
+Package: DeclareDesignZero
+Type: Package
+Title: A Tidyverse-First Research Design Declaration and Diagnosis Tool
+Version: 0.0.1
+Authors@R: c(person("Alex", "Coppock", email = "acoppock@gmail.com", role = c("aut", "cre")))
+Description: A ground-up rewrite of DeclareDesign built on tidyverse conventions.
+    Declares, simulates, and diagnoses research designs with an API identical
+    to DeclareDesign, using purrr for simulation, dplyr for diagnosis, and
+    rlang for tidy evaluation.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.1.0)
+Imports:
+    broom,
+    dplyr,
+    fabricatr,
+    generics,
+    purrr,
+    rlang,
+    tibble,
+    tidyr
+Suggests:
+    estimatr,
+    furrr,
+    knitr,
+    metafor,
+    randomizr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
