@@ -78,7 +78,12 @@ method_expr_label <- function(expr) {
 normalize_inquiry <- function(inquiry) {
   if (is.null(inquiry)) return(NULL)
   if (is.character(inquiry)) return(inquiry)
-  if (inherits(inquiry, "design_step")) return(attr(inquiry, "label"))
+  if (inherits(inquiry, "design_step")) {
+    rlang::abort(
+      "Pass the inquiry label as a string, not a step object.",
+      "i" = 'Use `inquiry = "ATE"` instead of `inquiry = my_inquiry_step`.'
+    )
+  }
   if (is.list(inquiry)) {
     return(unlist(lapply(inquiry, normalize_inquiry)))
   }

@@ -68,23 +68,29 @@ test_that("term and inquiry vectors stay aligned in user-supplied order", {
 })
 
 test_that("a single estimate row replicates across multiple inquiries", {
-  pate <- declare_inquiry(pate = 1)
-  sate <- declare_inquiry(sate = 1)
-  est <- declare_estimator(Y ~ Z, .method = lm, term = "Z",
-                           inquiry = c(pate, sate), label = "ols")
   d <- declare_model(N = 30, Z = rep(0:1, 15), Y = Z + rnorm(N)) +
-    pate + sate + est
+    declare_inquiry(pate = 1) +
+    declare_inquiry(sate = 1) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z",
+                      inquiry = c("pate", "sate"), label = "ols")
   e <- draw_estimates(d)
   expect_equal(nrow(e), 2L)
   expect_equal(sort(e$inquiry), c("pate", "sate"))
 })
 
-test_that("inquiry as a design_step object resolves to its label", {
+test_that("passing a design_step as inquiry errors with a helpful message", {
   pate <- declare_inquiry(pate = 1)
-  est <- declare_estimator(Y ~ Z, .method = lm, term = "Z",
-                           inquiry = pate, label = "ols")
+  expect_error(
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = pate),
+    "string, not a step object"
+  )
+})
+
+test_that("inquiry as a string links estimator to estimand correctly", {
   d <- declare_model(N = 30, Z = rep(0:1, 15), Y = Z + rnorm(N)) +
-    pate + est
+    declare_inquiry(pate = 1) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z",
+                      inquiry = "pate", label = "ols")
   e <- draw_estimates(d)
   expect_equal(e$inquiry, "pate")
 })

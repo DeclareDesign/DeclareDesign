@@ -34,6 +34,10 @@ resolve_step_index <- function(design, step) {
 #'   after = "model")
 #' names(new_design)
 insert_step <- function(design, new_step, after = NULL, before = NULL) {
+  rlang::warn(
+    "`insert_step()` is deprecated. Reconstruct the design explicitly instead.",
+    .frequency = "once", .frequency_id = "insert_step"
+  )
   if (is.null(after) && is.null(before)) {
     stop("Provide either `after` or `before`.")
   }
@@ -60,6 +64,10 @@ insert_step <- function(design, new_step, after = NULL, before = NULL) {
 #'   declare_inquiry(mu = mean(Y))
 #' delete_step(design, "mu") |> names()
 delete_step <- function(design, step) {
+  rlang::warn(
+    "`delete_step()` is deprecated. Reconstruct the design explicitly instead.",
+    .frequency = "once", .frequency_id = "delete_step"
+  )
   steps <- unclass(design)
   idx <- resolve_step_index(design, step)
   steps <- steps[-idx]
@@ -78,6 +86,10 @@ delete_step <- function(design, step) {
 #'   declare_inquiry(mu = mean(Y))
 #' replace_step(design, "mu", declare_inquiry(med = median(Y)))
 replace_step <- function(design, step, new_step) {
+  rlang::warn(
+    "`replace_step()` is deprecated. Reconstruct the design explicitly instead.",
+    .frequency = "once", .frequency_id = "replace_step"
+  )
   steps <- unclass(design)
   idx <- resolve_step_index(design, step)
   new_label <- attr(new_step, "label") %||% names(steps)[idx]

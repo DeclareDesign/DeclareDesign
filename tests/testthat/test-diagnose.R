@@ -23,19 +23,16 @@ test_that("diagnose_design over multiple designs adds a design column", {
   expect_equal(nrow(diag), 2L)
 })
 
-test_that("modify_design (insert/delete/replace) works", {
+test_that("modify_design (insert/delete/replace) still works after deprecation", {
   design <- declare_model(N = 30, Y = rnorm(N)) +
     declare_inquiry(mu = mean(Y))
 
-  inserted <- insert_step(design,
-    declare_measurement(Y2 = Y * 2),
-    after = "model")
+  inserted <- suppressWarnings(insert_step(design, declare_measurement(Y2 = Y * 2), after = "model"))
   expect_equal(length(inserted), 3L)
 
-  deleted <- delete_step(design, "mu")
+  deleted <- suppressWarnings(delete_step(design, "mu"))
   expect_equal(length(deleted), 1L)
 
-  replaced <- replace_step(design, "mu",
-    declare_inquiry(med = median(Y)))
+  replaced <- suppressWarnings(replace_step(design, "mu", declare_inquiry(med = median(Y))))
   expect_equal(length(replaced), 2L)
 })

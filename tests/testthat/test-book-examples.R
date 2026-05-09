@@ -151,16 +151,15 @@ test_that("expand_design varies parameters via a designer function", {
   expect_equal(nrow(draw_data(designs[[3]])), 30L)
 })
 
-test_that("insert_step / replace_step / delete_step round-trip", {
+test_that("insert_step / replace_step / delete_step still work after deprecation", {
   d <- declare_model(N = 20, Y = rnorm(N)) +
     declare_inquiry(mu = mean(Y))
-  d_added <- insert_step(d, declare_measurement(Y2 = Y * 2), after = "model")
+  d_added <- suppressWarnings(insert_step(d, declare_measurement(Y2 = Y * 2), after = "model"))
   expect_length(d_added, 3L)
   expect_true("measurement" %in% names(d_added))
-  d_replaced <- replace_step(d, "mu",
-                              declare_inquiry(med = stats::median(Y)))
+  d_replaced <- suppressWarnings(replace_step(d, "mu", declare_inquiry(med = stats::median(Y))))
   expect_equal(draw_estimands(d_replaced)$inquiry, "med")
-  d_deleted <- delete_step(d, "mu")
+  d_deleted <- suppressWarnings(delete_step(d, "mu"))
   expect_length(d_deleted, 1L)
 })
 
