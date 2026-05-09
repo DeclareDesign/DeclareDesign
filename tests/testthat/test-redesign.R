@@ -29,3 +29,25 @@ test_that("expand_design builds a list from a designer", {
   fam <- expand_design(designer, N = c(10, 20))
   expect_length(fam, 2L)
 })
+
+test_that("expand_design accepts function-valued parameters in zip mode", {
+  designer <- function(N = 100, fn = mean) {
+    declare_model(N = N, Y = rnorm(N)) +
+      declare_inquiry(inq = fn(Y))
+  }
+  fam <- expand_design(designer, N = c(10, 50),
+                       fn = c(mean, median), expand = FALSE)
+  expect_length(fam, 2L)
+  expect_equal(nrow(draw_data(fam[[1]])), 10L)
+  expect_equal(nrow(draw_data(fam[[2]])), 50L)
+})
+
+test_that("redesign accepts list-valued parameters", {
+  d <- declare_model(N = 30, U = rnorm(N)) +
+    declare_assignment(Z = randomizr::complete_ra(N, num_arms = 3,
+                                                   prob_each = c(.2, .5, .3)))
+  fam <- redesign(d, prob_each = list(c(.2, .5, .3), c(0, .5, .5)))
+  expect_length(fam, 2L)
+  expect_equal(nrow(draw_data(fam[[1]])), 30L)
+  expect_equal(nrow(draw_data(fam[[2]])), 30L)
+})

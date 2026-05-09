@@ -40,3 +40,23 @@ test_that("ATT-style subset = Z == 1 evaluates inquiry on subset", {
   expect_equal(out$estimand, 2)
   expect_equal(out$inquiry, "ATT")
 })
+
+test_that("a single unnamed inquiry uses the step label as inquiry name", {
+  default_step <- declare_inquiry(mean(Y))
+  manual_step  <- declare_inquiry(mean(Y), label = "ATE2")
+  df <- data.frame(Y = 1:5)
+  expect_equal(default_step(df)$inquiry, "inquiry")
+  expect_equal(manual_step(df)$inquiry, "ATE2")
+})
+
+test_that("custom inquiry handler receives `label` when it has that formal", {
+  fn <- function(data, label) {
+    data.frame(inquiry = label,
+               estimand = median(data$Y_Z_1 - data$Y_Z_0))
+  }
+  step <- declare_inquiry(handler = fn, label = "medianTE")
+  df <- data.frame(Y_Z_0 = 1:10, Y_Z_1 = 3:12)
+  out <- step(df)
+  expect_equal(out$inquiry, "medianTE")
+  expect_equal(out$estimand, 2)
+})

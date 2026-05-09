@@ -42,3 +42,11 @@ test_that("step type and causal type attributes are set", {
   expect_equal(attr(i, "step_type"), "inquiry")
   expect_equal(attr(i, "causal_type"), "inquiry")
 })
+
+test_that("declare_model accepts a custom handler", {
+  myf <- function(N) data.frame(u = rnorm(N))
+  step <- declare_model(handler = myf, N = 50)
+  out <- step()
+  expect_equal(nrow(out), 50L)
+  expect_true("u" %in% names(out))
+})
