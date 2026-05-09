@@ -76,8 +76,8 @@ compute_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
 #' Resampling at `sim_ID` in the nested case is statistically wrong because
 #' rows within the same world are correlated.
 #'
-#' Uses `rsample::bootstraps()` when available for reproducible splits; falls
-#' back to manual cluster resampling otherwise.
+#' For nested draws, resamples at the outermost draw level (cluster bootstrap)
+#' so that correlated within-world rows are always kept together.
 #'
 #' @keywords internal
 #' @noRd
@@ -92,7 +92,7 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set,
   diagnosand_names <- names(attr(diagnosands, "dots"))
 
   resample_once <- function() {
-    drawn <- sample(unit_ids, length(unit_ids), replace = TRUE)
+    drawn  <- sample(unit_ids, length(unit_ids), replace = TRUE)
     max_id <- max(simulations_df$sim_ID)
     purrr::map(seq_along(drawn), function(i) {
       sub <- simulations_df[simulations_df[[key_col]] == drawn[i], , drop = FALSE]
@@ -101,24 +101,9 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set,
     }) |> dplyr::bind_rows()
   }
 
-  if (requireNamespace("rsample", quietly = TRUE)) {
-    unit_df <- tibble::tibble(.id = unit_ids)
-    splits <- rsample::bootstraps(unit_df, times = B)$splits
-    replicates <- purrr::map(splits, function(split) {
-      drawn <- rsample::analysis(split)$.id
-      max_id <- max(simulations_df$sim_ID)
-      resampled <- purrr::map(seq_along(drawn), function(i) {
-        sub <- simulations_df[simulations_df[[key_col]] == drawn[i], , drop = FALSE]
-        sub$sim_ID <- sub$sim_ID + (i - 1L) * max_id
-        sub
-      }) |> dplyr::bind_rows()
-      compute_diagnosands(resampled, diagnosands, group_by_set)
-    })
-  } else {
-    replicates <- purrr::map(seq_len(B), function(b) {
-      compute_diagnosands(resample_once(), diagnosands, group_by_set)
-    })
-  }
+  replicates <- purrr::map(seq_len(B), function(b) {
+    compute_diagnosands(resample_once(), diagnosands, group_by_set)
+  })
   replicate_df <- dplyr::bind_rows(replicates)
   if (length(group_by_set) == 0) {
     se_row <- dplyr::summarize(
