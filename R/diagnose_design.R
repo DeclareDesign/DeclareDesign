@@ -334,10 +334,15 @@ compute_variance_decomposition <- function(simulations_df, draw_cols,
       components[[length(components) + 1L]] <- comp
     }
 
-    # Residual: within-innermost-cell variance
+    # Residual: within-innermost-cell variance.
+    # Cells with 1 row have undefined sample variance; treat as 0 (no
+    # within-cell stochasticity when each draw produces a single outcome).
     residual <- df |>
       dplyr::group_by(dplyr::across(dplyr::all_of(c(group_by_set, draw_cols)))) |>
-      dplyr::summarize(wv = stats::var(.y, na.rm = TRUE), .groups = "drop") |>
+      dplyr::summarize(
+        wv = if (dplyr::n() > 1L) stats::var(.y, na.rm = TRUE) else 0,
+        .groups = "drop"
+      ) |>
       dplyr::group_by(dplyr::across(dplyr::all_of(group_by_set))) |>
       dplyr::summarize(var_residual = mean(wv, na.rm = TRUE), .groups = "drop")
     components[[length(components) + 1L]] <- residual
@@ -349,11 +354,15 @@ compute_variance_decomposition <- function(simulations_df, draw_cols,
                       else dplyr::left_join(a, b, by = join_by)
     )
 
-    # Fractions
-    var_cols <- c(paste0("var_", step_names), "var_residual")
+    # Fractions: normalise over the SUM of components so they always sum to 1.
+    # Dividing by var_total can exceed 1 in finite samples because the
+    # component estimators (means of conditional variances) are not an exact
+    # partition of the sample variance.
+    var_cols  <- c(paste0("var_", step_names), "var_residual")
+    var_sum   <- Reduce(`+`, lapply(var_cols, function(vc) result[[vc]]))
     for (vc in var_cols) {
       fc <- sub("^var_", "frac_", vc)
-      result[[fc]] <- result[[vc]] / result[["var_total"]]
+      result[[fc]] <- result[[vc]] / var_sum
     }
 
     result[["quantity"]] <- col_name

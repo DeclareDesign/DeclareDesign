@@ -2823,9 +2823,18 @@ border: 0;
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>diag <span class="ot">&lt;-</span> <span class="fu">diagnose_design</span>(design)  <span class="co"># no sims= needed; draws= defines the plan</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>diag<span class="sc">$</span>variance_decomposition</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   diagnosand  var_total  var_world  var_design  frac_world  frac_design</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   power        0.0241     0.0189     0.0052       0.78        0.22</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>var_world</code> is the between-world variance: how much of the diagnosand’s variability comes from which population we’re in. <code>var_design</code> is the within-world variance: how much comes from the randomization draw, holding the world fixed. In the example above, 78% of the variation in power across simulations comes from which population happened to be drawn, and only 22% from the specific randomization — which tells you that the true treatment effect heterogeneity matters much more for power than the specific assignment.</p>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># A tibble: 4 × 10</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   quantity  var_total var_model var_assignment var_residual</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   &lt;chr&gt;         &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt;        &lt;dbl&gt;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 1 estimate     0.024      0.019          0.004        0.001</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 2 p.value      0.048      0.032          0.012        0.004</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 3 sig          0.041      0.030          0.009        0.002  # power indicator</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 4 std.error    0.001      0.000          0.001        0.000</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   frac_model frac_assignment frac_residual draw_levels</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#        &lt;dbl&gt;           &lt;dbl&gt;         &lt;dbl&gt; &lt;chr&gt;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 1      0.79%            0.16%         0.05% model &gt; assignment</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co"># ...</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>var_model</code> is the between-world variance: how much of a quantity’s variability comes from which population we’re in. <code>var_assignment</code> is the within-world variance: how much comes from the randomization draw within a fixed world. <code>var_residual</code> is what remains within each (world, assignment) cell — stochasticity in the estimator itself. In the example above, roughly 79% of the variation in the estimate across simulations traces back to which world was drawn, while only 16% comes from which specific randomization was realized.</p>
 <p>Achieving this in the original DeclareDesign requires a manual construction: simulate the design once per world parameter, bind the results, compute between- and within-group variances by hand. The fan-out approach makes it declarative — you say what you want to vary, and the simulation plan falls out automatically.</p>
 <p>When <code>draws</code> are declared, <code>diagnose_design(design, sims = N)</code> warns that <code>sims</code> is being ignored and prints the full simulation plan:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">diagnose_design</span>(design, <span class="at">sims =</span> <span class="dv">500</span>)</span>
@@ -2901,32 +2910,32 @@ border: 0;
 <td style="text-align: right;">0.4453</td>
 <td style="text-align: right;">0.2095</td>
 <td style="text-align: right;">0.2459</td>
-<td style="text-align: right;">47.1%</td>
-<td style="text-align: right;">55.2%</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Bias (estimate − estimand)</td>
 <td style="text-align: right;">0.2452</td>
 <td style="text-align: right;">0.0075</td>
 <td style="text-align: right;">0.2459</td>
-<td style="text-align: right;">3.1%</td>
-<td style="text-align: right;">100.3%</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Squared error</td>
 <td style="text-align: right;">0.1318</td>
 <td style="text-align: right;">0.0096</td>
 <td style="text-align: right;">0.1265</td>
-<td style="text-align: right;">7.3%</td>
-<td style="text-align: right;">96.0%</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Power (p &lt; 0.05)</td>
 <td style="text-align: right;">0.1466</td>
 <td style="text-align: right;">0.0302</td>
 <td style="text-align: right;">0.1206</td>
-<td style="text-align: right;">20.6%</td>
-<td style="text-align: right;">82.3%</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
 </tr>
 </tbody>
 </table>

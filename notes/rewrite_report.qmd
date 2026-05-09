@@ -361,11 +361,20 @@ Running `diagnose_design()` on such a design — with no `sims` argument, becaus
 diag <- diagnose_design(design)  # no sims= needed; draws= defines the plan
 
 diag$variance_decomposition
-#   diagnosand  var_total  var_world  var_design  frac_world  frac_design
-#   power        0.0241     0.0189     0.0052       0.78        0.22
+# A tibble: 4 × 10
+#   quantity  var_total var_model var_assignment var_residual
+#   <chr>         <dbl>     <dbl>          <dbl>        <dbl>
+# 1 estimate     0.024      0.019          0.004        0.001
+# 2 p.value      0.048      0.032          0.012        0.004
+# 3 sig          0.041      0.030          0.009        0.002  # power indicator
+# 4 std.error    0.001      0.000          0.001        0.000
+#   frac_model frac_assignment frac_residual draw_levels
+#        <dbl>           <dbl>         <dbl> <chr>
+# 1      0.79%            0.16%         0.05% model > assignment
+# ...
 ```
 
-`var_world` is the between-world variance: how much of the diagnosand's variability comes from which population we're in. `var_design` is the within-world variance: how much comes from the randomization draw, holding the world fixed. In the example above, 78% of the variation in power across simulations comes from which population happened to be drawn, and only 22% from the specific randomization — which tells you that the true treatment effect heterogeneity matters much more for power than the specific assignment.
+`var_model` is the between-world variance: how much of a quantity's variability comes from which population we're in. `var_assignment` is the within-world variance: how much comes from the randomization draw within a fixed world. `var_residual` is what remains within each (world, assignment) cell — stochasticity in the estimator itself. In the example above, roughly 79% of the variation in the estimate across simulations traces back to which world was drawn, while only 16% comes from which specific randomization was realized.
 
 Achieving this in the original DeclareDesign requires a manual construction: simulate the design once per world parameter, bind the results, compute between- and within-group variances by hand. The fan-out approach makes it declarative — you say what you want to vary, and the simulation plan falls out automatically.
 
