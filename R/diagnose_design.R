@@ -93,12 +93,12 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set,
 
   resample_once <- function() {
     drawn  <- sample(unit_ids, length(unit_ids), replace = TRUE)
-    max_id <- max(simulations_df$sim_ID)
-    purrr::map(seq_along(drawn), function(i) {
-      sub <- simulations_df[simulations_df[[key_col]] == drawn[i], , drop = FALSE]
-      sub$sim_ID <- sub$sim_ID + (i - 1L) * max_id
-      sub
-    }) |> dplyr::bind_rows()
+    lookup <- stats::setNames(data.frame(drawn), key_col)
+    # many-to-many join: units drawn k times appear k times in the output,
+    # giving them k-fold weight in subsequent summarize() calls -- correct
+    # bootstrap behaviour without any sim_ID reindexing.
+    dplyr::inner_join(simulations_df, lookup,
+                      by = key_col, relationship = "many-to-many")
   }
 
   replicates <- purrr::map(seq_len(B), function(b) {
