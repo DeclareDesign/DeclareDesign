@@ -88,7 +88,7 @@ test_that("diagnose_design uses nested draws when sims is NULL", {
   expect_false(is.null(diag$variance_decomposition))
 })
 
-test_that("variance decomposition has var_total, var_design, var_world, fracs", {
+test_that("variance decomposition names its components after the draw steps", {
   design <-
     declare_model(N = 20, U = rnorm(N), Y_Z_1 = U + .3, Y_Z_0 = U,
                   draws = 4) +
@@ -99,9 +99,48 @@ test_that("variance decomposition has var_total, var_design, var_world, fracs", 
                       label = "ols")
   diag <- diagnose_design(design, bootstrap_sims = 0)
   vd <- diag$variance_decomposition
-  expect_true(all(c("var_total", "var_design", "var_world",
-                    "frac_design", "frac_world") %in% names(vd)))
-  expect_true(all(vd$frac_design + vd$frac_world > 0, na.rm = TRUE))
+  expect_true(all(c("var_total", "var_model", "var_assignment", "var_residual",
+                    "frac_model", "frac_assignment", "frac_residual")
+                  %in% names(vd)))
+  fracs <- vd$frac_model + vd$frac_assignment + vd$frac_residual
+  expect_equal(fracs, rep(1, length(fracs)), tolerance = 1e-8)
+})
+
+test_that("draws on a step after the inquiry keep the inquiry and hold the population fixed", {
+  # Regression test. The outer fan-out ran only DGP steps ahead of the first
+  # fanned step, so an inquiry declared before it never executed and every
+  # estimand came back missing, while the model was redrawn per assignment.
+  design <-
+    declare_model(N = 20, U = rnorm(N), Y_Z_1 = U + .3, Y_Z_0 = U) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = sample(rep(0:1, length.out = N)), draws = 5) +
+    declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
+                      label = "ols")
+  sims <- simulate_design(design)
+  expect_equal(nrow(sims), 5L)
+  expect_true("estimand" %in% names(sims))
+  expect_false(any(is.na(sims$estimand)))
+  # One population means one realised estimand shared by all five draws
+  expect_equal(length(unique(sims$estimand)), 1L)
+  expect_gt(length(unique(sims$estimate)), 1L)
+})
+
+test_that("an inquiry upstream of a model fan-out still varies by world", {
+  design <-
+    declare_model(N = 20, tau = rnorm(1), U = rnorm(N),
+                  Y_Z_0 = U, Y_Z_1 = U + tau, draws = 4) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = sample(rep(0:1, length.out = N)), draws = 3) +
+    declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
+                      label = "ols")
+  sims <- simulate_design(design)
+  expect_equal(nrow(sims), 12L)
+  per_world <- tapply(sims$estimand, sims$model_draw, function(x)
+    length(unique(x)))
+  expect_equal(as.vector(per_world), rep(1L, 4))
+  expect_equal(length(unique(sims$estimand)), 4L)
 })
 
 test_that("only-model draws works (no assignment fan-out)", {

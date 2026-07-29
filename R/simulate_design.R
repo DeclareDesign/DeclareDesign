@@ -4,11 +4,15 @@
 #' single long tibble suitable for diagnosis. When more than one design is
 #' supplied, a `design` column distinguishes them.
 #'
-#' If any step in a design has `draws > 1` and `sims` is not supplied, the
-#' simulation runs in nested mode: each step with `draws > 1` fans out, and
-#' the total simulation count equals the product of all `draws` values across
-#' steps. When `sims` is supplied alongside step-level `draws`, the flat
-#' `sims` simulation is used and a warning lists the ignored draw values.
+#' If any step in a design has `draws > 1`, the simulation runs in nested
+#' mode: each step with `draws > 1` fans out, and the total simulation count
+#' equals the product of all `draws` values across steps. Declared `draws`
+#' take priority over `sims`, so supplying both runs the nested simulation and
+#' warns, printing the plan it is running instead.
+#'
+#' Steps upstream of the first fan-out run once and are held fixed across the
+#' draws below them, which is what makes `declare_assignment(..., draws = 50)`
+#' mean fifty randomizations of one population.
 #'
 #' Parallelism is handled transparently via the `future` ecosystem. Call
 #' `future::plan(multisession, workers = 4)` before `simulate_design()` and,
@@ -16,10 +20,10 @@
 #' no other changes required.
 #'
 #' @param ... One or more `design` objects.
-#' @param sims Number of simulations per design. Defaults to `NULL`. When
-#'   `NULL` and the design has step-level `draws`, the design runs in nested
-#'   mode; when `NULL` and the design has no step-level draws, defaults to
-#'   `500`.
+#' @param sims Number of simulations per design. Defaults to `NULL`, which
+#'   means 500 flat simulations for a design with no step-level `draws`. A
+#'   design with step-level `draws` runs in nested mode whether or not `sims`
+#'   is supplied; supplying it warns and is otherwise ignored.
 #' @return A tibble of stacked simulation results.
 #' @export
 #' @examples
@@ -220,8 +224,9 @@ simulate_nested_single <- function(design, design_label = "design",
 
   # run_from: execute steps[step_idx..end] against `data`, fanning out at any
   # step with draws > 1. Returns a list with inquiries, estimates collected
-  # across all draws below this point.
-  run_from <- function(step_idx, data, draw_cols = list()) {
+  # across all draws below this point. `pin` fixes this step to a single draw
+  # index, which is how the outermost fan-out is distributed across workers.
+  run_from <- function(step_idx, data, draw_cols = list(), pin = NULL) {
     if (step_idx > length(steps)) {
       return(list(
         inquiries = tibble::tibble(),
@@ -233,7 +238,8 @@ simulate_nested_single <- function(design, design_label = "design",
     ct    <- step_types[[step_idx]]
     label <- step_labels[[step_idx]]
 
-    draw_results <- lapply(seq_len(n), function(d) {
+    draw_ids <- if (is.null(pin)) seq_len(n) else pin
+    draw_results <- lapply(draw_ids, function(d) {
       new_draw_cols <- draw_cols
       if (n > 1L) new_draw_cols[[paste0(label, "_draw")]] <- d
       if (identical(ct, "dgp")) {
@@ -269,29 +275,44 @@ simulate_nested_single <- function(design, design_label = "design",
     )
   }
 
+  # Steps upstream of the first fan-out sit outside the fan and run exactly
+  # once. Re-running them per draw would redraw the very thing the fan is meant
+  # to hold fixed: `declare_assignment(..., draws = 50)` asks for 50
+  # randomizations of one population, not 50 populations.
+  run_prefix <- function(idx) {
+    data <- NULL
+    inquiries <- list()
+    estimates <- list()
+    for (i in idx) {
+      ct <- step_types[[i]]
+      if (identical(ct, "dgp")) {
+        data <- steps[[i]](data)
+      } else if (identical(ct, "inquiry")) {
+        inquiries[[length(inquiries) + 1L]] <- steps[[i]](data)
+      } else if (identical(ct, "estimator")) {
+        estimates[[length(estimates) + 1L]] <- steps[[i]](data)
+      }
+    }
+    list(data      = data,
+         inquiries = dplyr::bind_rows(inquiries),
+         estimates = dplyr::bind_rows(estimates))
+  }
+
   map_fn <- sim_map_fn()
   first_fan <- if (length(fan_steps) > 0) fan_steps[1] else NA_integer_
 
-  if (!is.na(first_fan) && identical(step_types[[first_fan]], "dgp")) {
+  if (!is.na(first_fan)) {
+    prefix  <- run_prefix(seq_len(first_fan - 1L))
     n_outer <- step_draws[[first_fan]]
     outer_results <- map_fn(seq_len(n_outer), function(outer_d) {
-      data <- NULL
-      # Run all DGP steps up to and including the first fan step.
-      # Inquiry / estimator steps before that point would be premature, but in
-      # principle there should not be any since the first fan-out is the first
-      # step touched. Inquiries / estimators ahead of the first fan step
-      # belong outside the fan and are evaluated in the inner recursion under
-      # data == NULL, which is meaningless. The convention is that the first
-      # fan-out step is a DGP step (model / sampling / assignment).
-      for (i in seq_len(first_fan)) {
-        if (identical(step_types[[i]], "dgp")) {
-          data <- steps[[i]](data)
-        }
-      }
-      dc <- list()
-      dc[[paste0(step_labels[[first_fan]], "_draw")]] <- outer_d
-      run_from(first_fan + 1L, data, dc)
+      run_from(first_fan, prefix$data, list(), pin = outer_d)
     })
+    if (nrow(prefix$inquiries) > 0 || nrow(prefix$estimates) > 0) {
+      outer_results <- c(
+        list(list(inquiries = prefix$inquiries, estimates = prefix$estimates)),
+        outer_results
+      )
+    }
   } else {
     outer_results <- list(run_from(1L, NULL, list()))
   }

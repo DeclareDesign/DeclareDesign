@@ -12,10 +12,10 @@ simulate_designs(..., sims = NULL)
 \arguments{
 \item{...}{One or more \code{design} objects.}
 
-\item{sims}{Number of simulations per design. Defaults to \code{NULL}. When
-\code{NULL} and the design has step-level \code{draws}, the design runs in nested
-mode; when \code{NULL} and the design has no step-level draws, defaults to
-\code{500}.}
+\item{sims}{Number of simulations per design. Defaults to \code{NULL}, which
+means 500 flat simulations for a design with no step-level \code{draws}. A
+design with step-level \code{draws} runs in nested mode whether or not \code{sims}
+is supplied; supplying it warns and is otherwise ignored.}
 }
 \value{
 A tibble of stacked simulation results.
@@ -26,11 +26,15 @@ single long tibble suitable for diagnosis. When more than one design is
 supplied, a \code{design} column distinguishes them.
 }
 \details{
-If any step in a design has \code{draws > 1} and \code{sims} is not supplied, the
-simulation runs in nested mode: each step with \code{draws > 1} fans out, and
-the total simulation count equals the product of all \code{draws} values across
-steps. When \code{sims} is supplied alongside step-level \code{draws}, the flat
-\code{sims} simulation is used and a warning lists the ignored draw values.
+If any step in a design has \code{draws > 1}, the simulation runs in nested
+mode: each step with \code{draws > 1} fans out, and the total simulation count
+equals the product of all \code{draws} values across steps. Declared \code{draws}
+take priority over \code{sims}, so supplying both runs the nested simulation and
+warns, printing the plan it is running instead.
+
+Steps upstream of the first fan-out run once and are held fixed across the
+draws below them, which is what makes \code{declare_assignment(..., draws = 50)}
+mean fifty randomizations of one population.
 
 Parallelism is handled transparently via the \code{future} ecosystem. Call
 \code{future::plan(multisession, workers = 4)} before \code{simulate_design()} and,
