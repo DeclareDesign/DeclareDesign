@@ -50,3 +50,32 @@ test_that("declare_model accepts a custom handler", {
   expect_equal(nrow(out), 50L)
   expect_true("u" %in% names(out))
 })
+
+test_that("multilevel declare_model nests and draws independently per cluster", {
+  # No test touched add_level or nest_level, which is how a recycling bug in
+  # the nested path went unnoticed: every cluster received identical residuals.
+  skip_if_not_installed("randomizr")
+  set.seed(4)
+  design <- declare_model(
+    villages = add_level(N = 25, u_v = rnorm(N)),
+    citizens = add_level(N = 8, e = rnorm(N))
+  )
+  df <- draw_data(design)
+  expect_equal(nrow(df), 200L)
+  expect_equal(length(unique(df$villages)), 25L)
+  expect_equal(length(unique(df$citizens)), 200L)
+  # Cluster-level column is constant within village, unit-level column is not
+  expect_equal(length(unique(tapply(df$u_v, df$villages, sd))), 1L)
+  expect_true(all(is.na(tapply(df$u_v, df$villages, sd)) |
+                    tapply(df$u_v, df$villages, sd) == 0))
+  by_village <- split(df$e, df$villages)
+  expect_equal(length(unique(by_village)), 25L)
+})
+
+test_that("declare_model may declare N alone and add variables downstream", {
+  design <- declare_model(N = 80) +
+    declare_measurement(Y = rbinom(N, 1, 0.5))
+  df <- draw_data(design)
+  expect_equal(nrow(df), 80L)
+  expect_true("Y" %in% names(df))
+})
