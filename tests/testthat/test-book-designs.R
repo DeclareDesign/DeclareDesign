@@ -10,7 +10,9 @@
 # the first draw is not a passing example, and neither is one that quietly
 # produces no estimate.
 #
-# 68 of 90 book declarations run here. The 22 that do not are listed at the
+# 81 of the book's 90 design declarations run here: 78 verbatim and 3 after
+# the one mechanical substitution fabricatrZero requires. The remaining
+# 9 are listed at the foot of the file, with the reason for each.
 # bottom with the reason for each.
 
 # The book leans on randomizr and estimatr throughout, and on rdss for its
@@ -28,6 +30,22 @@ test_that("declaration_9.1 runs (choosing answer strategy)", {
     declare_estimator(age ~ 1, .method = lm_robust)
   expect_s3_class(declaration_9.1, "design")
   estimates <- draw_estimates(declaration_9.1)
+  expect_gt(nrow(estimates), 0)
+  if ("estimate" %in% names(estimates))
+    expect_false(all(is.na(estimates$estimate)))
+})
+
+test_that("base_declaration runs (choosing answer strategy)", {
+  skip_unless("randomizr", "estimatr")
+  true_mean <- (seq(0, 100, length.out = 10))[[1]]
+  base_declaration <-
+    declare_model(N = 100, 
+                  age = round(rnorm(N, mean = true_mean, sd = 23))) +
+    declare_inquiry(mean_age = mean(age)) +
+    declare_sampling(S = complete_rs(N = N, n = 3)) +
+    declare_estimator(age ~ 1, .method = lm_robust)
+  expect_s3_class(base_declaration, "design")
+  estimates <- draw_estimates(base_declaration)
   expect_gt(nrow(estimates), 0)
   if ("estimate" %in% names(estimates))
     expect_false(all(is.na(estimates$estimate)))
@@ -62,6 +80,32 @@ test_that("MI runs (choosing answer strategy)", {
     expect_false(all(is.na(estimates$estimate)))
 })
 
+test_that("declaration_9.7 runs (choosing answer strategy)", {
+  skip_unless("randomizr", "estimatr", "rdss")
+  block_m = c(71, 47, 60, 48, 35, 39, 63, 32, 52)
+  declaration_9.7 <-
+    declare_model(data = foos_etal,
+                  # this is the sharp null hypothesis
+                  potential_outcomes(Y ~ 0 * Z + marked_register_2014)) +
+    declare_assignment(Z = block_and_cluster_ra(blocks = ward, 
+                                                clusters = street, 
+                                                block_m = block_m),
+                       probs = obtain_condition_probabilities(
+                         assignment = Z,
+                         blocks = ward,
+                         clusters = street,
+                         block_m = block_m
+                       ),
+                       ipw = 1 / probs) +
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+    declare_estimator(Y ~ Z + ward, weights = ipw, clusters = street)
+  expect_s3_class(declaration_9.7, "design")
+  estimates <- draw_estimates(declaration_9.7)
+  expect_gt(nrow(estimates), 0)
+  if ("estimate" %in% names(estimates))
+    expect_false(all(is.na(estimates$estimate)))
+})
+
 # declaration in code ----
 
 test_that("M runs (declaration in code)", {
@@ -73,6 +117,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -92,6 +137,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -134,6 +180,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -186,6 +233,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M1 runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M1 <- 
     declare_model(
       N = 1000, 
@@ -197,6 +245,7 @@ test_that("M1 runs (declaration in code)", {
 
 test_that("M2 runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M2 <- 
     declare_model(
       N = 1000, 
@@ -210,6 +259,7 @@ test_that("M2 runs (declaration in code)", {
 
 test_that("M3 runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M3 <- 
     declare_model(
       N = 1000, 
@@ -222,6 +272,7 @@ test_that("M3 runs (declaration in code)", {
 
 test_that("M1 runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M1 <- 
     declare_model(
       N = 1000, 
@@ -239,6 +290,7 @@ test_that("M1 runs (declaration in code)", {
 
 test_that("M2 runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M2 <- 
     declare_model(
       N = 1000, 
@@ -259,6 +311,7 @@ test_that("M2 runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -321,6 +374,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M1 runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M1 <- 
     declare_model(
       N = 1000, 
@@ -345,6 +399,7 @@ test_that("M1 runs (declaration in code)", {
 
 test_that("M2 runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M2 <- 
     declare_model(
       N = 1000, 
@@ -372,6 +427,7 @@ test_that("M2 runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -451,6 +507,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -535,6 +592,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -627,6 +685,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -727,6 +786,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -834,6 +894,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -948,6 +1009,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M1 runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M1 <- 
     declare_model(
       N = 1000, 
@@ -977,6 +1039,7 @@ test_that("M1 runs (declaration in code)", {
 
 test_that("M2 runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M2 <- 
     declare_model(
       N = 1000, 
@@ -1010,6 +1073,7 @@ test_that("M2 runs (declaration in code)", {
 
 test_that("M3 runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M3 <- 
     declare_model(
       N = 1000, 
@@ -1028,6 +1092,7 @@ test_that("M3 runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -1143,6 +1208,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -1259,6 +1325,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -1382,6 +1449,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -1510,6 +1578,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -1641,6 +1710,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -1773,6 +1843,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("M runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -1910,6 +1981,7 @@ test_that("M runs (declaration in code)", {
 
 test_that("declaration_13.1 runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   declaration_13.1 <-
     declare_model(N = 100,
                   U = rnorm(N),
@@ -1934,6 +2006,7 @@ test_that("declaration_13.1 runs (declaration in code)", {
 
 test_that("model runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   model <-
     declare_model(N = 1000,
                   U = rnorm(N),
@@ -1945,6 +2018,7 @@ test_that("model runs (declaration in code)", {
 
 test_that("declaration_13.2 runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   model <-
     declare_model(N = 1000,
                   U = rnorm(N),
@@ -1990,6 +2064,7 @@ test_that("declaration_13.2 runs (declaration in code)", {
 
 test_that("design runs (declaration in code)", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   design <-
     declare_model(
       N = 200,
@@ -2149,6 +2224,10 @@ test_that("M2 runs (diagnosing designs)", {
 
 test_that("declaration_11.1 runs (redesigning)", {
   skip_unless("randomizr", "estimatr")
+  N <- (seq(100, 1000, 100))[[1]]
+  N <- (c(100, 500, 1000))[[1]]
+  N <- (seq(100, 1000, 25))[[1]]
+  N <- (seq(10, 100, by = 10))[[1]]
   N <- 100
   declaration_11.1 <-
     declare_model(N = N) +
@@ -2167,6 +2246,10 @@ test_that("declaration_11.1 runs (redesigning)", {
 
 test_that("declaration_11.2 runs (redesigning)", {
   skip_unless("randomizr", "estimatr")
+  N <- (seq(100, 1000, 100))[[1]]
+  N <- (c(100, 500, 1000))[[1]]
+  N <- (seq(100, 1000, 25))[[1]]
+  N <- (seq(10, 100, by = 10))[[1]]
   N <- 100
   N <- 100
   declaration_11.2 <-
@@ -2184,8 +2267,36 @@ test_that("declaration_11.2 runs (redesigning)", {
     expect_false(all(is.na(estimates$estimate)))
 })
 
+test_that("declaration_11.3 runs (redesigning)", {
+  skip_unless("randomizr", "estimatr")
+  N <- (seq(100, 1000, 100))[[1]]
+  N <- (c(100, 500, 1000))[[1]]
+  N <- (seq(100, 1000, 25))[[1]]
+  prob <- (seq(0.1, 0.5, 0.2))[[1]]
+  N <- (seq(10, 100, by = 10))[[1]]
+  N <- 100
+  N <- 100
+  N <- 100
+  declaration_11.3 <-
+    declare_model(N = N, U = rnorm(N),
+                  potential_outcomes(Y ~ 0.2 * Z + U)) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = complete_ra(N = N, prob = prob)) +
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+    declare_estimator(Y ~ Z, inquiry = "ATE")
+  expect_s3_class(declaration_11.3, "design")
+  estimates <- draw_estimates(declaration_11.3)
+  expect_gt(nrow(estimates), 0)
+  if ("estimate" %in% names(estimates))
+    expect_false(all(is.na(estimates$estimate)))
+})
+
 test_that("declaration_11.4 runs (redesigning)", {
   skip_unless("randomizr", "estimatr", "stringr")
+  N <- (seq(100, 1000, 100))[[1]]
+  N <- (c(100, 500, 1000))[[1]]
+  N <- (seq(100, 1000, 25))[[1]]
+  N <- (seq(10, 100, by = 10))[[1]]
   N <- 100
   N <- 100
   N <- 100
@@ -2218,10 +2329,60 @@ test_that("declaration_11.4 runs (redesigning)", {
     expect_false(all(is.na(estimates$estimate)))
 })
 
+test_that("declaration_11.5 runs (redesigning)", {
+  skip_unless("randomizr", "estimatr", "margins")
+  N <- (seq(100, 1000, 100))[[1]]
+  N <- (c(100, 500, 1000))[[1]]
+  N <- (seq(100, 1000, 25))[[1]]
+  N <- (seq(10, 100, by = 10))[[1]]
+  N <- 100
+  N <- 100
+  N <- 100
+  tidy_margins <- function(x) {
+    tidy(margins(x, data = x$data), conf.int = TRUE)
+  }
+  N <- 10
+  declaration_11.5 <-
+    declare_model(N = N,
+                  U = rnorm(N),
+                  potential_outcomes(Y ~ rbinom(N, 1, prob = 0.2 * Z + 0.6))) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = complete_ra(N, prob = 0.5)) +
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+    declare_estimator(Y ~ Z,
+                      inquiry = "ATE",
+                      term = "Z",
+                      label = "OLS") +
+    declare_estimator(
+      Y ~ Z,
+      .method = glm,
+      family = binomial("logit"),
+      .summary = tidy_margins,
+      inquiry = "ATE",
+      term = "Z",
+      label = "logit"
+    ) +
+    declare_estimator(
+      Y ~ Z,
+      .method = glm,
+      family = binomial("probit"),
+      .summary = tidy_margins,
+      inquiry = "ATE",
+      term = "Z",
+      label = "probit"
+    )
+  expect_s3_class(declaration_11.5, "design")
+  estimates <- draw_estimates(declaration_11.5)
+  expect_gt(nrow(estimates), 0)
+  if ("estimate" %in% names(estimates))
+    expect_false(all(is.na(estimates$estimate)))
+})
+
 # what is a research design ----
 
 test_that("model runs (what is a research design)", {
   skip_unless("randomizr", "estimatr")
+  b <- (seq(0, 3, 0.25))[[1]]
   b <- 0
   model <- 
     declare_model(
@@ -2232,10 +2393,63 @@ test_that("model runs (what is a research design)", {
   expect_s3_class(model(NULL), "data.frame")
 })
 
+# complex ----
+
+test_that("declaration_19.2 runs (complex)", {
+  skip_unless("randomizr", "estimatr", "bbmle")
+  offer <- function(n, d){
+    sum(sapply(2:n[1], function(t) ((-1)^t)*(d^{t-1})))
+  }
+  likelihood  <- function(n){
+    function(k, d, a) {
+      m <- Z * offer(n, d) + (1 - Z) * (1 - offer(n, d))
+      R <- a * dbeta(y, k * .75, k * .25) + 
+        (1 - a) * dbeta(y, k * m, k * (1 - m))
+      return(-sum(log(R)))
+    }
+  }
+  n <- 2
+  delta <- 0.8
+  kappa <- 2
+  alpha <- 0.5
+  declaration_19.2 <- 
+    declare_model(
+      # Define the population: indicator for behavioral type (norm = 1)
+      N = 200, 
+      type = rbinom(N, 1, alpha),
+      n = n) +
+    declare_inquiry(kappa = kappa,     
+                    delta = delta,     
+                    alpha = alpha) +   
+    declare_assignment(Z = complete_ra(N)) +
+    declare_measurement(
+      # Equilibrium payoff
+      pi = type * .75 + 
+        (1 - type) * (Z * offer(n, delta) + (1 - Z) * (1 -offer(n, delta))), 
+      # Actual payoff (stochastic)
+      y = rbeta(N, pi * kappa, (1 - pi) * kappa))+
+    # Estimation via maximum likelihood
+    declare_estimator(.method = mle2,
+                      minuslogl = likelihood(n),
+                      start = list(k = 2, d = 0.50, a = 0.50),
+                      lower = list(k = 0.10, d = 0.01, a = 0.01),
+                      upper = list(k = 100, d = 0.99, a = 0.99),
+                      method = "L-BFGS-B",
+                      term = c("k", "d", "a"),
+                      inquiry = c("kappa","delta", "alpha"), 
+                      label = "Structural model")
+  expect_s3_class(declaration_19.2, "design")
+  estimates <- draw_estimates(declaration_19.2)
+  expect_gt(nrow(estimates), 0)
+  if ("estimate" %in% names(estimates))
+    expect_false(all(is.na(estimates$estimate)))
+})
+
 # experimental causal ----
 
 test_that("declaration_18.1 runs (experimental causal)", {
   skip_unless("randomizr", "estimatr")
+  N <- (seq(500, 3000, 500))[[1]]
   declaration_18.1 <-
     declare_model(N = 100,
                   U = rnorm(N),
@@ -2253,6 +2467,8 @@ test_that("declaration_18.1 runs (experimental causal)", {
 
 test_that("declaration_18.2 runs (experimental causal)", {
   skip_unless("randomizr", "estimatr")
+  r_sq <- (seq(0, 0.9, by = 0.2))[[1]]
+  N <- (seq(500, 3000, 500))[[1]]
   N <- 100
   r_sq <- 0
   declaration_18.2 <-
@@ -2276,8 +2492,37 @@ test_that("declaration_18.2 runs (experimental causal)", {
     expect_false(all(is.na(estimates$estimate)))
 })
 
+test_that("declaration_18.3 runs (experimental causal)", {
+  skip_unless("randomizr", "estimatr")
+  control_slope <- (seq(-1, 1, 0.5))[[1]]
+  prob <- (seq(0.1, 0.9, 0.1))[[1]]
+  N <- (seq(500, 3000, 500))[[1]]
+  N <- 100
+  prob = 0.5
+  control_slope = -1
+  declaration_18.3 <-
+    declare_model(N = 100,
+                  X = runif(N, 0, 1),
+                  U = rnorm(N, sd = 0.1),
+                  Y_Z_1 = 1*X + U,
+                  Y_Z_0 = control_slope*X + U
+    ) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = complete_ra(N = N, prob = prob)) + 
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+    declare_estimator(Y ~ Z, inquiry = "ATE", label = "DIM") +
+    declare_estimator(Y ~ Z + X, .method = lm_robust, inquiry = "ATE", label = "OLS") +
+    declare_estimator(Y ~ Z, covariates = ~X, .method = lm_lin, inquiry = "ATE", label = "Lin")
+  expect_s3_class(declaration_18.3, "design")
+  estimates <- draw_estimates(declaration_18.3)
+  expect_gt(nrow(estimates), 0)
+  if ("estimate" %in% names(estimates))
+    expect_false(all(is.na(estimates$estimate)))
+})
+
 test_that("declaration_18.4 runs (experimental causal)", {
   skip_unless("randomizr", "estimatr")
+  N <- (seq(500, 3000, 500))[[1]]
   N <- 100
   declaration_18.4 <-
     declare_model(
@@ -2311,6 +2556,8 @@ test_that("declaration_18.4 runs (experimental causal)", {
 
 test_that("declaration_18.5 runs (experimental causal)", {
   skip_unless("randomizr", "estimatr")
+  ICC <- (seq(0.1, 0.9, by = 0.4))[[1]]
+  N <- (seq(500, 3000, 500))[[1]]
   N <- 100
   ICC <- 0.9
   declaration_18.5 <-
@@ -2347,6 +2594,8 @@ test_that("declaration_18.5 runs (experimental causal)", {
 
 test_that("declaration_18.6 runs (experimental causal)", {
   skip_unless("randomizr", "estimatr")
+  n_x1 <- (seq(20, 980, by = 96))[[1]]
+  N <- (seq(500, 3000, 500))[[1]]
   N <- 100
   fixed_pop <-
     fabricate(N = 10000,
@@ -2381,6 +2630,10 @@ test_that("declaration_18.6 runs (experimental causal)", {
 
 test_that("declaration_18.7 runs (experimental causal)", {
   skip_unless("randomizr", "estimatr")
+  N <- (seq(500, 3000, 500))[[1]]
+  CATE_Z1_Z2_0 <- (seq(0, 0.5, 0.05))[[1]]
+  CATE_Z2_Z1_0 <- (0.2)[[1]]
+  interaction <- (0)[[1]]
   N <- 100
   CATE_Z1_Z2_0 <- 0.2
   CATE_Z2_Z1_0 <- 0.1
@@ -2433,6 +2686,7 @@ test_that("declaration_18.7 runs (experimental causal)", {
 
 test_that("declaration_18.8 runs (experimental causal)", {
   skip_unless("randomizr", "estimatr")
+  N <- (seq(500, 3000, 500))[[1]]
   N <- 100
   N <- 1000
   declaration_18.8 <-
@@ -2497,6 +2751,8 @@ test_that("declaration_18.8 runs (experimental causal)", {
 
 test_that("MI runs (experimental causal)", {
   skip_unless("randomizr", "estimatr")
+  N <- (seq(500, 3000, 500))[[1]]
+  compliance_rate <- (seq(0.1, 0.9, by = 0.1))[[1]]
   N <- 100
   N <- 1000
   compliance_rate <- 0.2
@@ -2533,8 +2789,37 @@ test_that("MI runs (experimental causal)", {
     expect_false(all(is.na(estimates$estimate)))
 })
 
+test_that("declaration_18.11 runs (experimental causal)", {
+  skip_unless("randomizr", "estimatr")
+  N <- (seq(500, 3000, 500))[[1]]
+  n_units <- (100)[[1]]
+  effect_size <- (seq(from = 0, to = 0.75, by = 0.05))[[1]]
+  n_units <- (200)[[1]]
+  N <- 100
+  N <- 1000
+  effect_size <- 0.35
+  declaration_18.11 <-
+    declare_model(
+      N = n_units, 
+      U_unit = rnorm(N),
+      U = rnorm(N),
+      effect_size = effect_size,
+      potential_outcomes(Y ~ scale(U_unit + U) + effect_size * Z)
+    ) +
+    declare_assignment(Z = complete_ra(N, m = n_units / 2)) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+    declare_estimator(Y ~ Z, inquiry = "ATE", label = "DIM")
+  expect_s3_class(declaration_18.11, "design")
+  estimates <- draw_estimates(declaration_18.11)
+  expect_gt(nrow(estimates), 0)
+  if ("estimate" %in% names(estimates))
+    expect_false(all(is.na(estimates$estimate)))
+})
+
 test_that("declaration_18.12 runs (experimental causal)", {
   skip_unless("randomizr", "estimatr")
+  N <- (seq(500, 3000, 500))[[1]]
   N <- 100
   N <- 1000
   declaration_18.12 <-
@@ -2590,6 +2875,7 @@ test_that("declaration_18.12 runs (experimental causal)", {
 
 test_that("declaration_17.1 runs (experimental descriptive)", {
   skip_unless("randomizr", "estimatr")
+  N <- (seq(from = 500, to = 2500, by = 500))[[1]]
   declaration_17.1 <-
     declare_model(
       N = 500,
@@ -2620,6 +2906,7 @@ test_that("declaration_17.1 runs (experimental descriptive)", {
 
 test_that("declaration_17.2 runs (experimental descriptive)", {
   skip_unless("randomizr", "estimatr")
+  N <- (seq(from = 500, to = 2500, by = 500))[[1]]
   declaration_17.2 <-
     # This part of the design is about causal inference
     declare_model(
@@ -2664,6 +2951,7 @@ test_that("declaration_17.2 runs (experimental descriptive)", {
 
 test_that("declaration_17.3 runs (experimental descriptive)", {
   skip_unless("randomizr", "estimatr")
+  N <- (seq(from = 500, to = 2500, by = 500))[[1]]
   declaration_17.3 <-
     declare_model(
       N = 500,
@@ -2683,7 +2971,142 @@ test_that("declaration_17.3 runs (experimental descriptive)", {
     expect_false(all(is.na(estimates$estimate)))
 })
 
+test_that("declaration_17.4 runs (experimental descriptive)", {
+  skip_unless("randomizr", "estimatr")
+  proportion_hiding <- (seq(from = 0, to = 0.3, by = 0.1))[[1]]
+  N <- (seq(from = 500, to = 2500, by = 500))[[1]]
+  declaration_17.4 <- 
+    declare_model(
+      N = N,
+      U = rnorm(N),
+      control_count = rbinom(N, size = 3, prob = 0.5),
+      Y_star = rbinom(N, size = 1, prob = 0.3),
+      W = case_when(Y_star == 0 ~ 0L,
+                    Y_star == 1 ~ rbinom(N, size = 1, prob = proportion_hiding)),
+      potential_outcomes(Y_list ~ Y_star * Z + control_count)
+    ) +
+    declare_inquiry(prevalence_rate = mean(Y_star)) +
+    declare_assignment(Z = complete_ra(N)) + 
+    declare_measurement(Y_list = reveal_outcomes(Y_list ~ Z),
+                        Y_direct = Y_star - W) +
+    declare_estimator(Y_list ~ Z, inquiry = "prevalence_rate", label = "list") + 
+    declare_estimator(Y_direct ~ 1, inquiry = "prevalence_rate", label = "direct")
+  expect_s3_class(declaration_17.4, "design")
+  estimates <- draw_estimates(declaration_17.4)
+  expect_gt(nrow(estimates), 0)
+  if ("estimate" %in% names(estimates))
+    expect_false(all(is.na(estimates$estimate)))
+})
+
+test_that("declaration_17.5 runs (experimental descriptive)", {
+  skip_unless("randomizr", "estimatr", "cjoint", "rdss")
+  N <- (seq(from = 500, to = 2500, by = 500))[[1]]
+  N_subjects <- 500
+  N_tasks <- 3
+  levels_list =
+    list(
+      gender = c("Man", "Woman"),
+      party = c("Left", "Right"),
+      region = c("North", "South", "East", "West")
+    )
+  conjoint_utility <-
+    function(data){
+      data |>
+        mutate(U = 0.25*(gender == "Woman")*(region %in% c("North", "East")) +
+                 0.5*(party == "Right")*(region %in% c("North", "South")) + uij)
+    }
+  declaration_17.5 <-
+    declare_model(
+      subject = add_level(N = N_subjects),
+      task = add_level(N = N_tasks, task = 1:N_tasks),
+      profile = add_level(
+        N = 2,
+        profile = 1:2,
+        uij = rnorm(N, sd = 1)
+      )
+    ) +
+    declare_inquiry(handler = conjoint_inquiries,
+                    levels_list = levels_list,
+                    utility_fn = conjoint_utility) +
+    declare_assignment(handler = conjoint_assignment,
+                       levels_list = levels_list) +
+    declare_measurement(handler = conjoint_measurement,
+                        utility_fn = conjoint_utility) +
+    declare_estimator(choice ~ gender + party + region,
+                      respondent.id = "subject",
+                      .method = amce)
+  expect_s3_class(declaration_17.5, "design")
+  estimates <- draw_estimates(declaration_17.5)
+  expect_gt(nrow(estimates), 0)
+  if ("estimate" %in% names(estimates))
+    expect_false(all(is.na(estimates$estimate)))
+})
+
 # observational causal ----
+
+test_that("declaration_16.1 runs (observational causal)", {
+  skip_unless("randomizr", "estimatr", "CausalQueries")
+  causal_model <- make_model("X -> M -> Y <- W -> M") |>
+    set_restrictions("(M[X=1] < M[X=0]) | (M[X=1, W=1] == M[X=0, W=1])") |>
+    set_restrictions("(Y[M=1] < Y[M=0]) | (Y[M=1, W=1] == Y[M=0, W=1])")
+  strategies = c("X-Y", "X-Y-M", "X-Y-W",  "X-Y-W-M")
+  declaration_16.1 <-
+    declare_model(draw_causal_type(causal_model)) +
+    declare_inquiry(
+      CoE =  query_distribution(
+        causal_model, 
+        query = "Y[X=1] - Y[X=0]", 
+        parameters = causal_type)) +
+    declare_measurement(
+      handler = function(data)
+        causal_model |>
+        make_data(parameters = data$causal_type))  +
+    declare_estimator(
+      handler = label_estimator(process_tracing_estimator), 
+      causal_model = causal_model,
+      query = "Y[X=1] - Y[X=0]",
+      strategies = strategies)
+  expect_s3_class(declaration_16.1, "design")
+  estimates <- draw_estimates(declaration_16.1)
+  expect_gt(nrow(estimates), 0)
+  if ("estimate" %in% names(estimates))
+    expect_false(all(is.na(estimates$estimate)))
+})
+
+test_that("declaration_16.2 runs (observational causal)", {
+  skip_unless("randomizr", "estimatr", "MatchIt")
+  exact_matching <-
+    function(data) {
+      matched <- matchit(D ~ X, method = "exact", data = data)
+      match.data(matched)
+    }
+  declaration_16.2 <-
+    declare_model(
+      N = 100,
+      U = rnorm(N),
+      X = rbinom(N, 1, prob = 0.5),
+      D = rbinom(N, 1, prob = 0.25 + 0.5 * X),
+      Y_D_0 = 0.2 * X + U,
+      Y_D_1 = Y_D_0 + 0.5
+    ) +
+    declare_inquiry(ATT = mean(Y_D_1[D == 1] - Y_D_0[D == 1])) +
+    declare_step(handler = exact_matching) +
+    declare_measurement(Y = reveal_outcomes(Y ~ D)) +
+    declare_estimator(Y ~ D,
+                      weights = weights,
+                      .method = difference_in_means,
+                      inquiry = "ATT",
+                      label = "Matched difference-in-means") +
+    declare_estimator(Y ~ D,
+                      .method = difference_in_means,
+                      inquiry = "ATT",
+                      label = "Raw difference-in-means")
+  expect_s3_class(declaration_16.2, "design")
+  estimates <- draw_estimates(declaration_16.2)
+  expect_gt(nrow(estimates), 0)
+  if ("estimate" %in% names(estimates))
+    expect_false(all(is.na(estimates$estimate)))
+})
 
 test_that("declaration_16.4 runs (observational causal)", {
   skip_unless("randomizr", "estimatr")
@@ -2733,6 +3156,7 @@ test_that("declaration_15.1 runs (observational descriptive)", {
 
 test_that("declaration_15.2 runs (observational descriptive)", {
   skip_unless("randomizr", "estimatr")
+  effort <- (seq(0, 5, by = 0.5))[[1]]
   portola <-
     fabricate(
       N = 2100,
@@ -2752,6 +3176,125 @@ test_that("declaration_15.2 runs (observational descriptive)", {
     declare_estimator(R ~ 1, label = "Response Rate")
   expect_s3_class(declaration_15.2, "design")
   estimates <- draw_estimates(declaration_15.2)
+  expect_gt(nrow(estimates), 0)
+  if ("estimate" %in% names(estimates))
+    expect_false(all(is.na(estimates$estimate)))
+})
+
+test_that("declaration_15.3 runs (observational descriptive)", {
+  skip_unless("randomizr", "estimatr")
+  cluster_prob <- (seq(0.1, 0.9, 0.1))[[1]]
+  ICC <- 0.4
+  two_nigerian_states <-
+    fabricate(
+      state = add_level(N = 2, 
+                        state_name = c("taraba", "kwara"),
+                        state_mean = c(-0.2, 0.2)),
+      locality = add_level(
+        N = 500,
+        locality_shock = rnorm(N, state_mean, sqrt(ICC))
+      ),
+      individual = add_level(
+        N = 100,
+        individual_shock = rnorm(N, sd = sqrt(1 - ICC)),
+        Y_star = locality_shock + individual_shock
+      )
+    )
+  budget_function <- 
+    function(cluster_prob){
+      budget = 20000
+      cluster_cost = 20
+      individual_cost = 2
+      n_clusters = 1000
+      n_individuals_per_cluster = 100
+      
+      total_cluster_cost <-
+        cluster_prob * n_clusters * cluster_cost
+      
+      remaining_funds <- budget - total_cluster_cost
+      
+      sampleable_individuals <- 
+        cluster_prob * n_clusters * n_individuals_per_cluster
+      
+      individual_prob = 
+        (remaining_funds/individual_cost)/sampleable_individuals
+      
+      pmin(individual_prob, 1)
+    }
+  declaration_15.3 <-
+    declare_model(data = two_nigerian_states) +
+    declare_measurement(Y = as.numeric(cut(Y_star, 7))) +
+    declare_inquiry(Y_bar = mean(Y)) +
+    declare_sampling(
+      S_cluster = strata_and_cluster_rs(
+        strata = state,
+        clusters = locality,
+        prob = cluster_prob
+      ),
+      filter = S_cluster == 1
+    ) +
+    declare_sampling(
+      S_individual = 
+        strata_rs(strata = locality, 
+                  prob = budget_function(cluster_prob)),
+      filter = S_individual == 1
+    ) +
+    declare_estimator(Y ~ 1,
+                      clusters = locality,
+                      se_type = "stata",
+                      inquiry = "Y_bar")
+  expect_s3_class(declaration_15.3, "design")
+  estimates <- draw_estimates(declaration_15.3)
+  expect_gt(nrow(estimates), 0)
+  if ("estimate" %in% names(estimates))
+    expect_false(all(is.na(estimates$estimate)))
+})
+
+test_that("declaration_15.4 runs (observational descriptive)", {
+  skip_unless("randomizr", "estimatr", "rdss")
+  states <- 
+    as_tibble(state.x77) |>
+    transmute(
+      state = rownames(state.x77),
+      prop_of_US = Population / sum(Population),
+      # results in exactly 2,000 due to rounding
+      state_n = round(prop_of_US * 1998.6), 
+      prob_HS = `HS Grad` / 100,
+      state_shock = rnorm(n = n(), sd = 0.5),
+      state_mean = prob_HS * pnorm(0.2 + state_shock) + (1 - prob_HS) * pnorm(state_shock)
+    )
+  declaration_15.4 <-
+    declare_model(
+      data = states[rep(1:50, states$state_n), ],
+      HS = rbinom(n = N, size = 1, prob = prob_HS),
+      PS_weight =
+        case_when(HS == 0 ~ (1 - prob_HS),
+                  HS == 1 ~ prob_HS),
+      individual_shock = rnorm(n = N, sd = 0.5),
+      policy_support = 
+        rbinom(N, 1, prob = pnorm(0.2 * HS + individual_shock + state_shock))
+    ) +
+    declare_inquiry(
+      handler = function(data) {
+        states |> transmute(
+          state, 
+          inquiry = "mean_policy_support", 
+          estimand = state_mean
+        )
+      }
+    ) +
+    declare_estimator(handler = label_estimator(function(data) {
+      model_fit <- glmer(
+        formula = policy_support ~ HS + (1 | state),
+        data = data,
+        family = binomial(link = "logit")
+      )
+      post_stratification_helper(model_fit, data = data, group = state, weights = PS_weight)
+    }),
+    label = "Partial pooling",
+    inquiry = "mean_policy_support")
+  expect_s3_class(declaration_15.4, "design")
+  estimates <- draw_estimates(declaration_15.4)
   expect_gt(nrow(estimates), 0)
   if ("estimate" %in% names(estimates))
     expect_false(all(is.na(estimates$estimate)))
@@ -2852,6 +3395,7 @@ test_that("model_3 runs (integration)", {
 
 test_that("M runs (declaration in code), ported", {
   skip_unless("randomizr", "estimatr")
+  N <- (c(100, 200, 300))[[1]]
   M <- declare_model(N = 1000)
   M <- 
     declare_model(
@@ -2888,6 +3432,8 @@ test_that("M runs (declaration in code), ported", {
 
 test_that("declaration_18.10 runs (experimental causal), ported", {
   skip_unless("randomizr", "estimatr")
+  N <- (seq(500, 3000, 500))[[1]]
+  effect_size <- (seq(from = 0, to = 0.75, by = 0.05))[[1]]
   N <- 100
   N <- 1000
   effect_size <- 0.35
@@ -2989,25 +3535,12 @@ test_that("declaration_16.3 runs (observational causal), ported", {
 #
 # Every book declaration this suite does not run, and why.
 #
-#   declaration_9.3    needs the rstanarm package
-#   base_declaration   the book sets true_mean in prose rather than in a code chunk
-#   declaration_9.7    the book sets block_m in prose rather than in a code chunk
-#   M                  the book sets baseline_data in prose rather than in a code chunk
-#   M                  the book sets baseline_data in prose rather than in a code chunk
-#   declaration_11.3   the book sets prob in prose rather than in a code chunk
-#   declaration_11.5   needs the margins package
-#   declaration_19.1   the book sets X.1 in prose rather than in a code chunk
-#   declaration_19.2   needs the bbmle package
-#   design             open defect: pre-evaluated estimator dots defeat the method's own NSE
-#   declaration_19.4   see notes/probes: ℹ In argument: `tidy(lm_robust(Y ~ Z_implemented))`. ℹ In gr
-#   declaration_18.3   the book sets control_slope in prose rather than in a code chunk
-#   declaration_18.11  the book sets n_units in prose rather than in a code chunk
-#   declaration_18.13  needs the spdep package
-#   declaration_17.4   the book sets N in prose rather than in a code chunk
-#   declaration_17.5   needs the cjoint package
-#   declaration_17.6   open defect: pre-evaluated dots defeat a tidyselect handler
-#   declaration_16.1   needs the CausalQueries package
-#   declaration_16.2   needs the MatchIt package
-#   declaration_16.5   open defect: pre-evaluated dots defeat a tidyselect handler
-#   declaration_15.3   the book sets cluster_prob in prose rather than in a code chunk
-#   declaration_15.4   needs the lme4 package
+#   declaration_9.3    see notes/probes: could not find function "summary_fn"
+#   M                  the book defines baseline_data outside any code chunk, so it cannot be reconstructed
+#   M                  the book defines baseline_data outside any code chunk, so it cannot be reconstructed
+#   declaration_19.1   the book defines X.1 outside any code chunk, so it cannot be reconstructed
+#   design             OPEN DEFECT: pre-evaluated estimator dots defeat the method's own NSE
+#   declaration_19.4   fails identically under DeclareDesign 1.1.1, so not a difference between them
+#   declaration_18.13  needs the interference package, which is not on CRAN
+#   declaration_17.6   OPEN DEFECT: pre-evaluated dots defeat a tidyselect handler
+#   declaration_16.5   OPEN DEFECT: pre-evaluated dots defeat a tidyselect handler

@@ -7,7 +7,10 @@ library(fabricatrZero)
 library(dplyr)
 library(tidyr)
 library(purrr)
-for (pkg in c("randomizr", "estimatr", "rdss", "stringr")) {
+for (pkg in c("randomizr", "estimatr", "rdss", "stringr", "margins", "bbmle",
+               "MatchIt", "broom.mixed", "grf", "spdep", "DIDmultiplegt",
+               "CausalQueries", "rstanarm", "cjoint", "lme4", "rdrobust",
+               "sf", "marginaleffects")) {
   if (requireNamespace(pkg, quietly = TRUE)) {
     suppressMessages(library(pkg, character.only = TRUE))
   }
