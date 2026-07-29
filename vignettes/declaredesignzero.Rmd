@@ -162,9 +162,7 @@ Mechanical, and consistent with the `.by` convention dplyr adopted in 1.1.0. The
 
 The three items above are the whole list, and each one errors loudly rather than running to a different answer. The data frames themselves are unchanged: the same columns, in the same order, with the same types. `ID` is still there, still zero-padded character, and levels still name their identifier column after the level. `N` is still available in the data mask and still absent from the output, in both packages. Column sets were compared across flat fabrication, `N` alone, an `N`-valued column, two and three levels, a renamed `ID_label`, and `potential_outcomes()`, and they match in every case.
 
-`N` inside a nested level is the total number of rows the level creates, not the per-parent count, which is also what fabricatr does. `citizens = nest_level(N = 5, e = rnorm(N))` under 20 villages sees `N` of 100 and draws 100 independent values rather than drawing 5 and reusing them.
-
-One addition worth knowing about: ID construction is the most expensive operation in the package, so `options(fabricatrZero.id_type = "integer")` switches every ID column to integers, which is roughly four times faster on a deep hierarchy. The default stays character, because an integer cluster ID gets silently swept into `lm(Y ~ clusters)` as a linear term where fixed effects were meant.
+`N` inside a nested level is the total number of rows the level creates, not the per-parent count, which is also what fabricatr does. `citizens = nest_level(N = 5, e = rnorm(N))` under 20 villages sees `N` of 100 and draws 100 independent values rather than drawing 5 and reusing them. A vector shorter than the level still recycles, so the book's `task = nest_level(N = 3, task = 1:3)` numbers the tasks within every subject exactly as before.
 
 ## What is new
 
@@ -265,6 +263,8 @@ The remaining five: the bootstrap now tolerates diagnosands that cannot be compu
 
 Both packages pass `R CMD check` with 0 errors, 0 warnings, and 0 notes.
 
-What is still missing is coverage rather than correctness, and the gap is worth naming rather than waiting to be found. The 54 worked examples from the DeclareDesign book were run once during development and are not checked in, so the compatibility claim rests on a transcript instead of a test file. Until they are, treat "every example in the book runs unchanged" as a claim under test.
+The compatibility claim is no longer a claim. Every design declaration in the book was scraped from the published text and turned into a test that declares it and then runs it, and an estimator returning nothing but NA counts as a failure. Of the 90 declarations, 68 run: 65 verbatim, and 3 after the mechanical `declare_level()` port described above. Of the remaining 22, eight need a modelling package outside this package's dependencies, eleven refer to a value the book sets in prose rather than in a code chunk, and three are open defects, described next.
+
+Building that suite found the defects it was meant to find. Three book designs pass their arguments to a fitting function that does its own non-standard evaluation: `rma_helper` reads `yi = estimate` as a column name, and `pivot_wider` and `rdrobust_helper` use tidyselect. DeclareDesignZero evaluates estimator arguments against the data before handing them over, so those methods receive values where they expected expressions. The meta-analysis design is the one to watch, because it does not error: it returns a full table of NA estimates. DeclareDesign passes the arguments unevaluated and returns real ones. Any `.method` or `handler` that quotes its own arguments is currently unreliable, and fixing it means changing how estimator arguments are passed, which is a decision for the group rather than a patch.
 
 `summary()` on a design also prints the step list rather than the original's detailed step-by-step display.
