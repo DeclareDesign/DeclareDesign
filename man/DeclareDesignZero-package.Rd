@@ -11,5 +11,10 @@ A ground-up rewrite of DeclareDesign built on tidyverse conventions. Declares, s
 \author{
 \strong{Maintainer}: Alex Coppock \email{acoppock@gmail.com}
 
+Authors:
+\itemize{
+  \item Alex Coppock \email{acoppock@gmail.com}
+}
+
 }
 \keyword{internal}

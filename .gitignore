@@ -1,15 +1,36 @@
-# R
-.Rhistory
-.RData
-.Ruserdata
-*.Rproj.user/
-inst/doc/
-
-# Package build
+# R build artifacts
+*.Rcheck/
 *.tar.gz
 *.zip
-/DeclareDesignZero.Rcheck/
+*.Rout
+src/*.so
+src/*.o
+src/*.dll
 
-# Session / Claude
-notes/LOGFILE.md
+# R session / RStudio
+.Rhistory
+.Rapp.history
+.RData
+.Rdata
+.Ruserdata
+.Rproj.user/
+.Renviron
+
+# Vignette build output
+vignettes/*.html
+vignettes/*.pdf
+vignettes/*_cache/
+vignettes/*_files/
+inst/doc/
+
+# pkgdown site
+docs/
+
+# Private dev notes and logfile (mirrored to claude_control)
+notes/
+
+# Claude Code session state
 .claude/
+
+# Misc
+.DS_Store

@@ -1,0 +1,14 @@
+^notes$
+^\.github$
+^\.claude$
+^\.Rproj\.user$
+^.*\.Rproj$
+^README\.Rmd$
+^cran-comments\.md$
+^docs$
+^_pkgdown\.yml$
+^pkgdown$
+^\.DS_Store$
+^.*\.Rcheck$
+^.*\.tar\.gz$
+^.*\.zip$

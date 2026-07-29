@@ -9,14 +9,14 @@ tidy_try(fit, ...)
 \arguments{
 \item{fit}{A fitted model.}
 
-\item{...}{Passed to \code{\link[broom:reexports]{broom::tidy()}}.}
+\item{...}{Passed to \code{\link[broom:tidy]{broom::tidy()}}.}
 }
 \value{
 A tibble with columns including \code{term}, \code{estimate}, \code{std.error},
 \code{statistic}, \code{p.value}, \code{conf.low}, \code{conf.high}.
 }
 \description{
-Tries \code{\link[broom:reexports]{broom::tidy()}} with confidence intervals; if that fails (because the
+Tries \code{\link[broom:tidy]{broom::tidy()}} with confidence intervals; if that fails (because the
 model class has no \code{tidy} method), assembles a minimal tidy table from the
 coefficient summary.
 }

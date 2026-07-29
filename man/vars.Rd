@@ -13,7 +13,7 @@ vars(...)
 A list of quosures.
 }
 \description{
-Convenience alias for \code{\link[rlang:defusing-advanced]{rlang::quos()}} used inside design declarations to
+Convenience alias for \code{\link[rlang:quos]{rlang::quos()}} used inside design declarations to
 pass through bare expressions.
 }
 \examples{
