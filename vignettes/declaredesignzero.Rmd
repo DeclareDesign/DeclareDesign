@@ -172,9 +172,17 @@ diagnose_design(design, sims = 500, diagnosands = c("sd_estimate", "mean_se"))
 
 The names a character vector may hold are `stock_diagnosand_names()`, fourteen definitions written in one place and read by every way of asking for one, so `"bias"` cannot mean two things depending on how it was requested.
 
+Diagnosing a subset of the simulations is a filter on the simulations table, not an argument of the diagnosands. `declare_diagnosands()` has no `subset`, for the same reason `diagnose_design()` has no `make_groups`: the operation already exists and works on the thing it appears to work on.
+
+```{r, purl = FALSE}
+simulate_design(design, sims = 500) |>
+  filter(p.value <= 0.05) |>
+  diagnose_design()
+```
+
 `set_diagnosands()` is removed. Diagnosands are not part of a design: diagnosis is what you do to a design, and two people can diagnose the same design differently without disagreeing about the design at all. For the same reason `design + declare_diagnosands(...)` is now an error rather than a step that nothing reads, which is what it was in both packages before.
 
-`select_diagnosands()` still works and warns once per session. Both of its jobs have shorter spellings above.
+`select_diagnosands()` still works and warns once per session. Both of its jobs have shorter spellings above. Its `subset` argument, and the one `declare_diagnosands()` briefly had, both error and name the filter instead, rather than being read as something else.
 
 #### The code-comparison functions are removed; `compare_diagnoses()` is not
 
@@ -250,6 +258,7 @@ Five greps cover every breaking change in both packages. Run them over a script 
 |---|---|---|
 | `inquiry = ` followed by an object | `inquiry = "ATE"` | any estimator linked to an estimand |
 | `make_groups` | `simulate_design() \|> group_by() \|> diagnose_design()` | subgroup diagnosis |
+| `set_diagnosands` | `diagnose_design(design, diagnosands = ...)` | any custom diagnosand set |
 | `nest = FALSE` | `declare_level()` | cross-classified designs |
 | `join_using` | `.by = c("A", "B")` | `cross_levels()`, `link_levels()` |
 | `modify_level(by =` | `modify_level(.by =` | grouped column construction |

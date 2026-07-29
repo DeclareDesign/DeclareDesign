@@ -99,25 +99,34 @@ test_that("a bad diagnosands argument says what it will take", {
                "must be a diagnosands object or a character vector")
 })
 
-test_that("declare_diagnosands still honours subset and alpha", {
+test_that("declare_diagnosands honours alpha", {
   sims <- simulate_design(simple_design(N = 30), sims = 30)
-  counted <- diagnose_simulations(sims, bootstrap_sims = 0,
-                                  diagnosands = declare_diagnosands(
-                                    n = dplyr::n(), subset = p.value <= 0.05))
-  expect_lt(get_diagnosands(counted)$n, 30L)
-
   tuned <- diagnose_simulations(sims, bootstrap_sims = 0,
                                 diagnosands = declare_diagnosands(
                                   power = mean(p.value <= alpha), alpha = 1))
   expect_equal(get_diagnosands(tuned)$power, 1)
 })
 
+test_that("diagnosing some of the simulations is a filter, not an argument", {
+  sims <- simulate_design(simple_design(N = 30), sims = 30)
+  counted <- sims |>
+    dplyr::filter(p.value <= 0.05) |>
+    diagnose_simulations(bootstrap_sims = 0,
+                         diagnosands = declare_diagnosands(n = dplyr::n()))
+  expect_lt(get_diagnosands(counted)$n, 30L)
+
+  # the argument that used to do this is gone, and does not quietly become a
+  # diagnosand named `subset`
+  expect_error(declare_diagnosands(n = dplyr::n(), subset = p.value <= 0.05),
+               "no longer an argument")
+  expect_error(suppressWarnings(select_diagnosands("power", subset = p.value <= 0.05)),
+               "not supported")
+})
+
 test_that("a diagnosands object prints its definitions", {
   expect_output(print(default_diagnosands()), "7 diagnosands")
   expect_output(print(declare_diagnosands(bias = mean(estimate - estimand))),
                 "bias = mean\\(estimate - estimand\\)")
-  expect_output(print(declare_diagnosands(n = dplyr::n(), subset = p.value < 1)),
-                "on simulations where")
 })
 
 test_that("every diagnosand must be named", {

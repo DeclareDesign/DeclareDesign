@@ -49,15 +49,13 @@ default_diagnosand_names <- c("mean_estimand", "mean_estimate", "bias",
 #' Construct a diagnosands object
 #'
 #' @param quos A named list of quosures.
-#' @param subset_quo A quosure filtering the simulations, or `NULL`.
 #' @keywords internal
 #' @noRd
-new_diagnosands <- function(quos, subset_quo = NULL) {
+new_diagnosands <- function(quos) {
   if (is.null(names(quos)) || any(!nzchar(names(quos)))) {
     rlang::abort("Every diagnosand must be named.")
   }
-  structure(quos, subset_quo = subset_quo,
-            class = c("diagnosands", "dd"))
+  structure(quos, class = c("diagnosands", "dd"))
 }
 
 #' The expressions a diagnosands object holds
@@ -85,10 +83,17 @@ diagnosand_dots <- function(x) {
 #' default_diagnosands() + declare_diagnosands(power = mean(p.value <= 0.1))
 #' ```
 #'
+#' To compute diagnosands on some of the simulations rather than all of them,
+#' filter the simulations table on the way in, the same way you would any
+#' other data frame:
+#'
+#' ```
+#' simulate_design(design, sims = 500) |>
+#'   filter(p.value <= 0.05) |>
+#'   diagnose_design()
+#' ```
+#'
 #' @param ... Named expressions defining diagnosands.
-#' @param subset An expression evaluated on the simulations table; only rows
-#'   for which it is `TRUE` enter the diagnosands. `NULL` (the default) keeps
-#'   every simulation.
 #' @param alpha Significance level. Any diagnosand expression that mentions
 #'   `alpha` sees this value.
 #' @return A `diagnosands` object.
@@ -105,11 +110,15 @@ diagnosand_dots <- function(x) {
 #'
 #' # power at the 10 percent level
 #' declare_diagnosands(power = mean(p.value <= alpha), alpha = 0.1)
-declare_diagnosands <- function(..., subset = NULL, alpha = 0.05) {
-  new_diagnosands(
-    bind_alpha(rlang::enquos(...), alpha),
-    subset_quo = unwrap_quosure(rlang::enquo(subset))
-  )
+declare_diagnosands <- function(..., alpha = 0.05) {
+  quos <- rlang::enquos(...)
+  if ("subset" %in% names(quos)) {
+    rlang::abort(c(
+      "`subset` is no longer an argument, and would be read here as a diagnosand named `subset`.",
+      "i" = "Filter the simulations instead: `simulate_design(design) |> filter(p.value <= 0.05) |> diagnose_design()`."
+    ))
+  }
+  new_diagnosands(bind_alpha(quos, alpha))
 }
 
 #' Default diagnosands
@@ -183,8 +192,7 @@ union_diagnosands <- function(e1, e2) {
   quos <- diagnosand_dots(e1)
   later <- diagnosand_dots(e2)
   for (nm in names(later)) quos[[nm]] <- later[[nm]]
-  new_diagnosands(quos, subset_quo = attr(e2, "subset_quo") %||%
-                                       attr(e1, "subset_quo"))
+  new_diagnosands(quos)
 }
 
 #' Print a diagnosands object
@@ -200,11 +208,6 @@ print.diagnosands <- function(x, ...) {
   cat(length(x), " diagnosand", if (length(x) == 1) "" else "s", ":\n", sep = "")
   for (nm in names(x)) {
     cat(sprintf("  %s = %s\n", nm, rlang::as_label(rlang::quo_get_expr(x[[nm]]))))
-  }
-  subset_quo <- attr(x, "subset_quo")
-  if (!is.null(subset_quo)) {
-    cat(sprintf("  [on simulations where %s]\n",
-                rlang::as_label(rlang::quo_get_expr(subset_quo))))
   }
   invisible(x)
 }
@@ -226,17 +229,4 @@ bind_alpha <- function(dots, alpha) {
     rlang::env_bind(env, alpha = alpha)
     rlang::new_quosure(expr, env = env)
   })
-}
-
-#' Unwrap a quosure that was injected into a quosure-capturing argument
-#'
-#' Returns `NULL` for an absent subset.
-#'
-#' @keywords internal
-#' @noRd
-unwrap_quosure <- function(quo) {
-  inner <- rlang::quo_get_expr(quo)
-  if (rlang::is_quosure(inner)) quo <- inner
-  if (rlang::quo_is_null(quo) || rlang::quo_is_missing(quo)) return(NULL)
-  quo
 }

@@ -54,14 +54,14 @@ test_that("select_diagnosands passes alpha through to power", {
   expect_equal(get_diagnosands(strict)$power, 0)
 })
 
-test_that("a diagnosands subset restricts which simulations count", {
+test_that("filtering the simulations restricts which ones count", {
   sims <- simulate_design(simple_design(N = 30), sims = 30)
+  counter <- declare_diagnosands(n = dplyr::n())
   all_sims <- diagnose_simulations(sims, bootstrap_sims = 0,
-                                   diagnosands = declare_diagnosands(
-                                     n = dplyr::n()))
-  significant <- diagnose_simulations(sims, bootstrap_sims = 0,
-                                      diagnosands = declare_diagnosands(
-                                        n = dplyr::n(), subset = p.value <= 0.05))
+                                   diagnosands = counter)
+  significant <- sims |>
+    dplyr::filter(p.value <= 0.05) |>
+    diagnose_simulations(bootstrap_sims = 0, diagnosands = counter)
   expect_equal(get_diagnosands(all_sims)$n, 30L)
   expect_lt(get_diagnosands(significant)$n, 30L)
 })

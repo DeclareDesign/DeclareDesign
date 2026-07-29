@@ -222,7 +222,6 @@ diagnose_simulations <- function(simulations_df,
     simulations_df <- dplyr::ungroup(simulations_df)
   }
   diagnosands <- as_diagnosands(diagnosands)
-  diagnosis_df <- apply_diagnosand_subset(simulations_df, diagnosands)
   param_cols <- attr(simulations_df, "parameter_names")
   draw_cols <- attr(simulations_df, "draw_cols")
   nested <- isTRUE(attr(simulations_df, "nested")) && length(draw_cols) > 0
@@ -232,11 +231,11 @@ diagnose_simulations <- function(simulations_df,
     intersect(standard_cols, names(simulations_df)),
     setdiff(extra_groups, standard_cols)
   )
-  diagnosands_df <- compute_diagnosands(diagnosis_df, diagnosands,
+  diagnosands_df <- compute_diagnosands(simulations_df, diagnosands,
                                         group_by_set)
   bootstrap_replicates <- NULL
   if (bootstrap_sims > 0) {
-    boot <- bootstrap_diagnosands(diagnosis_df, diagnosands, group_by_set,
+    boot <- bootstrap_diagnosands(simulations_df, diagnosands, group_by_set,
                                   bootstrap_sims, draw_cols = draw_cols)
     if (!is.null(boot)) {
       bootstrap_replicates <- boot$replicates
@@ -252,7 +251,7 @@ diagnose_simulations <- function(simulations_df,
   variance_decomposition <- NULL
   if (nested) {
     variance_decomposition <- compute_variance_decomposition(
-      diagnosis_df, draw_cols, group_by_set
+      simulations_df, draw_cols, group_by_set
     )
   }
   structure(
@@ -267,20 +266,6 @@ diagnose_simulations <- function(simulations_df,
     ),
     class = "diagnosis"
   )
-}
-
-#' Apply a diagnosands step's `subset` to the simulations table
-#'
-#' @keywords internal
-#' @noRd
-apply_diagnosand_subset <- function(simulations_df, diagnosands) {
-  subset_quo <- attr(diagnosands, "subset_quo")
-  if (is.null(subset_quo)) return(simulations_df)
-  keep <- rlang::eval_tidy(subset_quo, data = simulations_df)
-  if (!is.logical(keep)) {
-    rlang::abort("The diagnosands `subset` must evaluate to a logical vector.")
-  }
-  simulations_df[!is.na(keep) & keep, , drop = FALSE]
 }
 
 #' Decompose per-simulation quantity variance by draw level

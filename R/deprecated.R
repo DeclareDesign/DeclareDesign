@@ -98,7 +98,8 @@ tidy_estimator <- function(...) {
 #'
 #' @param ... Diagnosand names, optionally preceded by a `diagnosands` object
 #'   to subset.
-#' @param alpha,subset,na.rm Passed through when building from stock names.
+#' @param alpha,na.rm Passed through when building from stock names.
+#' @param subset Not supported. Filter the simulations table instead.
 #' @return A `diagnosands` object.
 #' @export
 #' @examples
@@ -122,6 +123,12 @@ select_diagnosands <- function(..., alpha = 0.05, subset = NULL,
   if (!is.character(keep) || length(keep) == 0) {
     rlang::abort("Name at least one diagnosand to keep, as a string.")
   }
+  if (!rlang::quo_is_null(rlang::enquo(subset))) {
+    rlang::abort(c(
+      "`subset` is not supported: it filtered simulations from inside a diagnosands object.",
+      "i" = "Filter the simulations instead: `simulate_design(design) |> filter(p.value <= 0.05) |> diagnose_design()`."
+    ))
+  }
   if (!is.null(base_set)) {
     unknown <- setdiff(keep, names(base_set))
     if (length(unknown) > 0) {
@@ -130,13 +137,9 @@ select_diagnosands <- function(..., alpha = 0.05, subset = NULL,
         paste(unknown, collapse = ", "), "."
       ))
     }
-    return(new_diagnosands(diagnosand_dots(base_set)[keep],
-                           subset_quo = attr(base_set, "subset_quo")))
+    return(new_diagnosands(diagnosand_dots(base_set)[keep]))
   }
-  out <- stock_diagnosands(keep, alpha = alpha, na.rm = na.rm)
-  subset_quo <- unwrap_quosure(rlang::enquo(subset))
-  if (is.null(subset_quo)) return(out)
-  new_diagnosands(diagnosand_dots(out), subset_quo = subset_quo)
+  stock_diagnosands(keep, alpha = alpha, na.rm = na.rm)
 }
 
 #' Defunct: attach diagnosands to a design

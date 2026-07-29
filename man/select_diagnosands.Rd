@@ -10,7 +10,9 @@ select_diagnosands(..., alpha = 0.05, subset = NULL, na.rm = FALSE)
 \item{...}{Diagnosand names, optionally preceded by a \code{diagnosands} object
 to subset.}
 
-\item{alpha, subset, na.rm}{Passed through when building from stock names.}
+\item{alpha, na.rm}{Passed through when building from stock names.}
+
+\item{subset}{Not supported. Filter the simulations table instead.}
 }
 \value{
 A \code{diagnosands} object.

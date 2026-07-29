@@ -4,14 +4,10 @@
 \alias{declare_diagnosands}
 \title{Declare diagnosands}
 \usage{
-declare_diagnosands(..., subset = NULL, alpha = 0.05)
+declare_diagnosands(..., alpha = 0.05)
 }
 \arguments{
 \item{...}{Named expressions defining diagnosands.}
-
-\item{subset}{An expression evaluated on the simulations table; only rows
-for which it is \code{TRUE} enter the diagnosands. \code{NULL} (the default) keeps
-every simulation.}
 
 \item{alpha}{Significance level. Any diagnosand expression that mentions
 \code{alpha} sees this value.}
@@ -31,6 +27,15 @@ overriding one of them are therefore the same act:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{default_diagnosands() + declare_diagnosands(mae = mean(abs(estimate - estimand)))
 default_diagnosands() + declare_diagnosands(power = mean(p.value <= 0.1))
+}\if{html}{\out{</div>}}
+
+To compute diagnosands on some of the simulations rather than all of them,
+filter the simulations table on the way in, the same way you would any
+other data frame:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{simulate_design(design, sims = 500) |>
+  filter(p.value <= 0.05) |>
+  diagnose_design()
 }\if{html}{\out{</div>}}
 }
 \examples{
