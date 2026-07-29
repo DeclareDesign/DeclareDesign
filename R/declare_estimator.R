@@ -71,6 +71,35 @@ method_expr_label <- function(expr) {
   if (is.na(out) || nchar(out) > 40L) "custom" else out
 }
 
+#' Pull a legacy `model =` argument out of the captured dots
+#'
+#' DeclareDesign renamed `model` to `.method` and still accepts the old spelling
+#' with a deprecation warning. Left in `...`, `model` is forwarded to the
+#' fitting function, which fails with an error from inside `lm_robust()` that
+#' says nothing about the rename.
+#'
+#' @return A list with the (possibly reduced) `dots`, the resolved method
+#'   function, and its label; method is NULL when no `model` was supplied.
+#' @keywords internal
+#' @noRd
+extract_legacy_model <- function(dots) {
+  nms <- names(dots) %||% rep("", length(dots))
+  idx <- which(nms == "model")
+  if (length(idx) == 0L) {
+    return(list(dots = dots, method = NULL, method_name = NULL))
+  }
+  q <- dots[[idx[1L]]]
+  rlang::warn(
+    "The `model =` argument is deprecated. Use `.method =` instead.",
+    .frequency = "once", .frequency_id = "declare_estimator_model"
+  )
+  list(
+    dots        = dots[-idx[1L]],
+    method      = rlang::eval_tidy(q),
+    method_name = method_expr_label(rlang::quo_get_expr(q))
+  )
+}
+
 #' Normalize an `inquiry` argument to a character vector
 #'
 #' @keywords internal
@@ -185,7 +214,8 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
 #' to one or more inquiries during diagnosis.
 #'
 #' @param ... Arguments forwarded to `.method`. Typically the formula appears
-#'   first (e.g., `Y ~ Z`).
+#'   first (e.g., `Y ~ Z`). A legacy `model =` argument is read as `.method`
+#'   with a deprecation warning rather than forwarded.
 #' @param .method The model-fitting function. Defaults to
 #'   [estimatr::lm_robust()].
 #' @param .summary Function used to tidy `.method`'s output. Defaults to
@@ -214,6 +244,12 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
   dots <- rlang::enquos(...)
   call <- sys.call()
   method_expr <- substitute(.method)
+  legacy <- extract_legacy_model(dots)
+  dots <- legacy$dots
+  if (!is.null(legacy$method) && is.null(.method)) {
+    .method <- legacy$method
+    method_expr <- NULL
+  }
   if (is.null(.method)) {
     if (requireNamespace("estimatr", quietly = TRUE)) {
       .method <- estimatr::lm_robust
@@ -222,6 +258,8 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
       .method <- stats::lm
       method_name <- "lm"
     }
+  } else if (is.null(method_expr)) {
+    method_name <- legacy$method_name
   } else {
     method_name <- method_expr_label(method_expr)
   }
@@ -278,9 +316,17 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
   dots <- rlang::enquos(...)
   call <- sys.call()
   method_expr <- substitute(.method)
+  legacy <- extract_legacy_model(dots)
+  dots <- legacy$dots
+  if (!is.null(legacy$method) && is.null(.method)) {
+    .method <- legacy$method
+    method_expr <- NULL
+  }
   if (is.null(.method)) {
     .method <- stats::lm
     method_name <- "lm"
+  } else if (is.null(method_expr)) {
+    method_name <- legacy$method_name
   } else {
     method_name <- method_expr_label(method_expr)
   }

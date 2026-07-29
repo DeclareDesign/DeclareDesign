@@ -16,7 +16,8 @@ declare_test(
 }
 \arguments{
 \item{...}{Arguments forwarded to \code{.method}. Typically the formula appears
-first (e.g., \code{Y ~ Z}).}
+first (e.g., \code{Y ~ Z}). A legacy \verb{model =} argument is read as \code{.method}
+with a deprecation warning rather than forwarded.}
 
 \item{.method}{The model-fitting function. Defaults to
 \code{\link[estimatr:lm_robust]{estimatr::lm_robust()}}.}

@@ -33,16 +33,19 @@ merge_estimates_inquiries <- function(estimates, inquiries) {
 #'
 #' @keywords internal
 #' @noRd
-compute_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
-  dots <- attr(diagnosands, "dots")
-  if (is.null(dots)) {
-    stop("`diagnosands` must be a declare_diagnosands() object.")
-  }
-  # Wrap each diagnosand expression so a missing-column or evaluation error
-  # in a single diagnosand yields NA rather than aborting the whole table.
-  # Useful when the design has no inquiries (no `estimand` column) but the
-  # default diagnosands include bias / coverage.
-  safe_dots <- purrr::imap(dots, function(q, nm) {
+#' Rewrite diagnosand quosures so a failure yields NA
+#'
+#' Wraps each diagnosand expression so a missing-column or evaluation error in
+#' a single diagnosand yields NA rather than aborting the whole table. Needed
+#' when the design has no inquiries (no `estimand` column) but the default
+#' diagnosands include bias / coverage. The point estimate and the bootstrap
+#' must use the same wrapping, or a design diagnoses at
+#' `bootstrap_sims = 0` and errors at any positive value.
+#'
+#' @keywords internal
+#' @noRd
+safe_diagnosand_dots <- function(dots) {
+  purrr::imap(dots, function(q, nm) {
     expr <- rlang::quo_get_expr(q)
     env  <- rlang::quo_get_env(q)
     rlang::new_quosure(
@@ -55,6 +58,14 @@ compute_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
       env = env
     )
   })
+}
+
+compute_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
+  dots <- attr(diagnosands, "dots")
+  if (is.null(dots)) {
+    stop("`diagnosands` must be a declare_diagnosands() object.")
+  }
+  safe_dots <- safe_diagnosand_dots(dots)
   if (length(group_by_set) == 0) {
     out <- dplyr::summarize(simulations_df, !!!safe_dots)
     return(tibble::as_tibble(out))
@@ -91,7 +102,7 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set,
   if (length(unit_ids) < 2L) return(NULL)
   diagnosand_names <- names(attr(diagnosands, "dots"))
 
-  dots <- attr(diagnosands, "dots")
+  dots <- safe_diagnosand_dots(attr(diagnosands, "dots"))
 
   # Stack all B resampled datasets with a .boot_id tag, then do ONE grouped
   # summarize over the whole thing. This amortises dplyr's per-call NSE
@@ -316,20 +327,22 @@ compute_variance_decomposition <- function(simulations_df, draw_cols,
 
       level_means <- df |>
         dplyr::group_by(dplyr::across(dplyr::all_of(c(group_by_set, outer_k)))) |>
-        dplyr::summarize(lm = mean(.y, na.rm = TRUE), .groups = "drop")
+        dplyr::summarize(.level_mean = mean(.y, na.rm = TRUE), .groups = "drop")
 
       if (k == 1) {
         comp <- level_means |>
           dplyr::group_by(dplyr::across(dplyr::all_of(group_by_set))) |>
-          dplyr::summarize(!!var_name := stats::var(lm, na.rm = TRUE),
+          dplyr::summarize(!!var_name := stats::var(.level_mean, na.rm = TRUE),
                            .groups = "drop")
       } else {
         outer_prev <- draw_cols[seq_len(k - 1L)]
         comp <- level_means |>
           dplyr::group_by(dplyr::across(dplyr::all_of(c(group_by_set, outer_prev)))) |>
-          dplyr::summarize(wv = stats::var(lm, na.rm = TRUE), .groups = "drop") |>
+          dplyr::summarize(.within_var = stats::var(.level_mean, na.rm = TRUE),
+                           .groups = "drop") |>
           dplyr::group_by(dplyr::across(dplyr::all_of(group_by_set))) |>
-          dplyr::summarize(!!var_name := mean(wv, na.rm = TRUE), .groups = "drop")
+          dplyr::summarize(!!var_name := mean(.within_var, na.rm = TRUE),
+                           .groups = "drop")
       }
       components[[length(components) + 1L]] <- comp
     }
@@ -340,11 +353,12 @@ compute_variance_decomposition <- function(simulations_df, draw_cols,
     residual <- df |>
       dplyr::group_by(dplyr::across(dplyr::all_of(c(group_by_set, draw_cols)))) |>
       dplyr::summarize(
-        wv = if (dplyr::n() > 1L) stats::var(.y, na.rm = TRUE) else 0,
+        .within_var = if (dplyr::n() > 1L) stats::var(.y, na.rm = TRUE) else 0,
         .groups = "drop"
       ) |>
       dplyr::group_by(dplyr::across(dplyr::all_of(group_by_set))) |>
-      dplyr::summarize(var_residual = mean(wv, na.rm = TRUE), .groups = "drop")
+      dplyr::summarize(var_residual = mean(.within_var, na.rm = TRUE),
+                       .groups = "drop")
     components[[length(components) + 1L]] <- residual
 
     # Join all components
