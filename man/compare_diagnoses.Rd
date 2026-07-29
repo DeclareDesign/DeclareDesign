@@ -9,6 +9,7 @@ compare_diagnoses(
   design2,
   sims = 500,
   bootstrap_sims = 100,
+  diagnosands = NULL,
   merge_by_estimator = TRUE,
   alpha = 0.05
 )
@@ -21,6 +22,11 @@ compare_diagnoses(
 \item{bootstrap_sims}{Number of bootstrap replicates, used only for
 arguments that are designs. With \code{0}, differences are reported without
 standard errors or intervals.}
+
+\item{diagnosands}{A diagnosands \code{design_step} applied to both designs, so
+the two sides are compared on the same footing by construction. Used only
+for arguments that are designs; a diagnosis passed in keeps the
+diagnosands it was computed with.}
 
 \item{merge_by_estimator}{Match estimators by label. \code{FALSE} compares every
 pair of estimators within an inquiry.}
@@ -49,7 +55,8 @@ designs are simulated independently, so the replicates are paired
 arbitrarily; the interval is a percentile interval on that difference.
 
 Either argument may be a design or an already computed \code{diagnosis}, so a
-diagnosis that took a long time to run can be reused.
+diagnosis that took a long time to run can be reused. Passing two diagnoses
+computed with different diagnosands compares whatever they have in common.
 }
 \examples{
 design <- declare_model(N = 100, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +

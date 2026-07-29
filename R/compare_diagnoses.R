@@ -2,12 +2,13 @@
 #'
 #' @keywords internal
 #' @noRd
-as_diagnosis <- function(x, sims, bootstrap_sims) {
+as_diagnosis <- function(x, sims, bootstrap_sims, diagnosands) {
   if (inherits(x, "diagnosis")) return(x)
   if (!inherits(x, "design")) {
     stop("Each argument must be a `design` or a `diagnosis` object.")
   }
-  diagnose_design(x, sims = sims, bootstrap_sims = bootstrap_sims)
+  diagnose_design(x, sims = sims, bootstrap_sims = bootstrap_sims,
+                  diagnosands = diagnosands)
 }
 
 #' Put a diagnosis's point estimates in long form
@@ -80,13 +81,18 @@ long_replicates <- function(diagnosis, diagnosands, label_cols, keys, suffix) {
 #' arbitrarily; the interval is a percentile interval on that difference.
 #'
 #' Either argument may be a design or an already computed `diagnosis`, so a
-#' diagnosis that took a long time to run can be reused.
+#' diagnosis that took a long time to run can be reused. Passing two diagnoses
+#' computed with different diagnosands compares whatever they have in common.
 #'
 #' @param design1,design2 A `design` or a `diagnosis`.
 #' @param sims Number of simulations, used only for arguments that are designs.
 #' @param bootstrap_sims Number of bootstrap replicates, used only for
 #'   arguments that are designs. With `0`, differences are reported without
 #'   standard errors or intervals.
+#' @param diagnosands A diagnosands `design_step` applied to both designs, so
+#'   the two sides are compared on the same footing by construction. Used only
+#'   for arguments that are designs; a diagnosis passed in keeps the
+#'   diagnosands it was computed with.
 #' @param merge_by_estimator Match estimators by label. `FALSE` compares every
 #'   pair of estimators within an inquiry.
 #' @param alpha One minus the coverage of the reported interval.
@@ -103,10 +109,10 @@ long_replicates <- function(diagnosis, diagnosands, label_cols, keys, suffix) {
 #' bigger <- redesign(design, N = 200)
 #' compare_diagnoses(design, bigger, sims = 20, bootstrap_sims = 20)
 compare_diagnoses <- function(design1, design2, sims = 500,
-                              bootstrap_sims = 100,
+                              bootstrap_sims = 100, diagnosands = NULL,
                               merge_by_estimator = TRUE, alpha = 0.05) {
-  diagnosis1 <- as_diagnosis(design1, sims, bootstrap_sims)
-  diagnosis2 <- as_diagnosis(design2, sims, bootstrap_sims)
+  diagnosis1 <- as_diagnosis(design1, sims, bootstrap_sims, diagnosands)
+  diagnosis2 <- as_diagnosis(design2, sims, bootstrap_sims, diagnosands)
 
   diagnosands <- intersect(diagnosis1$diagnosand_names,
                            diagnosis2$diagnosand_names)

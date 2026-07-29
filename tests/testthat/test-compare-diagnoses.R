@@ -55,3 +55,14 @@ test_that("compare_diagnoses refuses designs with nothing to match on", {
   expect_error(compare_diagnoses(design, "not a design"),
                "must be a `design` or a `diagnosis`")
 })
+
+test_that("compare_diagnoses applies one set of diagnosands to both designs", {
+  design <- simple_design(N = 40)
+  cmp <- compare_diagnoses(design, redesign(design, N = 80),
+                           sims = 20, bootstrap_sims = 20,
+                           diagnosands = declare_diagnosands(
+                             bias = mean(estimate - estimand),
+                             spread = sd(estimate)))
+  expect_setequal(cmp$compared_diagnoses_df$diagnosand, c("bias", "spread"))
+  expect_equal(cmp$diagnosis1$diagnosand_names, cmp$diagnosis2$diagnosand_names)
+})
