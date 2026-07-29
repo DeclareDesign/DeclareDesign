@@ -25,6 +25,17 @@ The rewrite can express designs the original cannot. Step-level `draws` let you 
 
 The cost of all three is roughly 1,900 lines of R where the original has roughly 5,400.
 
+## Getting it
+
+Both packages install from GitHub and are not on CRAN yet. They mask the originals, so attach one set or the other in a session, never both.
+
+```{r}
+remotes::install_github("DeclareDesign/fabricatrZero")
+remotes::install_github("DeclareDesign/DeclareDesignZero")
+```
+
+`estimatr` and `randomizr` are unchanged and are used exactly as before.
+
 ## The design that does not change
 
 Here is a standard two-arm design, written identically in both packages.
@@ -164,6 +175,22 @@ The three items above are the whole list, and each one errors loudly rather than
 
 `N` inside a nested level is the total number of rows the level creates, not the per-parent count, which is also what fabricatr does. `citizens = nest_level(N = 5, e = rnorm(N))` under 20 villages sees `N` of 100 and draws 100 independent values rather than drawing 5 and reusing them. A vector shorter than the level still recycles, so the book's `task = nest_level(N = 3, task = 1:3)` numbers the tasks within every subject exactly as before.
 
+## Porting an existing script
+
+Five greps cover every breaking change in both packages. Run them over a script and whatever they do not find needs no attention.
+
+| Grep for | Replace with | Where it bites |
+|---|---|---|
+| `inquiry = ` followed by an object | `inquiry = "ATE"` | any estimator linked to an estimand |
+| `make_groups` | `simulate_design() \|> group_by() \|> diagnose_design()` | subgroup diagnosis |
+| `nest = FALSE` | `declare_level()` | cross-classified designs |
+| `join_using` | `.by = c("A", "B")` | `cross_levels()`, `link_levels()` |
+| `modify_level(by =` | `modify_level(.by =` | grouped column construction |
+
+Nothing on that list fails quietly. Each one now stops with an error naming its replacement, which is the property that matters when you are porting someone else's code and cannot check every number by hand.
+
+Two more greps are worth running for a different reason. `insert_step`, `delete_step`, and `replace_step` still work but warn, so a script using them keeps running while you decide whether to rebuild the design instead. `compare_designs()` and `print_code()` stop outright, because neither is implemented.
+
 ## What is new
 
 ### Step-level `draws`
@@ -271,6 +298,6 @@ Of the nine that do not run, five are not evidence about compatibility either wa
 
 Those three pass arguments to a fitting function that does its own non-standard evaluation: `rma_helper` reads `yi = estimate` as a column name, and `pivot_wider` and `rdrobust_helper` use tidyselect. DeclareDesignZero evaluates estimator arguments against the data before handing them over, so those methods receive values where they expected expressions. The meta-analysis design is the one to watch, because it does not error: it returns a full table of NA estimates where DeclareDesign returns real ones. Any `.method` or `handler` that quotes its own arguments is currently unreliable, and fixing it means changing how estimator arguments are passed, which is a decision for the group rather than a patch.
 
-The short version for anyone deciding whether to switch: of the 84 book declarations that can be tested and that work in DeclareDesign, 81 work here, 78 of them without touching a character, three after one mechanical substitution, and three fail for a single reason that is written down and open.
+One smaller gap, for completeness: `summary()` on a design prints the step list rather than the original's detailed step-by-step display.
 
-`summary()` on a design also prints the step list rather than the original's detailed step-by-step display.
+The short version for anyone deciding whether to switch: of the 84 book declarations that can be tested and that work in DeclareDesign, 81 work here, 78 of them without touching a character, three after one mechanical substitution, and three fail for a single reason that is written down and open.
