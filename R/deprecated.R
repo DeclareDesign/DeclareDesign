@@ -20,17 +20,22 @@ declare_population <- function(...) {
 #' @keywords internal
 #' @noRd
 .compare_defunct <- function(fn_name) {
-  rlang::abort(paste0(
-    "`", fn_name, "()` is not implemented in DeclareDesignZero. ",
-    "Share the R script instead of the design object."
+  rlang::abort(c(
+    paste0("`", fn_name, "()` is not implemented in DeclareDesignZero."),
+    "i" = "Share the R script instead of the design object.",
+    "i" = "To compare what two designs achieve, use `compare_diagnoses()`."
   ))
 }
 
 #' Defunct comparison helpers
 #'
 #' These functions existed in the original DeclareDesign but are not part of
-#' DeclareDesignZero. They error with a message asking the user to share the
-#' R script that defines the design.
+#' DeclareDesignZero. Each compared two designs by printing their code, their
+#' draws, or their summaries side by side, which is a job for a diff of the
+#' two scripts. They error with a message saying so.
+#'
+#' [compare_diagnoses()], which compares what two designs achieve rather than
+#' how they are written, is implemented.
 #'
 #' @param ... Ignored.
 #' @return Never returns.
@@ -52,9 +57,6 @@ compare_design_inquiries <- function(...) .compare_defunct("compare_design_inqui
 #' @rdname compare_designs
 #' @export
 compare_design_summaries <- function(...) .compare_defunct("compare_design_summaries")
-#' @rdname compare_designs
-#' @export
-compare_diagnoses        <- function(...) .compare_defunct("compare_diagnoses")
 #' @rdname compare_designs
 #' @export
 print_code               <- function(...) .compare_defunct("print_code")

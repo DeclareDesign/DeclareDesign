@@ -2,23 +2,41 @@
 % Please edit documentation in R/set_diagnosands.R
 \name{select_diagnosands}
 \alias{select_diagnosands}
-\title{Subset diagnosands by name}
+\title{Build a diagnosands step from a set of named diagnosands}
 \usage{
-select_diagnosands(diagnosands, ...)
+select_diagnosands(..., alpha = 0.05, subset = NULL, na.rm = FALSE)
 }
 \arguments{
-\item{diagnosands}{A diagnosands \code{design_step}.}
+\item{...}{Diagnosand names to keep, optionally preceded by a diagnosands
+\code{design_step} to subset.}
 
-\item{...}{Names of diagnosands to keep.}
+\item{alpha}{Significance level used by \code{power}, \code{type_s_rate},
+\code{exaggeration_ratio}, and \code{prop_pos_sig}.}
+
+\item{subset}{An expression evaluated on the simulations table; only the
+rows for which it is \code{TRUE} enter the diagnosands.}
+
+\item{na.rm}{Passed to the library diagnosands.}
 }
 \value{
-A diagnosands \code{design_step} containing only the selected entries.
+A diagnosands \code{design_step}.
 }
 \description{
-Subset diagnosands by name
+Two ways to call this. Naming diagnosands from the built-in library
+(\code{select_diagnosands("bias", "power")}) builds a fresh diagnosands step,
+as in DeclareDesign. Passing an existing diagnosands step first
+(\code{select_diagnosands(my_diagnosands, "bias")}) subsets that step instead,
+which is the way to trim a custom set.
+}
+\details{
+The library is a superset of \code{\link[=default_diagnosands]{default_diagnosands()}}: \code{mean_estimand},
+\code{mean_estimate}, \code{bias}, \code{sd_estimate}, \code{rmse}, \code{power}, \code{coverage},
+\code{mean_se}, \code{type_s_rate}, \code{exaggeration_ratio}, \code{var_estimate},
+\code{mean_var_hat}, \code{prop_pos_sig}, and \code{mean_ci_length}.
 }
 \examples{
-diags <- default_diagnosands()
-kept <- select_diagnosands(diags, "bias", "rmse")
-names(attr(kept, "dots"))
+select_diagnosands("sd_estimate", "mean_se")
+
+# subset a custom set instead of the library
+select_diagnosands(default_diagnosands(), "bias", "rmse")
 }

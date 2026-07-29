@@ -7,7 +7,6 @@
 \alias{compare_design_estimates}
 \alias{compare_design_inquiries}
 \alias{compare_design_summaries}
-\alias{compare_diagnoses}
 \alias{print_code}
 \title{Defunct comparison helpers}
 \usage{
@@ -23,8 +22,6 @@ compare_design_inquiries(...)
 
 compare_design_summaries(...)
 
-compare_diagnoses(...)
-
 print_code(...)
 }
 \arguments{
@@ -35,6 +32,11 @@ Never returns.
 }
 \description{
 These functions existed in the original DeclareDesign but are not part of
-DeclareDesignZero. They error with a message asking the user to share the
-R script that defines the design.
+DeclareDesignZero. Each compared two designs by printing their code, their
+draws, or their summaries side by side, which is a job for a diff of the
+two scripts. They error with a message saying so.
+}
+\details{
+\code{\link[=compare_diagnoses]{compare_diagnoses()}}, which compares what two designs achieve rather than
+how they are written, is implemented.
 }

@@ -90,6 +90,11 @@ compute_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
 #' For nested draws, resamples at the outermost draw level (cluster bootstrap)
 #' so that correlated within-world rows are always kept together.
 #'
+#' Returns a list with `standard_errors` (one row per group, columns named
+#' `se(diagnosand)`) and `replicates` (one row per group per replicate), or
+#' `NULL` when there is nothing to resample. [compare_diagnoses()] uses the
+#' replicates to put a confidence interval on a difference in diagnosands.
+#'
 #' @keywords internal
 #' @noRd
 bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set,
@@ -113,12 +118,12 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set,
     lookup <- stats::setNames(data.frame(drawn), key_col)
     r <- dplyr::inner_join(simulations_df, lookup,
                            by = key_col, relationship = "many-to-many")
-    r$.boot_id <- b
+    r$bootstrap_id <- b
     r
   }) |> dplyr::bind_rows()
 
   replicate_df <- all_boot |>
-    dplyr::group_by(dplyr::across(dplyr::all_of(c(group_by_set, ".boot_id")))) |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(c(group_by_set, "bootstrap_id")))) |>
     dplyr::summarize(!!!dots, .groups = "drop")
 
   se_groups <- if (length(group_by_set) > 0) group_by_set else character(0)
@@ -132,7 +137,8 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set,
       ),
       .groups = "drop"
     )
-  tibble::as_tibble(out)
+  list(standard_errors = tibble::as_tibble(out),
+       replicates      = tibble::as_tibble(replicate_df))
 }
 
 #' Diagnose a design
@@ -221,6 +227,7 @@ diagnose_simulations <- function(simulations_df,
     simulations_df <- dplyr::ungroup(simulations_df)
   }
   if (is.null(diagnosands)) diagnosands <- default_diagnosands()
+  diagnosis_df <- apply_diagnosand_subset(simulations_df, diagnosands)
   param_cols <- attr(simulations_df, "parameter_names")
   draw_cols <- attr(simulations_df, "draw_cols")
   nested <- isTRUE(attr(simulations_df, "nested")) && length(draw_cols) > 0
@@ -230,12 +237,15 @@ diagnose_simulations <- function(simulations_df,
     intersect(standard_cols, names(simulations_df)),
     setdiff(extra_groups, standard_cols)
   )
-  diagnosands_df <- compute_diagnosands(simulations_df, diagnosands,
+  diagnosands_df <- compute_diagnosands(diagnosis_df, diagnosands,
                                         group_by_set)
+  bootstrap_replicates <- NULL
   if (bootstrap_sims > 0) {
-    se_df <- bootstrap_diagnosands(simulations_df, diagnosands, group_by_set,
-                                   bootstrap_sims, draw_cols = draw_cols)
-    if (!is.null(se_df)) {
+    boot <- bootstrap_diagnosands(diagnosis_df, diagnosands, group_by_set,
+                                  bootstrap_sims, draw_cols = draw_cols)
+    if (!is.null(boot)) {
+      bootstrap_replicates <- boot$replicates
+      se_df <- boot$standard_errors
       if (length(group_by_set) == 0) {
         diagnosands_df <- dplyr::bind_cols(diagnosands_df, se_df)
       } else {
@@ -247,7 +257,7 @@ diagnose_simulations <- function(simulations_df,
   variance_decomposition <- NULL
   if (nested) {
     variance_decomposition <- compute_variance_decomposition(
-      simulations_df, draw_cols, group_by_set
+      diagnosis_df, draw_cols, group_by_set
     )
   }
   structure(
@@ -257,10 +267,25 @@ diagnose_simulations <- function(simulations_df,
       diagnosand_names       = names(attr(diagnosands, "dots")),
       group_by_set           = group_by_set,
       bootstrap_sims         = bootstrap_sims,
+      bootstrap_replicates   = bootstrap_replicates,
       variance_decomposition = variance_decomposition
     ),
     class = "diagnosis"
   )
+}
+
+#' Apply a diagnosands step's `subset` to the simulations table
+#'
+#' @keywords internal
+#' @noRd
+apply_diagnosand_subset <- function(simulations_df, diagnosands) {
+  subset_quo <- attr(diagnosands, "subset_quo")
+  if (is.null(subset_quo)) return(simulations_df)
+  keep <- rlang::eval_tidy(subset_quo, data = simulations_df)
+  if (!is.logical(keep)) {
+    rlang::abort("The diagnosands `subset` must evaluate to a logical vector.")
+  }
+  simulations_df[!is.na(keep) & keep, , drop = FALSE]
 }
 
 #' Decompose per-simulation quantity variance by draw level

@@ -4,10 +4,17 @@
 \alias{declare_diagnosands}
 \title{Declare diagnosands}
 \usage{
-declare_diagnosands(..., label = "diagnosands")
+declare_diagnosands(..., subset = NULL, alpha = 0.05, label = "diagnosands")
 }
 \arguments{
 \item{...}{Named expressions defining diagnosands.}
+
+\item{subset}{An expression evaluated on the simulations table; only rows
+for which it is \code{TRUE} enter the diagnosands. \code{NULL} (the default) keeps
+every simulation.}
+
+\item{alpha}{Significance level. Any diagnosand expression that mentions
+\code{alpha} sees this value.}
 
 \item{label}{Step label.}
 }
@@ -27,4 +34,7 @@ diags <- declare_diagnosands(
   rmse = sqrt(mean((estimate - estimand)^2, na.rm = TRUE))
 )
 names(attr(diags, "dots"))
+
+# power at the 10 percent level, computed on significant simulations only
+declare_diagnosands(power = mean(p.value <= alpha), alpha = 0.1)
 }

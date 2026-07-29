@@ -117,7 +117,6 @@ test_that("compare_designs errors informatively", {
   expect_error(compare_design_estimates(), "not implemented")
   expect_error(compare_design_inquiries(), "not implemented")
   expect_error(compare_design_summaries(), "not implemented")
-  expect_error(compare_diagnoses(), "not implemented")
   expect_error(print_code(), "not implemented")
 })
 
