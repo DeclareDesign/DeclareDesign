@@ -23,6 +23,8 @@ The pipeline is faster. Simulation and diagnosis run 1.2 to 1.5 times faster seq
 
 The rewrite can express designs the original cannot. Step-level `draws` let you fan out a single step, so you can hold a population fixed and redraw the assignment, or hold the assignment fixed and redraw the population. The resulting simulations carry a variance decomposition that attributes the variability of any per-simulation quantity to the step that generated it.
 
+It also closes seven of the twenty-two issues open on the DeclareDesign tracker, six of them for one reason, and it regresses one. Both lists are in [Open issues in DeclareDesign] below, along with the design decision the seventh raises, which the group should take rather than the rewrite.
+
 The cost of all three is roughly 1,900 lines of R where the original has roughly 5,400.
 
 ## Getting it
@@ -298,8 +300,56 @@ The book contains 90 design declarations. **81 of them run, and 78 run with thei
 
 Of the nine that do not run, five are not evidence about compatibility either way: four use a value the book defines outside any code chunk, so the declaration cannot be reconstructed from the published text, and one needs the `interference` package, which is not on CRAN. A sixth fails in exactly the same way under DeclareDesign 1.1.1, so it is not a difference between the two packages. That leaves three, and they share one cause.
 
-Those three pass arguments to a fitting function that does its own non-standard evaluation: `rma_helper` reads `yi = estimate` as a column name, and `pivot_wider` and `rdrobust_helper` use tidyselect. DeclareDesignZero evaluates estimator arguments against the data before handing them over, so those methods receive values where they expected expressions. The meta-analysis design is the one to watch, because it does not error: it returns a full table of NA estimates where DeclareDesign returns real ones. Any `.method` or `handler` that quotes its own arguments is currently unreliable, and fixing it means changing how estimator arguments are passed, which is a decision for the group rather than a patch.
+Those three pass arguments to a fitting function that does its own non-standard evaluation: `rma_helper` reads `yi = estimate` as a column name, and `pivot_wider` and `rdrobust_helper` use tidyselect. DeclareDesignZero evaluates estimator arguments against the data before handing them over, so those methods receive values where they expected expressions. The meta-analysis design is the one to watch, because it does not error: it returns a full table of NA estimates where DeclareDesign returns real ones. That is the worst failure a design tool can have, and it is on the list below rather than buried here.
+
+It is also, as it turns out, one side of an argument the project has been having with itself since 2021. See [How estimator arguments are passed] below.
 
 One smaller gap, for completeness: `summary()` on a design prints the step list rather than the original's detailed step-by-step display.
 
-The short version for anyone deciding whether to switch: of the 84 book declarations that can be tested and that work in DeclareDesign, 81 work here, 78 of them without touching a character, three after one mechanical substitution, and three fail for a single reason that is written down and open.
+The short version for anyone deciding whether to switch: of the 84 book declarations that can be tested and that work in DeclareDesign, 81 work here, 78 of them without touching a character, three after one mechanical substitution, and three fail for a single reason, described next.
+
+### Open issues in DeclareDesign
+
+Every open issue on the DeclareDesign tracker was run against both packages. The script is in the repository, so this table can be regenerated rather than trusted.
+
+**Seven close.** Each of these errors or misbehaves in DeclareDesign 1.1.1 and works here.
+
+| Issue | What breaks in DeclareDesign |
+|---|---|
+| [#463](https://github.com/DeclareDesign/DeclareDesign/issues/463) | `rma.uni` as the estimator's method: quosures reach a function that uses base non-standard evaluation |
+| [#456](https://github.com/DeclareDesign/DeclareDesign/issues/456) | `declare_estimator(x ~ 1, model = lm, subset = x > 1)` errors, though it works with `lm_robust` |
+| [#456](https://github.com/DeclareDesign/DeclareDesign/issues/456) | the same with `weights = 1/x^2` |
+| [#457](https://github.com/DeclareDesign/DeclareDesign/issues/457) | a handler's own default arguments are not picked up |
+| [#479](https://github.com/DeclareDesign/DeclareDesign/issues/479) | a spurious many-to-many merge warning when two estimators name the same inquiry |
+| [#482](https://github.com/DeclareDesign/DeclareDesign/issues/482) | a design with a test but no estimator cannot be diagnosed after `redesign()` |
+| [#509](https://github.com/DeclareDesign/DeclareDesign/issues/509) | a recursive helper function in the calling environment overflows the node stack |
+
+Six of the seven are the same cause seen from different angles, which is the useful thing the exercise showed. DeclareDesign splices an estimator's arguments into the method call as quosures, so every method not written for rlang receives an object it cannot use.
+
+**One regresses.** [#293](https://github.com/DeclareDesign/DeclareDesign/issues/293): a helper function whose own environment holds a parameter survives deletion of that parameter in DeclareDesign and does not here.
+
+```{r}
+m <- 2
+f <- function(x) m * x
+design <- declare_model(N = 2, X1 = f(1)) + NULL
+rm(m)
+draw_data(design)   # DeclareDesign: works. DeclareDesignZero: object 'm' not found
+```
+
+DeclareDesign copies function environments when it captures a step; `redesign()` here clones only the environment the expression itself was captured in.
+
+**Two are feature requests neither package implements.** [#385](https://github.com/DeclareDesign/DeclareDesign/issues/385) asks for an estimator that errors to produce an `error = TRUE` row rather than abort the simulation, which matters for any MLE or MCMC procedure that fails on a few draws. DeclareDesignZero already does exactly that for diagnosands, so the pattern is available to reuse. [#497](https://github.com/DeclareDesign/DeclareDesign/issues/497) asks for `draw_data(design, theta = 0.5)`; both packages require going through `redesign()`, which works in both.
+
+### How estimator arguments are passed
+
+The three book designs that fail here, and issue #463, and issue #456, are all the same question, and the two packages have answered it in opposite directions.
+
+DeclareDesign passes **expressions**. A method that reads its arguments as column names, like the `rma_helper` in `rdss`, works. `rma.uni` receives a quosure where it expected a vector and fails, which is #463.
+
+DeclareDesignZero passes **values**. `rma.uni` works and #463 closes. `rma_helper` receives a numeric vector where it expected a name to look up, and returns NA.
+
+Neither convention serves both. Values are what an ordinary R function wants. Expressions are what tidyselect wants, and what any helper that resolves a column name wants. Two of the three book designs that fail here are `rdss` shims written specifically to work around #463 under the old convention, which is worth knowing before reading their failure as a verdict on the rewrite.
+
+Guessing per call site, which is what both packages currently do, is how a design ends up returning a table of NA without complaint. The proposal is an explicit argument on `declare_estimator()` and `declare_step()` naming which convention that call uses, defaulting to values. The choice then appears where it is made, and `rdss` gets a migration path rather than a breakage: `rma_helper` keeps working under the flag, and `rma.uni` works without it.
+
+That decision is not ours alone to take, which is the main reason this vignette exists.
