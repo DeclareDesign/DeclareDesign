@@ -137,6 +137,33 @@ find_all_objects <- function(design) {
   out
 }
 
+#' The value a design's parameter currently holds
+#'
+#' Looks for `name` the way [redesign()] rebinds it: as a literal argument
+#' first, then as a name read out of the environment an expression was
+#' captured in. Returns `NULL` when the design does not use the name, or when
+#' the value cannot be resolved.
+#'
+#' @keywords internal
+#' @noRd
+current_param_value <- function(design, name) {
+  for (step in unclass(design)) {
+    dots <- attr(step, "dots")
+    idx <- match(name, names(dots) %||% character(0))
+    if (!is.na(idx)) {
+      expr <- rlang::quo_get_expr(dots[[idx]])
+      if (is.atomic(expr)) return(expr)
+    }
+    for (quo in step_quosures(step)) {
+      if (!name %in% expr_symbols(rlang::quo_get_expr(quo))) next
+      found <- user_binding_env(rlang::quo_get_env(quo), name)
+      if (is.null(found)) next
+      return(tryCatch(rlang::env_get(found, name), error = function(e) NULL))
+    }
+  }
+  NULL
+}
+
 #' Aggregate the objects table to one row per name and print it
 #'
 #' @keywords internal

@@ -29,6 +29,11 @@ values are zipped position-wise.
 \details{
 A parameter that no step responds to draws a warning and is otherwise
 ignored. \code{\link[=summary]{summary()}} on a design lists the names that are available.
+
+An atomic vector always supplies one value per design, so a parameter that
+is itself a vector has to be wrapped: \code{prob_each = list(c(0, .5, .5))} is
+one design, where \code{prob_each = c(0, .5, .5)} is three. Handing a bare
+vector to a parameter that currently holds one warns.
 }
 \examples{
 designer <- function(N) {

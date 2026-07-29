@@ -237,6 +237,33 @@ check_params_in_design <- function(design, param_names) {
   ))
 }
 
+#' Warn when a vector-valued parameter is handed a bare vector
+#'
+#' An atomic vector always supplies one value per element, so
+#' `redesign(design, N = c(50, 100))` means two designs. That rule is
+#' unambiguous only until the parameter itself holds a vector: asking for
+#' `prob_each = c(0, .5, .5)` then produces three designs holding one number
+#' each, which is almost never what was meant and which does not fail until
+#' something draws from them. Warning here puts the complaint at the call.
+#'
+#' @keywords internal
+#' @noRd
+check_param_vectors <- function(design, params) {
+  for (name in names(params)) {
+    supplied <- params[[name]]
+    if (!is.atomic(supplied) || length(supplied) < 2L) next
+    current <- current_param_value(design, name)
+    if (!is.atomic(current) || length(current) < 2L) next
+    rlang::warn(c(
+      paste0("`", name, "` currently holds ", length(current), " values, so ",
+             paste(deparse(supplied), collapse = " "), " is being read as ",
+             length(supplied), " designs, one value each."),
+      "i" = "Wrap it in `list()` to use it as a single replacement."
+    ))
+  }
+  invisible(NULL)
+}
+
 #' Test whether an environment chain contains a binding
 #'
 #' @keywords internal
@@ -326,6 +353,11 @@ param_grid <- function(params, expand = TRUE) {
 #' A parameter that no step responds to draws a warning and is otherwise
 #' ignored. [summary()] on a design lists the names that are available.
 #'
+#' An atomic vector always supplies one value per design, so a parameter that
+#' is itself a vector has to be wrapped: `prob_each = list(c(0, .5, .5))` is
+#' one design, where `prob_each = c(0, .5, .5)` is three. Handing a bare
+#' vector to a parameter that currently holds one warns.
+#'
 #' @param design A `design`.
 #' @param ... Named parameter values. An atomic vector supplies one design per
 #'   element; to vary a function or another non-atomic parameter, pass a list
@@ -359,6 +391,7 @@ redesign <- function(design, ..., expand = TRUE) {
   new_params <- list(...)
   if (length(new_params) == 0) return(design)
   check_params_in_design(design, names(new_params))
+  check_param_vectors(design, new_params)
   param_df <- param_grid(new_params, expand = expand)
   designs <- purrr::map(seq_len(nrow(param_df)), function(i) {
     params_i <- extract_param_row(param_df, i)

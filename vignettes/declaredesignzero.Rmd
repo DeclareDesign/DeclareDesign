@@ -88,6 +88,19 @@ redesign(design, taw = 0.5)
 
 The names it finds are the objects the design's expressions read out of the environment they were written in, plus arguments declared as literal values, such as the `N` of `declare_model(N = 500)`. A value written inline inside a call, as in `complete_ra(N, prob_each = c(0.2, 0.8))`, is not one of them: there is no name to rebind, so pull it out into an object first. Functions count, so which estimator or which summary function a design uses can itself be a parameter: `redesign(design, g = median)` swaps `g` everywhere it appears.
 
+An atomic vector always supplies one value per design, which is what makes `N = c(100, 200)` two designs. A parameter that is itself a vector therefore has to be wrapped, in this package and in DeclareDesign both:
+
+```{r, purl = FALSE}
+redesign(design, prob_each = c(0, 0.5, 0.5))
+#> Warning: `prob_each` currently holds 3 values, so c(0, 0.5, 0.5) is being
+#> read as 3 designs, one value each.
+#> ℹ Wrap it in `list()` to use it as a single replacement.
+
+redesign(design, prob_each = list(c(0, 0.5, 0.5)))
+```
+
+DeclareDesign hands back the three broken designs without comment, and they fail later, when something draws from one of them. The rule is the same here; only the complaint moves to the call that caused it.
+
 ## What changes, and why
 
 ### In DeclareDesignZero

@@ -54,6 +54,21 @@ test_that("redesign accepts list-valued parameters", {
   expect_equal(unname(table(draw_data(fam[[2]])$Z)["T1"]), 0L)
 })
 
+test_that("a bare vector handed to a vector-valued parameter warns", {
+  prob_each <- c(.2, .5, .3)
+  d <- declare_model(N = 300, U = rnorm(N)) +
+    declare_assignment(Z = randomizr::complete_ra(N, num_arms = 3,
+                                                   prob_each = prob_each))
+  expect_warning(redesign(d, prob_each = c(0, .5, .5)),
+                 "currently holds 3 values")
+  expect_no_warning(redesign(d, prob_each = list(c(0, .5, .5))))
+
+  # sweeping a scalar parameter is the ordinary case and stays quiet
+  N <- 30
+  scalar <- declare_model(N = N, Y = rnorm(N)) + declare_inquiry(mu = mean(Y))
+  expect_no_warning(redesign(scalar, N = c(50, 100)))
+})
+
 test_that("a parameter written inline inside a call is not redesignable", {
   # `prob_each` here is the name of an argument to complete_ra(), not a name
   # the design reads out of an environment, so nothing can rebind it. The
