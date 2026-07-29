@@ -22,13 +22,26 @@ rows for which it is \code{TRUE} enter the diagnosands.}
 A diagnosands \code{design_step}.
 }
 \description{
-Two ways to call this. Naming diagnosands from the built-in library
-(\code{select_diagnosands("bias", "power")}) builds a fresh diagnosands step,
-as in DeclareDesign. Passing an existing diagnosands step first
-(\code{select_diagnosands(my_diagnosands, "bias")}) subsets that step instead,
-which is the way to trim a custom set.
+Two ways to call this, told apart by whether the first argument is a
+\code{design_step}.
 }
 \details{
+Given names only, \code{select_diagnosands("bias", "power")} builds a fresh
+diagnosands step out of the built-in library, which is what DeclareDesign
+does. \code{alpha}, \code{subset}, and \code{na.rm} shape the expressions it writes.
+
+Given a diagnosands step first, \code{select_diagnosands(my_diagnosands, "bias")}
+keeps those entries of that step and nothing else. The expressions are
+yours and are copied unchanged, so \code{alpha}, \code{subset}, and \code{na.rm} have
+nothing to act on and are refused rather than ignored: set them on the
+\code{\link[=declare_diagnosands]{declare_diagnosands()}} call that made the set.
+
+A consequence worth knowing: the same name can mean different things in
+the two forms. \code{select_diagnosands("bias")} writes
+\code{mean(estimate - estimand, na.rm = FALSE)}, following DeclareDesign's
+default, while \code{select_diagnosands(default_diagnosands(), "bias")} returns
+the \code{na.rm = TRUE} version \code{\link[=default_diagnosands]{default_diagnosands()}} declares.
+
 The library is a superset of \code{\link[=default_diagnosands]{default_diagnosands()}}: \code{mean_estimand},
 \code{mean_estimate}, \code{bias}, \code{sd_estimate}, \code{rmse}, \code{power}, \code{coverage},
 \code{mean_se}, \code{type_s_rate}, \code{exaggeration_ratio}, \code{var_estimate},

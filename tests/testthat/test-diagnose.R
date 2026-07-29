@@ -118,3 +118,17 @@ test_that("legacy `model =` is read as `.method` with a deprecation warning", {
   expect_equal(nrow(est), 1L)
   expect_false("model" %in% names(est))
 })
+
+test_that("select_diagnosands refuses library arguments when subsetting a set", {
+  diags <- declare_diagnosands(power = mean(p.value <= alpha), alpha = 0.1)
+  expect_error(select_diagnosands(diags, "power", alpha = 0.5),
+               "cannot be applied to a diagnosands set that already exists")
+  expect_error(select_diagnosands(diags, "power", subset = p.value < 1),
+               "cannot be applied")
+  expect_no_error(select_diagnosands(diags, "power"))
+})
+
+test_that("select_diagnosands says so when the step is not a diagnosands set", {
+  expect_error(select_diagnosands(declare_model(N = 5, Y = rnorm(N)), "bias"),
+               "this is a model step")
+})

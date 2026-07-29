@@ -47,11 +47,24 @@ diagnosand_library <- function() {
 
 #' Build a diagnosands step from a set of named diagnosands
 #'
-#' Two ways to call this. Naming diagnosands from the built-in library
-#' (`select_diagnosands("bias", "power")`) builds a fresh diagnosands step,
-#' as in DeclareDesign. Passing an existing diagnosands step first
-#' (`select_diagnosands(my_diagnosands, "bias")`) subsets that step instead,
-#' which is the way to trim a custom set.
+#' Two ways to call this, told apart by whether the first argument is a
+#' `design_step`.
+#'
+#' Given names only, `select_diagnosands("bias", "power")` builds a fresh
+#' diagnosands step out of the built-in library, which is what DeclareDesign
+#' does. `alpha`, `subset`, and `na.rm` shape the expressions it writes.
+#'
+#' Given a diagnosands step first, `select_diagnosands(my_diagnosands, "bias")`
+#' keeps those entries of that step and nothing else. The expressions are
+#' yours and are copied unchanged, so `alpha`, `subset`, and `na.rm` have
+#' nothing to act on and are refused rather than ignored: set them on the
+#' [declare_diagnosands()] call that made the set.
+#'
+#' A consequence worth knowing: the same name can mean different things in
+#' the two forms. `select_diagnosands("bias")` writes
+#' `mean(estimate - estimand, na.rm = FALSE)`, following DeclareDesign's
+#' default, while `select_diagnosands(default_diagnosands(), "bias")` returns
+#' the `na.rm = TRUE` version [default_diagnosands()] declares.
 #'
 #' The library is a superset of [default_diagnosands()]: `mean_estimand`,
 #' `mean_estimate`, `bias`, `sd_estimate`, `rmse`, `power`, `coverage`,
@@ -84,7 +97,20 @@ select_diagnosands <- function(..., alpha = 0.05, subset = NULL,
   if (!is.character(keep) || length(keep) == 0) {
     rlang::abort("Name at least one diagnosand to keep, as a string.")
   }
-  if (!is.null(base_set)) return(subset_diagnosands(base_set, keep))
+  if (!is.null(base_set)) {
+    supplied <- c("alpha", "subset", "na.rm")[
+      c(!missing(alpha), !missing(subset), !missing(na.rm))
+    ]
+    if (length(supplied) > 0) {
+      rlang::abort(c(
+        paste0("`", paste(supplied, collapse = "`, `"),
+               "` cannot be applied to a diagnosands set that already exists."),
+        "i" = "Those arguments build the library diagnosands, and this call is subsetting your own.",
+        "i" = "Set them on the `declare_diagnosands()` call that made the set."
+      ))
+    }
+    return(subset_diagnosands(base_set, keep))
+  }
   library <- diagnosand_library()
   unknown <- setdiff(keep, names(library))
   if (length(unknown) > 0) {
@@ -106,6 +132,13 @@ select_diagnosands <- function(..., alpha = 0.05, subset = NULL,
 #' @keywords internal
 #' @noRd
 subset_diagnosands <- function(diagnosands, keep) {
+  if (!identical(attr(diagnosands, "step_type"), "diagnosand")) {
+    rlang::abort(c(
+      paste0("To subset a set of diagnosands, pass one: this is a ",
+             attr(diagnosands, "step_type") %||% "design", " step."),
+      "i" = "To build from the library instead, pass names only, as in `select_diagnosands(\"bias\")`."
+    ))
+  }
   dots <- attr(diagnosands, "dots")
   unknown <- setdiff(keep, names(dots))
   if (length(unknown) > 0) {
