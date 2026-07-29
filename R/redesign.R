@@ -52,7 +52,7 @@ rebuild_step <- function(step, new_dots) {
       handler <- attr(step, "handler_fn")
       d <- new_dots
       function(data) {
-        if (identical(handler, fabricatrZero::fabricate)) {
+        if (handler_is_fabricate(handler)) {
           rlang::inject(handler(data = data, !!!d))
         } else {
           args <- lapply(d, function(q) {

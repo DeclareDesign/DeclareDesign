@@ -1,3 +1,21 @@
+#' Does this handler take its arguments unevaluated?
+#'
+#' `fabricate()` captures its dots with `enquos()`, so pre-evaluating them and
+#' passing the values would strip the data context the expressions need. Both
+#' spellings count: a script carried over from DeclareDesign passes
+#' `fabricatr::fabricate`, and dispatching on the fabricatrZero function alone
+#' sent it down the pre-evaluating branch and failed inside fabricate.
+#'
+#' @keywords internal
+#' @noRd
+handler_is_fabricate <- function(handler) {
+  if (identical(handler, fabricatrZero::fabricate)) return(TRUE)
+  if (requireNamespace("fabricatr", quietly = TRUE)) {
+    return(identical(handler, fabricatr::fabricate))
+  }
+  FALSE
+}
+
 #' Declare a custom data-handling step
 #'
 #' Wraps an arbitrary handler function as a step in the design. The handler
@@ -22,13 +40,8 @@ declare_step <- function(handler, ..., label = "custom_step", draws = 1L) {
   dots <- rlang::enquos(...)
   call <- sys.call()
   force(handler)
-  # If the user supplied `fabricatrZero::fabricate` (or a function that wraps it
-  # and uses NSE on its dots), we must inject the dots as quosures rather than
-  # pre-evaluating them. Otherwise the captured expressions are evaluated in
-  # the closure environment without the data context fabricate provides.
   fn <- function(data) {
-    handler_uses_nse <- identical(handler, fabricatrZero::fabricate)
-    if (handler_uses_nse) {
+    if (handler_is_fabricate(handler)) {
       rlang::inject(handler(data = data, !!!dots))
     } else {
       args <- lapply(dots, function(q) {
