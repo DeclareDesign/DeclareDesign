@@ -7,10 +7,13 @@ library(fabricatrZero)
 library(dplyr)
 library(tidyr)
 library(purrr)
+# randomizr and estimatr are Suggests and carry the ordinary tests. The rest
+# are needed only by test-book-designs.R, which is skipped on CRAN, so they are
+# attached when present and never declared as dependencies.
 for (pkg in c("randomizr", "estimatr", "rdss", "stringr", "margins", "bbmle",
-               "MatchIt", "broom.mixed", "grf", "spdep", "DIDmultiplegt",
-               "CausalQueries", "rstanarm", "cjoint", "lme4", "rdrobust",
-               "sf", "marginaleffects")) {
+              "MatchIt", "broom.mixed", "grf", "spdep", "DIDmultiplegt",
+              "CausalQueries", "rstanarm", "cjoint", "lme4", "rdrobust",
+              "sf", "marginaleffects", "metafor", "MASS")) {
   if (requireNamespace(pkg, quietly = TRUE)) {
     suppressMessages(library(pkg, character.only = TRUE))
   }

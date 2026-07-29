@@ -13,11 +13,15 @@
 # 81 of the book's 90 design declarations run here: 78 verbatim and 3 after
 # the one mechanical substitution fabricatrZero requires. The remaining
 # 9 are listed at the foot of the file, with the reason for each.
-# bottom with the reason for each.
 
-# The book leans on randomizr and estimatr throughout, and on rdss for its
-# datasets and handlers. All are Suggests, so each test says what it needs.
-skip_unless <- function(...) for (p in c(...)) skip_if_not_installed(p)
+# Every test here skips on CRAN. The suite is large, and between them these
+# designs need a dozen modelling packages that have no place in this
+# package's dependencies. They run locally and in CI, where those packages
+# are installed.
+skip_unless <- function(...) {
+  skip_on_cran()
+  for (p in c(...)) skip_if_not_installed(p)
+}
 
 # choosing answer strategy ----
 

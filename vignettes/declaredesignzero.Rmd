@@ -36,7 +36,7 @@ remotes::install_github("DeclareDesign/DeclareDesignZero")
 
 `estimatr` and `randomizr` are unchanged and are used exactly as before.
 
-## The design that does not change
+## What does not change
 
 Here is a standard two-arm design, written identically in both packages.
 
@@ -71,9 +71,11 @@ diagnose_design(designs, sims = 500)
 
 `tau` is a free symbol inside the model step's captured expression. `redesign()` finds it, clones the environment the expression was captured in, and rebinds it. The parameter then travels forward automatically: it appears as a column in the simulations table and as a grouping variable in the diagnosands table, so custom diagnosands can refer to it directly.
 
-## What changes in DeclareDesignZero
+## What changes, and why
 
-### `inquiry =` must be a string
+### In DeclareDesignZero
+
+#### `inquiry =` must be a string
 
 ```{r}
 # old, sometimes seen
@@ -86,7 +88,7 @@ declare_estimator(Y ~ Z, inquiry = "ATE")
 
 The step object carries a `label` attribute whose value is the step type, not the inquiry name. Passing the object linked the estimator to an inquiry called `"inquiry"`, which does not exist, and the estimand column came back all `NA` with no complaint. Requiring a string means the link is written down where a reader can check it, and a name that does not match fails immediately.
 
-### `make_groups = vars(...)` is gone; group with `group_by()`
+#### `make_groups = vars(...)` is gone; group with `group_by()`
 
 ```{r}
 # old
@@ -109,7 +111,7 @@ simulate_design(design, sims = 500) |>
 
 You can also filter simulations before diagnosing, bind simulations from separate runs, or diagnose a table you saved to disk last week. None of that was available through `make_groups`.
 
-### Step-modification functions are deprecated
+#### Step-modification functions are deprecated
 
 `insert_step()`, `delete_step()`, and `replace_step()` still work and warn once per session. The replacement is to rebuild the design, which is available because a design is an ordinary list of steps:
 
@@ -117,19 +119,19 @@ You can also filter simulations before diagnosing, bind simulations from separat
 design_v2 <- design[1:2] + new_step + design[4:5]
 ```
 
-### `compare_designs()` and `print_code()` are removed
+#### `compare_designs()` and `print_code()` are removed
 
 Both error with a message asking for the R script instead. Reconstructing a legible declaration from a design object requires carrying the original source text through every transformation the design undergoes, and the reconstruction was never faithful enough to trust. Sharing the script that made the design is both simpler and more honest about what was run.
 
-### `declare_potential_outcomes()` and `declare_reveal()` are not implemented
+#### `declare_potential_outcomes()` and `declare_reveal()` are not implemented
 
 Both were already deprecated in DeclareDesign. Use `potential_outcomes()` inside `declare_model()` and `reveal_outcomes()` inside `declare_measurement()`.
 
-## What changes in fabricatrZero
+### In fabricatrZero
 
 Three changes, all in multilevel and cross-classified declarations. A flat `declare_model(N = 500, ...)` is unaffected, and so is the output of every declaration that runs.
 
-### `add_level(nest = FALSE)` becomes `declare_level()`
+#### `add_level(nest = FALSE)` becomes `declare_level()`
 
 ```{r}
 # old
@@ -151,7 +153,7 @@ The `nest` argument is a mode switch that makes one function do two unrelated th
 
 `join_using()` mimics dplyr syntax without being dplyr. The replacement is a plain character vector, and the implementation underneath is `dplyr::cross_join()`, which is the right primitive for a Cartesian product.
 
-### `link_levels()` separates the structure from the correlation
+#### `link_levels()` separates the structure from the correlation
 
 ```{r}
 # old
@@ -165,11 +167,11 @@ students = link_levels(N = 500,
 
 Which levels to link is a structural question. How correlated the assignments should be is a statistical one. Burying `rho` inside `join_using()` conflates them.
 
-### `modify_level(by =)` becomes `modify_level(.by =)`
+#### `modify_level(by =)` becomes `modify_level(.by =)`
 
 Mechanical, and consistent with the `.by` convention dplyr adopted in 1.1.0. The leading dot distinguishes a control argument from the column expressions in `...`.
 
-### Nothing else changes, including the output
+#### Nothing else changes, including the output
 
 The three items above are the whole list, and each one errors loudly rather than running to a different answer. The data frames themselves are unchanged: the same columns, in the same order, with the same types. `ID` is still there, still zero-padded character, and levels still name their identifier column after the level. `N` is still available in the data mask and still absent from the output, in both packages. Column sets were compared across flat fabrication, `N` alone, an `N`-valued column, two and three levels, a renamed `ID_label`, and `potential_outcomes()`, and they match in every case.
 
