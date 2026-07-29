@@ -14,6 +14,60 @@ test_that("select_diagnosands subsets diagnosands", {
   expect_equal(names(attr(trimmed, "dots")), c("bias", "rmse"))
 })
 
+test_that("select_diagnosands builds a set from the library, as in DeclareDesign", {
+  diags <- select_diagnosands("sd_estimate", "mean_se")
+  expect_equal(names(attr(diags, "dots")), c("sd_estimate", "mean_se"))
+  d <- diagnose_design(simple_design(N = 30), diagnosands = diags, sims = 10,
+                       bootstrap_sims = 0)
+  expect_equal(setdiff(names(get_diagnosands(d)),
+                       c("inquiry", "estimator", "outcome", "term")),
+               c("sd_estimate", "mean_se"))
+})
+
+test_that("select_diagnosands reaches diagnosands outside the default set", {
+  extra <- c("type_s_rate", "exaggeration_ratio", "var_estimate",
+             "mean_var_hat", "prop_pos_sig", "mean_ci_length", "mean_estimand")
+  diags <- rlang::inject(select_diagnosands(!!!extra))
+  expect_equal(names(attr(diags, "dots")), extra)
+})
+
+test_that("select_diagnosands names an unknown diagnosand rather than ignoring it", {
+  expect_error(select_diagnosands("bais"), "Unknown diagnosand")
+  expect_error(select_diagnosands(default_diagnosands(), "bais"),
+               "not in this set")
+})
+
+test_that("select_diagnosands passes alpha through to power", {
+  sims <- simulate_design(simple_design(N = 30, ate = 0), sims = 30)
+  loose <- diagnose_simulations(sims, bootstrap_sims = 0,
+                                diagnosands = select_diagnosands("power", alpha = 1))
+  strict <- diagnose_simulations(sims, bootstrap_sims = 0,
+                                 diagnosands = select_diagnosands("power", alpha = 0))
+  expect_equal(get_diagnosands(loose)$power, 1)
+  expect_equal(get_diagnosands(strict)$power, 0)
+})
+
+test_that("a diagnosands subset restricts which simulations count", {
+  sims <- simulate_design(simple_design(N = 30), sims = 30)
+  all_sims <- diagnose_simulations(sims, bootstrap_sims = 0,
+                                   diagnosands = declare_diagnosands(
+                                     n = dplyr::n()))
+  significant <- diagnose_simulations(sims, bootstrap_sims = 0,
+                                      diagnosands = declare_diagnosands(
+                                        n = dplyr::n(), subset = p.value <= 0.05))
+  expect_equal(get_diagnosands(all_sims)$n, 30L)
+  expect_lt(get_diagnosands(significant)$n, 30L)
+})
+
+test_that("declare_diagnosands binds alpha inside diagnosand expressions", {
+  design <- simple_design(N = 30, ate = 0)
+  sims <- simulate_design(design, sims = 30)
+  d <- diagnose_simulations(sims, bootstrap_sims = 0,
+                            diagnosands = declare_diagnosands(
+                              power = mean(p.value <= alpha), alpha = 1))
+  expect_equal(get_diagnosands(d)$power, 1)
+})
+
 test_that("diagnose_design over multiple designs adds a design column", {
   design <- simple_design(N = 30)
   fam <- redesign(design, N = c(20, 40))
