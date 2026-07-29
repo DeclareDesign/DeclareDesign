@@ -9,7 +9,9 @@ redesign(design, ..., expand = TRUE)
 \arguments{
 \item{design}{A \code{design}.}
 
-\item{...}{Named parameter values.}
+\item{...}{Named parameter values. An atomic vector supplies one design per
+element; to vary a function or another non-atomic parameter, pass a list
+of values.}
 
 \item{expand}{If \code{TRUE} (default), expand the parameter grid; if \code{FALSE},
 zip parallel vectors.}
@@ -24,6 +26,10 @@ producing one or more modified designs. With \code{expand = TRUE} (the default),
 the cross-product of parameter values is taken; with \code{expand = FALSE},
 values are zipped position-wise.
 }
+\details{
+A parameter that no step responds to draws a warning and is otherwise
+ignored. \code{\link[=summary]{summary()}} on a design lists the names that are available.
+}
 \examples{
 designer <- function(N) {
   declare_model(N = N, Y = rnorm(N)) +
@@ -32,4 +38,10 @@ designer <- function(N) {
 design <- designer(50)
 redesigned <- redesign(design, N = c(10, 20))
 length(redesigned)
+
+# a function-valued parameter
+summarizer <- function(x) mean(x)
+design <- declare_model(N = 50, Y = rnorm(N)) +
+  declare_inquiry(mu = summarizer(Y))
+redesign(design, summarizer = stats::median)
 }

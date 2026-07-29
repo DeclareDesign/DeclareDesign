@@ -115,8 +115,7 @@ modify_design_params <- function(design, params) {
             # or environment chain. In either case we clone the env and bind
             # the new value so subsequent eval_tidy() resolves it.
             expr <- rlang::quo_get_expr(q)
-            if (env_has_var(rlang::quo_get_env(q), param_name) ||
-                expr_has_symbol(expr, param_name)) {
+            if (quo_uses_param(q, param_name)) {
               env <- rlang::quo_get_env(q)
               new_env <- rlang::env_clone(env)
               rlang::env_bind(new_env, !!param_name := new_val)
@@ -129,7 +128,7 @@ modify_design_params <- function(design, params) {
       if (!is.null(new_filter)) {
         env <- rlang::quo_get_env(new_filter)
         expr <- rlang::quo_get_expr(new_filter)
-        if (env_has_var(env, param_name) || expr_has_symbol(expr, param_name)) {
+        if (quo_uses_param(new_filter, param_name)) {
           new_env <- rlang::env_clone(env)
           rlang::env_bind(new_env, !!param_name := new_val)
           new_filter <- rlang::new_quosure(expr, env = new_env)
@@ -139,7 +138,7 @@ modify_design_params <- function(design, params) {
       if (!is.null(new_subset)) {
         env <- rlang::quo_get_env(new_subset)
         expr <- rlang::quo_get_expr(new_subset)
-        if (env_has_var(env, param_name) || expr_has_symbol(expr, param_name)) {
+        if (quo_uses_param(new_subset, param_name)) {
           new_env <- rlang::env_clone(env)
           rlang::env_bind(new_env, !!param_name := new_val)
           new_subset <- rlang::new_quosure(expr, env = new_env)
@@ -189,6 +188,55 @@ modify_design_params <- function(design, params) {
   construct_design(setNames(new_steps, names(design)))
 }
 
+#' Test whether rebinding `name` would change what a quosure evaluates to
+#'
+#' True when the name is bound somewhere in the environment the quosure was
+#' captured in, or appears as a free symbol in its expression. The two cases
+#' are separate: a designer function's argument is in the environment but not
+#' the expression, and a parameter used only inside a data-mask expression
+#' (`rnorm(N)`) is in the expression but may be bound nowhere.
+#'
+#' [modify_design_params()] and [step_uses_param()] must agree on this, or
+#' `redesign()` warns about a parameter it goes on to change (or changes one
+#' it warned about).
+#'
+#' @keywords internal
+#' @noRd
+quo_uses_param <- function(quo, name) {
+  env_has_var(rlang::quo_get_env(quo), name) ||
+    expr_has_symbol(rlang::quo_get_expr(quo), name)
+}
+
+#' Test whether a step would respond to a change in `name`
+#'
+#' @keywords internal
+#' @noRd
+step_uses_param <- function(step, name) {
+  dots <- attr(step, "dots")
+  if (name %in% names(dots)) return(TRUE)
+  quos <- c(as.list(dots), list(attr(step, "filter_quo"), attr(step, "subset_quo")))
+  quos <- Filter(rlang::is_quosure, quos)
+  any(vapply(quos, quo_uses_param, logical(1), name = name))
+}
+
+#' Warn about requested parameters no step would respond to
+#'
+#' @keywords internal
+#' @noRd
+check_params_in_design <- function(design, param_names) {
+  steps <- unclass(design)
+  found <- vapply(param_names, function(name) {
+    any(vapply(steps, step_uses_param, logical(1), name = name))
+  }, logical(1))
+  missing <- param_names[!found]
+  if (length(missing) == 0) return(invisible(NULL))
+  rlang::warn(paste0(
+    "You requested a change to ", paste(missing, collapse = ", "),
+    " but ", paste(missing, collapse = ", "),
+    if (length(missing) > 1) " are" else " is", " not found in the design."
+  ))
+}
+
 #' Test whether an environment chain contains a binding
 #'
 #' @keywords internal
@@ -219,37 +267,53 @@ expr_has_symbol <- function(expr, name) {
   FALSE
 }
 
-#' Zip a named list of parameter vectors into a row-wise data frame
+#' Split a supplied parameter into the list of values it should take
 #'
-#' Length-1 entries are recycled. Returns a data frame with one row per
-#' position. List columns are preserved (so functions, list-valued params,
-#' etc. survive).
+#' An atomic vector supplies one value per element. Anything else (a function,
+#' a formula, an environment) is a single value, since `length()` does not
+#' index it. To vary a non-atomic parameter, pass a list of values.
 #'
 #' @keywords internal
 #' @noRd
-zip_params <- function(params) {
-  if (length(params) == 0L) return(data.frame())
-  lengths_v <- vapply(params, length, integer(1))
-  n <- max(lengths_v)
-  if (any(lengths_v != 1L & lengths_v != n)) {
-    stop("All parameter vectors must have length 1 or the same length when ",
-         "`expand = FALSE`.")
-  }
-  # Recycle scalars and store as list-cols for non-atomic cases.
-  cols <- lapply(params, function(v) {
-    if (length(v) == 1L) v <- rep(list(v[[1]]), n) else if (!is.list(v)) v <- as.list(v)
-    v
-  })
-  # Try to simplify obvious atomic cases back to vectors so users see plain df
-  cols <- lapply(cols, function(col) {
-    if (all(vapply(col, function(x) is.atomic(x) && length(x) == 1L, logical(1)))) {
-      unlist(col)
-    } else {
-      col
+as_param_list <- function(v) {
+  if (is.list(v)) return(v)
+  if (is.atomic(v) && !is.null(v)) return(as.list(v))
+  list(v)
+}
+
+#' Collapse a column of parameter values back to an atomic vector if possible
+#'
+#' @keywords internal
+#' @noRd
+simplify_param_col <- function(col) {
+  scalar <- vapply(col, function(x) is.atomic(x) && length(x) == 1L, logical(1))
+  if (all(scalar)) unlist(col) else col
+}
+
+#' Build the parameter grid for redesign() and expand_design()
+#'
+#' With `expand = TRUE` the cross-product of values is taken; with
+#' `expand = FALSE` parallel vectors are zipped and length-1 entries recycled.
+#' Non-atomic values (functions, formulas) survive in list columns.
+#'
+#' @keywords internal
+#' @noRd
+param_grid <- function(params, expand = TRUE) {
+  if (length(params) == 0L) return(tibble::tibble())
+  cols <- lapply(params, as_param_list)
+  lens <- lengths(cols)
+  idx <- if (expand) {
+    expand.grid(lapply(lens, seq_len), KEEP.OUT.ATTRS = FALSE)
+  } else {
+    n <- max(lens)
+    if (any(lens != 1L & lens != n)) {
+      stop("All parameter vectors must have length 1 or the same length when ",
+           "`expand = FALSE`.")
     }
-  })
-  out <- tibble::as_tibble(cols)
-  out
+    as.data.frame(lapply(lens, function(l) if (l == 1L) rep(1L, n) else seq_len(l)))
+  }
+  out <- purrr::imap(cols, function(col, nm) simplify_param_col(col[idx[[nm]]]))
+  tibble::as_tibble(out)
 }
 
 #' Re-parameterize a design
@@ -259,8 +323,13 @@ zip_params <- function(params) {
 #' the cross-product of parameter values is taken; with `expand = FALSE`,
 #' values are zipped position-wise.
 #'
+#' A parameter that no step responds to draws a warning and is otherwise
+#' ignored. [summary()] on a design lists the names that are available.
+#'
 #' @param design A `design`.
-#' @param ... Named parameter values.
+#' @param ... Named parameter values. An atomic vector supplies one design per
+#'   element; to vary a function or another non-atomic parameter, pass a list
+#'   of values.
 #' @param expand If `TRUE` (default), expand the parameter grid; if `FALSE`,
 #'   zip parallel vectors.
 #' @return A single `design` if one combination is supplied, otherwise a list
@@ -274,6 +343,12 @@ zip_params <- function(params) {
 #' design <- designer(50)
 #' redesigned <- redesign(design, N = c(10, 20))
 #' length(redesigned)
+#'
+#' # a function-valued parameter
+#' summarizer <- function(x) mean(x)
+#' design <- declare_model(N = 50, Y = rnorm(N)) +
+#'   declare_inquiry(mu = summarizer(Y))
+#' redesign(design, summarizer = stats::median)
 redesign <- function(design, ..., expand = TRUE) {
   if (inherits(design, "design_step")) {
     design <- construct_design(wrap_step(design))
@@ -283,11 +358,8 @@ redesign <- function(design, ..., expand = TRUE) {
   }
   new_params <- list(...)
   if (length(new_params) == 0) return(design)
-  param_df <- if (expand) {
-    expand.grid(new_params, stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE)
-  } else {
-    zip_params(new_params)
-  }
+  check_params_in_design(design, names(new_params))
+  param_df <- param_grid(new_params, expand = expand)
   designs <- purrr::map(seq_len(nrow(param_df)), function(i) {
     params_i <- extract_param_row(param_df, i)
     d <- modify_design_params(design, params_i)
@@ -328,11 +400,7 @@ extract_param_row <- function(param_df, i) {
 #' expand_design(designer, N = c(10, 20))
 expand_design <- function(designer, ..., expand = TRUE) {
   new_params <- list(...)
-  param_df <- if (expand) {
-    expand.grid(new_params, stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE)
-  } else {
-    zip_params(new_params)
-  }
+  param_df <- param_grid(new_params, expand = expand)
   designs <- purrr::map(seq_len(nrow(param_df)), function(i) {
     params_i <- extract_param_row(param_df, i)
     d <- do.call(designer, params_i)

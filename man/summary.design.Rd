@@ -15,8 +15,11 @@
 The input invisibly.
 }
 \description{
-Summarize a design
+Prints the steps, then the parameters and objects the design's expressions
+refer to: the names \code{\link[=redesign]{redesign()}} can change, where each one was found, and
+which steps would respond to a change.
 }
 \examples{
-summary(declare_model(N = 30, Y = rnorm(N)) + NULL)
+N <- 30
+summary(declare_model(N = N, Y = rnorm(N)) + NULL)
 }

@@ -67,6 +67,28 @@ simulate_design <- function(..., sims = NULL) {
   out
 }
 
+#' Write a design's redesign parameters onto its simulations table
+#'
+#' A parameter that is not an atomic scalar (a function, say) is written as
+#' its deparsed source, so the column stays a plain vector that diagnosis can
+#' group by and print.
+#'
+#' @keywords internal
+#' @noRd
+attach_parameters <- function(out, params) {
+  if (is.null(params) || nrow(out) == 0) return(out)
+  for (nm in names(params)) {
+    if (nm %in% names(out)) next
+    value <- params[[nm]]
+    if (is.list(value)) value <- value[[1]]
+    if (!(is.atomic(value) && length(value) == 1L)) {
+      value <- paste(deparse(value), collapse = " ")
+    }
+    out[[nm]] <- value
+  }
+  out
+}
+
 #' Detect whether any step in a design has step-level draws > 1
 #'
 #' @keywords internal
@@ -189,12 +211,7 @@ one_design_sims <- function(design, sims, design_label = "design",
     out$design <- design_label
     out <- dplyr::relocate(out, "design")
   }
-  params <- attr(design, "parameters")
-  if (!is.null(params) && nrow(out) > 0) {
-    for (nm in names(params)) {
-      if (!nm %in% names(out)) out[[nm]] <- params[[nm]]
-    }
-  }
+  out <- attach_parameters(out, attr(design, "parameters"))
   out
 }
 
@@ -361,12 +378,7 @@ simulate_nested_single <- function(design, design_label = "design",
     out$design <- design_label
     out <- dplyr::relocate(out, "design")
   }
-  params <- attr(design, "parameters")
-  if (!is.null(params) && nrow(out) > 0) {
-    for (nm in names(params)) {
-      if (!nm %in% names(out)) out[[nm]] <- params[[nm]]
-    }
-  }
+  out <- attach_parameters(out, attr(design, "parameters"))
   attr(out, "draw_cols") <- intersect(draw_col_names, names(out))
   attr(out, "nested") <- TRUE
   out

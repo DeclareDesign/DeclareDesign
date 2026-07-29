@@ -79,15 +79,22 @@ print.diagnosis <- function(x, ...) {
 
 #' Summarize a design
 #'
+#' Prints the steps, then the parameters and objects the design's expressions
+#' refer to: the names [redesign()] can change, where each one was found, and
+#' which steps would respond to a change.
+#'
 #' @param object A `design`.
 #' @param ... Ignored.
 #' @return The input invisibly.
 #' @export
 #' @method summary design
 #' @examples
-#' summary(declare_model(N = 30, Y = rnorm(N)) + NULL)
+#' N <- 30
+#' summary(declare_model(N = N, Y = rnorm(N)) + NULL)
 summary.design <- function(object, ...) {
   print(object)
+  cat("\nParameters and objects the design refers to:\n")
+  print_objects(find_all_objects(object))
   invisible(object)
 }
 
