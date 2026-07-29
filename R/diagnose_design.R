@@ -61,11 +61,7 @@ safe_diagnosand_dots <- function(dots) {
 }
 
 compute_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
-  dots <- attr(diagnosands, "dots")
-  if (is.null(dots)) {
-    stop("`diagnosands` must be a declare_diagnosands() object.")
-  }
-  safe_dots <- safe_diagnosand_dots(dots)
+  safe_dots <- safe_diagnosand_dots(diagnosand_dots(diagnosands))
   if (length(group_by_set) == 0) {
     out <- dplyr::summarize(simulations_df, !!!safe_dots)
     return(tibble::as_tibble(out))
@@ -105,9 +101,9 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set,
   if (!key_col %in% names(simulations_df)) return(NULL)
   unit_ids <- unique(simulations_df[[key_col]])
   if (length(unit_ids) < 2L) return(NULL)
-  diagnosand_names <- names(attr(diagnosands, "dots"))
+  diagnosand_names <- names(diagnosands)
 
-  dots <- safe_diagnosand_dots(attr(diagnosands, "dots"))
+  dots <- safe_diagnosand_dots(diagnosand_dots(diagnosands))
 
   # Stack all B resampled datasets with a .boot_id tag, then do ONE grouped
   # summarize over the whole thing. This amortises dplyr's per-call NSE
@@ -153,8 +149,10 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set,
 #'   `500` flat simulations. When supplied alongside step-level `draws`, the
 #'   `draws` are ignored and a warning is emitted.
 #' @param bootstrap_sims Number of bootstrap replicates for diagnosand SEs.
-#' @param diagnosands A diagnosands `design_step` (e.g., from
-#'   [declare_diagnosands()]). Defaults to [default_diagnosands()].
+#' @param diagnosands What to compute. Either a `diagnosands` object, from
+#'   [default_diagnosands()] or [declare_diagnosands()] or the two joined with
+#'   `+`, or a character vector of [stock_diagnosand_names()]. `NULL`, the
+#'   default, means [default_diagnosands()].
 #' @return A `diagnosis` object. When the simulation was nested, the result
 #'   carries an additional `$variance_decomposition` slot.
 #' @export
@@ -184,11 +182,7 @@ diagnose_design <- function(..., sims = NULL, bootstrap_sims = 100,
   if (length(designs) == 0) {
     stop("diagnose_design() requires at least one `design` object.")
   }
-  if (is.null(diagnosands)) {
-    user_diags <- purrr::map(designs, function(d) attr(d, "diagnosands"))
-    user_diags <- Filter(Negate(is.null), user_diags)
-    diagnosands <- if (length(user_diags) > 0) user_diags[[1]] else default_diagnosands()
-  }
+  diagnosands <- as_diagnosands(diagnosands)
   simulations_df <- rlang::inject(
     simulate_design(!!!designs, sims = sims)
   )
@@ -206,7 +200,8 @@ diagnose_designs <- diagnose_design
 #' Diagnose a precomputed simulations table
 #'
 #' @param simulations_df A tibble produced by [simulate_design()].
-#' @param diagnosands A diagnosands step (e.g., [default_diagnosands()]).
+#' @param diagnosands A `diagnosands` object or a character vector of
+#'   [stock_diagnosand_names()]. `NULL` means [default_diagnosands()].
 #' @param bootstrap_sims Number of bootstrap replicates.
 #' @return A `diagnosis` object.
 #' @export
@@ -226,7 +221,7 @@ diagnose_simulations <- function(simulations_df,
     extra_groups   <- dplyr::group_vars(simulations_df)
     simulations_df <- dplyr::ungroup(simulations_df)
   }
-  if (is.null(diagnosands)) diagnosands <- default_diagnosands()
+  diagnosands <- as_diagnosands(diagnosands)
   diagnosis_df <- apply_diagnosand_subset(simulations_df, diagnosands)
   param_cols <- attr(simulations_df, "parameter_names")
   draw_cols <- attr(simulations_df, "draw_cols")
@@ -264,7 +259,7 @@ diagnose_simulations <- function(simulations_df,
     list(
       simulations_df         = simulations_df,
       diagnosands_df         = diagnosands_df,
-      diagnosand_names       = names(attr(diagnosands, "dots")),
+      diagnosand_names       = names(diagnosands),
       group_by_set           = group_by_set,
       bootstrap_sims         = bootstrap_sims,
       bootstrap_replicates   = bootstrap_replicates,

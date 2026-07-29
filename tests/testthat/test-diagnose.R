@@ -1,22 +1,29 @@
-test_that("diagnose_design accepts custom diagnosands via set_diagnosands", {
-  design <- simple_design(N = 30) |>
-    set_diagnosands(declare_diagnosands(
-      mean_estimate = mean(estimate, na.rm = TRUE)
-    ))
-  d <- diagnose_design(design, sims = 5, bootstrap_sims = 0)
+test_that("diagnose_design accepts a custom diagnosands object", {
+  d <- diagnose_design(simple_design(N = 30), sims = 5, bootstrap_sims = 0,
+                       diagnosands = declare_diagnosands(
+                         mean_estimate = mean(estimate, na.rm = TRUE)
+                       ))
   expect_true("mean_estimate" %in% names(get_diagnosands(d)))
   expect_false("bias" %in% names(get_diagnosands(d)))
 })
 
-test_that("select_diagnosands subsets diagnosands", {
-  diags <- default_diagnosands()
-  trimmed <- select_diagnosands(diags, "bias", "rmse")
-  expect_equal(names(attr(trimmed, "dots")), c("bias", "rmse"))
+test_that("set_diagnosands says diagnosands are not part of a design", {
+  expect_error(set_diagnosands(simple_design(N = 30), default_diagnosands()),
+               "not part of a design")
+})
+
+test_that("select_diagnosands still works, with a deprecation warning", {
+  # the warning is once-per-session, so ask for it every time here
+  rlang::local_options(rlib_warning_verbosity = "verbose")
+  expect_warning(select_diagnosands("bias", "rmse"), "deprecated")
+  trimmed <- suppressWarnings(select_diagnosands(default_diagnosands(),
+                                                 "bias", "rmse"))
+  expect_equal(names(trimmed), c("bias", "rmse"))
 })
 
 test_that("select_diagnosands builds a set from the library, as in DeclareDesign", {
-  diags <- select_diagnosands("sd_estimate", "mean_se")
-  expect_equal(names(attr(diags, "dots")), c("sd_estimate", "mean_se"))
+  diags <- suppressWarnings(select_diagnosands("sd_estimate", "mean_se"))
+  expect_equal(names(diags), c("sd_estimate", "mean_se"))
   d <- diagnose_design(simple_design(N = 30), diagnosands = diags, sims = 10,
                        bootstrap_sims = 0)
   expect_equal(setdiff(names(get_diagnosands(d)),
@@ -27,22 +34,22 @@ test_that("select_diagnosands builds a set from the library, as in DeclareDesign
 test_that("select_diagnosands reaches diagnosands outside the default set", {
   extra <- c("type_s_rate", "exaggeration_ratio", "var_estimate",
              "mean_var_hat", "prop_pos_sig", "mean_ci_length", "mean_estimand")
-  diags <- rlang::inject(select_diagnosands(!!!extra))
-  expect_equal(names(attr(diags, "dots")), extra)
+  diags <- suppressWarnings(rlang::inject(select_diagnosands(!!!extra)))
+  expect_equal(names(diags), extra)
 })
 
 test_that("select_diagnosands names an unknown diagnosand rather than ignoring it", {
-  expect_error(select_diagnosands("bais"), "Unknown diagnosand")
-  expect_error(select_diagnosands(default_diagnosands(), "bais"),
+  expect_error(suppressWarnings(select_diagnosands("bais")), "Unknown diagnosand")
+  expect_error(suppressWarnings(select_diagnosands(default_diagnosands(), "bais")),
                "not in this set")
 })
 
 test_that("select_diagnosands passes alpha through to power", {
   sims <- simulate_design(simple_design(N = 30, ate = 0), sims = 30)
   loose <- diagnose_simulations(sims, bootstrap_sims = 0,
-                                diagnosands = select_diagnosands("power", alpha = 1))
+                                diagnosands = default_diagnosands(alpha = 1))
   strict <- diagnose_simulations(sims, bootstrap_sims = 0,
-                                 diagnosands = select_diagnosands("power", alpha = 0))
+                                 diagnosands = default_diagnosands(alpha = 0))
   expect_equal(get_diagnosands(loose)$power, 1)
   expect_equal(get_diagnosands(strict)$power, 0)
 })
@@ -117,18 +124,4 @@ test_that("legacy `model =` is read as `.method` with a deprecation warning", {
   est <- draw_estimates(design)
   expect_equal(nrow(est), 1L)
   expect_false("model" %in% names(est))
-})
-
-test_that("select_diagnosands refuses library arguments when subsetting a set", {
-  diags <- declare_diagnosands(power = mean(p.value <= alpha), alpha = 0.1)
-  expect_error(select_diagnosands(diags, "power", alpha = 0.5),
-               "cannot be applied to a diagnosands set that already exists")
-  expect_error(select_diagnosands(diags, "power", subset = p.value < 1),
-               "cannot be applied")
-  expect_no_error(select_diagnosands(diags, "power"))
-})
-
-test_that("select_diagnosands says so when the step is not a diagnosands set", {
-  expect_error(select_diagnosands(declare_model(N = 5, Y = rnorm(N)), "bias"),
-               "this is a model step")
 })

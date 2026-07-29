@@ -149,6 +149,33 @@ You can also filter simulations before diagnosing, bind simulations from separat
 design_v2 <- design[1:2] + new_step + design[4:5]
 ```
 
+#### Diagnosands are declared and joined with `+`, not attached to a design
+
+Three things get wanted from a set of diagnosands, and each has one spelling.
+
+```{r, purl = FALSE}
+# take the defaults
+diagnose_design(design, sims = 500)
+diagnose_design(design, sims = 500, diagnosands = default_diagnosands(alpha = 0.01))
+
+# keep the defaults and add one of your own, or change one of them
+my_diagnosands <- default_diagnosands() +
+  declare_diagnosands(mae = mean(abs(estimate - estimand)))
+
+diagnose_design(design, sims = 500, diagnosands = my_diagnosands)
+
+# get just a few
+diagnose_design(design, sims = 500, diagnosands = c("sd_estimate", "mean_se"))
+```
+
+`+` unions two sets of diagnosands, and a name declared twice takes its later definition in the position it already held, so adding to the defaults and overriding one of them are the same act. The middle case had no spelling at all before, in either package: to keep the defaults and add an eighth diagnosand you re-declared the other seven by hand.
+
+The names a character vector may hold are `stock_diagnosand_names()`, fourteen definitions written in one place and read by every way of asking for one, so `"bias"` cannot mean two things depending on how it was requested.
+
+`set_diagnosands()` is removed. Diagnosands are not part of a design: diagnosis is what you do to a design, and two people can diagnose the same design differently without disagreeing about the design at all. For the same reason `design + declare_diagnosands(...)` is now an error rather than a step that nothing reads, which is what it was in both packages before.
+
+`select_diagnosands()` still works and warns once per session. Both of its jobs have shorter spellings above.
+
 #### The code-comparison functions are removed; `compare_diagnoses()` is not
 
 `compare_designs()`, `compare_design_code()`, `compare_design_summaries()`, and `print_code()` error with a message asking for the R script instead. Reconstructing a legible declaration from a design object requires carrying the original source text through every transformation the design undergoes, and the reconstruction was never faithful enough to trust. Sharing the script that made the design is both simpler and more honest about what was run.
@@ -342,7 +369,7 @@ It is also, as it turns out, one side of an argument the project has been having
 
 One smaller gap, for completeness: `summary()` on a design prints the step list and the parameters `redesign()` can reach, not the original's step-by-step display of the variables each step adds or modifies.
 
-Four things reported missing in the first round of review are now in: `select_diagnosands()` takes diagnosand names and builds the set, as in DeclareDesign, and reaches the extended library rather than only the seven defaults; `compare_diagnoses()` is implemented; `summary()` lists the design's parameters; and `redesign()` warns rather than silently doing nothing when asked for a change to a name the design does not use. Function-valued parameters survive `redesign()` in both the value it substitutes and the column it writes into the simulations table.
+Four things reported missing in the first round of review are now in: the diagnosands API takes names and joins sets with `+`, described above, with `select_diagnosands()` kept as a deprecated spelling; `compare_diagnoses()` is implemented; `summary()` lists the design's parameters; and `redesign()` warns rather than silently doing nothing when asked for a change to a name the design does not use. Function-valued parameters survive `redesign()` in both the value it substitutes and the column it writes into the simulations table.
 
 The short version for anyone deciding whether to switch: of the 84 book declarations that can be tested and that work in DeclareDesign, 81 work here, 78 of them without touching a character, three after one mechanical substitution, and three fail for a single reason, described next.
 

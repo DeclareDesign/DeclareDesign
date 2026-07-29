@@ -19,8 +19,10 @@ with step-level \code{draws} run in nested mode; otherwise the design runs
 
 \item{bootstrap_sims}{Number of bootstrap replicates for diagnosand SEs.}
 
-\item{diagnosands}{A diagnosands \code{design_step} (e.g., from
-\code{\link[=declare_diagnosands]{declare_diagnosands()}}). Defaults to \code{\link[=default_diagnosands]{default_diagnosands()}}.}
+\item{diagnosands}{What to compute. Either a \code{diagnosands} object, from
+\code{\link[=default_diagnosands]{default_diagnosands()}} or \code{\link[=declare_diagnosands]{declare_diagnosands()}} or the two joined with
+\code{+}, or a character vector of \code{\link[=stock_diagnosand_names]{stock_diagnosand_names()}}. \code{NULL}, the
+default, means \code{\link[=default_diagnosands]{default_diagnosands()}}.}
 }
 \value{
 A \code{diagnosis} object. When the simulation was nested, the result

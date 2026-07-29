@@ -163,20 +163,20 @@ test_that("insert_step / replace_step / delete_step still work after deprecation
   expect_length(d_deleted, 1L)
 })
 
-test_that("set_diagnosands stores diagnosands used by diagnose_design", {
+test_that("a declared diagnosands object is used by diagnose_design", {
   skip_if_no_estimatr()
   d <- simple_design(N = 30)
-  d <- set_diagnosands(d, declare_diagnosands(power = mean(p.value <= 0.05)))
-  diag <- diagnose_design(d, sims = 3, bootstrap_sims = 0)
+  my_diagnosands <- declare_diagnosands(power = mean(p.value <= 0.05))
+  diag <- diagnose_design(d, sims = 3, bootstrap_sims = 0,
+                          diagnosands = my_diagnosands)
   diag_df <- get_diagnosands(diag)
   expect_true("power" %in% names(diag_df))
   expect_false("bias" %in% names(diag_df))
 })
 
 test_that("select_diagnosands subsets the diagnosand set", {
-  diags <- default_diagnosands()
-  kept <- select_diagnosands(diags, "bias", "rmse")
-  expect_setequal(names(attr(kept, "dots")), c("bias", "rmse"))
+  kept <- suppressWarnings(select_diagnosands(default_diagnosands(), "bias", "rmse"))
+  expect_setequal(names(kept), c("bias", "rmse"))
 })
 
 test_that("tidy(diagnosis) reshapes diagnosands long", {

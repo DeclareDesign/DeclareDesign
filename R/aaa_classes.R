@@ -240,6 +240,18 @@ wrap_step <- function(step) {
 #'   declare_inquiry(mu = mean(Y))
 #' length(d)
 `+.dd` <- function(e1, e2) {
+  d1 <- inherits(e1, "diagnosands")
+  d2 <- inherits(e2, "diagnosands")
+  if (d1 && is.null(e2)) return(e1)
+  if (d2 && is.null(e1)) return(e2)
+  if (d1 && d2) return(union_diagnosands(e1, e2))
+  if (d1 || d2) {
+    rlang::abort(c(
+      "Diagnosands are not part of a design, so they cannot be added to one.",
+      "i" = "Diagnosis is what you do to a design; two people can diagnose the same design differently.",
+      "i" = "Pass them instead: `diagnose_design(design, diagnosands = ...)`."
+    ))
+  }
   if (is.null(e2)) {
     if (inherits(e1, "design")) return(e1)
     return(construct_design(wrap_step(e1)))

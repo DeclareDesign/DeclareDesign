@@ -38,16 +38,6 @@ rebuild_step <- function(step, new_dots) {
       add_inquiry = FALSE,
       handler     = attr(step, "handler_fn")
     ),
-    "diagnosand"  = {
-      d <- new_dots
-      function(data) {
-        out <- purrr::imap(d, function(q, nm) {
-          val <- rlang::eval_tidy(q, data = as.list(data))
-          tibble::tibble(diagnosand = nm, value = val)
-        })
-        dplyr::bind_rows(out)
-      }
-    },
     "custom"      = {
       handler <- attr(step, "handler_fn")
       d <- new_dots

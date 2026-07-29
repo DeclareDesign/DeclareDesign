@@ -9,7 +9,8 @@ diagnose_simulations(simulations_df, diagnosands = NULL, bootstrap_sims = 100)
 \arguments{
 \item{simulations_df}{A tibble produced by \code{\link[=simulate_design]{simulate_design()}}.}
 
-\item{diagnosands}{A diagnosands step (e.g., \code{\link[=default_diagnosands]{default_diagnosands()}}).}
+\item{diagnosands}{A \code{diagnosands} object or a character vector of
+\code{\link[=stock_diagnosand_names]{stock_diagnosand_names()}}. \code{NULL} means \code{\link[=default_diagnosands]{default_diagnosands()}}.}
 
 \item{bootstrap_sims}{Number of bootstrap replicates.}
 }
