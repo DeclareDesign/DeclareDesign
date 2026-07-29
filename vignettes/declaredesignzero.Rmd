@@ -26,7 +26,7 @@ The rewrite can express designs the original cannot. Step-level `draws` let you 
 
 It also closes seven of the twenty-two issues open on the DeclareDesign tracker, six of them for one reason, and it regresses one. Both lists are in [Open issues in DeclareDesign] below, along with the design decision the seventh raises, which the group should take rather than the rewrite.
 
-The cost of all three is roughly 1,900 lines of R where the original has roughly 5,400.
+The cost of all three is roughly 2,100 lines of R where the original has roughly 5,400.
 
 ## Getting it
 
@@ -312,7 +312,7 @@ fabricatr's workspace system exists to answer one question: how does a column de
 
 DeclareDesign's complexity concentrates in three places, and each has a tidyverse replacement. The simulation loop becomes `purrr::map`, or `furrr::future_map` when a parallel plan is set. Diagnosis becomes one `group_by() |> summarize()`. Parameter substitution in `redesign()` becomes environment cloning in about 40 lines, replacing a walk over the design's quosure graph.
 
-A `design_step` is a `function(data)` with attributes, and a `design` is a named list of them. No custom non-standard-evaluation machinery is required, because quosures already carry the environments they were captured in. The whole of DeclareDesignZero is about 1,900 lines against roughly 5,400.
+A `design_step` is a `function(data)` with attributes, and a `design` is a named list of them. No custom non-standard-evaluation machinery is required, because quosures already carry the environments they were captured in. The whole of DeclareDesignZero is about 2,100 lines against roughly 5,400.
 
 The point of the reduction is not the line count. It is that the remaining code is code a reader can hold in their head, written in idioms they already know from dplyr and purrr, which is the difference between a package two people can maintain and a package two people can hand to someone else.
 
