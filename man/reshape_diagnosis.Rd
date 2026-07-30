@@ -4,16 +4,12 @@
 \alias{reshape_diagnosis}
 \title{Format a diagnosis for display}
 \usage{
-reshape_diagnosis(diagnosis, digits = 2, select = NULL, exclude = NULL)
+reshape_diagnosis(diagnosis, digits = 2)
 }
 \arguments{
 \item{diagnosis}{A \code{diagnosis} object.}
 
 \item{digits}{Number of decimal places.}
-
-\item{select}{Diagnosands to keep, by their display names. \code{NULL} keeps all.}
-
-\item{exclude}{Columns to drop, by their display names.}
 }
 \value{
 A \code{data.frame} of formatted strings.
@@ -31,6 +27,11 @@ formatted string: the object exists to be printed, not computed on. Use
 
 Redesign parameter columns keep their own names, since \code{prob_each} is the
 argument the reader passed and not a phrase to be title-cased.
+
+DeclareDesign's \code{select} and \code{exclude} arguments are deliberately absent:
+the result is a data frame, so \code{select()} already chooses columns from it,
+and an argument that duplicates a verb is the wart this package exists to
+remove.
 }
 \examples{
 design <- declare_model(N = 30, Y = rnorm(N), Z = rep(0:1, 15)) +
@@ -39,5 +40,7 @@ design <- declare_model(N = 30, Y = rnorm(N), Z = rep(0:1, 15)) +
                     label = "ols")
 d <- diagnose_design(design, sims = 5, bootstrap_sims = 0)
 reshape_diagnosis(d)
-reshape_diagnosis(d, select = c("Bias", "Power"))
+
+# choose columns with select(), on the data frame it returns
+reshape_diagnosis(d) |> dplyr::select(Term, Bias, Power)
 }

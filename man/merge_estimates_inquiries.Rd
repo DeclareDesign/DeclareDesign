@@ -12,7 +12,7 @@ merge_estimates_inquiries(estimates, inquiries)
 \item{inquiries}{A tibble of inquiry output.}
 }
 \value{
-A tibble.
+A tibble, carrying a \code{matched_on} attribute.
 }
 \description{
 Used in \code{\link[=run_design]{run_design()}} and \code{\link[=simulate_design]{simulate_design()}} to attach estimands to
@@ -28,5 +28,10 @@ simulation's only inquiry is the one attached.
 
 When the join produces more rows than either table had, the match was
 genuinely ambiguous and a warning names the columns it went on.
+
+The columns the join went on are recorded on the result as the \code{matched_on}
+attribute, which \code{\link[=simulate_design]{simulate_design()}} carries to the simulations table and
+\code{\link[=print.diagnosis]{print.diagnosis()}} reports when the match was anything other than a
+labelled one.
 }
 \keyword{internal}

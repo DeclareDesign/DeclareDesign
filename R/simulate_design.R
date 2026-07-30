@@ -64,6 +64,9 @@ simulate_design <- function(..., sims = NULL) {
     attr(out, "draw_cols") <- draw_cols
     attr(out, "nested") <- TRUE
   }
+  attr(out, "matched_on") <- unique(unlist(lapply(per_design, function(d) {
+    attr(d, "matched_on")
+  })))
   out
 }
 
@@ -232,11 +235,13 @@ one_design_sims <- function(design, sims, design_label = "design",
     estimates_df$sim_ID <- as.integer(estimates_df$sim_ID)
   }
   out <- merge_estimates_inquiries(estimates_df, inquiries_df)
+  matched_on <- attr(out, "matched_on")
   if (multi && nrow(out) > 0) {
     out$design <- design_label
     out <- dplyr::relocate(out, "design")
   }
   out <- attach_parameters(out, attr(design, "parameters"))
+  attr(out, "matched_on") <- matched_on
   out
 }
 
@@ -398,12 +403,14 @@ simulate_nested_single <- function(design, design_label = "design",
   # table in the merge.
   out <- merge_estimates_inquiries_nested(estimates_df, inquiries_df,
                                           inquiries_draw_cols)
+  matched_on <- attr(out, "matched_on")
 
   if (multi && nrow(out) > 0) {
     out$design <- design_label
     out <- dplyr::relocate(out, "design")
   }
   out <- attach_parameters(out, attr(design, "parameters"))
+  attr(out, "matched_on") <- matched_on
   attr(out, "draw_cols") <- intersect(draw_col_names, names(out))
   attr(out, "nested") <- TRUE
   out
@@ -427,17 +434,19 @@ merge_estimates_inquiries_nested <- function(estimates, inquiries,
   draw_keys <- intersect(inquiry_draw_cols, names(estimates))
   draw_keys <- intersect(draw_keys, names(inquiries))
   join_cols <- c(base_keys, draw_keys)
-  if (length(join_cols) == 0) {
-    return(dplyr::cross_join(tibble::as_tibble(estimates),
-                             tibble::as_tibble(inquiries),
-                             suffix = c("", ".inquiry")))
+  result <- if (length(join_cols) == 0) {
+    dplyr::cross_join(tibble::as_tibble(estimates),
+                      tibble::as_tibble(inquiries),
+                      suffix = c("", ".inquiry"))
+  } else {
+    dplyr::left_join(
+      tibble::as_tibble(estimates),
+      tibble::as_tibble(inquiries),
+      by = join_cols,
+      suffix = c("", ".inquiry"),
+      relationship = "many-to-many"
+    )
   }
-  result <- dplyr::left_join(
-    tibble::as_tibble(estimates),
-    tibble::as_tibble(inquiries),
-    by = join_cols,
-    suffix = c("", ".inquiry"),
-    relationship = "many-to-many"
-  )
+  attr(result, "matched_on") <- join_cols
   result
 }

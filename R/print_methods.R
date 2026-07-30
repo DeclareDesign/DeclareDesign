@@ -45,8 +45,6 @@ print.design_step <- function(x, ...) {
 #'
 #' @param x A `diagnosis`.
 #' @param digits Number of decimal places.
-#' @param select Diagnosands to show, by their display names. `NULL` shows all.
-#' @param exclude Columns to drop, by their display names.
 #' @param ... Ignored.
 #' @return The reshaped table invisibly.
 #' @export
@@ -58,7 +56,7 @@ print.design_step <- function(x, ...) {
 #'                     label = "ols")
 #' d <- diagnose_design(design, sims = 5, bootstrap_sims = 0)
 #' print(d)
-print.diagnosis <- function(x, digits = 2, select = NULL, exclude = NULL, ...) {
+print.diagnosis <- function(x, digits = 2, ...) {
   cat("Research design diagnosis\n")
   sims_df <- x$simulations_df
   if (!is.null(sims_df) && "sim_ID" %in% names(sims_df) && nrow(sims_df) > 0) {
@@ -66,8 +64,8 @@ print.diagnosis <- function(x, digits = 2, select = NULL, exclude = NULL, ...) {
     if (is.finite(n)) {
       msg <- sprintf("  %d simulations", n)
       if (!is.null(x$variance_decomposition)) {
-        draw_levels <- x$variance_decomposition$draw_levels[1]
-        msg <- paste0(msg, sprintf(" [nested: %s]", draw_levels))
+        msg <- paste0(msg, sprintf(" [nested: %s]",
+                                   x$variance_decomposition$draw_levels[1]))
       }
       cat(msg, "\n", sep = "")
     }
@@ -76,9 +74,10 @@ print.diagnosis <- function(x, digits = 2, select = NULL, exclude = NULL, ...) {
     cat("  bootstrap standard errors in parentheses (",
         x$bootstrap_sims, " replicates)\n", sep = "")
   }
+  match_note <- describe_inquiry_match(x$matched_on)
+  if (!is.null(match_note)) cat("  ", match_note, "\n", sep = "")
   cat("\n")
-  out <- reshape_diagnosis(x, digits = digits, select = select,
-                           exclude = exclude)
+  out <- reshape_diagnosis(x, digits = digits)
   print(out, row.names = FALSE)
   if (!is.null(x$variance_decomposition)) {
     cat("\nVariance decomposition:\n")
@@ -87,6 +86,52 @@ print.diagnosis <- function(x, digits = 2, select = NULL, exclude = NULL, ...) {
     print(vd)
   }
   invisible(out)
+}
+
+#' Summarize a diagnosis
+#'
+#' The same report [print.diagnosis()] gives.
+#'
+#' @param object A `diagnosis`.
+#' @param digits Number of decimal places.
+#' @param ... Ignored.
+#' @return The reshaped table invisibly.
+#' @export
+#' @method summary diagnosis
+#' @examples
+#' design <- declare_model(N = 30, Y = rnorm(N), Z = rep(0:1, 15)) +
+#'   declare_inquiry(ATE = 0) +
+#'   declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
+#'                     label = "ols")
+#' summary(diagnose_design(design, sims = 5, bootstrap_sims = 0))
+summary.diagnosis <- function(object, digits = 2, ...) {
+  print(object, digits = digits)
+}
+
+#' Say how estimates were matched to inquiries, when it was not by label
+#'
+#' A labelled estimator matches on `inquiry`, which is the expected case and
+#' goes unremarked. Anything else is worth a line in the diagnosis header: an
+#' estimator with no `inquiry =` matched on `sim_ID` alone, or a handler
+#' emitting its own grouping columns matched on those too. Returns `NULL` when
+#' there is nothing to say.
+#'
+#' @keywords internal
+#' @noRd
+describe_inquiry_match <- function(matched_on) {
+  if (is.null(matched_on)) return(NULL)
+  expected <- c("design", "sim_ID", "inquiry")
+  extra <- setdiff(matched_on, expected)
+  if ("inquiry" %in% matched_on && length(extra) == 0) return(NULL)
+  on <- setdiff(matched_on, c("design", "sim_ID"))
+  on <- c(intersect("inquiry", on), setdiff(on, "inquiry"))
+  if (length(on) == 0) {
+    paste0("estimates matched to inquiries within each simulation ",
+           "(no estimator named an inquiry)")
+  } else {
+    paste0("estimates matched to inquiries on ", paste(on, collapse = ", "),
+           if (!"inquiry" %in% matched_on) " (no estimator named an inquiry)")
+  }
 }
 
 #' Format a diagnosis for display
@@ -103,10 +148,13 @@ print.diagnosis <- function(x, digits = 2, select = NULL, exclude = NULL, ...) {
 #' Redesign parameter columns keep their own names, since `prob_each` is the
 #' argument the reader passed and not a phrase to be title-cased.
 #'
+#' DeclareDesign's `select` and `exclude` arguments are deliberately absent:
+#' the result is a data frame, so `select()` already chooses columns from it,
+#' and an argument that duplicates a verb is the wart this package exists to
+#' remove.
+#'
 #' @param diagnosis A `diagnosis` object.
 #' @param digits Number of decimal places.
-#' @param select Diagnosands to keep, by their display names. `NULL` keeps all.
-#' @param exclude Columns to drop, by their display names.
 #' @return A `data.frame` of formatted strings.
 #' @export
 #' @examples
@@ -116,9 +164,10 @@ print.diagnosis <- function(x, digits = 2, select = NULL, exclude = NULL, ...) {
 #'                     label = "ols")
 #' d <- diagnose_design(design, sims = 5, bootstrap_sims = 0)
 #' reshape_diagnosis(d)
-#' reshape_diagnosis(d, select = c("Bias", "Power"))
-reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL,
-                              exclude = NULL) {
+#'
+#' # choose columns with select(), on the data frame it returns
+#' reshape_diagnosis(d) |> dplyr::select(Term, Bias, Power)
+reshape_diagnosis <- function(diagnosis, digits = 2) {
   if (!inherits(diagnosis, "diagnosis")) {
     stop("`diagnosis` must be a diagnosis object, from diagnose_design().")
   }
@@ -148,20 +197,6 @@ reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL,
 
   keep <- setdiff(names(return_df), param_names)
   names(return_df)[match(keep, names(return_df))] <- make_nice_names(keep)
-
-  if (!is.null(select)) {
-    available <- make_nice_names(diagnosand_names)
-    if (!all(select %in% available)) {
-      stop("`select` must name diagnosands from: ",
-           paste(available, collapse = ", "))
-    }
-    label_cols <- c(make_nice_names(setdiff(group_cols, param_names)),
-                    param_names)
-    return_df <- return_df[c(intersect(label_cols, names(return_df)), select)]
-  }
-  if (!is.null(exclude)) {
-    return_df <- return_df[setdiff(names(return_df), exclude)]
-  }
 
   rownames(return_df) <- NULL
   return_df

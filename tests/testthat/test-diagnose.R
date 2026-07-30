@@ -151,12 +151,11 @@ test_that("reshape_diagnosis puts bootstrap SEs in parentheses below", {
   expect_equal(out[["Inquiry"]][2], "")
 })
 
-test_that("reshape_diagnosis selects and excludes by display name", {
+test_that("reshape_diagnosis leaves choosing columns to select()", {
   d <- diagnose_design(simple_design(N = 30), sims = 10, bootstrap_sims = 0)
-  expect_equal(names(reshape_diagnosis(d, select = c("Bias", "Power"))),
-               c("Inquiry", "Estimator", "Term", "N Sims", "Bias", "Power"))
-  expect_false("Coverage" %in% names(reshape_diagnosis(d, exclude = "Coverage")))
-  expect_error(reshape_diagnosis(d, select = "bias"), "must name diagnosands")
+  expect_error(reshape_diagnosis(d, select = c("Bias", "Power")), "unused")
+  expect_equal(names(reshape_diagnosis(d) |> dplyr::select(Term, Bias, Power)),
+               c("Term", "Bias", "Power"))
 })
 
 test_that("reshape_diagnosis leaves redesign parameter names alone", {
@@ -199,4 +198,42 @@ test_that("designs supplied as bare symbols are named for the symbol", {
   dee <- simple_design(N = 30)
   sims <- simulate_design(dum, dee, sims = 3)
   expect_setequal(sims$design, c("dum", "dee"))
+})
+
+test_that("the diagnosis reports a match that did not go on inquiry", {
+  unlabelled <- declare_model(N = 40, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = sample(rep(0:1, length.out = N))) +
+    declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z")
+  d <- diagnose_design(unlabelled, sims = 5, bootstrap_sims = 0)
+  expect_equal(d$matched_on, "sim_ID")
+  expect_output(print(d), "no estimator named an inquiry")
+  expect_output(summary(d), "no estimator named an inquiry")
+})
+
+test_that("the diagnosis says nothing when the match went on inquiry", {
+  d <- diagnose_design(simple_design(N = 30), sims = 5, bootstrap_sims = 0)
+  expect_setequal(d$matched_on, c("sim_ID", "inquiry"))
+  expect_false(any(grepl("matched to inquiries",
+                         capture.output(print(d)))))
+})
+
+test_that("the diagnosis names the extra columns a match went on", {
+  design <- declare_model(N = 60, g = rep(c("a", "b", "c"), 20),
+                          U = rnorm(N), Y = U + as.numeric(g == "b")) +
+    declare_inquiry(handler = function(data) {
+      data |>
+        dplyr::group_by(g) |>
+        dplyr::summarize(inquiry = "group_mean", estimand = mean(Y),
+                         .groups = "drop")
+    }) +
+    declare_estimator(handler = function(data) {
+      data |>
+        dplyr::group_by(g) |>
+        dplyr::summarize(term = "mean", estimate = mean(Y), .groups = "drop") |>
+        dplyr::mutate(inquiry = "group_mean", estimator = "means")
+    })
+  d <- diagnose_design(design, sims = 5, bootstrap_sims = 0)
+  expect_output(print(d), "matched to inquiries on inquiry, g")
 })

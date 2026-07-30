@@ -13,9 +13,14 @@
 #' When the join produces more rows than either table had, the match was
 #' genuinely ambiguous and a warning names the columns it went on.
 #'
+#' The columns the join went on are recorded on the result as the `matched_on`
+#' attribute, which [simulate_design()] carries to the simulations table and
+#' [print.diagnosis()] reports when the match was anything other than a
+#' labelled one.
+#'
 #' @param estimates A tibble of estimator output.
 #' @param inquiries A tibble of inquiry output.
-#' @return A tibble.
+#' @return A tibble, carrying a `matched_on` attribute.
 #' @export
 #' @keywords internal
 merge_estimates_inquiries <- function(estimates, inquiries) {
@@ -47,6 +52,7 @@ merge_estimates_inquiries <- function(estimates, inquiries) {
       "so the match is one to one."
     ))
   }
+  attr(result, "matched_on") <- shared
   result
 }
 
@@ -286,6 +292,7 @@ diagnose_simulations <- function(simulations_df,
       diagnosands_df         = diagnosands_df,
       diagnosand_names       = names(attr(diagnosands, "dots")),
       group_by_set           = group_by_set,
+      matched_on             = attr(simulations_df, "matched_on"),
       bootstrap_sims         = bootstrap_sims,
       bootstrap_replicates   = bootstrap_replicates,
       variance_decomposition = variance_decomposition
