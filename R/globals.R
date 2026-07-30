@@ -7,6 +7,7 @@ utils::globalVariables(c(
   "var_total", ".y", ".level_mean", ".within_var"
 ))
 
-#' @importFrom stats coef setNames
+#' @importFrom rlang .data
+#' @importFrom stats coef quantile setNames
 #' @importFrom rlang :=
 NULL

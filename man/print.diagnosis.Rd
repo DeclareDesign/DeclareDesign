@@ -4,18 +4,26 @@
 \alias{print.diagnosis}
 \title{Print a diagnosis}
 \usage{
-\method{print}{diagnosis}(x, ...)
+\method{print}{diagnosis}(x, digits = 2, select = NULL, exclude = NULL, ...)
 }
 \arguments{
 \item{x}{A \code{diagnosis}.}
 
+\item{digits}{Number of decimal places.}
+
+\item{select}{Diagnosands to show, by their display names. \code{NULL} shows all.}
+
+\item{exclude}{Columns to drop, by their display names.}
+
 \item{...}{Ignored.}
 }
 \value{
-The input invisibly.
+The reshaped table invisibly.
 }
 \description{
-Print a diagnosis
+Prints the table \code{\link[=reshape_diagnosis]{reshape_diagnosis()}} builds: one row of diagnosand
+estimates per group, with bootstrap standard errors in parentheses on the
+row beneath.
 }
 \examples{
 design <- declare_model(N = 30, Y = rnorm(N), Z = rep(0:1, 15)) +

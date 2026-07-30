@@ -77,19 +77,3 @@ get_simulations <- function(diagnosis) diagnosis$simulations_df
 #' get_diagnosands(d)
 get_diagnosands <- function(diagnosis) diagnosis$diagnosands_df
 
-#' Reshape a diagnosis (returns the diagnosands table)
-#'
-#' @param diagnosis A `diagnosis` object.
-#' @param ... Reserved for future use.
-#' @return A tibble.
-#' @export
-#' @examples
-#' design <- declare_model(N = 30, Y = rnorm(N), Z = rep(0:1, 15)) +
-#'   declare_inquiry(ATE = 0) +
-#'   declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
-#'                     label = "ols")
-#' d <- diagnose_design(design, sims = 5, bootstrap_sims = 0)
-#' reshape_diagnosis(d)
-reshape_diagnosis <- function(diagnosis, ...) {
-  diagnosis$diagnosands_df
-}

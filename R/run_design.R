@@ -1,17 +1,34 @@
 #' Execute a design end-to-end
 #'
-#' Runs each step in order, threading the data frame through DGP steps and
-#' collecting inquiry and estimator output.
+#' Runs the design once and returns one row per estimate, with the realized
+#' estimands joined on. This is one simulation: `simulate_design(sims = 1)`
+#' without the `sim_ID` column.
+#'
+#' Use [draw_data()] for the realized data frame, [draw_estimands()] for the
+#' inquiries alone, and [draw_estimates()] for the estimates alone.
 #'
 #' @param design A `design`.
-#' @return A list with elements `data`, `inquiries`, and `estimates`.
+#' @return A tibble of estimates with estimands joined where applicable.
 #' @export
 #' @examples
 #' design <- declare_model(N = 30, U = rnorm(N), Y = U) +
 #'   declare_inquiry(mu = mean(Y))
-#' res <- run_design(design)
-#' nrow(res$data)
+#' run_design(design)
 run_design <- function(design) {
+  result <- run_design_internal(design)
+  merge_estimates_inquiries(result$estimates, result$inquiries)
+}
+
+#' Execute a design and keep the data alongside the results
+#'
+#' The workhorse behind [run_design()] and the `draw_*()` family. Returns the
+#' three pieces separately, before estimates and inquiries are joined.
+#'
+#' @param design A `design`.
+#' @return A list with elements `data`, `inquiries`, and `estimates`.
+#' @keywords internal
+#' @noRd
+run_design_internal <- function(design) {
   if (inherits(design, "design_step")) {
     design <- construct_design(wrap_step(design))
   }
@@ -49,7 +66,7 @@ run_design <- function(design) {
 #' df <- draw_data(design)
 #' nrow(df)
 draw_data <- function(design) {
-  run_design(design)$data
+  run_design_internal(design)$data
 }
 
 #' Draw the realized estimands
@@ -62,7 +79,7 @@ draw_data <- function(design) {
 #'   declare_inquiry(mu = mean(Y))
 #' draw_estimands(design)
 draw_estimands <- function(design) {
-  run_design(design)$inquiries
+  run_design_internal(design)$inquiries
 }
 
 #' @rdname draw_estimands
@@ -83,7 +100,7 @@ draw_estimand <- draw_estimands
 #'                     inquiry = "mu", label = "ols")
 #' draw_estimates(design)
 draw_estimates <- function(design) {
-  result <- run_design(design)
+  result <- run_design_internal(design)
   merge_estimates_inquiries(result$estimates, result$inquiries)
 }
 

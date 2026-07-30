@@ -63,8 +63,8 @@ test_that("term and inquiry vectors stay aligned in user-supplied order", {
                       inquiry = c("interaction", "x1", "x2"),
                       label = "ols")
   ret <- run_design(d)
-  expect_equal(ret$estimates$term, c("X1:X2", "X1", "X2"))
-  expect_equal(ret$estimates$inquiry, c("interaction", "x1", "x2"))
+  expect_equal(ret$term, c("X1:X2", "X1", "X2"))
+  expect_equal(ret$inquiry, c("interaction", "x1", "x2"))
 })
 
 test_that("a single estimate row replicates across multiple inquiries", {

@@ -33,7 +33,7 @@
 #'                     label = "ols")
 #' simulate_design(design, sims = 3)
 simulate_design <- function(..., sims = NULL) {
-  raw <- rlang::dots_list(..., .named = TRUE)
+  raw <- name_design_dots(...)
   designs <- flatten_designs(raw)
   if (length(designs) == 0) {
     stop("simulate_design() requires at least one `design` object.")
@@ -131,6 +131,31 @@ warn_sims_draws_conflict <- function(design, sims) {
   ))
 }
 
+#' Label the designs passed through `...`
+#'
+#' A dot takes its expression as a label only when that expression is a bare
+#' symbol *and* it holds a single design, so `simulate_design(design_a,
+#' design_b)` labels its two designs. A list of designs keeps its own names,
+#' whether it is written out (`list(dum = d, dee = d)`) or reached through a
+#' symbol, rather than having the enclosing expression pasted onto them. Names
+#' the caller supplied always win.
+#'
+#' @param ... Designs, lists of designs, or design steps.
+#' @return The dots as a list, named where a label could be found.
+#' @keywords internal
+#' @noRd
+name_design_dots <- function(...) {
+  items <- rlang::list2(...)
+  exprs <- rlang::enexprs(...)
+  nms <- rlang::names2(items)
+  single <- vapply(items, inherits, logical(1),
+                   what = c("design", "design_step"), which = FALSE)
+  auto <- !nzchar(nms) & single &
+    vapply(exprs, rlang::is_symbol, logical(1))
+  nms[auto] <- vapply(exprs[auto], rlang::as_string, character(1))
+  rlang::set_names(items, nms)
+}
+
 #' Flatten a list of designs / lists-of-designs / steps
 #'
 #' Accepts the raw `...` list passed by users to `simulate_design()` and
@@ -189,7 +214,7 @@ one_design_sims <- function(design, sims, design_label = "design",
                             multi = FALSE) {
   map_fn <- sim_map_fn()
   results <- map_fn(seq_len(sims), function(i) {
-    r <- run_design(design)
+    r <- run_design_internal(design)
     list(inquiries = r$inquiries, estimates = r$estimates)
   })
   inquiries_df <- dplyr::bind_rows(
@@ -397,15 +422,16 @@ merge_estimates_inquiries_nested <- function(estimates, inquiries,
   if (nrow(estimates) == 0 && nrow(inquiries) == 0) return(tibble::tibble())
   if (nrow(estimates) == 0) return(tibble::as_tibble(inquiries))
   if (nrow(inquiries) == 0) return(tibble::as_tibble(estimates))
-  if (!"inquiry" %in% names(estimates)) {
-    return(tibble::as_tibble(estimates))
-  }
   base_keys <- intersect(c("design", "inquiry"), names(estimates))
   base_keys <- intersect(base_keys, names(inquiries))
   draw_keys <- intersect(inquiry_draw_cols, names(estimates))
   draw_keys <- intersect(draw_keys, names(inquiries))
   join_cols <- c(base_keys, draw_keys)
-  if (length(join_cols) == 0) return(tibble::as_tibble(estimates))
+  if (length(join_cols) == 0) {
+    return(dplyr::cross_join(tibble::as_tibble(estimates),
+                             tibble::as_tibble(inquiries),
+                             suffix = c("", ".inquiry")))
+  }
   result <- dplyr::left_join(
     tibble::as_tibble(estimates),
     tibble::as_tibble(inquiries),

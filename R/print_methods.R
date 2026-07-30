@@ -39,9 +39,16 @@ print.design_step <- function(x, ...) {
 
 #' Print a diagnosis
 #'
+#' Prints the table [reshape_diagnosis()] builds: one row of diagnosand
+#' estimates per group, with bootstrap standard errors in parentheses on the
+#' row beneath.
+#'
 #' @param x A `diagnosis`.
+#' @param digits Number of decimal places.
+#' @param select Diagnosands to show, by their display names. `NULL` shows all.
+#' @param exclude Columns to drop, by their display names.
 #' @param ... Ignored.
-#' @return The input invisibly.
+#' @return The reshaped table invisibly.
 #' @export
 #' @method print diagnosis
 #' @examples
@@ -51,7 +58,7 @@ print.design_step <- function(x, ...) {
 #'                     label = "ols")
 #' d <- diagnose_design(design, sims = 5, bootstrap_sims = 0)
 #' print(d)
-print.diagnosis <- function(x, ...) {
+print.diagnosis <- function(x, digits = 2, select = NULL, exclude = NULL, ...) {
   cat("Research design diagnosis\n")
   sims_df <- x$simulations_df
   if (!is.null(sims_df) && "sim_ID" %in% names(sims_df) && nrow(sims_df) > 0) {
@@ -65,16 +72,125 @@ print.diagnosis <- function(x, ...) {
       cat(msg, "\n", sep = "")
     }
   }
+  if (x$bootstrap_sims > 0 && is.data.frame(x$bootstrap_replicates)) {
+    cat("  bootstrap standard errors in parentheses (",
+        x$bootstrap_sims, " replicates)\n", sep = "")
+  }
   cat("\n")
-  cat("Diagnosands:\n")
-  print(x$diagnosands_df, ...)
+  out <- reshape_diagnosis(x, digits = digits, select = select,
+                           exclude = exclude)
+  print(out, row.names = FALSE)
   if (!is.null(x$variance_decomposition)) {
     cat("\nVariance decomposition:\n")
     vd <- dplyr::select(x$variance_decomposition,
                         -dplyr::any_of(c("n_sims", "draw_levels")))
-    print(vd, ...)
+    print(vd)
   }
-  invisible(x)
+  invisible(out)
+}
+
+#' Format a diagnosis for display
+#'
+#' Rounds the diagnosands, puts each bootstrap standard error in parentheses on
+#' a second row beneath its estimate, and gives the columns display names
+#' (`mean_estimand` becomes `Mean Estimand`). This is what [print.diagnosis()]
+#' shows and what you want in front of `knitr::kable()`.
+#'
+#' Returns a `data.frame` rather than a tibble because every column is a
+#' formatted string: the object exists to be printed, not computed on. Use
+#' [tidy()] or [get_diagnosands()] for the numbers.
+#'
+#' Redesign parameter columns keep their own names, since `prob_each` is the
+#' argument the reader passed and not a phrase to be title-cased.
+#'
+#' @param diagnosis A `diagnosis` object.
+#' @param digits Number of decimal places.
+#' @param select Diagnosands to keep, by their display names. `NULL` keeps all.
+#' @param exclude Columns to drop, by their display names.
+#' @return A `data.frame` of formatted strings.
+#' @export
+#' @examples
+#' design <- declare_model(N = 30, Y = rnorm(N), Z = rep(0:1, 15)) +
+#'   declare_inquiry(ATE = 0) +
+#'   declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
+#'                     label = "ols")
+#' d <- diagnose_design(design, sims = 5, bootstrap_sims = 0)
+#' reshape_diagnosis(d)
+#' reshape_diagnosis(d, select = c("Bias", "Power"))
+reshape_diagnosis <- function(diagnosis, digits = 2, select = NULL,
+                              exclude = NULL) {
+  if (!inherits(diagnosis, "diagnosis")) {
+    stop("`diagnosis` must be a diagnosis object, from diagnose_design().")
+  }
+  diagnosands_df <- as.data.frame(diagnosis$diagnosands_df)
+  diagnosand_names <- intersect(diagnosis$diagnosand_names,
+                                names(diagnosands_df))
+  se_names <- intersect(paste0("se(", diagnosand_names, ")"),
+                        names(diagnosands_df))
+  group_cols <- setdiff(names(diagnosands_df), c(diagnosand_names, se_names))
+  param_names <- attr(diagnosis$simulations_df, "parameter_names") %||%
+    character(0)
+
+  estimate_rows <- diagnosands_df[c(group_cols, diagnosand_names)]
+  estimate_rows[diagnosand_names] <-
+    lapply(estimate_rows[diagnosand_names], format_num, digits = digits)
+
+  if (length(se_names) == length(diagnosand_names) && length(se_names) > 0) {
+    se_rows <- estimate_rows
+    se_rows[group_cols] <- ""
+    se_rows[diagnosand_names] <-
+      lapply(diagnosands_df[se_names], add_parens, digits = digits)
+    n <- nrow(estimate_rows)
+    return_df <- rbind(estimate_rows, se_rows)[as.vector(rbind(1:n, 1:n + n)), ]
+  } else {
+    return_df <- estimate_rows
+  }
+
+  keep <- setdiff(names(return_df), param_names)
+  names(return_df)[match(keep, names(return_df))] <- make_nice_names(keep)
+
+  if (!is.null(select)) {
+    available <- make_nice_names(diagnosand_names)
+    if (!all(select %in% available)) {
+      stop("`select` must name diagnosands from: ",
+           paste(available, collapse = ", "))
+    }
+    label_cols <- c(make_nice_names(setdiff(group_cols, param_names)),
+                    param_names)
+    return_df <- return_df[c(intersect(label_cols, names(return_df)), select)]
+  }
+  if (!is.null(exclude)) {
+    return_df <- return_df[setdiff(names(return_df), exclude)]
+  }
+
+  rownames(return_df) <- NULL
+  return_df
+}
+
+#' Give a diagnosands table column a display name
+#'
+#' `mean_estimand` becomes `Mean Estimand`, `sd_estimate` becomes
+#' `SD Estimate`, `rmse` becomes `RMSE`, `se(bias)` becomes `SE(Bias)`.
+#'
+#' @keywords internal
+#' @noRd
+make_nice_names <- function(x) {
+  gsub("\\b(se[(]|sd |rmse|[[:alpha:]])", "\\U\\1", gsub("_", " ", x),
+       perl = TRUE)
+}
+
+#' @keywords internal
+#' @noRd
+format_num <- function(x, digits = 2) {
+  sprintf(paste0("%.", digits, "f"), as.numeric(x))
+}
+
+#' @keywords internal
+#' @noRd
+add_parens <- function(x, digits = 2) {
+  out <- sprintf("(%s)", format_num(x, digits))
+  out[is.na(x)] <- "NA"
+  out
 }
 
 #' Summarize a design
@@ -98,13 +214,25 @@ summary.design <- function(object, ...) {
   invisible(object)
 }
 
+#' @importFrom generics tidy
+#' @export
+generics::tidy
+
 #' Tidy a diagnosis
 #'
-#' Returns the diagnosands table in long form, one row per diagnosand.
+#' Returns the diagnosands in long form, one row per group per diagnosand, with
+#' the bootstrap standard error and percentile confidence interval alongside.
+#' This is the shape to plot from: `ggplot(aes(estimate, diagnosand)) +
+#' geom_errorbarh(aes(xmin = conf.low, xmax = conf.high))`.
+#'
+#' `std.error`, `conf.low`, and `conf.high` come from the bootstrap replicates,
+#' so they appear only when the diagnosis was run with `bootstrap_sims > 0`.
 #'
 #' @param x A `diagnosis`.
-#' @param conf.int Reserved.
-#' @param ... Reserved.
+#' @param conf.int Whether to include the confidence interval. Defaults to
+#'   `TRUE`.
+#' @param conf.level Confidence level for the interval. Defaults to 0.95.
+#' @param ... Ignored.
 #' @return A tibble.
 #' @importFrom generics tidy
 #' @export tidy.diagnosis
@@ -116,15 +244,55 @@ summary.design <- function(object, ...) {
 #'   declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
 #'                     label = "ols")
 #' d <- diagnose_design(design, sims = 5, bootstrap_sims = 0)
-#' tidy.diagnosis(d)
-tidy.diagnosis <- function(x, conf.int = FALSE, ...) {
+#' tidy(d)
+tidy.diagnosis <- function(x, conf.int = TRUE, conf.level = 0.95, ...) {
   df <- x$diagnosands_df
   diag_names <- intersect(x$diagnosand_names, names(df))
   if (length(diag_names) == 0) return(tibble::as_tibble(df))
-  tidyr::pivot_longer(
-    df,
-    cols      = dplyr::all_of(diag_names),
-    names_to  = "diagnosand",
-    values_to = "estimate"
-  )
+  se_names <- paste0("se(", diag_names, ")")
+  group_cols <- setdiff(names(df), c(diag_names, se_names, "n_sims"))
+
+  out <- df |>
+    dplyr::select(dplyr::all_of(c(group_cols, diag_names))) |>
+    tidyr::pivot_longer(dplyr::all_of(diag_names), names_to = "diagnosand",
+                        values_to = "estimate")
+
+  if (all(se_names %in% names(df))) {
+    ses <- df |>
+      dplyr::select(dplyr::all_of(c(group_cols, se_names))) |>
+      tidyr::pivot_longer(dplyr::all_of(se_names), names_to = "diagnosand",
+                          values_to = "std.error") |>
+      dplyr::mutate(diagnosand = sub("^se\\((.*)\\)$", "\\1", .data$diagnosand))
+    out <- dplyr::left_join(out, ses, by = c(group_cols, "diagnosand"))
+  }
+
+  if (isTRUE(conf.int) && is.data.frame(x$bootstrap_replicates)) {
+    alpha <- 1 - conf.level
+    intervals <- x$bootstrap_replicates |>
+      dplyr::select(dplyr::all_of(c(group_cols, diag_names))) |>
+      tidyr::pivot_longer(dplyr::all_of(diag_names), names_to = "diagnosand",
+                          values_to = "replicate") |>
+      dplyr::group_by(dplyr::across(dplyr::all_of(c(group_cols, "diagnosand")))) |>
+      dplyr::summarize(
+        conf.low  = quantile_na(.data$replicate, alpha / 2),
+        conf.high = quantile_na(.data$replicate, 1 - alpha / 2),
+        .groups   = "drop"
+      )
+    out <- dplyr::left_join(out, intervals, by = c(group_cols, "diagnosand"))
+  }
+
+  out
+}
+
+#' Percentile of a bootstrap replicate vector, NA if any replicate is NA
+#'
+#' A diagnosand that fails on some replicate (no estimand, say) has no
+#' interval, and reporting the quantile of the replicates that happened to
+#' work would hide that.
+#'
+#' @keywords internal
+#' @noRd
+quantile_na <- function(x, probs) {
+  if (anyNA(x)) return(NA_real_)
+  unname(stats::quantile(x, probs))
 }

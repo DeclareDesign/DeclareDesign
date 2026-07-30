@@ -15,7 +15,18 @@ merge_estimates_inquiries(estimates, inquiries)
 A tibble.
 }
 \description{
-Used in \code{\link[=draw_estimates]{draw_estimates()}} and \code{\link[=simulate_design]{simulate_design()}} to attach estimands to
+Used in \code{\link[=run_design]{run_design()}} and \code{\link[=simulate_design]{simulate_design()}} to attach estimands to
 estimator output via the \code{inquiry} label.
+}
+\details{
+The join is on every column the two tables share, so a labelled estimator
+matches on \code{inquiry}, a conjoint matches on the \code{attribute} and \code{level}
+columns both of its tables carry, and an estimator declared without
+\verb{inquiry =} still matches on \code{sim_ID} alone. That last case is what makes
+the one-inquiry, one-estimator design work without the label: the
+simulation's only inquiry is the one attached.
+
+When the join produces more rows than either table had, the match was
+genuinely ambiguous and a warning names the columns it went on.
 }
 \keyword{internal}

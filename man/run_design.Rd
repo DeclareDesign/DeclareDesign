@@ -10,15 +10,19 @@ run_design(design)
 \item{design}{A \code{design}.}
 }
 \value{
-A list with elements \code{data}, \code{inquiries}, and \code{estimates}.
+A tibble of estimates with estimands joined where applicable.
 }
 \description{
-Runs each step in order, threading the data frame through DGP steps and
-collecting inquiry and estimator output.
+Runs the design once and returns one row per estimate, with the realized
+estimands joined on. This is one simulation: \code{simulate_design(sims = 1)}
+without the \code{sim_ID} column.
+}
+\details{
+Use \code{\link[=draw_data]{draw_data()}} for the realized data frame, \code{\link[=draw_estimands]{draw_estimands()}} for the
+inquiries alone, and \code{\link[=draw_estimates]{draw_estimates()}} for the estimates alone.
 }
 \examples{
 design <- declare_model(N = 30, U = rnorm(N), Y = U) +
   declare_inquiry(mu = mean(Y))
-res <- run_design(design)
-nrow(res$data)
+run_design(design)
 }

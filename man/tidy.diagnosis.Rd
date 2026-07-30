@@ -4,20 +4,29 @@
 \alias{tidy.diagnosis}
 \title{Tidy a diagnosis}
 \usage{
-\method{tidy}{diagnosis}(x, conf.int = FALSE, ...)
+\method{tidy}{diagnosis}(x, conf.int = TRUE, conf.level = 0.95, ...)
 }
 \arguments{
 \item{x}{A \code{diagnosis}.}
 
-\item{conf.int}{Reserved.}
+\item{conf.int}{Whether to include the confidence interval. Defaults to
+\code{TRUE}.}
 
-\item{...}{Reserved.}
+\item{conf.level}{Confidence level for the interval. Defaults to 0.95.}
+
+\item{...}{Ignored.}
 }
 \value{
 A tibble.
 }
 \description{
-Returns the diagnosands table in long form, one row per diagnosand.
+Returns the diagnosands in long form, one row per group per diagnosand, with
+the bootstrap standard error and percentile confidence interval alongside.
+This is the shape to plot from: \code{ggplot(aes(estimate, diagnosand)) + geom_errorbarh(aes(xmin = conf.low, xmax = conf.high))}.
+}
+\details{
+\code{std.error}, \code{conf.low}, and \code{conf.high} come from the bootstrap replicates,
+so they appear only when the diagnosis was run with \code{bootstrap_sims > 0}.
 }
 \examples{
 design <- declare_model(N = 30, Y = rnorm(N), Z = rep(0:1, 15)) +
@@ -25,5 +34,5 @@ design <- declare_model(N = 30, Y = rnorm(N), Z = rep(0:1, 15)) +
   declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
                     label = "ols")
 d <- diagnose_design(design, sims = 5, bootstrap_sims = 0)
-tidy.diagnosis(d)
+tidy(d)
 }

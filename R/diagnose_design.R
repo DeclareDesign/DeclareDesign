@@ -1,7 +1,17 @@
 #' Join estimates to their inquiries
 #'
-#' Used in [draw_estimates()] and [simulate_design()] to attach estimands to
+#' Used in [run_design()] and [simulate_design()] to attach estimands to
 #' estimator output via the `inquiry` label.
+#'
+#' The join is on every column the two tables share, so a labelled estimator
+#' matches on `inquiry`, a conjoint matches on the `attribute` and `level`
+#' columns both of its tables carry, and an estimator declared without
+#' `inquiry =` still matches on `sim_ID` alone. That last case is what makes
+#' the one-inquiry, one-estimator design work without the label: the
+#' simulation's only inquiry is the one attached.
+#'
+#' When the join produces more rows than either table had, the match was
+#' genuinely ambiguous and a warning names the columns it went on.
 #'
 #' @param estimates A tibble of estimator output.
 #' @param inquiries A tibble of inquiry output.
@@ -12,20 +22,27 @@ merge_estimates_inquiries <- function(estimates, inquiries) {
   if (nrow(estimates) == 0 && nrow(inquiries) == 0) return(tibble::tibble())
   if (nrow(estimates) == 0) return(tibble::as_tibble(inquiries))
   if (nrow(inquiries) == 0) return(tibble::as_tibble(estimates))
-  if (!"inquiry" %in% names(estimates)) {
-    return(tibble::as_tibble(estimates))
+  estimates <- tibble::as_tibble(estimates)
+  inquiries <- tibble::as_tibble(inquiries)
+  shared <- intersect(names(estimates), names(inquiries))
+  result <- if (length(shared) == 0) {
+    dplyr::cross_join(estimates, inquiries, suffix = c("", ".inquiry"))
+  } else {
+    dplyr::left_join(estimates, inquiries, by = shared,
+                     suffix = c("", ".inquiry"),
+                     relationship = "many-to-many")
   }
-  join_cols <- intersect(
-    intersect(c("design", "sim_ID", "inquiry"), names(estimates)),
-    names(inquiries)
-  )
-  if (length(join_cols) == 0) return(tibble::as_tibble(estimates))
-  result <- dplyr::left_join(
-    tibble::as_tibble(estimates),
-    tibble::as_tibble(inquiries),
-    by = join_cols,
-    suffix = c("", ".inquiry")
-  )
+  if (nrow(result) > max(nrow(estimates), nrow(inquiries))) {
+    rlang::warn(paste0(
+      "Estimates and inquiries were matched on ",
+      paste0("`", shared, "`", collapse = ", "),
+      ", which multiplied the rows: ", nrow(result), " rows from ",
+      nrow(estimates), " estimates and ", nrow(inquiries), " inquiries.\n",
+      "Name the inquiry each estimator targets, ",
+      "declare_estimator(..., inquiry = \"", inquiries$inquiry[[1]], "\"), ",
+      "so the match is one to one."
+    ))
+  }
   result
 }
 
@@ -67,12 +84,12 @@ compute_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
   }
   safe_dots <- safe_diagnosand_dots(dots)
   if (length(group_by_set) == 0) {
-    out <- dplyr::summarize(simulations_df, !!!safe_dots)
+    out <- dplyr::summarize(simulations_df, n_sims = dplyr::n(), !!!safe_dots)
     return(tibble::as_tibble(out))
   }
   out <- simulations_df |>
     dplyr::group_by(dplyr::across(dplyr::all_of(group_by_set))) |>
-    dplyr::summarize(!!!safe_dots, .groups = "drop")
+    dplyr::summarize(n_sims = dplyr::n(), !!!safe_dots, .groups = "drop")
   tibble::as_tibble(out)
 }
 
@@ -166,7 +183,7 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set,
 #' diagnose_design(design, sims = 5, bootstrap_sims = 0)
 diagnose_design <- function(..., sims = NULL, bootstrap_sims = 100,
                             diagnosands = NULL) {
-  raw <- rlang::dots_list(..., .named = FALSE)
+  raw <- name_design_dots(...)
 
   # If first argument is a data frame (pre-computed simulations piped in),
   # skip simulation and go straight to diagnosis. Honours grouping carried by
@@ -179,8 +196,7 @@ diagnose_design <- function(..., sims = NULL, bootstrap_sims = 100,
     ))
   }
 
-  raw_named <- rlang::dots_list(..., .named = TRUE)
-  designs <- flatten_designs(raw_named)
+  designs <- flatten_designs(raw)
   if (length(designs) == 0) {
     stop("diagnose_design() requires at least one `design` object.")
   }

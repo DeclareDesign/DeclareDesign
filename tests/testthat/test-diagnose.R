@@ -20,7 +20,7 @@ test_that("select_diagnosands builds a set from the library, as in DeclareDesign
   d <- diagnose_design(simple_design(N = 30), diagnosands = diags, sims = 10,
                        bootstrap_sims = 0)
   expect_equal(setdiff(names(get_diagnosands(d)),
-                       c("inquiry", "estimator", "outcome", "term")),
+                       c("inquiry", "estimator", "outcome", "term", "n_sims")),
                c("sd_estimate", "mean_se"))
 })
 
@@ -131,4 +131,72 @@ test_that("select_diagnosands refuses library arguments when subsetting a set", 
 test_that("select_diagnosands says so when the step is not a diagnosands set", {
   expect_error(select_diagnosands(declare_model(N = 5, Y = rnorm(N)), "bias"),
                "this is a model step")
+})
+
+test_that("reshape_diagnosis gives columns their display names", {
+  d <- diagnose_design(simple_design(N = 30), sims = 10, bootstrap_sims = 0)
+  out <- reshape_diagnosis(d)
+  expect_true(all(c("Inquiry", "Estimator", "Term", "N Sims",
+                    "Mean Estimand", "SD Estimate", "RMSE", "Power") %in%
+                    names(out)))
+  expect_equal(nrow(out), 1L)
+  expect_type(out[["Bias"]], "character")
+})
+
+test_that("reshape_diagnosis puts bootstrap SEs in parentheses below", {
+  d <- diagnose_design(simple_design(N = 30), sims = 10, bootstrap_sims = 10)
+  out <- reshape_diagnosis(d)
+  expect_equal(nrow(out), 2L)
+  expect_match(out[["Bias"]][2], "^\\(.*\\)$")
+  expect_equal(out[["Inquiry"]][2], "")
+})
+
+test_that("reshape_diagnosis selects and excludes by display name", {
+  d <- diagnose_design(simple_design(N = 30), sims = 10, bootstrap_sims = 0)
+  expect_equal(names(reshape_diagnosis(d, select = c("Bias", "Power"))),
+               c("Inquiry", "Estimator", "Term", "N Sims", "Bias", "Power"))
+  expect_false("Coverage" %in% names(reshape_diagnosis(d, exclude = "Coverage")))
+  expect_error(reshape_diagnosis(d, select = "bias"), "must name diagnosands")
+})
+
+test_that("reshape_diagnosis leaves redesign parameter names alone", {
+  designs <- redesign(simple_design(N = 30), ate = c(0.1, 0.5))
+  d <- diagnose_design(designs, sims = 5, bootstrap_sims = 0)
+  out <- reshape_diagnosis(d)
+  expect_true("ate" %in% names(out))
+})
+
+test_that("tidy(diagnosis) carries the bootstrap interval", {
+  d <- diagnose_design(simple_design(N = 30), sims = 10, bootstrap_sims = 20)
+  td <- tidy(d)
+  expect_true(all(c("diagnosand", "estimate", "std.error", "conf.low",
+                    "conf.high") %in% names(td)))
+  expect_false(any(grepl("^se\\(", names(td))))
+  bias <- td[td$diagnosand == "bias", ]
+  expect_true(bias$conf.low <= bias$estimate)
+  expect_true(bias$estimate <= bias$conf.high)
+  expect_false("conf.low" %in% names(tidy(d, conf.int = FALSE)))
+})
+
+test_that("tidy(diagnosis) works without a bootstrap", {
+  d <- diagnose_design(simple_design(N = 30), sims = 10, bootstrap_sims = 0)
+  td <- tidy(d)
+  expect_true(all(c("diagnosand", "estimate") %in% names(td)))
+  expect_false("std.error" %in% names(td))
+})
+
+test_that("designs supplied in a list keep the list's own names", {
+  designs <- list(dum = simple_design(N = 30), dee = simple_design(N = 30))
+  d <- diagnose_design(designs, sims = 5, bootstrap_sims = 0)
+  expect_setequal(get_diagnosands(d)$design, c("dum", "dee"))
+  expect_setequal(reshape_diagnosis(d)[["Design"]], c("dum", "dee"))
+  sims <- simulate_design(designs, sims = 3)
+  expect_setequal(sims$design, c("dum", "dee"))
+})
+
+test_that("designs supplied as bare symbols are named for the symbol", {
+  dum <- simple_design(N = 30)
+  dee <- simple_design(N = 30)
+  sims <- simulate_design(dum, dee, sims = 3)
+  expect_setequal(sims$design, c("dum", "dee"))
 })
