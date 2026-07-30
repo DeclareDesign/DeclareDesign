@@ -33,9 +33,13 @@ merge_estimates_inquiries <- function(estimates, inquiries) {
                      relationship = "many-to-many")
   }
   if (nrow(result) > max(nrow(estimates), nrow(inquiries))) {
+    matched_on <- if (length(shared) == 0) {
+      "no shared column, so every inquiry was attached to every estimate"
+    } else {
+      paste0("the shared ", paste0("`", shared, "`", collapse = ", "))
+    }
     rlang::warn(paste0(
-      "Estimates and inquiries were matched on ",
-      paste0("`", shared, "`", collapse = ", "),
+      "Estimates and inquiries were matched on ", matched_on,
       ", which multiplied the rows: ", nrow(result), " rows from ",
       nrow(estimates), " estimates and ", nrow(inquiries), " inquiries.\n",
       "Name the inquiry each estimator targets, ",

@@ -27,7 +27,7 @@ shows and what you want in front of \code{knitr::kable()}.
 \details{
 Returns a \code{data.frame} rather than a tibble because every column is a
 formatted string: the object exists to be printed, not computed on. Use
-\code{\link[generics:tidy]{tidy()}} or \code{\link[=get_diagnosands]{get_diagnosands()}} for the numbers.
+\code{\link[=tidy]{tidy()}} or \code{\link[=get_diagnosands]{get_diagnosands()}} for the numbers.
 
 Redesign parameter columns keep their own names, since \code{prob_each} is the
 argument the reader passed and not a phrase to be title-cased.
