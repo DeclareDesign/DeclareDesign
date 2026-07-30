@@ -158,6 +158,20 @@ test_that("reshape_diagnosis leaves choosing columns to select()", {
                c("Term", "Bias", "Power"))
 })
 
+test_that("reshape_diagnosis is DeclareDesign's name for format()", {
+  d <- diagnose_design(simple_design(N = 30), sims = 10, bootstrap_sims = 10)
+  expect_identical(reshape_diagnosis(d), format(d))
+  expect_identical(reshape_diagnosis(d, digits = 4), format(d, digits = 4))
+  capture.output(out <- print(d))
+  expect_identical(out, format(d))
+})
+
+test_that("format(diagnosis) rounds to digits", {
+  d <- diagnose_design(simple_design(N = 30), sims = 10, bootstrap_sims = 0)
+  expect_match(format(d, digits = 4)[["Bias"]], "^-?[0-9]+\\.[0-9]{4}$")
+  expect_match(format(d, digits = 1)[["Bias"]], "^-?[0-9]+\\.[0-9]$")
+})
+
 test_that("reshape_diagnosis leaves redesign parameter names alone", {
   designs <- redesign(simple_design(N = 30), ate = c(0.1, 0.5))
   d <- diagnose_design(designs, sims = 5, bootstrap_sims = 0)

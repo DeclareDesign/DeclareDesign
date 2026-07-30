@@ -17,7 +17,7 @@
 The reshaped table invisibly.
 }
 \description{
-Prints the table \code{\link[=reshape_diagnosis]{reshape_diagnosis()}} builds: one row of diagnosand
+Prints the table \code{\link[=format.diagnosis]{format.diagnosis()}} builds: one row of diagnosand
 estimates per group, with bootstrap standard errors in parentheses on the
 row beneath.
 }
