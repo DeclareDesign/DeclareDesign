@@ -141,6 +141,10 @@ describe_inquiry_match <- function(matched_on) {
 #' (`mean_estimand` becomes `Mean Estimand`). This is what [print.diagnosis()]
 #' shows and what you want in front of `knitr::kable()`.
 #'
+#' The standard-error rows appear only when the diagnosis was bootstrapped. At
+#' `bootstrap_sims = 0` there are no replicates, so the table is one row per
+#' group and there are no parentheses.
+#'
 #' It is a `format()` method because that is what it does. R's `format()` is
 #' the generic for "the character representation this object prints as", and
 #' `print()` is documented as calling it. The three views of a diagnosis are

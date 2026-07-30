@@ -28,6 +28,10 @@ a second row beneath its estimate, and gives the columns display names
 shows and what you want in front of \code{knitr::kable()}.
 }
 \details{
+The standard-error rows appear only when the diagnosis was bootstrapped. At
+\code{bootstrap_sims = 0} there are no replicates, so the table is one row per
+group and there are no parentheses.
+
 It is a \code{format()} method because that is what it does. R's \code{format()} is
 the generic for "the character representation this object prints as", and
 \code{print()} is documented as calling it. The three views of a diagnosis are
