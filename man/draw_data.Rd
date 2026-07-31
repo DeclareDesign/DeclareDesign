@@ -13,7 +13,9 @@ draw_data(design)
 A data frame.
 }
 \description{
-Draw the realized data from a design
+Runs the data-generating steps only. The inquiries and estimators are not
+run, so a design whose estimator fails still draws its data, and drawing
+data does not pay to fit models it would throw away.
 }
 \examples{
 design <- declare_model(N = 25, X = rnorm(N))

@@ -251,3 +251,17 @@ test_that("the diagnosis names the extra columns a match went on", {
   d <- diagnose_design(design, sims = 5, bootstrap_sims = 0)
   expect_output(print(d), "matched to inquiries on inquiry, g")
 })
+
+test_that("format() finds the parameter names on a DeclareDesign diagnosis", {
+  # A diagnosis produced by DeclareDesign and read back in carries its
+  # redesign parameters as `parameters_df`, not as an attribute of the
+  # simulations table. Without this the parameter column gets title-cased
+  # and `b` becomes `B`, which is what broke the course's saved diagnoses.
+  d <- diagnose_design(redesign(simple_design(N = 30), ate = c(0.1, 0.5)),
+                       sims = 5, bootstrap_sims = 0)
+  attr(d$simulations_df, "parameter_names") <- NULL
+  d$parameters_df <- data.frame(design = c("design_1", "design_2"),
+                                ate = c(0.1, 0.5))
+  expect_true("ate" %in% names(format(d)))
+  expect_false("Ate" %in% names(format(d)))
+})

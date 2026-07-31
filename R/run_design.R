@@ -25,10 +25,15 @@ run_design <- function(design) {
 #' three pieces separately, before estimates and inquiries are joined.
 #'
 #' @param design A `design`.
+#' @param what Which kinds of step to run. `draw_data()` asks for `"dgp"`
+#'   alone and `draw_estimands()` for the inquiries, so a failing estimator
+#'   does not take them down with it and neither pays to fit models it will
+#'   discard.
 #' @return A list with elements `data`, `inquiries`, and `estimates`.
 #' @keywords internal
 #' @noRd
-run_design_internal <- function(design) {
+run_design_internal <- function(design,
+                                what = c("dgp", "inquiry", "estimator")) {
   if (inherits(design, "design_step")) {
     design <- construct_design(wrap_step(design))
   }
@@ -40,7 +45,7 @@ run_design_internal <- function(design) {
   estimates <- list()
   for (step in design) {
     ct <- attr(step, "causal_type")
-    if (is.null(ct)) next
+    if (is.null(ct) || !ct %in% what) next
     if (identical(ct, "dgp")) {
       data <- step(data)
     } else if (identical(ct, "inquiry")) {
@@ -58,6 +63,10 @@ run_design_internal <- function(design) {
 
 #' Draw the realized data from a design
 #'
+#' Runs the data-generating steps only. The inquiries and estimators are not
+#' run, so a design whose estimator fails still draws its data, and drawing
+#' data does not pay to fit models it would throw away.
+#'
 #' @param design A `design`.
 #' @return A data frame.
 #' @export
@@ -66,10 +75,12 @@ run_design_internal <- function(design) {
 #' df <- draw_data(design)
 #' nrow(df)
 draw_data <- function(design) {
-  run_design_internal(design)$data
+  run_design_internal(design, what = "dgp")$data
 }
 
 #' Draw the realized estimands
+#'
+#' Runs the data-generating and inquiry steps only, not the estimators.
 #'
 #' @param design A `design`.
 #' @return A tibble of inquiries (one row per estimand).
@@ -79,7 +90,7 @@ draw_data <- function(design) {
 #'   declare_inquiry(mu = mean(Y))
 #' draw_estimands(design)
 draw_estimands <- function(design) {
-  run_design_internal(design)$inquiries
+  run_design_internal(design, what = c("dgp", "inquiry"))$inquiries
 }
 
 #' @rdname draw_estimands

@@ -16,7 +16,7 @@ draw_estimand(design)
 A tibble of inquiries (one row per estimand).
 }
 \description{
-Draw the realized estimands
+Runs the data-generating and inquiry steps only, not the estimators.
 }
 \examples{
 design <- declare_model(N = 25, U = rnorm(N), Y = U) +

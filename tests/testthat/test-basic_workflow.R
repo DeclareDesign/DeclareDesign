@@ -144,3 +144,21 @@ test_that("declare_step accepts the original fabricatr::fabricate as handler", {
   df <- draw_data(pop + step)
   expect_equal(df$X2, df$X * 2)
 })
+
+test_that("draw_data and draw_estimands do not run the estimators", {
+  # Regression test, from Macartan's crash course: an RDD design whose
+  # estimator handler wanted bare column names failed, and it took
+  # draw_data() down with it because every step was being run.
+  ran <- FALSE
+  design <- declare_model(N = 30, U = rnorm(N), Y = U) +
+    declare_inquiry(mu = mean(Y)) +
+    declare_estimator(handler = function(data) {
+      ran <<- TRUE
+      stop("this estimator is broken")
+    }, label = "broken")
+
+  expect_equal(nrow(draw_data(design)), 30L)
+  expect_equal(draw_estimands(design)$inquiry, "mu")
+  expect_false(ran)
+  expect_error(run_design(design), "this estimator is broken")
+})

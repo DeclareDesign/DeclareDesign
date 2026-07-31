@@ -201,8 +201,7 @@ format.diagnosis <- function(x, digits = 2, ...) {
   se_names <- intersect(paste0("se(", diagnosand_names, ")"),
                         names(diagnosands_df))
   group_cols <- setdiff(names(diagnosands_df), c(diagnosand_names, se_names))
-  param_names <- attr(diagnosis$simulations_df, "parameter_names") %||%
-    character(0)
+  param_names <- diagnosis_parameter_names(diagnosis)
 
   estimate_rows <- diagnosands_df[c(group_cols, diagnosand_names)]
   estimate_rows[diagnosand_names] <-
@@ -231,6 +230,26 @@ format.diagnosis <- function(x, digits = 2, ...) {
 #' @export
 reshape_diagnosis <- function(diagnosis, digits = 2) {
   format(diagnosis, digits = digits)
+}
+
+#' The redesign parameters a diagnosis varies
+#'
+#' These are the columns [format.diagnosis()] leaves alone when it title-cases
+#' the rest, since a parameter name is the argument the reader passed. A
+#' diagnosis this package produced carries them on the simulations table; one
+#' produced by DeclareDesign and read back in (from a course's `saved/`
+#' directory, say) carries them as `parameters_df`, whose first column is the
+#' design label.
+#'
+#' @keywords internal
+#' @noRd
+diagnosis_parameter_names <- function(diagnosis) {
+  from_sims <- attr(diagnosis$simulations_df, "parameter_names")
+  if (!is.null(from_sims)) return(from_sims)
+  if (is.data.frame(diagnosis$parameters_df)) {
+    return(setdiff(names(diagnosis$parameters_df), "design"))
+  }
+  character(0)
 }
 
 #' Give a diagnosands table column a display name
