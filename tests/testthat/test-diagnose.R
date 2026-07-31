@@ -265,3 +265,36 @@ test_that("format() finds the parameter names on a DeclareDesign diagnosis", {
   expect_true("ate" %in% names(format(d)))
   expect_false("Ate" %in% names(format(d)))
 })
+
+test_that("a design carrying DeclareDesign diagnosands falls back to the defaults", {
+  # Found by running DesignLibrary: two of its designers call
+  # DeclareDesign's set_diagnosands(), and the object that leaves on the
+  # design has the same class, step_type and causal_type as ours, so only the
+  # dots tell them apart. We used to read it and die inside quo_get_expr().
+  design <- simple_design(N = 30)
+  foreign <- structure(
+    function(data) data,
+    dots = list(data = quote(data), bias = rlang::quo(mean(estimate - estimand))),
+    step_type = "diagnosand", causal_type = "diagnosands",
+    class = c("design_step", "dd", "function")
+  )
+  attr(design, "diagnosands") <- foreign
+
+  expect_warning(d <- diagnose_design(design, sims = 5, bootstrap_sims = 0),
+                 "cannot be read here")
+  expect_true(all(c("bias", "rmse", "power", "coverage") %in%
+                    names(get_diagnosands(d))))
+  expect_error(
+    diagnose_design(simple_design(N = 30), diagnosands = foreign, sims = 5),
+    "not a declare_diagnosands\\(\\) object from this package"
+  )
+})
+
+test_that("our own set_diagnosands object is still read", {
+  design <- simple_design(N = 30) |>
+    set_diagnosands(declare_diagnosands(mean_estimate = mean(estimate)))
+  expect_no_warning(d <- diagnose_design(design, sims = 5, bootstrap_sims = 0))
+  expect_equal(setdiff(names(get_diagnosands(d)),
+                       c("inquiry", "estimator", "outcome", "term", "n_sims")),
+               "mean_estimate")
+})

@@ -87,10 +87,52 @@ safe_diagnosand_dots <- function(dots) {
   })
 }
 
+#' Is this a diagnosands set this package can compute with?
+#'
+#' A diagnosands object built by DeclareDesign carries the same class, the same
+#' `step_type` and the same `causal_type` as one built here, so none of those
+#' tell the two apart. What distinguishes them is the `dots`: ours are all
+#' quosures, and DeclareDesign's begin with the symbol `data`, because its
+#' diagnosands are a handler's arguments rather than expressions to evaluate.
+#'
+#' A design that reaches us carrying the other kind is not an error on the
+#' author's part. It is a design someone built with DeclareDesign and
+#' `set_diagnosands()`, which is exactly what several DesignLibrary designers
+#' do.
+#'
+#' @keywords internal
+#' @noRd
+is_own_diagnosands <- function(x) {
+  dots <- attr(x, "dots")
+  !is.null(dots) && length(dots) > 0 &&
+    all(vapply(dots, rlang::is_quosure, logical(1)))
+}
+
+#' @keywords internal
+#' @noRd
+warn_foreign_diagnosands <- function() {
+  rlang::warn(paste0(
+    "This design carries diagnosands that were not built by ",
+    "declare_diagnosands(), so they cannot be read here. ",
+    "Diagnosing with the defaults instead.\n",
+    "A design built with DeclareDesign and set_diagnosands() looks like this. ",
+    "Pass the diagnosands you want directly: ",
+    "diagnose_design(design, diagnosands = declare_diagnosands(...))."
+  ))
+}
+
 compute_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
   dots <- attr(diagnosands, "dots")
   if (is.null(dots)) {
     stop("`diagnosands` must be a declare_diagnosands() object.")
+  }
+  if (!is_own_diagnosands(diagnosands)) {
+    rlang::abort(paste0(
+      "`diagnosands` is not a declare_diagnosands() object from this package. ",
+      "Its expressions are not quosures, which is what a set of diagnosands ",
+      "built by DeclareDesign looks like.\n",
+      "Rewrite them with declare_diagnosands()."
+    ))
   }
   safe_dots <- safe_diagnosand_dots(dots)
   if (length(group_by_set) == 0) {
@@ -211,9 +253,11 @@ diagnose_design <- function(..., sims = NULL, bootstrap_sims = 100,
     stop("diagnose_design() requires at least one `design` object.")
   }
   if (is.null(diagnosands)) {
-    user_diags <- purrr::map(designs, function(d) attr(d, "diagnosands"))
-    user_diags <- Filter(Negate(is.null), user_diags)
-    diagnosands <- if (length(user_diags) > 0) user_diags[[1]] else default_diagnosands()
+    carried <- Filter(Negate(is.null),
+                      purrr::map(designs, function(d) attr(d, "diagnosands")))
+    usable <- Filter(is_own_diagnosands, carried)
+    if (length(carried) > length(usable)) warn_foreign_diagnosands()
+    diagnosands <- if (length(usable) > 0) usable[[1]] else default_diagnosands()
   }
   simulations_df <- rlang::inject(
     simulate_design(!!!designs, sims = sims)
