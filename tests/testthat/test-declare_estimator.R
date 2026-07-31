@@ -94,3 +94,74 @@ test_that("inquiry as a string links estimator to estimand correctly", {
   e <- draw_estimates(d)
   expect_equal(e$inquiry, "pate")
 })
+
+test_that("a method receives its arguments as written, not as values", {
+  # The rule: `declare_estimator(Y, X, .method = f)` hands `f` the names, so a
+  # method that resolves column names itself (pull(data, {{y}}), lm_robust's
+  # clusters and weights) can do so. DeclareDesign does the same.
+  peek <- function(data, y, x, ...) {
+    tibble::tibble(term = "peek", estimate = 0,
+                   y_got = rlang::as_label(rlang::enexpr(y)),
+                   x_got = rlang::as_label(rlang::enexpr(x)))
+  }
+  design <- declare_model(N = 10, X = rnorm(N), Y = X) +
+    declare_estimator(Y, X, .method = peek, label = "peek")
+  est <- draw_estimates(design)
+  expect_equal(est$y_got, "Y")
+  expect_equal(est$x_got, "X")
+})
+
+test_that("a tidy-evaluating helper resolves its own column names", {
+  pull_mean <- function(data, y) {
+    tibble::tibble(term = "mean", estimate = mean(dplyr::pull(data, {{ y }})))
+  }
+  design <- declare_model(N = 20, Y = seq_len(N)) +
+    declare_estimator(Y, .method = pull_mean, .summary = function(x) x,
+                      label = "m")
+  expect_equal(draw_estimates(design)$estimate, mean(1:20))
+})
+
+test_that("the ordinary estimator spellings are unaffected", {
+  skip_if_not_installed("estimatr")
+  skip_if_not_installed("randomizr")
+  my_weights <- runif(60, 0.5, 1.5)
+  model <- declare_model(N = 60, cl = rep(1:6, each = 10), U = rnorm(N),
+                         Z = randomizr::complete_ra(N), Y = U + 0.4 * Z,
+                         B = rbinom(N, 1, 0.5))
+
+  plain <- declare_estimator(Y ~ Z, .method = estimatr::lm_robust, term = "Z",
+                             label = "e")
+  clustered <- declare_estimator(Y ~ Z, clusters = cl,
+                                 .method = estimatr::lm_robust, term = "Z",
+                                 label = "e")
+  weighted <- declare_estimator(Y ~ Z, weights = my_weights,
+                                .method = estimatr::lm_robust, term = "Z",
+                                label = "e")
+  logit <- declare_estimator(B ~ Z, family = binomial, .method = glm,
+                             term = "Z", label = "e")
+
+  for (step in list(plain, clustered, weighted, logit)) {
+    est <- draw_estimates(model + step)
+    expect_equal(nrow(est), 1L)
+    expect_true(is.finite(est$estimate))
+  }
+})
+
+test_that("a method wanting a plain vector needs the column named explicitly", {
+  # The losing case of the rule, and the spelling that replaces it. This
+  # matches DeclareDesign, where the same declaration errors the same way.
+  mean_of <- function(data, v) tibble::tibble(term = "mean", estimate = mean(v))
+  model <- declare_model(N = 10, Y = seq_len(N))
+
+  expect_error(
+    draw_estimates(model + declare_estimator(v = Y, .method = mean_of,
+                                             .summary = function(x) x,
+                                             label = "m")),
+    "object 'Y' not found"
+  )
+  est <- draw_estimates(
+    model + declare_estimator(handler = function(data) mean_of(data, data$Y),
+                              label = "m")
+  )
+  expect_equal(est$estimate, mean(1:10))
+})

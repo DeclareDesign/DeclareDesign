@@ -119,29 +119,53 @@ normalize_inquiry <- function(inquiry) {
   as.character(inquiry)
 }
 
-#' Evaluate a list of quosures preserving formulas
+#' Take the dots as written, so the method does its own evaluation
 #'
-#' Splats a named list of quosures into ordinary argument values for
-#' `do.call()`. Quosures whose expressions are formulas are returned as
-#' formula objects so NSE-using methods (e.g., `lm_robust`, `lm_lin`) see the
-#' expected formula on their right-hand side.
+#' The arguments of `declare_estimator()` are passed to `.method` as the user
+#' wrote them, not as values. A bare `Y` reaches the method as the name `Y`,
+#' which is what lets a method resolve it against the data itself:
+#' `lm_robust()` does this for `clusters` and `weights`, and
+#' `rdss::rdrobust_helper()` does it for `y` and `x` via `pull(data, {{y}})`.
 #'
+#' The alternative, evaluating each dot against the data before the call, lets
+#' a method that knows nothing about tidy evaluation take a bare column name,
+#' but robs every method that does know of the chance to use it. Those are most
+#' of the methods people pass. It is also what DeclareDesign does, so a design
+#' written against the original behaves the same here.
+#'
+#' Formulas are the one thing evaluated, since `Y ~ Z` has to arrive as a
+#' formula object carrying the environment it was written in.
+#'
+#' @param dots A named list of quosures.
+#' @return A list of expressions ready to splice into a call.
 #' @keywords internal
 #' @noRd
-eval_dots <- function(dots, data = NULL) {
+dots_as_written <- function(dots) {
   lapply(dots, function(q) {
     e <- rlang::quo_get_expr(q)
-    # Detect a `~` call (which `rlang::is_formula()` treats as a formula even
-    # before evaluation). Evaluate it in the quosure's environment so the
-    # resulting formula object carries that environment with it.
+    # `rlang::is_formula()` treats a `~` call as a formula before evaluation.
     if (rlang::is_formula(e)) {
       env <- rlang::quo_get_env(q)
       f <- eval(e, envir = env)
       if (is.null(environment(f))) environment(f) <- env
       return(f)
     }
-    rlang::eval_tidy(q, data = data)
+    e
   })
+}
+
+#' The environment a step's arguments were written in
+#'
+#' `rlang::enquos()` captures every dot of one `declare_estimator()` call with
+#' the same environment, so the first one speaks for all of them. It is taken
+#' at declaration time rather than at run time, so it is the environment the
+#' user wrote the call in and not whatever is on the stack during a simulation.
+#'
+#' @keywords internal
+#' @noRd
+dots_env <- function(dots, default = rlang::caller_env()) {
+  if (length(dots) == 0) return(default)
+  rlang::quo_get_env(dots[[1L]])
 }
 
 #' Build an estimator/test step closure
@@ -158,16 +182,23 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
   force(term)
   force(add_inquiry)
   force(handler)
-  # Capture eval_dots by value so the closure is fully self-contained and works
-  # inside furrr workers without requiring the DeclareDesignZero namespace.
-  ed <- eval_dots
+  # Capture the helpers and the declaration environment by value so the closure
+  # is self-contained and works inside furrr workers without requiring the
+  # DeclareDesignZero namespace.
+  as_written <- dots_as_written
+  args <- as_written(dots)
+  decl_env <- dots_env(dots, default = rlang::caller_env())
   function(data) {
+    # `.dd_data` holds the simulation's data frame for the duration of one
+    # call. The arguments are spliced in as written, so anything the method
+    # resolves against the data it resolves itself.
+    call_env <- rlang::env(decl_env, .dd_data = data)
     if (!is.null(handler)) {
-      args <- ed(dots, data = data)
-      res <- do.call(handler, c(list(data), args))
+      res <- eval(rlang::call2(handler, quote(.dd_data), !!!args),
+                  envir = call_env)
     } else {
-      args <- ed(dots, data = data)
-      fit <- do.call(method, c(args, list(data = data)))
+      fit <- eval(rlang::call2(method, !!!args, data = quote(.dd_data)),
+                  envir = call_env)
       res <- summary_fn(fit)
     }
     res <- tibble::as_tibble(res)
