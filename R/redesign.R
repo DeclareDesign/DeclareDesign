@@ -264,16 +264,30 @@ check_param_vectors <- function(design, params) {
   invisible(NULL)
 }
 
-#' Test whether an environment chain contains a binding
+#' Test whether an environment chain contains a binding a design could own
+#'
+#' Walks up to and including the global environment and stops there, so the
+#' attached packages behind it do not count. Inheriting all the way to `base`
+#' would mean any parameter whose name a package happens to export is treated
+#' as part of the design: `redesign(design, n = 200)` on a design with no `n`
+#' found `dplyr::n` and so never warned, which is the one case the warning
+#' exists for.
+#'
+#' The other half of [quo_uses_param()], `expr_has_symbol()`, still catches a
+#' name the step's expression mentions outright, so a design that really does
+#' read a package object keeps working.
 #'
 #' @keywords internal
 #' @noRd
 env_has_var <- function(env, name) {
   if (!rlang::is_environment(env)) return(FALSE)
-  tryCatch(
-    rlang::env_has(env, name, inherit = TRUE)[[1]],
-    error = function(e) FALSE
-  )
+  repeat {
+    found <- tryCatch(rlang::env_has(env, name, inherit = FALSE)[[1]],
+                      error = function(e) FALSE)
+    if (found) return(TRUE)
+    if (identical(env, globalenv()) || identical(env, emptyenv())) return(FALSE)
+    env <- rlang::env_parent(env)
+  }
 }
 
 #' Test whether an expression mentions a symbol

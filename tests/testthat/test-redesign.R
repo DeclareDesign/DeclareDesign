@@ -137,3 +137,24 @@ test_that("summary lists the parameters and objects the design refers to", {
   expect_false("Y" %in% objects$name)
   expect_output(summary(design), "Parameters and objects")
 })
+
+test_that("the redesign warning is not silenced by a package of the same name", {
+  # Regression test from Macartan's crash course. `env_has_var()` inherited all
+  # the way to base, so `redesign(design, n = 200)` on a design with no `n`
+  # found `dplyr::n` and stayed quiet. Any short parameter name an attached
+  # package exports had the same effect.
+  local({
+    N <- 100
+    design <- declare_model(N = N, Y = rnorm(N)) + declare_inquiry(Q = 0)
+    expect_true(exists("n", envir = as.environment("package:dplyr")))
+    expect_warning(redesign(design, n = 200), "n is not found in the design")
+    expect_no_warning(redesign(design, N = 200))
+  })
+})
+
+test_that("a design that reads a package object is still redesignable", {
+  skip_if_not_installed("randomizr")
+  design <- declare_model(N = 20, Y = rnorm(N)) +
+    declare_assignment(Z = randomizr::complete_ra(N))
+  expect_no_warning(redesign(design, N = 40))
+})
