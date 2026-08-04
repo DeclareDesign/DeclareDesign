@@ -119,55 +119,6 @@ normalize_inquiry <- function(inquiry) {
   as.character(inquiry)
 }
 
-#' Take the dots as written, so the method does its own evaluation
-#'
-#' The arguments of `declare_estimator()` are passed to `.method` as the user
-#' wrote them, not as values. A bare `Y` reaches the method as the name `Y`,
-#' which is what lets a method resolve it against the data itself:
-#' `lm_robust()` does this for `clusters` and `weights`, and
-#' `rdss::rdrobust_helper()` does it for `y` and `x` via `pull(data, {{y}})`.
-#'
-#' The alternative, evaluating each dot against the data before the call, lets
-#' a method that knows nothing about tidy evaluation take a bare column name,
-#' but robs every method that does know of the chance to use it. Those are most
-#' of the methods people pass. It is also what DeclareDesign does, so a design
-#' written against the original behaves the same here.
-#'
-#' Formulas are the one thing evaluated, since `Y ~ Z` has to arrive as a
-#' formula object carrying the environment it was written in.
-#'
-#' @param dots A named list of quosures.
-#' @return A list of expressions ready to splice into a call.
-#' @keywords internal
-#' @noRd
-dots_as_written <- function(dots) {
-  lapply(dots, function(q) {
-    e <- rlang::quo_get_expr(q)
-    # `rlang::is_formula()` treats a `~` call as a formula before evaluation.
-    if (rlang::is_formula(e)) {
-      env <- rlang::quo_get_env(q)
-      f <- eval(e, envir = env)
-      if (is.null(environment(f))) environment(f) <- env
-      return(f)
-    }
-    e
-  })
-}
-
-#' The environment a step's arguments were written in
-#'
-#' `rlang::enquos()` captures every dot of one `declare_estimator()` call with
-#' the same environment, so the first one speaks for all of them. It is taken
-#' at declaration time rather than at run time, so it is the environment the
-#' user wrote the call in and not whatever is on the stack during a simulation.
-#'
-#' @keywords internal
-#' @noRd
-dots_env <- function(dots, default = rlang::caller_env()) {
-  if (length(dots) == 0) return(default)
-  rlang::quo_get_env(dots[[1L]])
-}
-
 #' Build an estimator/test step closure
 #'
 #' @keywords internal

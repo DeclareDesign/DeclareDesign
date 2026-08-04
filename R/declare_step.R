@@ -1,10 +1,17 @@
-#' Does this handler take its arguments unevaluated?
+#' Does this handler need its arguments as quosures?
 #'
-#' `fabricate()` captures its dots with `enquos()`, so pre-evaluating them and
-#' passing the values would strip the data context the expressions need. Both
-#' spellings count: a script carried over from DeclareDesign passes
+#' `fabricate()` is the one handler that wants neither values nor bare
+#' expressions. It captures its dots with `enquos()` and evaluates them in a
+#' mask of its own that binds names the caller never wrote, `N` above all. A
+#' bare expression arrives carrying the environment of the call we build rather
+#' than the user's, so `fabricate(y = x + rnorm(N, 0, 0))` fails on
+#' `object 'N' not found`; spliced quosures keep their own environment and it
+#' works. Measured both ways, 2026-08-04, which is why this special case
+#' survived the move of the other handlers onto the as-written convention.
+#'
+#' Both spellings count: a script carried over from DeclareDesign passes
 #' `fabricatr::fabricate`, and dispatching on the fabricatrZero function alone
-#' sent it down the pre-evaluating branch and failed inside fabricate.
+#' sent it down the wrong branch and failed inside fabricate.
 #'
 #' @keywords internal
 #' @noRd
@@ -22,8 +29,13 @@ handler_is_fabricate <- function(handler) {
 #' must accept `data` as its first argument and return a data frame.
 #'
 #' @param handler A function whose first argument is `data`.
-#' @param ... Additional arguments forwarded (unevaluated, then evaluated in
-#'   the caller's environment) to `handler`.
+#' @param ... Additional arguments passed to `handler` **as written**, so the
+#'   handler evaluates them itself. A bare column name arrives as a name, which
+#'   is what lets `tidyr::pivot_wider(id_cols = pair)` and the dplyr verbs
+#'   select and mask as they normally do. This is the same rule
+#'   [declare_estimator()] follows. A handler that does no evaluation of its own
+#'   and wants a value computed from the data takes a closure instead:
+#'   `declare_step(handler = function(data) f(data, cutoff = mean(data$a)))`.
 #' @param label Step label.
 #' @param draws Number of nested draws for this step. When `> 1`, the step is
 #'   re-executed `draws` times for each upstream draw during nested simulation.
@@ -36,18 +48,32 @@ handler_is_fabricate <- function(handler) {
 #' }, k = 2)
 #' df <- data.frame(X = 1:5)
 #' step(df)
+#'
+#' # A tidyselect handler receives the column names, not their contents.
+#' wide <- declare_step(
+#'   id_cols = pair, names_from = role, values_from = c(ID, a),
+#'   handler = tidyr::pivot_wider
+#' )
+#' long <- data.frame(pair = rep(1:3, each = 2), role = rep(c("A", "B"), 3),
+#'                    ID = sprintf("%03d", 1:6), a = 1:6)
+#' wide(long)
 declare_step <- function(handler, ..., label = "custom_step", draws = 1L) {
   dots <- rlang::enquos(...)
   call <- sys.call()
   force(handler)
+  # Taken at declaration time, so it is where the user wrote the call and not
+  # whatever is on the stack during a simulation.
+  decl_env <- dots_env(dots, default = rlang::caller_env())
+  args <- dots_as_written(dots)
   fn <- function(data) {
     if (handler_is_fabricate(handler)) {
       rlang::inject(handler(data = data, !!!dots))
     } else {
-      args <- lapply(dots, function(q) {
-        rlang::eval_tidy(q, data = if (is.data.frame(data)) as.list(data) else NULL)
-      })
-      do.call(handler, c(list(data), args))
+      # `.dd_data` holds this step's data frame for the duration of one call.
+      # Arguments go in as written, so anything the handler resolves against
+      # the data it resolves itself.
+      call_env <- rlang::env(decl_env, .dd_data = data)
+      eval(rlang::call2(handler, quote(.dd_data), !!!args), envir = call_env)
     }
   }
   step <- build_step(

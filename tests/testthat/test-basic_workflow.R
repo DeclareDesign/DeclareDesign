@@ -145,6 +145,59 @@ test_that("declare_step accepts the original fabricatr::fabricate as handler", {
   expect_equal(df$X2, df$X * 2)
 })
 
+test_that("fabricate still needs quosures, which is why its branch survives", {
+  # `N` is bound by fabricate's own mask, not by anything the caller wrote.
+  # Spliced quosures keep the user's environment and this works; bare
+  # expressions carry the environment of the call we build and it does not.
+  # The day this passes on the as-written path, handler_is_fabricate() can go.
+  pop <- declare_model(N = 10, X = seq_len(N))
+  step <- declare_step(handler = fabricatrZero::fabricate, Y = X + rnorm(N, 0, 0))
+  df <- draw_data(pop + step)
+  expect_equal(df$Y, df$X)
+})
+
+test_that("declare_step passes tidyselect handlers the column names, not the values", {
+  # Regression test for the trust-game design (RDSS declaration_17.6), reported
+  # by the Live Designs app port. Evaluating the dots first handed pivot_wider
+  # the *contents* of `role`, so tidyselect looked for columns named "A" and
+  # "B" and errored. Arguments now arrive as written and the handler selects.
+  long <- data.frame(pair = rep(1:3, each = 2), role = rep(c("A", "B"), 3),
+                     ID = sprintf("%03d", 1:6), a = 1:6)
+  step <- declare_step(id_cols = pair, names_from = role,
+                       values_from = c(ID, a), handler = tidyr::pivot_wider)
+  wide <- step(long)
+  expect_equal(nrow(wide), 3L)
+  expect_equal(names(wide), c("pair", "ID_A", "ID_B", "a_A", "a_B"))
+  expect_equal(wide$a_A, c(1, 3, 5))
+})
+
+test_that("the app's quoted-name workaround keeps working", {
+  # 17.6 currently ships quoted names to get around the above. Both spellings
+  # have to work, or adopting the fix would force a coordinated release.
+  long <- data.frame(pair = rep(1:3, each = 2), role = rep(c("A", "B"), 3),
+                     ID = sprintf("%03d", 1:6), a = 1:6)
+  step <- declare_step(id_cols = "pair", names_from = "role",
+                       values_from = c("ID", "a"), handler = tidyr::pivot_wider)
+  expect_equal(names(step(long)), c("pair", "ID_A", "ID_B", "a_A", "a_B"))
+})
+
+test_that("declare_step handlers that mask resolve data expressions themselves", {
+  # dplyr verbs do their own masking, so `mean(a)` needs no special support.
+  df <- data.frame(a = c(1, 2, 3, 4, 5, 6))
+  expect_equal(declare_step(handler = dplyr::summarise, m = mean(a))(df)$m, 3.5)
+  expect_equal(nrow(declare_step(handler = dplyr::filter, a > mean(a))(df)), 3L)
+  expect_equal(sum(declare_step(handler = dplyr::mutate, hi = a > mean(a))(df)$hi), 3L)
+})
+
+test_that("declare_step still takes a plain value from the caller", {
+  k <- 2
+  step <- declare_step(handler = function(data, k) {
+    data$X2 <- data$X * k
+    data
+  }, k = k)
+  expect_equal(step(data.frame(X = 1:5))$X2, c(2, 4, 6, 8, 10))
+})
+
 test_that("draw_data and draw_estimands do not run the estimators", {
   # Regression test, from Macartan's crash course: an RDD design whose
   # estimator handler wanted bare column names failed, and it took

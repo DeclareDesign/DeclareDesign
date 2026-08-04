@@ -9,8 +9,13 @@ declare_step(handler, ..., label = "custom_step", draws = 1L)
 \arguments{
 \item{handler}{A function whose first argument is \code{data}.}
 
-\item{...}{Additional arguments forwarded (unevaluated, then evaluated in
-the caller's environment) to \code{handler}.}
+\item{...}{Additional arguments passed to \code{handler} \strong{as written}, so the
+handler evaluates them itself. A bare column name arrives as a name, which
+is what lets \code{tidyr::pivot_wider(id_cols = pair)} and the dplyr verbs
+select and mask as they normally do. This is the same rule
+\code{\link[=declare_estimator]{declare_estimator()}} follows. A handler that does no evaluation of its own
+and wants a value computed from the data takes a closure instead:
+\code{declare_step(handler = function(data) f(data, cutoff = mean(data$a)))}.}
 
 \item{label}{Step label.}
 
@@ -31,4 +36,13 @@ step <- declare_step(handler = function(data, k) {
 }, k = 2)
 df <- data.frame(X = 1:5)
 step(df)
+
+# A tidyselect handler receives the column names, not their contents.
+wide <- declare_step(
+  id_cols = pair, names_from = role, values_from = c(ID, a),
+  handler = tidyr::pivot_wider
+)
+long <- data.frame(pair = rep(1:3, each = 2), role = rep(c("A", "B"), 3),
+                   ID = sprintf("\%03d", 1:6), a = 1:6)
+wide(long)
 }

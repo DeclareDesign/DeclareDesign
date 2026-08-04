@@ -49,6 +49,55 @@ sim_map_fn <- function() {
 #' length(qs)
 vars <- function(...) rlang::quos(...)
 
+#' Take the dots as written, so the handler does its own evaluation
+#'
+#' Shared by [declare_estimator()] and [declare_step()], the two verbs that hand
+#' their arguments to a function the user supplied. The rule those two follow is
+#' that **whoever receives the argument evaluates it**: a bare `Y` arrives as the
+#' name `Y`, which is what lets `lm_robust()` resolve `clusters` and `weights`
+#' against the data, `rdss::rdrobust_helper()` do `pull(data, {{y}})`, and
+#' `tidyr::pivot_wider()` select columns by name.
+#'
+#' The other verbs go the other way on purpose. `declare_inquiry()` and
+#' `declare_diagnosands()` evaluate their expressions themselves, because there
+#' is no handler to defer to: DeclareDesignZero *is* the thing doing the
+#' computing, so `mean(Y_Z_1 - Y_Z_0)` has to become a number.
+#'
+#' Formulas are the one thing evaluated here, since `Y ~ Z` has to arrive as a
+#' formula object carrying the environment it was written in.
+#'
+#' @param dots A named list of quosures.
+#' @return A list of expressions ready to splice into a call.
+#' @keywords internal
+#' @noRd
+dots_as_written <- function(dots) {
+  lapply(dots, function(q) {
+    e <- rlang::quo_get_expr(q)
+    # `rlang::is_formula()` treats a `~` call as a formula before evaluation.
+    if (rlang::is_formula(e)) {
+      env <- rlang::quo_get_env(q)
+      f <- eval(e, envir = env)
+      if (is.null(environment(f))) environment(f) <- env
+      return(f)
+    }
+    e
+  })
+}
+
+#' The environment a step's arguments were written in
+#'
+#' `rlang::enquos()` captures every dot of one declaration with the same
+#' environment, so the first one speaks for all of them. It is taken at
+#' declaration time rather than at run time, so it is the environment the user
+#' wrote the call in and not whatever is on the stack during a simulation.
+#'
+#' @keywords internal
+#' @noRd
+dots_env <- function(dots, default = rlang::caller_env()) {
+  if (length(dots) == 0) return(default)
+  rlang::quo_get_env(dots[[1L]])
+}
+
 #' Get the simulations table from a diagnosis
 #'
 #' @param diagnosis A `diagnosis` object.
