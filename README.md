@@ -7,7 +7,7 @@ The package on this branch is still named `DeclareDesignZero`, so installing it 
 ```r
 remotes::install_github("DeclareDesign/fabricatr@rewrite")
 remotes::install_github("DeclareDesign/DeclareDesign@rewrite", build_vignettes = TRUE)
-vignette("declaredesignzero")
+vignette("declaredesign2.0")
 ```
 
 The vignette is the document to read first. It covers what does not change, what changes and why, how to port an existing declaration, and the one open API question.

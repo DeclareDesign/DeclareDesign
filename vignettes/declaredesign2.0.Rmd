@@ -1,8 +1,8 @@
 ---
-title: "DeclareDesignZero: what changes, what does not, and why"
+title: "DeclareDesign 2.0: what changes, what does not, and why"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{DeclareDesignZero: what changes, what does not, and why}
+  %\VignetteIndexEntry{DeclareDesign 2.0: what changes, what does not, and why}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
