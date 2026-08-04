@@ -277,7 +277,7 @@ No other change is needed. `simulate_design()` uses `furrr::future_map` when the
 
 ## Speed
 
-All timings below are medians on an Apple M4 Pro under R 4.6.0, comparing DeclareDesign 1.1.1 against DeclareDesignZero 0.0.1 on the two-arm design declared above (N = 600). The last row uses a cluster-randomized design instead: 30 villages of 20 citizens, ICC 0.2, cluster-robust standard errors.
+All timings below are medians on an Apple M4 Pro under R 4.6.0, comparing DeclareDesign 1.1.1 against DeclareDesignZero 2.0.0 on the two-arm design declared above (N = 600). The last row uses a cluster-randomized design instead: 30 villages of 20 citizens, ICC 0.2, cluster-robust standard errors.
 
 | Operation | DeclareDesign | DeclareDesignZero | Ratio |
 |---|---:|---:|---:|

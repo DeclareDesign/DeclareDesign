@@ -27,6 +27,6 @@ Two API decisions are open and both change what a 2.0.0 would mean:
 - **How estimator arguments reach `.method`** (DeclareDesign issue #463, open since 2021). DeclareDesign passes expressions, which breaks `metafor::rma.uni` and works for the shim written around that breakage; this branch passes values, which does the reverse. Neither convention serves both tidyselect handlers and ordinary R functions. The recommendation in the vignette is an explicit argument naming the convention, defaulting to values.
 - **Whether a diagnosands set should stop being a `design_step`.** Implemented on the `rewrite-diagnosands-proposal` branch, deliberately unmerged.
 
-The intent is that this becomes DeclareDesign 2.0.0 after fabricatr 2.0.0 reaches CRAN, since the dependency forces that order. Nothing on this branch asserts it: the DESCRIPTION still reads `DeclareDesignZero 0.0.1`.
+**This branch is versioned 2.0.0**, against DeclareDesign 1.1.1 on CRAN, and it imports `fabricatrZero (>= 2.0.0)`, so the two move together. It reaches CRAN after fabricatr 2.0.0 does, since the dependency forces that order. It is still *named* `DeclareDesignZero`, which is what keeps it installable alongside the released package while the two are being compared; the rename is the last step before release.
 
 Sibling branches: `DeclareDesign/fabricatr@rewrite` and `DeclareDesign/estimatr@rewrite`.

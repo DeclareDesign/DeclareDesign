@@ -1,7 +1,7 @@
 Package: DeclareDesignZero
 Type: Package
 Title: A Tidyverse-First Research Design Declaration and Diagnosis Tool
-Version: 0.0.1
+Version: 2.0.0
 Authors@R: c(person("Alex", "Coppock", email = "acoppock@gmail.com", role = c("aut", "cre")))
 Description: A ground-up rewrite of DeclareDesign built on tidyverse conventions.
     Declares, simulates, and diagnoses research designs with an API identical
@@ -13,7 +13,7 @@ Depends: R (>= 4.1.0)
 Imports:
     broom,
     dplyr,
-    fabricatrZero,
+    fabricatrZero (>= 2.0.0),
     generics,
     purrr,
     rlang,
