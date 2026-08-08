@@ -26,3 +26,4 @@ vignettes
 ^pkgdown$
 ^CRAN-SUBMISSION$
 ^codecov\.yml$
+^notes$

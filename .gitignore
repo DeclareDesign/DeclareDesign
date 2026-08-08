@@ -17,3 +17,5 @@ inst/doc
 *.tar.gz
 *.Rcheck/
 docs
+# Private dev notes and logfiles (mirrored to claude_control)
+notes/
