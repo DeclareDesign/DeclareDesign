@@ -4,10 +4,17 @@
 #' which function it calls. The right-hand side of `$` and `@` is a field
 #' name, not a symbol that could be rebound, so only the left side is walked.
 #'
+#' A missing argument, the blank in `x[, 1]`, is a symbol whose name is the
+#' empty string. It names nothing, and asking an environment whether it holds
+#' the empty name is an error, so it is dropped here.
+#'
 #' @keywords internal
 #' @noRd
 expr_symbols <- function(expr) {
-  if (rlang::is_symbol(expr)) return(rlang::as_string(expr))
+  if (rlang::is_symbol(expr)) {
+    name <- rlang::as_string(expr)
+    return(if (nzchar(name)) name else character(0))
+  }
   if (!rlang::is_call(expr)) return(character(0))
   if (rlang::is_call(expr, c("$", "@")) && length(expr) == 3L) {
     return(expr_symbols(expr[[2]]))

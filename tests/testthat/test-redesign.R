@@ -158,3 +158,19 @@ test_that("a design that reads a package object is still redesignable", {
     declare_assignment(Z = randomizr::complete_ra(N))
   expect_no_warning(redesign(design, N = 40))
 })
+
+test_that("a missing argument in a subscript is not treated as a name", {
+  # From ResearchDesigns' latent_variables and multilevel. The blank in
+  # `scores[, 1]` parses to a symbol whose name is "", and asking an
+  # environment about the empty name errors, so the whole parameter list
+  # failed with "attempt to use zero-length variable name".
+  local({
+    N <- 40
+    scores <- matrix(rnorm(2 * N), ncol = 2)
+    design <- declare_model(N = N, Y = scores[, 1]) + declare_inquiry(Q = mean(Y))
+    objects <- find_all_objects(design)
+    expect_true(all(c("N", "scores") %in% objects$name))
+    expect_false("" %in% objects$name)
+    expect_no_warning(redesign(design, N = 20))
+  })
+})
