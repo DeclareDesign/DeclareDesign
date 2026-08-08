@@ -58,7 +58,7 @@ handler_is_fabricate <- function(handler) {
 #'                    ID = sprintf("%03d", 1:6), a = 1:6)
 #' wide(long)
 declare_step <- function(handler, ..., label = "custom_step", draws = 1L) {
-  dots <- rlang::enquos(...)
+  dots <- capture_dots_env(rlang::enquos(...))
   call <- sys.call()
   force(handler)
   # Taken at declaration time, so it is where the user wrote the call and not

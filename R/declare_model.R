@@ -73,7 +73,7 @@ make_fabricate_step <- function(dots, id_label_na = FALSE) {
 #' df <- step(NULL)
 #' nrow(df)
 declare_model <- function(..., label = "model", draws = 1L) {
-  dots <- rlang::enquos(...)
+  dots <- capture_dots_env(rlang::enquos(...))
   call <- sys.call()
   fn <- make_fabricate_step(dots, id_label_na = FALSE)
   step <- build_step(
@@ -101,7 +101,7 @@ declare_model <- function(..., label = "model", draws = 1L) {
 #' step <- declare_measurement(Y = Y_Z_0 * (1 - Z) + Y_Z_1 * Z)
 #' attr(step, "step_type")
 declare_measurement <- function(..., label = "measurement", draws = 1L) {
-  dots <- rlang::enquos(...)
+  dots <- capture_dots_env(rlang::enquos(...))
   call <- sys.call()
   fn <- make_fabricate_step(dots, id_label_na = TRUE)
   step <- build_step(
@@ -129,7 +129,7 @@ declare_measurement <- function(..., label = "measurement", draws = 1L) {
 #' step <- declare_assignment(Z = sample(rep(0:1, length.out = N)))
 #' attr(step, "step_type")
 declare_assignment <- function(..., label = "assignment", draws = 1L) {
-  dots <- rlang::enquos(...)
+  dots <- capture_dots_env(rlang::enquos(...))
   call <- sys.call()
   fn <- make_fabricate_step(dots, id_label_na = TRUE)
   step <- build_step(
@@ -191,8 +191,8 @@ make_sampling_step <- function(dots, filter_quo) {
 #' attr(step, "step_type")
 declare_sampling <- function(..., filter = NULL, label = "sampling",
                              draws = 1L) {
-  dots <- rlang::enquos(...)
-  filter_quo <- rlang::enquo(filter)
+  dots <- capture_dots_env(rlang::enquos(...))
+  filter_quo <- capture_quosure_env(rlang::enquo(filter))
   if (rlang::quo_is_null(filter_quo)) filter_quo <- NULL
   call <- sys.call()
   fn <- make_sampling_step(dots, filter_quo)

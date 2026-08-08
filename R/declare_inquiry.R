@@ -102,7 +102,7 @@ make_inquiry_step <- function(dots, subset_quo, label, handler = NULL) {
 #' attr(step, "step_type")
 declare_inquiry <- function(..., subset = NULL, label = "inquiry",
                             handler = NULL, draws = 1L) {
-  dots <- rlang::enquos(...)
+  dots <- capture_dots_env(rlang::enquos(...))
   subset_quo <- rlang::enquo(subset)
   if (rlang::quo_is_null(subset_quo)) subset_quo <- NULL
   call <- sys.call()

@@ -26,8 +26,8 @@
 #' declare_diagnosands(power = mean(p.value <= alpha), alpha = 0.1)
 declare_diagnosands <- function(..., subset = NULL, alpha = 0.05,
                                 label = "diagnosands") {
-  dots <- bind_alpha(rlang::enquos(...), alpha)
-  subset_quo <- unwrap_quosure(rlang::enquo(subset))
+  dots <- capture_dots_env(bind_alpha(rlang::enquos(...), alpha))
+  subset_quo <- capture_quosure_env(unwrap_quosure(rlang::enquo(subset)))
   call <- sys.call()
   fn <- function(data) {
     out <- purrr::imap(dots, function(q, nm) {

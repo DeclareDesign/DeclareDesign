@@ -226,7 +226,7 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
 declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
                               inquiry = NULL, term = NULL, label = "estimator",
                               handler = NULL, draws = 1L) {
-  dots <- rlang::enquos(...)
+  dots <- capture_dots_env(rlang::enquos(...))
   call <- sys.call()
   method_expr <- substitute(.method)
   legacy <- extract_legacy_model(dots)
@@ -298,7 +298,7 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
 declare_test <- function(..., .method = NULL, .summary = tidy_try,
                          term = NULL, label = "test", handler = NULL,
                          draws = 1L) {
-  dots <- rlang::enquos(...)
+  dots <- capture_dots_env(rlang::enquos(...))
   call <- sys.call()
   method_expr <- substitute(.method)
   legacy <- extract_legacy_model(dots)
