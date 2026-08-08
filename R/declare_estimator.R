@@ -126,7 +126,10 @@ normalize_inquiry <- function(inquiry) {
 make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
                                 add_inquiry, handler = NULL) {
   force(method)
-  force(summary_fn)
+  # `.summary = ~tidy_stan(., exponentiate = TRUE)` is how the book writes a
+  # one-argument tidier, so the formula shorthand has to become a function
+  # before the step calls it. `as_function()` leaves a real function alone.
+  summary_fn <- rlang::as_function(summary_fn)
   force(dots)
   force(label)
   force(inquiry)
@@ -364,9 +367,10 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
 label_estimator <- function(.method, label = NULL, inquiry = NULL, term = NULL,
                             .summary = tidy_try) {
   inquiry_chr <- normalize_inquiry(inquiry)
+  summary_fn <- rlang::as_function(.summary)
   function(data, ...) {
     fit <- .method(data = data, ...)
-    res <- tibble::as_tibble(.summary(fit))
+    res <- tibble::as_tibble(summary_fn(fit))
     if (!is.null(label)) res$estimator <- label
     if (!is.null(inquiry_chr)) res$inquiry <- inquiry_chr[1]
     if (!is.null(term)) res <- res[res$term %in% term, , drop = FALSE]

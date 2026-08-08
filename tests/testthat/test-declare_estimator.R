@@ -165,3 +165,21 @@ test_that("a method wanting a plain vector needs the column named explicitly", {
   )
   expect_equal(est$estimate, mean(1:10))
 })
+
+test_that(".summary accepts the formula shorthand", {
+  # declaration_9.3 in the book writes `.summary = ~tidy_stan(., exponentiate = TRUE)`.
+  # DeclareDesign 1.1.1 accepts it; the rewrite called the formula as a function
+  # and failed with `could not find function "summary_fn"`.
+  skip_if_not_installed("estimatr")
+  design <- declare_model(N = 50, Y = rnorm(N)) +
+    declare_assignment(Z = randomizr::complete_ra(N)) +
+    declare_estimator(Y ~ Z, .method = estimatr::lm_robust,
+                      .summary = ~generics::tidy(.))
+  expect_s3_class(draw_estimates(design), "data.frame")
+
+  labelled <- label_estimator(
+    function(data, ...) estimatr::lm_robust(Y ~ Z, data = data),
+    label = "lin", .summary = ~generics::tidy(.)
+  )
+  expect_s3_class(labelled(draw_data(design)), "data.frame")
+})
