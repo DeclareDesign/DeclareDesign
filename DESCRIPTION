@@ -19,6 +19,8 @@ Imports:
     rlang,
     tibble,
     tidyr
+Remotes:
+    DeclareDesign/fabricatr@rewrite
 Suggests:
     estimatr,
     fabricatr,
