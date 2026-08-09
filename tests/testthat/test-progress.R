@@ -54,7 +54,7 @@ test_that("progress renders once a handler and progressr are both enabled", {
 test_that("the option opts out even with a handler installed", {
   skip_if_not_installed("progressr")
   skip_if_not_installed("withr")
-  withr::with_options(list(DeclareDesignZero.progress = FALSE), {
+  withr::with_options(list(DeclareDesign.progress = FALSE), {
     expect_equal(bar_frames(simulate_design(simple(), sims = 5)), 0)
   })
 })
@@ -76,7 +76,7 @@ test_that("simulation still works when progressr is not installed", {
   # than error when it is absent.
   skip_if_not_installed("withr")
   tick <- withr::with_options(
-    list(DeclareDesignZero.progress = FALSE),
+    list(DeclareDesign.progress = FALSE),
     DeclareDesignZero:::dd_progressor(10, "x")
   )
   expect_true(is.function(tick))

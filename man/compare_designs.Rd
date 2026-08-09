@@ -31,8 +31,8 @@ print_code(...)
 Never returns.
 }
 \description{
-These functions existed in the original DeclareDesign but are not part of
-DeclareDesignZero. Each compared two designs by printing their code, their
+These functions existed in DeclareDesign 1.x but are not part of 2.0. Each
+compared two designs by printing their code, their
 draws, or their summaries side by side, which is a job for a diff of the
 two scripts. They error with a message saying so.
 }

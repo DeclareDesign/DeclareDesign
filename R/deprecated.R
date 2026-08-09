@@ -21,7 +21,7 @@ declare_population <- function(...) {
 #' @noRd
 .compare_defunct <- function(fn_name) {
   rlang::abort(c(
-    paste0("`", fn_name, "()` is not implemented in DeclareDesignZero."),
+    paste0("`", fn_name, "()` is not implemented in DeclareDesign 2.0."),
     "i" = "Share the R script instead of the design object.",
     "i" = "To compare what two designs achieve, use `compare_diagnoses()`."
   ))
@@ -29,8 +29,8 @@ declare_population <- function(...) {
 
 #' Defunct comparison helpers
 #'
-#' These functions existed in the original DeclareDesign but are not part of
-#' DeclareDesignZero. Each compared two designs by printing their code, their
+#' These functions existed in DeclareDesign 1.x but are not part of 2.0. Each
+#' compared two designs by printing their code, their
 #' draws, or their summaries side by side, which is a job for a diff of the
 #' two scripts. They error with a message saying so.
 #'

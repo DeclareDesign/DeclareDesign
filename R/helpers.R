@@ -50,7 +50,7 @@ sim_map_fn <- function(label = NULL) {
 #' @noRd
 dd_progressor <- function(n, label = NULL) {
   quiet <- function(...) invisible(NULL)
-  if (!isTRUE(getOption("DeclareDesignZero.progress", TRUE))) return(quiet)
+  if (!isTRUE(getOption("DeclareDesign.progress", TRUE))) return(quiet)
   if (!requireNamespace("progressr", quietly = TRUE)) return(quiet)
   if (!is.finite(n) || n < 1) return(quiet)
   # envir = parent.frame(2) so the progressor belongs to the caller of
