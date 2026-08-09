@@ -17,6 +17,7 @@
 #' run_design(design)
 run_design <- function(design) {
   result <- run_design_internal(design)
+  stop_on_estimator_failure(result$estimates)
   merge_estimates_inquiries(result$estimates, result$inquiries)
 }
 
@@ -116,6 +117,7 @@ draw_estimand <- draw_estimands
 #' draw_estimates(design)
 draw_estimates <- function(design) {
   result <- run_design_internal(design)
+  stop_on_estimator_failure(result$estimates)
   merge_estimates_inquiries(result$estimates, result$inquiries)
 }
 

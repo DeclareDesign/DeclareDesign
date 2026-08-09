@@ -135,6 +135,15 @@ compute_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
     ))
   }
   safe_dots <- safe_diagnosand_dots(dots)
+  # A failed draw is dropped here rather than summarised, so `n_sims` counts
+  # the draws a diagnosand actually used. Leaving the row in would keep
+  # `n_sims` at the number attempted while every default diagnosand, all of
+  # which carry na.rm = TRUE, quietly computed on fewer, which hides the
+  # shortfall in the one column that should show it.
+  if ("error" %in% names(simulations_df)) {
+    keep <- is.na(simulations_df$error) | !simulations_df$error
+    simulations_df <- simulations_df[keep, , drop = FALSE]
+  }
   if (length(group_by_set) == 0) {
     out <- dplyr::summarize(simulations_df, n_sims = dplyr::n(), !!!safe_dots)
     return(tibble::as_tibble(out))

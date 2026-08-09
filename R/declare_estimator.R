@@ -147,13 +147,39 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
     # call. The arguments are spliced in as written, so anything the method
     # resolves against the data it resolves itself.
     call_env <- rlang::env(decl_env, .dd_data = data)
-    if (!is.null(handler)) {
-      res <- eval(rlang::call2(handler, quote(.dd_data), !!!args),
-                  envir = call_env)
-    } else {
-      fit <- eval(rlang::call2(method, !!!args, data = quote(.dd_data)),
-                  envir = call_env)
-      res <- summary_fn(fit)
+    # An estimator that fails on one draw used to take the whole run with it,
+    # which on a 500-sim diagnosis with a slow method is the expensive way to
+    # learn that a fit did not converge. The draw is recorded as a failure
+    # instead and the run continues. Nothing here makes the failure quiet:
+    # `simulate_design()` warns once per run and `diagnose_design()` counts
+    # the failed draws out of `n_sims`, because draws that fail are not
+    # missing at random and diagnosing on the survivors flatters the design.
+    res <- tryCatch({
+      if (!is.null(handler)) {
+        eval(rlang::call2(handler, quote(.dd_data), !!!args), envir = call_env)
+      } else {
+        fit <- eval(rlang::call2(method, !!!args, data = quote(.dd_data)),
+                    envir = call_env)
+        summary_fn(fit)
+      }
+    }, error = function(e) {
+      tibble::tibble(
+        estimator = label,
+        term = NA_character_,
+        estimate = NA_real_,
+        std.error = NA_real_,
+        p.value = NA_real_,
+        conf.low = NA_real_,
+        conf.high = NA_real_,
+        error = TRUE,
+        error_message = conditionMessage(e)
+      )
+    })
+    # `res$error` on a tibble warns about an uninitialised column before it
+    # returns NULL, so ask the names instead.
+    if ("error" %in% names(res) && isTRUE(res$error[[1]])) {
+      if (add_inquiry && !is.null(inquiry)) res$inquiry <- inquiry[[1]]
+      return(res)
     }
     res <- tibble::as_tibble(res)
     if (!"estimator" %in% names(res) || all(is.na(res$estimator))) {

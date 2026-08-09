@@ -236,6 +236,7 @@ one_design_sims <- function(design, sims, design_label = "design",
     purrr::map(results, "estimates"),
     .id = "sim_ID"
   )
+  warn_estimator_failures(estimates_df, design_label)
   if (nrow(inquiries_df) > 0) {
     inquiries_df$sim_ID <- as.integer(inquiries_df$sim_ID)
   }
@@ -376,6 +377,7 @@ simulate_nested_single <- function(design, design_label = "design",
                                    .id = "sim_ID")
   estimates_df <- dplyr::bind_rows(purrr::map(outer_results, "estimates"),
                                    .id = "sim_ID")
+  warn_estimator_failures(estimates_df)
   if (nrow(inquiries_df) > 0) {
     inquiries_df$sim_ID <- as.integer(inquiries_df$sim_ID)
   }

@@ -196,3 +196,53 @@ get_simulations <- function(diagnosis) diagnosis$simulations_df
 #' get_diagnosands(d)
 get_diagnosands <- function(diagnosis) diagnosis$diagnosands_df
 
+
+#' Warn once per run about estimator draws that failed
+#'
+#' One warning per run rather than one per draw: three failures out of five
+#' hundred would otherwise be three warnings, and two hundred would be
+#' unreadable. The first message is carried through, because a user whose
+#' estimator failed two hundred times needs to know why and not only how often.
+#'
+#' @keywords internal
+#' @noRd
+warn_estimator_failures <- function(estimates_df, design_label = NULL) {
+  if (!is.data.frame(estimates_df) || !nrow(estimates_df)) return(invisible(NULL))
+  if (!"error" %in% names(estimates_df)) return(invisible(NULL))
+  failed <- which(!is.na(estimates_df$error) & estimates_df$error)
+  if (!length(failed)) return(invisible(NULL))
+  labels <- estimates_df$estimator[failed]
+  counts <- table(labels)
+  who <- paste0(
+    "`", names(counts), "` (", as.integer(counts), ")",
+    collapse = ", "
+  )
+  first <- estimates_df$error_message[failed][[1]]
+  rlang::warn(paste0(
+    if (!is.null(design_label)) paste0(design_label, ": ") else "",
+    length(failed), " estimator draw", if (length(failed) > 1) "s" else "",
+    " failed and were recorded rather than run: ", who, ".\n",
+    "First error: ", first, "\n",
+    "Diagnosands are computed on the draws that succeeded, and `n_sims` ",
+    "reports how many that was. Failed draws are not missing at random, so ",
+    "please interpret with care."
+  ))
+}
+
+#' Re-raise an estimator failure on a single run
+#'
+#' The step records a failure rather than aborting, which is what keeps a
+#' 500-simulation diagnosis alive when one draw will not converge. A single
+#' run is a different situation: somebody is debugging, and an NA row with a
+#' message buried in a column is a worse answer than the error itself. So the
+#' single-draw entry points re-raise, and only the simulation loop tolerates.
+#'
+#' @keywords internal
+#' @noRd
+stop_on_estimator_failure <- function(estimates_df) {
+  if (!is.data.frame(estimates_df) || !nrow(estimates_df)) return(invisible(NULL))
+  if (!"error" %in% names(estimates_df)) return(invisible(NULL))
+  failed <- which(!is.na(estimates_df$error) & estimates_df$error)
+  if (!length(failed)) return(invisible(NULL))
+  rlang::abort(estimates_df$error_message[failed][[1]])
+}
