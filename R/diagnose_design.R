@@ -224,6 +224,8 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set,
 #' @param bootstrap_sims Number of bootstrap replicates for diagnosand SEs.
 #' @param diagnosands A diagnosands `design_step` (e.g., from
 #'   [declare_diagnosands()]). Defaults to [default_diagnosands()].
+#' @param progress If `TRUE`, display a progress bar for this call by wrapping
+#'   it in [progressr::with_progress()]. See [simulate_design()].
 #' @return A `diagnosis` object. When the simulation was nested, the result
 #'   carries an additional `$variance_decomposition` slot.
 #' @export
@@ -234,7 +236,13 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set,
 #'                     label = "ols")
 #' diagnose_design(design, sims = 5, bootstrap_sims = 0)
 diagnose_design <- function(..., sims = NULL, bootstrap_sims = 100,
-                            diagnosands = NULL) {
+                            diagnosands = NULL, progress = FALSE) {
+  if (isTRUE(progress)) {
+    return(with_dd_progress(diagnose_design(
+      ..., sims = sims, bootstrap_sims = bootstrap_sims,
+      diagnosands = diagnosands, progress = FALSE
+    )))
+  }
   raw <- name_design_dots(...)
 
   # If first argument is a data frame (pre-computed simulations piped in),

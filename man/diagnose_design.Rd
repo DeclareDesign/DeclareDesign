@@ -5,9 +5,21 @@
 \alias{diagnose_designs}
 \title{Diagnose a design}
 \usage{
-diagnose_design(..., sims = NULL, bootstrap_sims = 100, diagnosands = NULL)
+diagnose_design(
+  ...,
+  sims = NULL,
+  bootstrap_sims = 100,
+  diagnosands = NULL,
+  progress = FALSE
+)
 
-diagnose_designs(..., sims = NULL, bootstrap_sims = 100, diagnosands = NULL)
+diagnose_designs(
+  ...,
+  sims = NULL,
+  bootstrap_sims = 100,
+  diagnosands = NULL,
+  progress = FALSE
+)
 }
 \arguments{
 \item{...}{One or more \code{design} objects.}
@@ -21,6 +33,9 @@ with step-level \code{draws} run in nested mode; otherwise the design runs
 
 \item{diagnosands}{A diagnosands \code{design_step} (e.g., from
 \code{\link[=declare_diagnosands]{declare_diagnosands()}}). Defaults to \code{\link[=default_diagnosands]{default_diagnosands()}}.}
+
+\item{progress}{If \code{TRUE}, display a progress bar for this call by wrapping
+it in \code{\link[progressr:with_progress]{progressr::with_progress()}}. See \code{\link[=simulate_design]{simulate_design()}}.}
 }
 \value{
 A \code{diagnosis} object. When the simulation was nested, the result

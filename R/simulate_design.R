@@ -24,6 +24,10 @@
 #'   means 500 flat simulations for a design with no step-level `draws`. A
 #'   design with step-level `draws` runs in nested mode whether or not `sims`
 #'   is supplied; supplying it warns and is otherwise ignored.
+#' @param progress If `TRUE`, display a progress bar for this call by wrapping
+#'   it in [progressr::with_progress()]. The better habit is to opt in once per
+#'   session with `progressr::handlers(global = TRUE)`, which covers every call
+#'   and lets you choose how progress is shown. Nothing is displayed by default.
 #' @return A tibble of stacked simulation results.
 #' @export
 #' @examples
@@ -32,7 +36,10 @@
 #'   declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
 #'                     label = "ols")
 #' simulate_design(design, sims = 3)
-simulate_design <- function(..., sims = NULL) {
+simulate_design <- function(..., sims = NULL, progress = FALSE) {
+  if (isTRUE(progress)) {
+    return(with_dd_progress(simulate_design(..., sims = sims, progress = FALSE)))
+  }
   raw <- name_design_dots(...)
   designs <- flatten_designs(raw)
   if (length(designs) == 0) {
@@ -215,7 +222,7 @@ simulate_designs <- simulate_design
 #' @noRd
 one_design_sims <- function(design, sims, design_label = "design",
                             multi = FALSE) {
-  map_fn <- sim_map_fn()
+  map_fn <- sim_map_fn(paste0("Simulating ", design_label))
   results <- map_fn(seq_len(sims), function(i) {
     r <- run_design_internal(design)
     list(inquiries = r$inquiries, estimates = r$estimates)
@@ -345,7 +352,7 @@ simulate_nested_single <- function(design, design_label = "design",
          estimates = dplyr::bind_rows(estimates))
   }
 
-  map_fn <- sim_map_fn()
+  map_fn <- sim_map_fn("Simulating")
   first_fan <- if (length(fan_steps) > 0) fan_steps[1] else NA_integer_
 
   if (!is.na(first_fan)) {

@@ -17,7 +17,75 @@ pop.var <- function(x) mean((x - mean(x, na.rm = TRUE))^2, na.rm = TRUE)
 # is used with seed = TRUE for statistically valid parallel RNG (L'Ecuyer-CMRG).
 # Users enable parallelism with future::plan(multisession, workers = N) before
 # calling simulate_design() -- no other changes needed.
-sim_map_fn <- function() {
+sim_map_fn <- function(label = NULL) {
+  base_map <- sim_base_map_fn()
+  function(x, f, ...) {
+    tick <- dd_progressor(length(x), label)
+    base_map(x, function(...) {
+      tick()
+      f(...)
+    }, ...)
+  }
+}
+
+#' A progress ticker for one simulation loop
+#'
+#' Signals progress with progressr and renders none of it. progressr emits
+#' conditions and leaves the display to whatever handler the *user* has
+#' installed, so with no handler this writes nothing at all, in any context. A
+#' handler is never installed here: a package that installs one surprises
+#' people and fights whatever they set themselves.
+#'
+#' progressr is chosen over `purrr::map(.progress =)` for two reasons that a
+#' console bar cannot cover. It relays out of `furrr` workers, so the parallel
+#' path, where a run is long enough to want a progress bar in the first place,
+#' is the same mechanism as the sequential one. And `progressr::handler_shiny()`
+#' drives a Shiny app's own progress widget, where a cli bar would go to the
+#' server console and never reach the browser.
+#'
+#' @param n Number of steps.
+#' @param label Optional message shown beside the bar.
+#' @return A function of no arguments; calling it advances one step.
+#' @keywords internal
+#' @noRd
+dd_progressor <- function(n, label = NULL) {
+  quiet <- function(...) invisible(NULL)
+  if (!isTRUE(getOption("DeclareDesignZero.progress", TRUE))) return(quiet)
+  if (!requireNamespace("progressr", quietly = TRUE)) return(quiet)
+  if (!is.finite(n) || n < 1) return(quiet)
+  # envir = parent.frame(2) so the progressor belongs to the caller of
+  # sim_map_fn()'s returned closure, which is the frame that lives for the
+  # whole loop; tying it to this frame would finish it immediately.
+  tryCatch(
+    progressr::progressor(steps = n, message = label, envir = parent.frame(2)),
+    error = function(e) quiet
+  )
+}
+
+#' Run `expr` with progress displayed, if progressr is available
+#'
+#' Backs the `progress` argument on [simulate_design()] and
+#' [diagnose_design()], for the reader who wants a bar once without learning
+#' that progressr exists. Global opt-in stays the better route:
+#' `progressr::handlers(global = TRUE)` once per session.
+#'
+#' @keywords internal
+#' @noRd
+with_dd_progress <- function(expr) {
+  if (!requireNamespace("progressr", quietly = TRUE)) {
+    warning(
+      "`progress = TRUE` needs the progressr package; continuing without it.",
+      call. = FALSE
+    )
+    return(expr)
+  }
+  progressr::with_progress(expr)
+}
+
+#' The map function itself, before progress is layered on
+#' @keywords internal
+#' @noRd
+sim_base_map_fn <- function() {
   has_furrr <- requireNamespace("furrr", quietly = TRUE)
   has_future <- requireNamespace("future", quietly = TRUE)
   if (has_furrr && has_future &&

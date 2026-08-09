@@ -5,9 +5,9 @@
 \alias{simulate_designs}
 \title{Simulate one or more designs}
 \usage{
-simulate_design(..., sims = NULL)
+simulate_design(..., sims = NULL, progress = FALSE)
 
-simulate_designs(..., sims = NULL)
+simulate_designs(..., sims = NULL, progress = FALSE)
 }
 \arguments{
 \item{...}{One or more \code{design} objects.}
@@ -16,6 +16,11 @@ simulate_designs(..., sims = NULL)
 means 500 flat simulations for a design with no step-level \code{draws}. A
 design with step-level \code{draws} runs in nested mode whether or not \code{sims}
 is supplied; supplying it warns and is otherwise ignored.}
+
+\item{progress}{If \code{TRUE}, display a progress bar for this call by wrapping
+it in \code{\link[progressr:with_progress]{progressr::with_progress()}}. The better habit is to opt in once per
+session with \code{progressr::handlers(global = TRUE)}, which covers every call
+and lets you choose how progress is shown. Nothing is displayed by default.}
 }
 \value{
 A tibble of stacked simulation results.
