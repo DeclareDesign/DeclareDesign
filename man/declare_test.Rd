@@ -49,3 +49,14 @@ design <- declare_model(N = 30, Z = rep(0:1, 15), Y = Z + rnorm(N)) +
   declare_test(Y ~ Z, .method = lm, term = "Z", label = "diff")
 draw_estimates(design)
 }
+\seealso{
+Other design declarations:
+\code{\link[=declare_assignment]{declare_assignment()}},
+\code{\link[=declare_estimator]{declare_estimator()}},
+\code{\link[=declare_inquiry]{declare_inquiry()}},
+\code{\link[=declare_measurement]{declare_measurement()}},
+\code{\link[=declare_model]{declare_model()}},
+\code{\link[=declare_sampling]{declare_sampling()}},
+\code{\link[=declare_step]{declare_step()}}
+}
+\concept{design declarations}

@@ -28,6 +28,20 @@ Adds a sampling indicator and subsets to sampled rows. By default, if no
 kept.
 }
 \examples{
-step <- declare_sampling(S = sample(rep(0:1, length.out = N)))
-attr(step, "step_type")
+design <-
+  declare_model(N = 200, Y = rnorm(N)) +
+  declare_sampling(S = sample(rep(0:1, length.out = N)))
+
+nrow(draw_data(design))
 }
+\seealso{
+Other design declarations:
+\code{\link[=declare_assignment]{declare_assignment()}},
+\code{\link[=declare_estimator]{declare_estimator()}},
+\code{\link[=declare_inquiry]{declare_inquiry()}},
+\code{\link[=declare_measurement]{declare_measurement()}},
+\code{\link[=declare_model]{declare_model()}},
+\code{\link[=declare_step]{declare_step()}},
+\code{\link[=declare_test]{declare_test()}}
+}
+\concept{design declarations}

@@ -20,7 +20,15 @@
 #'   bias = mean(estimate - estimand, na.rm = TRUE),
 #'   rmse = sqrt(mean((estimate - estimand)^2, na.rm = TRUE))
 #' )
-#' names(attr(diags, "dots"))
+#'
+#' design <-
+#'   declare_model(N = 30, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_assignment(Z = sample(rep(0:1, length.out = N))) +
+#'   declare_measurement(Y = Y_Z_0 * (1 - Z) + Y_Z_1 * Z) +
+#'   declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE")
+#'
+#' diagnose_design(design, sims = 5, bootstrap_sims = 0, diagnosands = diags)
 #'
 #' # power at the 10 percent level, computed on significant simulations only
 #' declare_diagnosands(power = mean(p.value <= alpha), alpha = 0.1)

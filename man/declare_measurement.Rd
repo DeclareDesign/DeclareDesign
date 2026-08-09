@@ -24,6 +24,21 @@ Like \code{\link[=declare_model]{declare_model()}} but does not append an ID col
 creating outcome measurements after assignment.
 }
 \examples{
-step <- declare_measurement(Y = Y_Z_0 * (1 - Z) + Y_Z_1 * Z)
-attr(step, "step_type")
+design <-
+  declare_model(N = 100, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
+  declare_assignment(Z = sample(rep(0:1, length.out = N))) +
+  declare_measurement(Y = Y_Z_0 * (1 - Z) + Y_Z_1 * Z)
+
+head(draw_data(design))
 }
+\seealso{
+Other design declarations:
+\code{\link[=declare_assignment]{declare_assignment()}},
+\code{\link[=declare_estimator]{declare_estimator()}},
+\code{\link[=declare_inquiry]{declare_inquiry()}},
+\code{\link[=declare_model]{declare_model()}},
+\code{\link[=declare_sampling]{declare_sampling()}},
+\code{\link[=declare_step]{declare_step()}},
+\code{\link[=declare_test]{declare_test()}}
+}
+\concept{design declarations}

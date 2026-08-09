@@ -5,7 +5,7 @@
 \alias{declare_inquiries}
 \alias{declare_estimand}
 \alias{declare_estimands}
-\title{Declare an inquiry (estimand)}
+\title{Declare an inquiry}
 \usage{
 declare_inquiry(
   ...,
@@ -60,10 +60,34 @@ re-executed \code{draws} times for each upstream draw during nested simulation.}
 A \code{design_step}.
 }
 \description{
-Each named argument defines an inquiry: an expression evaluated on the
-realized data that yields a numeric estimand.
+Each named argument records an inquiry: an expression evaluated on the data
+as it stands when the step runs. Its value on a given draw is the estimand.
 }
 \examples{
-step <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-attr(step, "step_type")
+design <-
+  declare_model(N = 100, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+
+draw_estimands(design)
+
+# Placed before declare_sampling(), the question is about the population;
+# placed after, about the sample.
+design <-
+  declare_model(N = 500, Y = rnorm(N)) +
+  declare_inquiry(population_mean = mean(Y)) +
+  declare_sampling(S = sample(rep(0:1, length.out = N))) +
+  declare_inquiry(sample_mean = mean(Y))
+
+draw_estimands(design)
 }
+\seealso{
+Other design declarations:
+\code{\link[=declare_assignment]{declare_assignment()}},
+\code{\link[=declare_estimator]{declare_estimator()}},
+\code{\link[=declare_measurement]{declare_measurement()}},
+\code{\link[=declare_model]{declare_model()}},
+\code{\link[=declare_sampling]{declare_sampling()}},
+\code{\link[=declare_step]{declare_step()}},
+\code{\link[=declare_test]{declare_test()}}
+}
+\concept{design declarations}

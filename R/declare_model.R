@@ -60,6 +60,7 @@ make_fabricate_step <- function(dots, id_label_na = FALSE) {
 #' `data = NULL`, so it must specify `N` (and any variables) directly.
 #' Subsequent model steps add columns to the existing data.
 #'
+#' @family design declarations
 #' @param ... Named arguments forwarded to [fabricatrZero::fabricate()]. Unquoted
 #'   expressions are evaluated lazily in the caller's environment with access
 #'   to the current data frame.
@@ -69,9 +70,16 @@ make_fabricate_step <- function(dots, id_label_na = FALSE) {
 #' @return A `design_step`.
 #' @export
 #' @examples
-#' step <- declare_model(N = 50, U = rnorm(N), Y = U + 1)
-#' df <- step(NULL)
-#' nrow(df)
+#' design <- declare_model(N = 50, U = rnorm(N), Y = U + 1)
+#'
+#' head(draw_data(design))
+#'
+#' # A second model step adds columns to the data the first one made.
+#' design <-
+#'   declare_model(N = 50, U = rnorm(N)) +
+#'   declare_model(Y_Z_0 = U, Y_Z_1 = U + 0.5)
+#'
+#' head(draw_data(design))
 declare_model <- function(..., label = "model", draws = 1L) {
   dots <- capture_dots_env(rlang::enquos(...))
   call <- sys.call()
@@ -95,11 +103,16 @@ declare_model <- function(..., label = "model", draws = 1L) {
 #' creating outcome measurements after assignment.
 #'
 #' @inheritParams declare_model
+#' @family design declarations
 #' @return A `design_step`.
 #' @export
 #' @examples
-#' step <- declare_measurement(Y = Y_Z_0 * (1 - Z) + Y_Z_1 * Z)
-#' attr(step, "step_type")
+#' design <-
+#'   declare_model(N = 100, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
+#'   declare_assignment(Z = sample(rep(0:1, length.out = N))) +
+#'   declare_measurement(Y = Y_Z_0 * (1 - Z) + Y_Z_1 * Z)
+#'
+#' head(draw_data(design))
 declare_measurement <- function(..., label = "measurement", draws = 1L) {
   dots <- capture_dots_env(rlang::enquos(...))
   call <- sys.call()
@@ -123,11 +136,15 @@ declare_measurement <- function(..., label = "measurement", draws = 1L) {
 #' [randomizr::complete_ra()] or similar).
 #'
 #' @inheritParams declare_model
+#' @family design declarations
 #' @return A `design_step`.
 #' @export
 #' @examples
-#' step <- declare_assignment(Z = sample(rep(0:1, length.out = N)))
-#' attr(step, "step_type")
+#' design <-
+#'   declare_model(N = 100, U = rnorm(N)) +
+#'   declare_assignment(Z = sample(rep(0:1, length.out = N)))
+#'
+#' table(draw_data(design)$Z)
 declare_assignment <- function(..., label = "assignment", draws = 1L) {
   dots <- capture_dots_env(rlang::enquos(...))
   call <- sys.call()
@@ -182,13 +199,17 @@ make_sampling_step <- function(dots, filter_quo) {
 #' kept.
 #'
 #' @inheritParams declare_model
+#' @family design declarations
 #' @param filter Optional unquoted expression evaluated against the data;
 #'   rows where the expression is `TRUE` are retained.
 #' @return A `design_step`.
 #' @export
 #' @examples
-#' step <- declare_sampling(S = sample(rep(0:1, length.out = N)))
-#' attr(step, "step_type")
+#' design <-
+#'   declare_model(N = 200, Y = rnorm(N)) +
+#'   declare_sampling(S = sample(rep(0:1, length.out = N)))
+#'
+#' nrow(draw_data(design))
 declare_sampling <- function(..., filter = NULL, label = "sampling",
                              draws = 1L) {
   dots <- capture_dots_env(rlang::enquos(...))

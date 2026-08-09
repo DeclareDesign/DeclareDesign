@@ -20,8 +20,15 @@ Stores \code{diagnosands} as an attribute on \code{design}; \code{\link[=diagnos
 use these in place of the defaults when present.
 }
 \examples{
-design <- declare_model(N = 30, Y = rnorm(N))
-design <- set_diagnosands(design,
-  declare_diagnosands(mean_Y = mean(estimate, na.rm = TRUE)))
-attr(design, "diagnosands") |> attr("step_type")
+design <-
+  declare_model(N = 30, Y = rnorm(N)) +
+  declare_inquiry(mu = mean(Y)) +
+  declare_estimator(Y ~ 1, .method = lm, term = "(Intercept)", inquiry = "mu")
+
+design <- set_diagnosands(
+  design,
+  declare_diagnosands(mean_estimate = mean(estimate, na.rm = TRUE))
+)
+
+diagnose_design(design, sims = 5, bootstrap_sims = 0)
 }

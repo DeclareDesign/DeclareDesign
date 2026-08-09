@@ -26,7 +26,25 @@ Declares a step that builds (or augments) the population data via
 Subsequent model steps add columns to the existing data.
 }
 \examples{
-step <- declare_model(N = 50, U = rnorm(N), Y = U + 1)
-df <- step(NULL)
-nrow(df)
+design <- declare_model(N = 50, U = rnorm(N), Y = U + 1)
+
+head(draw_data(design))
+
+# A second model step adds columns to the data the first one made.
+design <-
+  declare_model(N = 50, U = rnorm(N)) +
+  declare_model(Y_Z_0 = U, Y_Z_1 = U + 0.5)
+
+head(draw_data(design))
 }
+\seealso{
+Other design declarations:
+\code{\link[=declare_assignment]{declare_assignment()}},
+\code{\link[=declare_estimator]{declare_estimator()}},
+\code{\link[=declare_inquiry]{declare_inquiry()}},
+\code{\link[=declare_measurement]{declare_measurement()}},
+\code{\link[=declare_sampling]{declare_sampling()}},
+\code{\link[=declare_step]{declare_step()}},
+\code{\link[=declare_test]{declare_test()}}
+}
+\concept{design declarations}

@@ -28,6 +28,7 @@ handler_is_fabricate <- function(handler) {
 #' Wraps an arbitrary handler function as a step in the design. The handler
 #' must accept `data` as its first argument and return a data frame.
 #'
+#' @family design declarations
 #' @param handler A function whose first argument is `data`.
 #' @param ... Additional arguments passed to `handler` **as written**, so the
 #'   handler evaluates them itself. A bare column name arrives as a name, which

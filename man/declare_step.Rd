@@ -46,3 +46,14 @@ long <- data.frame(pair = rep(1:3, each = 2), role = rep(c("A", "B"), 3),
                    ID = sprintf("\%03d", 1:6), a = 1:6)
 wide(long)
 }
+\seealso{
+Other design declarations:
+\code{\link[=declare_assignment]{declare_assignment()}},
+\code{\link[=declare_estimator]{declare_estimator()}},
+\code{\link[=declare_inquiry]{declare_inquiry()}},
+\code{\link[=declare_measurement]{declare_measurement()}},
+\code{\link[=declare_model]{declare_model()}},
+\code{\link[=declare_sampling]{declare_sampling()}},
+\code{\link[=declare_test]{declare_test()}}
+}
+\concept{design declarations}

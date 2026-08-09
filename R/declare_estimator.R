@@ -198,6 +198,7 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
 #' Wraps a model-fitting function with metadata that links its tidied output
 #' to one or more inquiries during diagnosis.
 #'
+#' @family design declarations
 #' @param ... Arguments forwarded to `.method`. Typically the formula appears
 #'   first (e.g., `Y ~ Z`). A legacy `model =` argument is read as `.method`
 #'   with a deprecation warning rather than forwarded.
@@ -284,6 +285,7 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
 #' column; intended for tests not tied to an estimand.
 #'
 #' @inheritParams declare_estimator
+#' @family design declarations
 #' @param handler Optional handler function. When supplied, the test bypasses
 #'   `.method`/`.summary` and instead calls `handler(data, ...)` with the
 #'   evaluated dots, which must return a tidy table.

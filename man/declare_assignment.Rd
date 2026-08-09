@@ -24,6 +24,20 @@ Augments the data with an assignment column (typically using
 \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}} or similar).
 }
 \examples{
-step <- declare_assignment(Z = sample(rep(0:1, length.out = N)))
-attr(step, "step_type")
+design <-
+  declare_model(N = 100, U = rnorm(N)) +
+  declare_assignment(Z = sample(rep(0:1, length.out = N)))
+
+table(draw_data(design)$Z)
 }
+\seealso{
+Other design declarations:
+\code{\link[=declare_estimator]{declare_estimator()}},
+\code{\link[=declare_inquiry]{declare_inquiry()}},
+\code{\link[=declare_measurement]{declare_measurement()}},
+\code{\link[=declare_model]{declare_model()}},
+\code{\link[=declare_sampling]{declare_sampling()}},
+\code{\link[=declare_step]{declare_step()}},
+\code{\link[=declare_test]{declare_test()}}
+}
+\concept{design declarations}

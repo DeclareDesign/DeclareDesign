@@ -79,10 +79,12 @@ make_inquiry_step <- function(dots, subset_quo, label, handler = NULL) {
   }
 }
 
-#' Declare an inquiry (estimand)
+#' Declare an inquiry
 #'
-#' Each named argument defines an inquiry: an expression evaluated on the
-#' realized data that yields a numeric estimand.
+#' Each named argument records an inquiry: an expression evaluated on the data
+#' as it stands when the step runs. Its value on a given draw is the estimand.
+#'
+#' @family design declarations
 #'
 #' @param ... Named expressions. Each expression becomes an inquiry whose
 #'   numeric value is recorded in the simulation output.
@@ -98,8 +100,21 @@ make_inquiry_step <- function(dots, subset_quo, label, handler = NULL) {
 #' @return A `design_step`.
 #' @export
 #' @examples
-#' step <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-#' attr(step, "step_type")
+#' design <-
+#'   declare_model(N = 100, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+#'
+#' draw_estimands(design)
+#'
+#' # Placed before declare_sampling(), the question is about the population;
+#' # placed after, about the sample.
+#' design <-
+#'   declare_model(N = 500, Y = rnorm(N)) +
+#'   declare_inquiry(population_mean = mean(Y)) +
+#'   declare_sampling(S = sample(rep(0:1, length.out = N))) +
+#'   declare_inquiry(sample_mean = mean(Y))
+#'
+#' draw_estimands(design)
 declare_inquiry <- function(..., subset = NULL, label = "inquiry",
                             handler = NULL, draws = 1L) {
   dots <- capture_dots_env(rlang::enquos(...))
