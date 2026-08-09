@@ -452,6 +452,13 @@ test_that("a design with no dynamic lookup is still pruned", {
     saveRDS(x, f)
     file.size(f)
   }
+  # Measured against the object the design must not contain, never against an
+  # absolute byte count. A design's fixed overhead varies with the R version
+  # and the platform; whether it swallowed a 20,000-row data frame does not.
+  one_copy <- local({
+    unread <- data.frame(a = rnorm(20000))
+    size_of(unread)
+  })
   static <- local({
     unread <- data.frame(a = rnorm(20000))
     d <- data.frame(a = rnorm(1))
@@ -462,6 +469,6 @@ test_that("a design with no dynamic lookup is still pruned", {
     d <- data.frame(a = rnorm(1))
     size_of(declare_model(data = d) + declare_inquiry(q = mean(get("a"))))
   })
-  expect_lt(static, 50 * 1024)
-  expect_gt(dynamic, static * 2)
+  expect_lt(static, one_copy)
+  expect_gt(dynamic, one_copy)
 })
