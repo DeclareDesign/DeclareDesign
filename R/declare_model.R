@@ -55,6 +55,10 @@ make_fabricate_step <- function(dots, id_label_na = FALSE) {
 
 #' Declare the data-generating model
 #'
+#' The model describes the world the design runs in. It does not have to be
+#' correct: declaring one you doubt is how you find out whether the design
+#' still works when you are wrong about it.
+#'
 #' Declares a step that builds (or augments) the population data via
 #' [fabricatrZero::fabricate()]. The first model step in a design receives
 #' `data = NULL`, so it must specify `N` (and any variables) directly.

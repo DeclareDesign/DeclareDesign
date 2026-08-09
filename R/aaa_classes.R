@@ -1,4 +1,28 @@
-#' @keywords internal
+#' @details
+#' A design is a sequence of steps combined with `+`. Each step is one of the
+#' four elements of a research design:
+#'
+#' * [declare_model()] describes the world the design runs in.
+#' * [declare_inquiry()] records the question. Its value on a draw is the estimand.
+#' * [declare_sampling()] and [declare_assignment()] make up the data strategy.
+#' * [declare_measurement()] records what is observed.
+#' * [declare_estimator()] is the answer strategy.
+#'
+#' [diagnose_design()] simulates a design many times and reports how its
+#' estimates compare to its estimands: bias, power, coverage and the rest.
+#' [redesign()] changes a parameter and returns a new design, so two versions
+#' can be compared before any data are collected.
+#'
+#' ```
+#' design <-
+#'   declare_model(N = 100, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_assignment(Z = sample(rep(0:1, length.out = N))) +
+#'   declare_measurement(Y = Y_Z_0 * (1 - Z) + Y_Z_1 * Z) +
+#'   declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE")
+#'
+#' diagnose_design(design)
+#' ```
 "_PACKAGE"
 
 #' Null-coalescing operator

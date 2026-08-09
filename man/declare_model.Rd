@@ -20,6 +20,11 @@ re-executed \code{draws} times for each upstream draw during nested simulation.}
 A \code{design_step}.
 }
 \description{
+The model describes the world the design runs in. It does not have to be
+correct: declaring one you doubt is how you find out whether the design
+still works when you are wrong about it.
+}
+\details{
 Declares a step that builds (or augments) the population data via
 \code{\link[fabricatrZero:fabricate]{fabricatrZero::fabricate()}}. The first model step in a design receives
 \code{data = NULL}, so it must specify \code{N} (and any variables) directly.

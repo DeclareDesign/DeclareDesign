@@ -8,6 +8,32 @@
 \description{
 A ground-up rewrite of DeclareDesign built on tidyverse conventions. Declares, simulates, and diagnoses research designs with an API identical to DeclareDesign, using purrr for simulation, dplyr for diagnosis, and rlang for tidy evaluation.
 }
+\details{
+A design is a sequence of steps combined with \code{+}. Each step is one of the
+four elements of a research design:
+\itemize{
+\item \code{\link[=declare_model]{declare_model()}} describes the world the design runs in.
+\item \code{\link[=declare_inquiry]{declare_inquiry()}} records the question. Its value on a draw is the estimand.
+\item \code{\link[=declare_sampling]{declare_sampling()}} and \code{\link[=declare_assignment]{declare_assignment()}} make up the data strategy.
+\item \code{\link[=declare_measurement]{declare_measurement()}} records what is observed.
+\item \code{\link[=declare_estimator]{declare_estimator()}} is the answer strategy.
+}
+
+\code{\link[=diagnose_design]{diagnose_design()}} simulates a design many times and reports how its
+estimates compare to its estimands: bias, power, coverage and the rest.
+\code{\link[=redesign]{redesign()}} changes a parameter and returns a new design, so two versions
+can be compared before any data are collected.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{design <-
+  declare_model(N = 100, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_assignment(Z = sample(rep(0:1, length.out = N))) +
+  declare_measurement(Y = Y_Z_0 * (1 - Z) + Y_Z_1 * Z) +
+  declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE")
+
+diagnose_design(design)
+}\if{html}{\out{</div>}}
+}
 \author{
 \strong{Maintainer}: Alex Coppock \email{acoppock@gmail.com}
 
@@ -17,4 +43,3 @@ Authors:
 }
 
 }
-\keyword{internal}

@@ -364,17 +364,17 @@ Every open issue on the DeclareDesign tracker was run against both packages. The
 
 Six of the seven are the same cause seen from different angles, which is the useful thing the exercise showed. DeclareDesign splices an estimator's arguments into the method call as quosures, so every method not written for rlang receives an object it cannot use.
 
-**One regresses.** [#293](https://github.com/DeclareDesign/DeclareDesign/issues/293): a helper function whose own environment holds a parameter survives deletion of that parameter in DeclareDesign and does not here.
+**One regressed and has since been fixed.** [#293](https://github.com/DeclareDesign/DeclareDesign/issues/293): a helper function whose own environment holds a parameter used to survive deletion of that parameter in DeclareDesign and not here. Both now return 2.
 
 ```{r, purl = FALSE}
 m <- 2
 f <- function(x) m * x
 design <- declare_model(N = 2, X1 = f(1)) + NULL
 rm(m)
-draw_data(design)   # DeclareDesign: works. DeclareDesignZero: object 'm' not found
+draw_data(design)
 ```
 
-DeclareDesign copies function environments when it captures a step; `redesign()` here clones only the environment the expression itself was captured in.
+A design now carries the objects its expressions read, helper functions among them, which is also what lets a design survive `saveRDS()` and reach a parallel worker.
 
 **Two are feature requests neither package implements.** [#385](https://github.com/DeclareDesign/DeclareDesign/issues/385) asks for an estimator that errors to produce an `error = TRUE` row rather than abort the simulation, which matters for any MLE or MCMC procedure that fails on a few draws. DeclareDesignZero already does exactly that for diagnosands, so the pattern is available to reuse. [#497](https://github.com/DeclareDesign/DeclareDesign/issues/497) asks for `draw_data(design, theta = 0.5)`; both packages require going through `redesign()`, which works in both.
 
