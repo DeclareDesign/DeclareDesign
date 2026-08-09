@@ -5,6 +5,7 @@
 #' data frame, grouped by `inquiry`, `estimator`, `term`, and `outcome`
 #' where present.
 #'
+#' @family diagnosands
 #' @param ... Named expressions defining diagnosands.
 #' @param subset An expression evaluated on the simulations table; only rows
 #'   for which it is `TRUE` enter the diagnosands. `NULL` (the default) keeps
@@ -92,10 +93,31 @@ unwrap_quosure <- function(quo) {
 
 #' Default diagnosands
 #'
-#' Returns the standard set of diagnosands: mean estimand, mean estimate,
-#' bias, SD of estimates, RMSE, power, and coverage of nominal 95 percent
-#' confidence intervals.
+#' Returns the standard set of diagnosands. A diagnosand is a summary of a
+#' design's behaviour across simulations, so each one is computed over the
+#' whole set of draws rather than within any single draw.
 #'
+#' \describe{
+#'   \item{`mean_estimand`}{Average of the estimand across draws. The estimand
+#'     varies from draw to draw whenever the model is stochastic.}
+#'   \item{`mean_estimate`}{Average of the estimator's estimate across draws.}
+#'   \item{`bias`}{Average of estimate minus estimand. Zero means the estimator
+#'     lands on the estimand on average, not that it is close on any one draw.}
+#'   \item{`sd_estimate`}{Standard deviation of the estimates, which is the
+#'     true sampling variability of the design.}
+#'   \item{`rmse`}{Root mean squared error, the average distance between
+#'     estimate and estimand. It counts bias and variability together, so it is
+#'     the one to read when an estimator trades one against the other.}
+#'   \item{`power`}{Share of draws in which the p-value is at or below 0.05.
+#'     Read it as power only when the effect is real; under a true null the
+#'     same number is the false positive rate.}
+#'   \item{`coverage`}{Share of draws in which the confidence interval contains
+#'     the estimand. A 95 percent interval should give 0.95. Materially lower
+#'     means the intervals are too narrow and the design overstates its own
+#'     precision.}
+#' }
+#'
+#' @family diagnosands
 #' @return A diagnosand `design_step`.
 #' @export
 #' @examples

@@ -68,3 +68,12 @@ design <- declare_model(N = 100, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
 bigger <- redesign(design, N = 200)
 compare_diagnoses(design, bigger, sims = 20, bootstrap_sims = 20)
 }
+\seealso{
+Other simulation and diagnosis:
+\code{\link[=diagnose_design]{diagnose_design()}},
+\code{\link[=diagnose_simulations]{diagnose_simulations()}},
+\code{\link[=get_diagnosands]{get_diagnosands()}},
+\code{\link[=get_simulations]{get_simulations()}},
+\code{\link[=simulate_design]{simulate_design()}}
+}
+\concept{simulation and diagnosis}

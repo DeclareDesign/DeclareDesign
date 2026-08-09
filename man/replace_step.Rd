@@ -24,3 +24,11 @@ design <- declare_model(N = 30, Y = rnorm(N)) +
   declare_inquiry(mu = mean(Y))
 replace_step(design, "mu", declare_inquiry(med = median(Y)))
 }
+\seealso{
+Other modifying a design:
+\code{\link[=delete_step]{delete_step()}},
+\code{\link[=expand_design]{expand_design()}},
+\code{\link[=insert_step]{insert_step()}},
+\code{\link[=redesign]{redesign()}}
+}
+\concept{modifying a design}

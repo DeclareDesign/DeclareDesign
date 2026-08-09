@@ -19,6 +19,7 @@
 #' if the `furrr` package is installed, simulations will run in parallel with
 #' no other changes required.
 #'
+#' @family simulation and diagnosis
 #' @param ... One or more `design` objects.
 #' @param sims Number of simulations per design. Defaults to `NULL`, which
 #'   means 500 flat simulations for a design with no step-level `draws`. A

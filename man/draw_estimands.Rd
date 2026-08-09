@@ -23,3 +23,11 @@ design <- declare_model(N = 25, U = rnorm(N), Y = U) +
   declare_inquiry(mu = mean(Y))
 draw_estimands(design)
 }
+\seealso{
+Other drawing from a design:
+\code{\link[=draw_data]{draw_data()}},
+\code{\link[=draw_estimates]{draw_estimates()}},
+\code{\link[=get_estimates]{get_estimates()}},
+\code{\link[=run_design]{run_design()}}
+}
+\concept{drawing from a design}

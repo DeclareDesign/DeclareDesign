@@ -28,3 +28,11 @@ new_design <- insert_step(design,
   after = "model")
 names(new_design)
 }
+\seealso{
+Other modifying a design:
+\code{\link[=delete_step]{delete_step()}},
+\code{\link[=expand_design]{expand_design()}},
+\code{\link[=redesign]{redesign()}},
+\code{\link[=replace_step]{replace_step()}}
+}
+\concept{modifying a design}

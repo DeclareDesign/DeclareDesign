@@ -226,6 +226,7 @@ format.diagnosis <- function(x, digits = 2, ...) {
 }
 
 #' @rdname format.diagnosis
+#' @family diagnosands
 #' @param diagnosis A `diagnosis` object.
 #' @export
 reshape_diagnosis <- function(diagnosis, digits = 2) {

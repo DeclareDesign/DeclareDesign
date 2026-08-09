@@ -372,6 +372,7 @@ param_grid <- function(params, expand = TRUE) {
 #' one design, where `prob_each = c(0, .5, .5)` is three. Handing a bare
 #' vector to a parameter that currently holds one warns.
 #'
+#' @family modifying a design
 #' @param design A `design`.
 #' @param ... Named parameter values. An atomic vector supplies one design per
 #'   element; to vary a function or another non-atomic parameter, pass a list
@@ -437,6 +438,7 @@ extract_param_row <- function(param_df, i) {
 
 #' Build a family of designs from a designer function
 #'
+#' @family modifying a design
 #' @param designer A function returning a `design`.
 #' @param ... Named parameter values to vary.
 #' @param expand If `TRUE`, expand the grid; if `FALSE`, zip values.

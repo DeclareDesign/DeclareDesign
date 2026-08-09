@@ -168,6 +168,7 @@ dots_env <- function(dots, default = rlang::caller_env()) {
 
 #' Get the simulations table from a diagnosis
 #'
+#' @family simulation and diagnosis
 #' @param diagnosis A `diagnosis` object.
 #' @return A tibble of simulations.
 #' @export
@@ -182,6 +183,7 @@ get_simulations <- function(diagnosis) diagnosis$simulations_df
 
 #' Get the diagnosands table from a diagnosis
 #'
+#' @family simulation and diagnosis
 #' @param diagnosis A `diagnosis` object.
 #' @return A tibble of diagnosands.
 #' @export

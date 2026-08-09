@@ -84,6 +84,7 @@ long_replicates <- function(diagnosis, diagnosands, label_cols, keys, suffix) {
 #' diagnosis that took a long time to run can be reused. Passing two diagnoses
 #' computed with different diagnosands compares whatever they have in common.
 #'
+#' @family simulation and diagnosis
 #' @param design1,design2 A `design` or a `diagnosis`.
 #' @param sims Number of simulations, used only for arguments that are designs.
 #' @param bootstrap_sims Number of bootstrap replicates, used only for

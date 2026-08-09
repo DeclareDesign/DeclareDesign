@@ -22,3 +22,11 @@ design <- declare_model(N = 30, Y = rnorm(N)) +
   declare_inquiry(mu = mean(Y))
 delete_step(design, "mu") |> names()
 }
+\seealso{
+Other modifying a design:
+\code{\link[=expand_design]{expand_design()}},
+\code{\link[=insert_step]{insert_step()}},
+\code{\link[=redesign]{redesign()}},
+\code{\link[=replace_step]{replace_step()}}
+}
+\concept{modifying a design}

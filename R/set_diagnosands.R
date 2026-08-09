@@ -3,6 +3,7 @@
 #' Stores `diagnosands` as an attribute on `design`; [diagnose_design()] will
 #' use these in place of the defaults when present.
 #'
+#' @family diagnosands
 #' @param design A `design`.
 #' @param diagnosands A diagnosands `design_step`. Defaults to
 #'   [default_diagnosands()].
@@ -78,6 +79,7 @@ diagnosand_library <- function() {
 #' `mean_se`, `type_s_rate`, `exaggeration_ratio`, `var_estimate`,
 #' `mean_var_hat`, `prop_pos_sig`, and `mean_ci_length`.
 #'
+#' @family diagnosands
 #' @param ... Diagnosand names to keep, optionally preceded by a diagnosands
 #'   `design_step` to subset.
 #' @param alpha Significance level used by `power`, `type_s_rate`,
@@ -162,6 +164,7 @@ subset_diagnosands <- function(diagnosands, keep) {
 #' Records bibliographic information on the design. This is currently a
 #' lightweight stub.
 #'
+#' @family citing a design
 #' @param design A `design`.
 #' @param ... Citation fields (e.g., `title`, `author`, `year`).
 #' @return The design with a `citation` attribute set.
@@ -176,6 +179,7 @@ set_citation <- function(design, ...) {
 
 #' Retrieve a design's citation (stub)
 #'
+#' @family citing a design
 #' @param design A `design`.
 #' @return The citation list, or `NULL` if none has been set.
 #' @export

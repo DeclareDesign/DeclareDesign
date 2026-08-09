@@ -53,3 +53,11 @@ select_diagnosands("sd_estimate", "mean_se")
 # subset a custom set instead of the library
 select_diagnosands(default_diagnosands(), "bias", "rmse")
 }
+\seealso{
+Other diagnosands:
+\code{\link[=declare_diagnosands]{declare_diagnosands()}},
+\code{\link[=default_diagnosands]{default_diagnosands()}},
+\code{\link[=format.diagnosis]{format.diagnosis()}},
+\code{\link[=set_diagnosands]{set_diagnosands()}}
+}
+\concept{diagnosands}

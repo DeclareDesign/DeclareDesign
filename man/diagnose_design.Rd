@@ -53,3 +53,12 @@ design <- declare_model(N = 40, U = rnorm(N), Z = rep(0:1, 20), Y = U + Z) +
                     label = "ols")
 diagnose_design(design, sims = 5, bootstrap_sims = 0)
 }
+\seealso{
+Other simulation and diagnosis:
+\code{\link[=compare_diagnoses]{compare_diagnoses()}},
+\code{\link[=diagnose_simulations]{diagnose_simulations()}},
+\code{\link[=get_diagnosands]{get_diagnosands()}},
+\code{\link[=get_simulations]{get_simulations()}},
+\code{\link[=simulate_design]{simulate_design()}}
+}
+\concept{simulation and diagnosis}

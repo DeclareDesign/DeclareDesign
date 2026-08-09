@@ -32,3 +32,11 @@ design <- set_diagnosands(
 
 diagnose_design(design, sims = 5, bootstrap_sims = 0)
 }
+\seealso{
+Other diagnosands:
+\code{\link[=declare_diagnosands]{declare_diagnosands()}},
+\code{\link[=default_diagnosands]{default_diagnosands()}},
+\code{\link[=format.diagnosis]{format.diagnosis()}},
+\code{\link[=select_diagnosands]{select_diagnosands()}}
+}
+\concept{diagnosands}

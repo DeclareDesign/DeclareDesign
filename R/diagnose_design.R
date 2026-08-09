@@ -216,6 +216,7 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set,
 #' and so on) across simulations. If `bootstrap_sims > 0`, bootstrap standard
 #' errors for each diagnosand are also reported.
 #'
+#' @family simulation and diagnosis
 #' @param ... One or more `design` objects.
 #' @param sims Number of simulations. Defaults to `NULL`. When `NULL`, designs
 #'   with step-level `draws` run in nested mode; otherwise the design runs
@@ -283,6 +284,7 @@ diagnose_designs <- diagnose_design
 
 #' Diagnose a precomputed simulations table
 #'
+#' @family simulation and diagnosis
 #' @param simulations_df A tibble produced by [simulate_design()].
 #' @param diagnosands A diagnosands step (e.g., [default_diagnosands()]).
 #' @param bootstrap_sims Number of bootstrap replicates.

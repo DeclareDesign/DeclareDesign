@@ -72,3 +72,11 @@ reshape_diagnosis(d)
 # choose columns with select(), on the data frame it returns
 format(d) |> dplyr::select(Term, Bias, Power)
 }
+\seealso{
+Other diagnosands:
+\code{\link[=declare_diagnosands]{declare_diagnosands()}},
+\code{\link[=default_diagnosands]{default_diagnosands()}},
+\code{\link[=select_diagnosands]{select_diagnosands()}},
+\code{\link[=set_diagnosands]{set_diagnosands()}}
+}
+\concept{diagnosands}

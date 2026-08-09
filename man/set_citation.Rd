@@ -22,3 +22,8 @@ lightweight stub.
 design <- declare_model(N = 10, Y = rnorm(N))
 set_citation(design, title = "Example", author = "Coppock", year = 2026)
 }
+\seealso{
+Other citing a design:
+\code{\link[=cite_design]{cite_design()}}
+}
+\concept{citing a design}

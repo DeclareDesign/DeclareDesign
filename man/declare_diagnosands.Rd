@@ -46,3 +46,11 @@ diagnose_design(design, sims = 5, bootstrap_sims = 0, diagnosands = diags)
 # power at the 10 percent level, computed on significant simulations only
 declare_diagnosands(power = mean(p.value <= alpha), alpha = 0.1)
 }
+\seealso{
+Other diagnosands:
+\code{\link[=default_diagnosands]{default_diagnosands()}},
+\code{\link[=format.diagnosis]{format.diagnosis()}},
+\code{\link[=select_diagnosands]{select_diagnosands()}},
+\code{\link[=set_diagnosands]{set_diagnosands()}}
+}
+\concept{diagnosands}

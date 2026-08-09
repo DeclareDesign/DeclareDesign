@@ -20,6 +20,7 @@ resolve_step_index <- function(design, step) {
 
 #' Insert a step into a design
 #'
+#' @family modifying a design
 #' @param design A `design`.
 #' @param new_step A `design_step` to insert.
 #' @param after,before A label, integer, or `design_step` indicating the
@@ -55,6 +56,7 @@ insert_step <- function(design, new_step, after = NULL, before = NULL) {
 
 #' Delete a step from a design
 #'
+#' @family modifying a design
 #' @param design A `design`.
 #' @param step A label, integer, or `design_step`.
 #' @return A `design`.
@@ -76,6 +78,7 @@ delete_step <- function(design, step) {
 
 #' Replace a step in a design
 #'
+#' @family modifying a design
 #' @param design A `design`.
 #' @param step A label, integer, or `design_step` to replace.
 #' @param new_step The replacement `design_step`.

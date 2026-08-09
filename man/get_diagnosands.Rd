@@ -23,3 +23,12 @@ design <- declare_model(N = 30, Y = rnorm(N), Z = rep(0:1, 15)) +
 d <- diagnose_design(design, sims = 5, bootstrap_sims = 0)
 get_diagnosands(d)
 }
+\seealso{
+Other simulation and diagnosis:
+\code{\link[=compare_diagnoses]{compare_diagnoses()}},
+\code{\link[=diagnose_design]{diagnose_design()}},
+\code{\link[=diagnose_simulations]{diagnose_simulations()}},
+\code{\link[=get_simulations]{get_simulations()}},
+\code{\link[=simulate_design]{simulate_design()}}
+}
+\concept{simulation and diagnosis}

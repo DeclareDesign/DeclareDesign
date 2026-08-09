@@ -22,3 +22,11 @@ design <- declare_model(N = 30, U = rnorm(N), Y = U) +
                     inquiry = "mu", label = "ols")
 draw_estimates(design)
 }
+\seealso{
+Other drawing from a design:
+\code{\link[=draw_data]{draw_data()}},
+\code{\link[=draw_estimands]{draw_estimands()}},
+\code{\link[=get_estimates]{get_estimates()}},
+\code{\link[=run_design]{run_design()}}
+}
+\concept{drawing from a design}

@@ -20,3 +20,8 @@ design <- set_citation(declare_model(N = 10, Y = rnorm(N)),
                        title = "Example")
 cite_design(design)
 }
+\seealso{
+Other citing a design:
+\code{\link[=set_citation]{set_citation()}}
+}
+\concept{citing a design}

@@ -7,6 +7,7 @@
 #' Use [draw_data()] for the realized data frame, [draw_estimands()] for the
 #' inquiries alone, and [draw_estimates()] for the estimates alone.
 #'
+#' @family drawing from a design
 #' @param design A `design`.
 #' @return A tibble of estimates with estimands joined where applicable.
 #' @export
@@ -67,6 +68,7 @@ run_design_internal <- function(design,
 #' run, so a design whose estimator fails still draws its data, and drawing
 #' data does not pay to fit models it would throw away.
 #'
+#' @family drawing from a design
 #' @param design A `design`.
 #' @return A data frame.
 #' @export
@@ -82,6 +84,7 @@ draw_data <- function(design) {
 #'
 #' Runs the data-generating and inquiry steps only, not the estimators.
 #'
+#' @family drawing from a design
 #' @param design A `design`.
 #' @return A tibble of inquiries (one row per estimand).
 #' @export
@@ -101,6 +104,7 @@ draw_estimand <- draw_estimands
 #'
 #' Runs the design once and returns its estimates joined to inquiries.
 #'
+#' @family drawing from a design
 #' @param design A `design`.
 #' @return A tibble of estimates with estimands joined where applicable.
 #' @export
@@ -119,6 +123,7 @@ draw_estimates <- function(design) {
 #'
 #' Runs only the estimator steps of a design against a supplied data frame.
 #'
+#' @family drawing from a design
 #' @param design A `design`.
 #' @param data A data frame.
 #' @param start Integer; first step index to consider.

@@ -22,3 +22,11 @@ design <- declare_model(N = 25, X = rnorm(N))
 df <- draw_data(design)
 nrow(df)
 }
+\seealso{
+Other drawing from a design:
+\code{\link[=draw_estimands]{draw_estimands()}},
+\code{\link[=draw_estimates]{draw_estimates()}},
+\code{\link[=get_estimates]{get_estimates()}},
+\code{\link[=run_design]{run_design()}}
+}
+\concept{drawing from a design}
