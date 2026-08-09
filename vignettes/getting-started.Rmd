@@ -1,0 +1,104 @@
+---
+title: "Getting started"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+set.seed(343)
+```
+
+```{r, eval = FALSE}
+library(DeclareDesign)
+library(fabricatr)
+library(randomizr)
+library(estimatr)
+```
+
+```{r, include = FALSE}
+# TEMPORARY, delete at release. The 2.0 packages are not yet on CRAN under
+# their own names, so the chunks below run against the branch packages while
+# the chunk above shows what a reader will type.
+library(DeclareDesignZero)
+library(fabricatrZero)
+library(randomizr)
+library(estimatr)
+```
+
+`DeclareDesign` declares and diagnoses. The other three supply the pieces a
+declaration is written out of: `fabricatr` makes data, `randomizr` randomizes,
+and `estimatr` estimates.
+
+## Declaration
+
+Every design element is made with a function that starts with the word `declare`. Here is one, an assignment that gives each unit a 60 percent chance of treatment:
+
+```{r}
+simple_random_assignment <- declare_assignment(Z = simple_ra(N = N, prob = 0.6))
+```
+
+Design elements are themselves functions, which is why the same declaration produces a different assignment each time you use it rather than one fixed vector.
+
+A two-arm randomized experiment with 100 units puts four elements together with `+`:
+
+```{r}
+declaration <-
+  declare_model(
+    N = 100,
+    potential_outcomes(Y ~ 0.2 * Z + rnorm(N))
+  ) +
+  declare_inquiry(ATE = mean(Y_Z_1) - mean(Y_Z_0)) +
+  declare_assignment(Z = complete_ra(N)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, .method = difference_in_means, inquiry = "ATE")
+```
+
+Run the design to see what one study would look like:
+
+```{r}
+head(draw_data(declaration))
+```
+
+Both potential outcomes are in the data because you are simulating the world. A real study observes `Y` alone.
+
+```{r}
+draw_estimands(declaration)
+
+draw_estimates(declaration)
+```
+
+## Diagnosis
+
+Diagnosis is the process of simulating the design many times and calculating summary statistics about the design that describe its properties, which we call diagnosands.
+
+```{r}
+diagnosis <- diagnose_design(declaration, sims = 100)
+
+diagnosis
+```
+
+Bias sits near zero, so the estimator recovers the estimand on average. Power is the number to look at here: with 100 units and an effect of 0.2, most runs of this study end without a significant result.
+
+Each diagnosand comes with a bootstrapped standard error, so you can tell a real difference from simulation noise. `?default_diagnosands` says what each one means.
+
+## Redesign
+
+We redesign to learn how the diagnosands change as design features change. `redesign()` over a range of sample sizes produces a list of designs:
+
+```{r}
+designs <- redesign(declaration, N = c(100, 200, 300, 400, 500))
+
+diagnose_design(designs, sims = 100)
+```
+
+Power rises with `N` while bias stays where it was. Choosing a sample size is now an argument about a table rather than a hunch, and none of it required collecting data.
+
+## A design is code
+
+The declaration above is the whole design: the model, the inquiry, the data strategy and the answer strategy, in one object you can run, diagnose, change, and send to a collaborator. `cite_design()` gives the citation, `print_code()` gives the code back, and `?DeclareDesign` lists the verbs.
+
+The book at <https://book.declaredesign.org> works through the same steps at length, and its library of designs covers the common ones.
