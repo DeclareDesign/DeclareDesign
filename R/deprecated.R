@@ -80,3 +80,43 @@ tidy_estimator <- function(...) {
   rlang::warn("`tidy_estimator()` is deprecated. Use `label_estimator()` instead.")
   label_estimator(...)
 }
+
+#' Defunct step declarations from DeclareDesign 1.x
+#'
+#' `declare_potential_outcomes()` and `declare_reveal()` were separate steps in
+#' 1.x. In 2.0 potential outcomes belong in [declare_model()] and revealing
+#' belongs in [declare_measurement()], so neither has a 2.0 equivalent as a
+#' step of its own.
+#'
+#' They exist here only so that 1.x code fails with a message saying what to
+#' write instead. Without them R reports `could not find function`, which says
+#' nothing about the replacement.
+#'
+#' @param ... Ignored.
+#' @return Never returns; always raises an error.
+#' @name declare-defunct
+NULL
+
+#' @rdname declare-defunct
+#' @export
+declare_potential_outcomes <- function(...) {
+  rlang::abort(c(
+    "`declare_potential_outcomes()` is not a step in DeclareDesign 2.0.",
+    "i" = "Put potential outcomes in the model, as a formula:",
+    "*" = "declare_model(N = 100, potential_outcomes(Y ~ 0.2 * Z + U))",
+    "i" = "Named potential outcomes are ordinary model variables:",
+    "*" = "declare_model(Y_Z_0 = U, Y_Z_1 = U + 0.2)"
+  ))
+}
+
+#' @rdname declare-defunct
+#' @export
+declare_reveal <- function(...) {
+  rlang::abort(c(
+    "`declare_reveal()` is not a step in DeclareDesign 2.0.",
+    "i" = "Reveal outcomes in the measurement step:",
+    "*" = "declare_measurement(Y = reveal_outcomes(Y ~ Z))",
+    "i" = "Several assignment variables go on the right-hand side:",
+    "*" = "declare_measurement(Y = reveal_outcomes(Y ~ A + B))"
+  ))
+}

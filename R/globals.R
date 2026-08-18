@@ -7,6 +7,9 @@ utils::globalVariables(c(
   "var_total", ".y", ".level_mean", ".within_var"
 ))
 
+#' @importFrom estimatrZero lm_robust
+#' @importFrom fabricatrZero fabricate potential_outcomes reveal_outcomes
+#' @importFrom randomizr complete_ra
 #' @importFrom rlang .data
 #' @importFrom stats coef quantile setNames
 #' @importFrom rlang :=

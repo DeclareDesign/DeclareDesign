@@ -263,13 +263,12 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
     method_expr <- NULL
   }
   if (is.null(.method)) {
-    if (requireNamespace("estimatr", quietly = TRUE)) {
-      .method <- estimatr::lm_robust
-      method_name <- "lm_robust"
-    } else {
-      .method <- stats::lm
-      method_name <- "lm"
-    }
+    # estimatrZero is a Depends, so lm_robust is always there. The former guard
+    # fell back to stats::lm when estimatr was missing, which silently turned
+    # HC2 standard errors into classical ones: an analysis choice made by an
+    # installation accident, with nothing printed to say so.
+    .method <- estimatrZero::lm_robust
+    method_name <- "lm_robust"
   } else if (is.null(method_expr)) {
     method_name <- legacy$method_name
   } else {

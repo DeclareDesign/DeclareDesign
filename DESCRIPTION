@@ -9,18 +9,22 @@ Description: A ground-up rewrite of DeclareDesign built on tidyverse conventions
     rlang for tidy evaluation.
 License: MIT + file LICENSE
 Encoding: UTF-8
-Depends: R (>= 4.1.0)
+Depends:
+    R (>= 4.1.0),
+    randomizr (>= 1.0.1),
+    fabricatrZero (>= 2.0.0),
+    estimatrZero (>= 2.0.0)
 Imports:
     broom,
     dplyr,
-    fabricatrZero (>= 2.0.0),
     generics,
     purrr,
     rlang,
     tibble,
     tidyr
 Remotes:
-    DeclareDesign/fabricatr@rewrite
+    fabricatrZero=DeclareDesign/fabricatr@rewrite,
+    estimatrZero=DeclareDesign/estimatr@rewrite
 Suggests:
     estimatr,
     fabricatr,
@@ -29,7 +33,6 @@ Suggests:
     knitr,
     MASS,
     progressr,
-    randomizr,
     rmarkdown,
     testthat (>= 3.0.0),
     withr
