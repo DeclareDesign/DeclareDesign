@@ -296,7 +296,7 @@ add_parens <- function(x, digits = 2) {
 summary.design <- function(object, ...) {
   print(object)
   cat("\nParameters and objects the design refers to:\n")
-  print_objects(find_all_objects(object))
+  print(find_all_objects(object))
   invisible(object)
 }
 

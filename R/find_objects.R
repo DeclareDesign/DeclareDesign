@@ -141,6 +141,7 @@ find_all_objects <- function(design) {
     do.call(rbind, rows)
   }
   row.names(out) <- NULL
+  class(out) <- c("objects", "data.frame")
   out
 }
 
@@ -171,23 +172,31 @@ current_param_value <- function(design, name) {
   NULL
 }
 
-#' Aggregate the objects table to one row per name and print it
+#' Print the objects table, one row per name
 #'
-#' @keywords internal
-#' @noRd
-print_objects <- function(objects) {
-  if (nrow(objects) == 0) {
+#' The table carries an `env` column of environments, which `print.data.frame`
+#' cannot format, so the table is aggregated down to the three columns a reader
+#' wants before it is printed.
+#'
+#' @param x An `objects` table, as returned by `find_all_objects()`.
+#' @param ... Ignored.
+#' @return The input invisibly.
+#' @export
+#' @method print objects
+print.objects <- function(x, ...) {
+  if (nrow(x) == 0) {
     cat("No parameters or objects found in the design.\n")
-    return(invisible(objects))
+    return(invisible(x))
   }
-  tmp <- unique(objects[c("name", "value_str", "step")])
+  tmp <- unique(x[c("name", "value_str", "step")])
+  class(tmp) <- "data.frame"
   out <- stats::aggregate(
     step ~ name + value_str, data = tmp,
     FUN = function(s) paste(sort(unique(s)), collapse = ", ")
   )
   names(out)[names(out) == "step"] <- "steps"
   print(out[order(tolower(out$name)), , drop = FALSE], row.names = FALSE)
-  invisible(objects)
+  invisible(x)
 }
 
 #' Sentinel distinguishing "bound to NULL" from "not bound"
