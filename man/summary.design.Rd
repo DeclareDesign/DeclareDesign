@@ -15,9 +15,8 @@
 The input invisibly.
 }
 \description{
-Prints the steps, then the parameters and objects the design's expressions
-refer to: the names \code{\link[=redesign]{redesign()}} can change, where each one was found, and
-which steps would respond to a change.
+The same as printing it: the steps, then the parameters and objects the
+design's expressions refer to.
 }
 \examples{
 N <- 30

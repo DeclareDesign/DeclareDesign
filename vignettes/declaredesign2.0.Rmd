@@ -74,13 +74,13 @@ diagnose_design(designs, sims = 500)
 
 `tau` is a free symbol inside the model step's captured expression. `redesign()` finds it, clones the environment the expression was captured in, and rebinds it. The parameter then travels forward automatically: it appears as a column in the simulations table and as a grouping variable in the diagnosands table, so custom diagnosands can refer to it directly.
 
-`summary()` on a design lists the names `redesign()` can reach, with the value each currently holds and the steps that would respond to a change, and asking for a change to a name that is not one of them warns instead of silently returning the design you started with:
+Printing a design lists the names `redesign()` can reach, with the value each currently holds, its kind, and the steps that would respond to a change (`summary()` prints the same thing). Asking for a change to a name that is not one of them warns instead of silently returning the design you started with:
 
 ```{r, purl = FALSE}
-summary(design)
+print(design)
 #> Parameters and objects the design refers to:
-#>  name value_str steps
-#>   tau       0.3     1
+#>  name value_str   kind steps
+#>   tau       0.3 scalar     1
 
 redesign(design, taw = 0.5)
 #> Warning: You requested a change to taw but taw is not found in the design.
@@ -88,7 +88,7 @@ redesign(design, taw = 0.5)
 
 The names it finds are the objects the design's expressions read out of the environment they were written in, plus arguments declared as literal values, such as the `N` of `declare_model(N = 500)`. A value written inline inside a call, as in `complete_ra(N, prob_each = c(0.2, 0.8))`, is not one of them: there is no name to rebind, so pull it out into an object first. Functions count, so which estimator or which summary function a design uses can itself be a parameter: `redesign(design, g = median)` swaps `g` everywhere it appears.
 
-An atomic vector always supplies one value per design, which is what makes `N = c(100, 200)` two designs. A parameter that is itself a vector therefore has to be wrapped, in this package and in DeclareDesign both:
+A bare atomic vector always supplies one value per design, which is what makes `N = c(100, 200)` two designs. A parameter that is itself a vector therefore has to be wrapped, in this package and in DeclareDesign both:
 
 ```{r, purl = FALSE}
 redesign(design, prob_each = c(0, 0.5, 0.5))
@@ -100,6 +100,15 @@ redesign(design, prob_each = list(c(0, 0.5, 0.5)))
 ```
 
 DeclareDesign hands back the three broken designs without comment, and they fail later, when something draws from one of them. The rule is the same here; only the complaint moves to the call that caused it.
+
+The rule applies to bare vectors and bare lists, and to nothing else. A data frame, a matrix, a function and anything else carrying a class is one value, so a design built on a supplied data set is re-run on another one by naming it:
+
+```{r, purl = FALSE}
+design <- declare_model(data = pilot, Y = Y_star + tau) + declare_inquiry(mu = mean(Y))
+redesign(design, data = full_sample)
+```
+
+DeclareDesign reads the data frame as a list of columns there and asks for one design per column.
 
 ## What changes, and why
 

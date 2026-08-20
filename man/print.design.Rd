@@ -15,7 +15,10 @@
 The input invisibly.
 }
 \description{
-Print a design
+Lists the steps, then the parameters and objects the design's expressions
+refer to: the names \code{\link[=redesign]{redesign()}} can change, the value each one currently
+holds, its kind, and which steps would respond to a change. A design with
+no such names prints its steps alone.
 }
 \examples{
 d <- declare_model(N = 30, Y = rnorm(N)) + NULL

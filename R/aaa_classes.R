@@ -133,14 +133,14 @@ infer_estimator_label <- function(step, include_method = FALSE) {
 relabel_estimator_step <- function(step, new_label) {
   step_type <- attr(step, "step_type")
   add_inquiry <- identical(step_type, "estimator")
-  inquiry_arg <- if (add_inquiry) attr(step, "inquiry_arg") else NULL
+  inquiry_quo <- if (add_inquiry) attr(step, "inquiry_quo") else NULL
   fn <- make_estimator_step(
     method      = attr(step, "method_arg"),
     summary_fn  = attr(step, "summary_arg"),
     dots        = attr(step, "dots"),
     label       = new_label,
-    inquiry     = inquiry_arg,
-    term        = attr(step, "term_arg"),
+    inquiry     = inquiry_quo,
+    term        = attr(step, "term_quo"),
     add_inquiry = add_inquiry,
     handler     = attr(step, "handler_fn")
   )
@@ -154,8 +154,8 @@ relabel_estimator_step <- function(step, new_label) {
     call         = attr(step, "call"),
     method_arg   = attr(step, "method_arg"),
     summary_arg  = attr(step, "summary_arg"),
-    inquiry_arg  = inquiry_arg,
-    term_arg     = attr(step, "term_arg"),
+    inquiry_quo  = inquiry_quo,
+    term_quo     = attr(step, "term_quo"),
     handler_fn   = attr(step, "handler_fn"),
     method_name  = attr(step, "method_name")
   )

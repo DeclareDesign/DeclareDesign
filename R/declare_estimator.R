@@ -121,6 +121,13 @@ normalize_inquiry <- function(inquiry) {
 
 #' Build an estimator/test step closure
 #'
+#' `inquiry` and `term` arrive as quosures and are evaluated on every draw, in
+#' the environment the declaration was written in. They are declared arguments
+#' like any other, so [redesign()] has to be able to reach them: an estimator
+#' whose `term` reads `paste0("factor(Z)", seq_len(m_arms)[-1])` has to follow
+#' `m_arms` when the design is re-parameterized, or the design half-updates
+#' and reports fewer contrasts than it assigns, without erroring.
+#'
 #' @keywords internal
 #' @noRd
 make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
@@ -147,6 +154,11 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
     # call. The arguments are spliced in as written, so anything the method
     # resolves against the data it resolves itself.
     call_env <- rlang::env(decl_env, .dd_data = data)
+    # Evaluated per draw, not at declaration, so that a redesign() reaches
+    # them. Neither reads the data: they name model terms and inquiry labels,
+    # both of which belong to the declaration's own environment.
+    term <- eval_step_arg(term)
+    inquiry <- normalize_inquiry(eval_step_arg(inquiry))
     # An estimator that fails on one draw used to take the whole run with it,
     # which on a 500-sim diagnosis with a slow method is the expensive way to
     # learn that a fit did not converge. The draw is recorded as a failure
@@ -254,6 +266,8 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
                               inquiry = NULL, term = NULL, label = "estimator",
                               handler = NULL, draws = 1L) {
   dots <- capture_dots_env(rlang::enquos(...))
+  term_quo <- capture_quosure_env(rlang::enquo(term))
+  inquiry_quo <- capture_quosure_env(rlang::enquo(inquiry))
   call <- sys.call()
   method_expr <- substitute(.method)
   legacy <- extract_legacy_model(dots)
@@ -274,14 +288,16 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
   } else {
     method_name <- method_expr_label(method_expr)
   }
-  inquiry_chr <- normalize_inquiry(inquiry)
+  # Evaluated once here as well, so that an inquiry passed as a step object
+  # fails where it was written rather than on the first draw.
+  normalize_inquiry(rlang::eval_tidy(inquiry_quo))
   fn <- make_estimator_step(
     method      = .method,
     summary_fn  = .summary,
     dots        = dots,
     label       = label,
-    inquiry     = inquiry_chr,
-    term        = term,
+    inquiry     = inquiry_quo,
+    term        = term_quo,
     add_inquiry = TRUE,
     handler     = handler
   )
@@ -295,8 +311,8 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
     call         = call,
     method_arg   = .method,
     summary_arg  = .summary,
-    inquiry_arg  = inquiry_chr,
-    term_arg     = term,
+    inquiry_quo  = inquiry_quo,
+    term_quo     = term_quo,
     handler_fn   = handler,
     method_name  = method_name
   )
@@ -326,6 +342,7 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
                          term = NULL, label = "test", handler = NULL,
                          draws = 1L) {
   dots <- capture_dots_env(rlang::enquos(...))
+  term_quo <- capture_quosure_env(rlang::enquo(term))
   call <- sys.call()
   method_expr <- substitute(.method)
   legacy <- extract_legacy_model(dots)
@@ -348,7 +365,7 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
     dots        = dots,
     label       = label,
     inquiry     = NULL,
-    term        = term,
+    term        = term_quo,
     add_inquiry = FALSE,
     handler     = handler
   )
@@ -362,8 +379,8 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
     call         = call,
     method_arg   = .method,
     summary_arg  = .summary,
-    inquiry_arg  = NULL,
-    term_arg     = term,
+    inquiry_quo  = NULL,
+    term_quo     = term_quo,
     handler_fn   = handler,
     method_name  = method_name
   )

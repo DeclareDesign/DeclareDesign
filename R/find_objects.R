@@ -59,13 +59,32 @@ describe_value <- function(x) {
   paste0("<", class(x)[1], ">")
 }
 
+#' The kind of value a parameter holds
+#'
+#' Reported alongside each name so that a caller building a control for a
+#' parameter, or deciding how to pass a replacement, does not have to inspect
+#' the value itself. The kinds line up with how [redesign()] reads a bare
+#' replacement: `scalar`, `vector` and `list` supply one design per element,
+#' and `data`, `function` and `other` are single values.
+#'
+#' @keywords internal
+#' @noRd
+param_kind <- function(x) {
+  if (is.function(x)) return("function")
+  if (is.data.frame(x) || !is.null(dim(x))) return("data")
+  if (is.object(x)) return("other")
+  if (is.list(x)) return("list")
+  if (is.atomic(x)) return(if (length(x) == 1L) "scalar" else "vector")
+  "other"
+}
+
 #' Every quosure a step carries
 #'
 #' @keywords internal
 #' @noRd
 step_quosures <- function(step) {
   quos <- c(as.list(attr(step, "dots")),
-            list(attr(step, "filter_quo"), attr(step, "subset_quo")))
+            lapply(side_quo_names(), function(nm) attr(step, nm)))
   Filter(rlang::is_quosure, quos)
 }
 
@@ -79,16 +98,41 @@ step_quosures <- function(step) {
 #' name a column supplied by an earlier step, are both left out.
 #'
 #' A name a previous expression put in the data is a column, not a parameter:
-#' the data mask shadows the environment, so once `N` has been declared by a
-#' step, a later `rnorm(N)` reads the column and not whatever `N` happens to
-#' be bound to in the workspace.
+#' the data mask shadows the environment, so once a step has declared `Y`, a
+#' later `mean(Y)` reads the column and not whatever `Y` happens to be bound
+#' to in the workspace. Only steps that build data shadow names this way. A
+#' name handed to a handler (`declare_inquiry(handler = f, m_arms = m_arms)`)
+#' is an argument and creates no column, so it stays visible to every later
+#' step, and `redesign(design, m_arms = 4)` reaches all of them.
+#'
+#' `N` is its own case. Within the step that declares it, `rnorm(N)` reads the
+#' number of rows fabricate is building rather than the workspace's `N`, so the
+#' step shadows it. It is not a column, though, so it does not shadow anything
+#' later: an estimator whose `term` reads `N`, or a second level declaring
+#' `nest_level(N = N)`, is reading the workspace and can be redesigned.
 #'
 #' @param design A `design` or a `design_step`.
 #' @return A data frame with one row per name per step: `name`, `value_str`,
+#'   `kind` (`scalar`, `vector`, `list`, `data`, `function` or `other`),
 #'   `step`, `quosure`, and the environment the name was found in. Rows are
 #'   in step order.
 #' @keywords internal
 #' @noRd
+#' Whether a step's named arguments become columns of the data
+#'
+#' A step that runs `fabricate()` turns each named dot into a column, which
+#' shadows the same name for every expression after it. A step with an
+#' explicit handler passes its named dots to that handler as arguments, and
+#' an inquiry or an estimator names inquiries and terms rather than columns.
+#'
+#' @keywords internal
+#' @noRd
+step_builds_data <- function(step) {
+  is.null(attr(step, "handler_fn")) &&
+    isTRUE(attr(step, "step_type") %in%
+             c("model", "measurement", "assignment", "sampling"))
+}
+
 find_all_objects <- function(design) {
   if (inherits(design, "design_step")) {
     design <- construct_design(wrap_step(design))
@@ -99,43 +143,54 @@ find_all_objects <- function(design) {
   steps <- unclass(design)
   rows <- list()
   mask <- character(0)
-  add_row <- function(name, value_str, step, quosure, env) {
+  add_row <- function(name, value, step, quosure, env) {
     rows[[length(rows) + 1L]] <<- data.frame(
-      name = name, value_str = value_str, step = step, quosure = quosure,
-      env = I(list(env)), stringsAsFactors = FALSE
+      name = name, value_str = describe_value(value), kind = param_kind(value),
+      step = step, quosure = quosure, env = I(list(env)),
+      stringsAsFactors = FALSE
     )
   }
-  add_quosure <- function(quo, step) {
+  add_quosure <- function(quo, step, masked = character(0)) {
     env <- rlang::quo_get_env(quo)
     label <- rlang::as_label(rlang::quo_get_expr(quo))
-    for (name in setdiff(unique(expr_symbols(rlang::quo_get_expr(quo))), mask)) {
+    for (name in setdiff(unique(expr_symbols(rlang::quo_get_expr(quo))), masked)) {
       found <- user_binding_env(env, name)
       if (is.null(found)) next
       value <- tryCatch(rlang::env_get(found, name), error = function(e) NULL)
       if (inherits(value, "design")) next
-      add_row(name, describe_value(value), step, label, found)
+      add_row(name, value, step, label, found)
     }
   }
   for (i in seq_along(steps)) {
     step <- steps[[i]]
     dots <- attr(step, "dots")
     dot_names <- names(dots) %||% rep("", length(dots))
+    builds_data <- step_builds_data(step)
+    step_mask <- character(0)
     for (j in seq_along(dots)) {
       expr <- rlang::quo_get_expr(dots[[j]])
       if (nzchar(dot_names[j]) && is.atomic(expr) && length(expr) <= 5) {
-        add_row(dot_names[j], describe_value(expr), i, dot_names[j], NULL)
+        add_row(dot_names[j], expr, i, dot_names[j], NULL)
       }
-      add_quosure(dots[[j]], i)
-      if (nzchar(dot_names[j])) mask <- c(mask, dot_names[j])
+      add_quosure(dots[[j]], i, c(mask, step_mask))
+      if (builds_data && nzchar(dot_names[j])) step_mask <- c(step_mask, dot_names[j])
     }
-    for (quo in Filter(rlang::is_quosure,
-                       list(attr(step, "filter_quo"), attr(step, "subset_quo")))) {
-      add_quosure(quo, i)
+    # `N` is shadowed inside the step that declares it, because `rnorm(N)`
+    # there reads the number of rows being built. It is not a column, though,
+    # so it does not shadow the steps that follow.
+    mask <- c(mask, setdiff(step_mask, "N"))
+    for (nm in side_quo_names()) {
+      quo <- attr(step, nm)
+      if (!rlang::is_quosure(quo)) next
+      # `filter` and `subset` are evaluated against the data; `term` and
+      # `inquiry` are evaluated in the environment they were written in, so
+      # no column can shadow them.
+      add_quosure(quo, i, if (nm %in% c("filter_quo", "subset_quo")) mask else character(0))
     }
   }
   out <- if (length(rows) == 0) {
     data.frame(name = character(0), value_str = character(0),
-               step = integer(0), quosure = character(0),
+               kind = character(0), step = integer(0), quosure = character(0),
                env = I(list()), stringsAsFactors = FALSE)
   } else {
     do.call(rbind, rows)
@@ -188,10 +243,10 @@ print.objects <- function(x, ...) {
     cat("No parameters or objects found in the design.\n")
     return(invisible(x))
   }
-  tmp <- unique(x[c("name", "value_str", "step")])
+  tmp <- unique(x[c("name", "value_str", "kind", "step")])
   class(tmp) <- "data.frame"
   out <- stats::aggregate(
-    step ~ name + value_str, data = tmp,
+    step ~ name + value_str + kind, data = tmp,
     FUN = function(s) paste(sort(unique(s)), collapse = ", ")
   )
   names(out)[names(out) == "step"] <- "steps"

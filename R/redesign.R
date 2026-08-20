@@ -4,27 +4,30 @@
 #'
 #' @keywords internal
 #' @noRd
-rebuild_step <- function(step, new_dots) {
+rebuild_step <- function(step, new_dots, new_side = list()) {
   step_type   <- attr(step, "step_type")
   causal_type <- attr(step, "causal_type")
   label       <- attr(step, "label")
   call        <- attr(step, "call")
   handler_expr <- attr(step, "handler_expr")
+  for (nm in side_quo_names()) {
+    if (!nm %in% names(new_side)) new_side[[nm]] <- attr(step, nm)
+  }
   new_fn <- switch(
     step_type,
     "model"       = make_fabricate_step(new_dots, id_label_na = FALSE),
     "measurement" = make_fabricate_step(new_dots, id_label_na = TRUE),
     "assignment"  = make_fabricate_step(new_dots, id_label_na = TRUE),
-    "sampling"    = make_sampling_step(new_dots, attr(step, "filter_quo")),
-    "inquiry"     = make_inquiry_step(new_dots, attr(step, "subset_quo"), label,
+    "sampling"    = make_sampling_step(new_dots, new_side$filter_quo),
+    "inquiry"     = make_inquiry_step(new_dots, new_side$subset_quo, label,
                                        handler = attr(step, "handler_fn")),
     "estimator"   = make_estimator_step(
       method      = attr(step, "method_arg"),
       summary_fn  = attr(step, "summary_arg"),
       dots        = new_dots,
       label       = label,
-      inquiry     = attr(step, "inquiry_arg"),
-      term        = attr(step, "term_arg"),
+      inquiry     = new_side$inquiry_quo,
+      term        = new_side$term_quo,
       add_inquiry = TRUE,
       handler     = attr(step, "handler_fn")
     ),
@@ -34,7 +37,7 @@ rebuild_step <- function(step, new_dots) {
       dots        = new_dots,
       label       = label,
       inquiry     = NULL,
-      term        = attr(step, "term_arg"),
+      term        = new_side$term_quo,
       add_inquiry = FALSE,
       handler     = attr(step, "handler_fn")
     ),
@@ -73,12 +76,40 @@ rebuild_step <- function(step, new_dots) {
     label        = label,
     call         = call
   )
-  carry <- c("filter_quo", "subset_quo", "method_arg", "summary_arg",
-             "inquiry_arg", "term_arg", "handler_fn", "draws", "method_name")
+  carry <- c("method_arg", "summary_arg", "handler_fn", "draws", "method_name")
   for (nm in carry) {
     if (!is.null(attr(step, nm))) attr(out, nm) <- attr(step, nm)
   }
+  for (nm in side_quo_names()) {
+    if (!is.null(new_side[[nm]])) attr(out, nm) <- new_side[[nm]]
+  }
   out
+}
+
+#' The declared arguments a step holds as quosures rather than as values
+#'
+#' These are rebound by [redesign()] and read by `find_all_objects()` exactly
+#' as the dots are. Anything not on this list is frozen when the step is
+#' written, and so is out of reach of a redesign.
+#'
+#' @keywords internal
+#' @noRd
+side_quo_names <- function() {
+  c("filter_quo", "subset_quo", "term_quo", "inquiry_quo")
+}
+
+#' Rebind one parameter inside a single quosure
+#'
+#' Returns `NULL` when the quosure does not read the parameter, so the caller
+#' can tell "unchanged" from "changed".
+#'
+#' @keywords internal
+#' @noRd
+rebind_quo_param <- function(quo, param_name, new_val) {
+  if (!rlang::is_quosure(quo) || !quo_uses_param(quo, param_name)) return(NULL)
+  new_env <- rlang::env_clone(rlang::quo_get_env(quo))
+  rlang::env_bind(new_env, !!param_name := new_val)
+  rlang::new_quosure(rlang::quo_get_expr(quo), env = new_env)
 }
 
 #' Rebind parameters in a single design
@@ -88,15 +119,14 @@ rebuild_step <- function(step, new_dots) {
 modify_design_params <- function(design, params) {
   new_steps <- lapply(unclass(design), function(step) {
     dots <- attr(step, "dots")
-    filter_quo <- attr(step, "filter_quo")
-    subset_quo <- attr(step, "subset_quo")
+    side <- lapply(stats::setNames(side_quo_names(), side_quo_names()),
+                   function(nm) attr(step, nm))
     if ((is.null(dots) || length(dots) == 0) &&
-        is.null(filter_quo) && is.null(subset_quo)) {
+        all(vapply(side, is.null, logical(1)))) {
       return(step)
     }
     new_dots <- dots
-    new_filter <- filter_quo
-    new_subset <- subset_quo
+    new_side <- side
     changed <- FALSE
     for (param_name in names(params)) {
       new_val <- params[[param_name]]
@@ -125,61 +155,18 @@ modify_design_params <- function(design, params) {
           }
         }
       }
-      if (!is.null(new_filter)) {
-        env <- rlang::quo_get_env(new_filter)
-        expr <- rlang::quo_get_expr(new_filter)
-        if (quo_uses_param(new_filter, param_name)) {
-          new_env <- rlang::env_clone(env)
-          rlang::env_bind(new_env, !!param_name := new_val)
-          new_filter <- rlang::new_quosure(expr, env = new_env)
-          changed <- TRUE
-        }
-      }
-      if (!is.null(new_subset)) {
-        env <- rlang::quo_get_env(new_subset)
-        expr <- rlang::quo_get_expr(new_subset)
-        if (quo_uses_param(new_subset, param_name)) {
-          new_env <- rlang::env_clone(env)
-          rlang::env_bind(new_env, !!param_name := new_val)
-          new_subset <- rlang::new_quosure(expr, env = new_env)
+      for (nm in names(new_side)) {
+        rebound <- rebind_quo_param(new_side[[nm]], param_name, new_val)
+        if (!is.null(rebound)) {
+          new_side[[nm]] <- rebound
           changed <- TRUE
         }
       }
     }
     if (!changed) return(step)
-    out_step <- rebuild_step(step, new_dots)
-    if (!is.null(new_filter)) attr(out_step, "filter_quo") <- new_filter
-    if (!is.null(new_subset)) attr(out_step, "subset_quo") <- new_subset
-    if (identical(attr(step, "step_type"), "sampling")) {
-      out_step <- structure(
-        make_sampling_step(new_dots, new_filter),
-        attributes = attributes(out_step)
-      )
-      out_step <- build_step(
-        fn = make_sampling_step(new_dots, new_filter),
-        handler_expr = attr(step, "handler_expr"),
-        dots = new_dots,
-        step_type = "sampling",
-        causal_type = "dgp",
-        label = attr(step, "label"),
-        call = attr(step, "call"),
-        filter_quo = new_filter
-      )
-    }
-    if (identical(attr(step, "step_type"), "inquiry")) {
-      out_step <- build_step(
-        fn = make_inquiry_step(new_dots, new_subset, attr(step, "label"),
-                                handler = attr(step, "handler_fn")),
-        handler_expr = attr(step, "handler_expr"),
-        dots = new_dots,
-        step_type = "inquiry",
-        causal_type = "inquiry",
-        label = attr(step, "label"),
-        call = attr(step, "call"),
-        subset_quo = new_subset,
-        handler_fn = attr(step, "handler_fn")
-      )
-    }
+    # Sampling and inquiry used to be rebuilt again here, by hand, after
+    # rebuild_step() had already rebuilt them. The switch covers both.
+    out_step <- rebuild_step(step, new_dots, new_side)
     if (!is.null(attr(step, "draws"))) {
       attr(out_step, "draws") <- attr(step, "draws")
     }
@@ -212,11 +199,8 @@ quo_uses_param <- function(quo, name) {
 #' @keywords internal
 #' @noRd
 step_uses_param <- function(step, name) {
-  dots <- attr(step, "dots")
-  if (name %in% names(dots)) return(TRUE)
-  quos <- c(as.list(dots), list(attr(step, "filter_quo"), attr(step, "subset_quo")))
-  quos <- Filter(rlang::is_quosure, quos)
-  any(vapply(quos, quo_uses_param, logical(1), name = name))
+  if (name %in% names(attr(step, "dots"))) return(TRUE)
+  any(vapply(step_quosures(step), quo_uses_param, logical(1), name = name))
 }
 
 #' Warn about requested parameters no step would respond to
@@ -251,6 +235,9 @@ check_params_in_design <- function(design, param_names) {
 check_param_vectors <- function(design, params) {
   for (name in names(params)) {
     supplied <- params[[name]]
+    # Values `as_param_list()` keeps whole are never ambiguous: a data frame,
+    # a matrix or any classed object is one replacement, not a sweep.
+    if (is.object(supplied) || !is.null(dim(supplied))) next
     if (!is.atomic(supplied) || length(supplied) < 2L) next
     current <- current_param_value(design, name)
     if (!is.atomic(current) || length(current) < 2L) next
@@ -310,13 +297,20 @@ expr_has_symbol <- function(expr, name) {
 
 #' Split a supplied parameter into the list of values it should take
 #'
-#' An atomic vector supplies one value per element. Anything else (a function,
-#' a formula, an environment) is a single value, since `length()` does not
-#' index it. To vary a non-atomic parameter, pass a list of values.
+#' A bare atomic vector supplies one value per element and a bare list supplies
+#' one value per element. Everything else is a single value: a function, a
+#' formula, an environment, anything carrying a class (a data frame, a factor,
+#' a fitted model), and anything with a `dim` attribute (a matrix, an array).
+#'
+#' A data frame is a list and a matrix is atomic, so without the first test
+#' both would be taken apart: `redesign(design, data = df)` would ask for one
+#' design per column, which is never what a data-valued parameter means. To
+#' vary such a parameter across designs, pass a list of values.
 #'
 #' @keywords internal
 #' @noRd
 as_param_list <- function(v) {
+  if (is.object(v) || !is.null(dim(v))) return(list(v))
   if (is.list(v)) return(v)
   if (is.atomic(v) && !is.null(v)) return(as.list(v))
   list(v)
@@ -372,11 +366,15 @@ param_grid <- function(params, expand = TRUE) {
 #' one design, where `prob_each = c(0, .5, .5)` is three. Handing a bare
 #' vector to a parameter that currently holds one warns.
 #'
+#' Only bare vectors and bare lists are read that way. A data frame, a matrix
+#' and anything carrying a class are single replacement values, so
+#' `redesign(design, data = new_df)` swaps the data and needs no wrapping.
+#'
 #' @family modifying a design
 #' @param design A `design`.
-#' @param ... Named parameter values. An atomic vector supplies one design per
-#'   element; to vary a function or another non-atomic parameter, pass a list
-#'   of values.
+#' @param ... Named parameter values. A bare atomic vector supplies one design
+#'   per element; a data frame, a matrix, a function or any classed object is
+#'   one value. To sweep over such values, pass a list of them.
 #' @param expand If `TRUE` (default), expand the parameter grid; if `FALSE`,
 #'   zip parallel vectors.
 #' @return A single `design` if one combination is supplied, otherwise a list

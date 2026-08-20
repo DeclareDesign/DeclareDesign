@@ -174,3 +174,89 @@ test_that("a missing argument in a subscript is not treated as a name", {
     expect_no_warning(redesign(design, N = 20))
   })
 })
+
+test_that("a data frame is one replacement value and needs no wrapping", {
+  # `make_design(id, data = df)` in ResearchDesigns errored here: a data frame
+  # is a list, so the grid builder asked for one design per column.
+  small <- fabricate(N = 30, Y_star = rnorm(N))
+  big <- fabricate(N = 121, Y_star = rnorm(N))
+  design <- declare_model(data = small, Y = Y_star + 1) + NULL
+  expect_equal(nrow(draw_data(design)), 30L)
+
+  swapped <- redesign(design, data = big)
+  expect_s3_class(swapped, "design")
+  expect_equal(nrow(draw_data(swapped)), 121L)
+  expect_no_warning(redesign(design, data = big))
+
+  # wrapping still works, and a list of two data frames is still two designs
+  expect_equal(nrow(draw_data(redesign(design, data = list(big)))), 121L)
+  fam <- redesign(design, data = list(small, big))
+  expect_length(fam, 2L)
+  expect_equal(vapply(fam, function(d) nrow(draw_data(d)), integer(1)),
+               c(design_1 = 30L, design_2 = 121L))
+})
+
+test_that("a matrix-valued parameter is replaced rather than swept", {
+  local({
+    weights <- matrix(1, nrow = 2, ncol = 2)
+    design <- declare_model(N = 2, Y = as.numeric(weights %*% c(1, 1))) + NULL
+    expect_equal(draw_data(design)$Y, c(2, 2))
+
+    swapped <- redesign(design, weights = matrix(3, nrow = 2, ncol = 2))
+    expect_s3_class(swapped, "design")
+    expect_equal(draw_data(swapped)$Y, c(6, 6))
+    expect_no_warning(redesign(design, weights = matrix(3, nrow = 2, ncol = 2)))
+  })
+})
+
+test_that("an estimator's term and inquiry follow a redesign", {
+  # multi_arm_designer(m_arms = 4) assigned four arms, declared three contrasts
+  # and reported two estimates. `term` and `inquiry` were ordinary arguments,
+  # evaluated when the estimator was written, so no redesign could reach them.
+  local({
+    m_arms <- 3
+    design <- declare_model(N = 300, u = rnorm(N)) +
+      declare_assignment(Z = sample(rep(seq_len(m_arms), length.out = 300))) +
+      declare_inquiry(
+        handler = function(data, m_arms) {
+          ks <- seq_len(m_arms)[-1]
+          data.frame(inquiry = paste0("ate_", ks), estimand = ks - 1)
+        },
+        m_arms = m_arms
+      ) +
+      declare_measurement(Y = u + as.numeric(Z)) +
+      declare_estimator(Y ~ factor(Z), .method = lm,
+                        term = paste0("factor(Z)", seq_len(m_arms)[-1]),
+                        inquiry = paste0("ate_", seq_len(m_arms)[-1]))
+
+    expect_equal(draw_estimates(design)$term, c("factor(Z)2", "factor(Z)3"))
+
+    wider <- redesign(design, m_arms = 4)
+    estimates <- draw_estimates(wider)
+    expect_equal(estimates$term, c("factor(Z)2", "factor(Z)3", "factor(Z)4"))
+    expect_equal(estimates$inquiry, c("ate_2", "ate_3", "ate_4"))
+    expect_equal(nrow(draw_estimands(wider)), 3L)
+
+    # the design that was redesigned from is untouched
+    expect_equal(draw_estimates(design)$term, c("factor(Z)2", "factor(Z)3"))
+  })
+})
+
+test_that("declare_test's term follows a redesign", {
+  local({
+    keep <- "Z"
+    design <- declare_model(N = 100, Z = rep(0:1, 50), W = rnorm(N),
+                            Y = Z + W + rnorm(N)) +
+      declare_test(Y ~ Z + W, .method = lm, term = keep)
+    expect_equal(draw_estimates(design)$term, "Z")
+    expect_equal(draw_estimates(redesign(design, keep = "W"))$term, "W")
+  })
+})
+
+test_that("an inquiry passed as a step object still fails where it is written", {
+  step <- declare_inquiry(ATE = 0)
+  expect_error(
+    declare_estimator(Y ~ Z, .method = lm, inquiry = step),
+    "label as a string"
+  )
+})

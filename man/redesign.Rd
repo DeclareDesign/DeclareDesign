@@ -9,9 +9,9 @@ redesign(design, ..., expand = TRUE)
 \arguments{
 \item{design}{A \code{design}.}
 
-\item{...}{Named parameter values. An atomic vector supplies one design per
-element; to vary a function or another non-atomic parameter, pass a list
-of values.}
+\item{...}{Named parameter values. A bare atomic vector supplies one design
+per element; a data frame, a matrix, a function or any classed object is
+one value. To sweep over such values, pass a list of them.}
 
 \item{expand}{If \code{TRUE} (default), expand the parameter grid; if \code{FALSE},
 zip parallel vectors.}
@@ -34,6 +34,10 @@ An atomic vector always supplies one value per design, so a parameter that
 is itself a vector has to be wrapped: \code{prob_each = list(c(0, .5, .5))} is
 one design, where \code{prob_each = c(0, .5, .5)} is three. Handing a bare
 vector to a parameter that currently holds one warns.
+
+Only bare vectors and bare lists are read that way. A data frame, a matrix
+and anything carrying a class are single replacement values, so
+\code{redesign(design, data = new_df)} swaps the data and needs no wrapping.
 }
 \examples{
 designer <- function(N) {

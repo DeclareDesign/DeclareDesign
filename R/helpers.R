@@ -246,3 +246,17 @@ stop_on_estimator_failure <- function(estimates_df) {
   if (!length(failed)) return(invisible(NULL))
   rlang::abort(estimates_df$error_message[failed][[1]])
 }
+
+#' Evaluate a declared argument that may have been captured as a quosure
+#'
+#' Arguments a step holds as quosures (`term`, `inquiry`) are evaluated where
+#' they were written, on every draw, so that a [redesign()] which rebinds a
+#' name they read takes effect. A plain value passes through untouched, which
+#' is what internal callers that build a step from an already-evaluated
+#' argument supply.
+#'
+#' @keywords internal
+#' @noRd
+eval_step_arg <- function(x) {
+  if (rlang::is_quosure(x)) rlang::eval_tidy(x) else x
+}

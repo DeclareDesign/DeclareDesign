@@ -1,5 +1,10 @@
 #' Print a design
 #'
+#' Lists the steps, then the parameters and objects the design's expressions
+#' refer to: the names [redesign()] can change, the value each one currently
+#' holds, its kind, and which steps would respond to a change. A design with
+#' no such names prints its steps alone.
+#'
 #' @param x A `design`.
 #' @param ... Ignored.
 #' @return The input invisibly.
@@ -16,6 +21,11 @@ print.design <- function(x, ...) {
                 attr(step, "step_type") %||% "?",
                 nm,
                 attr(step, "causal_type") %||% "?"))
+  }
+  objects <- find_all_objects(x)
+  if (nrow(objects) > 0) {
+    cat("\nParameters and objects the design refers to:\n")
+    print(objects)
   }
   invisible(x)
 }
@@ -281,9 +291,8 @@ add_parens <- function(x, digits = 2) {
 
 #' Summarize a design
 #'
-#' Prints the steps, then the parameters and objects the design's expressions
-#' refer to: the names [redesign()] can change, where each one was found, and
-#' which steps would respond to a change.
+#' The same as printing it: the steps, then the parameters and objects the
+#' design's expressions refer to.
 #'
 #' @param object A `design`.
 #' @param ... Ignored.
@@ -295,8 +304,6 @@ add_parens <- function(x, digits = 2) {
 #' summary(declare_model(N = N, Y = rnorm(N)) + NULL)
 summary.design <- function(object, ...) {
   print(object)
-  cat("\nParameters and objects the design refers to:\n")
-  print(find_all_objects(object))
   invisible(object)
 }
 
