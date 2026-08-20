@@ -3,8 +3,13 @@
 #
 # This is the rewrite branch's own workflow. `main`'s triggers on
 # [main, master] and would never fire here, and this branch needs a step
-# `main` does not: fabricatrZero is not on CRAN, so it is resolved from the
-# Remotes: field in DESCRIPTION, which points at DeclareDesign/fabricatr@rewrite.
+# `main` does not: two of its dependencies are resolved from the Remotes: field
+# in DESCRIPTION rather than from CRAN. fabricatrZero is not on CRAN at all,
+# and estimatr is, but at 1.0.6, which does not satisfy the `>= 2.0.0` this
+# branch requires. Both remotes carry the `pkgname=` prefix; for estimatr that
+# is deliberate insurance, since the repository name now collides with a real
+# CRAN package and an unprefixed remote resolves in some pak configurations and
+# not others.
 on:
   push:
     branches: [rewrite]

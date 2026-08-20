@@ -24,7 +24,7 @@ Imports:
     tidyr
 Remotes:
     fabricatrZero=DeclareDesign/fabricatr@rewrite,
-    DeclareDesign/estimatr@rewrite
+    estimatr=DeclareDesign/estimatr@rewrite
 Suggests:
     fabricatr,
     furrr,
