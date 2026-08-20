@@ -13,7 +13,7 @@ Depends:
     R (>= 4.1.0),
     randomizr (>= 1.0.1),
     fabricatrZero (>= 2.0.0),
-    estimatrZero (>= 2.0.0)
+    estimatr (>= 2.0.0)
 Imports:
     broom,
     dplyr,
@@ -24,9 +24,8 @@ Imports:
     tidyr
 Remotes:
     fabricatrZero=DeclareDesign/fabricatr@rewrite,
-    estimatrZero=DeclareDesign/estimatr@rewrite
+    DeclareDesign/estimatr@rewrite
 Suggests:
-    estimatr,
     fabricatr,
     furrr,
     future,

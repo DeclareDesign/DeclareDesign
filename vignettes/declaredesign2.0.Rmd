@@ -300,7 +300,7 @@ Where the time actually goes is worth seeing, because it bounds the gain:
 | `declare_measurement` | 0.185 ms | 0.090 ms |
 | `declare_estimator` (`lm_robust`) | 1.015 ms | 0.965 ms |
 
-Data fabrication is roughly twice as fast, and the inquiry step is roughly three times slower, which is a known and unfixed cost of evaluating each estimand against a copied list. Both of those are small next to the estimator, which is the same `estimatr` call in both packages and takes more than half the total. The plumbing is where a rewrite can win, and the plumbing is under half of a typical design's cost. Speeding up the other half is what `estimatrZero` is for.
+Data fabrication is roughly twice as fast, and the inquiry step is roughly three times slower, which is a known and unfixed cost of evaluating each estimand against a copied list. Both of those are small next to the estimator, which is the same `lm_robust()` call in both packages and takes more than half the total. The plumbing is where a rewrite can win, and the plumbing is under half of a typical design's cost. Speeding up the other half is what estimatr 2.0 is for.
 
 Parallelism is the larger lever. On the same design, 2,000 simulations take 3.59 s sequentially and 1.01 s on four workers, a factor of 3.6.
 
