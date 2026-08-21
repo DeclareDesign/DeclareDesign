@@ -52,16 +52,20 @@ rebuild_step <- function(step, new_dots, new_side = list()) {
       }
     },
     "custom"      = {
-      handler <- attr(step, "handler_fn")
-      d <- new_dots
+      # Must mirror declare_step()'s own closure exactly. Evaluating the dots
+      # here instead of passing them as written broke every tidyselect handler
+      # the moment a design was redesigned: `id_cols = pair` reached
+      # pivot_wider() as the column's contents rather than as the name `pair`.
+      handler  <- attr(step, "handler_fn")
+      decl_env <- dots_env(new_dots, default = globalenv())
+      args     <- dots_as_written(new_dots)
+      d        <- new_dots
       function(data) {
         if (handler_is_fabricate(handler)) {
           rlang::inject(handler(data = data, !!!d))
         } else {
-          args <- lapply(d, function(q) {
-            rlang::eval_tidy(q, data = if (is.data.frame(data)) as.list(data) else NULL)
-          })
-          do.call(handler, c(list(data), args))
+          call_env <- rlang::env(decl_env, .dd_data = data)
+          eval(rlang::call2(handler, quote(.dd_data), !!!args), envir = call_env)
         }
       }
     },
@@ -117,7 +121,19 @@ rebind_quo_param <- function(quo, param_name, new_val) {
 #' @keywords internal
 #' @noRd
 modify_design_params <- function(design, params) {
+  # A name a `declare_parameters()` step declares is changed at that step and
+  # nowhere else; `construct_design()` then pushes the new value onto every
+  # step that reads it. Rebinding it step by step as well is what would let a
+  # redesign reach a column that happens to share the parameter's name.
+  declared <- declared_param_names(design)
   new_steps <- lapply(unclass(design), function(step) {
+    own <- if (is_parameters_step(step)) {
+      names(attr(step, "dots")) %||% character(0)
+    } else {
+      character(0)
+    }
+    params <- params[setdiff(names(params), setdiff(declared, own))]
+    if (length(params) == 0) return(step)
     dots <- attr(step, "dots")
     side <- lapply(stats::setNames(side_quo_names(), side_quo_names()),
                    function(nm) attr(step, nm))

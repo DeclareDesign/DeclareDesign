@@ -260,3 +260,18 @@ test_that("an inquiry passed as a step object still fails where it is written", 
     "label as a string"
   )
 })
+
+test_that("a custom step's arguments stay as written through a redesign", {
+  local({
+    k <- 2
+    design <- declare_model(N = 6, pair = rep(1:3, each = 2),
+                            role = rep(c("A", "B"), 3), a = 1:6, kk = k) +
+      declare_step(id_cols = pair, names_from = role, values_from = c(a),
+                   handler = tidyr::pivot_wider)
+    # `id_cols = pair` must reach pivot_wider() as the name `pair`, not as the
+    # column's contents, on the rebuilt step as well as the declared one.
+    expect_equal(names(draw_data(design)), c("pair", "A", "B"))
+    expect_equal(names(draw_data(redesign(design, k = 3))), c("pair", "A", "B"))
+    expect_equal(unique(draw_data(design)$kk), NULL)
+  })
+})

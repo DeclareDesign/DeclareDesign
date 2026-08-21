@@ -143,9 +143,11 @@ find_all_objects <- function(design) {
   steps <- unclass(design)
   rows <- list()
   mask <- character(0)
+  declared <- declared_param_names(design)
   add_row <- function(name, value, step, quosure, env) {
     rows[[length(rows) + 1L]] <<- data.frame(
       name = name, value_str = describe_value(value), kind = param_kind(value),
+      declared = name %in% declared,
       step = step, quosure = quosure, env = I(list(env)),
       stringsAsFactors = FALSE
     )
@@ -165,6 +167,17 @@ find_all_objects <- function(design) {
     step <- steps[[i]]
     dots <- attr(step, "dots")
     dot_names <- names(dots) %||% rep("", length(dots))
+    # A declared parameter is reported by its evaluated value, whatever
+    # expression produced it, so `ks = seq_len(m_arms)[-1]` is listed as the
+    # vector it is rather than left out for not being a literal.
+    if (is_parameters_step(step)) {
+      values <- tryCatch(parameter_values(step), error = function(e) NULL)
+      for (nm in names(dots)) {
+        add_row(nm, if (nm %in% names(values)) values[[nm]] else NULL,
+                i, nm, NULL)
+      }
+      next
+    }
     builds_data <- step_builds_data(step)
     step_mask <- character(0)
     for (j in seq_along(dots)) {
@@ -190,8 +203,9 @@ find_all_objects <- function(design) {
   }
   out <- if (length(rows) == 0) {
     data.frame(name = character(0), value_str = character(0),
-               kind = character(0), step = integer(0), quosure = character(0),
-               env = I(list()), stringsAsFactors = FALSE)
+               kind = character(0), declared = logical(0), step = integer(0),
+               quosure = character(0), env = I(list()),
+               stringsAsFactors = FALSE)
   } else {
     do.call(rbind, rows)
   }
@@ -211,6 +225,11 @@ find_all_objects <- function(design) {
 #' @noRd
 current_param_value <- function(design, name) {
   for (step in unclass(design)) {
+    if (is_parameters_step(step)) {
+      values <- tryCatch(parameter_values(step), error = function(e) NULL)
+      if (name %in% names(values)) return(values[[name]])
+      next
+    }
     dots <- attr(step, "dots")
     idx <- match(name, names(dots) %||% character(0))
     if (!is.na(idx)) {
@@ -243,10 +262,10 @@ print.objects <- function(x, ...) {
     cat("No parameters or objects found in the design.\n")
     return(invisible(x))
   }
-  tmp <- unique(x[c("name", "value_str", "kind", "step")])
+  tmp <- unique(x[c("name", "value_str", "kind", "declared", "step")])
   class(tmp) <- "data.frame"
   out <- stats::aggregate(
-    step ~ name + value_str + kind, data = tmp,
+    step ~ name + value_str + kind + declared, data = tmp,
     FUN = function(s) paste(sort(unique(s)), collapse = ", ")
   )
   names(out)[names(out) == "step"] <- "steps"

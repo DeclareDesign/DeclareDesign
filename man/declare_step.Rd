@@ -53,6 +53,7 @@ Other design declarations:
 \code{\link[=declare_inquiry]{declare_inquiry()}},
 \code{\link[=declare_measurement]{declare_measurement()}},
 \code{\link[=declare_model]{declare_model()}},
+\code{\link[=declare_parameters]{declare_parameters()}},
 \code{\link[=declare_sampling]{declare_sampling()}},
 \code{\link[=declare_test]{declare_test()}}
 }

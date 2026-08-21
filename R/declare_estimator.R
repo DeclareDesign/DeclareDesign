@@ -289,8 +289,12 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
     method_name <- method_expr_label(method_expr)
   }
   # Evaluated once here as well, so that an inquiry passed as a step object
-  # fails where it was written rather than on the first draw.
-  normalize_inquiry(rlang::eval_tidy(inquiry_quo))
+  # fails where it was written rather than on the first draw. A name a
+  # `declare_parameters()` step will supply cannot resolve yet, and its
+  # failure here says nothing, so only a value that does resolve is checked.
+  resolved <- tryCatch(list(rlang::eval_tidy(inquiry_quo)),
+                       error = function(e) NULL)
+  if (!is.null(resolved)) normalize_inquiry(resolved[[1]])
   fn <- make_estimator_step(
     method      = .method,
     summary_fn  = .summary,

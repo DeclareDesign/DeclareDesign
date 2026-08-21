@@ -26,6 +26,7 @@ expand_design(designer, N = c(10, 20))
 \seealso{
 Other modifying a design:
 \code{\link[=delete_step]{delete_step()}},
+\code{\link[=design_parameters]{design_parameters()}},
 \code{\link[=insert_step]{insert_step()}},
 \code{\link[=redesign]{redesign()}},
 \code{\link[=replace_step]{replace_step()}}
