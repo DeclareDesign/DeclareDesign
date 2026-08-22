@@ -4,17 +4,23 @@
 \alias{redesign}
 \title{Re-parameterize a design}
 \usage{
-redesign(design, ..., expand = TRUE)
+redesign(.design, ..., .expand = TRUE)
 }
 \arguments{
-\item{design}{A \code{design}.}
+\item{.design}{A \code{design}. Named with a dot, like \code{.method} and \code{.summary}
+in \code{\link[=declare_estimator]{declare_estimator()}}, because everything else here is a parameter of
+the user's design: a plain \code{design} would partially match and swallow a
+parameter named \code{d}, \code{de}, \code{des}, \code{desi} or \code{desig}, and designs with a
+parameter named \code{d} exist.}
 
 \item{...}{Named parameter values. A bare atomic vector supplies one design
 per element; a data frame, a matrix, a function or any classed object is
 one value. To sweep over such values, pass a list of them.}
 
-\item{expand}{If \code{TRUE} (default), expand the parameter grid; if \code{FALSE},
-zip parallel vectors.}
+\item{.expand}{If \code{TRUE} (default), expand the parameter grid; if \code{FALSE},
+zip parallel vectors. Dotted for the same reason as \code{.design}: an
+undotted \code{expand} after the dots would collide exactly with a parameter
+of that name.}
 }
 \value{
 A single \code{design} if one combination is supplied, otherwise a list
@@ -22,8 +28,8 @@ of designs named \code{design_1}, \code{design_2}, etc.
 }
 \description{
 Replaces parameter values in the captured environments of a design's steps,
-producing one or more modified designs. With \code{expand = TRUE} (the default),
-the cross-product of parameter values is taken; with \code{expand = FALSE},
+producing one or more modified designs. With \code{.expand = TRUE} (the default),
+the cross-product of parameter values is taken; with \code{.expand = FALSE},
 values are zipped position-wise.
 }
 \details{

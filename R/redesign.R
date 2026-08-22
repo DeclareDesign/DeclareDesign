@@ -463,7 +463,7 @@ param_grid <- function(params, expand = TRUE) {
     n <- max(lens)
     if (any(lens != 1L & lens != n)) {
       stop("All parameter vectors must have length 1 or the same length when ",
-           "`expand = FALSE`.")
+           "`.expand = FALSE`.")
     }
     as.data.frame(lapply(lens, function(l) if (l == 1L) rep(1L, n) else seq_len(l)))
   }
@@ -474,8 +474,8 @@ param_grid <- function(params, expand = TRUE) {
 #' Re-parameterize a design
 #'
 #' Replaces parameter values in the captured environments of a design's steps,
-#' producing one or more modified designs. With `expand = TRUE` (the default),
-#' the cross-product of parameter values is taken; with `expand = FALSE`,
+#' producing one or more modified designs. With `.expand = TRUE` (the default),
+#' the cross-product of parameter values is taken; with `.expand = FALSE`,
 #' values are zipped position-wise.
 #'
 #' A parameter that no step responds to draws a warning and is otherwise
@@ -494,12 +494,18 @@ param_grid <- function(params, expand = TRUE) {
 #' fabricate's argument and belongs to the declaration.
 #'
 #' @family modifying a design
-#' @param design A `design`.
+#' @param .design A `design`. Named with a dot, like `.method` and `.summary`
+#'   in [declare_estimator()], because everything else here is a parameter of
+#'   the user's design: a plain `design` would partially match and swallow a
+#'   parameter named `d`, `de`, `des`, `desi` or `desig`, and designs with a
+#'   parameter named `d` exist.
 #' @param ... Named parameter values. A bare atomic vector supplies one design
 #'   per element; a data frame, a matrix, a function or any classed object is
 #'   one value. To sweep over such values, pass a list of them.
-#' @param expand If `TRUE` (default), expand the parameter grid; if `FALSE`,
-#'   zip parallel vectors.
+#' @param .expand If `TRUE` (default), expand the parameter grid; if `FALSE`,
+#'   zip parallel vectors. Dotted for the same reason as `.design`: an
+#'   undotted `expand` after the dots would collide exactly with a parameter
+#'   of that name.
 #' @return A single `design` if one combination is supplied, otherwise a list
 #'   of designs named `design_1`, `design_2`, etc.
 #' @export
@@ -517,19 +523,20 @@ param_grid <- function(params, expand = TRUE) {
 #' design <- declare_model(N = 50, Y = rnorm(N)) +
 #'   declare_inquiry(mu = summarizer(Y))
 #' redesign(design, summarizer = stats::median)
-redesign <- function(design, ..., expand = TRUE) {
+redesign <- function(.design, ..., .expand = TRUE) {
+  design <- .design
   if (inherits(design, "design_step")) {
     design <- construct_design(wrap_step(design))
   }
   if (!inherits(design, "design")) {
-    stop("`design` must be a `design` or `design_step` object.")
+    stop("`.design` must be a `design` or `design_step` object.")
   }
   new_params <- list(...)
   if (length(new_params) == 0) return(design)
   check_params_in_design(design, names(new_params))
   check_params_are_declared(design, names(new_params))
   check_param_vectors(design, new_params)
-  param_df <- param_grid(new_params, expand = expand)
+  param_df <- param_grid(new_params, expand = .expand)
   designs <- purrr::map(seq_len(nrow(param_df)), function(i) {
     params_i <- extract_param_row(param_df, i)
     d <- modify_design_params(design, params_i)
@@ -561,20 +568,21 @@ extract_param_row <- function(param_df, i) {
 #' Build a family of designs from a designer function
 #'
 #' @family modifying a design
-#' @param designer A function returning a `design`.
+#' @param .designer A function returning a `design`. Dotted for the same
+#'   reason as [redesign()]'s `.design`.
 #' @param ... Named parameter values to vary.
-#' @param expand If `TRUE`, expand the grid; if `FALSE`, zip values.
+#' @param .expand If `TRUE`, expand the grid; if `FALSE`, zip values.
 #' @return A single design or a list of designs.
 #' @export
 #' @examples
 #' designer <- function(N) declare_model(N = N, Y = rnorm(N))
 #' expand_design(designer, N = c(10, 20))
-expand_design <- function(designer, ..., expand = TRUE) {
+expand_design <- function(.designer, ..., .expand = TRUE) {
   new_params <- list(...)
-  param_df <- param_grid(new_params, expand = expand)
+  param_df <- param_grid(new_params, expand = .expand)
   designs <- purrr::map(seq_len(nrow(param_df)), function(i) {
     params_i <- extract_param_row(param_df, i)
-    d <- do.call(designer, params_i)
+    d <- do.call(.designer, params_i)
     attr(d, "parameters") <- param_df[i, , drop = FALSE]
     d
   })

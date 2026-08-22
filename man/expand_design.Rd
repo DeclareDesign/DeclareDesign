@@ -4,14 +4,15 @@
 \alias{expand_design}
 \title{Build a family of designs from a designer function}
 \usage{
-expand_design(designer, ..., expand = TRUE)
+expand_design(.designer, ..., .expand = TRUE)
 }
 \arguments{
-\item{designer}{A function returning a \code{design}.}
+\item{.designer}{A function returning a \code{design}. Dotted for the same
+reason as \code{\link[=redesign]{redesign()}}'s \code{.design}.}
 
 \item{...}{Named parameter values to vary.}
 
-\item{expand}{If \code{TRUE}, expand the grid; if \code{FALSE}, zip values.}
+\item{.expand}{If \code{TRUE}, expand the grid; if \code{FALSE}, zip values.}
 }
 \value{
 A single design or a list of designs.

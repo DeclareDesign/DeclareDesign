@@ -14,13 +14,13 @@ test_that("redesign expands the parameter grid by default", {
   expect_equal(unname(sort(ns)), c(20L, 40L))
 })
 
-test_that("redesign with expand = FALSE zips parameters", {
+test_that("redesign with .expand = FALSE zips parameters", {
   designer <- function(N, ate) {
     declare_model(N = N, Y = rnorm(N) + ate) +
       declare_inquiry(mu = ate)
   }
   design <- designer(N = 50, ate = 0.5)
-  fam <- redesign(design, N = c(25, 75), ate = c(0.1, 0.2), expand = FALSE)
+  fam <- redesign(design, N = c(25, 75), ate = c(0.1, 0.2), .expand = FALSE)
   expect_length(fam, 2L)
 })
 
@@ -36,7 +36,7 @@ test_that("expand_design accepts function-valued parameters in zip mode", {
       declare_inquiry(inq = fn(Y))
   }
   fam <- expand_design(designer, N = c(10, 50),
-                       fn = c(mean, median), expand = FALSE)
+                       fn = c(mean, median), .expand = FALSE)
   expect_length(fam, 2L)
   expect_equal(nrow(draw_data(fam[[1]])), 10L)
   expect_equal(nrow(draw_data(fam[[2]])), 50L)
@@ -117,6 +117,30 @@ test_that("the refusal leads with the ordinary route and quotes the design back"
                                     error = function(e) e))
   expect_match(msg2, "declare_inquiry(target = target, ...)", fixed = TRUE)
   expect_match(msg2, "`target <- 0.25`", fixed = TRUE)
+})
+
+test_that("a parameter named d is reachable, and so are de, des, desi, desig", {
+  # Macartan: "`.design` is a good solution for d arguments; this has tripped
+  # me up before." `mediation_analysis` in the library has a parameter named
+  # `d`, and an undotted first formal partially matched it, so the design
+  # object was replaced by the number and `redesign()` failed on its own type
+  # check. Every prefix of `design` had the same problem.
+  local({
+    for (nm in c("d", "de", "des", "desi", "desig", "design")) {
+      env <- new.env()
+      assign(nm, 2, envir = env)
+      quo <- rlang::new_quosure(rlang::sym(nm), env = env)
+      step <- eval(rlang::expr(declare_model(N = !!rlang::sym(nm), Y = rnorm(N))),
+                   envir = env)
+      out <- do.call(redesign, c(list(step), setNames(list(5), nm)))
+      expect_equal(nrow(draw_data(out)), 5L, info = nm)
+    }
+  })
+  # and the same for expand_design()'s first formal
+  designer <- function(d = 2) declare_model(N = d, Y = rnorm(N))
+  fam <- expand_design(designer, d = c(3, 6))
+  expect_equal(vapply(fam, function(x) nrow(draw_data(x)), integer(1)),
+               c(design_1 = 3L, design_2 = 6L))
 })
 
 test_that("a column does not make its own parameter unreachable", {
