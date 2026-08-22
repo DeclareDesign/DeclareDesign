@@ -152,3 +152,53 @@ test_that("changing a parameter recomputes the ones declared after it and no oth
     expect_equal(draw_data(kept)$y, 20)
   })
 })
+
+# A declared parameter read by an argument other than the first one ----
+
+test_that("a declared parameter reaches an estimator argument passed to the method", {
+  # The executor splices the estimator's arguments as written and evaluates
+  # them in the environment of the *first* dot, so a parameter bound only into
+  # the environment of the dot that reads it was invisible and the estimator
+  # failed on every draw with "object 'se_type' not found".
+  design <- declare_parameters(se_type = "stata") +
+    declare_model(N = 100, Z = rbinom(N, 1, 0.5), Y = rnorm(N)) +
+    declare_estimator(Y ~ Z, se_type = se_type, .method = lm_robust)
+  est <- draw_estimates(design)
+  expect_false("error" %in% names(est) && isTRUE(est$error[[1]]))
+  expect_true(is.finite(est$std.error[[1]]))
+})
+
+test_that("a declared parameter reaches a subset argument", {
+  design <- declare_parameters(bw = 0.5) +
+    declare_model(N = 200, X = runif(N), Z = rbinom(N, 1, 0.5), Y = rnorm(N)) +
+    declare_estimator(Y ~ Z, subset = X > bw, .method = lm_robust)
+  est <- draw_estimates(design)
+  expect_false("error" %in% names(est) && isTRUE(est$error[[1]]))
+})
+
+test_that("a declared parameter is the value the method actually receives", {
+  # Not merely that the draw stops failing: the declared value has to be the
+  # one that arrives, and a redesign has to replace it.
+  record_se <- function(formula, data, se_type = "unset", ...) {
+    data.frame(term = "Z", estimate = NA_real_, std.error = NA_real_,
+               p.value = NA_real_, conf.low = NA_real_, conf.high = NA_real_,
+               se_seen = se_type)
+  }
+  design <- declare_parameters(se_type = "stata") +
+    declare_model(N = 50, Z = rbinom(N, 1, 0.5), Y = rnorm(N)) +
+    declare_estimator(Y ~ Z, se_type = se_type, .method = record_se,
+                      label = "e")
+  expect_equal(draw_estimates(design)$se_seen[[1]], "stata")
+  expect_equal(draw_estimates(redesign(design, se_type = "HC2"))$se_seen[[1]],
+               "HC2")
+})
+
+test_that("a declared parameter is not shadowed by a base binding of its name", {
+  # `cut` resolves to base::cut when the binding does not reach the argument,
+  # which reports a comparison error rather than a missing object.
+  design <- declare_parameters(cut = 0.5) +
+    declare_model(N = 200, X = runif(N), Z = rbinom(N, 1, 0.5), Y = rnorm(N)) +
+    declare_estimator(Y ~ Z, subset = X > cut, .method = lm_robust)
+  est <- draw_estimates(design)
+  expect_false("error" %in% names(est) && isTRUE(est$error[[1]]))
+})

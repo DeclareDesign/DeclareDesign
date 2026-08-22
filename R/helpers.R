@@ -159,6 +159,11 @@ dots_as_written <- function(dots) {
 #' declaration time rather than at run time, so it is the environment the user
 #' wrote the call in and not whatever is on the stack during a simulation.
 #'
+#' Two things keep the first dot speaking for the rest, and both are load
+#' bearing: [capture_dots_env()] gives co-captured quosures one captured
+#' environment, and [reshare_quo_envs()] puts them back on one after a
+#' parameter has been bound into whichever of them reads it.
+#'
 #' @keywords internal
 #' @noRd
 dots_env <- function(dots, default = rlang::caller_env()) {
@@ -259,4 +264,101 @@ stop_on_estimator_failure <- function(estimates_df) {
 #' @noRd
 eval_step_arg <- function(x) {
   if (rlang::is_quosure(x)) rlang::eval_tidy(x) else x
+}
+
+#' The bindings one environment adds to another
+#'
+#' @keywords internal
+#' @noRd
+env_added_bindings <- function(new_env, old_env) {
+  out <- list()
+  if (identical(new_env, old_env)) return(out)
+  for (nm in rlang::env_names(new_env)) {
+    if (rlang::env_has(old_env, nm, inherit = FALSE) &&
+        identical(rlang::env_get(old_env, nm), rlang::env_get(new_env, nm))) {
+      next
+    }
+    out[nm] <- list(rlang::env_get(new_env, nm))
+  }
+  out
+}
+
+#' Put quosures that shared an environment back onto a shared one
+#'
+#' `capture_dots_env()` gives every quosure captured in one environment a
+#' single captured environment, and `dots_env()` then reads a step's
+#' environment off the first dot on the understanding that it speaks for all
+#' of them. Binding a parameter clones the environment of the one quosure that
+#' reads the name, which breaks that understanding:
+#' `declare_estimator(Y ~ Z, se_type = se_type)` binds `se_type` into the
+#' second dot's environment, the executor splices the arguments as written and
+#' evaluates them in the *first* dot's environment, and the estimator dies
+#' with `object 'se_type' not found` on every draw. Merging the added bindings
+#' back onto one environment per original group restores it.
+#'
+#' Quosures that were captured separately keep their own environments, since
+#' grouping is by the environment each one started in.
+#'
+#' @keywords internal
+#' @noRd
+reshare_quo_envs <- function(orig, rebound, marker = "dd_param_env") {
+  idx <- which(vapply(orig, rlang::is_quosure, logical(1)) &
+               vapply(rebound, rlang::is_quosure, logical(1)))
+  if (length(idx) < 2L) return(rebound)
+  handled <- rep(FALSE, length(idx))
+  for (k in seq_along(idx)) {
+    if (handled[[k]]) next
+    base_env <- rlang::quo_get_env(orig[[idx[[k]]]])
+    same <- vapply(idx, function(i) {
+      identical(rlang::quo_get_env(orig[[i]]), base_env)
+    }, logical(1))
+    handled[same] <- TRUE
+    group <- idx[same]
+    if (length(group) < 2L) next
+    added <- list()
+    for (i in group) {
+      new_binds <- env_added_bindings(rlang::quo_get_env(rebound[[i]]), base_env)
+      for (nm in names(new_binds)) added[nm] <- list(new_binds[[nm]])
+    }
+    if (!length(added)) next
+    merged <- rlang::env_clone(base_env)
+    rlang::env_bind(merged, !!!added)
+    attr(merged, marker) <- TRUE
+    for (i in group) {
+      rebound[[i]] <- rlang::new_quosure(rlang::quo_get_expr(rebound[[i]]),
+                                         env = merged)
+    }
+  }
+  rebound
+}
+
+#' Reshare environments across a step's dots and side quosures at once
+#'
+#' Returns the pair back in the shape the callers hold them, so a `NULL` set
+#' of dots stays `NULL` rather than becoming an empty list.
+#'
+#' @keywords internal
+#' @noRd
+reshare_step_quos <- function(dots, side, new_dots, new_side) {
+  n_dots <- length(new_dots)
+  # `as.list()` because a dots object is a quosure list, which rlang refuses to
+  # concatenate with the side quosures, some of which are NULL.
+  merged <- reshare_quo_envs(
+    c(as.list(dots), as.list(side)),
+    c(as.list(new_dots), as.list(new_side))
+  )
+  # Assigned back element by element so the dots keep their class, and so a
+  # side quosure that is absent stays absent rather than being dropped by a
+  # `NULL` assignment.
+  out_dots <- new_dots
+  out_side <- new_side
+  for (i in seq_len(n_dots)) {
+    if (rlang::is_quosure(merged[[i]])) out_dots[[i]] <- merged[[i]]
+  }
+  for (i in seq_along(new_side)) {
+    if (rlang::is_quosure(merged[[n_dots + i]])) {
+      out_side[[i]] <- merged[[n_dots + i]]
+    }
+  }
+  list(dots = out_dots, side = out_side)
 }

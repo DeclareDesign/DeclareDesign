@@ -252,7 +252,10 @@ bind_params_into_step <- function(step, params, marker = "dd_param_env",
     }
   }
   if (!changed) return(step)
-  out <- rebuild_step(step, new_dots, new_side)
+  # Binding clones the environment of whichever quosure reads the name, which
+  # leaves a parameter read by a later dot invisible to the step's executor.
+  shared <- reshare_step_quos(dots, side, new_dots, new_side)
+  out <- rebuild_step(step, shared$dots, shared$side)
   if (!is.null(attr(step, "draws"))) attr(out, "draws") <- attr(step, "draws")
   attr(out, applied_attr) <- params
   out

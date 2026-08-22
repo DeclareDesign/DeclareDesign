@@ -338,7 +338,8 @@ modify_design_params <- function(design, params) {
     }
     # Sampling and inquiry used to be rebuilt again here, by hand, after
     # rebuild_step() had already rebuilt them. The switch covers both.
-    out_step <- rebuild_step(step, new_dots, new_side)
+    shared <- reshare_step_quos(dots, side, new_dots, new_side)
+    out_step <- rebuild_step(step, shared$dots, shared$side)
     if (!is.null(attr(step, "draws"))) {
       attr(out_step, "draws") <- attr(step, "draws")
     }
