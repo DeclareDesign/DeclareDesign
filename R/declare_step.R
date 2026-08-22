@@ -60,6 +60,7 @@ handler_is_fabricate <- function(handler) {
 #' wide(long)
 declare_step <- function(handler, ..., label = "custom_step", draws = 1L) {
   dots <- capture_dots_env(rlang::enquos(...))
+  handler_quo <- capture_quosure_env(rlang::enquo(handler))
   call <- sys.call()
   force(handler)
   # Taken at declaration time, so it is where the user wrote the call and not
@@ -85,6 +86,7 @@ declare_step <- function(handler, ..., label = "custom_step", draws = 1L) {
     causal_type = "dgp",
     label       = label,
     call        = call,
+    handler_quo = handler_quo,
     handler_fn  = handler
   )
   attr(step, "draws") <- as.integer(draws)

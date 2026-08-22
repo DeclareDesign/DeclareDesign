@@ -99,11 +99,60 @@ is_parameters_step <- function(step) {
 #' @noRd
 parameter_values <- function(step) {
   dots <- attr(step, "dots")
-  out <- list()
+  # Evaluated once and kept. A parameter is fixed for the life of the design,
+  # so a stochastic one (`locality_shock = rnorm(500, sd = sqrt(ICC))`) must
+  # not be redrawn every time the design is rebuilt, which `+` and every
+  # redesign both do. Without the cache, redesigning `cluster_prob` silently
+  # drew a new population.
+  cached <- attr(step, "param_values")
+  out <- if (is.list(cached)) cached[intersect(names(dots), names(cached))] else list()
   for (nm in names(dots)) {
+    if (nm %in% names(out)) next
     out[nm] <- list(rlang::eval_tidy(dots[[nm]], data = out))
   }
-  out
+  out[names(dots)]
+}
+
+#' Keep the values a parameter declaration evaluated to
+#'
+#' Called once, from [apply_parameters()], so every later rebuild reuses them.
+#' [modify_design_params()] drops the ones a redesign invalidates.
+#'
+#' @keywords internal
+#' @noRd
+cache_parameter_values <- function(step, values) {
+  attr(step, "param_values") <- values
+  step
+}
+
+#' Drop the cached values a redesign invalidates
+#'
+#' A parameter may read the ones declared before it, so changing the `k`th
+#' invalidates the `k`th onward and nothing before it. Redesigning `ICC` does
+#' redraw the two shocks computed from it, which is the point; redesigning
+#' `cluster_prob`, declared after them, leaves them alone.
+#'
+#' A value that is not actually different invalidates nothing. Macartan's rule:
+#' redesigning a parameter to the value it already holds must not change what
+#' the design does, and it would have, because the shocks downstream of it are
+#' random.
+#'
+#' @param new_values Named list of the values the redesign supplied.
+#' @keywords internal
+#' @noRd
+invalidate_param_cache <- function(step, new_values) {
+  cached <- attr(step, "param_values")
+  if (!is.list(cached)) return(step)
+  nms <- names(attr(step, "dots"))
+  moved <- names(new_values)[vapply(names(new_values), function(nm) {
+    !nm %in% names(cached) || !identical(cached[[nm]], new_values[[nm]])
+  }, logical(1))]
+  if (!length(moved)) return(step)
+  first <- min(match(moved, nms), na.rm = TRUE)
+  if (!is.finite(first)) return(step)
+  keep <- nms[seq_len(first - 1L)]
+  attr(step, "param_values") <- cached[intersect(keep, names(cached))]
+  step
 }
 
 #' Every parameter name declared anywhere in a design
@@ -228,6 +277,7 @@ apply_parameters <- function(steps) {
   if (!any(is_param)) return(steps)
   for (i in which(is_param)) {
     params <- parameter_values(steps[[i]])
+    steps[[i]] <- cache_parameter_values(steps[[i]], params)
     if (!length(params)) next
     for (j in seq_along(steps)) {
       if (j <= i || is_param[[j]]) next

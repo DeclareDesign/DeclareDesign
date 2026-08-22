@@ -120,6 +120,7 @@ declare_inquiry <- function(..., subset = NULL, label = "inquiry",
   dots <- capture_dots_env(rlang::enquos(...))
   subset_quo <- rlang::enquo(subset)
   if (rlang::quo_is_null(subset_quo)) subset_quo <- NULL
+  handler_quo <- capture_quosure_env(rlang::enquo(handler))
   call <- sys.call()
   # When the user supplies exactly one named splat (e.g. `pate = mean(...)`),
   # the splat name becomes the step's label so it doubles as a reference key
@@ -140,6 +141,7 @@ declare_inquiry <- function(..., subset = NULL, label = "inquiry",
     label       = label,
     call        = call,
     subset_quo  = subset_quo,
+    handler_quo = handler_quo,
     handler_fn  = handler
   )
   attr(step, "draws") <- as.integer(draws)

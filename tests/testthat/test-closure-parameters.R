@@ -93,3 +93,31 @@ test_that("Macartan's twice-reported N and se_type are gone", {
     expect_error(suppressWarnings(redesign(design, N = 50)), "not a parameter")
   })
 })
+
+test_that("a function passed to .method, .summary or handler is reachable by name", {
+  # Six library designs advertised a parameter `redesign()` could not reach,
+  # because `.method`, `.summary` and `handler` are formals: the function
+  # arrived as a value and its name appeared in no quosure.
+  skip_if_not_installed("estimatr")
+  local({
+    plain <- function(x) tibble::tibble(term = "a", estimate = 1)
+    doubled <- function(x) tibble::tibble(term = "a", estimate = 2)
+    design <- declare_model(N = 10, u = rnorm(N), Z = rep(0:1, 5), Y = u + Z) +
+      declare_estimator(Y ~ Z, .method = estimatr::lm_robust, .summary = plain,
+                        term = "a")
+    expect_true("plain" %in% design_parameters(design)$name)
+    expect_equal(run_design(design)$estimate, 1)
+    expect_equal(run_design(redesign(design, plain = doubled))$estimate, 2)
+  })
+})
+
+test_that("a handler passed by name to declare_step is reachable", {
+  local({
+    add_one <- function(data) { data$k <- 1; data }
+    add_two <- function(data) { data$k <- 2; data }
+    design <- declare_model(N = 2) + declare_step(handler = add_one)
+    expect_true("add_one" %in% design_parameters(design)$name)
+    expect_equal(unique(draw_data(design)$k), 1)
+    expect_equal(unique(draw_data(redesign(design, add_one = add_two))$k), 2)
+  })
+})

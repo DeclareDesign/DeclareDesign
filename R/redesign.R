@@ -5,6 +5,15 @@
 #' @keywords internal
 #' @noRd
 rebuild_step <- function(step, new_dots, new_side = list()) {
+  # A rebound `.method`, `.summary` or `handler` quosure is the new source of
+  # truth for the function the step runs, so it is re-evaluated before anything
+  # reads the value off the step.
+  for (qnm in names(fn_quo_targets())) {
+    quo <- if (qnm %in% names(new_side)) new_side[[qnm]] else attr(step, qnm)
+    if (!rlang::is_quosure(quo)) next
+    val <- tryCatch(rlang::eval_tidy(quo), error = function(e) NULL)
+    if (is.function(val)) attr(step, fn_quo_targets()[[qnm]]) <- val
+  }
   step_type   <- attr(step, "step_type")
   causal_type <- attr(step, "causal_type")
   label       <- attr(step, "label")
@@ -80,7 +89,8 @@ rebuild_step <- function(step, new_dots, new_side = list()) {
     label        = label,
     call         = call
   )
-  carry <- c("method_arg", "summary_arg", "handler_fn", "draws", "method_name")
+  carry <- c("method_arg", "summary_arg", "handler_fn", "draws", "method_name",
+             "param_values", "method_quo", "summary_quo", "handler_quo")
   for (nm in carry) {
     if (!is.null(attr(step, nm))) attr(out, nm) <- attr(step, nm)
   }
@@ -99,7 +109,26 @@ rebuild_step <- function(step, new_dots, new_side = list()) {
 #' @keywords internal
 #' @noRd
 side_quo_names <- function() {
-  c("filter_quo", "subset_quo", "term_quo", "inquiry_quo")
+  c("filter_quo", "subset_quo", "term_quo", "inquiry_quo",
+    "method_quo", "summary_quo", "handler_quo")
+}
+
+#' The captured arguments that hold a function rather than a value
+#'
+#' `.method`, `.summary` and `handler` are declared as formals, so the function
+#' they name arrives as a value and its *name* was invisible: six designs in
+#' the library advertised a parameter (`tidy_margins`, `exact_matching`,
+#' `estimator_AS`, `get_best_predictor`, `summary_fn`) that `redesign()` could
+#' not reach, because the symbol appeared in no quosure. Capturing the
+#' expression alongside the value is what makes the name reachable; the value
+#' is still what the step runs, and is recomputed from the quosure whenever a
+#' redesign rebinds it.
+#'
+#' @keywords internal
+#' @noRd
+fn_quo_targets <- function() {
+  c(method_quo = "method_arg", summary_quo = "summary_arg",
+    handler_quo = "handler_fn")
 }
 
 #' Does this body reassign the name upward with `<<-`?
@@ -255,6 +284,7 @@ modify_design_params <- function(design, params) {
     new_dots <- dots
     new_side <- side
     changed <- FALSE
+    changed_params <- list()
     for (param_name in names(params)) {
       new_val <- params[[param_name]]
       if (length(new_dots) > 0) {
@@ -274,6 +304,7 @@ modify_design_params <- function(design, params) {
               env = rlang::quo_get_env(q)
             )
             changed <- TRUE
+            changed_params[[param_name]] <- new_val
             next
           }
           rebound <- rebind_quo_any(q, param_name, new_val)
@@ -302,6 +333,9 @@ modify_design_params <- function(design, params) {
       }
     }
     if (!changed) return(step)
+    if (length(changed_params)) {
+      step <- invalidate_param_cache(step, changed_params)
+    }
     # Sampling and inquiry used to be rebuilt again here, by hand, after
     # rebuild_step() had already rebuilt them. The switch covers both.
     out_step <- rebuild_step(step, new_dots, new_side)

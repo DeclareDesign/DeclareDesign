@@ -122,3 +122,33 @@ test_that("a design with no parameter declaration is untouched", {
     expect_equal(nrow(draw_data(redesign(design, n = 25))), 25L)
   })
 })
+
+test_that("a stochastic declared parameter is fixed for the life of the design", {
+  local({
+    design <- declare_parameters(u = rnorm(1), v = u * 2) +
+      declare_model(N = 2, y = u)
+    first <- unique(draw_data(design)$y)
+    # `+` rebuilds the design, and so does every redesign. Neither may redraw.
+    expect_equal(unique(draw_data(design + NULL)$y), first)
+    expect_equal(unique(draw_data(redesign(design, v = 99))$y), first)
+    # redesigning to the value it already holds changes nothing at all
+    expect_equal(unique(draw_data(redesign(design, u = first))$y), first)
+  })
+})
+
+test_that("changing a parameter recomputes the ones declared after it and no others", {
+  local({
+    design <- declare_parameters(a = 2, b = a * 10, c_val = rnorm(1)) +
+      declare_model(N = 1, y = b)
+    expect_equal(draw_data(design)$y, 20)
+    before <- DeclareDesignZero:::current_param_value(design, "c_val")
+    moved <- redesign(design, a = 3)
+    expect_equal(draw_data(moved)$y, 30)
+    # `c_val` is declared after `a`, so it is invalidated and redrawn
+    expect_false(identical(before,
+                           DeclareDesignZero:::current_param_value(moved, "c_val")))
+    # but a parameter declared before the change is untouched
+    kept <- redesign(design, c_val = 1)
+    expect_equal(draw_data(kept)$y, 20)
+  })
+})

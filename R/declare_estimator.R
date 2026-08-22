@@ -268,6 +268,9 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
   dots <- capture_dots_env(rlang::enquos(...))
   term_quo <- capture_quosure_env(rlang::enquo(term))
   inquiry_quo <- capture_quosure_env(rlang::enquo(inquiry))
+  method_quo <- capture_quosure_env(rlang::enquo(.method))
+  summary_quo <- capture_quosure_env(rlang::enquo(.summary))
+  handler_quo <- capture_quosure_env(rlang::enquo(handler))
   call <- sys.call()
   method_expr <- substitute(.method)
   legacy <- extract_legacy_model(dots)
@@ -317,6 +320,9 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
     summary_arg  = .summary,
     inquiry_quo  = inquiry_quo,
     term_quo     = term_quo,
+    method_quo   = method_quo,
+    summary_quo  = summary_quo,
+    handler_quo  = handler_quo,
     handler_fn   = handler,
     method_name  = method_name
   )
@@ -347,6 +353,9 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
                          draws = 1L) {
   dots <- capture_dots_env(rlang::enquos(...))
   term_quo <- capture_quosure_env(rlang::enquo(term))
+  method_quo <- capture_quosure_env(rlang::enquo(.method))
+  summary_quo <- capture_quosure_env(rlang::enquo(.summary))
+  handler_quo <- capture_quosure_env(rlang::enquo(handler))
   call <- sys.call()
   method_expr <- substitute(.method)
   legacy <- extract_legacy_model(dots)
@@ -385,6 +394,9 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
     summary_arg  = .summary,
     inquiry_quo  = NULL,
     term_quo     = term_quo,
+    method_quo   = method_quo,
+    summary_quo  = summary_quo,
+    handler_quo  = handler_quo,
     handler_fn   = handler,
     method_name  = method_name
   )
