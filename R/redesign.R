@@ -231,9 +231,9 @@ step_uses_param <- function(step, name) {
 #' holds that number and nothing names it, so a redesign has nothing to change
 #' and used to be honoured by rewriting the argument because its *name*
 #' matched. That is the branch that let `redesign(sd = 3)` reach a column
-#' called `sd`, and it is gone: a design says which of its numbers are knobs
-#' with `declare_parameters()`, or reads them from a name defined outside
-#' itself.
+#' called `sd`, and it is gone: a design says which of its numbers a redesign
+#' may set with `declare_parameters()`, or reads them from a name defined
+#' outside itself.
 #'
 #' Erring rather than warning is the point. The alternative is a design that
 #' silently keeps the value it was written with, which is the failure this
@@ -265,9 +265,9 @@ check_params_are_declared <- function(design, param_names) {
        else " is an argument this design writes down, not a parameter.",
        "
 ",
-       "Declare it to make it a knob: `declare_parameters(", one, " = <value>) + ",
-       "declare_model(", one, " = ", one, ", ...)`, or write the value as a ",
-       "name defined outside the design.", call. = FALSE)
+       "To redesign over values of `", one, "`, declare it: `declare_parameters(",
+       one, " = <value>) + declare_model(", one, " = ", one, ", ...)`, or write ",
+       "the value as a name defined outside the design.", call. = FALSE)
 }
 
 #' Warn about requested parameters no step would respond to
@@ -446,9 +446,9 @@ param_grid <- function(params, expand = TRUE) {
 #' Only bare vectors and bare lists are read that way. A data frame, a matrix
 #' and anything carrying a class are single replacement values, so a design
 #' written as `declare_model(data = pilot, ...)` swaps its data with
-#' `redesign(design, pilot = new_df)` and needs no wrapping. The knob is the
-#' name the design reads the data under, not `data`, which names fabricate's
-#' argument and belongs to the declaration.
+#' `redesign(design, pilot = new_df)` and needs no wrapping. A redesign
+#' reaches the name the design reads the data under, not `data`, which names
+#' fabricate's argument and belongs to the declaration.
 #'
 #' @family modifying a design
 #' @param design A `design`.

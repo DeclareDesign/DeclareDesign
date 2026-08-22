@@ -47,10 +47,10 @@ from a parameter:
                 term_names = paste0("factor(Z)", ks))
 }\if{html}{\out{</div>}}
 
-\code{m_arms} is the design's one knob and \code{redesign()} changes it. \code{ks} and
-\code{term_names} follow from it, and are not knobs: they cannot be set
-independently without contradicting \code{m_arms}, so \code{\link[=redesign]{redesign()}} refuses them
-and \code{\link[=design_parameters]{design_parameters()}} does not list them. That is the difference
+\code{m_arms} is the one thing a caller sets: \code{redesign(design, m_arms = 4)}.
+\code{ks} and \code{term_names} follow from it, and cannot be set independently
+without contradicting it, so \code{\link[=redesign]{redesign()}} refuses them and
+\code{\link[=design_parameters]{design_parameters()}} does not list them. That is the difference
 between a note and a parameter. A \code{\link[=declare_parameters]{declare_parameters()}} step names what a
 caller may change; a \code{declare_notes()} step names what the design works out
 for itself.
@@ -69,7 +69,8 @@ design <-
   declare_inquiry(gap = mean(Y) - population_mean)
 draw_estimands(design)
 
-# A quantity derived from a parameter, so that `m_arms` is the only knob.
+# A quantity derived from a parameter, so `m_arms` is the only name a
+# redesign can set.
 design <-
   declare_parameters(m_arms = 3) +
   declare_notes(inquiry_names = paste0("ate_", seq_len(m_arms)[-1])) +

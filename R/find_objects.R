@@ -100,7 +100,8 @@ step_quosures <- function(step) {
 #' An argument written as a literal is not one of them. `declare_model(N = 500)`
 #' puts 500 in the design; nothing outside it holds that number and nothing
 #' names it, so there is nothing for a redesign to change. `declare_parameters(
-#' n = 500) + declare_model(N = n)` is how a design says that number is a knob.
+#' n = 500) + declare_model(N = n)` is how a design says a redesign may set
+#' that number.
 #'
 #' A name a previous expression put in the data is a column, not a parameter:
 #' the data mask shadows the environment, so once a step has declared `Y`, a
@@ -149,7 +150,7 @@ find_all_objects <- function(design) {
   rows <- list()
   mask <- character(0)
   declared <- declared_param_names(design)
-  # A note is not a knob, so it is left out of the list of knobs. Without this
+  # A note is not something a redesign can set, so it is left out. Without this
   # a note name that happens to be bound in the workspace as well would be
   # reported as something `redesign()` could change, which it cannot.
   notes <- declared_note_names(design)

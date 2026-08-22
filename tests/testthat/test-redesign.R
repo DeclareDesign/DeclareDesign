@@ -196,7 +196,7 @@ test_that("a data frame is one replacement value and needs no wrapping", {
   big <- fabricate(N = 121, Y_star = rnorm(N))
   # The data are reached by the name the design reads them under, `small`,
   # rather than by the name of fabricate's argument. `data` names the argument
-  # and belongs to the declaration; `small` names the object and is the knob.
+  # and belongs to the declaration; `small` names the object a redesign reaches.
   design <- declare_model(data = small, Y = Y_star + 1) + NULL
   expect_equal(nrow(draw_data(design)), 30L)
   expect_true("small" %in% design_parameters(design)$name)

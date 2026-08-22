@@ -33,10 +33,10 @@
 #'                 term_names = paste0("factor(Z)", ks))
 #' ```
 #'
-#' `m_arms` is the design's one knob and `redesign()` changes it. `ks` and
-#' `term_names` follow from it, and are not knobs: they cannot be set
-#' independently without contradicting `m_arms`, so [redesign()] refuses them
-#' and [design_parameters()] does not list them. That is the difference
+#' `m_arms` is the one thing a caller sets: `redesign(design, m_arms = 4)`.
+#' `ks` and `term_names` follow from it, and cannot be set independently
+#' without contradicting it, so [redesign()] refuses them and
+#' [design_parameters()] does not list them. That is the difference
 #' between a note and a parameter. A [declare_parameters()] step names what a
 #' caller may change; a `declare_notes()` step names what the design works out
 #' for itself.
@@ -64,7 +64,8 @@
 #'   declare_inquiry(gap = mean(Y) - population_mean)
 #' draw_estimands(design)
 #'
-#' # A quantity derived from a parameter, so that `m_arms` is the only knob.
+#' # A quantity derived from a parameter, so `m_arms` is the only name a
+#' # redesign can set.
 #' design <-
 #'   declare_parameters(m_arms = 3) +
 #'   declare_notes(inquiry_names = paste0("ate_", seq_len(m_arms)[-1])) +
@@ -207,7 +208,7 @@ apply_notes_from <- function(steps, i, notes) {
 #' Refuse a design that declares one name as both a parameter and a note
 #'
 #' The two answer opposite questions about the same name: a parameter is a
-#' knob a caller may turn, a note is a quantity the design works out. A design
+#' value a caller may set, a note is a quantity the design works out. A design
 #' that declares both has no answer for `redesign()`, so it is caught when the
 #' step is added rather than on the draw that disagrees.
 #'
@@ -221,7 +222,7 @@ check_notes_against_params <- function(steps) {
   if (length(clash)) {
     stop("Declared as both a parameter and a note: ",
          paste(clash, collapse = ", "), ".\n",
-         "A parameter is a knob `redesign()` turns; a note is computed from ",
+         "A parameter is a value `redesign()` sets; a note is computed from ",
          "one. Pick one for each name.", call. = FALSE)
   }
   invisible(NULL)

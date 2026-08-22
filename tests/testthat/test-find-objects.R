@@ -10,7 +10,7 @@ test_that("a name a data step declares is a column, not a parameter", {
   })
 })
 
-test_that("an argument written as a literal is not a knob", {
+test_that("an argument written as a literal cannot be redesigned", {
   local({
     design <- declare_model(N = 50, Y = rnorm(N)) +
       declare_inquiry(target = 0.5)
@@ -21,7 +21,7 @@ test_that("an argument written as a literal is not a knob", {
   })
 })
 
-test_that("the same numbers are knobs once they are declared or named outside", {
+test_that("the same numbers can be redesigned once declared or named outside", {
   local({
     declared <- declare_parameters(n = 50) +
       declare_model(N = n, Y = rnorm(N))

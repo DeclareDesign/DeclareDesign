@@ -77,7 +77,7 @@ test_that("a note derived from a parameter follows a redesign", {
   })
 })
 
-test_that("a note is not a knob: it is out of design_parameters() and out of redesign()", {
+test_that("a note cannot be redesigned: out of design_parameters() and out of redesign()", {
   local({
     design <- declare_parameters(m_arms = 3) +
       declare_notes(ks = seq_len(m_arms)[-1]) +
