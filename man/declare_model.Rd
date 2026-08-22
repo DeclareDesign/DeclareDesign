@@ -7,7 +7,7 @@
 declare_model(..., label = "model", draws = 1L)
 }
 \arguments{
-\item{...}{Named arguments forwarded to \code{\link[fabricatrZero:fabricate]{fabricatrZero::fabricate()}}. Unquoted
+\item{...}{Named arguments forwarded to \code{\link[fabricatr:fabricate]{fabricatr::fabricate()}}. Unquoted
 expressions are evaluated lazily in the caller's environment with access
 to the current data frame.}
 
@@ -26,7 +26,7 @@ still works when you are wrong about it.
 }
 \details{
 Declares a step that builds (or augments) the population data via
-\code{\link[fabricatrZero:fabricate]{fabricatrZero::fabricate()}}. The first model step in a design receives
+\code{\link[fabricatr:fabricate]{fabricatr::fabricate()}}. The first model step in a design receives
 \code{data = NULL}, so it must specify \code{N} (and any variables) directly.
 Subsequent model steps add columns to the existing data.
 }

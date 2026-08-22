@@ -77,7 +77,7 @@ test_that("simulation still works when progressr is not installed", {
   skip_if_not_installed("withr")
   tick <- withr::with_options(
     list(DeclareDesign.progress = FALSE),
-    DeclareDesignZero:::dd_progressor(10, "x")
+    DeclareDesign:::dd_progressor(10, "x")
   )
   expect_true(is.function(tick))
   expect_null(tick())

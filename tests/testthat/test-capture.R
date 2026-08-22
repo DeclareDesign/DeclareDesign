@@ -367,7 +367,7 @@ test_that("capture does not reach across a package namespace", {
   # environment serialises with it anyway.
   with_globals(cap_hidden = 5, code = {
     f <- function() declare_model(N = 3, Y = cap_hidden)
-    environment(f) <- asNamespace("DeclareDesignZero")
+    environment(f) <- asNamespace("DeclareDesign")
     env <- rlang::quo_get_env(attr(f(), "dots")[[2]])
     expect_false(exists("cap_hidden", envir = env, inherits = FALSE))
   })

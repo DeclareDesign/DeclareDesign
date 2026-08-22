@@ -1,4 +1,4 @@
-Package: DeclareDesignZero
+Package: DeclareDesign
 Type: Package
 Title: A Tidyverse-First Research Design Declaration and Diagnosis Tool
 Version: 2.0.0
@@ -12,7 +12,7 @@ Encoding: UTF-8
 Depends:
     R (>= 4.1.0),
     randomizr (>= 1.0.1),
-    fabricatrZero (>= 2.0.0),
+    fabricatr (>= 2.0.0),
     estimatr (>= 2.0.0)
 Imports:
     broom,
@@ -23,10 +23,9 @@ Imports:
     tibble,
     tidyr
 Remotes:
-    fabricatrZero=DeclareDesign/fabricatr@rewrite,
-    estimatr=DeclareDesign/estimatr@rewrite
+    DeclareDesign/fabricatr@rewrite,
+    DeclareDesign/estimatr@rewrite
 Suggests:
-    fabricatr,
     furrr,
     future,
     knitr,

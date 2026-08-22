@@ -1,6 +1,6 @@
 #' Build a DGP step closure
 #'
-#' Helper that splices a captured set of quosures into a `fabricatrZero::fabricate`
+#' Helper that splices a captured set of quosures into a `fabricatr::fabricate`
 #' call. Pulled out into its own helper so that [redesign()] can re-create
 #' steps after rebinding parameters in the captured environment.
 #'
@@ -49,7 +49,7 @@ make_fabricate_step <- function(dots, id_label_na = FALSE) {
     # Use fabricate_with_dots to avoid double-quoting: !!!-injection turns
     # quosures into formula objects (~expr), which fabricate()'s enquos()
     # would re-capture incorrectly.
-    fabricatrZero:::fabricate_with_dots(data = data, dots = rest)
+    fabricatr:::fabricate_with_dots(data = data, dots = rest)
   }
 }
 
@@ -60,12 +60,12 @@ make_fabricate_step <- function(dots, id_label_na = FALSE) {
 #' still works when you are wrong about it.
 #'
 #' Declares a step that builds (or augments) the population data via
-#' [fabricatrZero::fabricate()]. The first model step in a design receives
+#' [fabricatr::fabricate()]. The first model step in a design receives
 #' `data = NULL`, so it must specify `N` (and any variables) directly.
 #' Subsequent model steps add columns to the existing data.
 #'
 #' @family design declarations
-#' @param ... Named arguments forwarded to [fabricatrZero::fabricate()]. Unquoted
+#' @param ... Named arguments forwarded to [fabricatr::fabricate()]. Unquoted
 #'   expressions are evaluated lazily in the caller's environment with access
 #'   to the current data frame.
 #' @param label Step label. Defaults to `"model"`.
@@ -90,7 +90,7 @@ declare_model <- function(..., label = "model", draws = 1L) {
   fn <- make_fabricate_step(dots, id_label_na = FALSE)
   step <- build_step(
     fn          = fn,
-    handler_expr = quote(fabricatrZero::fabricate),
+    handler_expr = quote(fabricatr::fabricate),
     dots        = dots,
     step_type   = "model",
     causal_type = "dgp",
@@ -123,7 +123,7 @@ declare_measurement <- function(..., label = "measurement", draws = 1L) {
   fn <- make_fabricate_step(dots, id_label_na = TRUE)
   step <- build_step(
     fn          = fn,
-    handler_expr = quote(fabricatrZero::fabricate),
+    handler_expr = quote(fabricatr::fabricate),
     dots        = dots,
     step_type   = "measurement",
     causal_type = "dgp",
@@ -155,7 +155,7 @@ declare_assignment <- function(..., label = "assignment", draws = 1L) {
   fn <- make_fabricate_step(dots, id_label_na = TRUE)
   step <- build_step(
     fn          = fn,
-    handler_expr = quote(fabricatrZero::fabricate),
+    handler_expr = quote(fabricatr::fabricate),
     dots        = dots,
     step_type   = "assignment",
     causal_type = "dgp",
@@ -184,7 +184,7 @@ make_sampling_step <- function(dots, filter_quo) {
         data <- user_data
       }
     }
-    data <- fabricatrZero:::fabricate_with_dots(data = data, dots = rest)
+    data <- fabricatr:::fabricate_with_dots(data = data, dots = rest)
     if (!is.null(filter_quo)) {
       keep <- rlang::eval_tidy(filter_quo, data = data)
       data <- data[!is.na(keep) & keep, , drop = FALSE]
@@ -223,7 +223,7 @@ declare_sampling <- function(..., filter = NULL, label = "sampling",
   fn <- make_sampling_step(dots, filter_quo)
   step <- build_step(
     fn           = fn,
-    handler_expr = quote(fabricatrZero::fabricate),
+    handler_expr = quote(fabricatr::fabricate),
     dots         = dots,
     step_type    = "sampling",
     causal_type  = "dgp",

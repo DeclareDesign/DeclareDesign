@@ -141,12 +141,12 @@ test_that("changing a parameter recomputes the ones declared after it and no oth
     design <- declare_parameters(a = 2, b = a * 10, c_val = rnorm(1)) +
       declare_model(N = 1, y = b)
     expect_equal(draw_data(design)$y, 20)
-    before <- DeclareDesignZero:::current_param_value(design, "c_val")
+    before <- DeclareDesign:::current_param_value(design, "c_val")
     moved <- redesign(design, a = 3)
     expect_equal(draw_data(moved)$y, 30)
     # `c_val` is declared after `a`, so it is invalidated and redrawn
     expect_false(identical(before,
-                           DeclareDesignZero:::current_param_value(moved, "c_val")))
+                           DeclareDesign:::current_param_value(moved, "c_val")))
     # but a parameter declared before the change is untouched
     kept <- redesign(design, c_val = 1)
     expect_equal(draw_data(kept)$y, 20)

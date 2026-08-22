@@ -27,8 +27,8 @@ A tibble of stacked simulation results.
 }
 \description{
 Runs each design \code{sims} times, collecting estimands and estimates into a
-single long tibble suitable for diagnosis. When more than one design is
-supplied, a \code{design} column distinguishes them.
+single long tibble suitable for diagnosis. A \code{design} column names the
+design each row came from, whether one design is supplied or several.
 }
 \details{
 If any step in a design has \code{draws > 1}, the simulation runs in nested

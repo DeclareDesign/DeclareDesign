@@ -145,7 +145,7 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
   force(handler)
   # Capture the helpers and the declaration environment by value so the closure
   # is self-contained and works inside furrr workers without requiring the
-  # DeclareDesignZero namespace.
+  # DeclareDesign namespace.
   as_written <- dots_as_written
   args <- as_written(dots)
   decl_env <- dots_env(dots, default = rlang::caller_env())

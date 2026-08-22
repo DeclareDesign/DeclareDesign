@@ -10,13 +10,13 @@
 #' survived the move of the other handlers onto the as-written convention.
 #'
 #' Both spellings count: a script carried over from DeclareDesign passes
-#' `fabricatr::fabricate`, and dispatching on the fabricatrZero function alone
+#' `fabricatr::fabricate`, and dispatching on the fabricatr function alone
 #' sent it down the wrong branch and failed inside fabricate.
 #'
 #' @keywords internal
 #' @noRd
 handler_is_fabricate <- function(handler) {
-  if (identical(handler, fabricatrZero::fabricate)) return(TRUE)
+  if (identical(handler, fabricatr::fabricate)) return(TRUE)
   if (requireNamespace("fabricatr", quietly = TRUE)) {
     return(identical(handler, fabricatr::fabricate))
   }

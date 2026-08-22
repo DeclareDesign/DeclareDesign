@@ -3,7 +3,7 @@
 # be on the search path for the tests to exercise the path users actually take.
 # The Suggests are attached only if present; tests that need one say so with
 # skip_if_not_installed().
-library(fabricatrZero)
+library(fabricatr)
 library(dplyr)
 library(tidyr)
 library(purrr)

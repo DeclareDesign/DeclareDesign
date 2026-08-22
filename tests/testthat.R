@@ -1,4 +1,4 @@
 library(testthat)
-library(DeclareDesignZero)
+library(DeclareDesign)
 
-test_check("DeclareDesignZero")
+test_check("DeclareDesign")

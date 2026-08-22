@@ -4,12 +4,11 @@
 # This is the rewrite branch's own workflow. `main`'s triggers on
 # [main, master] and would never fire here, and this branch needs a step
 # `main` does not: two of its dependencies are resolved from the Remotes: field
-# in DESCRIPTION rather than from CRAN. fabricatrZero is not on CRAN at all,
-# and estimatr is, but at 1.0.6, which does not satisfy the `>= 2.0.0` this
-# branch requires. Both remotes carry the `pkgname=` prefix; for estimatr that
-# is deliberate insurance, since the repository name now collides with a real
-# CRAN package and an unprefixed remote resolves in some pak configurations and
-# not others.
+# in DESCRIPTION rather than from CRAN. Both fabricatr and estimatr are on
+# CRAN, at 1.0.2 and 1.0.6, and neither satisfies the `>= 2.0.0` this branch
+# requires, so both resolve from their own rewrite branches. Since the *Zero
+# names were dropped (2026-08-22) every package builds under its released name,
+# so the remotes no longer carry a `pkgname=` prefix.
 on:
   push:
     branches: [rewrite]

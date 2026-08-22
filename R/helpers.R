@@ -128,7 +128,7 @@ vars <- function(...) rlang::quos(...)
 #'
 #' The other verbs go the other way on purpose. `declare_inquiry()` and
 #' `declare_diagnosands()` evaluate their expressions themselves, because there
-#' is no handler to defer to: DeclareDesignZero *is* the thing doing the
+#' is no handler to defer to: DeclareDesign *is* the thing doing the
 #' computing, so `mean(Y_Z_1 - Y_Z_0)` has to become a number.
 #'
 #' Formulas are the one thing evaluated here, since `Y ~ Z` has to arrive as a

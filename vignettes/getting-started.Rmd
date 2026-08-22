@@ -23,8 +23,8 @@ library(estimatr)
 # TEMPORARY, delete at release. The 2.0 packages are not yet on CRAN under
 # their own names, so the chunks below run against the branch packages while
 # the chunk above shows what a reader will type.
-library(DeclareDesignZero)
-library(fabricatrZero)
+library(DeclareDesign)
+library(fabricatr)
 library(randomizr)
 library(estimatr)
 ```

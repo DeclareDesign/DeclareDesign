@@ -11,7 +11,7 @@
 # produces no estimate.
 #
 # 81 of the book's 90 design declarations run here: 78 verbatim and 3 after
-# the one mechanical substitution fabricatrZero requires. The remaining
+# the one mechanical substitution fabricatr requires. The remaining
 # 9 are listed at the foot of the file, with the reason for each.
 
 # Every test here skips on CRAN. The suite is large, and between them these
@@ -3392,7 +3392,7 @@ test_that("model_3 runs (integration)", {
 # Ported from fabricatr syntax ----
 #
 # These declarations use fabricatr's `nest = FALSE` and
-# `cross_levels(by = join_using(...))`, which fabricatrZero replaces with
+# `cross_levels(by = join_using(...))`, which fabricatr replaces with
 # `declare_level()` and `.by = c(...)`. Both old spellings now error with a
 # message naming the replacement, so the port is mechanical and is applied
 # here. They are the only book designs whose text has to change.

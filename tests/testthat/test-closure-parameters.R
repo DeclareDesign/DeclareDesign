@@ -3,7 +3,7 @@ test_that("a parameter a handler reads out of its closure is found and changed",
   # it, so this is a regression to close rather than a feature to add.
   local({
     b <- 100
-    f <- function(...) fabricatrZero::fabricate(...)
+    f <- function(...) fabricatr::fabricate(...)
     hdl <- function(...) f(..., extra = rnorm(2, b, 0))
     design <- declare_model(N = 2, U = rnorm(N)) +
       declare_measurement(handler = hdl)

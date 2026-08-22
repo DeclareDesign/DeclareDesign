@@ -131,7 +131,7 @@ test_that("several unlabelled estimators against several inquiries warns", {
 
 test_that("declare_step with handler = fabricate evaluates lazily", {
   pop <- declare_model(N = 10, X = seq_len(N))
-  step <- declare_step(handler = fabricatrZero::fabricate, X2 = X * 2)
+  step <- declare_step(handler = fabricatr::fabricate, X2 = X * 2)
   d <- pop + step
   df <- draw_data(d)
   expect_equal(df$X2, df$X * 2)
@@ -151,7 +151,7 @@ test_that("fabricate still needs quosures, which is why its branch survives", {
   # expressions carry the environment of the call we build and it does not.
   # The day this passes on the as-written path, handler_is_fabricate() can go.
   pop <- declare_model(N = 10, X = seq_len(N))
-  step <- declare_step(handler = fabricatrZero::fabricate, Y = X + rnorm(N, 0, 0))
+  step <- declare_step(handler = fabricatr::fabricate, Y = X + rnorm(N, 0, 0))
   df <- draw_data(pop + step)
   expect_equal(df$Y, df$X)
 })

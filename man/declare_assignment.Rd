@@ -7,7 +7,7 @@
 declare_assignment(..., label = "assignment", draws = 1L)
 }
 \arguments{
-\item{...}{Named arguments forwarded to \code{\link[fabricatrZero:fabricate]{fabricatrZero::fabricate()}}. Unquoted
+\item{...}{Named arguments forwarded to \code{\link[fabricatr:fabricate]{fabricatr::fabricate()}}. Unquoted
 expressions are evaluated lazily in the caller's environment with access
 to the current data frame.}
 

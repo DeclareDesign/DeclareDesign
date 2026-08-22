@@ -2,7 +2,7 @@
 
 **This branch is not the CRAN package and it is not `main`.** It holds a ground-up rewrite of DeclareDesign on tidyverse foundations. The released DeclareDesign is unaffected by anything here.
 
-The package on this branch is still named `DeclareDesignZero`, so installing it leaves your CRAN DeclareDesign in place and both can be loaded in the same session. It imports `fabricatrZero`, which comes from the sibling branch and installs alongside your CRAN fabricatr the same way.
+The package on this branch carries the released package's name, so installing it **replaces** your CRAN DeclareDesign: two packages of one name cannot be loaded together. It imports `fabricatr (>= 2.0.0)` from the sibling branch, which replaces your CRAN fabricatr the same way. To keep 1.1.1 available for comparison, install it into a separate library and pass `lib.loc` when you need it.
 
 ```r
 remotes::install_github("DeclareDesign/fabricatr@rewrite")
@@ -27,6 +27,6 @@ Two API decisions are open and both change what a 2.0.0 would mean:
 - **How estimator arguments reach `.method`** (DeclareDesign issue #463, open since 2021). DeclareDesign passes expressions, which breaks `metafor::rma.uni` and works for the shim written around that breakage; this branch passes values, which does the reverse. Neither convention serves both tidyselect handlers and ordinary R functions. The recommendation in the vignette is an explicit argument naming the convention, defaulting to values.
 - **Whether a diagnosands set should stop being a `design_step`.** Implemented on the `rewrite-diagnosands-proposal` branch, deliberately unmerged.
 
-**This branch is versioned 2.0.0**, against DeclareDesign 1.1.1 on CRAN, and it imports `fabricatrZero (>= 2.0.0)`, so the two move together. It reaches CRAN after fabricatr 2.0.0 does, since the dependency forces that order. It is still *named* `DeclareDesignZero`, which is what keeps it installable alongside the released package while the two are being compared; the rename is the last step before release.
+**This branch is versioned 2.0.0**, against DeclareDesign 1.1.1 on CRAN, and it imports `fabricatr (>= 2.0.0)`, so the two move together. It reaches CRAN after fabricatr 2.0.0 does, since the dependency forces that order.
 
 Sibling branches: `DeclareDesign/fabricatr@rewrite` and `DeclareDesign/estimatr@rewrite`.

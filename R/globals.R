@@ -8,7 +8,7 @@ utils::globalVariables(c(
 ))
 
 #' @importFrom estimatr lm_robust
-#' @importFrom fabricatrZero fabricate potential_outcomes reveal_outcomes
+#' @importFrom fabricatr fabricate potential_outcomes reveal_outcomes
 #' @importFrom randomizr complete_ra
 #' @importFrom rlang .data
 #' @importFrom stats coef quantile setNames
