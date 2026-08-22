@@ -251,21 +251,23 @@ step_uses_param <- function(step, name) {
 check_params_are_declared <- function(design, param_names) {
   undeclared <- setdiff(param_names, declared_param_names(design))
   if (!length(undeclared)) return(invisible(NULL))
+  # `find_all_objects()` is the definition of what a design's parameters are,
+  # and this has to use it rather than a second rule of its own: what
+  # `design_parameters()` lists is what `redesign()` changes. Asking each
+  # argument in isolation was wrong for `declare_model(N = a, a = 5)`, where
+  # the design does read `a` from outside and a *column* of the same name made
+  # it look as though it did not.
+  reachable <- unique(find_all_objects(design, include_unbound = TRUE)$name)
+  undeclared <- setdiff(undeclared, reachable)
+  if (!length(undeclared)) return(invisible(NULL))
   literal <- character(0)
   verbs <- character(0)
   for (step in unclass(design)) {
     if (is_parameters_step(step)) next
-    dots <- attr(step, "dots")
-    nms <- names(dots) %||% character(0)
-    for (name in intersect(undeclared, nms)) {
-      quo <- dots[[match(name, nms)]]
-      # Reachable as a name is the test: a designer's `declare_model(N = N)`
-      # and a workspace object's `declare_model(N = n_units)` both are, and
-      # both keep working. A literal is not.
-      if (!quo_uses_param(quo, name)) {
-        literal <- c(literal, name)
-        verbs <- c(verbs, step_verb(step))
-      }
+    nms <- names(attr(step, "dots")) %||% character(0)
+    for (name in intersect(setdiff(undeclared, literal), nms)) {
+      literal <- c(literal, name)
+      verbs <- c(verbs, step_verb(step))
     }
   }
   if (!length(literal)) return(invisible(NULL))

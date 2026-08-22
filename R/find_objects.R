@@ -139,7 +139,30 @@ step_builds_data <- function(step) {
              c("model", "measurement", "assignment", "sampling"))
 }
 
-find_all_objects <- function(design) {
+#' Is this name bound nowhere the declaration can see, packages included?
+#'
+#' Distinguishes the two cases [user_binding_env()] collapses into `NULL`. A
+#' name that resolves to a package (`rnorm`, `complete_ra`) is not a parameter
+#' and never will be. A name that resolves to nothing is usually a column an
+#' earlier step created, but it is also how a design written for a designer
+#' function reads: `declare_model(N = N)` at top level has no `N` anywhere, and
+#' `redesign()` is what supplies it.
+#'
+#' @keywords internal
+#' @noRd
+name_is_unbound <- function(env, name) {
+  if (!rlang::is_environment(env)) return(TRUE)
+  !exists(name, envir = env, inherits = TRUE)
+}
+
+#' @param include_unbound Whether to report names that are bound nowhere.
+#'   `design_parameters()` leaves them out, because most of them are columns.
+#'   [redesign()] needs them, because the rest are names it is expected to
+#'   supply, and refusing one of those would break every design written in the
+#'   `declare_model(N = N)` form a designer function is called with.
+#' @keywords internal
+#' @noRd
+find_all_objects <- function(design, include_unbound = FALSE) {
   if (inherits(design, "design_step")) {
     design <- construct_design(wrap_step(design))
   }
@@ -168,7 +191,11 @@ find_all_objects <- function(design) {
     symbols <- setdiff(unique(expr_symbols(rlang::quo_get_expr(quo))), masked)
     for (name in setdiff(symbols, notes)) {
       found <- user_binding_env(env, name)
-      if (is.null(found)) next
+      if (is.null(found)) {
+        if (!include_unbound || !name_is_unbound(env, name)) next
+        add_row(name, NULL, step, label, NULL)
+        next
+      }
       value <- tryCatch(rlang::env_get(found, name), error = function(e) NULL)
       if (inherits(value, "design")) next
       add_row(name, value, step, label, found)
@@ -202,10 +229,12 @@ find_all_objects <- function(design) {
       add_quosure(dots[[j]], i, c(mask, step_mask))
       if (builds_data && nzchar(dot_names[j])) step_mask <- c(step_mask, dot_names[j])
     }
-    # `N` is shadowed inside the step that declares it, because `rnorm(N)`
-    # there reads the number of rows being built. It is not a column, though,
-    # so it does not shadow the steps that follow.
-    mask <- c(mask, setdiff(step_mask, "N"))
+    # `N` is shadowed from the step that declares it onward, because `rnorm(N)`
+    # reads the number of rows fabricate is building rather than anything
+    # defined outside the design, in that step and in every later one. A
+    # designer's `declare_model(N = N)` still reports `N`, from its own
+    # expression, before the shadow goes up.
+    mask <- c(mask, step_mask)
     for (nm in side_quo_names()) {
       quo <- attr(step, nm)
       if (!rlang::is_quosure(quo)) next

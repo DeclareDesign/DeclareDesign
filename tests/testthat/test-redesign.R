@@ -119,6 +119,50 @@ test_that("the refusal leads with the ordinary route and quotes the design back"
   expect_match(msg2, "`target <- 0.25`", fixed = TRUE)
 })
 
+test_that("a column does not make its own parameter unreachable", {
+  # Macartan's `a` case. The design reads `a` from outside for the row count
+  # and creates a column called `a` in the same step. A redesign must move the
+  # first and leave the second where the declaration put it.
+  local({
+    a <- 4
+    design <- declare_model(N = a, a = 5) + NULL
+    expect_equal(nrow(draw_data(design)), 4L)
+    expect_equal(unique(draw_data(design)$a), 5)
+    moved <- draw_data(redesign(design, a = 3))
+    expect_equal(nrow(moved), 3L)
+    expect_equal(unique(moved$a), 5)
+  })
+})
+
+test_that("a name the design expects redesign to supply is not refused", {
+  # The designer form, written at top level: nothing binds `N` or `prob`
+  # anywhere, and `redesign()` is what supplies them. Refusing these would
+  # break every design written to be called through a designer function.
+  declaration <- declare_model(N = N, U = rnorm(N)) +
+    declare_assignment(Z = randomizr::complete_ra(N = N, prob = prob))
+  skip_if_not_installed("randomizr")
+  designs <- redesign(declaration, N = c(20, 40), prob = 0.5)
+  expect_length(designs, 2L)
+  expect_equal(vapply(designs, function(d) nrow(draw_data(d)), integer(1)),
+               c(design_1 = 20L, design_2 = 40L))
+  # and they are still not reported as parameters, because they hold nothing
+  expect_false("N" %in% design_parameters(declaration)$name)
+})
+
+test_that("N is the rows being built in every step, not only the one that declares it", {
+  # `declare_model(N = m) + declare_model(U = rnorm(N))`: the second step's `N`
+  # is fabricate's row count, so a workspace `N` of the same name is not a
+  # parameter of this design and redesigning it says so.
+  local({
+    N <- 2
+    m <- 1
+    design <- declare_model(N = m) + declare_model(U = rnorm(N))
+    expect_equal(design_parameters(design)$name, "m")
+    expect_error(redesign(design, N = 2), "not a parameter")
+    expect_equal(nrow(draw_data(redesign(design, m = 5))), 5L)
+  })
+})
+
 test_that("both routes the refusal names actually work", {
   N <- 30
   outside <- declare_model(N = N, Y = rnorm(N))
