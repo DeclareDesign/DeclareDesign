@@ -231,9 +231,16 @@ step_uses_param <- function(step, name) {
 #' holds that number and nothing names it, so a redesign has nothing to change
 #' and used to be honoured by rewriting the argument because its *name*
 #' matched. That is the branch that let `redesign(sd = 3)` reach a column
-#' called `sd`, and it is gone: a design says which of its numbers a redesign
-#' may set with `declare_parameters()`, or reads them from a name defined
-#' outside itself.
+#' called `sd`, and it is gone.
+#'
+#' The message leads with the ordinary way out, which is to give the value a
+#' name outside the design (`N <- 500` at the top of a script, or a designer
+#' function's argument) and read it from there. `declare_parameters()` is the
+#' second suggestion, not the first: most designs never need it, and it earns
+#' its place when several steps read the value or when a column shares its
+#' name. Both are shown with the value the argument currently holds and with
+#' the `declare_*()` verb the argument actually sits in, so the advice can be
+#' pasted rather than translated.
 #'
 #' Erring rather than warning is the point. The alternative is a design that
 #' silently keeps the value it was written with, which is the failure this
@@ -245,6 +252,7 @@ check_params_are_declared <- function(design, param_names) {
   undeclared <- setdiff(param_names, declared_param_names(design))
   if (!length(undeclared)) return(invisible(NULL))
   literal <- character(0)
+  verbs <- character(0)
   for (step in unclass(design)) {
     if (is_parameters_step(step)) next
     dots <- attr(step, "dots")
@@ -254,20 +262,53 @@ check_params_are_declared <- function(design, param_names) {
       # Reachable as a name is the test: a designer's `declare_model(N = N)`
       # and a workspace object's `declare_model(N = n_units)` both are, and
       # both keep working. A literal is not.
-      if (!quo_uses_param(quo, name)) literal <- c(literal, name)
+      if (!quo_uses_param(quo, name)) {
+        literal <- c(literal, name)
+        verbs <- c(verbs, step_verb(step))
+      }
     }
   }
-  literal <- unique(literal)
   if (!length(literal)) return(invisible(NULL))
   one <- literal[[1]]
-  stop(paste(literal, collapse = ", "),
-       if (length(literal) > 1) " are arguments this design writes down, not parameters."
-       else " is an argument this design writes down, not a parameter.",
-       "
-",
-       "To redesign over values of `", one, "`, declare it: `declare_parameters(",
-       one, " = <value>) + declare_model(", one, " = ", one, ", ...)`, or write ",
-       "the value as a name defined outside the design.", call. = FALSE)
+  verb <- verbs[[1]]
+  literal <- unique(literal)
+  value <- format_param_value(current_param_value(design, one))
+  rlang::abort(c(
+    paste0(paste(literal, collapse = ", "),
+           if (length(literal) > 1) " are arguments this design writes down, not parameters."
+           else " is an argument this design writes down, not a parameter."),
+    "i" = paste0("To redesign over values of `", one, "`, give it a name outside ",
+                 "the design: `", one, " <- ", value, "`, then `", verb, "(",
+                 one, " = ", one, ", ...)`. A designer function's argument does ",
+                 "the same thing."),
+    "i" = paste0("`declare_parameters(", one, " = ", value, ")` names it inside ",
+                 "the design instead, which is worth it when several steps read ",
+                 "it or when a column shares its name.")
+  ))
+}
+
+#' The declare_*() verb a step was written with
+#'
+#' Used to quote the user's own call back at them, so the advice on how to make
+#' an argument redesignable names the step it is actually in.
+#'
+#' @keywords internal
+#' @noRd
+step_verb <- function(step) {
+  call <- attr(step, "call")
+  if (is.call(call) && is.name(call[[1]])) return(as.character(call[[1]]))
+  paste0("declare_", attr(step, "step_type") %||% "model")
+}
+
+#' A value short enough to paste back into an error message
+#'
+#' @keywords internal
+#' @noRd
+format_param_value <- function(value) {
+  if (is.null(value)) return("<value>")
+  if (!is.atomic(value) || is.object(value) || length(value) > 5L) return("<value>")
+  out <- paste(deparse(value), collapse = " ")
+  if (nchar(out) > 40L) "<value>" else out
 }
 
 #' Warn about requested parameters no step would respond to

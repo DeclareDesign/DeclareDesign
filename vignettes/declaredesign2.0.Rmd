@@ -86,11 +86,15 @@ redesign(design, taw = 0.5)
 #> Warning: You requested a change to taw but taw is not found in the design.
 ```
 
-The names it finds are the parameters a `declare_parameters()` step declares and the objects the design's expressions read out of the environment they were written in. **A number written into the design is not one of them.** `declare_model(N = 500)` puts 500 in the design; nothing outside it holds that number and nothing names it, so `redesign(design, N = 1000)` errors and says how to declare it:
+The names it finds are the parameters a `declare_parameters()` step declares and the objects the design's expressions read out of the environment they were written in. **A number written into the design is not one of them.** `declare_model(N = 500)` puts 500 in the design; nothing outside it holds that number and nothing names it, so `redesign(design, N = 1000)` errors and says how to give it one. The ordinary way is a name outside the design, which is what a designer function's argument already is:
 
 ```{r, purl = FALSE}
-declare_parameters(n_units = 500) + declare_model(N = n_units, ...)
+N <- 500
+design <- declare_model(N = N, ...)
+redesign(design, N = c(500, 1000))
 ```
+
+`declare_parameters(N = 500) + declare_model(N = N, ...)` does the same from inside the design, and earns its place when several steps read the value or when a column shares its name.
 
 That is the one deliberate break in `redesign()`'s reach, and it is what removes a whole class of silent wrong answers. Matching a redesign against the *name* of a declared argument is what used to make `redesign(design, sd = 3)` write 3 into a column called `sd` rather than change the parameter behind it, and what put a character vector where `diff_in_diff`'s outcome belonged. A declared parameter and a column of the same name are now different things.
 

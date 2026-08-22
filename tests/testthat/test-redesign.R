@@ -96,7 +96,39 @@ test_that("redesign is silent about parameters it does change", {
   # keeping the value the design was written with
   literal <- declare_model(N = 30, Y = rnorm(N)) + declare_inquiry(mu = mean(Y))
   expect_error(redesign(literal, N = 50), "not a parameter")
-  expect_error(redesign(literal, N = 50), "declare_parameters")
+})
+
+test_that("the refusal leads with the ordinary route and quotes the design back", {
+  literal <- declare_model(N = 30, Y = rnorm(N)) +
+    declare_inquiry(target = 0.25)
+  msg <- conditionMessage(tryCatch(redesign(literal, N = 50),
+                                   error = function(e) e))
+  # The value the argument holds, and the verb it sits in, so the advice can be
+  # pasted rather than translated.
+  expect_match(msg, "`N <- 30`", fixed = TRUE)
+  expect_match(msg, "declare_model(N = N, ...)", fixed = TRUE)
+  # A name outside the design comes first; declare_parameters() is the second
+  # suggestion, because most designs do not need it.
+  expect_lt(regexpr("name outside the design", msg, fixed = TRUE),
+            regexpr("declare_parameters", msg, fixed = TRUE))
+
+  # the verb reported is the step the argument is actually in
+  msg2 <- conditionMessage(tryCatch(redesign(literal, target = 0.5),
+                                    error = function(e) e))
+  expect_match(msg2, "declare_inquiry(target = target, ...)", fixed = TRUE)
+  expect_match(msg2, "`target <- 0.25`", fixed = TRUE)
+})
+
+test_that("both routes the refusal names actually work", {
+  N <- 30
+  outside <- declare_model(N = N, Y = rnorm(N))
+  expect_equal(nrow(draw_data(redesign(outside, N = 50))), 50L)
+
+  declared <- declare_parameters(N = 30) + declare_model(N = N, Y = rnorm(N))
+  expect_equal(nrow(draw_data(redesign(declared, N = 50))), 50L)
+
+  designer <- function(N = 30) declare_model(N = N, Y = rnorm(N))
+  expect_equal(nrow(draw_data(redesign(designer(), N = 50))), 50L)
 })
 
 test_that("a declared parameter is reached by name and a column of that name is not", {
