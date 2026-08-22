@@ -101,13 +101,14 @@ long_replicates <- function(diagnosis, diagnosands, label_cols, keys, suffix) {
 #'   and the two diagnoses.
 #' @export
 #' @examples
-#' design <- declare_model(N = 100, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
+#' design <- declare_parameters(n_units = 100) +
+#'   declare_model(N = n_units, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
 #'   declare_assignment(Z = randomizr::complete_ra(N)) +
 #'   declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
 #'   declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
 #'                     label = "ols")
-#' bigger <- redesign(design, N = 200)
+#' bigger <- redesign(design, n_units = 200)
 #' compare_diagnoses(design, bigger, sims = 20, bootstrap_sims = 20)
 compare_diagnoses <- function(design1, design2, sims = 500,
                               bootstrap_sims = 100, diagnosands = NULL,
@@ -195,11 +196,12 @@ compare_diagnoses <- function(design1, design2, sims = 500,
 #' @export
 #' @method print compared_diagnoses
 #' @examples
-#' design <- declare_model(N = 100, Y = rnorm(N), Z = randomizr::complete_ra(N)) +
+#' design <- declare_parameters(n_units = 100) +
+#'   declare_model(N = n_units, Y = rnorm(N), Z = randomizr::complete_ra(N)) +
 #'   declare_inquiry(ATE = 0) +
 #'   declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
 #'                     label = "ols")
-#' print(compare_diagnoses(design, redesign(design, N = 200),
+#' print(compare_diagnoses(design, redesign(design, n_units = 200),
 #'                         sims = 20, bootstrap_sims = 20))
 print.compared_diagnoses <- function(x, ...) {
   cat("Comparison of diagnosands, design 2 minus design 1\n\n")

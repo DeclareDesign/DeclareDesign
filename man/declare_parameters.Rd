@@ -30,11 +30,16 @@ the life of the design.
 }
 \details{
 Without a \code{declare_parameters()} step, a design's parameters are whatever
-its expressions happen to read out of the environment they were written in,
-and \code{redesign()} finds them by name. That works, and it stays supported,
-but the name of a parameter and the name of a column the design creates
-live in one namespace, so \code{declare_model(N = a, a = 5)} cannot say which
-\code{a} a redesign means. Declaring parameters separates the two: \code{redesign()}
+its expressions read out of the environment they were written in, and
+\code{redesign()} finds them by name. That works and it stays supported:
+\code{declare_model(N = n_units, ...)} with \code{n_units} defined outside the design
+needs no declaration.
+
+What does need one is a number written into the design. \code{declare_model(N = 500)} puts 500 in the design, and nothing outside it names that number, so
+\code{redesign(design, N = 1000)} errors rather than rewriting the argument
+because its name matched. Matching names is what used to make
+\code{redesign(design, sd = 3)} write 3 into a column called \code{sd} instead of
+changing the parameter behind it. Declaring separates the two: a redesign
 changes the declared parameter, and a column of the same name is left
 alone, because it belongs to the data rather than to the design.
 

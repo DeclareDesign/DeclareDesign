@@ -59,13 +59,14 @@ diagnosis that took a long time to run can be reused. Passing two diagnoses
 computed with different diagnosands compares whatever they have in common.
 }
 \examples{
-design <- declare_model(N = 100, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
+design <- declare_parameters(n_units = 100) +
+  declare_model(N = n_units, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
   declare_assignment(Z = randomizr::complete_ra(N)) +
   declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
   declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
                     label = "ols")
-bigger <- redesign(design, N = 200)
+bigger <- redesign(design, n_units = 200)
 compare_diagnoses(design, bigger, sims = 20, bootstrap_sims = 20)
 }
 \seealso{

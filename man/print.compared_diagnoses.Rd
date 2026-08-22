@@ -18,10 +18,11 @@ The input invisibly.
 Print a diagnosand comparison
 }
 \examples{
-design <- declare_model(N = 100, Y = rnorm(N), Z = randomizr::complete_ra(N)) +
+design <- declare_parameters(n_units = 100) +
+  declare_model(N = n_units, Y = rnorm(N), Z = randomizr::complete_ra(N)) +
   declare_inquiry(ATE = 0) +
   declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
                     label = "ols")
-print(compare_diagnoses(design, redesign(design, N = 200),
+print(compare_diagnoses(design, redesign(design, n_units = 200),
                         sims = 20, bootstrap_sims = 20))
 }

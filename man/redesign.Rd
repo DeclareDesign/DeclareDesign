@@ -36,8 +36,11 @@ one design, where \code{prob_each = c(0, .5, .5)} is three. Handing a bare
 vector to a parameter that currently holds one warns.
 
 Only bare vectors and bare lists are read that way. A data frame, a matrix
-and anything carrying a class are single replacement values, so
-\code{redesign(design, data = new_df)} swaps the data and needs no wrapping.
+and anything carrying a class are single replacement values, so a design
+written as \code{declare_model(data = pilot, ...)} swaps its data with
+\code{redesign(design, pilot = new_df)} and needs no wrapping. The knob is the
+name the design reads the data under, not \code{data}, which names fabricate's
+argument and belongs to the declaration.
 }
 \examples{
 designer <- function(N) {

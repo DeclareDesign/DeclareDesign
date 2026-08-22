@@ -138,6 +138,7 @@ modify_design_params <- function(design, params) {
     }
     params <- params[setdiff(names(params), setdiff(declared, own))]
     if (length(params) == 0) return(step)
+    declares_own <- length(own) > 0 && !is.null(names(attr(step, "dots")))
     dots <- attr(step, "dots")
     side <- lapply(stats::setNames(side_quo_names(), side_quo_names()),
                    function(nm) attr(step, nm))
@@ -153,25 +154,26 @@ modify_design_params <- function(design, params) {
       if (length(new_dots) > 0) {
         for (j in seq_along(new_dots)) {
           q <- new_dots[[j]]
-          # Case 1: the dot is named after the parameter (e.g. N = 100 -> N = 200)
-          if (!is.null(names(new_dots)) && identical(names(new_dots)[j], param_name)) {
+          # A `declare_parameters()` step is the one place a redesign replaces
+          # an argument because of its *name*: that is what declaring a
+          # parameter means. Everywhere else the parameter is reached as a
+          # name the expression reads, either as a free symbol or as a binding
+          # in the environment the declaration was written in. Matching names
+          # in an ordinary step is what used to let `redesign(sd = 3)` reach a
+          # column called `sd`, and what made a literal `declare_model(N = 100)`
+          # redesignable without being declared.
+          if (declares_own && identical(names(new_dots)[j], param_name)) {
             new_dots[[j]] <- rlang::new_quosure(
               rlang::expr(!!new_val),
               env = rlang::quo_get_env(q)
             )
             changed <- TRUE
-          } else {
-            # Case 2: parameter appears as a free symbol in the quosure's expr
-            # or environment chain. In either case we clone the env and bind
-            # the new value so subsequent eval_tidy() resolves it.
-            expr <- rlang::quo_get_expr(q)
-            if (quo_uses_param(q, param_name)) {
-              env <- rlang::quo_get_env(q)
-              new_env <- rlang::env_clone(env)
-              rlang::env_bind(new_env, !!param_name := new_val)
-              new_dots[[j]] <- rlang::new_quosure(expr, env = new_env)
-              changed <- TRUE
-            }
+            next
+          }
+          rebound <- rebind_quo_param(q, param_name, new_val)
+          if (!is.null(rebound)) {
+            new_dots[[j]] <- rebound
+            changed <- TRUE
           }
         }
       }
@@ -223,6 +225,51 @@ step_uses_param <- function(step, name) {
   any(vapply(step_quosures(step), quo_uses_param, logical(1), name = name))
 }
 
+#' Refuse a redesign of an argument the design wrote down as a literal
+#'
+#' `declare_model(N = 500)` puts 500 in the design. Nothing outside the design
+#' holds that number and nothing names it, so a redesign has nothing to change
+#' and used to be honoured by rewriting the argument because its *name*
+#' matched. That is the branch that let `redesign(sd = 3)` reach a column
+#' called `sd`, and it is gone: a design says which of its numbers are knobs
+#' with `declare_parameters()`, or reads them from a name defined outside
+#' itself.
+#'
+#' Erring rather than warning is the point. The alternative is a design that
+#' silently keeps the value it was written with, which is the failure this
+#' whole line of work exists to remove.
+#'
+#' @keywords internal
+#' @noRd
+check_params_are_declared <- function(design, param_names) {
+  undeclared <- setdiff(param_names, declared_param_names(design))
+  if (!length(undeclared)) return(invisible(NULL))
+  literal <- character(0)
+  for (step in unclass(design)) {
+    if (is_parameters_step(step)) next
+    dots <- attr(step, "dots")
+    nms <- names(dots) %||% character(0)
+    for (name in intersect(undeclared, nms)) {
+      quo <- dots[[match(name, nms)]]
+      # Reachable as a name is the test: a designer's `declare_model(N = N)`
+      # and a workspace object's `declare_model(N = n_units)` both are, and
+      # both keep working. A literal is not.
+      if (!quo_uses_param(quo, name)) literal <- c(literal, name)
+    }
+  }
+  literal <- unique(literal)
+  if (!length(literal)) return(invisible(NULL))
+  one <- literal[[1]]
+  stop(paste(literal, collapse = ", "),
+       if (length(literal) > 1) " are arguments this design writes down, not parameters."
+       else " is an argument this design writes down, not a parameter.",
+       "
+",
+       "Declare it to make it a knob: `declare_parameters(", one, " = <value>) + ",
+       "declare_model(", one, " = ", one, ", ...)`, or write the value as a ",
+       "name defined outside the design.", call. = FALSE)
+}
+
 #' Warn about requested parameters no step would respond to
 #'
 #' @keywords internal
@@ -254,7 +301,7 @@ check_params_in_design <- function(design, param_names) {
 #' Warn when a vector-valued parameter is handed a bare vector
 #'
 #' An atomic vector always supplies one value per element, so
-#' `redesign(design, N = c(50, 100))` means two designs. That rule is
+#' `redesign(design, n_units = c(50, 100))` means two designs. That rule is
 #' unambiguous only until the parameter itself holds a vector: asking for
 #' `prob_each = c(0, .5, .5)` then produces three designs holding one number
 #' each, which is almost never what was meant and which does not fail until
@@ -333,7 +380,7 @@ expr_has_symbol <- function(expr, name) {
 #' a fitted model), and anything with a `dim` attribute (a matrix, an array).
 #'
 #' A data frame is a list and a matrix is atomic, so without the first test
-#' both would be taken apart: `redesign(design, data = df)` would ask for one
+#' both would be taken apart: `redesign(design, pilot = df)` would ask for one
 #' design per column, which is never what a data-valued parameter means. To
 #' vary such a parameter across designs, pass a list of values.
 #'
@@ -397,8 +444,11 @@ param_grid <- function(params, expand = TRUE) {
 #' vector to a parameter that currently holds one warns.
 #'
 #' Only bare vectors and bare lists are read that way. A data frame, a matrix
-#' and anything carrying a class are single replacement values, so
-#' `redesign(design, data = new_df)` swaps the data and needs no wrapping.
+#' and anything carrying a class are single replacement values, so a design
+#' written as `declare_model(data = pilot, ...)` swaps its data with
+#' `redesign(design, pilot = new_df)` and needs no wrapping. The knob is the
+#' name the design reads the data under, not `data`, which names fabricate's
+#' argument and belongs to the declaration.
 #'
 #' @family modifying a design
 #' @param design A `design`.
@@ -434,6 +484,7 @@ redesign <- function(design, ..., expand = TRUE) {
   new_params <- list(...)
   if (length(new_params) == 0) return(design)
   check_params_in_design(design, names(new_params))
+  check_params_are_declared(design, names(new_params))
   check_param_vectors(design, new_params)
   param_df <- param_grid(new_params, expand = expand)
   designs <- purrr::map(seq_len(nrow(param_df)), function(i) {

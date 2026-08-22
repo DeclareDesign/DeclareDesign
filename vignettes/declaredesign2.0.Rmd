@@ -86,9 +86,17 @@ redesign(design, taw = 0.5)
 #> Warning: You requested a change to taw but taw is not found in the design.
 ```
 
-The names it finds are the objects the design's expressions read out of the environment they were written in, plus arguments declared as literal values, such as the `N` of `declare_model(N = 500)`. A value written inline inside a call, as in `complete_ra(N, prob_each = c(0.2, 0.8))`, is not one of them: there is no name to rebind, so pull it out into an object first. Functions count, so which estimator or which summary function a design uses can itself be a parameter: `redesign(design, g = median)` swaps `g` everywhere it appears.
+The names it finds are the parameters a `declare_parameters()` step declares and the objects the design's expressions read out of the environment they were written in. **A number written into the design is not one of them.** `declare_model(N = 500)` puts 500 in the design; nothing outside it holds that number and nothing names it, so `redesign(design, N = 1000)` errors and says how to make it a knob:
 
-A bare atomic vector always supplies one value per design, which is what makes `N = c(100, 200)` two designs. A parameter that is itself a vector therefore has to be wrapped, in this package and in DeclareDesign both:
+```{r, purl = FALSE}
+declare_parameters(n_units = 500) + declare_model(N = n_units, ...)
+```
+
+That is the one deliberate break in `redesign()`'s reach, and it is what removes a whole class of silent wrong answers. Matching a redesign against the *name* of a declared argument is what used to make `redesign(design, sd = 3)` write 3 into a column called `sd` rather than change the parameter behind it, and what put a character vector where `diff_in_diff`'s outcome belonged. A declared parameter and a column of the same name are now different things.
+
+A value written inline inside a call, as in `complete_ra(N, prob_each = c(0.2, 0.8))`, is not a knob either: there is no name to rebind, so declare it or pull it out into an object first. Functions count, so which estimator or which summary function a design uses can itself be a parameter: `redesign(design, g = median)` swaps `g` everywhere it appears.
+
+A bare atomic vector always supplies one value per design, which is what makes `n_units = c(100, 200)` two designs. A parameter that is itself a vector therefore has to be wrapped, in this package and in DeclareDesign both:
 
 ```{r, purl = FALSE}
 redesign(design, prob_each = c(0, 0.5, 0.5))
@@ -105,8 +113,10 @@ The rule applies to bare vectors and bare lists, and to nothing else. A data fra
 
 ```{r, purl = FALSE}
 design <- declare_model(data = pilot, Y = Y_star + tau) + declare_inquiry(mu = mean(Y))
-redesign(design, data = full_sample)
+redesign(design, pilot = full_sample)
 ```
+
+The data are reached by the name the design reads them under, `pilot`, rather than by `data`, which names fabricate's argument and belongs to the declaration.
 
 DeclareDesign reads the data frame as a list of columns there and asks for one design per column.
 
@@ -165,7 +175,7 @@ design_v2 <- design[1:2] + new_step + design[4:5]
 Comparing what two designs *achieve* is a different question, and `compare_diagnoses()` answers it:
 
 ```{r, purl = FALSE}
-compare_diagnoses(design, redesign(design, N = 1200), sims = 500)
+compare_diagnoses(design, redesign(design, n_units = 1200), sims = 500)
 ```
 
 Every diagnosand the two designs share is reported under each design and as a difference, with a bootstrap standard error and interval on that difference. Either argument can be a diagnosis you already ran, so a slow diagnosis does not have to be repeated to be compared. `merge_by_estimator = FALSE` crosses the estimators of the two designs instead of matching them by label, which is how to compare two estimators that carry different names.

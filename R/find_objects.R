@@ -91,11 +91,16 @@ step_quosures <- function(step) {
 #' Find the parameters and objects a design refers to
 #'
 #' Walks every captured expression in the design and reports the names that
-#' [redesign()] can change: objects the design's expressions read out of the
-#' environments they were written in, and arguments declared as literal values
-#' (the `N` of `declare_model(N = 500)`). Symbols that resolve to a package
-#' (`rnorm`, `complete_ra`) and symbols that resolve to nothing, because they
-#' name a column supplied by an earlier step, are both left out.
+#' [redesign()] can change: the parameters a [declare_parameters()] step
+#' declares, and objects the design's expressions read out of the environments
+#' they were written in. Symbols that resolve to a package (`rnorm`,
+#' `complete_ra`) and symbols that resolve to nothing, because they name a
+#' column supplied by an earlier step, are both left out.
+#'
+#' An argument written as a literal is not one of them. `declare_model(N = 500)`
+#' puts 500 in the design; nothing outside it holds that number and nothing
+#' names it, so there is nothing for a redesign to change. `declare_parameters(
+#' n = 500) + declare_model(N = n)` is how a design says that number is a knob.
 #'
 #' A name a previous expression put in the data is a column, not a parameter:
 #' the data mask shadows the environment, so once a step has declared `Y`, a
@@ -193,10 +198,6 @@ find_all_objects <- function(design) {
     builds_data <- step_builds_data(step)
     step_mask <- character(0)
     for (j in seq_along(dots)) {
-      expr <- rlang::quo_get_expr(dots[[j]])
-      if (nzchar(dot_names[j]) && is.atomic(expr) && length(expr) <= 5) {
-        add_row(dot_names[j], expr, i, dot_names[j], NULL)
-      }
       add_quosure(dots[[j]], i, c(mask, step_mask))
       if (builds_data && nzchar(dot_names[j])) step_mask <- c(step_mask, dot_names[j])
     }

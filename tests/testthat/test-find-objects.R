@@ -4,7 +4,34 @@ test_that("a name a data step declares is a column, not a parameter", {
     design <- declare_model(N = 50, Y = rnorm(N)) + declare_inquiry(mu = mean(Y))
     objects <- find_all_objects(design)
     expect_false("Y" %in% objects$name)
-    expect_true("N" %in% objects$name)
+    # `N = 50` is a number the design writes down, not a name it reads from
+    # anywhere, so there is nothing for a redesign to change.
+    expect_false("N" %in% objects$name)
+  })
+})
+
+test_that("an argument written as a literal is not a knob", {
+  local({
+    design <- declare_model(N = 50, Y = rnorm(N)) +
+      declare_inquiry(target = 0.5)
+    objects <- find_all_objects(design)
+    expect_equal(nrow(objects), 0L)
+    expect_error(redesign(design, N = 80), "not a parameter")
+    expect_error(redesign(design, target = 1), "not a parameter")
+  })
+})
+
+test_that("the same numbers are knobs once they are declared or named outside", {
+  local({
+    declared <- declare_parameters(n = 50) +
+      declare_model(N = n, Y = rnorm(N))
+    expect_true("n" %in% design_parameters(declared)$name)
+    expect_equal(nrow(draw_data(redesign(declared, n = 80))), 80L)
+
+    n_units <- 50
+    outside <- declare_model(N = n_units, Y = rnorm(N))
+    expect_true("n_units" %in% design_parameters(outside)$name)
+    expect_equal(nrow(draw_data(redesign(outside, n_units = 80))), 80L)
   })
 })
 
@@ -36,9 +63,10 @@ test_that("a name passed to a handler stays visible to every later step", {
 
 test_that("N keeps meaning the rows being built after a redesign moves it", {
   local({
-    design <- declare_model(N = 50, Y = rnorm(N)) +
+    design <- declare_parameters(n = 50) +
+      declare_model(N = n, Y = rnorm(N)) +
       declare_measurement(W = rnorm(N))
-    bigger <- redesign(design, N = 80)
+    bigger <- redesign(design, n = 80)
     df <- draw_data(bigger)
     expect_equal(nrow(df), 80L)
     # `rnorm(N)` in the measurement step reads the rows it has, not the 50 the

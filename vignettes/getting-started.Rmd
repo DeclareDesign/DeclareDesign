@@ -43,12 +43,13 @@ simple_random_assignment <- declare_assignment(Z = simple_ra(N = N, prob = 0.6))
 
 Design elements are themselves functions, which is why the same declaration produces a different assignment each time you use it rather than one fixed vector.
 
-A two-arm randomized experiment with 100 units puts four elements together with `+`:
+A two-arm randomized experiment with 100 units puts four elements together with `+`. `declare_parameters()` names the numbers we intend to vary later; everything else is written down as part of the design:
 
 ```{r}
 declaration <-
+  declare_parameters(n_units = 100) +
   declare_model(
-    N = 100,
+    N = n_units,
     potential_outcomes(Y ~ 0.2 * Z + rnorm(N))
   ) +
   declare_inquiry(ATE = mean(Y_Z_1) - mean(Y_Z_0)) +
@@ -90,12 +91,14 @@ Each diagnosand comes with a bootstrapped standard error, so you can tell a real
 We redesign to learn how the diagnosands change as design features change. `redesign()` over a range of sample sizes produces a list of designs:
 
 ```{r}
-designs <- redesign(declaration, N = c(100, 200, 300, 400, 500))
+designs <- redesign(declaration, n_units = c(100, 200, 300, 400, 500))
 
 diagnose_design(designs, sims = 100)
 ```
 
-Power rises with `N` while bias stays where it was. Choosing a sample size is now an argument about a table rather than a hunch, and none of it required collecting data.
+A design's knobs are the parameters it declares and the objects its expressions read from outside it. A number written into the design, as `0.2` is above, is part of the design rather than a knob: pull it into `declare_parameters()` to vary it.
+
+Power rises with the sample size while bias stays where it was. Choosing a sample size is now an argument about a table rather than a hunch, and none of it required collecting data.
 
 ## A design is code
 

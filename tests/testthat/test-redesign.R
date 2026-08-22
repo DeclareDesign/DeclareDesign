@@ -92,10 +92,22 @@ test_that("redesign is silent about parameters it does change", {
   design <- declare_model(N = N, Y = rnorm(N)) + declare_inquiry(mu = mean(Y))
   expect_no_warning(redesign(design, N = 50))
 
-  # a literal argument is redesignable too, and must not warn
+  # a literal argument is not a parameter, and says so rather than quietly
+  # keeping the value the design was written with
   literal <- declare_model(N = 30, Y = rnorm(N)) + declare_inquiry(mu = mean(Y))
-  expect_no_warning(redesign(literal, N = 50))
-  expect_equal(nrow(draw_data(redesign(literal, N = 50))), 50L)
+  expect_error(redesign(literal, N = 50), "not a parameter")
+  expect_error(redesign(literal, N = 50), "declare_parameters")
+})
+
+test_that("a declared parameter is reached by name and a column of that name is not", {
+  # The branch that used to replace an argument because its *name* matched is
+  # gone from every step but `declare_parameters()`. It is what made
+  # `redesign(sd = 3)` write 3 into a column called `sd`, and what made
+  # `diff_in_diff` put the character "Y" where its outcome belonged.
+  design <- declare_parameters(sd = 2) +
+    declare_model(N = 100, u = rnorm(N), sd = sd^2)
+  expect_equal(unique(draw_data(design)$sd), 4)
+  expect_equal(unique(draw_data(redesign(design, sd = 3))$sd), 9)
 })
 
 test_that("redesign replaces a function-valued parameter", {
@@ -154,9 +166,11 @@ test_that("the redesign warning is not silenced by a package of the same name", 
 
 test_that("a design that reads a package object is still redesignable", {
   skip_if_not_installed("randomizr")
-  design <- declare_model(N = 20, Y = rnorm(N)) +
+  design <- declare_parameters(n = 20) +
+    declare_model(N = n, Y = rnorm(N)) +
     declare_assignment(Z = randomizr::complete_ra(N))
-  expect_no_warning(redesign(design, N = 40))
+  expect_no_warning(redesign(design, n = 40))
+  expect_equal(nrow(draw_data(redesign(design, n = 40))), 40L)
 })
 
 test_that("a missing argument in a subscript is not treated as a name", {
@@ -180,17 +194,22 @@ test_that("a data frame is one replacement value and needs no wrapping", {
   # is a list, so the grid builder asked for one design per column.
   small <- fabricate(N = 30, Y_star = rnorm(N))
   big <- fabricate(N = 121, Y_star = rnorm(N))
+  # The data are reached by the name the design reads them under, `small`,
+  # rather than by the name of fabricate's argument. `data` names the argument
+  # and belongs to the declaration; `small` names the object and is the knob.
   design <- declare_model(data = small, Y = Y_star + 1) + NULL
   expect_equal(nrow(draw_data(design)), 30L)
+  expect_true("small" %in% design_parameters(design)$name)
+  expect_error(redesign(design, data = big), "not a parameter")
 
-  swapped <- redesign(design, data = big)
+  swapped <- redesign(design, small = big)
   expect_s3_class(swapped, "design")
   expect_equal(nrow(draw_data(swapped)), 121L)
-  expect_no_warning(redesign(design, data = big))
+  expect_no_warning(redesign(design, small = big))
 
   # wrapping still works, and a list of two data frames is still two designs
-  expect_equal(nrow(draw_data(redesign(design, data = list(big)))), 121L)
-  fam <- redesign(design, data = list(small, big))
+  expect_equal(nrow(draw_data(redesign(design, small = list(big)))), 121L)
+  fam <- redesign(design, small = list(small, big))
   expect_length(fam, 2L)
   expect_equal(vapply(fam, function(d) nrow(draw_data(d)), integer(1)),
                c(design_1 = 30L, design_2 = 121L))
