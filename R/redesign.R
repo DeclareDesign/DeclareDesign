@@ -102,6 +102,106 @@ side_quo_names <- function() {
   c("filter_quo", "subset_quo", "term_quo", "inquiry_quo")
 }
 
+#' Does this body reassign the name upward with `<<-`?
+#'
+#' The one case where re-homing a function changes what it means. `<<-` starts
+#' its search in the function's enclosing environment, so putting a new
+#' environment there sends the assignment to the copy instead of to the binding
+#' the author meant. Such a function is left alone.
+#'
+#' @keywords internal
+#' @noRd
+superassigns_name <- function(expr, name) {
+  if (!is.call(expr)) return(FALSE)
+  if (identical(expr[[1]], quote(`<<-`)) && length(expr) >= 2L &&
+      identical(expr[[2]], as.name(name))) {
+    return(TRUE)
+  }
+  parts <- as.list(expr)[-1]
+  for (part in parts) {
+    if (missing(part) || is.null(part)) next
+    if (superassigns_name(part, name)) return(TRUE)
+  }
+  FALSE
+}
+
+#' Give a user function a parameter it reads out of its own closure
+#'
+#' A handler, a `.method`, a `.summary`, or any function the design reads by
+#' name, is stored as a value, so no amount of expression rebinding reaches
+#' what it reads. Re-homing it does, and DeclareDesign 1.1.1 does the same
+#' thing more bluntly: it copies the whole enclosing environment and rebuilds
+#' the function in the copy. This puts a child environment holding the one
+#' parameter in front of the original instead, which leaves every other name
+#' the function reads exactly where it was.
+#'
+#' Recurses one function deep at a time to a bounded depth, so a handler that
+#' calls a helper that reads the parameter is reached the way `hdl` calling `f`
+#' is. Returns `NULL` when nothing in reach reads the name.
+#'
+#' @keywords internal
+#' @noRd
+rehome_fn_deep <- function(fn, name, new_val, depth = 0L) {
+  if (depth >= 3L || !is.function(fn) || fn_is_from_package(fn)) return(NULL)
+  env <- environment(fn)
+  if (name %in% closure_symbols(fn)) {
+    if (superassigns_name(body(fn), name)) return(NULL)
+    return(rehome_fn_on_params(fn, stats::setNames(list(new_val), name)))
+  }
+  inner <- list()
+  for (sym in closure_symbols(fn)) {
+    found <- user_binding_env(env, sym)
+    if (is.null(found)) next
+    val <- tryCatch(rlang::env_get(found, sym), error = function(e) NULL)
+    if (!is.function(val)) next
+    rehomed <- rehome_fn_deep(val, name, new_val, depth + 1L)
+    if (!is.null(rehomed)) inner[[sym]] <- rehomed
+  }
+  if (!length(inner)) return(NULL)
+  new_env <- rlang::new_environment(data = inner, parent = env)
+  attr(new_env, "dd_param_env") <- TRUE
+  environment(fn) <- new_env
+  fn
+}
+
+#' Rebind the functions a quosure reads, when they are what hold the parameter
+#'
+#' `declare_measurement(handler = hdl)` keeps `hdl` as an expression, so the
+#' quosure reads a name and the name resolves to a function. Rebinding the
+#' parameter in that quosure reaches nothing, because the parameter is inside
+#' `hdl`. Rebinding `hdl` itself, to a copy that can see the new value, does.
+#'
+#' @keywords internal
+#' @noRd
+rehome_quo_functions <- function(quo, name, new_val) {
+  if (!rlang::is_quosure(quo)) return(NULL)
+  env <- rlang::quo_get_env(quo)
+  if (!rlang::is_environment(env)) return(NULL)
+  swapped <- list()
+  for (sym in unique(expr_symbols(rlang::quo_get_expr(quo)))) {
+    found <- user_binding_env(env, sym)
+    if (is.null(found)) next
+    val <- tryCatch(rlang::env_get(found, sym), error = function(e) NULL)
+    if (!is.function(val)) next
+    rehomed <- rehome_fn_deep(val, name, new_val)
+    if (!is.null(rehomed)) swapped[[sym]] <- rehomed
+  }
+  if (!length(swapped)) return(NULL)
+  new_env <- rlang::env_clone(env)
+  rlang::env_bind(new_env, !!!swapped)
+  rlang::new_quosure(rlang::quo_get_expr(quo), env = new_env)
+}
+
+#' Rebind a parameter in a quosure, by name or through the functions it reads
+#'
+#' @keywords internal
+#' @noRd
+rebind_quo_any <- function(quo, name, new_val) {
+  out <- rebind_quo_param(quo, name, new_val)
+  through <- rehome_quo_functions(out %||% quo, name, new_val)
+  through %||% out
+}
+
 #' Rebind one parameter inside a single quosure
 #'
 #' Returns `NULL` when the quosure does not read the parameter, so the caller
@@ -142,8 +242,14 @@ modify_design_params <- function(design, params) {
     dots <- attr(step, "dots")
     side <- lapply(stats::setNames(side_quo_names(), side_quo_names()),
                    function(nm) attr(step, nm))
+    # A step with no dots and no side quosures can still hold the parameter:
+    # `declare_step(handler = f)` keeps `f` as a value, and what `f` reads out
+    # of its closure is reached by re-homing it rather than by rebinding an
+    # expression. Returning early here skipped exactly that case.
+    holds_fn <- any(vapply(c("handler_fn", "method_arg", "summary_arg"),
+                           function(nm) is.function(attr(step, nm)), logical(1)))
     if ((is.null(dots) || length(dots) == 0) &&
-        all(vapply(side, is.null, logical(1)))) {
+        all(vapply(side, is.null, logical(1))) && !holds_fn) {
       return(step)
     }
     new_dots <- dots
@@ -170,7 +276,7 @@ modify_design_params <- function(design, params) {
             changed <- TRUE
             next
           }
-          rebound <- rebind_quo_param(q, param_name, new_val)
+          rebound <- rebind_quo_any(q, param_name, new_val)
           if (!is.null(rebound)) {
             new_dots[[j]] <- rebound
             changed <- TRUE
@@ -178,9 +284,19 @@ modify_design_params <- function(design, params) {
         }
       }
       for (nm in names(new_side)) {
-        rebound <- rebind_quo_param(new_side[[nm]], param_name, new_val)
+        rebound <- rebind_quo_any(new_side[[nm]], param_name, new_val)
         if (!is.null(rebound)) {
           new_side[[nm]] <- rebound
+          changed <- TRUE
+        }
+      }
+      # A handler, a `.method` or a `.summary` held as a step attribute rather
+      # than read from a name. `bind_params_into_step()` has always done this
+      # for a declared parameter; an undeclared one needs it just as much.
+      for (nm in c("handler_fn", "method_arg", "summary_arg")) {
+        rehomed <- rehome_fn_deep(attr(step, nm), param_name, new_val)
+        if (!is.null(rehomed)) {
+          attr(step, nm) <- rehomed
           changed <- TRUE
         }
       }
@@ -225,6 +341,26 @@ step_uses_param <- function(step, name) {
   any(vapply(step_quosures(step), quo_uses_param, logical(1), name = name))
 }
 
+#' Refuse a redesign of a name a `declare_notes()` step computes
+#'
+#' The most specific of the three refusals, so it runs first: a note is not
+#' merely unreachable, it is a quantity the design works out, and saying so is
+#' more use than saying the design writes it down.
+#'
+#' @keywords internal
+#' @noRd
+check_params_are_not_notes <- function(design, param_names) {
+  notes <- intersect(param_names, declared_note_names(design))
+  if (!length(notes)) return(invisible(NULL))
+  stop(paste(notes, collapse = ", "),
+       if (length(notes) > 1) " are notes, not parameters." else
+         " is a note, not a parameter.",
+       "\n",
+       "A note is computed while the design runs. Change the parameters it ",
+       "is computed from, or declare it with `declare_parameters()` if it ",
+       "is meant to be set directly.", call. = FALSE)
+}
+
 #' Refuse a redesign of an argument the design wrote down as a literal
 #'
 #' `declare_model(N = 500)` puts 500 in the design. Nothing outside the design
@@ -248,16 +384,9 @@ step_uses_param <- function(step, name) {
 #'
 #' @keywords internal
 #' @noRd
-check_params_are_declared <- function(design, param_names) {
+check_params_are_declared <- function(design, param_names, reachable) {
   undeclared <- setdiff(param_names, declared_param_names(design))
   if (!length(undeclared)) return(invisible(NULL))
-  # `find_all_objects()` is the definition of what a design's parameters are,
-  # and this has to use it rather than a second rule of its own: what
-  # `design_parameters()` lists is what `redesign()` changes. Asking each
-  # argument in isolation was wrong for `declare_model(N = a, a = 5)`, where
-  # the design does read `a` from outside and a *column* of the same name made
-  # it look as though it did not.
-  reachable <- unique(find_all_objects(design, include_unbound = TRUE)$name)
   undeclared <- setdiff(undeclared, reachable)
   if (!length(undeclared)) return(invisible(NULL))
   literal <- character(0)
@@ -317,22 +446,11 @@ format_param_value <- function(value) {
 #'
 #' @keywords internal
 #' @noRd
-check_params_in_design <- function(design, param_names) {
-  steps <- unclass(design)
-  notes <- intersect(param_names, declared_note_names(design))
-  if (length(notes)) {
-    stop(paste(notes, collapse = ", "),
-         if (length(notes) > 1) " are notes, not parameters." else
-           " is a note, not a parameter.",
-         "\n",
-         "A note is computed while the design runs. Change the parameters it ",
-         "is computed from, or declare it with `declare_parameters()` if it ",
-         "is meant to be set directly.", call. = FALSE)
-  }
-  found <- vapply(param_names, function(name) {
-    any(vapply(steps, step_uses_param, logical(1), name = name))
-  }, logical(1))
-  missing <- param_names[!found]
+check_params_in_design <- function(design, param_names, reachable) {
+  # One reachability set for all three checks, so a name cannot be warned
+  # about as absent by one and changed by another. `step_uses_param()` used to
+  # answer this and could not see a parameter held inside a handler's closure.
+  missing <- setdiff(param_names, reachable)
   if (length(missing) == 0) return(invisible(NULL))
   rlang::warn(paste0(
     "You requested a change to ", paste(missing, collapse = ", "),
@@ -533,8 +651,20 @@ redesign <- function(.design, ..., .expand = TRUE) {
   }
   new_params <- list(...)
   if (length(new_params) == 0) return(design)
-  check_params_in_design(design, names(new_params))
-  check_params_are_declared(design, names(new_params))
+  # `find_all_objects()` is the definition of what a design's parameters are,
+  # and every check here uses it rather than a rule of its own. `include_unbound`
+  # adds the names a design expects `redesign()` to supply, which the printed
+  # table leaves out because most of them are columns.
+  reachable <- unique(find_all_objects(design, include_unbound = TRUE)$name)
+  # The refusal first: a name this design writes down gets the message that
+  # says how to make it a parameter, not a warning that it cannot be found
+  # followed by that message.
+  # Most specific refusal first. A note gets the message about notes, a name
+  # the design writes down gets the message about declaring it, and only a
+  # name that is neither gets the generic "not found" warning.
+  check_params_are_not_notes(design, names(new_params))
+  check_params_are_declared(design, names(new_params), reachable)
+  check_params_in_design(design, names(new_params), reachable)
   check_param_vectors(design, new_params)
   param_df <- param_grid(new_params, expand = .expand)
   designs <- purrr::map(seq_len(nrow(param_df)), function(i) {

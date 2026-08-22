@@ -139,6 +139,63 @@ step_builds_data <- function(step) {
              c("model", "measurement", "assignment", "sampling"))
 }
 
+#' The user-written functions a step holds as values
+#'
+#' A handler, a `.method` and a `.summary` are stored as values rather than as
+#' expressions, so what they read out of their closures is invisible to a walk
+#' over the design's quosures. It is not invisible to `redesign()`: the same
+#' re-homing that reaches a declared parameter inside one reaches an undeclared
+#' one, and DeclareDesign 1.1.1 reaches it too, by cloning the handler's whole
+#' environment. Package functions are left out, since `lm_robust()`'s namespace
+#' is not a design's parameters.
+#'
+#' @keywords internal
+#' @noRd
+step_user_functions <- function(step) {
+  fns <- lapply(c("handler_fn", "method_arg", "summary_arg"),
+                function(nm) attr(step, nm))
+  Filter(function(f) is.function(f) && !fn_is_from_package(f), fns)
+}
+
+#' Was this function written by a package rather than by the user?
+#'
+#' Two cases, and they need different tests. A function a package *exports*
+#' (`lm_robust`) has a namespace for its environment. A closure a package
+#' *returns* (`label_estimator()`'s) has an ordinary function frame, and no
+#' property of that frame separates it from one the user wrote at the console,
+#' so it carries a mark instead. Walking into the second kind reported this
+#' package's own internals (`term`, `label`, `.method`, `summary_fn`) as
+#' parameters of 37 designs in the library.
+#'
+#' `topenv()` looks like the answer to the second case and is not: a function
+#' the user defines inside a `testthat` block, or inside any package, has a
+#' namespace for its `topenv()` too, so that test quietly switches the whole
+#' mechanism off wherever `R CMD check` runs it.
+#'
+#' @keywords internal
+#' @noRd
+fn_is_from_package <- function(fn) {
+  if (!is.function(fn)) return(TRUE)
+  if (isTRUE(attr(fn, "dd_internal"))) return(TRUE)
+  env <- environment(fn)
+  if (!rlang::is_environment(env)) return(TRUE)
+  is_package_env(env)
+}
+
+#' The names a user-written function reads out of its closure
+#'
+#' Its own formals are not among them, and neither is anything it assigns to
+#' before reading, since a local binding shadows the closure either way. A name
+#' that resolves to a package is not a parameter.
+#'
+#' @keywords internal
+#' @noRd
+closure_symbols <- function(fn) {
+  body_expr <- body(fn)
+  if (is.null(body_expr)) return(character(0))
+  setdiff(unique(expr_symbols(body_expr)), names(formals(fn)))
+}
+
 #' Is this name bound nowhere the declaration can see, packages included?
 #'
 #' Distinguishes the two cases [user_binding_env()] collapses into `NULL`. A
@@ -185,6 +242,24 @@ find_all_objects <- function(design, include_unbound = FALSE) {
       stringsAsFactors = FALSE
     )
   }
+  # A name a design reads which turns out to be a function brings its own
+  # names with it: `declare_measurement(handler = hdl)` where `hdl` reads `b`
+  # makes `b` a parameter of the design, and DeclareDesign 1.1.1 treats it as
+  # one. Bounded, because a function that reads a function that reads a
+  # function is already past the point of being anyone's design parameter.
+  add_fn_symbols <- function(fn, step, label, depth = 0L) {
+    if (depth >= 3L || fn_is_from_package(fn)) return(invisible(NULL))
+    env <- environment(fn)
+    for (name in setdiff(closure_symbols(fn), notes)) {
+      found <- user_binding_env(env, name)
+      if (is.null(found)) next
+      value <- tryCatch(rlang::env_get(found, name), error = function(e) NULL)
+      if (inherits(value, "design")) next
+      add_row(name, value, step, label, found)
+      if (is.function(value)) add_fn_symbols(value, step, label, depth + 1L)
+    }
+    invisible(NULL)
+  }
   add_quosure <- function(quo, step, masked = character(0)) {
     env <- rlang::quo_get_env(quo)
     label <- rlang::as_label(rlang::quo_get_expr(quo))
@@ -199,6 +274,7 @@ find_all_objects <- function(design, include_unbound = FALSE) {
       value <- tryCatch(rlang::env_get(found, name), error = function(e) NULL)
       if (inherits(value, "design")) next
       add_row(name, value, step, label, found)
+      if (is.function(value)) add_fn_symbols(value, step, label)
     }
   }
   for (i in seq_along(steps)) {
@@ -235,6 +311,11 @@ find_all_objects <- function(design, include_unbound = FALSE) {
     # designer's `declare_model(N = N)` still reports `N`, from its own
     # expression, before the shadow goes up.
     mask <- c(mask, step_mask)
+    # A name a handler, a `.method` or a `.summary` reads out of its closure is
+    # a parameter of the design like any other. Nothing masks these: a closure
+    # is evaluated in its own environment, not in the data mask, so a column of
+    # the same name never shadows what it reads.
+    for (fn in step_user_functions(step)) add_fn_symbols(fn, i, "closure")
     for (nm in side_quo_names()) {
       quo <- attr(step, nm)
       if (!rlang::is_quosure(quo)) next
@@ -285,6 +366,15 @@ current_param_value <- function(design, name) {
       if (is.null(found)) next
       return(tryCatch(rlang::env_get(found, name), error = function(e) NULL))
     }
+  }
+  # A parameter a handler or a `.method` reads out of its closure is in the
+  # objects table and in none of the places walked above, so the table is the
+  # fallback. Without it `check_param_vectors()` cannot tell whether such a
+  # parameter already holds a vector, and the library sweep cannot test one.
+  objs <- find_all_objects(design)
+  idx <- match(name, objs$name)
+  if (!is.na(idx) && rlang::is_environment(objs$env[[idx]])) {
+    return(tryCatch(rlang::env_get(objs$env[[idx]], name), error = function(e) NULL))
   }
   NULL
 }

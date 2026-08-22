@@ -416,7 +416,7 @@ label_estimator <- function(.method, label = NULL, inquiry = NULL, term = NULL,
                             .summary = tidy_try) {
   inquiry_chr <- normalize_inquiry(inquiry)
   summary_fn <- rlang::as_function(.summary)
-  function(data, ...) {
+  out <- function(data, ...) {
     fit <- .method(data = data, ...)
     res <- tibble::as_tibble(summary_fn(fit))
     if (!is.null(label)) res$estimator <- label
@@ -424,6 +424,13 @@ label_estimator <- function(.method, label = NULL, inquiry = NULL, term = NULL,
     if (!is.null(term)) res <- res[res$term %in% term, , drop = FALSE]
     res
   }
+  # This closure is ours, not the user's, so the names it reads (`term`,
+  # `label`, `summary_fn`, `inquiry_chr`) are not parameters of anybody's
+  # design. Marked rather than inferred: a closure a package returns has an
+  # ordinary function frame for an environment, and no property of that frame
+  # separates it from one the user wrote.
+  attr(out, "dd_internal") <- TRUE
+  out
 }
 
 #' @rdname label_estimator
