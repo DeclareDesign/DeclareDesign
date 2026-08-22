@@ -84,6 +84,7 @@ build_step <- function(fn, handler_expr, dots, step_type, causal_type, label,
 #' @noRd
 construct_design <- function(steps) {
   steps <- autolabel_estimators(steps)
+  check_notes_against_params(steps)
   steps <- apply_parameters(steps)
   if (is.null(names(steps))) {
     names(steps) <- vapply(

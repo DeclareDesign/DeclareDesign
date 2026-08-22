@@ -103,7 +103,7 @@ parameter_values <- function(step) {
 #' @keywords internal
 #' @noRd
 declared_param_names <- function(design) {
-  steps <- unclass(design)
+  steps <- if (inherits(design, "design")) unclass(design) else design
   nms <- lapply(steps, function(s) {
     if (!is_parameters_step(s)) return(character(0))
     names(attr(s, "dots")) %||% character(0)
@@ -129,16 +129,16 @@ declared_param_names <- function(design) {
 #'
 #' @keywords internal
 #' @noRd
-rehome_fn_on_params <- function(fn, params) {
+rehome_fn_on_params <- function(fn, params, marker = "dd_param_env") {
   if (!is.function(fn)) return(NULL)
   env <- environment(fn)
   if (!rlang::is_environment(env)) return(NULL)
-  if (isTRUE(attr(env, "dd_param_env"))) env <- rlang::env_parent(env)
+  if (isTRUE(attr(env, marker))) env <- rlang::env_parent(env)
   if (is_package_env(env)) return(NULL)
   used <- intersect(names(params), expr_symbols(body(fn)))
   if (!length(used)) return(NULL)
   new_env <- rlang::new_environment(data = params, parent = env)
-  attr(new_env, "dd_param_env") <- TRUE
+  attr(new_env, marker) <- TRUE
   environment(fn) <- new_env
   fn
 }
@@ -155,9 +155,10 @@ rehome_fn_on_params <- function(fn, params) {
 #'
 #' @keywords internal
 #' @noRd
-bind_params_into_step <- function(step, params) {
+bind_params_into_step <- function(step, params, marker = "dd_param_env",
+                                  applied_attr = "params_applied") {
   if (!length(params)) return(step)
-  applied <- attr(step, "params_applied")
+  applied <- attr(step, applied_attr)
   if (!is.null(applied) && identical(applied, params)) return(step)
   dots <- attr(step, "dots")
   side <- lapply(stats::setNames(side_quo_names(), side_quo_names()),
@@ -187,7 +188,7 @@ bind_params_into_step <- function(step, params) {
   # a quosure. `rebuild_step()` reads these back off the step, so they are set
   # before it runs.
   for (nm in c("handler_fn", "method_arg", "summary_arg")) {
-    rehomed <- rehome_fn_on_params(attr(step, nm), params)
+    rehomed <- rehome_fn_on_params(attr(step, nm), params, marker = marker)
     if (!is.null(rehomed)) {
       attr(step, nm) <- rehomed
       changed <- TRUE
@@ -196,7 +197,7 @@ bind_params_into_step <- function(step, params) {
   if (!changed) return(step)
   out <- rebuild_step(step, new_dots, new_side)
   if (!is.null(attr(step, "draws"))) attr(out, "draws") <- attr(step, "draws")
-  attr(out, "params_applied") <- params
+  attr(out, applied_attr) <- params
   out
 }
 

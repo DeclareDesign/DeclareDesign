@@ -48,6 +48,7 @@ Other design declarations:
 \code{\link[=declare_estimator]{declare_estimator()}},
 \code{\link[=declare_inquiry]{declare_inquiry()}},
 \code{\link[=declare_measurement]{declare_measurement()}},
+\code{\link[=declare_notes]{declare_notes()}},
 \code{\link[=declare_parameters]{declare_parameters()}},
 \code{\link[=declare_sampling]{declare_sampling()}},
 \code{\link[=declare_step]{declare_step()}},

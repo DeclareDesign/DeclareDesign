@@ -27,6 +27,11 @@ print.design <- function(x, ...) {
     cat("\nParameters and objects the design refers to:\n")
     print(objects)
   }
+  notes <- design_notes(x)
+  if (nrow(notes) > 0) {
+    cat("\nNotes the design takes when it runs (not redesignable):\n")
+    print(notes, row.names = FALSE)
+  }
   invisible(x)
 }
 

@@ -144,6 +144,10 @@ find_all_objects <- function(design) {
   rows <- list()
   mask <- character(0)
   declared <- declared_param_names(design)
+  # A note is not a knob, so it is left out of the list of knobs. Without this
+  # a note name that happens to be bound in the workspace as well would be
+  # reported as something `redesign()` could change, which it cannot.
+  notes <- declared_note_names(design)
   add_row <- function(name, value, step, quosure, env) {
     rows[[length(rows) + 1L]] <<- data.frame(
       name = name, value_str = describe_value(value), kind = param_kind(value),
@@ -155,7 +159,8 @@ find_all_objects <- function(design) {
   add_quosure <- function(quo, step, masked = character(0)) {
     env <- rlang::quo_get_env(quo)
     label <- rlang::as_label(rlang::quo_get_expr(quo))
-    for (name in setdiff(unique(expr_symbols(rlang::quo_get_expr(quo))), masked)) {
+    symbols <- setdiff(unique(expr_symbols(rlang::quo_get_expr(quo))), masked)
+    for (name in setdiff(symbols, notes)) {
       found <- user_binding_env(env, name)
       if (is.null(found)) next
       value <- tryCatch(rlang::env_get(found, name), error = function(e) NULL)
@@ -176,6 +181,13 @@ find_all_objects <- function(design) {
         add_row(nm, if (nm %in% names(values)) values[[nm]] else NULL,
                 i, nm, NULL)
       }
+      next
+    }
+    # A note declaration's own names are not reported; the expressions it is
+    # computed from are walked like any other, so the parameters behind a note
+    # still appear.
+    if (is_notes_step(step)) {
+      for (j in seq_along(dots)) add_quosure(dots[[j]], i, mask)
       next
     }
     builds_data <- step_builds_data(step)

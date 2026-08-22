@@ -126,6 +126,10 @@ modify_design_params <- function(design, params) {
   # step that reads it. Rebinding it step by step as well is what would let a
   # redesign reach a column that happens to share the parameter's name.
   declared <- declared_param_names(design)
+  # A note is never a redesign target; `check_params_in_design()` has already
+  # refused one by name, and this keeps the rebinding out of the note's own
+  # declaration so a parameter behind it is reached there instead.
+  params <- params[setdiff(names(params), declared_note_names(design))]
   new_steps <- lapply(unclass(design), function(step) {
     own <- if (is_parameters_step(step)) {
       names(attr(step, "dots")) %||% character(0)
@@ -225,6 +229,16 @@ step_uses_param <- function(step, name) {
 #' @noRd
 check_params_in_design <- function(design, param_names) {
   steps <- unclass(design)
+  notes <- intersect(param_names, declared_note_names(design))
+  if (length(notes)) {
+    stop(paste(notes, collapse = ", "),
+         if (length(notes) > 1) " are notes, not parameters." else
+           " is a note, not a parameter.",
+         "\n",
+         "A note is computed while the design runs. Change the parameters it ",
+         "is computed from, or declare it with `declare_parameters()` if it ",
+         "is meant to be set directly.", call. = FALSE)
+  }
   found <- vapply(param_names, function(name) {
     any(vapply(steps, step_uses_param, logical(1), name = name))
   }, logical(1))

@@ -45,7 +45,18 @@ run_design_internal <- function(design,
   data <- NULL
   inquiries <- list()
   estimates <- list()
-  for (step in design) {
+  # A note is taken during the run, so the steps after it are rebound on every
+  # draw against a local copy of the step list. The design itself is never
+  # touched, which is what keeps one draw's notes out of the next one.
+  steps <- unclass(design)
+  notes <- list()
+  for (i in seq_along(steps)) {
+    step <- steps[[i]]
+    if (is_notes_step(step)) {
+      notes <- record_notes(notes, note_values(step, data, notes))
+      steps <- apply_notes_from(steps, i, notes)
+      next
+    }
     ct <- attr(step, "causal_type")
     if (is.null(ct) || !ct %in% what) next
     if (identical(ct, "dgp")) {
@@ -143,8 +154,20 @@ get_estimates <- function(design, data = draw_data(design), start = 1L,
     design <- construct_design(wrap_step(design))
   }
   steps <- unclass(design)[seq.int(start, end)]
+  # Notes are taken against the supplied data rather than against the data
+  # they would have seen in a full run, which is the only thing available
+  # here. A note that has to be computed before a sampling step therefore
+  # reads the sample, so a design that depends on one is better run than
+  # re-estimated.
+  notes <- list()
   estimates <- list()
-  for (step in steps) {
+  for (i in seq_along(steps)) {
+    step <- steps[[i]]
+    if (is_notes_step(step)) {
+      notes <- record_notes(notes, note_values(step, data, notes))
+      steps <- apply_notes_from(steps, i, notes)
+      next
+    }
     if (identical(attr(step, "causal_type"), "estimator")) {
       estimates[[length(estimates) + 1L]] <- step(data)
     }

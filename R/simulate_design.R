@@ -282,17 +282,27 @@ simulate_nested_single <- function(design, design_label = "design",
   # step with draws > 1. Returns a list with inquiries, estimates collected
   # across all draws below this point. `pin` fixes this step to a single draw
   # index, which is how the outermost fan-out is distributed across workers.
-  run_from <- function(step_idx, data, draw_cols = list(), pin = NULL) {
-    if (step_idx > length(steps)) {
+  run_from <- function(step_idx, data, draw_cols = list(), pin = NULL,
+                       steps_cur = steps, notes = list()) {
+    if (step_idx > length(steps_cur)) {
       return(list(
         inquiries = tibble::tibble(),
         estimates = tibble::tibble()
       ))
     }
-    step  <- steps[[step_idx]]
+    step  <- steps_cur[[step_idx]]
     n     <- step_draws[[step_idx]]
     ct    <- step_types[[step_idx]]
     label <- step_labels[[step_idx]]
+
+    # A note is taken once at its own position, inside whatever fan-out it
+    # sits under, so each branch of the fan carries the notes its own data
+    # produced.
+    if (is_notes_step(step)) {
+      notes <- record_notes(notes, note_values(step, data, notes))
+      return(run_from(step_idx + 1L, data, draw_cols, NULL,
+                      apply_notes_from(steps_cur, step_idx, notes), notes))
+    }
 
     draw_ids <- if (is.null(pin)) seq_len(n) else pin
     draw_results <- lapply(draw_ids, function(d) {
@@ -300,10 +310,10 @@ simulate_nested_single <- function(design, design_label = "design",
       if (n > 1L) new_draw_cols[[paste0(label, "_draw")]] <- d
       if (identical(ct, "dgp")) {
         new_data <- step(data)
-        run_from(step_idx + 1L, new_data, new_draw_cols)
+        run_from(step_idx + 1L, new_data, new_draw_cols, NULL, steps_cur, notes)
       } else if (identical(ct, "inquiry")) {
         inq <- step(data)
-        sub <- run_from(step_idx + 1L, data, new_draw_cols)
+        sub <- run_from(step_idx + 1L, data, new_draw_cols, NULL, steps_cur, notes)
         if (nrow(inq) > 0) {
           for (nm in names(new_draw_cols)) inq[[nm]] <- new_draw_cols[[nm]]
         }
@@ -313,7 +323,7 @@ simulate_nested_single <- function(design, design_label = "design",
         )
       } else if (identical(ct, "estimator")) {
         est <- step(data)
-        sub <- run_from(step_idx + 1L, data, new_draw_cols)
+        sub <- run_from(step_idx + 1L, data, new_draw_cols, NULL, steps_cur, notes)
         if (nrow(est) > 0) {
           for (nm in names(new_draw_cols)) est[[nm]] <- new_draw_cols[[nm]]
         }
@@ -322,7 +332,7 @@ simulate_nested_single <- function(design, design_label = "design",
           estimates = dplyr::bind_rows(est, sub$estimates)
         )
       } else {
-        run_from(step_idx + 1L, data, new_draw_cols)
+        run_from(step_idx + 1L, data, new_draw_cols, NULL, steps_cur, notes)
       }
     })
     list(
@@ -339,19 +349,28 @@ simulate_nested_single <- function(design, design_label = "design",
     data <- NULL
     inquiries <- list()
     estimates <- list()
+    steps_cur <- steps
+    notes <- list()
     for (i in idx) {
+      if (is_notes_step(steps_cur[[i]])) {
+        notes <- record_notes(notes, note_values(steps_cur[[i]], data, notes))
+        steps_cur <- apply_notes_from(steps_cur, i, notes)
+        next
+      }
       ct <- step_types[[i]]
       if (identical(ct, "dgp")) {
-        data <- steps[[i]](data)
+        data <- steps_cur[[i]](data)
       } else if (identical(ct, "inquiry")) {
-        inquiries[[length(inquiries) + 1L]] <- steps[[i]](data)
+        inquiries[[length(inquiries) + 1L]] <- steps_cur[[i]](data)
       } else if (identical(ct, "estimator")) {
-        estimates[[length(estimates) + 1L]] <- steps[[i]](data)
+        estimates[[length(estimates) + 1L]] <- steps_cur[[i]](data)
       }
     }
     list(data      = data,
          inquiries = dplyr::bind_rows(inquiries),
-         estimates = dplyr::bind_rows(estimates))
+         estimates = dplyr::bind_rows(estimates),
+         steps     = steps_cur,
+         notes     = notes)
   }
 
   map_fn <- sim_map_fn("Simulating")
@@ -361,7 +380,8 @@ simulate_nested_single <- function(design, design_label = "design",
     prefix  <- run_prefix(seq_len(first_fan - 1L))
     n_outer <- step_draws[[first_fan]]
     outer_results <- map_fn(seq_len(n_outer), function(outer_d) {
-      run_from(first_fan, prefix$data, list(), pin = outer_d)
+      run_from(first_fan, prefix$data, list(), pin = outer_d,
+               steps_cur = prefix$steps, notes = prefix$notes)
     })
     if (nrow(prefix$inquiries) > 0 || nrow(prefix$estimates) > 0) {
       outer_results <- c(

@@ -31,6 +31,7 @@ names(new_design)
 \seealso{
 Other modifying a design:
 \code{\link[=delete_step]{delete_step()}},
+\code{\link[=design_notes]{design_notes()}},
 \code{\link[=design_parameters]{design_parameters()}},
 \code{\link[=expand_design]{expand_design()}},
 \code{\link[=redesign]{redesign()}},
