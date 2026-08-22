@@ -1,8 +1,8 @@
 #' Simulate one or more designs
 #'
 #' Runs each design `sims` times, collecting estimands and estimates into a
-#' single long tibble suitable for diagnosis. When more than one design is
-#' supplied, a `design` column distinguishes them.
+#' single long tibble suitable for diagnosis. A `design` column names the
+#' design each row came from, whether one design is supplied or several.
 #'
 #' If any step in a design has `draws > 1`, the simulation runs in nested
 #' mode: each step with `draws > 1` fans out, and the total simulation count
@@ -46,15 +46,13 @@ simulate_design <- function(..., sims = NULL, progress = FALSE) {
   if (length(designs) == 0) {
     stop("simulate_design() requires at least one `design` object.")
   }
-  multi <- length(designs) > 1L
   per_design <- purrr::imap(designs, function(design, design_label) {
     if (design_has_nested_draws(design)) {
       if (!is.null(sims)) warn_sims_draws_conflict(design, sims)
-      simulate_nested_single(design, design_label = design_label,
-                             multi = multi)
+      simulate_nested_single(design, design_label = design_label)
     } else {
       one_design_sims(design, sims = sims %||% 500L,
-                      design_label = design_label, multi = multi)
+                      design_label = design_label)
     }
   })
   out <- dplyr::bind_rows(per_design)
@@ -221,8 +219,7 @@ simulate_designs <- simulate_design
 #'
 #' @keywords internal
 #' @noRd
-one_design_sims <- function(design, sims, design_label = "design",
-                            multi = FALSE) {
+one_design_sims <- function(design, sims, design_label = "design") {
   map_fn <- sim_map_fn(paste0("Simulating ", design_label))
   results <- map_fn(seq_len(sims), function(i) {
     r <- run_design_internal(design)
@@ -245,7 +242,7 @@ one_design_sims <- function(design, sims, design_label = "design",
   }
   out <- merge_estimates_inquiries(estimates_df, inquiries_df)
   matched_on <- attr(out, "matched_on")
-  if (multi && nrow(out) > 0) {
+  if (nrow(out) > 0) {
     out$design <- design_label
     out <- dplyr::relocate(out, "design")
   }
@@ -262,14 +259,12 @@ one_design_sims <- function(design, sims, design_label = "design",
 #' sequentially within each outer iteration.
 #'
 #' @param design A single `design` object.
-#' @param design_label Name of the design (only used when `multi = TRUE`).
-#' @param multi Whether multiple designs are being simulated.
+#' @param design_label Name of the design, written into the `design` column.
 #' @return A tibble of merged estimates and inquiries with one
 #'   `<step_label>_draw` column per fan-out step.
 #' @keywords internal
 #' @noRd
-simulate_nested_single <- function(design, design_label = "design",
-                                   multi = FALSE) {
+simulate_nested_single <- function(design, design_label = "design") {
   steps <- unclass(design)
   step_draws <- vapply(steps, function(s) as.integer(attr(s, "draws") %||% 1L),
                        integer(1))
@@ -435,7 +430,7 @@ simulate_nested_single <- function(design, design_label = "design",
                                           inquiries_draw_cols)
   matched_on <- attr(out, "matched_on")
 
-  if (multi && nrow(out) > 0) {
+  if (nrow(out) > 0) {
     out$design <- design_label
     out <- dplyr::relocate(out, "design")
   }

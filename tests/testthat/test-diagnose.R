@@ -20,7 +20,8 @@ test_that("select_diagnosands builds a set from the library, as in DeclareDesign
   d <- diagnose_design(simple_design(N = 30), diagnosands = diags, sims = 10,
                        bootstrap_sims = 0)
   expect_equal(setdiff(names(get_diagnosands(d)),
-                       c("inquiry", "estimator", "outcome", "term", "n_sims")),
+                       c("design", "inquiry", "estimator", "outcome", "term",
+                         "n_sims")),
                c("sd_estimate", "mean_se"))
 })
 
@@ -295,6 +296,26 @@ test_that("our own set_diagnosands object is still read", {
     set_diagnosands(declare_diagnosands(mean_estimate = mean(estimate)))
   expect_no_warning(d <- diagnose_design(design, sims = 5, bootstrap_sims = 0))
   expect_equal(setdiff(names(get_diagnosands(d)),
-                       c("inquiry", "estimator", "outcome", "term", "n_sims")),
+                       c("design", "inquiry", "estimator", "outcome", "term",
+                         "n_sims")),
                "mean_estimate")
+})
+
+test_that("a `design` column is emitted for one design as well as for several", {
+  # DeclareDesign 1.1.1 always emits it, and book-era code groups by it. Gating
+  # it on `length(designs) > 1` made the break conditional on the number of
+  # designs: 1.x code worked on a redesigned list and failed on the single
+  # design it was written for.
+  one <- simple_design(N = 30)
+  expect_true("design" %in% names(simulate_design(one, sims = 3)))
+
+  d <- diagnose_design(one, sims = 3, bootstrap_sims = 0)
+  expect_true("design" %in% names(get_simulations(d)))
+  expect_true("design" %in% names(get_diagnosands(d)))
+
+  # the label is the name the design was supplied under, as in 1.1.1
+  expect_equal(unique(as.character(simulate_design(one, sims = 2)$design)),
+               "one")
+  expect_equal(unique(as.character(simulate_design(mine = one, sims = 2)$design)),
+               "mine")
 })
