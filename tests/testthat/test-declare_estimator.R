@@ -46,6 +46,46 @@ test_that("declare_test does not add an inquiry column", {
   expect_equal(est$estimator, "diff")
 })
 
+test_that("an unset term reports the first non-intercept term only", {
+  # The 1.x contract, and what Macartan's designs are written against:
+  # `declare_estimator(Y ~ Z + X)` is one estimate of one inquiry, and the
+  # covariate X is not a second row of it. The rewrite returned every
+  # non-intercept term here, so a diagnosis of `ATE` grew an X row.
+  design <- declare_model(N = 30, Z = rnorm(N), X = rnorm(N), Y = rnorm(N)) +
+    declare_inquiry(ATE = 0) +
+    declare_estimator(Y ~ Z + X)
+  est <- draw_estimates(design)
+  expect_equal(nrow(est), 1L)
+  expect_equal(est$term, "Z")
+  expect_equal(est$inquiry, "ATE")
+  diag <- diagnose_design(design, sims = 2, bootstrap_sims = FALSE)
+  expect_equal(diag$diagnosands_df$term, "Z")
+  # `term = FALSE` is the same thing spelled out.
+  design_false <- declare_model(N = 30, Z = rnorm(N), X = rnorm(N),
+                                Y = rnorm(N)) +
+    declare_estimator(Y ~ Z + X, .method = lm, term = FALSE)
+  expect_equal(draw_estimates(design_false)$term, "Z")
+})
+
+test_that("an unset term on an intercept-only fit keeps the intercept", {
+  design <- declare_model(N = 30, Y = rnorm(N)) +
+    declare_estimator(Y ~ 1, .method = lm)
+  est <- draw_estimates(design)
+  expect_equal(est$term, "(Intercept)")
+})
+
+test_that("a named term the fit does not produce is an error, not a shorter table", {
+  # 1.x stopped here; the rewrite dropped the unmatched name silently, so a
+  # typo in `term` cost a row rather than raising anything. The estimator
+  # failure machinery records it per draw.
+  design <- declare_model(N = 30, Z = rnorm(N), Y = rnorm(N)) +
+    declare_estimator(Y ~ Z, .method = lm, term = c("Z", "W"))
+  expect_error(draw_estimates(design), "W")
+  sims <- suppressWarnings(simulate_design(design, sims = 2))
+  expect_true(all(sims$error))
+  expect_match(sims$error_message, "W")
+})
+
 test_that("term = TRUE returns all model rows including (Intercept)", {
   d <- declare_model(N = 50, X = rnorm(N), Y = rnorm(N) + X) +
     declare_estimator(Y ~ X, .method = lm, term = TRUE, label = "ols")

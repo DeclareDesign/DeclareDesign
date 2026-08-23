@@ -119,6 +119,33 @@ normalize_inquiry <- function(inquiry) {
   as.character(inquiry)
 }
 
+#' Keep the rows of a tidied fit that `term` asks for
+#'
+#' The 1.x contract. A character `term` keeps exactly those rows, in the
+#' user's order so they align with a vector `inquiry`, and a name the summary
+#' did not produce is an error rather than a silently shorter table.
+#' `term = TRUE` keeps every row, intercept included. Left unset (or `FALSE`),
+#' the estimator reports the first non-intercept term only:
+#' `declare_estimator(Y ~ Z + X)` is one estimate of one inquiry, and a
+#' covariate is not a second row of it.
+#'
+#' @keywords internal
+#' @noRd
+filter_terms <- function(res, term) {
+  if (!"term" %in% names(res)) return(res)
+  if (is.character(term)) {
+    missing_terms <- setdiff(term, res$term)
+    if (length(missing_terms) > 0L) {
+      stop("Not all of the terms declared in your estimator are present in ",
+           "the estimator's output, including ",
+           paste(missing_terms, collapse = ", "), ".", call. = FALSE)
+    }
+    return(res[match(term, res$term), , drop = FALSE])
+  }
+  if (isTRUE(term) || nrow(res) < 2L) return(res)
+  res[which.max(res$term != "(Intercept)"), , drop = FALSE]
+}
+
 #' Build an estimator/test step closure
 #'
 #' `inquiry` and `term` arrive as quosures and are evaluated on every draw, in
@@ -167,12 +194,25 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
     # the failed draws out of `n_sims`, because draws that fail are not
     # missing at random and diagnosing on the survivors flatters the design.
     res <- tryCatch({
+      # A named term the fit did not produce is an error, and it is raised
+      # here so that it is a failure of this draw like any other: a term
+      # that exists only when a small draw happens to fill every arm is
+      # exactly the per-draw case the guard is for.
       if (!is.null(handler)) {
-        eval(rlang::call2(handler, quote(.dd_data), !!!args), envir = call_env)
+        out <- eval(rlang::call2(handler, quote(.dd_data), !!!args),
+                    envir = call_env)
+        # A handler's table is its own. A handler that returns one row per
+        # group is reporting one estimate per group, so nothing is dropped
+        # unless a term is named.
+        if (is.character(term)) {
+          filter_terms(tibble::as_tibble(out), term)
+        } else {
+          tibble::as_tibble(out)
+        }
       } else {
         fit <- eval(rlang::call2(method, !!!args, data = quote(.dd_data)),
                     envir = call_env)
-        summary_fn(fit)
+        filter_terms(tibble::as_tibble(summary_fn(fit)), term)
       }
     }, error = function(e) {
       tibble::tibble(
@@ -193,25 +233,8 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
       if (add_inquiry && !is.null(inquiry)) res$inquiry <- inquiry[[1]]
       return(res)
     }
-    res <- tibble::as_tibble(res)
     if (!"estimator" %in% names(res) || all(is.na(res$estimator))) {
       res$estimator <- label
-    }
-    # Term filtering. `term = TRUE` (or any non-character truthy) means
-    # "return every term"; `term = FALSE` is treated as "no explicit filter".
-    # When term is a character vector, preserve the user's ordering so the
-    # output rows align with `inquiry =` if both are vectors.
-    if ("term" %in% names(res)) {
-      if (is.character(term)) {
-        ord <- match(term, res$term)
-        ord <- ord[!is.na(ord)]
-        res <- res[ord, , drop = FALSE]
-      } else if (isTRUE(term)) {
-        # keep all rows, do not drop (Intercept)
-      } else if (nrow(res) > 1L) {
-        keep <- res$term != "(Intercept)"
-        if (any(keep)) res <- res[keep, , drop = FALSE]
-      }
     }
     if (add_inquiry && !is.null(inquiry)) {
       if (!"inquiry" %in% names(res)) {
@@ -246,8 +269,12 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
 #'   [tidy_try()].
 #' @param inquiry Either an inquiry label (character), a `design_step`, or a
 #'   list of these; used to join the estimate to its target estimand.
-#' @param term Optional character vector restricting which model terms appear
-#'   in the result.
+#' @param term Which model terms to report. A character vector keeps exactly
+#'   those terms, in that order, and errors if any is absent from the tidied
+#'   output; `TRUE` keeps every term including the intercept. When left
+#'   unset (or `FALSE`), only the first non-intercept term is reported, so
+#'   `declare_estimator(Y ~ Z + X)` returns the `Z` row alone. Evaluated on
+#'   every draw, so it may name a design parameter.
 #' @param label Step label. Defaults to `"estimator"`.
 #' @param handler Optional handler function. When supplied, the estimator
 #'   bypasses `.method`/`.summary` and instead calls

@@ -12,5 +12,5 @@ utils::globalVariables(c(
 #' @importFrom randomizr complete_ra
 #' @importFrom rlang .data
 #' @importFrom stats coef quantile setNames
-#' @importFrom rlang :=
+#' @importFrom rlang := %||%
 NULL

@@ -29,8 +29,12 @@ with a deprecation warning rather than forwarded.}
 \item{inquiry}{Either an inquiry label (character), a \code{design_step}, or a
 list of these; used to join the estimate to its target estimand.}
 
-\item{term}{Optional character vector restricting which model terms appear
-in the result.}
+\item{term}{Which model terms to report. A character vector keeps exactly
+those terms, in that order, and errors if any is absent from the tidied
+output; \code{TRUE} keeps every term including the intercept. When left
+unset (or \code{FALSE}), only the first non-intercept term is reported, so
+\code{declare_estimator(Y ~ Z + X)} returns the \code{Z} row alone. Evaluated on
+every draw, so it may name a design parameter.}
 
 \item{label}{Step label. Defaults to \code{"estimator"}.}
 
