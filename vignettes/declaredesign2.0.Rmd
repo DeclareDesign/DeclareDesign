@@ -79,8 +79,8 @@ Printing a design lists the names `redesign()` can reach, with the value each cu
 ```{r, purl = FALSE}
 print(design)
 #> Parameters and objects the design refers to:
-#>  name value_str   kind steps
-#>   tau       0.3 scalar     1
+#>  name value   kind declared steps
+#>   tau   0.3 scalar    FALSE     1
 
 redesign(design, taw = 0.5)
 #> Warning: You requested a change to taw but taw is not found in the design.

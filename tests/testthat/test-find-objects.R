@@ -118,7 +118,7 @@ test_that("redesigning N in a multilevel model leaves the level sizes alone", {
     # The second level's `N = 3` is a literal and its `rnorm(N)` is that
     # level's row count, so neither is a parameter of the design.
     expect_equal(unique(objects$step[objects$name == "N"]), 1L)
-    expect_equal(unique(objects$value_str[objects$name == "N"]), "5")
+    expect_equal(unique(objects$value[objects$name == "N"]), "5")
   })
 })
 
@@ -167,4 +167,25 @@ test_that("n() is available in a declaration and is not a parameter", {
     expect_equal(unique(draw_data(redesign(design, N = 45))$size), 45L)
     expect_false("n" %in% find_all_objects(design)$name)
   })
+})
+
+test_that("the value column is a display snippet, not a serialisation", {
+  # Macartan's table showed `prob_each` as fifteen digits of 1/3 three times
+  # over, and every function as the word "function". The value itself is
+  # reachable through the row's `env`; the column is for reading.
+  prob_each <- rep(1/3, 3)
+  hdl <- function(data) { data$Y <- rnorm(nrow(data)); data }
+  design <- declare_model(N = 30, u = rnorm(N)) +
+    declare_assignment(Z = complete_ra(N, prob_each = prob_each)) +
+    declare_measurement(handler = hdl)
+  params <- design_parameters(design)
+  expect_false("value_str" %in% names(params))
+  expect_equal(params$value[params$name == "prob_each"], "c(0.333, 0.333, 0.333)")
+  fn_row <- params$value[params$name == "hdl"]
+  expect_match(fn_row, "^function \\(data\\)")
+  expect_lte(nchar(fn_row), 40L)
+  expect_match(fn_row, "\\.\\.\\.$")
+  expect_equal(DeclareDesign:::describe_value(function(x) x^2), "function (x) x^2")
+  expect_equal(DeclareDesign:::describe_value(1:3), "1:3")
+  expect_equal(DeclareDesign:::describe_value(c("a", "b")), 'c("a", "b")')
 })

@@ -303,7 +303,8 @@ apply_parameters <- function(steps) {
 #'
 #' @family modifying a design
 #' @param design A `design` or a `design_step`.
-#' @return A data frame with one row per name per step: `name`, `value_str`,
+#' @return A data frame with one row per name per step: `name`, `value`
+#'   (a display snippet of the value),
 #'   `kind` (`scalar`, `vector`, `list`, `data`, `function` or `other`),
 #'   `declared` (whether a `declare_parameters()` step declares it), and
 #'   `step`. Rows are in step order.

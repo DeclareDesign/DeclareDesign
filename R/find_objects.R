@@ -49,14 +49,29 @@ user_binding_env <- function(env, name) {
   NULL
 }
 
-#' One-line description of a value, for the objects table
+#' One-line snippet of a value, for the objects table
+#'
+#' A display string, not a serialisation: the value itself is reachable
+#' through the row's `env`. Doubles are shown to three significant digits,
+#' so `prob_each = rep(1/3, 3)` reads `c(0.333, 0.333, 0.333)` rather than
+#' fifteen digits of it; a function shows the head of its source rather than
+#' the word "function"; and anything longer than `width` characters is cut
+#' with an ellipsis.
 #'
 #' @keywords internal
 #' @noRd
-describe_value <- function(x) {
-  if (is.function(x)) return("function")
-  if (is.atomic(x) && length(x) <= 5) return(paste(deparse(x), collapse = ""))
-  paste0("<", class(x)[1], ">")
+describe_value <- function(x, width = 40L) {
+  txt <- if (is.function(x)) {
+    paste(trimws(deparse(x, width.cutoff = 60L)), collapse = " ")
+  } else if (is.atomic(x) && length(x) <= 5) {
+    shown <- if (is.double(x)) signif(x, 3) else x
+    paste(deparse(shown), collapse = "")
+  } else {
+    paste0("<", class(x)[1], ">")
+  }
+  txt <- gsub("\\s+", " ", txt)
+  if (nchar(txt) > width) txt <- paste0(substr(txt, 1L, width - 3L), "...")
+  txt
 }
 
 #' The kind of value a parameter holds
@@ -118,7 +133,8 @@ step_quosures <- function(step) {
 #' `nest_level(N = N)`, is reading the workspace and can be redesigned.
 #'
 #' @param design A `design` or a `design_step`.
-#' @return A data frame with one row per name per step: `name`, `value_str`,
+#' @return A data frame with one row per name per step: `name`, `value`
+#'   (a display snippet of the value),
 #'   `kind` (`scalar`, `vector`, `list`, `data`, `function` or `other`),
 #'   `step`, `quosure`, and the environment the name was found in. Rows are
 #'   in step order.
@@ -236,7 +252,7 @@ find_all_objects <- function(design, include_unbound = FALSE) {
   notes <- declared_note_names(design)
   add_row <- function(name, value, step, quosure, env) {
     rows[[length(rows) + 1L]] <<- data.frame(
-      name = name, value_str = describe_value(value), kind = param_kind(value),
+      name = name, value = describe_value(value), kind = param_kind(value),
       declared = name %in% declared,
       step = step, quosure = quosure, env = I(list(env)),
       stringsAsFactors = FALSE
@@ -326,7 +342,7 @@ find_all_objects <- function(design, include_unbound = FALSE) {
     }
   }
   out <- if (length(rows) == 0) {
-    data.frame(name = character(0), value_str = character(0),
+    data.frame(name = character(0), value = character(0),
                kind = character(0), declared = logical(0), step = integer(0),
                quosure = character(0), env = I(list()),
                stringsAsFactors = FALSE)
@@ -395,10 +411,10 @@ print.objects <- function(x, ...) {
     cat("No parameters or objects found in the design.\n")
     return(invisible(x))
   }
-  tmp <- unique(x[c("name", "value_str", "kind", "declared", "step")])
+  tmp <- unique(x[c("name", "value", "kind", "declared", "step")])
   class(tmp) <- "data.frame"
   out <- stats::aggregate(
-    step ~ name + value_str + kind + declared, data = tmp,
+    step ~ name + value + kind + declared, data = tmp,
     FUN = function(s) paste(sort(unique(s)), collapse = ", ")
   )
   names(out)[names(out) == "step"] <- "steps"

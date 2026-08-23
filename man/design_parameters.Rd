@@ -10,7 +10,8 @@ design_parameters(design)
 \item{design}{A \code{design} or a \code{design_step}.}
 }
 \value{
-A data frame with one row per name per step: \code{name}, \code{value_str},
+A data frame with one row per name per step: \code{name}, \code{value}
+(a display snippet of the value),
 \code{kind} (\code{scalar}, \code{vector}, \code{list}, \code{data}, \code{function} or \code{other}),
 \code{declared} (whether a \code{declare_parameters()} step declares it), and
 \code{step}. Rows are in step order.

@@ -24,8 +24,8 @@ test_that("a later parameter reads the ones declared before it", {
                                  names = paste0("ate_", ks)) +
       declare_model(N = 10)
     params <- design_parameters(design)
-    expect_equal(params$value_str[params$name == "ks"], "2:3")
-    expect_equal(params$value_str[params$name == "names"],
+    expect_equal(params$value[params$name == "ks"], "2:3")
+    expect_equal(params$value[params$name == "names"],
                  'c("ate_2", "ate_3")')
     expect_true(all(params$declared[params$name %in% c("m_arms", "ks", "names")]))
   })
