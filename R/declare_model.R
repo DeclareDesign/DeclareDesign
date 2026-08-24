@@ -36,15 +36,30 @@ make_fabricate_step <- function(dots, id_label_na = FALSE) {
     }
     if (!is.null(user_handler_quo)) {
       handler_fn <- rlang::eval_tidy(user_handler_quo)
-      args <- lapply(rest, rlang::eval_tidy,
-                     data = if (is.data.frame(data)) as.list(data) else NULL)
+      if (handler_is_fabricate(handler_fn)) {
+        return(rlang::inject(handler_fn(data = data, !!!rest)))
+      }
+      # Arguments reach the handler as written, which is what `declare_step()`
+      # does and what DeclareDesign 1.x did here. A handler that resolves its
+      # own arguments against the data (`dplyr::mutate()`, `tidyr::uncount()`,
+      # anything using tidyselect or a data mask) needs the expression rather
+      # than its value. Evaluating first both broke `n()` and left `uncount()`
+      # unable to drop the weights column it was given.
+      decl_env <- dots_env(rest, default = rlang::caller_env())
+      args <- dots_as_written(rest)
+      call_env <- rlang::env(decl_env, .dd_data = data)
+      # A handler with no slot for the data builds the table from scratch, so
+      # it is called with the declared arguments alone.
       formal_names <- tryCatch(names(formals(handler_fn)),
                                error = function(e) NULL)
-      if (!is.null(formal_names) && "data" %in% formal_names &&
-          !"data" %in% names(args)) {
-        args <- c(list(data = data), args)
+      takes_data <- is.null(formal_names) ||
+        any(c("data", ".data") %in% formal_names)
+      cl <- if (takes_data) {
+        rlang::call2(handler_fn, quote(.dd_data), !!!args)
+      } else {
+        rlang::call2(handler_fn, !!!args)
       }
-      return(do.call(handler_fn, args))
+      return(eval(cl, envir = call_env))
     }
     # Use fabricate_with_dots to avoid double-quoting: !!!-injection turns
     # quosures into formula objects (~expr), which fabricate()'s enquos()

@@ -79,3 +79,45 @@ test_that("declare_model may declare N alone and add variables downstream", {
   expect_equal(nrow(df), 80L)
   expect_true("Y" %in% names(df))
 })
+
+test_that("a handler receives its arguments as written, not as values", {
+  # `declare_step()` has always passed arguments as written; the fabricate-based
+  # steps evaluated them first, which called dplyr verbs without their data and
+  # left tidyselect handlers holding a vector where a column name belonged.
+  skip_if_not_installed("dplyr")
+  base <- declare_model(N = 4, x = 1:4, wt = c(1, 2, 1, 2))
+
+  plain <- draw_data(base + declare_model(y = x * 2, handler = dplyr::mutate))
+  expect_equal(plain$y, c(2, 4, 6, 8))
+
+  # Context functions are only defined inside a data-masking verb, so their
+  # working is the evidence that `mutate()` did the evaluation.
+  ctx <- draw_data(base + declare_model(k = dplyr::n(), handler = dplyr::mutate))
+  expect_equal(unique(ctx$k), 4L)
+
+  meas <- draw_data(base + declare_measurement(y = x * 2, handler = dplyr::mutate))
+  expect_equal(meas$y, c(2, 4, 6, 8))
+})
+
+test_that("uncount as a handler drops the weights column it was given", {
+  skip_if_not_installed("tidyr")
+  base <- declare_model(N = 4, x = 1:4, wt = c(1, 2, 1, 2))
+  out <- draw_data(base + declare_model(handler = tidyr::uncount, weights = wt))
+  expect_equal(nrow(out), 6L)
+  expect_false("wt" %in% names(out))
+})
+
+test_that("a handler with no data argument is still called without data", {
+  step <- declare_model(handler = function(N) data.frame(u = rnorm(N)), N = 12)
+  expect_equal(nrow(step()), 12L)
+})
+
+test_that("resample_data as a handler takes a scalar N", {
+  skip_if_not_installed("fabricatr")
+  pilot <- data.frame(a = 1:5, b = 6:10)
+  n_out <- 12
+  out <- draw_data(declare_model(data = pilot, handler = fabricatr::resample_data,
+                                 N = n_out))
+  expect_equal(nrow(out), 12L)
+  expect_equal(names(out), c("a", "b"))
+})
