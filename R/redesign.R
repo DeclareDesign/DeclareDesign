@@ -494,7 +494,7 @@ check_params_in_design <- function(design, param_names, reachable) {
   ))
 }
 
-#' Warn when a vector-valued parameter is handed a bare vector
+#' Warn when a vector- or list-valued parameter is handed a bare one
 #'
 #' An atomic vector always supplies one value per element, so
 #' `redesign(design, n_units = c(50, 100))` means two designs. That rule is
@@ -502,6 +502,12 @@ check_params_in_design <- function(design, param_names, reachable) {
 #' `prob_each = c(0, .5, .5)` then produces three designs holding one number
 #' each, which is almost never what was meant and which does not fail until
 #' something draws from them. Warning here puts the complaint at the call.
+#'
+#' A bare list is split the same way, and a list-valued parameter is where that
+#' bites hardest, since a replacement and a sweep are both lists. A sweep over
+#' lists has a list in every element; a replacement for a parameter such as a
+#' conjoint's `levels_list` does not, so the elements are what the warning
+#' reads.
 #'
 #' @keywords internal
 #' @noRd
@@ -511,13 +517,29 @@ check_param_vectors <- function(design, params) {
     # Values `as_param_list()` keeps whole are never ambiguous: a data frame,
     # a matrix or any classed object is one replacement, not a sweep.
     if (is.object(supplied) || !is.null(dim(supplied))) next
-    if (!is.atomic(supplied) || length(supplied) < 2L) next
+    if (length(supplied) < 2L) next
     current <- current_param_value(design, name)
-    if (!is.atomic(current) || length(current) < 2L) next
+    if (is.atomic(supplied)) {
+      if (!is.atomic(current) || length(current) < 2L) next
+      complaint <- paste0(
+        "`", name, "` currently holds ", length(current), " values, so ",
+        paste(deparse(supplied), collapse = " "), " is being read as ",
+        length(supplied), " designs, one value each."
+      )
+    } else if (is.list(supplied)) {
+      if (!is.list(current) || is.object(current) || is.data.frame(current)) next
+      # A sweep over lists holds a list in every element. Anything else is one
+      # value that is about to be taken apart.
+      if (all(vapply(supplied, function(v) is.list(v) && !is.object(v), logical(1)))) next
+      complaint <- paste0(
+        "`", name, "` currently holds a list, so a list of ", length(supplied),
+        " is being read as ", length(supplied), " designs, one element each."
+      )
+    } else {
+      next
+    }
     rlang::warn(c(
-      paste0("`", name, "` currently holds ", length(current), " values, so ",
-             paste(deparse(supplied), collapse = " "), " is being read as ",
-             length(supplied), " designs, one value each."),
+      complaint,
       "i" = "Wrap it in `list()` to use it as a single replacement."
     ))
   }
@@ -639,6 +661,13 @@ param_grid <- function(params, expand = TRUE) {
 #' one design, where `prob_each = c(0, .5, .5)` is three. Handing a bare
 #' vector to a parameter that currently holds one warns.
 #'
+#' A bare list is split the same way, one design per element, so a parameter
+#' whose value is a list is wrapped by the same rule:
+#' `levels_list = list(levels)` is one design and `levels_list = levels` is one
+#' design per element of `levels`. The two are told apart by what the elements
+#' are, since a sweep over lists holds a list in every element, and a bare list
+#' handed to a list-valued parameter whose elements are not lists warns.
+#'
 #' Only bare vectors and bare lists are read that way. A data frame, a matrix
 #' and anything carrying a class are single replacement values, so a design
 #' written as `declare_model(data = pilot, ...)` swaps its data with
@@ -652,9 +681,10 @@ param_grid <- function(params, expand = TRUE) {
 #'   the user's design: a plain `design` would partially match and swallow a
 #'   parameter named `d`, `de`, `des`, `desi` or `desig`, and designs with a
 #'   parameter named `d` exist.
-#' @param ... Named parameter values. A bare atomic vector supplies one design
-#'   per element; a data frame, a matrix, a function or any classed object is
-#'   one value. To sweep over such values, pass a list of them.
+#' @param ... Named parameter values. A bare atomic vector, and a bare list,
+#'   supply one design per element; a data frame, a matrix, a function or any
+#'   classed object is one value. To sweep over such values, pass a list of
+#'   them, and to supply one list as a single value wrap it: `list(x)`.
 #' @param .expand If `TRUE` (default), expand the parameter grid; if `FALSE`,
 #'   zip parallel vectors. Dotted for the same reason as `.design`: an
 #'   undotted `expand` after the dots would collide exactly with a parameter

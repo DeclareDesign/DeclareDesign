@@ -69,6 +69,27 @@ test_that("a bare vector handed to a vector-valued parameter warns", {
   expect_no_warning(redesign(scalar, N = c(50, 100)))
 })
 
+test_that("a bare list handed to a list-valued parameter warns", {
+  levels_list <- list(party = c("Left", "Right"), region = c("North", "South"))
+  d <- declare_model(N = 20, U = rnorm(N)) +
+    declare_inquiry(k = length(levels_list))
+
+  # The elements are character vectors rather than lists, so this is one value
+  # split into two designs, which is the mistake the warning exists for.
+  expect_warning(
+    redesign(d, levels_list = list(party = c("A", "B"), region = c("N", "S"))),
+    "currently holds a list"
+  )
+  # Wrapping is the documented escape, and a list of lists is a real sweep.
+  expect_no_warning(redesign(d, levels_list = list(levels_list)))
+  fam <- expect_no_warning(
+    redesign(d, levels_list = list(levels_list, levels_list["party"]))
+  )
+  expect_length(fam, 2L)
+  expect_equal(draw_estimands(fam[[1]])$estimand, 2)
+  expect_equal(draw_estimands(fam[[2]])$estimand, 1)
+})
+
 test_that("a parameter written inline inside a call is not redesignable", {
   # `prob_each` here is the name of an argument to complete_ra(), not a name
   # the design reads out of an environment, so nothing can rebind it. The

@@ -13,9 +13,10 @@ the user's design: a plain \code{design} would partially match and swallow a
 parameter named \code{d}, \code{de}, \code{des}, \code{desi} or \code{desig}, and designs with a
 parameter named \code{d} exist.}
 
-\item{...}{Named parameter values. A bare atomic vector supplies one design
-per element; a data frame, a matrix, a function or any classed object is
-one value. To sweep over such values, pass a list of them.}
+\item{...}{Named parameter values. A bare atomic vector, and a bare list,
+supply one design per element; a data frame, a matrix, a function or any
+classed object is one value. To sweep over such values, pass a list of
+them, and to supply one list as a single value wrap it: \code{list(x)}.}
 
 \item{.expand}{If \code{TRUE} (default), expand the parameter grid; if \code{FALSE},
 zip parallel vectors. Dotted for the same reason as \code{.design}: an
@@ -40,6 +41,13 @@ An atomic vector always supplies one value per design, so a parameter that
 is itself a vector has to be wrapped: \code{prob_each = list(c(0, .5, .5))} is
 one design, where \code{prob_each = c(0, .5, .5)} is three. Handing a bare
 vector to a parameter that currently holds one warns.
+
+A bare list is split the same way, one design per element, so a parameter
+whose value is a list is wrapped by the same rule:
+\code{levels_list = list(levels)} is one design and \code{levels_list = levels} is one
+design per element of \code{levels}. The two are told apart by what the elements
+are, since a sweep over lists holds a list in every element, and a bare list
+handed to a list-valued parameter whose elements are not lists warns.
 
 Only bare vectors and bare lists are read that way. A data frame, a matrix
 and anything carrying a class are single replacement values, so a design

@@ -55,8 +55,8 @@ user_binding_env <- function(env, name) {
 #' through the row's `env`. Doubles are shown to three significant digits,
 #' so `prob_each = rep(1/3, 3)` reads `c(0.333, 0.333, 0.333)` rather than
 #' fifteen digits of it; a function shows the head of its source rather than
-#' the word "function"; and anything longer than `width` characters is cut
-#' with an ellipsis.
+#' the word "function"; a named list shows its names; and anything longer than
+#' `width` characters is cut with an ellipsis.
 #'
 #' @keywords internal
 #' @noRd
@@ -66,6 +66,15 @@ describe_value <- function(x, width = 40L) {
   } else if (is.atomic(x) && length(x) <= 5) {
     shown <- if (is.double(x)) signif(x, 3) else x
     paste(deparse(shown), collapse = "")
+  } else if (is.list(x) && !is.object(x)) {
+    # `<list>` says nothing about which list, and a design built around one
+    # (a conjoint's `levels_list`) is exactly where the reader needs to see it.
+    nms <- names(x)
+    if (length(nms) && all(nzchar(nms))) {
+      paste0("list(", paste(nms, collapse = ", "), ")")
+    } else {
+      paste0("<list[", length(x), "]>")
+    }
   } else {
     paste0("<", class(x)[1], ">")
   }

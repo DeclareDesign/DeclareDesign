@@ -188,4 +188,23 @@ test_that("the value column is a display snippet, not a serialisation", {
   expect_equal(DeclareDesign:::describe_value(function(x) x^2), "function (x) x^2")
   expect_equal(DeclareDesign:::describe_value(1:3), "1:3")
   expect_equal(DeclareDesign:::describe_value(c("a", "b")), 'c("a", "b")')
+  # `<list>` names no list at all, and a design built around one is where the
+  # reader most needs to see which.
+  expect_equal(
+    DeclareDesign:::describe_value(list(gender = 1, party = 2)),
+    "list(gender, party)"
+  )
+  expect_equal(DeclareDesign:::describe_value(list(1, 2, 3)), "<list[3]>")
+  expect_equal(DeclareDesign:::describe_value(data.frame(a = 1)), "<data.frame>")
+})
+
+test_that("a list-valued parameter is reported with kind list", {
+  levels_list <- list(party = c("Left", "Right"), region = c("North", "South"))
+  design <- declare_model(N = 10, U = rnorm(N)) +
+    declare_inquiry(k = length(levels_list))
+  params <- design_parameters(design)
+  row <- params[params$name == "levels_list", , drop = FALSE]
+  expect_equal(nrow(row), 1L)
+  expect_equal(row$kind, "list")
+  expect_equal(row$value, "list(party, region)")
 })
