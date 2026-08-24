@@ -75,12 +75,17 @@ safe_diagnosand_dots <- function(dots) {
   purrr::imap(dots, function(q, nm) {
     expr <- rlang::quo_get_expr(q)
     env  <- rlang::quo_get_env(q)
+    # A diagnosand written as a bare constant, `k = 500`, is captured by
+    # `enquos()` as a constant quosure, whose environment is the empty one:
+    # the expression needs no scope, so rlang gives it none. The wrapper below
+    # does need scope, and in the empty environment `tryCatch` cannot be found.
+    # The base environment is what a constant's wrapper needs and all it needs.
+    if (identical(env, rlang::empty_env())) env <- rlang::base_env()
     rlang::new_quosure(
       rlang::call2(
         "tryCatch",
         rlang::call2("suppressWarnings", expr),
-        error   = rlang::call2("function", as.pairlist(alist(e = )),
-                                quote(NA_real_))
+        error = function(e) NA_real_
       ),
       env = env
     )
