@@ -39,11 +39,9 @@ What does need a name is a number written into the design. \code{declare_model(N
 \code{redesign(design, N = 1000)} errors rather than rewriting the argument
 because its name matched. Giving the value a name outside the design fixes
 that on its own, and is the usual answer; declaring it here earns its place
-when several steps read the value, or when a column shares its name. Matching names is what used to make
-\code{redesign(design, sd = 3)} write 3 into a column called \code{sd} instead of
-changing the parameter behind it. Declaring separates the two: a redesign
-changes the declared parameter, and a column of the same name is left
-alone, because it belongs to the data rather than to the design.
+when several steps read the value, or when a column shares its name. A
+redesign changes the declared parameter, and a column of the same name is
+left alone, because it belongs to the data rather than to the design.
 
 The step generates no data and is skipped when the design runs.
 }

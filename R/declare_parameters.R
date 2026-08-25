@@ -25,11 +25,9 @@
 #' `redesign(design, N = 1000)` errors rather than rewriting the argument
 #' because its name matched. Giving the value a name outside the design fixes
 #' that on its own, and is the usual answer; declaring it here earns its place
-#' when several steps read the value, or when a column shares its name. Matching names is what used to make
-#' `redesign(design, sd = 3)` write 3 into a column called `sd` instead of
-#' changing the parameter behind it. Declaring separates the two: a redesign
-#' changes the declared parameter, and a column of the same name is left
-#' alone, because it belongs to the data rather than to the design.
+#' when several steps read the value, or when a column shares its name. A
+#' redesign changes the declared parameter, and a column of the same name is
+#' left alone, because it belongs to the data rather than to the design.
 #'
 #' The step generates no data and is skipped when the design runs.
 #'
@@ -210,6 +208,12 @@ rehome_fn_on_params <- function(fn, params, marker = "dd_param_env") {
 #' a free symbol like any other name, and a column that shares its name keeps
 #' its own expression.
 #'
+#' The rebinding goes through `rebind_quo_any()`, so a parameter an expression
+#' reads *through a helper function* is reached too: `g <- function(x) mean(x)
+#' + k` under `declare_parameters(k = 100)` sees 100, as the roxygen for
+#' [declare_parameters()] promises. Rebinding the name alone left `g` reading
+#' the workspace `k`, silently.
+#'
 #' @keywords internal
 #' @noRd
 bind_params_into_step <- function(step, params, marker = "dd_param_env",
@@ -226,14 +230,14 @@ bind_params_into_step <- function(step, params, marker = "dd_param_env",
   for (name in names(params)) {
     new_val <- params[[name]]
     for (j in seq_along(new_dots)) {
-      rebound <- rebind_quo_param(new_dots[[j]], name, new_val)
+      rebound <- rebind_quo_any(new_dots[[j]], name, new_val)
       if (!is.null(rebound)) {
         new_dots[[j]] <- rebound
         changed <- TRUE
       }
     }
     for (nm in names(new_side)) {
-      rebound <- rebind_quo_param(new_side[[nm]], name, new_val)
+      rebound <- rebind_quo_any(new_side[[nm]], name, new_val)
       if (!is.null(rebound)) {
         new_side[[nm]] <- rebound
         changed <- TRUE

@@ -202,3 +202,23 @@ test_that("a declared parameter is not shadowed by a base binding of its name", 
   est <- draw_estimates(design)
   expect_false("error" %in% names(est) && isTRUE(est$error[[1]]))
 })
+
+test_that("a declared parameter reaches a helper function the design reads through", {
+  # `g` reads `k` out of its closure. Rebinding the name in the quosure alone
+  # left `g` reading the workspace `k`, so the declaration was ignored and the
+  # redesign was too, silently. Both go through the helper now.
+  # Defined at globalenv(), as at the prompt: a helper built in the test frame
+  # has a closure the finder stops at (see test-capture.R).
+  eval(quote({
+    dp_k <- 1
+    dp_g <- function(x) mean(x) + dp_k
+  }), envir = globalenv())
+  on.exit(rm(dp_k, dp_g, envir = globalenv()), add = TRUE)
+  design <- eval(quote(
+    declare_parameters(dp_k = 100) +
+      declare_model(N = 5, Y = 0) +
+      declare_inquiry(m = dp_g(Y))
+  ), envir = globalenv())
+  expect_equal(draw_estimands(design)$estimand, 100)
+  expect_equal(draw_estimands(redesign(design, dp_k = 1000))$estimand, 1000)
+})
