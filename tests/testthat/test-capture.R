@@ -472,3 +472,26 @@ test_that("a design with no dynamic lookup is still pruned", {
   expect_lt(static, one_copy)
   expect_gt(dynamic, one_copy)
 })
+
+test_that("label_estimator() of a workspace function runs on a worker", {
+  # The closure label_estimator() returns travels to the worker with `.method`
+  # as an unevaluated promise unless it is forced, and the promise points at a
+  # frame the worker does not have. 1.x forced it; every draw failed here.
+  skip_on_cran()
+  skip_if_not_installed("future")
+  skip_if_not_installed("furrr")
+  define_globally(cap_lm <- function(data, ...) lm(Y ~ Z, data = data))
+  on.exit(rm(cap_lm, envir = globalenv()), add = TRUE)
+  design <- declare_globally(
+    declare_model(N = 20, Z = rep(0:1, 10), Y = rnorm(N) + Z) +
+      declare_inquiry(ATE = 1) +
+      declare_estimator(handler = label_estimator(cap_lm, label = "lm",
+                                                  inquiry = "ATE", term = "Z"))
+  )
+  old <- future::plan(future::multisession, workers = 2)
+  on.exit(future::plan(old), add = TRUE)
+  sims <- simulate_design(design, sims = 4)
+  expect_equal(nrow(sims), 4)
+  expect_false("error" %in% names(sims) && any(sims$error %in% TRUE))
+  expect_true(all(is.finite(sims$estimate)))
+})

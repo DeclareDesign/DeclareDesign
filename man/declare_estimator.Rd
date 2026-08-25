@@ -49,8 +49,9 @@ re-executed \code{draws} times for each upstream draw during nested simulation.}
 A \code{design_step}.
 }
 \description{
-Wraps a model-fitting function with metadata that links its tidied output
-to one or more inquiries during diagnosis.
+Declares the answer strategy: a function that produces an estimate of an
+inquiry from the observed data. The estimate is tidied to one row per term
+and joined to its estimand by the \code{inquiry} label during diagnosis.
 }
 \examples{
 design <- declare_model(N = 50, U = rnorm(N), Y = U) +

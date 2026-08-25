@@ -256,8 +256,9 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
 
 #' Declare an estimator
 #'
-#' Wraps a model-fitting function with metadata that links its tidied output
-#' to one or more inquiries during diagnosis.
+#' Declares the answer strategy: a function that produces an estimate of an
+#' inquiry from the observed data. The estimate is tidied to one row per term
+#' and joined to its estimand by the `inquiry` label during diagnosis.
 #'
 #' @family design declarations
 #' @param ... Arguments forwarded to `.method`. Typically the formula appears
@@ -453,6 +454,11 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
 #' my_est(df)
 label_estimator <- function(.method, label = NULL, inquiry = NULL, term = NULL,
                             .summary = tidy_try) {
+  # Forced here because the closure below travels: under
+  # `future::plan(multisession)` it is serialised to a worker, and an
+  # unevaluated promise for `.method` points back at a frame the worker does
+  # not have. 1.x forced it too, through `formals(fn)`.
+  force(.method)
   inquiry_chr <- normalize_inquiry(inquiry)
   summary_fn <- rlang::as_function(.summary)
   out <- function(data, ...) {
