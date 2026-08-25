@@ -69,7 +69,10 @@ merge_estimates_inquiries <- function(estimates, inquiries) {
   result <- if (length(shared) == 0) {
     dplyr::cross_join(estimates, inquiries, suffix = c("", ".inquiry"))
   } else {
-    dplyr::left_join(estimates, inquiries, by = shared,
+    # A full join, so an inquiry no estimator targets keeps its own row with
+    # an NA estimator, as in 1.x: its mean_estimand is still reported and the
+    # row says that nothing answers it. A left join dropped it silently.
+    dplyr::full_join(estimates, inquiries, by = shared,
                      suffix = c("", ".inquiry"),
                      relationship = "many-to-many")
   }

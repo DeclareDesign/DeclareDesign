@@ -36,6 +36,8 @@ DeclareDesign 2.0 is a ground-up reimplementation on tidyverse primitives. The d
 
 ## Messages that were silences
 
+* An inquiry that no estimator targets keeps its own row in a diagnosis, with an NA estimator and its `mean_estimand`, as in 1.x; the join had dropped it.
+* `declare_sampling(handler = )` takes a custom sampling function, as the other data verbs do.
 * An estimator naming an inquiry no step produced warns once, naming the labels that exist.
 * A sampling step that produces no `S` column and has no `filter` warns once that every row was kept.
 * An error inside a step names the step and its verb, with the original error as the cause.

@@ -376,7 +376,7 @@ test_that("an estimator naming an inquiry no step produced warns once", {
                       inquiry = "mew", label = "ols")
   rlang::reset_warning_verbosity("dd_unmatched_inquiry_mew")
   expect_warning(out <- run_design(design), "`ols` names inquiry `mew`")
-  expect_true(is.na(out$estimand))
+  expect_true(is.na(out$estimand[out$estimator %in% "ols"]))
 })
 
 test_that("insert_step() keeps 1.x's argument order, before then after", {
@@ -386,4 +386,17 @@ test_that("insert_step() keeps 1.x's argument order, before then after", {
   named <- suppressWarnings(insert_step(design, new, before = "assignment"))
   expect_equal(names(positional), names(named))
   expect_equal(which(names(positional) == "measurement")[1], 3L)
+})
+
+test_that("an inquiry no estimator targets keeps its own diagnosis row, as in 1.x", {
+  design <- declare_model(N = 20, U = rnorm(N), Y = U) +
+    declare_inquiry(mu = mean(Y)) +
+    declare_inquiry(sigma = sd(Y)) +
+    declare_estimator(Y ~ 1, .method = lm, term = "(Intercept)",
+                      inquiry = "mu", label = "ols")
+  diag <- diagnose_design(design, sims = 3, bootstrap_sims = 0)$diagnosands_df
+  expect_setequal(diag$inquiry, c("mu", "sigma"))
+  sigma_row <- diag[diag$inquiry == "sigma", ]
+  expect_true(is.na(sigma_row$estimator))
+  expect_false(is.na(sigma_row$mean_estimand))
 })

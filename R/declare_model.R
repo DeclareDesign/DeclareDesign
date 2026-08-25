@@ -193,6 +193,17 @@ make_sampling_step <- function(dots, filter_quo) {
   force(filter_quo)
   function(data = NULL) {
     nm <- names(dots) %||% rep("", length(dots))
+    # A custom handler is the whole sampling step, as in 1.x: it receives the
+    # data and returns the sample, and only an explicit `filter` is applied
+    # on top of it.
+    if (any(!is.na(nm) & nm == "handler")) {
+      data <- make_fabricate_step(dots, id_label_na = TRUE)(data)
+      if (!is.null(filter_quo)) {
+        keep <- rlang::eval_tidy(filter_quo, data = data)
+        data <- data[!is.na(keep) & keep, , drop = FALSE]
+      }
+      return(data)
+    }
     is_data <- !is.na(nm) & nm == "data"
     user_data_quo <- if (any(is_data)) dots[[which(is_data)[1]]] else NULL
     rest <- dots[!is_data]

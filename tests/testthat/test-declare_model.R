@@ -134,3 +134,16 @@ test_that("a sampling step that keeps every row says so", {
   expect_silent(df <- draw_data(quiet))
   expect_equal(nrow(df), 10L)
 })
+
+test_that("declare_sampling() takes a custom handler, as the other data verbs do", {
+  # A handler dot went straight to fabricate and died in rep() on a closure;
+  # DesignLibrary's regression discontinuity designer sampled that way.
+  design <- declare_model(N = 40, X = seq(-2, 2, length.out = N)) +
+    declare_sampling(handler = function(data) data[abs(data$X) < 1, ])
+  df <- draw_data(design)
+  expect_true(all(abs(df$X) < 1))
+  expect_lt(nrow(df), 40L)
+  with_filter <- declare_model(N = 40, X = seq(-2, 2, length.out = N)) +
+    declare_sampling(handler = function(data) data[abs(data$X) < 1, ], filter = X > 0)
+  expect_true(all(draw_data(with_filter)$X > 0))
+})
