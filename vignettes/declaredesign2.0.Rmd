@@ -71,16 +71,18 @@ diagnose_design(designs, sims = 500)
 
 `tau` is a name the model step reads. `redesign()` finds it, rebinds it in a copy of the environment the expression was written in, and the parameter travels forward: it appears as a column in the simulations table and as a grouping variable in the diagnosands table, so custom diagnosands can refer to it directly. A designer function's argument is the same thing, and `expand_design()` works as before.
 
-Printing a design lists the names `redesign()` can reach, with the value each currently holds, its kind, and the steps that would respond to a change. Asking for a change to a name that is not one of them warns instead of silently returning the design you started with:
+Printing a design shows the calls that declared it, as in 1.x, then the names `redesign()` can reach, with the value each currently holds, its kind, and the steps that would respond to a change. Asking for a change to a name that is not one of them warns instead of silently returning the design you started with:
 
 ```{r}
 print(design)
-#> Research design with 5 step(s):
-#>   [model] model (dgp)
-#>   [inquiry] ATE (inquiry)
-#>   [assignment] assignment (dgp)
-#>   [measurement] measurement (dgp)
-#>   [estimator] ols (estimator)
+#> Research design with 5 steps
+#>
+#> Step 1 (model): declare_model(N = 600, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + tau)
+#> Step 2 (inquiry): declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+#> Step 3 (assignment): declare_assignment(Z = complete_ra(N))
+#> Step 4 (measurement): declare_measurement(Y = reveal_outcomes(Y ~ Z))
+#> Step 5 (estimator): declare_estimator(Y ~ Z, .method = lm_robust, inquiry = "ATE", label = "ols")
+#>
 #> Parameters and objects the design refers to:
 #>  name value   kind declared steps
 #>   tau   0.3 scalar    FALSE     1
@@ -296,6 +298,18 @@ future::plan(future::sequential)
 
 No other change is needed. Every draw runs on its own L'Ecuyer-CMRG random-number stream whichever plan is active, so `set.seed(1)` before the call gives the same table under `plan(sequential)` and `plan(multisession)`, nested draws included. The packages attached in your session are attached on each worker. The seeds are not 1.x's, so a seed carried over from a 1.x script reproduces a 1.x table only under 1.x. The bootstrap inside `diagnose_design()` runs in the main process; it is one grouped `summarize()` over the stacked replicates and is not where the time goes.
 
+### `summary()` says what each step did
+
+`summary(design)` runs the design once and reports, under each step's call, what that step did to the data: the rows a data step produced or kept and the columns it added, dropped or changed, the value each inquiry took, and the estimate each estimator returned, followed by the run itself and the parameters. It replaces 1.x's variable-by-variable tables with one line per step, and the pieces are on the returned object (`summary(design)$steps`, `$estimates`, `$data`) rather than only on the console. `summary(design, run = FALSE)` skips the run for a design whose estimator is slow.
+
+```{r}
+summary(design)
+#> Step 3 (sampling): declare_sampling(S = complete_rs(N, n = 50))
+#>   keeps 50 of 100 rows; adds S
+#> Step 4 (assignment): declare_assignment(Z = complete_ra(N))
+#>   adds Z
+```
+
 ### Progress
 
 `simulate_design(design, progress = TRUE)` shows a bar for that call. The better habit is `progressr::handlers(global = TRUE)` once per session, after which every call reports, in the console, in a Shiny app or from inside parallel workers, through whatever handler you chose. The package signals progress and never renders it, so with no handler it prints nothing.
@@ -338,7 +352,7 @@ The rewrite is pre-release. Nothing goes to CRAN until fabricatr 2.0 and estimat
 
 **Fixed in the 2026-08-24 review**, each with a regression test: a declared parameter read through a helper function was ignored; `label_estimator()` of a workspace function failed on every parallel draw; sequential and parallel runs gave different numbers for the same seed; `make_groups` and `future.seed` were accepted and silently dropped; a misspelled `inquiry` label was silent; a sampling step with no `S` column kept every row without a word; an error inside a step did not say which step; `insert_step()` had its `before` and `after` arguments in the wrong order.
 
-**Open.** `summary()` on a design prints the step list and the parameters and not 1.x's step-by-step display of the variables each step adds. `expand_design()` and `redesign()` disagree about a stochastic declared parameter: the first draws it afresh per design, the second shares one draw. `library(DesignLibrary)` attaches CRAN DeclareDesign 1.1.1 over 2.0 until DesignLibrary is released against 2.0, and the result is a hybrid that fails on the next declaration. Whether bare `print(design)` should carry the parameter table, as it does now, or leave it to `summary()`, is undecided.
+**Open.** `expand_design()` and `redesign()` disagree about a stochastic declared parameter: the first draws it afresh per design, the second shares one draw. `library(DesignLibrary)` attaches CRAN DeclareDesign 1.1.1 over 2.0 until DesignLibrary is released against 2.0, and the result is a hybrid that fails on the next declaration.
 
 ### Open issues in DeclareDesign
 

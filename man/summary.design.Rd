@@ -4,21 +4,44 @@
 \alias{summary.design}
 \title{Summarize a design}
 \usage{
-\method{summary}{design}(object, ...)
+\method{summary}{design}(object, run = TRUE, ...)
 }
 \arguments{
 \item{object}{A \code{design}.}
 
+\item{run}{Whether to run the design once. Defaults to \code{TRUE}.}
+
 \item{...}{Ignored.}
 }
 \value{
-The input invisibly.
+A \code{summary.design}: a list with \code{steps} (a tibble with one row per
+step: \code{step}, \code{label}, \code{type}, \code{call}, and \code{one_run}, the account of that
+step on this run), \code{parameters} and \code{notes} (as \code{\link[=design_parameters]{design_parameters()}}
+and \code{\link[=design_notes]{design_notes()}} return them), \code{ran}, and when the design was run,
+\code{data} (the final data), \code{inquiries} and \code{estimates} (as \code{\link[=run_design]{run_design()}}
+returns them).
 }
 \description{
-The same as printing it: the steps, then the parameters and objects the
-design's expressions refer to.
+Runs the design once and reports what each step did: the rows a data step
+produced or kept and the columns it added, dropped or changed; the value
+each inquiry took; the estimate each estimator returned. The run itself,
+estimates joined to estimands, comes after the steps, then the parameters
+and objects the design refers to. Everything the printout shows is on the
+returned object, so a document or an app can use the pieces.
+}
+\details{
+The run is one random draw, so the numbers differ from call to call. A
+design whose estimator is slow can be summarized without running it:
+\code{run = FALSE} gives the steps and the parameters alone, which is what
+\code{\link[=print]{print()}} shows.
 }
 \examples{
-N <- 30
-summary(declare_model(N = N, Y = rnorm(N)) + NULL)
+n_units <- 30
+design <- declare_model(N = n_units, U = rnorm(N), Y = U) +
+  declare_inquiry(mu = mean(Y)) +
+  declare_estimator(Y ~ 1, .method = lm, term = "(Intercept)",
+                    inquiry = "mu", label = "ols")
+summary(design)
+summary(design, run = FALSE)
+summary(design)$steps
 }

@@ -268,7 +268,7 @@ test_that("summary lists the parameters and objects the design refers to", {
   expect_false("rnorm" %in% objects$name)
   # neither is a column an earlier step created
   expect_false("Y" %in% objects$name)
-  expect_output(summary(design), "Parameters and objects")
+  expect_output(print(summary(design, run = FALSE)), "Parameters and objects")
 })
 
 test_that("the redesign warning is not silenced by a package of the same name", {

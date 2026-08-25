@@ -28,6 +28,7 @@ DeclareDesign 2.0 is a ground-up reimplementation on tidyverse primitives. The d
 * An estimator that errors on a draw under `simulate_design()` is recorded as a row with `error = TRUE`, one warning per run gives the counts, and diagnosands use the draws that succeeded (closes #385). `run_design()` and `draw_estimates()` still stop.
 * Every simulation draw runs on its own L'Ecuyer-CMRG stream under any `future::plan()`, so a seeded run gives the same table sequentially and in parallel.
 * `progress = TRUE` on `simulate_design()` and `diagnose_design()`, or `progressr::handlers(global = TRUE)` once per session, reports progress through progressr, from parallel workers too.
+* `print(design)` shows the calls that declared the steps, as 1.x did, and the parameters `redesign()` can reach. `summary(design)` runs the design once and says under each step what it did to the data (rows kept, columns added, dropped or changed, the estimand, the estimate), returning the pieces as a `summary.design` object; `run = FALSE` skips the run.
 * `diagnose_design()` accepts a simulations data frame and honours its grouping; `diagnose_simulations()` is the same entry point by name.
 * `default_diagnosands()` and `select_diagnosands()` build a diagnosands set from names; `tidy()` works on a diagnosis.
 * Estimator and step arguments pass to `.method` or the handler as written, so methods that do their own non-standard evaluation work (closes #463; also #456, #457, #479, #482, #509).

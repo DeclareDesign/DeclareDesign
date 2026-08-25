@@ -31,11 +31,16 @@ run_design <- function(design) {
 #'   alone and `draw_estimands()` for the inquiries, so a failing estimator
 #'   does not take them down with it and neither pays to fit models it will
 #'   discard.
-#' @return A list with elements `data`, `inquiries`, and `estimates`.
+#' @param trace If `TRUE`, also return `trace`, one element per step holding
+#'   what that step produced on this run: the data after a data step, the
+#'   inquiry rows, or the estimate rows. [summary.design()] reads it.
+#' @return A list with elements `data`, `inquiries`, and `estimates`, plus
+#'   `trace` when asked for.
 #' @keywords internal
 #' @noRd
 run_design_internal <- function(design,
-                                what = c("dgp", "inquiry", "estimator")) {
+                                what = c("dgp", "inquiry", "estimator"),
+                                trace = FALSE) {
   if (inherits(design, "design_step")) {
     design <- construct_design(wrap_step(design))
   }
@@ -50,10 +55,12 @@ run_design_internal <- function(design,
   # touched, which is what keeps one draw's notes out of the next one.
   steps <- unclass(design)
   notes <- list()
+  traced <- vector("list", length(steps))
   for (i in seq_along(steps)) {
     step <- steps[[i]]
     if (is_notes_step(step)) {
       notes <- record_notes(notes, note_values(step, data, notes))
+      if (trace) traced[[i]] <- list(notes = note_values(step, data, notes))
       steps <- apply_notes_from(steps, i, notes)
       next
     }
@@ -61,17 +68,24 @@ run_design_internal <- function(design,
     if (is.null(ct) || !ct %in% what) next
     if (identical(ct, "dgp")) {
       data <- run_step(step, data)
+      if (trace) traced[[i]] <- list(data = data)
     } else if (identical(ct, "inquiry")) {
-      inquiries[[length(inquiries) + 1L]] <- run_step(step, data)
+      inq <- run_step(step, data)
+      inquiries[[length(inquiries) + 1L]] <- inq
+      if (trace) traced[[i]] <- list(inquiries = inq)
     } else if (identical(ct, "estimator")) {
-      estimates[[length(estimates) + 1L]] <- run_step(step, data)
+      est <- run_step(step, data)
+      estimates[[length(estimates) + 1L]] <- est
+      if (trace) traced[[i]] <- list(estimates = est)
     }
   }
-  list(
+  out <- list(
     data      = data,
     inquiries = dplyr::bind_rows(inquiries),
     estimates = dplyr::bind_rows(estimates)
   )
+  if (trace) out$trace <- traced
+  out
 }
 
 #' Run one step, naming it if it fails
