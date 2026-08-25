@@ -1,32 +1,43 @@
-# DeclareDesign, rewritten
+# DeclareDesign
 
-**This branch is not the CRAN package and it is not `main`.** It holds a ground-up rewrite of DeclareDesign on tidyverse foundations. The released DeclareDesign is unaffected by anything here.
+DeclareDesign declares, diagnoses and redesigns research designs. A design is written as four parts, a model of the world, an inquiry about it, a data strategy and an answer strategy, joined with `+`; `diagnose_design()` then simulates it and reports bias, power, coverage and whatever else you ask for, before any data are collected.
 
-The package on this branch carries the released package's name, so installing it **replaces** your CRAN DeclareDesign: two packages of one name cannot be loaded together. It imports `fabricatr (>= 2.0.0)` from the sibling branch, which replaces your CRAN fabricatr the same way. To keep 1.1.1 available for comparison, install it into a separate library and pass `lib.loc` when you need it.
+```r
+library(DeclareDesign)
+
+design <-
+  declare_model(N = 100, U = rnorm(N), potential_outcomes(Y ~ 0.2 * Z + U)) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_assignment(Z = complete_ra(N)) +
+  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+  declare_estimator(Y ~ Z, .method = difference_in_means, inquiry = "ATE")
+
+diagnose_design(design)
+```
+
+The companion packages supply the pieces: [fabricatr](https://github.com/DeclareDesign/fabricatr) makes data, [randomizr](https://github.com/DeclareDesign/randomizr) randomizes, and [estimatr](https://github.com/DeclareDesign/estimatr) estimates. The book *Research Design in the Social Sciences* (Blair, Coppock and Humphreys) works through all of it at <https://book.declaredesign.org>.
+
+## Installing
+
+Version 2.0 is on this repository's `rewrite` branch and not yet on CRAN. It installs under the released name and replaces the CRAN DeclareDesign in your library, as do fabricatr 2.0 and estimatr 2.0, which it needs:
 
 ```r
 remotes::install_github("DeclareDesign/fabricatr@rewrite")
+remotes::install_github("DeclareDesign/estimatr@rewrite")
 remotes::install_github("DeclareDesign/DeclareDesign@rewrite", build_vignettes = TRUE)
-vignette("declaredesign2.0")
 ```
 
-The vignette is the document to read first. It covers what does not change, what changes and why, how to port an existing declaration, and the one open API question.
+To keep the CRAN versions for comparison, install them into a separate library and pass `lib.loc`.
 
-## What it is
+## What changed in 2.0
 
-3,982 lines of R against DeclareDesign's 7,036, using purrr for simulation and dplyr for diagnosis. The exported API is DeclareDesign's, minus the three aliases `declare_estimators`, `declare_potential_outcomes` and `declare_reveal`, plus `default_diagnosands`, `diagnose_simulations`, `merge_estimates_inquiries` and `tidy.diagnosis`.
+2.0 is a ground-up rewrite on tidyverse foundations. The declaration syntax is unchanged, and the book's designs run as written. What changed:
 
-**The compatibility claim is an artifact rather than a description.** All 28 chapters of book.declaredesign.org were scraped down to 90 design declarations and checked in as `tests/testthat/test-book-designs.R`. Of the 84 that are testable and working under DeclareDesign 1.1.1, **81 work here and 78 work with their text unchanged**. Separately, 18 of DesignLibrary's 19 designers run under all three verbs, and Macartan's 275-expression crash course runs end to end with zero errors, unmodified.
+* `redesign()` reaches a name the design reads (a value named above the design, a designer's argument, or `declare_parameters()`), and errors, with the fix, on a number written inside a step.
+* `declare_parameters()` and `declare_notes()` name what a design can be set to and what it works out.
+* A design is a value: it carries the objects it reads, so it survives `saveRDS()` and travels to parallel workers. A seeded run gives the same numbers sequentially and under `future::plan(multisession)`.
+* Step-level `draws` hold a population fixed while the assignment is redrawn, and the diagnosis decomposes variance by step.
+* An estimator that fails on one draw is recorded rather than fatal.
+* `inquiry =` takes the inquiry's label; `make_groups` is `group_by()`; `print_code()` and `compare_designs()` are gone.
 
-## Status
-
-As of 2026-07-30: 538 tests passing, `R CMD check` 0 errors / 0 warnings / 0 notes.
-
-Two API decisions are open and both change what a 2.0.0 would mean:
-
-- **How estimator arguments reach `.method`** (DeclareDesign issue #463, open since 2021). DeclareDesign passes expressions, which breaks `metafor::rma.uni` and works for the shim written around that breakage; this branch passes values, which does the reverse. Neither convention serves both tidyselect handlers and ordinary R functions. The recommendation in the vignette is an explicit argument naming the convention, defaulting to values.
-- **Whether a diagnosands set should stop being a `design_step`.** Implemented on the `rewrite-diagnosands-proposal` branch, deliberately unmerged.
-
-**This branch is versioned 2.0.0**, against DeclareDesign 1.1.1 on CRAN, and it imports `fabricatr (>= 2.0.0)`, so the two move together. It reaches CRAN after fabricatr 2.0.0 does, since the dependency forces that order.
-
-Sibling branches: `DeclareDesign/fabricatr@rewrite` and `DeclareDesign/estimatr@rewrite`.
+`NEWS.md` has the full list, and `vignette("declaredesign2.0")` the reasoning, the speed measurements and a grep table for porting a script. `vignette("getting-started")` is the short introduction.

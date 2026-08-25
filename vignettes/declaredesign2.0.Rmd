@@ -14,36 +14,33 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = FALSE,
 
 ## The short version
 
-DeclareDesign 2.0 is a ground-up reimplementation of DeclareDesign on tidyverse primitives. The public API is the same one you already know: `declare_model()`, `declare_inquiry()`, `declare_assignment()`, `declare_measurement()`, `declare_estimator()`, joined by `+`, then handed to `simulate_design()` and `diagnose_design()`.
+DeclareDesign 2.0 is a ground-up reimplementation of DeclareDesign on tidyverse primitives. The public API is the one you already know: `declare_model()`, `declare_inquiry()`, `declare_sampling()`, `declare_assignment()`, `declare_measurement()`, `declare_estimator()`, joined by `+`, then handed to `simulate_design()`, `diagnose_design()` and `redesign()`.
 
 Three things are true of the rewrite, and this vignette defends each in turn.
 
-Most designs run unchanged. Of the 90 design declarations in the DeclareDesign book, 78 run with their text unchanged and three more need a single mechanical substitution; the accounting for the rest is in [Current status] below. Of the syntax you write in a typical declaration, one argument name and one argument type change, and both are caught immediately with an error rather than a wrong answer. Three further changes live in the data-fabrication layer, confined to multilevel and cross-classified declarations. Every one of the five errors loudly, and none of them changes the shape of the data a design produces.
+Most designs run unchanged. Of the 90 design declarations in the DeclareDesign book, 81 are checked in as tests and every one of them builds, runs and returns estimates; the accounting for the other nine is in [Current status] below. What a typical declaration has to change is one thing: an estimator's `inquiry =` is the inquiry's label, not the step object. Everything else that changes is at the edges (a handful of argument names, three functions that went, one way of grouping a diagnosis), and every one of those changes stops with an error naming the replacement rather than running to a different answer.
 
-The pipeline is faster. Simulation and diagnosis run 1.2 to 1.5 times faster sequentially, on flat and multilevel designs alike, and parallel execution is a one-line change that scales close to linearly. The gain is concentrated in the design plumbing, because model fitting is the same `estimatr` call in both packages.
+The pipeline is faster and it parallelises. Simulation and diagnosis run 1.15 to 1.35 times faster sequentially, and four workers make a 2,000-simulation run 3.2 times faster after one line of `future::plan()`. A seeded run gives the same table sequentially and in parallel.
 
-The rewrite can express designs the original cannot. Step-level `draws` let you fan out a single step, so you can hold a population fixed and redraw the assignment, or hold the assignment fixed and redraw the population. The resulting simulations carry a variance decomposition that attributes the variability of any per-simulation quantity to the step that generated it.
-
-It also closes seven of the twenty-two issues open on the DeclareDesign tracker, six of them for one reason, and it regresses one. Both lists are in [Open issues in DeclareDesign] below, along with the design decision the seventh raises, which the group should take rather than the rewrite.
-
-The cost of all three is roughly 2,100 lines of R where the original has roughly 5,400.
+The rewrite can express designs the original cannot. A design carries the objects it reads, so it survives `saveRDS()` and travels to a worker. `declare_parameters()` names what a design can be redesigned over, and `declare_notes()` names what it works out along the way. Step-level `draws` hold a population fixed while the assignment is redrawn, or the reverse, and the diagnosis then decomposes the variance of any per-simulation quantity by the step that generated it. An estimator that fails on one draw is recorded rather than fatal.
 
 ## Getting it
 
-Both packages install from GitHub and are not on CRAN yet. They mask the originals, so attach one set or the other in a session, never both.
+The 2.0 packages are not on CRAN yet. They install from GitHub under their released names, so installing them replaces the CRAN versions in your library; keep the CRAN versions available by installing them into a separate library and passing `lib.loc` when you want them.
 
-```{r, purl = FALSE}
+```{r}
 remotes::install_github("DeclareDesign/fabricatr@rewrite")
-remotes::install_github("DeclareDesign/DeclareDesign@rewrite")
+remotes::install_github("DeclareDesign/estimatr@rewrite")
+remotes::install_github("DeclareDesign/DeclareDesign@rewrite", build_vignettes = TRUE)
 ```
 
-`estimatr` and `randomizr` are unchanged and are used exactly as before.
+`randomizr` from CRAN is enough. `vignette("getting-started")` is the short introduction; this vignette is the long one.
 
 ## What does not change
 
-Here is a standard two-arm design, written identically in both packages.
+Here is a standard two-arm design, written identically in 1.x and 2.0.
 
-```{r, purl = FALSE}
+```{r}
 library(DeclareDesign)
 library(fabricatr)
 library(randomizr)
@@ -59,11 +56,11 @@ design <-
 diagnose_design(design, sims = 500)
 ```
 
-Everything about that block carries over: the `+` operator, lazily captured expressions with access to columns declared earlier in the same step, `N` available inside the data mask, `potential_outcomes()` and `reveal_outcomes()`, formula-first estimators, and the `inquiry` argument that links an estimator to its estimand. Writing the potential outcomes out by hand (`Y_Z_0 = U, Y_Z_1 = U + 0.3`) and revealing them with an arithmetic expression works just as well, in both packages. `draw_data()`, `draw_estimands()`, `draw_estimates()`, `get_estimates()`, `simulate_design()`, `diagnose_design()`, `redesign()`, and `expand_design()` all keep their signatures and their return shapes.
+Everything about that block carries over: the `+` operator, expressions that see the columns declared earlier in the same step, `N` available inside the data mask, `potential_outcomes()` and `reveal_outcomes()`, formula-first estimators with `.method =` and `.summary =`, `term =`, and the `inquiry` argument that links an estimator to its estimand. Writing the potential outcomes out by hand (`Y_Z_0 = U, Y_Z_1 = U + 0.3`) and revealing them with an arithmetic expression works just as well. `draw_data()`, `draw_estimands()`, `draw_estimates()`, `run_design()`, `simulate_design()`, `diagnose_design()`, `diagnose_designs()`, `reshape_diagnosis()`, `tidy()`, `get_diagnosands()`, `get_simulations()`, `declare_test()`, `declare_step()`, `declare_diagnosands()`, `set_diagnosands()`, `label_estimator()` and `expand_design()` all keep their names and what they return, and the book's designs are the evidence.
 
-`redesign()` in particular works on the declared design itself, with no designer function:
+The book's way of redesigning is the 2.0 way. A value named above the design is a parameter of it:
 
-```{r, purl = FALSE}
+```{r}
 tau <- 0.3
 design <-
   declare_model(N = 600, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + tau) + ...
@@ -72,12 +69,18 @@ designs <- redesign(design, tau = c(0.1, 0.3, 0.5))
 diagnose_design(designs, sims = 500)
 ```
 
-`tau` is a free symbol inside the model step's captured expression. `redesign()` finds it, clones the environment the expression was captured in, and rebinds it. The parameter then travels forward automatically: it appears as a column in the simulations table and as a grouping variable in the diagnosands table, so custom diagnosands can refer to it directly.
+`tau` is a name the model step reads. `redesign()` finds it, rebinds it in a copy of the environment the expression was written in, and the parameter travels forward: it appears as a column in the simulations table and as a grouping variable in the diagnosands table, so custom diagnosands can refer to it directly. A designer function's argument is the same thing, and `expand_design()` works as before.
 
-Printing a design lists the names `redesign()` can reach, with the value each currently holds, its kind, and the steps that would respond to a change (`summary()` prints the same thing). Asking for a change to a name that is not one of them warns instead of silently returning the design you started with:
+Printing a design lists the names `redesign()` can reach, with the value each currently holds, its kind, and the steps that would respond to a change. Asking for a change to a name that is not one of them warns instead of silently returning the design you started with:
 
-```{r, purl = FALSE}
+```{r}
 print(design)
+#> Research design with 5 step(s):
+#>   [model] model (dgp)
+#>   [inquiry] ATE (inquiry)
+#>   [assignment] assignment (dgp)
+#>   [measurement] measurement (dgp)
+#>   [estimator] ols (estimator)
 #> Parameters and objects the design refers to:
 #>  name value   kind declared steps
 #>   tau   0.3 scalar    FALSE     1
@@ -86,23 +89,31 @@ redesign(design, taw = 0.5)
 #> Warning: You requested a change to taw but taw is not found in the design.
 ```
 
-The names it finds are the parameters a `declare_parameters()` step declares and the objects the design's expressions read out of the environment they were written in. **A number written into the design is not one of them.** `declare_model(N = 500)` puts 500 in the design; nothing outside it holds that number and nothing names it, so `redesign(design, N = 1000)` errors and says how to give it one. The ordinary way is a name outside the design, which is what a designer function's argument already is:
+## What changes, and why
 
-```{r, purl = FALSE}
-N <- 500
-design <- declare_model(N = N, ...)
-redesign(design, N = c(500, 1000))
+### In DeclareDesign 2.0
+
+#### `redesign()` reaches a name the design reads, not a number it writes down
+
+`declare_model(N = 500)` puts 500 in the design. Nothing outside the design holds that number and nothing names it, so `redesign(design, N = 1000)` has nothing to change. In 1.x that call warned that `N` was not found and returned the design unchanged, at N = 500, which is the quiet kind of failure: three "designs" that are one design. In 2.0 it errors and says what to do:
+
+```{r}
+design <- declare_model(N = 500, U = rnorm(N), Y = U) + declare_inquiry(m = mean(Y))
+redesign(design, N = 1000)
+#> Error:
+#> ! N is an argument this design writes down, not a parameter.
+#> ℹ To redesign over values of `N`, give it a name outside the design:
+#>   `N <- 500`, then `declare_model(N = N, ...)`. A designer function's
+#>   argument does the same thing.
+#> ℹ `declare_parameters(N = 500)` names it inside the design instead, which is
+#>   worth it when several steps read it or when a column shares its name.
 ```
 
-`declare_parameters(N = 500) + declare_model(N = N, ...)` does the same from inside the design, and earns its place when several steps read the value or when a column shares its name.
+The ordinary way out is the book's: a name outside the design, or a designer function's argument. `declare_parameters(N = 500) + declare_model(N = N, ...)` does the same from inside the design, and earns its place when several steps read the value or when a column shares its name. A value written inline inside a call, as in `complete_ra(N, prob_each = c(0.2, 0.8))`, cannot be redesigned either: there is no name to rebind, so name it first. Functions count as names, so which estimator or which summary function a design uses can itself be a parameter: `redesign(design, g = median)` swaps `g` everywhere it appears.
 
-That is the one deliberate break in `redesign()`'s reach, and it is what removes a whole class of silent wrong answers. Matching a redesign against the *name* of a declared argument is what used to make `redesign(design, sd = 3)` write 3 into a column called `sd` rather than change the parameter behind it, and what put a character vector where `diff_in_diff`'s outcome belonged. A declared parameter and a column of the same name are now different things.
+A bare atomic vector always supplies one value per design, which is what makes `tau = c(0.1, 0.3)` two designs. A parameter that is itself a vector therefore has to be wrapped, in 2.0 as in 1.x, and 2.0 says so where 1.x handed back the broken designs without comment:
 
-A value written inline inside a call, as in `complete_ra(N, prob_each = c(0.2, 0.8))`, cannot be redesigned either: there is no name to rebind, so declare it or pull it out into an object first. Functions count, so which estimator or which summary function a design uses can itself be a parameter: `redesign(design, g = median)` swaps `g` everywhere it appears.
-
-A bare atomic vector always supplies one value per design, which is what makes `n_units = c(100, 200)` two designs. A parameter that is itself a vector therefore has to be wrapped, in this package and in DeclareDesign both:
-
-```{r, purl = FALSE}
+```{r}
 redesign(design, prob_each = c(0, 0.5, 0.5))
 #> Warning: `prob_each` currently holds 3 values, so c(0, 0.5, 0.5) is being
 #> read as 3 designs, one value each.
@@ -111,41 +122,30 @@ redesign(design, prob_each = c(0, 0.5, 0.5))
 redesign(design, prob_each = list(c(0, 0.5, 0.5)))
 ```
 
-DeclareDesign hands back the three broken designs without comment, and they fail later, when something draws from one of them. The rule is the same here; only the complaint moves to the call that caused it.
+The rule applies to bare vectors and bare lists, and to nothing else. A data frame, a matrix, a function and anything else carrying a class is one value, so a design built on a supplied data set is re-run on another one by naming it: `declare_model(data = pilot, ...)` is redesigned with `redesign(design, pilot = full_sample)`, reaching the name the design reads the data under rather than `data`, which names fabricate's argument. 1.x read the data frame as a list of columns and asked for one design per column.
 
-The rule applies to bare vectors and bare lists, and to nothing else. A data frame, a matrix, a function and anything else carrying a class is one value, so a design built on a supplied data set is re-run on another one by naming it:
+#### `inquiry =` is the quoted label of the inquiry
 
-```{r, purl = FALSE}
-design <- declare_model(data = pilot, Y = Y_star + tau) + declare_inquiry(mu = mean(Y))
-redesign(design, pilot = full_sample)
-```
-
-The data are reached by the name the design reads them under, `pilot`, rather than by `data`, which names fabricate's argument and belongs to the declaration.
-
-DeclareDesign reads the data frame as a list of columns there and asks for one design per column.
-
-## What changes, and why
-
-### In DeclareDesign 2.0
-
-#### `inquiry =` must be the quoted label of the inquiry
-
-```{r, purl = FALSE}
+```{r}
 # old, sometimes seen
 my_inquiry <- declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 declare_estimator(Y ~ Z, inquiry = my_inquiry)
+#> Error: Pass the inquiry label as a string, not a step object.
 
 # new
 declare_estimator(Y ~ Z, inquiry = "ATE")
 ```
 
-The step object carries a `label` attribute whose value is the step type, not the inquiry name. Passing the object linked the estimator to an inquiry called `"inquiry"`, which does not exist, and the estimand column came back all `NA` with no complaint. Requiring the quoted label means the link is written down where a reader can check it, and a name that does not match fails immediately.
+In 1.x the step object carried a `label` attribute whose value was the step type, so passing it linked the estimator to an inquiry called `"inquiry"`, which does not exist, and the estimand column came back all `NA` with no complaint. Requiring the quoted label puts the link where a reader can check it. A label that matches no inquiry step now warns, once, naming the estimator, the label it asked for and the labels that exist; in 1.x it was silent.
 
 #### `make_groups = vars(...)` is gone; group with `group_by()`
 
-```{r, purl = FALSE}
+```{r}
 # old
 diagnose_design(design, make_groups = vars(N))
+#> Error: `make_groups` is not a design.
+#> ℹ `make_groups` is gone. Group the simulations instead:
+#>   `simulate_design(design) |> group_by(N) |> diagnose_design()`.
 
 # new
 simulate_design(design, sims = 500) |>
@@ -153,114 +153,116 @@ simulate_design(design, sims = 500) |>
   diagnose_design()
 ```
 
-`diagnose_design()` accepts a simulations data frame as its first argument and honors any grouping already on it. The gain is composability. Anything you can compute with `mutate()` becomes a grouping variable, so subgroup diagnosis no longer needs a bespoke argument:
+`diagnose_design()` accepts a simulations data frame as its first argument and honours any grouping already on it. Anything you can compute with `mutate()` becomes a grouping variable, so subgroup diagnosis no longer needs a bespoke argument:
 
-```{r, purl = FALSE}
+```{r}
 simulate_design(design, sims = 500) |>
   mutate(significant = p.value < 0.05) |>
   group_by(significant) |>
   diagnose_design()
 ```
 
-You can also filter simulations before diagnosing, bind simulations from separate runs, or diagnose a table you saved to disk last week. None of that was available through `make_groups`.
+You can also filter simulations before diagnosing, bind simulations from separate runs, or diagnose a table you saved to disk last week. `add_grouping_variables` and `future.seed` are gone the same way, and each errors with its replacement: grouping is `group_by()`, and seeding is `set.seed()` before the call under any plan (see [Parallel execution]).
+
+#### Argument names that moved out of the way of your parameters
+
+`redesign()` and `expand_design()` take `.design` and `.designer`, with `.expand` after the dots. Everything else in those calls is a parameter of *your* design, and a plain `design` partially matched a parameter named `d`, `de` or `des` and swallowed it; `.method` and `.summary` in `declare_estimator()` follow the same convention. `redesign(design = d, N = 10)` therefore errors; write `redesign(d, N = 10)`. `expand_design()`'s `prefix` argument went with it: the designs are named `design_1`, `design_2` and so on.
+
+`label_estimator(fn = )` and `label_test(fn = )` are `label_estimator(.method = )`; `set_diagnosands(x = )` is `set_diagnosands(design = )`. Each is an error if written the old way.
+
+#### `draw_data()` takes the design and nothing else
+
+`draw_data(design, data = , start = , end = )` ran a slice of the design against supplied data. That job belongs to `get_estimates(design, data)` for the estimators, and to `design[start:end]` for a slice, since a design is a list of steps and `+` reassembles one. `draw_data()` now runs the data-generating steps only, so a design whose estimator fails still draws its data, and drawing data no longer fits models it throws away.
+
+#### `reshape_diagnosis()` reshapes; select columns afterwards
+
+`reshape_diagnosis(select = , exclude = )` are gone. The result is a tibble; `select()` it.
 
 #### Step-modification functions are deprecated
 
-`insert_step()`, `delete_step()`, and `replace_step()` still work and warn once per session. The replacement is to rebuild the design, which is available because a design is an ordinary list of steps:
+`insert_step()`, `delete_step()` and `replace_step()` still work, with their 1.x argument order, and warn once per session. The replacement is to rebuild the design, which is available because a design is an ordinary list of steps:
 
-```{r, purl = FALSE}
+```{r}
 design_v2 <- design[1:2] + new_step + design[4:5]
 ```
 
 #### The code-comparison functions are removed; `compare_diagnoses()` is not
 
-`compare_designs()`, `compare_design_code()`, `compare_design_summaries()`, and `print_code()` error with a message asking for the R script instead. Reconstructing a legible declaration from a design object requires carrying the original source text through every transformation the design undergoes, and the reconstruction was never faithful enough to trust. Sharing the script that made the design is both simpler and more honest about what was run.
+`compare_designs()`, `compare_design_code()`, `compare_design_summaries()` and `print_code()` error with a message asking for the R script instead. Reconstructing a legible declaration from a design object requires carrying the original source text through every transformation the design undergoes, and the reconstruction was never faithful enough to trust. Sharing the script that made the design is simpler.
 
 Comparing what two designs *achieve* is a different question, and `compare_diagnoses()` answers it:
 
-```{r, purl = FALSE}
-compare_diagnoses(design, redesign(design, n_units = 1200), sims = 500)
+```{r}
+compare_diagnoses(design, redesign(design, tau = 0.5), sims = 500)
 ```
 
-Every diagnosand the two designs share is reported under each design and as a difference, with a bootstrap standard error and interval on that difference. Either argument can be a diagnosis you already ran, so a slow diagnosis does not have to be repeated to be compared. `merge_by_estimator = FALSE` crosses the estimators of the two designs instead of matching them by label, which is how to compare two estimators that carry different names.
+Every diagnosand the two designs share is reported under each design and as a difference, with a bootstrap standard error and interval on that difference. Either argument can be a diagnosis you already ran.
 
-#### `declare_potential_outcomes()` and `declare_reveal()` are not implemented
+#### `declare_potential_outcomes()`, `declare_reveal()` and `declare_estimators()` are gone
 
-Both were already deprecated in DeclareDesign. Use `potential_outcomes()` inside `declare_model()` and `reveal_outcomes()` inside `declare_measurement()`.
+The first two were already deprecated in 1.x and error with the replacement: `potential_outcomes()` inside `declare_model()` and `reveal_outcomes()` inside `declare_measurement()`. `declare_estimators()` was an alias of `declare_estimator()` and is simply absent. `declare_population()` still works and warns once.
+
+#### What comes back has one more column, in a different order
+
+Every table of estimates (`draw_estimates()`, `run_design()`, `get_estimates()`, the simulations) carries an `estimand` column, joined from the inquiry, and puts `estimator`, `inquiry` and `estimand` after the tidied statistics rather than before. Code that indexes columns by position, or that snapshots a table, will see the difference; code that uses names will not. Two estimators with the same label are renamed apart with a message where 1.x errored.
+
+#### An estimator that fails on one draw is recorded, not fatal
+
+Under `simulate_design()` and `diagnose_design()` a draw whose estimator errors is kept as a row with `error = TRUE` and the message, one warning per run gives the count per estimator and the first message, and diagnosands are computed on the draws that succeeded, with `n_sims` reporting how many that was. In 1.x one non-convergence in five hundred lost the run. `run_design()` and `draw_estimates()` still stop, because a single run is somebody debugging.
 
 ### In fabricatr 2.0
 
-Three changes, all in multilevel and cross-classified declarations. A flat `declare_model(N = 500, ...)` is unaffected, and so is the output of every declaration that runs.
+fabricatr 2.0 has its own vignette, `vignette("fabricatr2.0", package = "fabricatr")`, and its changes are confined to the spelling of multilevel and cross-classified declarations. A flat `declare_model(N = 500, ...)` is unaffected, and so is the output of every declaration that runs: the same columns, in the same order, with the same types, `ID` still zero-padded character, `N` still available in the data mask and still absent from the output.
 
-#### `add_level(nest = FALSE)` becomes `declare_level()`
-
-```{r, purl = FALSE}
-# old
-fabricate(
-  countries = add_level(N = 20, gdp = runif(N, 1, 10)),
-  years     = add_level(N = 10, shock = runif(N, 0, 1), nest = FALSE),
-  obs       = cross_levels(by = join_using(countries, years))
-)
-
-# new
-fabricate(
-  countries = declare_level(N = 20, gdp = runif(N, 1, 10)),
-  years     = declare_level(N = 10, shock = runif(N, 0, 1)),
-  obs       = cross_levels(.by = c("countries", "years"))
-)
-```
-
-The `nest` argument is a mode switch that makes one function do two unrelated things. Two `add_level()` calls in sequence mean nesting, which is what the default does. The `nest = FALSE` case is not adding a level to a hierarchy at all: it is declaring an independent population to be crossed later. Naming it `declare_level()` says so, and it matches the `declare_*` idiom the rest of the ecosystem already uses.
-
-`join_using()` mimics dplyr syntax without being dplyr. The replacement is a plain character vector, and the implementation underneath is `dplyr::cross_join()`, which is the right primitive for a Cartesian product.
-
-#### `link_levels()` separates the structure from the correlation
-
-```{r, purl = FALSE}
-# old
-students = link_levels(N = 500,
-  by = join_using(primary_school, secondary_school, rho = 0.5))
-
-# new
-students = link_levels(N = 500,
-  .by = c("primary_school", "secondary_school"), rho = 0.5)
-```
-
-Which levels to link is a structural question. How correlated the assignments should be is a statistical one. Burying `rho` inside `join_using()` conflates them.
-
-#### `modify_level(by =)` becomes `modify_level(.by =)`
-
-Mechanical, and consistent with the `.by` convention dplyr adopted in 1.1.0. The leading dot distinguishes a control argument from the column expressions in `...`.
-
-#### Nothing else changes, including the output
-
-The three items above are the whole list, and each one errors loudly rather than running to a different answer. The data frames themselves are unchanged: the same columns, in the same order, with the same types. `ID` is still there, still zero-padded character, and levels still name their identifier column after the level. `N` is still available in the data mask and still absent from the output, in both packages. Column sets were compared across flat fabrication, `N` alone, an `N`-valued column, two and three levels, a renamed `ID_label`, and `potential_outcomes()`, and they match in every case.
-
-`N` inside a nested level is the total number of rows the level creates, not the per-parent count, which is also what fabricatr does. `citizens = nest_level(N = 5, e = rnorm(N))` under 20 villages sees `N` of 100 and draws 100 independent values rather than drawing 5 and reusing them. A vector shorter than the level still recycles, so the book's `task = nest_level(N = 3, task = 1:3)` numbers the tasks within every subject exactly as before.
+The spellings that change, each accepted for now with a once-per-session warning that prints the call to write instead: `add_level(nest = FALSE)` becomes `declare_level()`, `cross_levels(by = join_using(A, B))` and `link_levels(by = join_using(A, B, rho = ))` become `.by = c("A", "B")` with `rho` as its own argument, and `modify_level(by = )` becomes `modify_level(.by = )`. `fabricate(100, ...)` with a positional `N` is an error; write `N = 100`.
 
 ## Porting an existing script
 
-Five greps cover every breaking change in both packages. Run them over a script and whatever they do not find needs no attention.
+Seven greps cover every breaking change in both packages. Run them over a script and whatever they do not find needs no attention.
 
 | Grep for | Replace with | Where it bites |
 |---|---|---|
+| `redesign(` over a number written inside a step | name the value above the design, or `declare_parameters()` | every redesign of a literal |
 | `inquiry = ` followed by an object | `inquiry = "ATE"` | any estimator linked to an estimand |
-| `make_groups` | `simulate_design() \|> group_by() \|> diagnose_design()` | subgroup diagnosis |
-| `nest = FALSE` | `declare_level()` | cross-classified designs |
-| `join_using` | `.by = c("A", "B")` | `cross_levels()`, `link_levels()` |
-| `modify_level(by =` | `modify_level(.by =` | grouped column construction |
+| `make_groups`, `add_grouping_variables` | `simulate_design() \|> group_by() \|> diagnose_design()` | subgroup diagnosis |
+| `redesign(design = `, `expand_design(designer = `, `prefix = ` | `redesign(d, ...)`, `expand_design(f, ...)` | named first arguments |
+| `draw_data(` with `data =`, `start =` or `end =` | `get_estimates(design, data)`, `design[i:j]` | partial runs |
+| `nest = FALSE`, `join_using`, `modify_level(by =` | `declare_level()`, `.by = c("A", "B")`, `.by =` | multilevel fabrication |
+| `fabricate(<number>,` | `fabricate(N = <number>,` | positional `N` |
 
-Nothing on that list fails quietly. Each one now stops with an error naming its replacement, which is the property that matters when you are porting someone else's code and cannot check every number by hand.
+Every row fails loudly. The DeclareDesign rows stop with an error naming the replacement, and the fabricatr rows warn once and run, which is the property that matters when you are porting someone else's code and cannot check every number by hand.
 
-Two more greps are worth running for a different reason. `insert_step`, `delete_step`, and `replace_step` still work but warn, so a script using them keeps running while you decide whether to rebuild the design instead. `compare_designs()` and `print_code()` stop outright, because neither is implemented; `compare_diagnoses()` is implemented and needs no change.
+Two things do not fail at all, and are the ones to check by eye: the `estimand` column and the column order of every estimates table, and `insert_step()`, `delete_step()` and `replace_step()`, which run with a deprecation warning. `compare_designs()` and `print_code()` stop outright.
 
 ## What is new
+
+### `declare_parameters()` and `declare_notes()`
+
+A parameter is a value a caller may set; a note is a quantity the design works out. `declare_parameters()` names the first, `declare_notes()` the second, and `redesign()` reaches only the first.
+
+```{r}
+design <-
+  declare_parameters(m_arms = 3, n_units = 300) +
+  declare_notes(conditions = seq_len(m_arms)) +
+  declare_model(N = n_units, U = rnorm(N)) +
+  declare_assignment(Z = complete_ra(N, conditions = conditions)) +
+  ...
+
+design_parameters(design)
+redesign(design, m_arms = c(2, 3, 4))
+```
+
+A declared parameter is bound for every step after it and takes precedence over a workspace binding of the same name, including one read through a helper function. It is evaluated once, when the design is built, so `declare_parameters(u = rnorm(1))` fixes one number for the life of the design; put `set.seed()` above the declaration, not above `draw_data()`, if that number is to be reproducible. A note is evaluated at its own position on every run, so it can read the data (`declare_notes(tallest = max(Y))` after a model step) and it survives a sampling step that destroys what it was computed from.
+
+### A design is a value
+
+A design carries the objects its expressions read: helper functions, data frames, the `tau` above. It therefore survives `saveRDS()` and a fresh session, reaches a parallel worker, and does not change meaning when an unrelated console variable is edited. 1.x designs were live views onto the environment they were written in, which is what made issue #293 possible.
 
 ### Step-level `draws`
 
 Every step takes a `draws` argument. When a step declares `draws = k`, it fans out `k` independent times, and every step downstream inherits and multiplies those paths.
 
-```{r, purl = FALSE}
+```{r}
 design <-
   declare_model(N = 500, potential_outcomes(Y ~ tau * Z + rnorm(N)), draws = 100) +
   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
@@ -272,102 +274,71 @@ design <-
 diagnosis <- diagnose_design(design)
 ```
 
-The declared draws define the simulation plan, so no `sims` argument is needed. The simulations table gains one column per fan-out step: `model_draw` runs 1 to 100 and `assignment_draw` runs 1 to 50 within each. Each population carries its own realized estimand, and the estimates drawn within it are matched to that estimand rather than to a pooled average.
-
-The distinction the fan-out makes available is the one between sampling variability and design variability. A conventional `sims = 500` draws a new population, a new assignment, and a new outcome on every pass, and the three sources are then inseparable.
+The declared draws define the simulation plan, so no `sims` argument is needed. The simulations table gains one column per fan-out step: `model_draw` runs 1 to 100 and `assignment_draw` runs 1 to 50 within each. Each population carries its own realized estimand, and the estimates drawn within it are matched to that estimand rather than to a pooled average. Steps upstream of the first fan-out run once and stay fixed, which is what "hold the population fixed and redraw the assignment" means.
 
 ### Variance decomposition
 
 When a design has declared draws, the diagnosis carries an extra slot:
 
-```{r, purl = FALSE}
+```{r}
 diagnosis$variance_decomposition
 ```
 
-Each row is one per-simulation quantity (`estimate`, `p.value`, `std.error`, `statistic` by default) and each column is one draw level, named after the step that produced it. `var_model` is the between-population variance, `var_assignment` is the variance across randomizations within a fixed population, and `var_residual` is what remains inside a single (population, assignment) cell. The `frac_` columns normalize the components so they sum to 1.
-
-The reading is direct: `frac_model` of 0.79 says that 79 percent of the variability in the estimate traces to which population was drawn rather than to which randomization was realized. Getting the same answer out of the original DeclareDesign means simulating once per population, binding the results, and computing the between- and within-group variances by hand.
+Each row is one per-simulation quantity (`estimate`, `p.value`, `std.error`, `statistic` by default) and each column is one draw level, named after the step that produced it. `var_model` is the between-population variance, `var_assignment` is the variance across randomizations within a fixed population, and `var_residual` is what remains inside a single (population, assignment) cell. The `frac_` columns normalize the components so they sum to 1: `frac_model` of 0.79 says that 79 percent of the variability in the estimate traces to which population was drawn rather than to which randomization was realized.
 
 ### Parallel execution
 
-```{r, purl = FALSE}
+```{r}
 future::plan(future::multisession, workers = 4)
 simulate_design(design, sims = 2000)
 future::plan(future::sequential)
 ```
 
-No other change is needed. `simulate_design()` uses `furrr::future_map` when the active plan is parallel and `purrr::map` when it is not, so the sequential path pays no overhead. Random number generation on workers uses L'Ecuyer-CMRG streams, and the packages attached in your session are attached on each worker.
+No other change is needed. Every draw runs on its own L'Ecuyer-CMRG random-number stream whichever plan is active, so `set.seed(1)` before the call gives the same table under `plan(sequential)` and `plan(multisession)`, nested draws included. The packages attached in your session are attached on each worker. The seeds are not 1.x's, so a seed carried over from a 1.x script reproduces a 1.x table only under 1.x. The bootstrap inside `diagnose_design()` runs in the main process; it is one grouped `summarize()` over the stacked replicates and is not where the time goes.
+
+### Progress
+
+`simulate_design(design, progress = TRUE)` shows a bar for that call. The better habit is `progressr::handlers(global = TRUE)` once per session, after which every call reports, in the console, in a Shiny app or from inside parallel workers, through whatever handler you chose. The package signals progress and never renders it, so with no handler it prints nothing.
+
+### Estimator arguments pass as written
+
+`declare_estimator()` and `declare_step()` hand their arguments to `.method` or the handler as written rather than pre-evaluated against the data, so a method that does its own non-standard evaluation gets what it expects: `metafor::rma.uni` (issue #463), `tidyr::pivot_wider` as a `declare_step()` handler with `id_cols = pair`, and a helper that reads a bare column name. A plain function taking values works as before, because `.method` is called with the data and the expressions are evaluated where the method evaluates them.
 
 ## Speed
 
-All timings below are medians on an Apple M4 Pro under R 4.6.0, comparing DeclareDesign 1.1.1 against 2.0.0 on the two-arm design declared above (N = 600). The last row uses a cluster-randomized design instead: 30 villages of 20 citizens, ICC 0.2, cluster-robust standard errors.
+All timings are medians of five runs on an Apple M4 Pro under R 4.6.0, comparing DeclareDesign 1.1.1 with fabricatr 1.0.2 against DeclareDesign 2.0.0 with fabricatr 2.0.0, on the two-arm design declared above (N = 600, `lm_robust`), measured on the 2026-08-24 build.
 
 | Operation | 1.1.1 | 2.0.0 | Ratio |
 |---|---:|---:|---:|
-| `simulate_design(sims = 500)` | 1.06 s | 0.89 s | 1.19x |
-| `diagnose_design(sims = 500, bootstrap_sims = 200)` | 1.40 s | 0.97 s | 1.45x |
-| `redesign()` over 3 values, then diagnose each | 4.26 s | 2.80 s | 1.52x |
-| Multilevel design, same diagnosis | 1.79 s | 1.26 s | 1.42x |
+| `simulate_design(sims = 500)` | 0.97 s | 0.84 s | 1.15x |
+| `diagnose_design(sims = 500, bootstrap_sims = 200)` | 1.29 s | 0.96 s | 1.34x |
+| `simulate_design(sims = 2000)`, four workers | | 1.07 s against 3.37 s sequential | 3.2x |
 
-On that multilevel design the two packages also agree on what they report, which is the check worth running whenever a rewrite claims to be a replacement. Across 500 simulations: bias -0.010 against 0.015, SD of the estimate 0.197 against 0.194, power 0.294 against 0.304, coverage 0.968 against 0.954.
+Parallelism is the larger lever. The sequential gain is concentrated in the plumbing, because model fitting is the same `lm_robust()` call in both packages and takes more than half of each simulation; on this design the estimator step is about 1 ms of a 1.7 ms draw. The bootstrap stacks all `B` resampled tables with a `.boot_id` column and runs one grouped `summarize()` instead of `B` separate calls, which is where the diagnosis row's extra gain comes from. Speeding up the estimator itself is what estimatr 2.0 is for.
 
-The end-to-end gain comes from three places. `purrr::map` replaces a custom simulation loop. The bootstrap stacks all `B` resampled tables with a `.boot_id` column and runs one grouped `summarize()` instead of `B` separate calls, which amortizes dplyr's per-call evaluation overhead. `redesign()` operates on the declared design, so no designer function has to be re-evaluated per parameter value.
-
-Where the time actually goes is worth seeing, because it bounds the gain:
-
-| Step, per simulation | 1.1.1 | 2.0.0 |
-|---|---:|---:|
-| `declare_model` | 0.230 ms | 0.120 ms |
-| `declare_inquiry` | 0.060 ms | 0.185 ms |
-| `declare_assignment` | 0.240 ms | 0.150 ms |
-| `declare_measurement` | 0.185 ms | 0.090 ms |
-| `declare_estimator` (`lm_robust`) | 1.015 ms | 0.965 ms |
-
-Data fabrication is roughly twice as fast, and the inquiry step is roughly three times slower, which is a known and unfixed cost of evaluating each estimand against a copied list. Both of those are small next to the estimator, which is the same `lm_robust()` call in both packages and takes more than half the total. The plumbing is where a rewrite can win, and the plumbing is under half of a typical design's cost. Speeding up the other half is what estimatr 2.0 is for.
-
-Parallelism is the larger lever. On the same design, 2,000 simulations take 3.59 s sequentially and 1.01 s on four workers, a factor of 3.6.
+On a clustered design (30 villages of 20 citizens, ICC 0.2, cluster-robust standard errors) the two packages agree on what they report, which is the check worth running whenever a rewrite claims to be a replacement. Across 500 simulations: bias -0.010 against 0.015, SD of the estimate 0.197 against 0.194, power 0.294 against 0.304, coverage 0.968 against 0.954.
 
 ## Why rewrite at all
 
-The original packages carry thousands of lines solving problems the tidyverse already solves.
+The original packages carry machinery solving problems the tidyverse already solves.
 
-fabricatr's workspace system exists to answer one question: how does a column defined early in a `fabricate()` call become visible to a column defined later? Its answer is a UUID-keyed environment of data frames, an "active df" pointer, `rlang::call_modify` injection, and `dynGet("N")` walking the dynamic scope to find the row count. The tidyverse answer is a named list used as a data mask and a loop over `rlang::eval_tidy`. fabricatr 2.0 is about 600 lines against roughly 3,200.
+fabricatr's workspace system exists to answer one question: how does a column defined early in a `fabricate()` call become visible to a column defined later? Its answer is a UUID-keyed environment of data frames, an "active df" pointer, `rlang::call_modify` injection, and `dynGet("N")` walking the dynamic scope to find the row count. The tidyverse answer is a named list used as a data mask and a loop over `rlang::eval_tidy`. fabricatr 2.0 is about 2,100 lines of R against 3,193.
 
-DeclareDesign's complexity concentrates in three places, and each has a tidyverse replacement. The simulation loop becomes `purrr::map`, or `furrr::future_map` when a parallel plan is set. Diagnosis becomes one `group_by() |> summarize()`. Parameter substitution in `redesign()` becomes environment cloning in about 40 lines, replacing a walk over the design's quosure graph.
+DeclareDesign's complexity concentrates in three places, and each has a tidyverse replacement. The simulation loop is `purrr::map2`, or `furrr::future_map2` when a parallel plan is set, over one RNG stream per draw. Diagnosis is one `group_by() |> summarize()`. Parameter substitution in `redesign()` is environment cloning: a quosure already carries the environment it was captured in, so changing a parameter is cloning that environment and rebinding one name, and the same operation is what `declare_parameters()` does at construction and `declare_notes()` does at run time. A `design_step` is a `function(data)` with attributes, and a `design` is a named list of them.
 
-A `design_step` is a `function(data)` with attributes, and a `design` is a named list of them. No custom non-standard-evaluation machinery is required, because quosures already carry the environments they were captured in. The whole of 2.0 is about 2,100 lines against roughly 5,400.
-
-The point of the reduction is not the line count. It is that the remaining code is code a reader can hold in their head, written in idioms they already know from dplyr and purrr, which is the difference between a package two people can maintain and a package two people can hand to someone else.
+DeclareDesign 2.0 is 6,153 lines of R against 1.1.1's 7,036, so the line count is not the argument. The argument is what the lines are spent on. In 1.x the count goes to the custom evaluation machinery; in 2.0 it goes to capturing what a design reads so that it is a value, to the checks that turn silent failures into messages, and to the features under [What is new]. The remaining code is written in idioms a reader already knows from dplyr, purrr and rlang, which is the difference between a package two people can maintain and a package two people can hand to someone else.
 
 ## Current status
 
-The rewrite is not finished, and the honest inventory is short enough to print.
+The rewrite is pre-release. Nothing goes to CRAN until fabricatr 2.0 and estimatr 2.0 are accepted, since DeclareDesign depends on both.
 
-Seven defects were found in an audit and fixed. Two of them were the kind worth describing, because they say something about where to keep looking.
+**Coverage the claims rest on.** 877 assertions in the package's own suite, 0 failures. The 81 book declarations are `tests/testthat/test-book-designs.R`, each asserting that the declaration builds, runs, and returns estimates that are not all `NA`; the file skips on CRAN because it needs a dozen modelling packages. All 191 code chunks of the book's fifteen code-bearing chapters have been run in order under 2.0: 173 ran without error, two are `install.packages()` calls, one chapter halts where it attaches the CRAN DesignLibrary over 2.0, and the remaining errors are names the book defines outside any displayed chunk. The designs of `macartan/ResearchDesigns` run under 2.0, 494 assertions with 0 failures, and a no-op redesign of each of their 194 parameters changes nothing. `R CMD check --as-cran` is clean apart from one NOTE for the `Remotes:` field, which stays until the dependencies ship.
 
-The multilevel fabrication path evaluated a stochastic expression once inside a nested level and repeated it across every parent group, so `citizens = add_level(N = 20, e = rnorm(N))` handed all 30 villages the identical 20 residuals. Every clustered design written in that idiom generated data whose within-cluster pattern was the same in each cluster, and reported power of 0.515 where the correct answer is 0.30. Nothing errored. The path had no test in either package, which is why a defect that changes every clustered result survived a suite of 187 tests, and it is the reason the multilevel agreement check now appears above.
+**Of the nine book declarations not checked in**, four use a value the book defines outside any code chunk, one needs the `interference` package, which is not on CRAN, one fails identically under 1.1.1, and three passed tidyselect arguments through `declare_step()`, which now passes arguments as written; they have not been re-added to the suite.
 
-Declaring `draws` on a step downstream of `declare_inquiry()` skipped the inquiry entirely and redrew the population on every fan-out, so "hold the population fixed and redraw the assignment 50 times" produced 50 populations and no estimand. Steps upstream of the first fan-out now run once and stay fixed, which is what the feature meant in the first place.
+**Fixed in the 2026-08-24 review**, each with a regression test: a declared parameter read through a helper function was ignored; `label_estimator()` of a workspace function failed on every parallel draw; sequential and parallel runs gave different numbers for the same seed; `make_groups` and `future.seed` were accepted and silently dropped; a misspelled `inquiry` label was silent; a sampling step with no `S` column kept every row without a word; an error inside a step did not say which step; `insert_step()` had its `before` and `after` arguments in the wrong order.
 
-The remaining five: the bootstrap now tolerates diagnosands that cannot be computed, so a design with no inquiry no longer errors at the default `bootstrap_sims = 100`; `declare_model(N = 500)` with no columns produces 500 rows; a legacy `model =` argument is read as `.method` with a deprecation warning instead of being forwarded into the fitting function; `declare_step(handler = fabricatr::fabricate)` works alongside the bare spelling; and the documented priority of `sims` against `draws` now matches what the code does.
-
-Both packages pass `R CMD check` with 0 errors, 0 warnings, and 0 notes.
-
-The compatibility claim is no longer a claim. Every design declaration in the book was scraped from the published text and turned into a test that declares it and then runs it, and an estimator returning nothing but NA counts as a failure.
-
-The book contains 90 design declarations. **81 of them run, and 78 run with their text unchanged.** Three need the one substitution described above, `add_level(nest = FALSE)` becoming `declare_level()` and `cross_levels(by = join_using(A, B))` becoming `.by = c("A", "B")`, which is the same edit in each case and which the package now demands with an error naming the replacement.
-
-Of the nine that do not run, five are not evidence about compatibility either way: four use a value the book defines outside any code chunk, so the declaration cannot be reconstructed from the published text, and one needs the `interference` package, which is not on CRAN. A sixth fails in exactly the same way under DeclareDesign 1.1.1, so it is not a difference between the two packages. That leaves three, and they share one cause.
-
-Those three pass arguments to a fitting function that does its own non-standard evaluation: `rma_helper` reads `yi = estimate` as a column name, and `pivot_wider` and `rdrobust_helper` use tidyselect. 2.0 evaluates estimator arguments against the data before handing them over, so those methods receive values where they expected expressions. The meta-analysis design is the one to watch, because it does not error: it returns a full table of NA estimates where 1.1.1 returns real ones. That is the worst failure a design tool can have, and it is on the list below rather than buried here.
-
-It is also, as it turns out, one side of an argument the project has been having with itself since 2021. See [How estimator arguments are passed] below.
-
-One smaller gap, for completeness: `summary()` on a design prints the step list and the parameters `redesign()` can reach, not the original's step-by-step display of the variables each step adds or modifies.
-
-Four things reported missing in the first round of review are now in: `select_diagnosands()` takes diagnosand names and builds the set, as in DeclareDesign, and reaches the extended library rather than only the seven defaults; `compare_diagnoses()` is implemented; `summary()` lists the design's parameters; and `redesign()` warns rather than silently doing nothing when asked for a change to a name the design does not use. Function-valued parameters survive `redesign()` in both the value it substitutes and the column it writes into the simulations table.
-
-The short version for anyone deciding whether to switch: of the 84 book declarations that can be tested and that work in DeclareDesign, 81 work here, 78 of them without touching a character, three after one mechanical substitution, and three fail for a single reason, described next.
+**Open.** `summary()` on a design prints the step list and the parameters and not 1.x's step-by-step display of the variables each step adds. `expand_design()` and `redesign()` disagree about a stochastic declared parameter: the first draws it afresh per design, the second shares one draw. `library(DesignLibrary)` attaches CRAN DeclareDesign 1.1.1 over 2.0 until DesignLibrary is released against 2.0, and the result is a hybrid that fails on the next declaration. Whether bare `print(design)` should carry the parameter table, as it does now, or leave it to `summary()`, is undecided.
 
 ### Open issues in DeclareDesign
 
@@ -375,7 +346,7 @@ Every open issue on the DeclareDesign tracker was run against both packages. The
 
 **Seven close.** Each of these errors or misbehaves in DeclareDesign 1.1.1 and works here.
 
-| Issue | What breaks in DeclareDesign |
+| Issue | What breaks in DeclareDesign 1.1.1 |
 |---|---|
 | [#463](https://github.com/DeclareDesign/DeclareDesign/issues/463) | `rma.uni` as the estimator's method: quosures reach a function that uses base non-standard evaluation |
 | [#456](https://github.com/DeclareDesign/DeclareDesign/issues/456) | `declare_estimator(x ~ 1, model = lm, subset = x > 1)` errors, though it works with `lm_robust` |
@@ -385,11 +356,11 @@ Every open issue on the DeclareDesign tracker was run against both packages. The
 | [#482](https://github.com/DeclareDesign/DeclareDesign/issues/482) | a design with a test but no estimator cannot be diagnosed after `redesign()` |
 | [#509](https://github.com/DeclareDesign/DeclareDesign/issues/509) | a recursive helper function in the calling environment overflows the node stack |
 
-Six of the seven are the same cause seen from different angles, which is the useful thing the exercise showed. DeclareDesign splices an estimator's arguments into the method call as quosures, so every method not written for rlang receives an object it cannot use.
+Six of the seven are the same cause seen from different angles. 1.x splices an estimator's arguments into the method call as quosures, so every method not written for rlang receives an object it cannot use.
 
-**One regressed and has since been fixed.** [#293](https://github.com/DeclareDesign/DeclareDesign/issues/293): a helper function whose own environment holds a parameter used to survive deletion of that parameter in DeclareDesign and not here. Both now return 2.
+**Two feature requests are now implemented.** [#385](https://github.com/DeclareDesign/DeclareDesign/issues/385) asked for an estimator that errors to produce a row rather than abort the simulation; see [An estimator that fails on one draw is recorded, not fatal]. [#293](https://github.com/DeclareDesign/DeclareDesign/issues/293), a helper function whose environment holds a parameter surviving deletion of that parameter, follows from a design being a value:
 
-```{r, purl = FALSE}
+```{r}
 m <- 2
 f <- function(x) m * x
 design <- declare_model(N = 2, X1 = f(1)) + NULL
@@ -397,20 +368,4 @@ rm(m)
 draw_data(design)
 ```
 
-A design now carries the objects its expressions read, helper functions among them, which is also what lets a design survive `saveRDS()` and reach a parallel worker.
-
-**Two are feature requests neither package implements.** [#385](https://github.com/DeclareDesign/DeclareDesign/issues/385) asks for an estimator that errors to produce an `error = TRUE` row rather than abort the simulation, which matters for any MLE or MCMC procedure that fails on a few draws. 2.0 already does exactly that for diagnosands, so the pattern is available to reuse. [#497](https://github.com/DeclareDesign/DeclareDesign/issues/497) asks for `draw_data(design, theta = 0.5)`; both packages require going through `redesign()`, which works in both.
-
-### How estimator arguments are passed
-
-The three book designs that fail here, and issue #463, and issue #456, are all the same question, and the two packages have answered it in opposite directions.
-
-DeclareDesign passes **expressions**. A method that reads its arguments as column names, like the `rma_helper` in `rdss`, works. `rma.uni` receives a quosure where it expected a vector and fails, which is #463.
-
-2.0 passes **values**. `rma.uni` works and #463 closes. `rma_helper` receives a numeric vector where it expected a name to look up, and returns NA.
-
-Neither convention serves both. Values are what an ordinary R function wants. Expressions are what tidyselect wants, and what any helper that resolves a column name wants. Two of the three book designs that fail here are `rdss` shims written specifically to work around #463 under the old convention, which is worth knowing before reading their failure as a verdict on the rewrite.
-
-Guessing per call site, which is what both packages currently do, is how a design ends up returning a table of NA without complaint. The proposal is an explicit argument on `declare_estimator()` and `declare_step()` naming which convention that call uses, defaulting to values. The choice then appears where it is made, and `rdss` gets a migration path rather than a breakage: `rma_helper` keeps working under the flag, and `rma.uni` works without it.
-
-That decision is not ours alone to take, which is the main reason this vignette exists.
+**One is not.** [#497](https://github.com/DeclareDesign/DeclareDesign/issues/497) asks for `draw_data(design, theta = 0.5)`; both packages go through `redesign()`.
