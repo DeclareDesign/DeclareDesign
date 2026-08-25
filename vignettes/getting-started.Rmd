@@ -102,6 +102,6 @@ Power rises with the sample size while bias stays where it was. Choosing a sampl
 
 ## A design is code
 
-The declaration above is the whole design: the model, the inquiry, the data strategy and the answer strategy, in one object you can run, diagnose, change, and send to a collaborator. `cite_design()` gives the citation, `print_code()` gives the code back, and `?DeclareDesign` lists the verbs.
+The declaration above is the whole design: the model, the inquiry, the data strategy and the answer strategy, in one object you can run, diagnose, change, and send to a collaborator. `cite_design()` gives the citation, the script that built it is the code, and `?DeclareDesign` lists the verbs.
 
 The book at <https://book.declaredesign.org> works through the same steps at length, and its library of designs covers the common ones.
