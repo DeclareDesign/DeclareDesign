@@ -230,7 +230,7 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set,
 
   # Stack all B resampled datasets with a .boot_id tag, then do ONE grouped
   # summarize over the whole thing. This amortises dplyr's per-call NSE
-  # overhead across all replicates at once -- ~5x faster than B separate
+  # overhead across all replicates at once, about 5x faster than B separate
   # summarize() calls.
   all_boot <- purrr::map(seq_len(B), function(b) {
     drawn  <- sample(unit_ids, length(unit_ids), replace = TRUE)
@@ -350,7 +350,7 @@ diagnose_designs <- diagnose_design
 diagnose_simulations <- function(simulations_df,
                                  diagnosands = NULL,
                                  bootstrap_sims = 100) {
-  # Honour group_by() applied upstream -- this is the make_groups replacement
+  # Honour group_by() applied upstream; this is the make_groups replacement
   extra_groups <- character(0)
   if (inherits(simulations_df, "grouped_df")) {
     extra_groups   <- dplyr::group_vars(simulations_df)
