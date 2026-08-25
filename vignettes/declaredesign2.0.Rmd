@@ -56,7 +56,7 @@ design <-
 diagnose_design(design, sims = 500)
 ```
 
-Everything about that block carries over: the `+` operator, expressions that see the columns declared earlier in the same step, `N` available inside the data mask, `potential_outcomes()` and `reveal_outcomes()`, formula-first estimators with `.method =` and `.summary =`, `term =`, and the `inquiry` argument that links an estimator to its estimand. Writing the potential outcomes out by hand (`Y_Z_0 = U, Y_Z_1 = U + 0.3`) and revealing them with an arithmetic expression works just as well. `draw_data()`, `draw_estimands()`, `draw_estimates()`, `run_design()`, `simulate_design()`, `diagnose_design()`, `diagnose_designs()`, `reshape_diagnosis()`, `tidy()`, `get_diagnosands()`, `get_simulations()`, `declare_test()`, `declare_step()`, `declare_diagnosands()`, `set_diagnosands()`, `label_estimator()` and `expand_design()` all keep their names and what they return, and the book's designs are the evidence.
+Everything about that block carries over: the `+` operator, expressions that see the columns declared earlier in the same step, `N` available inside the data mask, `potential_outcomes()` and `reveal_outcomes()`, formula-first estimators with `.method =` and `.summary =`, `term =`, and the `inquiry` argument that links an estimator to its estimand. Writing the potential outcomes out by hand (`Y_Z_0 = U, Y_Z_1 = U + 0.3`) and revealing them with an arithmetic expression works just as well. `draw_data()`, `draw_estimands()`, `draw_estimates()`, `run_design()`, `simulate_design()`, `diagnose_design()`, `diagnose_designs()`, `reshape_diagnosis()`, `tidy()`, `get_diagnosands()`, `get_simulations()`, `declare_test()`, `declare_step()`, `declare_diagnosands()`, `set_diagnosands()` and `label_estimator()` all keep their names and what they return, and the book's designs are the evidence.
 
 The book's way of redesigning is the 2.0 way. A value named above the design is a parameter of it:
 
@@ -69,7 +69,7 @@ designs <- redesign(design, tau = c(0.1, 0.3, 0.5))
 diagnose_design(designs, sims = 500)
 ```
 
-`tau` is a name the model step reads. `redesign()` finds it, rebinds it in a copy of the environment the expression was written in, and the parameter travels forward: it appears as a column in the simulations table and as a grouping variable in the diagnosands table, so custom diagnosands can refer to it directly. A designer function's argument is the same thing, and `expand_design()` works as before.
+`tau` is a name the model step reads. `redesign()` finds it, rebinds it in a copy of the environment the expression was written in, and the parameter travels forward: it appears as a column in the simulations table and as a grouping variable in the diagnosands table, so custom diagnosands can refer to it directly. A designer function's argument is the same thing, so `redesign(designer(), tau = c(0.1, 0.3))` sweeps a designer, and `expand_design()` is deprecated in its favour.
 
 Printing a design shows the calls that declared it, as in 1.x, then the names `redesign()` can reach, with the value each currently holds, its kind, and the steps that would respond to a change. Asking for a change to a name that is not one of them warns instead of silently returning the design you started with:
 
@@ -168,7 +168,7 @@ You can also filter simulations before diagnosing, bind simulations from separat
 
 #### Argument names that moved out of the way of your parameters
 
-`redesign()` and `expand_design()` take `.design` and `.designer`, with `.expand` after the dots. Everything else in those calls is a parameter of *your* design, and a plain `design` partially matched a parameter named `d`, `de` or `des` and swallowed it; `.method` and `.summary` in `declare_estimator()` follow the same convention. `redesign(design = d, N = 10)` therefore errors; write `redesign(d, N = 10)`. `expand_design()`'s `prefix` argument went with it: the designs are named `design_1`, `design_2` and so on.
+`redesign()` takes `.design`, with `.expand` after the dots. Everything else in those calls is a parameter of *your* design, and a plain `design` partially matched a parameter named `d`, `de` or `des` and swallowed it; `.method` and `.summary` in `declare_estimator()` follow the same convention. `redesign(design = d, N = 10)` therefore errors; write `redesign(d, N = 10)`. The designs a sweep returns are named `design_1`, `design_2` and so on.
 
 `label_estimator(fn = )` and `label_test(fn = )` are `label_estimator(.method = )`; `set_diagnosands(x = )` is `set_diagnosands(design = )`. Each is an error if written the old way.
 
@@ -179,6 +179,10 @@ You can also filter simulations before diagnosing, bind simulations from separat
 #### `reshape_diagnosis()` reshapes; select columns afterwards
 
 `reshape_diagnosis(select = , exclude = )` are gone. The result is a tibble; `select()` it.
+
+#### `expand_design()` is deprecated
+
+A designer's argument is a name the design reads, so `redesign(designer(), N = c(100, 200))` does what `expand_design(designer, N = c(100, 200))` did, with one verb instead of two. `expand_design()` still works and warns once per session. The one thing it did that `redesign()` cannot is rebuild a design whose shape depends on an argument (a designer that adds a step when `blocked = TRUE`); call the designer with each value for that.
 
 #### Step-modification functions are deprecated
 
@@ -227,14 +231,14 @@ Seven greps cover every breaking change in both packages. Run them over a script
 | `redesign(` over a number written inside a step | name the value above the design, or `declare_parameters()` | every redesign of a literal |
 | `inquiry = ` followed by an object | `inquiry = "ATE"` | any estimator linked to an estimand |
 | `make_groups`, `add_grouping_variables` | `simulate_design() \|> group_by() \|> diagnose_design()` | subgroup diagnosis |
-| `redesign(design = `, `expand_design(designer = `, `prefix = ` | `redesign(d, ...)`, `expand_design(f, ...)` | named first arguments |
+| `redesign(design = `, `expand_design(` | `redesign(d, ...)`, `redesign(designer(), ...)` | named first argument; deprecated verb |
 | `draw_data(` with `data =`, `start =` or `end =` | `get_estimates(design, data)`, `design[i:j]` | partial runs |
 | `nest = FALSE`, `join_using`, `modify_level(by =` | `declare_level()`, `.by = c("A", "B")`, `.by =` | multilevel fabrication |
 | `fabricate(<number>,` | `fabricate(N = <number>,` | positional `N` |
 
 Every row fails loudly. The DeclareDesign rows stop with an error naming the replacement, and the fabricatr rows warn once and run, which is the property that matters when you are porting someone else's code and cannot check every number by hand.
 
-Two things do not fail at all, and are the ones to check by eye: the `estimand` column and the column order of every estimates table, and `insert_step()`, `delete_step()` and `replace_step()`, which run with a deprecation warning. `compare_designs()` and `print_code()` stop outright.
+Two things do not fail at all, and are the ones to check by eye: the `estimand` column and the column order of every estimates table, and the deprecated verbs (`expand_design()`, `insert_step()`, `delete_step()`, `replace_step()`), which run with a warning. `compare_designs()` and `print_code()` stop outright.
 
 ## What is new
 
@@ -352,7 +356,7 @@ The rewrite is pre-release. Nothing goes to CRAN until fabricatr 2.0 and estimat
 
 **Fixed in the 2026-08-24 review**, each with a regression test: a declared parameter read through a helper function was ignored; `label_estimator()` of a workspace function failed on every parallel draw; sequential and parallel runs gave different numbers for the same seed; `make_groups` and `future.seed` were accepted and silently dropped; a misspelled `inquiry` label was silent; a sampling step with no `S` column kept every row without a word; an error inside a step did not say which step; `insert_step()` had its `before` and `after` arguments in the wrong order.
 
-**Open.** `expand_design()` and `redesign()` disagree about a stochastic declared parameter: the first draws it afresh per design, the second shares one draw. `library(DesignLibrary)` attaches CRAN DeclareDesign 1.1.1 over 2.0 until DesignLibrary is released against 2.0, and the result is a hybrid that fails on the next declaration.
+**Open.** `library(DesignLibrary)` attaches CRAN DeclareDesign 1.1.1 over 2.0 until DesignLibrary is released against 2.0, and the result is a hybrid that fails on the next declaration.
 
 ### Open issues in DeclareDesign
 

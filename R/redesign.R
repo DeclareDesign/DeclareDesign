@@ -762,19 +762,39 @@ extract_param_row <- function(param_df, i) {
   out
 }
 
-#' Build a family of designs from a designer function
+#' Build a family of designs from a designer function (deprecated)
+#'
+#' Deprecated in 2.0. Call the designer once and [redesign()] the result:
+#' `redesign(designer(), N = c(100, 200))` does what
+#' `expand_design(designer, N = c(100, 200))` did, and reaches the same
+#' names, since a designer's argument is a name the design reads.
+#' `expand_design()` still works and warns once per session.
+#'
+#' The one thing it did that `redesign()` cannot is rebuild a design whose
+#' *shape* depends on an argument, such as a designer that adds a step when
+#' `blocked = TRUE`. For that, call the designer with each value.
 #'
 #' @family modifying a design
-#' @param .designer A function returning a `design`. Dotted for the same
-#'   reason as [redesign()]'s `.design`.
+#' @param .designer A function returning a `design`.
 #' @param ... Named parameter values to vary.
-#' @param .expand If `TRUE`, expand the grid; if `FALSE`, zip values.
-#' @return A single design or a list of designs.
+#' @param .expand If `TRUE`, expand the grid; if `FALSE`, zip parallel
+#'   vectors.
+#' @return A `design` or a named list of designs, as [redesign()] returns.
 #' @export
 #' @examples
-#' designer <- function(N) declare_model(N = N, Y = rnorm(N))
-#' expand_design(designer, N = c(10, 20))
+#' designer <- function(N = 50) {
+#'   declare_model(N = N, Y = rnorm(N)) + declare_inquiry(mu = mean(Y))
+#' }
+#' # deprecated
+#' designs <- suppressWarnings(expand_design(designer, N = c(10, 20)))
+#' # instead
+#' designs <- redesign(designer(), N = c(10, 20))
+#' length(designs)
 expand_design <- function(.designer, ..., .expand = TRUE) {
+  rlang::warn(c(
+    "`expand_design()` is deprecated in DeclareDesign 2.0.",
+    i = "Call the designer and redesign the result: `redesign(designer(), N = c(100, 200))`."
+  ), .frequency = "once", .frequency_id = "expand_design")
   new_params <- list(...)
   param_df <- param_grid(new_params, expand = .expand)
   designs <- purrr::map(seq_len(nrow(param_df)), function(i) {

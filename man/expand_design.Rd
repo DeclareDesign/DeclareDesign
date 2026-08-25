@@ -2,27 +2,42 @@
 % Please edit documentation in R/redesign.R
 \name{expand_design}
 \alias{expand_design}
-\title{Build a family of designs from a designer function}
+\title{Build a family of designs from a designer function (deprecated)}
 \usage{
 expand_design(.designer, ..., .expand = TRUE)
 }
 \arguments{
-\item{.designer}{A function returning a \code{design}. Dotted for the same
-reason as \code{\link[=redesign]{redesign()}}'s \code{.design}.}
+\item{.designer}{A function returning a \code{design}.}
 
 \item{...}{Named parameter values to vary.}
 
-\item{.expand}{If \code{TRUE}, expand the grid; if \code{FALSE}, zip values.}
+\item{.expand}{If \code{TRUE}, expand the grid; if \code{FALSE}, zip parallel
+vectors.}
 }
 \value{
-A single design or a list of designs.
+A \code{design} or a named list of designs, as \code{\link[=redesign]{redesign()}} returns.
 }
 \description{
-Build a family of designs from a designer function
+Deprecated in 2.0. Call the designer once and \code{\link[=redesign]{redesign()}} the result:
+\code{redesign(designer(), N = c(100, 200))} does what
+\code{expand_design(designer, N = c(100, 200))} did, and reaches the same
+names, since a designer's argument is a name the design reads.
+\code{expand_design()} still works and warns once per session.
+}
+\details{
+The one thing it did that \code{redesign()} cannot is rebuild a design whose
+\emph{shape} depends on an argument, such as a designer that adds a step when
+\code{blocked = TRUE}. For that, call the designer with each value.
 }
 \examples{
-designer <- function(N) declare_model(N = N, Y = rnorm(N))
-expand_design(designer, N = c(10, 20))
+designer <- function(N = 50) {
+  declare_model(N = N, Y = rnorm(N)) + declare_inquiry(mu = mean(Y))
+}
+# deprecated
+designs <- suppressWarnings(expand_design(designer, N = c(10, 20)))
+# instead
+designs <- redesign(designer(), N = c(10, 20))
+length(designs)
 }
 \seealso{
 Other modifying a design:

@@ -145,7 +145,7 @@ test_that("expand_design varies parameters via a designer function", {
     declare_model(N = N, Y = rnorm(N)) +
       declare_inquiry(mu = mean(Y))
   }
-  designs <- expand_design(designer, N = c(10, 20, 30))
+  designs <- suppressWarnings(expand_design(designer, N = c(10, 20, 30)))
   expect_length(designs, 3L)
   expect_equal(nrow(draw_data(designs[[1]])), 10L)
   expect_equal(nrow(draw_data(designs[[3]])), 30L)

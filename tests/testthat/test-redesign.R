@@ -26,7 +26,7 @@ test_that("redesign with .expand = FALSE zips parameters", {
 
 test_that("expand_design builds a list from a designer", {
   designer <- function(N) declare_model(N = N, Y = rnorm(N))
-  fam <- expand_design(designer, N = c(10, 20))
+  fam <- suppressWarnings(expand_design(designer, N = c(10, 20)))
   expect_length(fam, 2L)
 })
 
@@ -35,8 +35,8 @@ test_that("expand_design accepts function-valued parameters in zip mode", {
     declare_model(N = N, Y = rnorm(N)) +
       declare_inquiry(inq = fn(Y))
   }
-  fam <- expand_design(designer, N = c(10, 50),
-                       fn = c(mean, median), .expand = FALSE)
+  fam <- suppressWarnings(expand_design(designer, N = c(10, 50),
+                       fn = c(mean, median), .expand = FALSE))
   expect_length(fam, 2L)
   expect_equal(nrow(draw_data(fam[[1]])), 10L)
   expect_equal(nrow(draw_data(fam[[2]])), 50L)
@@ -159,7 +159,7 @@ test_that("a parameter named d is reachable, and so are de, des, desi, desig", {
   })
   # and the same for expand_design()'s first formal
   designer <- function(d = 2) declare_model(N = d, Y = rnorm(N))
-  fam <- expand_design(designer, d = c(3, 6))
+  fam <- suppressWarnings(expand_design(designer, d = c(3, 6)))
   expect_equal(vapply(fam, function(x) nrow(draw_data(x)), integer(1)),
                c(design_1 = 3L, design_2 = 6L))
 })
@@ -414,4 +414,14 @@ test_that("a custom step's arguments stay as written through a redesign", {
     expect_equal(names(draw_data(redesign(design, k = 3))), c("pair", "A", "B"))
     expect_equal(unique(draw_data(design)$kk), NULL)
   })
+})
+
+test_that("expand_design() is deprecated and redesign() of the designer's result replaces it", {
+  designer <- function(N = 50) declare_model(N = N, Y = rnorm(N)) + declare_inquiry(mu = mean(Y))
+  rlang::reset_warning_verbosity("expand_design")
+  expect_warning(old <- expand_design(designer, N = c(10, 20)), "deprecated")
+  new <- redesign(designer(), N = c(10, 20))
+  expect_equal(length(new), 2L)
+  expect_equal(nrow(draw_data(new[[2]])), 20L)
+  expect_equal(nrow(draw_data(old[[2]])), 20L)
 })
