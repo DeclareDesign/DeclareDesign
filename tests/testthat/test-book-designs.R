@@ -10,9 +10,9 @@
 # the first draw is not a passing example, and neither is one that quietly
 # produces no estimate.
 #
-# 81 of the book's 90 design declarations run here: 78 verbatim and 3 after
+# 84 of the book's 90 design declarations run here: 81 verbatim and 3 after
 # the one mechanical substitution fabricatr requires. The remaining
-# 9 are listed at the foot of the file, with the reason for each.
+# 6 are listed at the foot of the file, with the reason for each.
 
 # Every test here skips on CRAN. The suite is large, and between them these
 # designs need a dozen modelling packages that have no place in this
@@ -2449,6 +2449,38 @@ test_that("declaration_19.2 runs (complex)", {
     expect_false(all(is.na(estimates$estimate)))
 })
 
+
+test_that("design runs (complex)", {
+  skip_unless("randomizr", "estimatr", "rdss", "metafor")
+  tau <- (c(0, 1))[[1]]
+  mu <- 0.2 # true PATE
+  tau <- 0.0 # true SD of site-level ATEs
+  design <-
+    declare_model(
+      N = 200,
+      site = 1:N,
+      std.error = pmax(0.1, abs(rnorm(N, mean = 0.8, sd = 0.5))),
+      theta = rnorm(N, mean = mu, sd = tau), # when tau = 0, theta = mu 
+      estimate = rnorm(N, mean = theta, sd = std.error)
+    ) + 
+    declare_inquiry(mu = mu, tau_sq = tau^2) + 
+    declare_estimator(
+      yi = estimate, sei = std.error, method = "REML",
+      .method = rma_helper, .summary = rma_mu_tau,
+      term = c("mu", "tau_sq"), inquiry = c("mu", "tau_sq"),
+      label = "random-effects") + 
+    declare_estimator(
+      yi = estimate, sei = std.error, method = "FE",
+      .method = rma_helper, .summary = rma_mu_tau,
+      term = c("mu", "tau_sq"), inquiry = c("mu", "tau_sq"),
+      label = "fixed-effects")
+  expect_s3_class(design, "design")
+  estimates <- draw_estimates(design)
+  expect_gt(nrow(estimates), 0)
+  if ("estimate" %in% names(estimates))
+    expect_false(all(is.na(estimates$estimate)))
+})
+
 # experimental causal ----
 
 test_that("declaration_18.1 runs (experimental causal)", {
@@ -3046,6 +3078,63 @@ test_that("declaration_17.5 runs (experimental descriptive)", {
     expect_false(all(is.na(estimates$estimate)))
 })
 
+test_that("declaration_17.6 runs (experimental descriptive)", {
+  skip_unless("randomizr", "estimatr", "tidyr")
+  deceive <- (c(TRUE, FALSE))[[1]]
+  invested <- function(a_1, a_2) {
+    u_a = (1 - a_1) * log(1 - a_1) + a_1 * log(2 * a_1)  # give a1
+    u_b = (1 - a_1) * log(2 * a_2) + a_1 * log(2 * (1 - a_2)) # give 1
+    ifelse(u_a > u_b, a_1, 1)
+  }
+  average_invested <- function(a_1) 
+    mean(sapply(seq(0, 1, .01),  invested, a_1 = a_1))
+  returned <- function(x1, a_2 = 1/3) 
+    ((2 * a_2 * x1 - (1 - a_2) * (1 - x1)) / (2 * x1)) * 
+    (x1  > (1 - a_2) / (1 + a_2))
+  average_returned <- function(a_2) 
+    mean(sapply(seq(0.01, 1, .01), returned, a_2 = a_2))
+  n_pairs <- 200
+  deceive <- FALSE
+  declaration_17.6 <-
+    
+    declare_model(N = 2 * n_pairs,
+                  a = runif(N)) +
+    
+    declare_inquiries(
+      trusting = mean(sapply(a, average_invested)),
+      trustworthy = mean(sapply(a, average_returned))) +
+  
+    declare_assignment(pair = complete_ra(N = N, num_arms = n_pairs),
+                       role = 1 + block_ra(blocks = pair)) + 
+    declare_step(
+      id_cols = pair,
+      names_from = role,
+      values_from = c(ID, a),
+      handler = pivot_wider) +
+    
+    declare_measurement(invested = invested(a_1, a_2)) + 
+    
+    declare_estimator(
+      invested ~ 1,
+      .method = lm_robust,
+      inquiry = "trusting",
+      label = "trusting") +
+  
+    declare_measurement(invested = deceive*runif(N) + (1-deceive)*invested,
+                        returned = returned(invested, a_2)) +
+    
+    declare_estimator(
+      returned ~ 1,
+      .method = lm_robust,
+      inquiry = "trustworthy",
+      label = "trustworthy")
+  expect_s3_class(declaration_17.6, "design")
+  estimates <- draw_estimates(declaration_17.6)
+  expect_gt(nrow(estimates), 0)
+  if ("estimate" %in% names(estimates))
+    expect_false(all(is.na(estimates$estimate)))
+})
+
 # observational causal ----
 
 test_that("declaration_16.1 runs (observational causal)", {
@@ -3131,6 +3220,39 @@ test_that("declaration_16.4 runs (observational causal)", {
     declare_estimator(Y ~ D | Z, .method = iv_robust, inquiry = "LATE")
   expect_s3_class(declaration_16.4, "design")
   estimates <- draw_estimates(declaration_16.4)
+  expect_gt(nrow(estimates), 0)
+  if ("estimate" %in% names(estimates))
+    expect_false(all(is.na(estimates$estimate)))
+})
+
+
+test_that("declaration_16.5 runs (observational causal)", {
+  skip_unless("randomizr", "estimatr", "rdss", "rdrobust")
+  cutoff <- 0.5
+  control <- function(X) {
+    as.vector(poly(X - cutoff, 4, raw = TRUE) %*% c(.7, -.8, .5, 1))}
+  treatment <- function(X) {
+    as.vector(poly(X - cutoff, 4, raw = TRUE) %*% c(0, -1.5, .5, .8)) + .15}
+  declaration_16.5 <-
+    declare_model(
+      N = 500,
+      U = rnorm(N, 0, 0.1),
+      X = runif(N, 0, 1) + U,
+      D = 1 * (X > cutoff),
+      Y_D_0 = control(X) + U,
+      Y_D_1 = treatment(X) + U
+    ) +
+    declare_inquiry(LATE = treatment(cutoff) - control(cutoff)) +
+    declare_measurement(Y = reveal_outcomes(Y ~ D)) +
+    declare_estimator(
+      Y, X, c = cutoff,
+      term = "Bias-Corrected",
+      .method = rdrobust_helper,
+      inquiry = "LATE",
+      label = "optimal"
+    )
+  expect_s3_class(declaration_16.5, "design")
+  estimates <- draw_estimates(declaration_16.5)
   expect_gt(nrow(estimates), 0)
   if ("estimate" %in% names(estimates))
     expect_false(all(is.na(estimates$estimate)))
@@ -3543,8 +3665,5 @@ test_that("declaration_16.3 runs (observational causal), ported", {
 #   M                  the book defines baseline_data outside any code chunk, so it cannot be reconstructed
 #   M                  the book defines baseline_data outside any code chunk, so it cannot be reconstructed
 #   declaration_19.1   the book defines X.1 outside any code chunk, so it cannot be reconstructed
-#   design             OPEN DEFECT: pre-evaluated estimator dots defeat the method's own NSE
 #   declaration_19.4   fails identically under DeclareDesign 1.1.1, so not a difference between them
 #   declaration_18.13  needs the interference package, which is not on CRAN
-#   declaration_17.6   OPEN DEFECT: pre-evaluated dots defeat a tidyselect handler
-#   declaration_16.5   OPEN DEFECT: pre-evaluated dots defeat a tidyselect handler
