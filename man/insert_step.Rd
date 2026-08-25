@@ -4,15 +4,17 @@
 \alias{insert_step}
 \title{Insert a step into a design}
 \usage{
-insert_step(design, new_step, after = NULL, before = NULL)
+insert_step(design, new_step, before = NULL, after = NULL)
 }
 \arguments{
 \item{design}{A \code{design}.}
 
 \item{new_step}{A \code{design_step} to insert.}
 
-\item{after, before}{A label, integer, or \code{design_step} indicating the
-anchor point. Provide exactly one of the two.}
+\item{before, after}{A label, integer, or \code{design_step} indicating the
+anchor point. Provide exactly one of the two. \code{before} comes first, as in
+DeclareDesign 1.x, so a script that passed the anchor by position keeps
+its meaning.}
 }
 \value{
 A \code{design}.

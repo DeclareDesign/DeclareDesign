@@ -23,8 +23,10 @@ resolve_step_index <- function(design, step) {
 #' @family modifying a design
 #' @param design A `design`.
 #' @param new_step A `design_step` to insert.
-#' @param after,before A label, integer, or `design_step` indicating the
-#'   anchor point. Provide exactly one of the two.
+#' @param before,after A label, integer, or `design_step` indicating the
+#'   anchor point. Provide exactly one of the two. `before` comes first, as in
+#'   DeclareDesign 1.x, so a script that passed the anchor by position keeps
+#'   its meaning.
 #' @return A `design`.
 #' @export
 #' @examples
@@ -34,7 +36,7 @@ resolve_step_index <- function(design, step) {
 #'   declare_measurement(Y2 = Y * 2),
 #'   after = "model")
 #' names(new_design)
-insert_step <- function(design, new_step, after = NULL, before = NULL) {
+insert_step <- function(design, new_step, before = NULL, after = NULL) {
   rlang::warn(
     "`insert_step()` is deprecated. Reconstruct the design explicitly instead.",
     .frequency = "once", .frequency_id = "insert_step"

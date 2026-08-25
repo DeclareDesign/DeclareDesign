@@ -378,3 +378,12 @@ test_that("an estimator naming an inquiry no step produced warns once", {
   expect_warning(out <- run_design(design), "`ols` names inquiry `mew`")
   expect_true(is.na(out$estimand))
 })
+
+test_that("insert_step() keeps 1.x's argument order, before then after", {
+  design <- simple_design(N = 20)
+  new <- declare_measurement(Y2 = Y * 2)
+  positional <- suppressWarnings(insert_step(design, new, "assignment"))
+  named <- suppressWarnings(insert_step(design, new, before = "assignment"))
+  expect_equal(names(positional), names(named))
+  expect_equal(which(names(positional) == "measurement")[1], 3L)
+})
