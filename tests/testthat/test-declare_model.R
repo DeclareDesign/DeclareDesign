@@ -121,3 +121,16 @@ test_that("resample_data as a handler takes a scalar N", {
   expect_equal(nrow(out), 12L)
   expect_equal(names(out), c("a", "b"))
 })
+
+test_that("a sampling step that keeps every row says so", {
+  # `declare_sampling(S1 = ...)` filtered on nothing and returned every row.
+  rlang::reset_warning_verbosity("dd_sampling_no_S")
+  design <- declare_model(N = 20, U = rnorm(N)) +
+    declare_sampling(S1 = sample(rep(0:1, 10)))
+  expect_warning(df <- draw_data(design), "no column named `S`")
+  expect_equal(nrow(df), 20L)
+  quiet <- declare_model(N = 20, U = rnorm(N)) +
+    declare_sampling(S = sample(rep(0:1, 10)))
+  expect_silent(df <- draw_data(quiet))
+  expect_equal(nrow(df), 10L)
+})

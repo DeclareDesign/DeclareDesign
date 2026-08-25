@@ -41,10 +41,13 @@ Steps upstream of the first fan-out run once and are held fixed across the
 draws below them, which is what makes \code{declare_assignment(..., draws = 50)}
 mean fifty randomizations of one population.
 
-Parallelism is handled transparently via the \code{future} ecosystem. Call
+Parallelism is handled through the \code{future} ecosystem. Call
 \code{future::plan(multisession, workers = 4)} before \code{simulate_design()} and,
-if the \code{furrr} package is installed, simulations will run in parallel with
-no other changes required.
+if the \code{furrr} package is installed, simulations run in parallel with no
+other change. Every draw runs on its own L'Ecuyer-CMRG random-number
+stream whichever plan is active, so \code{set.seed()} before the call gives the
+same table sequentially and in parallel. The streams are not those of
+DeclareDesign 1.x, so a 1.x seed does not reproduce a 1.x table here.
 }
 \examples{
 design <- declare_model(N = 30, U = rnorm(N), Z = rep(0:1, 15), Y = U + Z) +

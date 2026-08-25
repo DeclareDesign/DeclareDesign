@@ -2,7 +2,7 @@
 % Please edit documentation in R/redesign.R
 \name{redesign}
 \alias{redesign}
-\title{Re-parameterize a design}
+\title{Redesign}
 \usage{
 redesign(.design, ..., .expand = TRUE)
 }
@@ -28,10 +28,11 @@ A single \code{design} if one combination is supplied, otherwise a list
 of designs named \code{design_1}, \code{design_2}, etc.
 }
 \description{
-Replaces parameter values in the captured environments of a design's steps,
-producing one or more modified designs. With \code{.expand = TRUE} (the default),
-the cross-product of parameter values is taken; with \code{.expand = FALSE},
-values are zipped position-wise.
+Returns a copy of the design with one or more parameters changed, so that
+versions can be diagnosed side by side. Several values for a parameter give
+several designs: with \code{.expand = TRUE} (the default) the cross-product of
+the values is taken, and with \code{.expand = FALSE} they are zipped
+position-wise.
 }
 \details{
 A parameter that no step responds to draws a warning and is otherwise

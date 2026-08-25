@@ -355,3 +355,26 @@ test_that("a diagnosand that errors comes back NA rather than aborting", {
                        diagnosands = declare_diagnosands(boom = stop("no")))
   expect_true(all(is.na(d$diagnosands_df$boom)))
 })
+
+test_that("a 1.x argument to simulate or diagnose errors instead of vanishing", {
+  # `make_groups = vars(N)` used to return an ungrouped table and
+  # `future.seed = TRUE` used to do nothing, both without a message.
+  design <- simple_design(N = 20)
+  expect_error(diagnose_design(design, sims = 2, bootstrap_sims = 0,
+                               make_groups = vars(N)),
+               "make_groups")
+  expect_error(simulate_design(design, sims = 2, future.seed = TRUE),
+               "future.seed")
+  expect_error(simulate_design(design, sims = 2, data.frame(x = 1)),
+               "not a design")
+})
+
+test_that("an estimator naming an inquiry no step produced warns once", {
+  design <- declare_model(N = 20, U = rnorm(N), Y = U) +
+    declare_inquiry(mu = mean(Y)) +
+    declare_estimator(Y ~ 1, .method = lm, term = "(Intercept)",
+                      inquiry = "mew", label = "ols")
+  rlang::reset_warning_verbosity("dd_unmatched_inquiry_mew")
+  expect_warning(out <- run_design(design), "`ols` names inquiry `mew`")
+  expect_true(is.na(out$estimand))
+})

@@ -20,8 +20,9 @@ re-executed \code{draws} times for each upstream draw during nested simulation.}
 A \code{design_step}.
 }
 \description{
-Augments the data with an assignment column (typically using
-\code{\link[randomizr:complete_ra]{randomizr::complete_ra()}} or similar).
+Assigns units to treatment conditions, adding the assignment variable (\code{Z}
+by convention) to the data. The randomization itself is usually a randomizr
+function such as \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}.
 }
 \examples{
 design <-

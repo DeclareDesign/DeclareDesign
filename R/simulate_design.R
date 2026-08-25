@@ -14,10 +14,13 @@
 #' draws below them, which is what makes `declare_assignment(..., draws = 50)`
 #' mean fifty randomizations of one population.
 #'
-#' Parallelism is handled transparently via the `future` ecosystem. Call
+#' Parallelism is handled through the `future` ecosystem. Call
 #' `future::plan(multisession, workers = 4)` before `simulate_design()` and,
-#' if the `furrr` package is installed, simulations will run in parallel with
-#' no other changes required.
+#' if the `furrr` package is installed, simulations run in parallel with no
+#' other change. Every draw runs on its own L'Ecuyer-CMRG random-number
+#' stream whichever plan is active, so `set.seed()` before the call gives the
+#' same table sequentially and in parallel. The streams are not those of
+#' DeclareDesign 1.x, so a 1.x seed does not reproduce a 1.x table here.
 #'
 #' @family simulation and diagnosis
 #' @param ... One or more `design` objects.
@@ -181,6 +184,10 @@ flatten_designs <- function(raw) {
   for (i in seq_along(raw)) {
     item <- raw[[i]]
     nm <- names(raw)[i]
+    if (!is.null(nm) && nm %in% c("make_groups", "future.seed",
+                                  "add_grouping_variables")) {
+      stop_not_a_design(item, nm)
+    }
     if (inherits(item, "design")) {
       label <- if (!is.null(nm) && nzchar(nm)) nm else
         paste0("design_", length(out) + 1L)
@@ -189,7 +196,7 @@ flatten_designs <- function(raw) {
       label <- if (!is.null(nm) && nzchar(nm)) nm else
         paste0("design_", length(out) + 1L)
       out[[label]] <- construct_design(wrap_step(item))
-    } else if (is.list(item)) {
+    } else if (is.list(item) && !is.data.frame(item)) {
       sub <- flatten_designs(item)
       if (length(sub) > 0) {
         sub_names <- names(sub)
@@ -206,9 +213,46 @@ flatten_designs <- function(raw) {
           out[[label]] <- sub[[k]]
         }
       }
+    } else {
+      stop_not_a_design(item, nm)
     }
   }
   out
+}
+
+#' Refuse an argument that is not a design
+#'
+#' The dots of [simulate_design()] and [diagnose_design()] take designs, and
+#' only designs, so an argument DeclareDesign 1.x accepted by name used to
+#' fall through here and vanish: `make_groups = vars(N)` returned an ungrouped
+#' table and `future.seed = TRUE` did nothing, neither with a message. The
+#' two names a 1.x script is likely to carry get the replacement spelled out.
+#'
+#' @keywords internal
+#' @noRd
+stop_not_a_design <- function(item, nm) {
+  what <- if (!is.null(nm) && nzchar(nm)) paste0("`", nm, "`") else
+    paste0("an object of class <", paste(class(item), collapse = "/"), ">")
+  hint <- if (identical(nm, "make_groups")) {
+    paste0(
+      "`make_groups` is gone. Group the simulations instead: ",
+      "`simulate_design(design) |> group_by(N) |> diagnose_design()`."
+    )
+  } else if (identical(nm, "future.seed")) {
+    paste0(
+      "`future.seed` is gone. Every draw runs on its own L'Ecuyer-CMRG ",
+      "stream under any `future::plan()`, so `set.seed()` before the call ",
+      "is all that is needed."
+    )
+  } else if (identical(nm, "add_grouping_variables")) {
+    "`add_grouping_variables` is gone; group the simulations with `group_by()`."
+  } else {
+    "Only designs, lists of designs and design steps are accepted here."
+  }
+  rlang::abort(c(
+    paste0(what, " is not a design."),
+    i = hint
+  ), call = NULL)
 }
 
 #' @rdname simulate_design
@@ -304,10 +348,10 @@ simulate_nested_single <- function(design, design_label = "design") {
       new_draw_cols <- draw_cols
       if (n > 1L) new_draw_cols[[paste0(label, "_draw")]] <- d
       if (identical(ct, "dgp")) {
-        new_data <- step(data)
+        new_data <- run_step(step, data)
         run_from(step_idx + 1L, new_data, new_draw_cols, NULL, steps_cur, notes)
       } else if (identical(ct, "inquiry")) {
-        inq <- step(data)
+        inq <- run_step(step, data)
         sub <- run_from(step_idx + 1L, data, new_draw_cols, NULL, steps_cur, notes)
         if (nrow(inq) > 0) {
           for (nm in names(new_draw_cols)) inq[[nm]] <- new_draw_cols[[nm]]
@@ -317,7 +361,7 @@ simulate_nested_single <- function(design, design_label = "design") {
           estimates = sub$estimates
         )
       } else if (identical(ct, "estimator")) {
-        est <- step(data)
+        est <- run_step(step, data)
         sub <- run_from(step_idx + 1L, data, new_draw_cols, NULL, steps_cur, notes)
         if (nrow(est) > 0) {
           for (nm in names(new_draw_cols)) est[[nm]] <- new_draw_cols[[nm]]
@@ -354,11 +398,11 @@ simulate_nested_single <- function(design, design_label = "design") {
       }
       ct <- step_types[[i]]
       if (identical(ct, "dgp")) {
-        data <- steps_cur[[i]](data)
+        data <- run_step(steps_cur[[i]], data)
       } else if (identical(ct, "inquiry")) {
-        inquiries[[length(inquiries) + 1L]] <- steps_cur[[i]](data)
+        inquiries[[length(inquiries) + 1L]] <- run_step(steps_cur[[i]], data)
       } else if (identical(ct, "estimator")) {
-        estimates[[length(estimates) + 1L]] <- steps_cur[[i]](data)
+        estimates[[length(estimates) + 1L]] <- run_step(steps_cur[[i]], data)
       }
     }
     list(data      = data,

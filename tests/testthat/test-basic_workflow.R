@@ -215,3 +215,11 @@ test_that("draw_data and draw_estimands do not run the estimators", {
   expect_false(ran)
   expect_error(run_design(design), "this estimator is broken")
 })
+
+test_that("an error inside a step names the step", {
+  design <- declare_model(N = 20, U = rnorm(N)) +
+    declare_inquiry(m = mean(W))
+  err <- tryCatch(draw_estimands(design), error = function(e) e)
+  expect_match(conditionMessage(err), "In step `m` \\(declare_inquiry\\(\\)\\)")
+  expect_match(conditionMessage(err$parent), "object 'W' not found")
+})

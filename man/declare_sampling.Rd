@@ -23,9 +23,11 @@ re-executed \code{draws} times for each upstream draw during nested simulation.}
 A \code{design_step}.
 }
 \description{
-Adds a sampling indicator and subsets to sampled rows. By default, if no
-\code{filter} is supplied and an \code{S} column is produced, rows with \code{S == 1} are
-kept.
+Draws the sample from the population, keeping the rows where the sampling
+indicator \code{S} is 1. Name the indicator \code{S}, as in
+\code{declare_sampling(S = complete_rs(N, n = 50))}, or say which rows to keep
+with \verb{filter = }; a sampling step that produces neither keeps every row and
+warns.
 }
 \examples{
 design <-

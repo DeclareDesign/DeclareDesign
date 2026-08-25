@@ -20,8 +20,10 @@ re-executed \code{draws} times for each upstream draw during nested simulation.}
 A \code{design_step}.
 }
 \description{
-Like \code{\link[=declare_model]{declare_model()}} but does not append an ID column; intended for
-creating outcome measurements after assignment.
+Records what the study observes: the measured outcome, typically \code{Y}
+revealed from the potential outcomes given the assignment \code{Z}. Columns are
+added to the data the way \code{\link[=declare_model]{declare_model()}} adds them, without a new ID
+column.
 }
 \examples{
 design <-

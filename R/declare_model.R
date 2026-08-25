@@ -118,8 +118,10 @@ declare_model <- function(..., label = "model", draws = 1L) {
 
 #' Declare measurement
 #'
-#' Like [declare_model()] but does not append an ID column; intended for
-#' creating outcome measurements after assignment.
+#' Records what the study observes: the measured outcome, typically `Y`
+#' revealed from the potential outcomes given the assignment `Z`. Columns are
+#' added to the data the way [declare_model()] adds them, without a new ID
+#' column.
 #'
 #' @inheritParams declare_model
 #' @family design declarations
@@ -151,8 +153,9 @@ declare_measurement <- function(..., label = "measurement", draws = 1L) {
 
 #' Declare an assignment procedure
 #'
-#' Augments the data with an assignment column (typically using
-#' [randomizr::complete_ra()] or similar).
+#' Assigns units to treatment conditions, adding the assignment variable (`Z`
+#' by convention) to the data. The randomization itself is usually a randomizr
+#' function such as [randomizr::complete_ra()].
 #'
 #' @inheritParams declare_model
 #' @family design declarations
@@ -206,6 +209,12 @@ make_sampling_step <- function(dots, filter_quo) {
     } else if ("S" %in% names(data)) {
       keep <- data[["S"]]
       data <- data[!is.na(keep) & keep == 1, , drop = FALSE]
+    } else {
+      rlang::warn(c(
+        "`declare_sampling()` found no column named `S` and no `filter`, so every row was kept.",
+        i = paste0("Name the sampling indicator `S`, as in `declare_sampling(S = ",
+                   "complete_rs(N, n = 50))`, or say which rows to keep with `filter = `.")
+      ), .frequency = "once", .frequency_id = "dd_sampling_no_S")
     }
     data
   }
@@ -213,9 +222,11 @@ make_sampling_step <- function(dots, filter_quo) {
 
 #' Declare a sampling procedure
 #'
-#' Adds a sampling indicator and subsets to sampled rows. By default, if no
-#' `filter` is supplied and an `S` column is produced, rows with `S == 1` are
-#' kept.
+#' Draws the sample from the population, keeping the rows where the sampling
+#' indicator `S` is 1. Name the indicator `S`, as in
+#' `declare_sampling(S = complete_rs(N, n = 50))`, or say which rows to keep
+#' with `filter = `; a sampling step that produces neither keeps every row and
+#' warns.
 #'
 #' @inheritParams declare_model
 #' @family design declarations

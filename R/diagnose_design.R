@@ -1,3 +1,38 @@
+#' Warn when an estimator names an inquiry no step produced
+#'
+#' A misspelled `inquiry = "ate"` used to give `estimand = NA` and
+#' `bias = NaN` without a word. Once per session per set of missing labels.
+#'
+#' @keywords internal
+#' @noRd
+warn_unmatched_inquiries <- function(estimates, inquiries) {
+  if (!"inquiry" %in% names(estimates) || !"inquiry" %in% names(inquiries)) {
+    return(invisible(NULL))
+  }
+  named <- unique(estimates$inquiry[!is.na(estimates$inquiry)])
+  missing <- setdiff(named, unique(inquiries$inquiry))
+  if (!length(missing)) return(invisible(NULL))
+  who <- unique(estimates$estimator[estimates$inquiry %in% missing])
+  who <- who[!is.na(who)]
+  rlang::warn(c(
+    paste0(
+      "Estimator", if (length(who) > 1) "s" else "", " ",
+      paste0("`", who, "`", collapse = ", "),
+      " name", if (length(who) > 1) "" else "s", " inquir",
+      if (length(missing) > 1) "ies " else "y ",
+      paste0("`", missing, "`", collapse = ", "),
+      ", which no inquiry step produced."
+    ),
+    i = paste0(
+      "Declared: ",
+      if (nrow(inquiries)) paste0("`", unique(inquiries$inquiry), "`",
+                                  collapse = ", ") else "none",
+      ". The estimand is `NA` and diagnosands that need it are `NaN`."
+    )
+  ), .frequency = "once", .frequency_id = paste0("dd_unmatched_inquiry_",
+                                                  paste(missing, collapse = ",")))
+}
+
 #' Join estimates to their inquiries
 #'
 #' Used in [run_design()] and [simulate_design()] to attach estimands to
@@ -29,6 +64,7 @@ merge_estimates_inquiries <- function(estimates, inquiries) {
   if (nrow(inquiries) == 0) return(tibble::as_tibble(estimates))
   estimates <- tibble::as_tibble(estimates)
   inquiries <- tibble::as_tibble(inquiries)
+  warn_unmatched_inquiries(estimates, inquiries)
   shared <- intersect(names(estimates), names(inquiries))
   result <- if (length(shared) == 0) {
     dplyr::cross_join(estimates, inquiries, suffix = c("", ".inquiry"))

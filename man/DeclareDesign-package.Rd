@@ -6,7 +6,7 @@
 \alias{DeclareDesign-package}
 \title{DeclareDesign: A Tidyverse-First Research Design Declaration and Diagnosis Tool}
 \description{
-A ground-up rewrite of DeclareDesign built on tidyverse conventions. Declares, simulates, and diagnoses research designs with an API identical to DeclareDesign, using purrr for simulation, dplyr for diagnosis, and rlang for tidy evaluation.
+Declares, simulates, diagnoses and redesigns research designs. A design is declared as a model, an inquiry, a data strategy and an answer strategy, then simulated with purrr and diagnosed with dplyr. Version 2.0 is a ground-up rewrite of the package on tidyverse conventions.
 }
 \details{
 A design is a sequence of steps combined with \code{+}. Each step is one of the
@@ -14,9 +14,10 @@ four elements of a research design:
 \itemize{
 \item \code{\link[=declare_model]{declare_model()}} describes the world the design runs in.
 \item \code{\link[=declare_inquiry]{declare_inquiry()}} records the question. Its value on a draw is the estimand.
-\item \code{\link[=declare_sampling]{declare_sampling()}} and \code{\link[=declare_assignment]{declare_assignment()}} make up the data strategy.
-\item \code{\link[=declare_measurement]{declare_measurement()}} records what is observed.
-\item \code{\link[=declare_estimator]{declare_estimator()}} is the answer strategy.
+\item \code{\link[=declare_sampling]{declare_sampling()}}, \code{\link[=declare_assignment]{declare_assignment()}} and \code{\link[=declare_measurement]{declare_measurement()}}
+make up the data strategy: who is observed, what they are assigned, and
+what is measured.
+\item \code{\link[=declare_estimator]{declare_estimator()}} and \code{\link[=declare_test]{declare_test()}} are the answer strategy.
 }
 
 \code{\link[=diagnose_design]{diagnose_design()}} simulates a design many times and reports how its

@@ -60,17 +60,39 @@ run_design_internal <- function(design,
     ct <- attr(step, "causal_type")
     if (is.null(ct) || !ct %in% what) next
     if (identical(ct, "dgp")) {
-      data <- step(data)
+      data <- run_step(step, data)
     } else if (identical(ct, "inquiry")) {
-      inquiries[[length(inquiries) + 1L]] <- step(data)
+      inquiries[[length(inquiries) + 1L]] <- run_step(step, data)
     } else if (identical(ct, "estimator")) {
-      estimates[[length(estimates) + 1L]] <- step(data)
+      estimates[[length(estimates) + 1L]] <- run_step(step, data)
     }
   }
   list(
     data      = data,
     inquiries = dplyr::bind_rows(inquiries),
     estimates = dplyr::bind_rows(estimates)
+  )
+}
+
+#' Run one step, naming it if it fails
+#'
+#' A column that does not exist fails inside `eval_tidy()` with "object 'W'
+#' not found" and nothing else, and a five-step design has five places that
+#' could have been. The step's label and verb go in front; the original
+#' condition is kept as the parent, so anything catching by class still can.
+#'
+#' @keywords internal
+#' @noRd
+run_step <- function(step, data) {
+  tryCatch(
+    step(data),
+    error = function(e) {
+      rlang::abort(
+        paste0("In step `", attr(step, "label") %||% "?", "` (",
+               step_verb(step), "())."),
+        parent = e, call = NULL
+      )
+    }
   )
 }
 
@@ -169,7 +191,7 @@ get_estimates <- function(design, data = draw_data(design), start = 1L,
       next
     }
     if (identical(attr(step, "causal_type"), "estimator")) {
-      estimates[[length(estimates) + 1L]] <- step(data)
+      estimates[[length(estimates) + 1L]] <- run_step(step, data)
     }
   }
   dplyr::bind_rows(estimates)
