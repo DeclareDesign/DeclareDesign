@@ -399,10 +399,11 @@ check_params_are_not_notes <- function(design, param_names) {
 #' Refuse a redesign of an argument the design wrote down as a literal
 #'
 #' `declare_model(N = 500)` puts 500 in the design. Nothing outside the design
-#' holds that number and nothing names it, so a redesign has nothing to change
-#' and used to be honoured by rewriting the argument because its *name*
-#' matched. That is the branch that let `redesign(sd = 3)` reach a column
-#' called `sd`, and it is gone.
+#' holds that number and nothing names it, so a redesign has nothing to change.
+#' An earlier build of 2.0 honoured it anyway by rewriting the argument
+#' because its *name* matched, which is the branch that let `redesign(sd = 3)`
+#' reach a column called `sd`; that branch is gone, and 1.x never had it
+#' (there the call warns "not found" and returns the design unchanged).
 #'
 #' The message leads with the ordinary way out, which is to give the value a
 #' name outside the design (`N <- 500` at the top of a script, or a designer
@@ -646,12 +647,13 @@ param_grid <- function(params, expand = TRUE) {
   tibble::as_tibble(out)
 }
 
-#' Re-parameterize a design
+#' Redesign
 #'
-#' Replaces parameter values in the captured environments of a design's steps,
-#' producing one or more modified designs. With `.expand = TRUE` (the default),
-#' the cross-product of parameter values is taken; with `.expand = FALSE`,
-#' values are zipped position-wise.
+#' Returns a copy of the design with one or more parameters changed, so that
+#' versions can be diagnosed side by side. Several values for a parameter give
+#' several designs: with `.expand = TRUE` (the default) the cross-product of
+#' the values is taken, and with `.expand = FALSE` they are zipped
+#' position-wise.
 #'
 #' A parameter that no step responds to draws a warning and is otherwise
 #' ignored. [summary()] on a design lists the names that are available.

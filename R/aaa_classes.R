@@ -4,9 +4,10 @@
 #'
 #' * [declare_model()] describes the world the design runs in.
 #' * [declare_inquiry()] records the question. Its value on a draw is the estimand.
-#' * [declare_sampling()] and [declare_assignment()] make up the data strategy.
-#' * [declare_measurement()] records what is observed.
-#' * [declare_estimator()] is the answer strategy.
+#' * [declare_sampling()], [declare_assignment()] and [declare_measurement()]
+#'   make up the data strategy: who is observed, what they are assigned, and
+#'   what is measured.
+#' * [declare_estimator()] and [declare_test()] are the answer strategy.
 #'
 #' [diagnose_design()] simulates a design many times and reports how its
 #' estimates compare to its estimands: bias, power, coverage and the rest.
