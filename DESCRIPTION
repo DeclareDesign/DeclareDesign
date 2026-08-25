@@ -3,10 +3,10 @@ Type: Package
 Title: A Tidyverse-First Research Design Declaration and Diagnosis Tool
 Version: 2.0.0
 Authors@R: c(person("Alex", "Coppock", email = "acoppock@gmail.com", role = c("aut", "cre")))
-Description: A ground-up rewrite of DeclareDesign built on tidyverse conventions.
-    Declares, simulates, and diagnoses research designs with an API identical
-    to DeclareDesign, using purrr for simulation, dplyr for diagnosis, and
-    rlang for tidy evaluation.
+Description: Declares, simulates, diagnoses and redesigns research designs.
+    A design is declared as a model, an inquiry, a data strategy and an answer
+    strategy, then simulated with purrr and diagnosed with dplyr. Version 2.0
+    is a ground-up rewrite of the package on tidyverse conventions.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends:
@@ -18,6 +18,7 @@ Imports:
     broom,
     dplyr,
     generics,
+    parallel,
     purrr,
     rlang,
     tibble,

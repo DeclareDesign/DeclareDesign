@@ -10,22 +10,92 @@
 #' pop.var(c(1, 2, 3, 4, 5))
 pop.var <- function(x) mean((x - mean(x, na.rm = TRUE))^2, na.rm = TRUE)
 
-# Pick the best available map function for the simulation loop.
-# Only switches to furrr::future_map when (a) furrr is installed AND (b) the
-# active future plan is actually parallel. Under the default sequential plan,
-# furrr adds overhead with no benefit. With a parallel plan, furrr::future_map
-# is used with seed = TRUE for statistically valid parallel RNG (L'Ecuyer-CMRG).
-# Users enable parallelism with future::plan(multisession, workers = N) before
-# calling simulate_design() -- no other changes needed.
+#' The map function for one simulation loop
+#'
+#' Every simulation draw runs on its own L'Ecuyer-CMRG stream, whichever
+#' `future::plan()` is active. The streams are made in the main process by
+#' [sim_stream_seeds()] and handed to the loop, so `set.seed(1)` followed by
+#' `simulate_design()` gives the same table under `plan(sequential)` and
+#' `plan(multisession)`. Routing the sequential case through `purrr::map` with
+#' the caller's own RNG gave a different table per plan, which is the kind of
+#' difference that surfaces only when someone compares a laptop run with a
+#' cluster run.
+#'
+#' Parallelism is switched on by the caller with `future::plan(multisession,
+#' workers = N)` before the call and needs furrr installed; nothing else
+#' changes.
+#'
+#' @keywords internal
+#' @noRd
 sim_map_fn <- function(label = NULL) {
   base_map <- sim_base_map_fn()
   function(x, f, ...) {
     tick <- dd_progressor(length(x), label)
-    base_map(x, function(...) {
+    seeds <- sim_stream_seeds(length(x))
+    base_map(x, seeds, function(xi, seed, ...) {
       tick()
-      f(...)
+      with_stream_seed(seed, f(xi, ...))
     }, ...)
   }
+}
+
+#' One L'Ecuyer-CMRG stream per simulation draw
+#'
+#' Draws one number from the caller's RNG, so the streams follow from whatever
+#' `set.seed()` the caller wrote and the caller's own generator advances by one
+#' draw, then derives `n` streams from it with [parallel::nextRNGStream()] and
+#' puts the caller's generator back the way it was.
+#'
+#' @keywords internal
+#' @noRd
+sim_stream_seeds <- function(n) {
+  entropy <- sample.int(.Machine$integer.max, 1L)
+  saved <- save_rng_state()
+  on.exit(restore_rng_state(saved), add = TRUE)
+  RNGkind("L'Ecuyer-CMRG")
+  set.seed(entropy)
+  stream <- get(".Random.seed", envir = globalenv())
+  seeds <- vector("list", n)
+  for (i in seq_len(n)) {
+    stream <- parallel::nextRNGStream(stream)
+    seeds[[i]] <- stream
+  }
+  seeds
+}
+
+#' Evaluate `expr` on a given RNG stream, then put the caller's generator back
+#'
+#' A `.Random.seed` carries its own kind, so assigning an L'Ecuyer seed is all
+#' a draw needs; this is what a `future` worker does with the seed it is sent,
+#' and doing the same thing in the main process is what makes the two paths
+#' agree.
+#'
+#' @keywords internal
+#' @noRd
+with_stream_seed <- function(seed, expr) {
+  saved <- save_rng_state()
+  on.exit(restore_rng_state(saved), add = TRUE)
+  assign(".Random.seed", seed, envir = globalenv())
+  expr
+}
+
+save_rng_state <- function() {
+  list(
+    seed = get0(".Random.seed", envir = globalenv(), inherits = FALSE),
+    kind = RNGkind()
+  )
+}
+
+restore_rng_state <- function(saved) {
+  do.call(RNGkind, as.list(saved$kind))
+  if (is.null(saved$seed)) {
+    if (exists(".Random.seed", envir = globalenv(), inherits = FALSE)) {
+      rm(".Random.seed", envir = globalenv())
+    }
+  } else {
+    assign(".Random.seed", saved$seed, envir = globalenv())
+  }
+  invisible(NULL)
 }
 
 #' A progress ticker for one simulation loop
@@ -82,7 +152,14 @@ with_dd_progress <- function(expr) {
   progressr::with_progress(expr)
 }
 
-#' The map function itself, before progress is layered on
+#' The map function itself, before progress and seeds are layered on
+#'
+#' Takes the items, one seed per item, and a function of both. With a parallel
+#' plan and furrr installed the seeds go to the workers through
+#' `furrr_options(seed = )`, which assigns each one as `.Random.seed` before
+#' the item runs; otherwise the same assignment happens in the main process
+#' through [with_stream_seed()].
+#'
 #' @keywords internal
 #' @noRd
 sim_base_map_fn <- function() {
@@ -97,10 +174,12 @@ sim_base_map_fn <- function() {
       sub("^package:", "", grep("^package:", search(), value = TRUE)),
       c("base", ".GlobalEnv", "Autoloads")
     )
-    opts <- furrr::furrr_options(seed = TRUE, packages = pkgs)
-    function(x, f, ...) furrr::future_map(x, f, ..., .options = opts)
+    function(x, seeds, f, ...) {
+      opts <- furrr::furrr_options(seed = seeds, packages = pkgs)
+      furrr::future_map2(x, seeds, f, ..., .options = opts)
+    }
   } else {
-    purrr::map
+    purrr::map2
   }
 }
 
