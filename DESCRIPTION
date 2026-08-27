@@ -5,8 +5,8 @@ Version: 2.0.0
 Authors@R: c(person("Alexander", "Coppock", email = "acoppock@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-5733-2386")),
              person("Graeme", "Blair", email = "graeme.blair@gmail.com", role = "aut", comment = c(ORCID = "0000-0001-9164-2102")),
              person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = "aut", comment = c(ORCID = "0000-0002-8639-3188")),
-             person("Neal", "Fultz", email = "nfultz@gmail.com", role = "aut"),
-             person("Macartan", "Humphreys", email = "macartan@gmail.com", role = "ctb", comment = c(ORCID = "0000-0001-7029-2326")))
+             person("Macartan", "Humphreys", email = "macartan@gmail.com", role = "aut", comment = c(ORCID = "0000-0001-7029-2326")),
+             person("Neal", "Fultz", email = "nfultz@gmail.com", role = "aut"))
 Description: Declares, simulates, diagnoses and redesigns research designs.
     A design is declared as a model, an inquiry, a data strategy and an answer
     strategy, then simulated with purrr and diagnosed with dplyr. Version 2.0

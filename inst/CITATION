@@ -15,6 +15,7 @@ bibentry(
   author       = c(person("Alexander", "Coppock"),
                    person("Graeme", "Blair"),
                    person("Jasper", "Cooper"),
+                   person("Macartan", "Humphreys"),
                    person("Neal", "Fultz")),
   year         = "2026",
   note         = paste("R package version", meta$Version),
