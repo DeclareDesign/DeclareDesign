@@ -36,11 +36,19 @@ diagnose_design(design)
 }\if{html}{\out{</div>}}
 }
 \author{
-\strong{Maintainer}: Alex Coppock \email{acoppock@gmail.com}
+\strong{Maintainer}: Alexander Coppock \email{acoppock@gmail.com} (\href{https://orcid.org/0000-0002-5733-2386}{ORCID})
 
 Authors:
 \itemize{
-  \item Alex Coppock \email{acoppock@gmail.com}
+  \item Alexander Coppock \email{acoppock@gmail.com} (\href{https://orcid.org/0000-0002-5733-2386}{ORCID})
+  \item Graeme Blair \email{graeme.blair@gmail.com} (\href{https://orcid.org/0000-0001-9164-2102}{ORCID})
+  \item Jasper Cooper \email{jaspercooper@gmail.com} (\href{https://orcid.org/0000-0002-8639-3188}{ORCID})
+  \item Neal Fultz \email{nfultz@gmail.com}
+}
+
+Other contributors:
+\itemize{
+  \item Macartan Humphreys \email{macartan@gmail.com} (\href{https://orcid.org/0000-0001-7029-2326}{ORCID}) [contributor]
 }
 
 }
