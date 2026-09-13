@@ -18,9 +18,9 @@ DeclareDesign 2.0 is a ground-up reimplementation of DeclareDesign on tidyverse 
 
 Three things are true of the rewrite, and this vignette defends each in turn.
 
-Most designs run unchanged. Of the 90 design declarations in the DeclareDesign book, 81 are checked in as tests and every one of them builds, runs and returns estimates; the accounting for the other nine is in [Current status] below. What a typical declaration has to change is one thing: an estimator's `inquiry =` is the inquiry's label, not the step object. Everything else that changes is at the edges (a handful of argument names, three functions that went, one way of grouping a diagnosis), and every one of those changes stops with an error naming the replacement rather than running to a different answer.
+Most designs run unchanged. Of the 90 design declarations in the DeclareDesign book, 84 are checked in as tests and every one of them builds, runs and returns estimates; the accounting for the other six is in [Current status] below. What a typical declaration has to change is one thing: an estimator's `inquiry =` is the inquiry's label, not the step object. Everything else that changes is at the edges (a handful of argument names, three functions that went, one way of grouping a diagnosis), and every one of those changes stops with an error naming the replacement rather than running to a different answer.
 
-The pipeline is faster and it parallelises. Simulation and diagnosis run 1.15 to 1.35 times faster sequentially, and four workers make a 2,000-simulation run 3.2 times faster after one line of `future::plan()`. A seeded run gives the same table sequentially and in parallel.
+The pipeline is faster and it parallelises. Simulation and diagnosis run 1.19 to 1.33 times faster sequentially, and four workers make a 2,000-simulation run 3.4 times faster after one line of `future::plan()`. A seeded run gives the same table sequentially and in parallel.
 
 The rewrite can express designs the original cannot. A design carries the objects it reads, so it survives `saveRDS()` and travels to a worker. `declare_parameters()` names what a design can be redesigned over, and `declare_notes()` names what it works out along the way. Step-level `draws` hold a population fixed while the assignment is redrawn, or the reverse, and the diagnosis then decomposes the variance of any per-simulation quantity by the step that generated it. An estimator that fails on one draw is recorded rather than fatal.
 
@@ -236,7 +236,7 @@ Seven greps cover every breaking change in both packages. Run them over a script
 | `nest = FALSE`, `join_using`, `modify_level(by =` | `declare_level()`, `.by = c("A", "B")`, `.by =` | multilevel fabrication |
 | `fabricate(<number>,` | `fabricate(N = <number>,` | positional `N` |
 
-Every row fails loudly. The DeclareDesign rows stop with an error naming the replacement, and the fabricatr rows warn once and run, which is the property that matters when you are porting someone else's code and cannot check every number by hand.
+Every row fails, and the way it fails is worth knowing when you are porting someone else's code and cannot check every number by hand. Three of the DeclareDesign rows stop with an error that names the replacement: a `redesign()` over a literal, an `inquiry =` given a step object, and `make_groups` or `add_grouping_variables`. Two stop with R's own message, which tells you that you are wrong without telling you what to write: `redesign(design = d, ...)` reports that `.design` is missing, and `draw_data(design, data = )` reports an unused argument. `expand_design()` does not stop at all, and warns once per session as the deprecated verbs below do. The fabricatr rows warn once and run.
 
 Two things do not fail at all, and are the ones to check by eye: the `estimand` column and the column order of every estimates table, and the deprecated verbs (`expand_design()`, `insert_step()`, `delete_step()`, `replace_step()`), which run with a warning. `compare_designs()` and `print_code()` stop outright.
 
@@ -324,17 +324,17 @@ summary(design)
 
 ## Speed
 
-All timings are medians of five runs on an Apple M4 Pro under R 4.6.0, comparing DeclareDesign 1.1.1 with fabricatr 1.0.2 against DeclareDesign 2.0.0 with fabricatr 2.0.0, on the two-arm design declared above (N = 600, `lm_robust`), measured on the 2026-08-24 build.
+All timings come from `data-raw/benchmark_vignette.R`, which re-measures every figure in this section and reports which ones have moved. Each cell runs in its own R process and reports the quietest of three runs, each the median of five replications. The parallel row warms its workers first, because `future::plan()` spawns them once per session and charging that to the run understates what parallelism buys: measured without warming, the last row reads 2.4x rather than 3.4x. Measured 2026-09-12 on an Apple M4 Pro under R 4.6.0, comparing DeclareDesign 1.1.1 with fabricatr 1.0.2 against DeclareDesign 2.0.0 with fabricatr 2.0.0, holding estimatr fixed at 2.0.0 on both sides, on the two-arm design declared above (N = 600, `lm_robust`).
 
 | Operation | 1.1.1 | 2.0.0 | Ratio |
 |---|---:|---:|---:|
-| `simulate_design(sims = 500)` | 0.97 s | 0.84 s | 1.15x |
-| `diagnose_design(sims = 500, bootstrap_sims = 200)` | 1.29 s | 0.96 s | 1.34x |
-| `simulate_design(sims = 2000)`, four workers | | 1.07 s against 3.37 s sequential | 3.2x |
+| `simulate_design(sims = 500)` | 0.94 s | 0.79 s | 1.19x |
+| `diagnose_design(sims = 500, bootstrap_sims = 200)` | 1.26 s | 0.95 s | 1.33x |
+| `simulate_design(sims = 2000)`, four workers | | 0.95 s against 3.20 s sequential | 3.4x |
 
 Parallelism is the larger lever. The sequential gain is concentrated in the plumbing, because model fitting is the same `lm_robust()` call in both packages and takes more than half of each simulation; on this design the estimator step is about 1 ms of a 1.7 ms draw. The bootstrap stacks all `B` resampled tables with a `.boot_id` column and runs one grouped `summarize()` instead of `B` separate calls, which is where the diagnosis row's extra gain comes from. Speeding up the estimator itself is what estimatr 2.0 is for.
 
-On a clustered design (30 villages of 20 citizens, ICC 0.2, cluster-robust standard errors) the two packages agree on what they report, which is the check worth running whenever a rewrite claims to be a replacement. Across 500 simulations: bias -0.010 against 0.015, SD of the estimate 0.197 against 0.194, power 0.294 against 0.304, coverage 0.968 against 0.954.
+On a clustered design (30 villages of 20 citizens, an ICC of 0.2, a true effect of 0.3, and cluster-robust standard errors) the two packages agree on what they report, which is the check worth running whenever a rewrite claims to be a replacement. Across 2,000 simulations: bias 0.001 against -0.003, SD of the estimate 0.178 against 0.177, power 0.360 against 0.364, coverage 0.947 against 0.953. The two columns are independent runs rather than a seed-matched pair, because 2.0's random-number streams are deliberately not 1.x's, so what separates them is Monte Carlo error: at 2,000 simulations its standard error is about 0.005 on coverage and 0.011 on power. The design is declared in `data-raw/benchmark_vignette.R` rather than described only here, because the figures this sentence used to carry came from a design whose effect size was never written down and so could not be re-derived.
 
 ## Why rewrite at all
 
@@ -350,9 +350,9 @@ DeclareDesign 2.0 is 6,153 lines of R against 1.1.1's 7,036, so the line count i
 
 The rewrite is pre-release. Nothing goes to CRAN until fabricatr 2.0 and estimatr 2.0 are accepted, since DeclareDesign depends on both.
 
-**Coverage the claims rest on.** 875 assertions in the package's own suite, 0 failures. The 81 book declarations are `tests/testthat/test-book-designs.R`, each asserting that the declaration builds, runs, and returns estimates that are not all `NA`; the file skips on CRAN because it needs a dozen modelling packages. All 191 code chunks of the book's fifteen code-bearing chapters have been run in order under 2.0: 173 ran without error, two are `install.packages()` calls, one chapter halts where it attaches the CRAN DesignLibrary over 2.0, and the remaining errors are names the book defines outside any displayed chunk. The designs of `macartan/ResearchDesigns` run under 2.0, 494 assertions with 0 failures, and a no-op redesign of each of their 194 parameters changes nothing. `R CMD check --as-cran` is clean apart from one NOTE for the `Remotes:` field, which stays until the dependencies ship.
+**Coverage the claims rest on.** 901 assertions with nothing skipped, 0 failures, of which 184 are the book declarations. Under `R CMD check` the figure is `FAIL 0 | WARN 2 | SKIP 87 | PASS 711`, because the book designs and the parallel tests both skip on CRAN; the number to quote for coverage is the first and the number a check prints is the second. The 84 book declarations are `tests/testthat/test-book-designs.R`, each asserting that the declaration builds, runs, and returns estimates that are not all `NA`; the file skips on CRAN because it needs a dozen modelling packages. All 191 code chunks of the book's fifteen code-bearing chapters have been run in order under 2.0: 173 ran without error, two are `install.packages()` calls, one chapter halts where it attaches the CRAN DesignLibrary over 2.0, and the remaining errors are names the book defines outside any displayed chunk. The designs of `macartan/ResearchDesigns` run under 2.0, 494 assertions with 0 failures, and a no-op redesign of each of their 194 parameters changes nothing. `R CMD check --as-cran` is clean apart from one NOTE for the `Remotes:` field, which stays until the dependencies ship.
 
-**Of the nine book declarations not checked in**, four use a value the book defines outside any code chunk, one needs the `interference` package, which is not on CRAN, one fails identically under 1.1.1, and three passed tidyselect arguments through `declare_step()`, which now passes arguments as written; they have not been re-added to the suite.
+**Of the six book declarations not checked in**, four use a value the book defines outside any code chunk, one needs the `interference` package, which is not on CRAN, and one fails identically under 1.1.1. The three that passed tidyselect arguments through `declare_step()` were the ninth, tenth and eleventh exclusions until `declare_step()` began passing arguments as written; they are back in the suite.
 
 **Fixed in the 2026-08-24 review**, each with a regression test: a declared parameter read through a helper function was ignored; `label_estimator()` of a workspace function failed on every parallel draw; sequential and parallel runs gave different numbers for the same seed; `make_groups` and `future.seed` were accepted and silently dropped; a misspelled `inquiry` label was silent; a sampling step with no `S` column kept every row without a word; an error inside a step did not say which step; `insert_step()` had its `before` and `after` arguments in the wrong order.
 

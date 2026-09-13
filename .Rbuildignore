@@ -12,3 +12,4 @@
 ^.*\.Rcheck$
 ^.*\.tar\.gz$
 ^.*\.zip$
+^data-raw$
