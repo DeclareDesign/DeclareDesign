@@ -28,8 +28,7 @@ Imports:
     tibble,
     tidyr
 Remotes:
-    DeclareDesign/fabricatr@rewrite,
-    DeclareDesign/estimatr@rewrite
+    DeclareDesign/fabricatr@rewrite
 Suggests:
     furrr,
     future,
