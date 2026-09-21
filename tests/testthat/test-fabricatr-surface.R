@@ -284,3 +284,97 @@ test_that("a clustered design draws, assigns and estimates by cluster", {
   dat <- draw_data(design)
   expect_true(all(tapply(dat$Z, dat$cl, function(z) length(unique(z))) == 1))
 })
+
+# The level functions ----
+#
+# `add_level()` and `nest_level()` are reached elsewhere in this suite. These
+# are the rest of the hierarchy vocabulary, which a design reaches only
+# through `declare_model()`, and whose results later steps then have to be
+# able to sample, assign and estimate over.
+
+test_that("declare_level() and cross_levels() build the crossing of two levels", {
+  set.seed(343)
+  dat <- draw_data(declare_model(
+    region = add_level(N = 4, u_region = rnorm(N)),
+    year = declare_level(N = 3, u_year = rnorm(N)),
+    obs = cross_levels(.by = join_using(region, year), Y = u_region + u_year)))
+
+  expect_equal(nrow(dat), 12L)
+  expect_equal(names(dat),
+               c("region", "u_region", "year", "u_year", "obs", "Y"))
+  # Every region appears in every year, which is what crossing means.
+  expect_equal(as.vector(table(dat$region)), rep(3L, 4))
+  expect_equal(as.vector(table(dat$year)), rep(4L, 3))
+  expect_length(unique(dat$u_region), 4L)
+})
+
+test_that("link_levels() matches two levels, and rho correlates the match", {
+  design <-
+    declare_parameters(rho = 0.9) +
+    declare_model(
+      worker = add_level(N = 100, u_worker = rnorm(N)),
+      firm = declare_level(N = 100, u_firm = rnorm(N)),
+      job = link_levels(N = 400, .by = join_using(worker, firm), rho = rho,
+                        Y = u_worker + u_firm))
+
+  set.seed(343)
+  dat <- draw_data(design)
+  expect_equal(nrow(dat), 400L)
+  # `rho` correlates which unit is matched to which, by level id, and not the
+  # variables drawn on the two levels: those stay independent at any rho.
+  expect_gt(cor(as.numeric(dat$worker), as.numeric(dat$firm)), 0.8)
+  expect_lt(abs(cor(dat$u_worker, dat$u_firm)), 0.2)
+
+  set.seed(343)
+  independent <- draw_data(redesign(design, rho = 0))
+  expect_lt(abs(cor(as.numeric(independent$worker),
+                    as.numeric(independent$firm))), 0.2)
+})
+
+test_that("modify_level() writes a group summary back onto every row", {
+  # `.by` takes the *name* of a grouping column, not the column.
+  set.seed(343)
+  dat <- draw_data(
+    declare_model(cluster = add_level(N = 10, u = rnorm(N)),
+                  unit = add_level(N = 5, Y = rnorm(N, u)),
+                  unit = modify_level(cluster_mean = mean(Y), .by = "cluster")) +
+      declare_measurement(Y_centred = Y - cluster_mean))
+
+  expect_equal(nrow(dat), 50L)
+  expect_length(unique(dat$cluster_mean), 10L)
+  expect_lt(abs(mean(dat$Y_centred)), 1e-12)
+})
+
+test_that("import_level() takes a real table as the top level, and the design carries it", {
+  # A design is a value: the frame the declaration read is carried by the
+  # design, so it still draws once the environment that built it is gone.
+  build <- function() {
+    districts <- data.frame(district = letters[1:4], n_voters = c(10, 20, 30, 40))
+    declare_model(district = import_level(data = districts),
+                  voter = add_level(N = 3, Y = rnorm(N, n_voters)))
+  }
+  set.seed(343)
+  dat <- draw_data(build())
+  expect_equal(nrow(dat), 12L)
+  expect_equal(sort(unique(dat$district)), letters[1:4])
+  expect_gt(mean(dat$Y[dat$district == "d"]), mean(dat$Y[dat$district == "a"]))
+})
+
+test_that("resample_data() bootstraps clusters with ALL", {
+  # ALL is fabricatr's own sentinel for "as many as there are", and a
+  # cluster bootstrap is the design that wants it.
+  set.seed(343)
+  base <- fabricate(cluster = add_level(N = 10, u = rnorm(N)),
+                    unit = add_level(N = 5, Y = rnorm(N, u)))
+  design <- declare_model(
+    data = base,
+    handler = function(data) {
+      resample_data(data, N = c(ALL, 3), ID_labels = c("cluster", "unit"))
+    })
+
+  dat <- draw_data(design)
+  expect_equal(nrow(dat), 30L)
+  expect_lte(length(unique(dat$cluster)), 10L)
+  # Two draws of the same design are different resamples.
+  expect_false(identical(draw_data(design)$Y, draw_data(design)$Y))
+})
