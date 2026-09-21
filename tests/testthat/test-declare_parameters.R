@@ -222,3 +222,20 @@ test_that("a declared parameter reaches a helper function the design reads throu
   expect_equal(draw_estimands(design)$estimand, 100)
   expect_equal(draw_estimands(redesign(design, dp_k = 1000))$estimand, 1000)
 })
+
+test_that("declare_parameters() with nothing to declare is a no-op step", {
+  design <- declare_parameters() + declare_model(N = 5, Y = seq_len(N)) +
+    declare_inquiry(m = mean(Y))
+  expect_equal(nrow(design_parameters(design)), 0L)
+  expect_equal(run_design(design)$estimand, 3)
+})
+
+test_that("a primitive can be a declared parameter and be redesigned", {
+  # A declared function is rehomed so that the steps reading it see the
+  # declared one. A primitive has no environment to rehome, so there is
+  # nothing to do and the value is bound as any other value is.
+  design <- declare_parameters(f = sum) + declare_model(N = 5, Y = seq_len(N)) +
+    declare_inquiry(m = f(Y))
+  expect_equal(run_design(design)$estimand, 15)
+  expect_equal(run_design(redesign(design, f = prod))$estimand, 120)
+})
