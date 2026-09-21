@@ -423,3 +423,40 @@ test_that("expand_design() is deprecated and redesign() of the designer's result
   expect_equal(nrow(draw_data(new[[2]])), 20L)
   expect_equal(nrow(draw_data(old[[2]])), 20L)
 })
+
+test_that("a redesigned custom step passes fabricate its own formals", {
+  # The redesign closure has to mirror declare_step()'s own, and it carried
+  # the same defect: `N` is a formal of `fabricate()` rather than one of its
+  # dots, so a spliced quosure reached it unevaluated. The step worked and
+  # broke on being redesigned, which is why fixing the two sites that were
+  # measured was not enough.
+  local({
+    m <- 3
+    step <- declare_step(handler = fabricatr::fabricate, N = m)
+    expect_equal(nrow(step(NULL)), 3L)
+    expect_equal(nrow(draw_data(redesign(step, m = 7))), 7L)
+  })
+})
+
+test_that("redesign refuses anything that is not a design", {
+  expect_error(redesign(42, N = 3), "must be a `design` or `design_step`")
+})
+
+test_that("a designer sweep of a single value returns the design itself", {
+  designer <- function(N = 10) {
+    declare_model(N = N, Y = rnorm(N)) + declare_inquiry(m = mean(Y))
+  }
+  out <- suppressWarnings(expand_design(designer, N = 20))
+  expect_s3_class(out, "design")
+  expect_equal(nrow(draw_data(out)), 20L)
+})
+
+test_that("`.expand = FALSE` requires parameter vectors of one length", {
+  designer <- function(N = 10, k = 1) declare_model(N = N, Y = rnorm(N) + k)
+  expect_error(
+    suppressWarnings(
+      expand_design(designer, N = c(10, 20), k = c(1, 2, 3), .expand = FALSE)
+    ),
+    "length 1 or the same length"
+  )
+})

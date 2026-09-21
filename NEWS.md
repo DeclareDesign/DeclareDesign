@@ -37,7 +37,7 @@ DeclareDesign 2.0 is a ground-up reimplementation on tidyverse primitives. The d
 
 ## Messages that were silences
 
-* A `declare_measurement()`, `declare_assignment()` or `declare_sampling()` step that supplies its own rows, rather than receiving them from the model, no longer appends a row id column. The flag that controls this was set at all four call sites and never passed to `fabricate()`, so the steps avoided a stray `ID` column only because they normally run with data already in hand. 1.x wrote `ID_label = NA` at each of those sites.
+* A `declare_measurement()`, `declare_assignment()` or `declare_sampling()` step that supplies its own rows, rather than receiving them from the model, no longer appends a row id column. The flag that controls this was set at all four call sites and never passed to `fabricate()`, so the steps avoided a stray `ID` column only because they normally run with data already in hand. 1.x wrote `ID_label = NA` at each of those sites. The rule belongs to the verb rather than to the handler, so it holds whether or not the declaration spells out `handler = fabricate`; in 1.x that was a different handler from the verb's own and appended an `ID`.
 
 
 * An inquiry that no estimator targets keeps its own row in a diagnosis, with an NA estimator and its `mean_estimand`, as in 1.x; the join had dropped it.

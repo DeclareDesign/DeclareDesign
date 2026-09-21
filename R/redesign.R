@@ -71,7 +71,7 @@ rebuild_step <- function(step, new_dots, new_side = list()) {
       d        <- new_dots
       function(data) {
         if (handler_is_fabricate(handler)) {
-          rlang::inject(handler(data = data, !!!d))
+          call_fabricate_with_dots(data, d)
         } else {
           call_env <- rlang::env(decl_env, .dd_data = data)
           eval(rlang::call2(handler, quote(.dd_data), !!!args), envir = call_env)

@@ -65,3 +65,17 @@ test_that("single estimator is not autolabeled", {
   ]
   expect_equal(attr(est_steps[[1]], "label"), "my_est")
 })
+
+test_that("two unlabelled identical estimators are suffixed on the inferred label", {
+  # The suffix goes on the label the user set, when they set one and set the
+  # same one twice (`ols.a`, `ols.b` above). With neither labelled, the
+  # original is the default `estimator` and carries no information, so the
+  # suffix goes on the inferred formula label instead.
+  design <- suppressMessages(
+    declare_model(N = 20, Y = rnorm(N), Z = rep(0:1, 10)) +
+      declare_estimator(Y ~ Z, .method = lm, term = "Z") +
+      declare_estimator(Y ~ Z, .method = lm, term = "Z")
+  )
+  lbls <- vapply(unclass(design), function(s) attr(s, "label"), character(1))
+  expect_true(all(c("Y~Z.a", "Y~Z.b") %in% lbls))
+})
