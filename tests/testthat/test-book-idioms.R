@@ -1,16 +1,14 @@
-# Regression tests for patterns drawn directly from book.declaredesign.org.
-# Each test exercises a code idiom from the book chapters; if any of these
-# break, the package has lost drop-in compatibility with DeclareDesign for
-# the canonical examples readers encounter first.
-
-skip_if_no_estimatr <- function() {
-  testthat::skip_if_not_installed("estimatr")
-  testthat::skip_if_not_installed("randomizr")
-  testthat::skip_if_not_installed("fabricatr")
-}
+# Idioms drawn directly from book.declaredesign.org, as regression tests.
+#
+# Not the book's design corpus, which is tests/acceptance/. Each test here
+# exercises a way of writing something that the book teaches first: a bare
+# formula reaching the estimator, a 1.x alias, a redesign over a free symbol,
+# a list of designs into diagnose_design(). If one breaks, the package has
+# lost drop-in compatibility for the spelling a reader meets on page one.
+# Nothing here needs a modelling package beyond the Depends, which is why it
+# sits with the unit tests and runs on CRAN.
 
 test_that("formula passed via `Y ~ Z` reaches lm_robust as a real formula", {
-  skip_if_no_estimatr()
   design <- declare_model(N = 60, U = rnorm(N),
                           fabricatr::potential_outcomes(Y ~ 0.2 * Z + U)) +
     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
@@ -50,7 +48,6 @@ test_that("inquiry subset filters before estimand evaluation", {
 })
 
 test_that("redesign substitutes parameters captured as free symbols", {
-  skip_if_no_estimatr()
   declaration <-
     declare_model(N = N, U = rnorm(N),
                   fabricatr::potential_outcomes(Y ~ 0.2 * Z + U)) +
@@ -68,7 +65,6 @@ test_that("redesign substitutes parameters captured as free symbols", {
 })
 
 test_that("redesign parameters surface as columns in simulations and diagnosands", {
-  skip_if_no_estimatr()
   d <- declare_model(N = N, U = rnorm(N),
                      fabricatr::potential_outcomes(Y ~ 0.2 * Z + U)) +
     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
@@ -90,7 +86,6 @@ test_that("redesign parameters surface as columns in simulations and diagnosands
 })
 
 test_that("default diagnosands tolerate designs with no inquiry", {
-  skip_if_no_estimatr()
   design <- declare_model(N = 80) +
     declare_measurement(Y = rbinom(n = N, size = 1, prob = 0.55)) +
     declare_test(handler = label_estimator(function(data) {
@@ -105,7 +100,6 @@ test_that("default diagnosands tolerate designs with no inquiry", {
 })
 
 test_that("declare_inquiry handler form (e.g. tibble) supports forward-referencing args", {
-  skip_if_no_estimatr()
   x_range <- 1:5
   design <- declare_model(N = 30, X = runif(N, 0, 1)) +
     declare_inquiry(
@@ -122,7 +116,6 @@ test_that("declare_inquiry handler form (e.g. tibble) supports forward-referenci
 })
 
 test_that("diagnose_design accepts a list of designs and adds a `design` column", {
-  skip_if_no_estimatr()
   d1 <- simple_design(N = 30, ate = 0.0)
   d2 <- simple_design(N = 30, ate = 0.5)
   diag <- diagnose_design(list(d1, d2), sims = 3, bootstrap_sims = 0)
@@ -132,7 +125,6 @@ test_that("diagnose_design accepts a list of designs and adds a `design` column"
 })
 
 test_that("simulate_design accepts a list of redesigned designs", {
-  skip_if_no_estimatr()
   d <- simple_design(N = 30)
   designs <- redesign(d, ate = c(0, 0.3))
   sims <- simulate_design(designs, sims = 2)
@@ -164,7 +156,6 @@ test_that("insert_step / replace_step / delete_step still work after deprecation
 })
 
 test_that("set_diagnosands stores diagnosands used by diagnose_design", {
-  skip_if_no_estimatr()
   d <- simple_design(N = 30)
   d <- suppressWarnings(
     set_diagnosands(d, declare_diagnosands(power = mean(p.value <= 0.05)))
@@ -182,7 +173,6 @@ test_that("select_diagnosands subsets the diagnosand set", {
 })
 
 test_that("tidy(diagnosis) reshapes diagnosands long", {
-  skip_if_no_estimatr()
   d <- simple_design(N = 30)
   diag <- diagnose_design(d, sims = 3, bootstrap_sims = 0)
   td <- generics::tidy(diag)
@@ -191,7 +181,6 @@ test_that("tidy(diagnosis) reshapes diagnosands long", {
 })
 
 test_that("get_simulations and get_diagnosands return tibbles", {
-  skip_if_no_estimatr()
   d <- simple_design(N = 30)
   diag <- diagnose_design(d, sims = 3, bootstrap_sims = 0)
   expect_s3_class(get_simulations(diag), "tbl_df")
@@ -199,7 +188,6 @@ test_that("get_simulations and get_diagnosands return tibbles", {
 })
 
 test_that("label_estimator wraps a custom function for declare_estimator", {
-  skip_if_no_estimatr()
   my_est <- label_estimator(
     function(data, ...) lm(Y ~ Z, data = data),
     label = "ols", inquiry = "ATE", term = "Z"

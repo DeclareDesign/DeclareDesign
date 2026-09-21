@@ -13,3 +13,5 @@
 ^.*\.tar\.gz$
 ^.*\.zip$
 ^data-raw$
+^tests/testthat/_problems$
+^tests/testthat/testthat-problems\.rds$

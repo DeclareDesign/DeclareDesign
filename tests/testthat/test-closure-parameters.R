@@ -27,7 +27,6 @@ test_that("a parameter one function deeper than the handler is reached", {
 })
 
 test_that("a .method reads its parameters out of its closure too", {
-  skip_if_not_installed("estimatr")
   local({
     shift <- 100
     my_method <- function(formula, data) {
@@ -62,7 +61,6 @@ test_that("this package's own closures are not reported as design parameters", {
   # environment, and only its ancestors are the namespace. Walking into one
   # reported `term`, `label`, `.method` and `summary_fn` as parameters of 37
   # library designs.
-  skip_if_not_installed("estimatr")
   design <- declare_model(N = 20, u = rnorm(N), Z = rep(0:1, 10), Y = u + Z) +
     declare_estimator(Y ~ Z, .method = estimatr::lm_robust, term = "Z")
   found <- design_parameters(design)$name
@@ -73,8 +71,6 @@ test_that("this package's own closures are not reported as design parameters", {
 test_that("Macartan's twice-reported N and se_type are gone", {
   # His 2026-08-22 example: `design_parameters()` listed `N` at two values and
   # `se_type` at two values, none of which a redesign could coherently change.
-  skip_if_not_installed("estimatr")
-  skip_if_not_installed("randomizr")
   local({
     N <- 200
     design <-
@@ -98,7 +94,6 @@ test_that("a function passed to .method, .summary or handler is reachable by nam
   # Six library designs advertised a parameter `redesign()` could not reach,
   # because `.method`, `.summary` and `handler` are formals: the function
   # arrived as a value and its name appeared in no quosure.
-  skip_if_not_installed("estimatr")
   local({
     plain <- function(x) tibble::tibble(term = "a", estimate = 1)
     doubled <- function(x) tibble::tibble(term = "a", estimate = 2)

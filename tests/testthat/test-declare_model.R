@@ -54,7 +54,6 @@ test_that("declare_model accepts a custom handler", {
 test_that("multilevel declare_model nests and draws independently per cluster", {
   # No test touched add_level or nest_level, which is how a recycling bug in
   # the nested path went unnoticed: every cluster received identical residuals.
-  skip_if_not_installed("randomizr")
   set.seed(4)
   design <- declare_model(
     villages = add_level(N = 25, u_v = rnorm(N)),
@@ -84,7 +83,6 @@ test_that("a handler receives its arguments as written, not as values", {
   # `declare_step()` has always passed arguments as written; the fabricate-based
   # steps evaluated them first, which called dplyr verbs without their data and
   # left tidyselect handlers holding a vector where a column name belonged.
-  skip_if_not_installed("dplyr")
   base <- declare_model(N = 4, x = 1:4, wt = c(1, 2, 1, 2))
 
   plain <- draw_data(base + declare_model(y = x * 2, handler = dplyr::mutate))
@@ -100,7 +98,6 @@ test_that("a handler receives its arguments as written, not as values", {
 })
 
 test_that("uncount as a handler drops the weights column it was given", {
-  skip_if_not_installed("tidyr")
   base <- declare_model(N = 4, x = 1:4, wt = c(1, 2, 1, 2))
   out <- draw_data(base + declare_model(handler = tidyr::uncount, weights = wt))
   expect_equal(nrow(out), 6L)
@@ -113,7 +110,6 @@ test_that("a handler with no data argument is still called without data", {
 })
 
 test_that("resample_data as a handler takes a scalar N", {
-  skip_if_not_installed("fabricatr")
   pilot <- data.frame(a = 1:5, b = 6:10)
   n_out <- 12
   out <- draw_data(declare_model(data = pilot, handler = fabricatr::resample_data,

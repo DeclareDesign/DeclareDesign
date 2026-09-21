@@ -1,23 +1,16 @@
 # Attached the way a user attaches them: designs are written with bare
 # add_level(), complete_ra(), lm_robust() and if_else() calls, so these have to
 # be on the search path for the tests to exercise the path users actually take.
-# The Suggests are attached only if present; tests that need one say so with
-# skip_if_not_installed().
-library(fabricatr)
+#
+# randomizr, fabricatr and estimatr are Depends, so library(DeclareDesign)
+# already attached them and a skip_if_not_installed() on any of the three can
+# never fire. Seventeen of them were written here anyway, and they read as
+# "this test is optional" over tests that are not. The Suggests really are
+# optional and are skipped around where they are used: furrr, future,
+# progressr, withr, MASS.
 library(dplyr)
 library(tidyr)
 library(purrr)
-# randomizr and estimatr are Suggests and carry the ordinary tests. The rest
-# are needed only by test-book-designs.R, which is skipped on CRAN, so they are
-# attached when present and never declared as dependencies.
-for (pkg in c("randomizr", "estimatr", "rdss", "stringr", "margins", "bbmle",
-              "MatchIt", "broom.mixed", "grf", "spdep", "DIDmultiplegt",
-              "CausalQueries", "rstanarm", "cjoint", "lme4", "rdrobust",
-              "sf", "marginaleffects", "metafor", "MASS")) {
-  if (requireNamespace(pkg, quietly = TRUE)) {
-    suppressMessages(library(pkg, character.only = TRUE))
-  }
-}
 
 simple_design <- function(N = 50, ate = 0.3) {
   declare_model(N = N, U = rnorm(N), Y_Z_1 = U + ate, Y_Z_0 = U) +

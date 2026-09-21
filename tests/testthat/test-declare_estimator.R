@@ -162,8 +162,6 @@ test_that("a tidy-evaluating helper resolves its own column names", {
 })
 
 test_that("the ordinary estimator spellings are unaffected", {
-  skip_if_not_installed("estimatr")
-  skip_if_not_installed("randomizr")
   my_weights <- runif(60, 0.5, 1.5)
   model <- declare_model(N = 60, cl = rep(1:6, each = 10), U = rnorm(N),
                          Z = randomizr::complete_ra(N), Y = U + 0.4 * Z,
@@ -210,7 +208,6 @@ test_that(".summary accepts the formula shorthand", {
   # declaration_9.3 in the book writes `.summary = ~tidy_stan(., exponentiate = TRUE)`.
   # DeclareDesign 1.1.1 accepts it; the rewrite called the formula as a function
   # and failed with `could not find function "summary_fn"`.
-  skip_if_not_installed("estimatr")
   design <- declare_model(N = 50, Y = rnorm(N)) +
     declare_assignment(Z = randomizr::complete_ra(N)) +
     declare_estimator(Y ~ Z, .method = estimatr::lm_robust,

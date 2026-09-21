@@ -185,7 +185,6 @@ test_that("a name the design expects redesign to supply is not refused", {
   # break every design written to be called through a designer function.
   declaration <- declare_model(N = N, U = rnorm(N)) +
     declare_assignment(Z = randomizr::complete_ra(N = N, prob = prob))
-  skip_if_not_installed("randomizr")
   designs <- redesign(declaration, N = c(20, 40), prob = 0.5)
   expect_length(designs, 2L)
   expect_equal(vapply(designs, function(d) nrow(draw_data(d)), integer(1)),
@@ -286,7 +285,6 @@ test_that("the redesign warning is not silenced by a package of the same name", 
 })
 
 test_that("a design that reads a package object is still redesignable", {
-  skip_if_not_installed("randomizr")
   design <- declare_parameters(n = 20) +
     declare_model(N = n, Y = rnorm(N)) +
     declare_assignment(Z = randomizr::complete_ra(N))

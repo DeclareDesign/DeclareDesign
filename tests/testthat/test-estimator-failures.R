@@ -25,7 +25,6 @@ two_estimator_design <- function(handler) {
 }
 
 test_that("one failing draw does not abort the run", {
-  skip_if_not_installed("estimatr")
   design <- two_estimator_design(flaky(fail_on = 2L))
   sims <- suppressWarnings(simulate_design(design, sims = 4))
   expect_s3_class(sims, "data.frame")
@@ -33,7 +32,6 @@ test_that("one failing draw does not abort the run", {
 })
 
 test_that("the failure is recorded, with its message", {
-  skip_if_not_installed("estimatr")
   design <- two_estimator_design(flaky(fail_on = c(1L, 3L)))
   sims <- suppressWarnings(simulate_design(design, sims = 4))
   failed <- sims[!is.na(sims$error) & sims$error, ]
@@ -44,7 +42,6 @@ test_that("the failure is recorded, with its message", {
 })
 
 test_that("one warning per run, naming the estimator and the count", {
-  skip_if_not_installed("estimatr")
   design <- two_estimator_design(flaky(fail_on = c(1L, 2L, 3L)))
   ws <- character(0)
   withCallingHandlers(
@@ -61,7 +58,6 @@ test_that("one warning per run, naming the estimator and the count", {
 })
 
 test_that("a run with no failures warns not at all", {
-  skip_if_not_installed("estimatr")
   design <- two_estimator_design(flaky(fail_on = integer(0)))
   ws <- character(0)
   withCallingHandlers(
@@ -78,7 +74,6 @@ test_that("n_sims counts the draws a diagnosand actually used", {
   # The point of the whole exercise. If the failed rows were summarised
   # instead of dropped, n_sims would read 6 for both estimators while every
   # default diagnosand, all of which carry na.rm = TRUE, computed on fewer.
-  skip_if_not_installed("estimatr")
   design <- two_estimator_design(flaky(fail_on = c(1L, 2L)))
   d <- suppressWarnings(
     get_diagnosands(diagnose_design(design, sims = 6, bootstrap_sims = 0))
@@ -89,7 +84,6 @@ test_that("n_sims counts the draws a diagnosand actually used", {
 })
 
 test_that("a design whose only estimator always fails still diagnoses", {
-  skip_if_not_installed("estimatr")
   design <- declare_model(N = 30, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.3) +
     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
     declare_assignment(Z = sample(rep(0:1, length.out = N))) +
@@ -107,7 +101,6 @@ test_that("a single run re-raises rather than returning an NA row", {
   # answer than the error. Two tests elsewhere in this suite depend on this
   # (test-basic_workflow.R and test-declare_estimator.R), and they are what
   # caught the first version of this feature swallowing errors everywhere.
-  skip_if_not_installed("estimatr")
   # A fresh design per assertion: flaky() counts its own calls, so reusing one
   # would let the first assertion consume the failing draw.
   expect_error(draw_estimates(two_estimator_design(flaky(fail_on = 1L))),
@@ -117,7 +110,6 @@ test_that("a single run re-raises rather than returning an NA row", {
 })
 
 test_that("the same design tolerates the same failure under simulation", {
-  skip_if_not_installed("estimatr")
   design <- two_estimator_design(flaky(fail_on = 1L))
   sims <- suppressWarnings(simulate_design(design, sims = 3))
   expect_equal(sum(sims$error, na.rm = TRUE), 1)
