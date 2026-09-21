@@ -23,6 +23,34 @@ handler_is_fabricate <- function(handler) {
   FALSE
 }
 
+#' Call `fabricate()` with the declared dots
+#'
+#' `fabricate()` reads `N` and `ID_label` off its own formals, and a quosure
+#' spliced into a formal arrives as a quosure object rather than as a value, so
+#' `rlang::inject(fabricate(data = data, !!!dots))` errored with "fabricate()
+#' was given an object of class quosure" on any declaration naming one of them.
+#' `declare_model(handler = fabricate, N = 5)` is 1.x's documented spelling and
+#' it was one of them. `fabricate_with_dots()` is the same function's
+#' dots-taking entry point, and it is the route the unspelled handler already
+#' takes, so the two spellings now run the same code.
+#'
+#' @param default_id_label The id column to append when the declaration does
+#'   not name one: `"ID"` for a model or custom step, `NA` for the three verbs
+#'   that do not append a row id of their own.
+#' @keywords internal
+#' @noRd
+call_fabricate_with_dots <- function(data, dots, default_id_label = "ID") {
+  nm <- names(dots) %||% rep("", length(dots))
+  is_id <- !is.na(nm) & nm == "ID_label"
+  id_label <- if (any(is_id)) {
+    rlang::eval_tidy(dots[[which(is_id)[1]]])
+  } else {
+    default_id_label
+  }
+  fabricatr::fabricate_with_dots(data = data, dots = dots[!is_id],
+                                 ID_label = id_label)
+}
+
 #' Declare a custom data-handling step
 #'
 #' Wraps an arbitrary handler function as a step in the design. The handler
@@ -69,7 +97,7 @@ declare_step <- function(handler, ..., label = "custom_step", draws = 1L) {
   args <- dots_as_written(dots)
   fn <- function(data) {
     if (handler_is_fabricate(handler)) {
-      rlang::inject(handler(data = data, !!!dots))
+      call_fabricate_with_dots(data, dots)
     } else {
       # `.dd_data` holds this step's data frame for the duration of one call.
       # Arguments go in as written, so anything the handler resolves against

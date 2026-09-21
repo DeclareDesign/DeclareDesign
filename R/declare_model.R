@@ -39,12 +39,10 @@ make_fabricate_step <- function(dots, id_label_na = FALSE) {
       if (handler_is_fabricate(handler_fn)) {
         # A model step keeps fabricate()'s default id; the other three suppress
         # it, unless the declaration names ID_label itself.
-        extra <- if (id_label_na && !"ID_label" %in% names(rest)) {
-          list(ID_label = NA)
-        } else {
-          list()
-        }
-        return(rlang::inject(handler_fn(data = data, !!!rest, !!!extra)))
+        return(call_fabricate_with_dots(
+          data, rest,
+          default_id_label = if (id_label_na) NA else "ID"
+        ))
       }
       # Arguments reach the handler as written, which is what `declare_step()`
       # does and what DeclareDesign 1.x did here. A handler that resolves its

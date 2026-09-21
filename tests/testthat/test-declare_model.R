@@ -169,3 +169,54 @@ test_that("a step given data in hand is unchanged by the id rule", {
     declare_assignment(Z = rbinom(N, 1, 0.5))
   expect_equal(names(draw_data(design)), c("ID", "X", "Y", "Z"))
 })
+
+test_that("`handler = fabricate` reaches fabricate's own formals", {
+  # `fabricate()` reads `N` and `ID_label` off its formals, so a quosure
+  # spliced into one arrived as a quosure object and the call died inside
+  # fabricate with "given an object of class quosure". Every declaration that
+  # spelled the handler out and named `N` was affected, and that is 1.x's
+  # documented spelling: DeclareDesign 1.1.1 accepts all four of these.
+  # Arguments reaching fabricate through `...` were fine throughout, which is
+  # why the handler tests in test-basic-workflow.R passed over it.
+  expect_equal(nrow(declare_model(handler = fabricate, N = 5)(NULL)), 5L)
+  expect_equal(nrow(declare_sampling(handler = fabricate, N = 3)(NULL)), 3L)
+  expect_equal(nrow(declare_assignment(handler = fabricate, N = 3)(NULL)), 3L)
+  expect_equal(nrow(declare_measurement(handler = fabricate, N = 3)(NULL)), 3L)
+  df <- declare_model(handler = fabricate, N = 4, X = seq_len(N))(NULL)
+  expect_equal(df$X, 1:4)
+})
+
+test_that("spelling the handler out does not change the verb's id rule", {
+  # The id belongs to the verb rather than to the handler: a model step names
+  # its rows and the other three do not, on either spelling. 1.1.1 differs,
+  # because there `fabricate` was declare_model()'s own default and the other
+  # three verbs had handlers of their own, so naming it on a sampling step
+  # asked for something else and got an `ID` column back.
+  expect_equal(names(declare_model(handler = fabricate, N = 3)(NULL)), "ID")
+  expect_equal(names(declare_model(N = 3)(NULL)), "ID")
+  expect_equal(names(declare_sampling(handler = fabricate, N = 3)(NULL)),
+               character(0))
+  expect_equal(names(suppressWarnings(declare_sampling(N = 3)(NULL))),
+               character(0))
+  # A declaration that names `ID_label` gets it, on any verb.
+  expect_equal(
+    names(declare_model(handler = fabricate, N = 3, ID_label = "unit")(NULL)),
+    "unit"
+  )
+  expect_equal(
+    names(declare_sampling(handler = fabricate, N = 3, ID_label = "unit")(NULL)),
+    "unit"
+  )
+})
+
+test_that("a sampling step can supply its own data", {
+  frame <- data.frame(ID = 1:6, S = rep(c(1, 0), 3))
+  # The frame is used when the step is first in the pipeline, and ignored when
+  # a previous step has already handed data along, which is the same rule
+  # `declare_model(data = )` follows.
+  expect_equal(declare_sampling(data = frame)(NULL)$ID, c(1L, 3L, 5L))
+  expect_equal(
+    nrow(declare_sampling(data = frame, S = c(1, 0, 1))(data.frame(ID = 1:3))),
+    2L
+  )
+})

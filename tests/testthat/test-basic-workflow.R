@@ -137,6 +137,14 @@ test_that("declare_step with handler = fabricate evaluates lazily", {
   expect_equal(df$X2, df$X * 2)
 })
 
+test_that("declare_step passes fabricate its own formals, not quosures", {
+  # `N` is a formal of `fabricate()` rather than one of its dots, so a spliced
+  # quosure reached it unevaluated and the step errored. The two tests either
+  # side of this one pass arguments through `...`, where eval_tidy unwraps
+  # them, which is why the branch looked exercised.
+  expect_equal(nrow(declare_step(handler = fabricatr::fabricate, N = 4)(NULL)), 4L)
+})
+
 test_that("declare_step accepts the original fabricatr::fabricate as handler", {
   pop <- declare_model(N = 10, X = seq_len(N))
   step <- declare_step(handler = fabricatr::fabricate, X2 = X * 2)

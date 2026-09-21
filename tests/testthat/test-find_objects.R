@@ -208,3 +208,43 @@ test_that("a list-valued parameter is reported with kind list", {
   expect_equal(row$kind, "list")
   expect_equal(row$value, "list(party, region)")
 })
+
+test_that("a parameter that is an S3 object is reported as `other`", {
+  design <- declare_parameters(f = factor(c("a", "b"))) + declare_model(N = 4)
+  params <- design_parameters(design)
+  expect_equal(params$kind[params$name == "f"], "other")
+})
+
+test_that("a primitive read under an alias brings no names of its own", {
+  local({
+    f <- sum
+    design <- declare_model(N = 5, Y = seq_len(N)) + declare_inquiry(q = f(Y))
+    objects <- find_all_objects(design)
+    # `f` is a name the design reads, so it is a parameter of it. `sum` is a
+    # primitive with no body and no environment, so there is nothing
+    # underneath it to walk and no row comes out of its insides.
+    expect_equal(objects$name, "f")
+    expect_equal(run_design(design)$estimand, 15)
+  })
+})
+
+test_that("a name holding a design is not a parameter of the design reading it", {
+  local({
+    other <- declare_model(N = 4, Y = seq_len(N)) + declare_inquiry(m = mean(Y))
+    k <- 3
+    design <- declare_model(N = k, Y = seq_len(N)) +
+      declare_inquiry(q = mean(Y) + length(other))
+    # A design is not a value anyone redesigns over, so `other` is passed by.
+    expect_equal(find_all_objects(design)$name, "k")
+  })
+})
+
+test_that("an objects table with no rows says so rather than printing a header", {
+  design <- declare_model(N = 10, Y = rnorm(N))
+  expect_output(print(design_parameters(design)),
+                "No parameters or objects found")
+})
+
+test_that("find_all_objects refuses anything that is not a design", {
+  expect_error(find_all_objects(42), "must be a `design` or `design_step`")
+})
