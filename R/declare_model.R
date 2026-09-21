@@ -68,16 +68,19 @@ make_fabricate_step <- function(dots, id_label_na = FALSE) {
       }
       return(eval(cl, envir = call_env))
     }
-    # Use fabricate_with_dots to avoid double-quoting: !!!-injection turns
+    # Use fabricate_with_dots() to avoid double-quoting: !!!-injection turns
     # quosures into formula objects (~expr), which fabricate()'s enquos()
-    # would re-capture incorrectly.
+    # would re-capture incorrectly. It is fabricatr's exported entry point for
+    # a caller that captured the expressions itself, and the contract is
+    # asserted on both sides: fabricatr's test-declaredesign-api.R and this
+    # package's test-fabricatr-contract.R.
     #
     # `id_label_na` is what keeps a measurement, assignment or sampling step
     # from appending a row id, which is what 1.x did by writing
     # `ID_label = NA` at each of those four call sites. It was forced above and
     # then never passed on, so the flag was inert and those steps avoided a
     # stray ID column only because they always run with data already in hand.
-    fabricatr:::fabricate_with_dots(
+    fabricatr::fabricate_with_dots(
       data = data,
       dots = rest,
       ID_label = if (id_label_na) NA else "ID"
@@ -232,7 +235,7 @@ make_sampling_step <- function(dots, filter_quo) {
     }
     # A sampling step never appends a row id, the same as the handler branch
     # above and the same as 1.x's `fabricate(data = data, ..., ID_label = NA)`.
-    data <- fabricatr:::fabricate_with_dots(data = data, dots = rest,
+    data <- fabricatr::fabricate_with_dots(data = data, dots = rest,
                                             ID_label = NA)
     if (!is.null(filter_quo)) {
       keep <- rlang::eval_tidy(filter_quo, data = data)
