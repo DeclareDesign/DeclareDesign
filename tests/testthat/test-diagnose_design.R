@@ -39,20 +39,6 @@ test_that("bootstrap tolerates diagnosands that cannot be computed", {
   expect_true("se(mean_estimate)" %in% names(diag_df))
 })
 
-test_that("legacy `model =` is read as `.method` with a deprecation warning", {
-  expect_warning(
-    step <- declare_estimator(Y ~ Z, model = estimatr::lm_robust, term = "Z",
-                              label = "ols"),
-    "deprecated"
-  )
-  expect_identical(attr(step, "method_name"), "lm_robust")
-  design <- declare_model(N = 40, U = rnorm(N), Z = rep(0:1, 20),
-                          Y = U + 0.5 * Z) + step
-  est <- draw_estimates(design)
-  expect_equal(nrow(est), 1L)
-  expect_false("model" %in% names(est))
-})
-
 test_that("designs supplied in a list keep the list's own names", {
   designs <- list(dum = simple_design(N = 30), dee = simple_design(N = 30))
   d <- diagnose_design(designs, sims = 5, bootstrap_sims = 0)

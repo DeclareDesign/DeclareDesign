@@ -220,3 +220,103 @@ test_that(".summary accepts the formula shorthand", {
   )
   expect_s3_class(labelled(draw_data(design)), "data.frame")
 })
+
+test_that("tidy_try falls back to the coefficient matrix when broom cannot tidy the fit", {
+  coefs <- matrix(c(0.5, 0.1, 5, 0.01), nrow = 1,
+                  dimnames = list("Z", c("Estimate", "Std. Error", "t value",
+                                         "Pr(>|t|)")))
+  assign("summary.ddtoyfit", function(object, ...) list(coefficients = coefs),
+         envir = globalenv())
+  assign("summary.ddbarefit", function(object, ...) list(), envir = globalenv())
+  withr::defer(rm("summary.ddtoyfit", "summary.ddbarefit", envir = globalenv()))
+
+  out <- DeclareDesign:::tidy_try(structure(list(), class = "ddtoyfit"))
+  expect_equal(out$term, "Z")
+  expect_equal(out$estimate, 0.5)
+  expect_equal(out$std.error, 0.1)
+  expect_equal(out$statistic, 5)
+  expect_equal(out$p.value, 0.01)
+
+  # No coefficient matrix either: an empty table of the right shape, so the
+  # draw is a failed draw rather than a malformed one.
+  bare <- DeclareDesign:::tidy_try(structure(list(), class = "ddbarefit"))
+  expect_equal(nrow(bare), 0L)
+  expect_equal(names(bare), c("term", "estimate", "std.error", "statistic",
+                              "p.value", "conf.low", "conf.high"))
+})
+
+test_that("an inquiry may be a list or anything that is a string when coerced", {
+  expect_equal(DeclareDesign:::normalize_inquiry(list("ATE", "ATT")),
+               c("ATE", "ATT"))
+  expect_equal(DeclareDesign:::normalize_inquiry(factor("ATE")), "ATE")
+  expect_null(DeclareDesign:::normalize_inquiry(NULL))
+})
+
+test_that("a named term leaves a handler's table alone when it has no term column", {
+  design <- declare_model(N = 20, Y = rnorm(N), Z = rep(0:1, 10)) +
+    declare_estimator(handler = function(data) data.frame(estimate = 1),
+                      term = "Z", label = "termless")
+  expect_equal(draw_estimates(design)$estimate, 1)
+})
+
+test_that("a handler's table is filtered when a term is named and it has terms", {
+  design <- declare_model(N = 20, Y = rnorm(N), Z = rep(0:1, 10)) +
+    declare_estimator(handler = function(data) {
+      data.frame(term = c("(Intercept)", "Z"), estimate = c(3, 7))
+    }, term = "Z", label = "picky")
+  estimates <- draw_estimates(design)
+  expect_equal(estimates$term, "Z")
+  expect_equal(estimates$estimate, 7)
+})
+
+test_that("more estimate rows than inquiries attaches the first inquiry", {
+  design <- declare_model(N = 20, Y = rnorm(N), Z = rep(0:1, 10)) +
+    declare_estimator(handler = function(data) {
+      data.frame(term = c("a", "b", "c"), estimate = c(1, 2, 3))
+    }, inquiry = c("A", "B"), label = "three")
+  expect_equal(draw_estimates(design)$inquiry, rep("A", 3))
+})
+
+test_that("a failed draw keeps the inquiry the estimator named", {
+  design <- declare_model(N = 20, Y = rnorm(N), Z = rep(0:1, 10)) +
+    declare_inquiry(ATE = 0.5) +
+    declare_estimator(handler = function(data) stop("no fit today"),
+                      inquiry = "ATE", label = "broken")
+  sims <- suppressWarnings(simulate_design(design, sims = 2))
+  expect_true(all(sims$error))
+  expect_equal(unique(sims$inquiry), "ATE")
+})
+
+test_that("legacy `model =` is read as `.method` with a deprecation warning", {
+  # The warning is `.frequency = "once"`, so only the first call in the session
+  # raises it. Everything about `model =` is asserted here, in one test, for
+  # that reason: a second test elsewhere would pass or fail on file order.
+  expect_warning(
+    step <- declare_estimator(Y ~ Z, model = estimatr::lm_robust, term = "Z",
+                              label = "ols"),
+    "deprecated"
+  )
+  expect_identical(attr(step, "method_name"), "lm_robust")
+  design <- declare_model(N = 40, U = rnorm(N), Z = rep(0:1, 20),
+                          Y = U + 0.5 * Z) + step
+  est <- draw_estimates(design)
+  expect_equal(nrow(est), 1L)
+  expect_equal(est$term, "Z")
+  expect_equal(est$estimator, "ols")
+  expect_false("model" %in% names(est))
+
+  later <- suppressWarnings(
+    declare_estimator(Y ~ Z, model = lm, term = "Z", label = "legacy"))
+  expect_identical(attr(later, "method_name"), "lm")
+})
+
+test_that("a method written inline is named `custom` rather than deparsed whole", {
+  long <- function(formula, data) lm(formula, data = data)
+  expect_equal(
+    DeclareDesign:::method_expr_label(
+      quote(function(formula, data) estimatr::lm_robust(formula, data = data))),
+    "custom")
+  expect_equal(DeclareDesign:::method_expr_label(quote(estimatr::lm_robust)),
+               "lm_robust")
+  expect_null(DeclareDesign:::method_expr_label(NULL))
+})
