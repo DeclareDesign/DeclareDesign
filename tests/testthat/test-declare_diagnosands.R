@@ -45,3 +45,33 @@ test_that("a diagnosand that errors comes back NA rather than aborting", {
                        diagnosands = declare_diagnosands(boom = stop("no")))
   expect_true(all(is.na(d$diagnosands_df$boom)))
 })
+
+test_that("a diagnosands step evaluates its own expressions the way diagnose_design does", {
+  # The step is a function and nothing in the package calls it: diagnose_design
+  # reads the dots off the step and evaluates them in compute_diagnosands().
+  # Asserting the two agree on one table is what would catch them drifting.
+  design <- declare_model(N = 40, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = sample(rep(0:1, length.out = N))) +
+    declare_measurement(Y = Y_Z_0 * (1 - Z) + Y_Z_1 * Z) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
+                      label = "ols")
+  sims <- simulate_design(design, sims = 6)
+  diagnosands <- declare_diagnosands(bias = mean(estimate - estimand),
+                                     power = mean(p.value <= alpha))
+
+  direct <- diagnosands(sims)
+  expect_equal(direct$diagnosand, c("bias", "power"))
+
+  computed <- DeclareDesign:::compute_diagnosands(sims, diagnosands, character(0))
+  expect_equal(direct$value[direct$diagnosand == "bias"], computed$bias)
+  expect_equal(direct$value[direct$diagnosand == "power"], computed$power)
+})
+
+test_that("select_diagnosands() forwards its subset as an expression, not a quosure", {
+  diagnosands <- select_diagnosands("bias", "power", subset = p.value < 0.5)
+  subset_quo <- attr(diagnosands, "subset_quo")
+  expect_true(rlang::is_quosure(subset_quo))
+  expect_false(rlang::is_quosure(rlang::quo_get_expr(subset_quo)))
+  expect_equal(rlang::quo_get_expr(subset_quo), quote(p.value < 0.5))
+})

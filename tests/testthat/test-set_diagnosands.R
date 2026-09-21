@@ -151,3 +151,19 @@ test_that("a redesigned design is diagnosed with the defaults, not the attached 
   # The attached set was one diagnosand; the full default seven come back.
   expect_true(all(names(attr(default_diagnosands(), "dots")) %in% diagnosands))
 })
+
+test_that("select_diagnosands() needs at least one name", {
+  expect_error(select_diagnosands(), "Name at least one diagnosand to keep")
+  expect_error(select_diagnosands(default_diagnosands()),
+               "Name at least one diagnosand to keep")
+})
+
+test_that("a design carries the citation it was given", {
+  design <- declare_model(N = 10, Y = rnorm(N)) + declare_inquiry(mu = mean(Y))
+  expect_null(cite_design(design))
+  cited <- set_citation(design, title = "Example", author = "Coppock", year = 2026)
+  expect_equal(cite_design(cited),
+               list(title = "Example", author = "Coppock", year = 2026))
+  expect_s3_class(cited, "design")
+  expect_equal(names(cited), names(design))
+})

@@ -60,3 +60,34 @@ test_that("custom inquiry handler receives `label` when it has that formal", {
   expect_equal(out$inquiry, "medianTE")
   expect_equal(out$estimand, 2)
 })
+
+test_that("unnamed inquiries take the step's label, with a suffix when there is more than one", {
+  one <- declare_model(N = 10, Y = 1:10) + declare_inquiry(mean(Y), label = "mu")
+  expect_equal(draw_estimands(one)$inquiry, "mu")
+
+  two <- declare_model(N = 10, Y = 1:10) +
+    declare_inquiry(mean(Y), median(Y), label = "mu")
+  expect_equal(draw_estimands(two)$inquiry, c("mu_1", "mu_2"))
+  expect_equal(draw_estimands(two)$estimand, c(5.5, 5.5))
+})
+
+test_that("an inquiry handler's table gets the columns the design reads", {
+  labelled <- declare_model(N = 10, Y = 1:10) +
+    declare_inquiry(handler = function(data) data.frame(estimand = mean(data$Y)),
+                    label = "mu")
+  expect_equal(draw_estimands(labelled)$inquiry, "mu")
+
+  # No `estimand` either: the first numeric column becomes it.
+  numeric_only <- declare_model(N = 10, Y = 1:10) +
+    declare_inquiry(handler = function(data) data.frame(value = c(2, 4)),
+                    label = "mu")
+  estimands <- draw_estimands(numeric_only)
+  expect_equal(estimands$inquiry, c("mu", "mu"))
+  expect_equal(estimands$estimand, c(2, 4))
+
+  # Nothing numeric to promote: the step returns what the handler gave.
+  no_number <- declare_model(N = 10, Y = 1:10) +
+    declare_inquiry(handler = function(data) data.frame(note = "none"),
+                    label = "mu")
+  expect_false("estimand" %in% names(draw_estimands(no_number)))
+})

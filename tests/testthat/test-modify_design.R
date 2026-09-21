@@ -25,3 +25,35 @@ test_that("insert_step() keeps 1.x's argument order, before then after", {
   expect_equal(names(positional), names(named))
   expect_equal(which(names(positional) == "measurement")[1], 3L)
 })
+
+test_that("a step locator is a label, an integer, or the step itself", {
+  design <- simple_design(N = 20)
+  step <- design[["assignment"]]
+  by_label <- suppressWarnings(delete_step(design, "assignment"))
+  by_index <- suppressWarnings(delete_step(design, 3))
+  by_step <- suppressWarnings(delete_step(design, step))
+  expect_equal(names(by_label), names(by_index))
+  expect_equal(names(by_label), names(by_step))
+  expect_false("assignment" %in% names(by_label))
+})
+
+test_that("a locator that names no step says so, and so does one of the wrong type", {
+  design <- simple_design(N = 20)
+  expect_error(suppressWarnings(delete_step(design, "nowhere")),
+               "No step named nowhere")
+  orphan <- declare_measurement(Y2 = Y * 2, label = "elsewhere")
+  expect_error(suppressWarnings(delete_step(design, orphan)),
+               "Step labeled elsewhere not found")
+  expect_error(suppressWarnings(delete_step(design, list())),
+               "must be a label, an integer, or a design_step")
+})
+
+test_that("insert_step() needs an anchor, and clamps one that points before the start", {
+  design <- simple_design(N = 20)
+  new <- declare_measurement(Y2 = Y * 2)
+  expect_error(suppressWarnings(insert_step(design, new)),
+               "Provide either `after` or `before`")
+  first <- suppressWarnings(insert_step(design, new, before = 0))
+  expect_equal(names(first)[1], "measurement")
+  expect_equal(length(first), length(design) + 1L)
+})
