@@ -147,3 +147,29 @@ test_that("declare_sampling() takes a custom handler, as the other data verbs do
     declare_sampling(handler = function(data) data[abs(data$X) < 1, ], filter = X > 0)
   expect_true(all(draw_data(with_filter)$X > 0))
 })
+
+test_that("only a model step appends a row id", {
+  # make_fabricate_step() carried an `id_label_na` flag, documented as "pass
+  # ID_label = NA so fabricate does not append a row id", and never passed it
+  # on. All four call sites set it deliberately and it reached nothing. It was
+  # invisible because these steps normally run with data already in hand, and
+  # fabricate() suppresses the flat id whenever data are present; a step that
+  # supplies its own rows is where it shows. 1.x wrote `ID_label = NA` at each
+  # of the four sites in declare_assignment.R, declare_measurement.R,
+  # declare_potential_outcomes.R and declare_sampling.R.
+  expect_equal(names(draw_data(declare_model(N = 4, Y = rnorm(N)))),
+               c("ID", "Y"))
+  expect_equal(names(draw_data(declare_measurement(N = 4, Y = rnorm(N)))), "Y")
+  expect_equal(names(draw_data(declare_assignment(N = 4, Z = rbinom(N, 1, 0.5)))),
+               "Z")
+  expect_equal(names(draw_data(declare_sampling(N = 4, S = 1))), "S")
+})
+
+test_that("a step given data in hand is unchanged by the id rule", {
+  # The ordinary shape: the model makes the rows and names them, and nothing
+  # downstream adds a second id column.
+  design <- declare_model(N = 5, X = rnorm(N)) +
+    declare_measurement(Y = X * 2) +
+    declare_assignment(Z = rbinom(N, 1, 0.5))
+  expect_equal(names(draw_data(design)), c("ID", "X", "Y", "Z"))
+})

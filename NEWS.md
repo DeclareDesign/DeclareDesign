@@ -37,6 +37,9 @@ DeclareDesign 2.0 is a ground-up reimplementation on tidyverse primitives. The d
 
 ## Messages that were silences
 
+* A `declare_measurement()`, `declare_assignment()` or `declare_sampling()` step that supplies its own rows, rather than receiving them from the model, no longer appends a row id column. The flag that controls this was set at all four call sites and never passed to `fabricate()`, so the steps avoided a stray `ID` column only because they normally run with data already in hand. 1.x wrote `ID_label = NA` at each of those sites.
+
+
 * An inquiry that no estimator targets keeps its own row in a diagnosis, with an NA estimator and its `mean_estimand`, as in 1.x; the join had dropped it.
 * `declare_sampling(handler = )` takes a custom sampling function, as the other data verbs do.
 * An estimator naming an inquiry no step produced warns once, naming the labels that exist.

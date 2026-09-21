@@ -37,7 +37,14 @@ make_fabricate_step <- function(dots, id_label_na = FALSE) {
     if (!is.null(user_handler_quo)) {
       handler_fn <- rlang::eval_tidy(user_handler_quo)
       if (handler_is_fabricate(handler_fn)) {
-        return(rlang::inject(handler_fn(data = data, !!!rest)))
+        # A model step keeps fabricate()'s default id; the other three suppress
+        # it, unless the declaration names ID_label itself.
+        extra <- if (id_label_na && !"ID_label" %in% names(rest)) {
+          list(ID_label = NA)
+        } else {
+          list()
+        }
+        return(rlang::inject(handler_fn(data = data, !!!rest, !!!extra)))
       }
       # Arguments reach the handler as written, which is what `declare_step()`
       # does and what DeclareDesign 1.x did here. A handler that resolves its
@@ -64,7 +71,17 @@ make_fabricate_step <- function(dots, id_label_na = FALSE) {
     # Use fabricate_with_dots to avoid double-quoting: !!!-injection turns
     # quosures into formula objects (~expr), which fabricate()'s enquos()
     # would re-capture incorrectly.
-    fabricatr:::fabricate_with_dots(data = data, dots = rest)
+    #
+    # `id_label_na` is what keeps a measurement, assignment or sampling step
+    # from appending a row id, which is what 1.x did by writing
+    # `ID_label = NA` at each of those four call sites. It was forced above and
+    # then never passed on, so the flag was inert and those steps avoided a
+    # stray ID column only because they always run with data already in hand.
+    fabricatr:::fabricate_with_dots(
+      data = data,
+      dots = rest,
+      ID_label = if (id_label_na) NA else "ID"
+    )
   }
 }
 
@@ -213,7 +230,10 @@ make_sampling_step <- function(dots, filter_quo) {
         data <- user_data
       }
     }
-    data <- fabricatr:::fabricate_with_dots(data = data, dots = rest)
+    # A sampling step never appends a row id, the same as the handler branch
+    # above and the same as 1.x's `fabricate(data = data, ..., ID_label = NA)`.
+    data <- fabricatr:::fabricate_with_dots(data = data, dots = rest,
+                                            ID_label = NA)
     if (!is.null(filter_quo)) {
       keep <- rlang::eval_tidy(filter_quo, data = data)
       data <- data[!is.na(keep) & keep, , drop = FALSE]
