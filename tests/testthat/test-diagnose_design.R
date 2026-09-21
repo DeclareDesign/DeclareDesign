@@ -161,3 +161,41 @@ test_that("an inquiry no estimator targets keeps its own diagnosis row, as in 1.
   expect_true(is.na(sigma_row$estimator))
   expect_false(is.na(sigma_row$mean_estimand))
 })
+
+# diagnose_design() as the unified entry point ----
+#
+# Moved from test-autolabel.R, which is a file about estimator labelling.
+test_that("simulate_design |> diagnose_design() works (df piped in)", {
+  design <- declare_model(N = 30, Y = rnorm(N), Z = rep(0:1, 15)) +
+    declare_inquiry(mu = mean(Y)) +
+    declare_estimator(Y ~ 1, .method = lm, term = "(Intercept)", inquiry = "mu")
+  diag <- design |> simulate_design(sims = 5) |>
+    diagnose_design(bootstrap_sims = 0)
+  expect_s3_class(diag, "diagnosis")
+})
+
+test_that("group_by() upstream of diagnose_simulations adds groups", {
+  design <- declare_model(N = 50, Y = rnorm(N), Z = rep(0:1, 25)) +
+    declare_inquiry(mu = mean(Y)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "mu")
+  diag <- design |>
+    simulate_design(sims = 10) |>
+    dplyr::mutate(big = estimate > 0) |>
+    dplyr::group_by(big) |>
+    diagnose_simulations(bootstrap_sims = 0)
+  expect_true("big" %in% names(diag$diagnosands_df))
+  expect_equal(nrow(diag$diagnosands_df), 2L)
+})
+
+test_that("group_by |> diagnose_design() works end-to-end", {
+  design <- declare_model(N = 50, Y = rnorm(N), Z = rep(0:1, 25)) +
+    declare_inquiry(mu = mean(Y)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "mu")
+  diag <- design |>
+    simulate_design(sims = 10) |>
+    dplyr::mutate(sig = p.value < 0.5) |>
+    dplyr::group_by(sig) |>
+    diagnose_design(bootstrap_sims = 0)
+  expect_s3_class(diag, "diagnosis")
+  expect_true("sig" %in% names(diag$diagnosands_df))
+})
