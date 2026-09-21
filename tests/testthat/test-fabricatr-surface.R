@@ -125,3 +125,162 @@ test_that("a design assigning treatment with draw_binary() diagnoses and redesig
   lopsided <- draw_data(redesign(design, p = 0.1))
   expect_lt(abs(mean(lopsided$Z) - 0.1), 0.05)
 })
+
+# The rest of the draw_*() family ----
+#
+# Each of these was run against 1.1.1 with fabricatr 1.0.2 first and agrees
+# with it draw for draw, except where fabricatr's own NEWS says 2.0 differs
+# on purpose. What is asserted here is what the *design* sees: the function
+# is on the search path because fabricatr is a `Depends`, its arguments may
+# be declared parameters, it reads columns drawn earlier in the same step,
+# and the column it returns is one a later step can use.
+
+test_that("draw_binomial() takes its trial count from a declared parameter", {
+  design <-
+    declare_parameters(trials = 4) +
+    declare_model(N = 500, D = draw_binomial(N = N, prob = 0.3, trials = trials))
+
+  set.seed(343)
+  dat <- draw_data(design)
+  expect_true(all(dat$D %in% 0:4))
+  expect_lt(abs(mean(dat$D) - 1.2), 0.15)
+
+  set.seed(343)
+  wider <- draw_data(redesign(design, trials = 8))
+  expect_true(all(wider$D %in% 0:8))
+  expect_lt(abs(mean(wider$D) - 2.4), 0.25)
+})
+
+test_that("draw_count() takes its mean from a declared parameter", {
+  design <-
+    declare_parameters(lambda = 2) +
+    declare_model(N = 500, D = draw_count(N = N, mean = lambda))
+
+  set.seed(343)
+  dat <- draw_data(design)
+  expect_true(all(dat$D >= 0) && all(dat$D == floor(dat$D)))
+  expect_lt(abs(mean(dat$D) - 2), 0.25)
+
+  set.seed(343)
+  expect_lt(abs(mean(draw_data(redesign(design, lambda = 6))$D) - 6), 0.5)
+})
+
+test_that("draw_categorical() reads a per-row probability matrix built in the step", {
+  # The matrix is assembled out of a column drawn a moment earlier in the
+  # same declaration, which is the whole reason it has to be tested here:
+  # fabricatr sees the assembled matrix and never the column.
+  set.seed(343)
+  dat <- draw_data(declare_model(N = 500, X = runif(N),
+                                 D = draw_categorical(prob = cbind(X, 1 - X))))
+  expect_true(all(dat$D %in% 1:2))
+  # Category 1 is drawn with probability X, so it falls on the larger X.
+  expect_gt(mean(dat$X[dat$D == 1]), mean(dat$X[dat$D == 2]))
+})
+
+test_that("draw_categorical() labels its categories", {
+  set.seed(343)
+  dat <- draw_data(declare_model(
+    N = 400, D = draw_categorical(N = N, prob = c(0.2, 0.3, 0.5),
+                                  labels = c("a", "b", "c"))))
+  expect_s3_class(dat$D, "factor")
+  expect_equal(levels(dat$D), c("a", "b", "c"))
+  expect_gt(sum(dat$D == "c"), sum(dat$D == "a"))
+})
+
+test_that("draw_likert() cuts a latent column into bins", {
+  # A value outside [min, max] takes the outermost bin rather than NA, and the
+  # codes are integer. Both are deliberate fabricatr 2.0 changes, recorded in
+  # its NEWS; 1.0.2 returned doubles and two NAs on this draw.
+  set.seed(343)
+  dat <- draw_data(declare_model(N = 400, X = rnorm(N),
+                                 D = draw_likert(x = X, min = -3, max = 3, bins = 5)))
+  expect_true(all(dat$D %in% 1:5))
+  expect_false(anyNA(dat$D))
+  expect_gt(cor(dat$X, dat$D), 0.9)
+})
+
+test_that("draw_ordered() cuts at interior break points", {
+  set.seed(343)
+  dat <- draw_data(declare_model(N = 400, X = rnorm(N),
+                                 D = draw_ordered(x = X, breaks = c(-1, 0, 1))))
+  expect_equal(sort(unique(dat$D)), 1:4)
+  expect_equal(max(dat$X[dat$D == 1]), max(dat$X[dat$X < -1]))
+})
+
+test_that("draw_quantile() and split_quantile() make equal-sized groups", {
+  set.seed(343)
+  dat <- draw_data(declare_model(N = 400, D = draw_quantile(N = N, type = 4),
+                                 X = rnorm(N), Q = split_quantile(x = X, type = 4)))
+  expect_equal(as.vector(table(dat$D)), rep(100L, 4))
+  expect_equal(as.vector(table(dat$Q)), rep(100L, 4))
+  # split_quantile() cuts the column it is given; draw_quantile() ignores it.
+  expect_lt(max(dat$X[dat$Q == 1]), min(dat$X[dat$Q == 2]))
+})
+
+test_that("an ICC draw reads the cluster column and the declared ICC", {
+  design <-
+    declare_parameters(icc = 0.8) +
+    declare_model(N = 500, cl = rep(1:50, each = 10),
+                  U = draw_normal_icc(mean = 0, clusters = cl, ICC = icc, sd = 1),
+                  D = draw_binary_icc(prob = 0.5, clusters = cl, ICC = icc))
+
+  set.seed(343)
+  dat <- draw_data(design)
+  expect_true(all(dat$D %in% 0:1))
+  spread <- function(d) var(tapply(d$U, d$cl, mean))
+
+  set.seed(343)
+  independent <- draw_data(redesign(design, icc = 0))
+  # Clustered draws move together, so the cluster means are further apart.
+  expect_gt(spread(dat), 3 * spread(independent))
+})
+
+test_that("draw_multivariate() makes several columns from one declaration", {
+  # One named dot produces two columns, which is a shape nothing else in a
+  # declaration does, and the step has to carry both out.
+  set.seed(343)
+  dat <- draw_data(declare_model(N = 1000, draw_multivariate(
+    c(X1, X2) ~ MASS::mvrnorm(n = N, mu = c(0, 0),
+                              Sigma = matrix(c(1, 0.5, 0.5, 1), 2, 2)))))
+  expect_equal(names(dat), c("ID", "X1", "X2"))
+  expect_lt(abs(cor(dat$X1, dat$X2) - 0.5), 0.1)
+})
+
+test_that("correlate() draws a variable against a column drawn before it", {
+  set.seed(343)
+  dat <- draw_data(declare_model(N = 2000, X = rnorm(N),
+                                 D = correlate(draw_binary, given = X,
+                                               rho = 0.7, prob = 0.5)))
+  expect_true(all(dat$D %in% 0:1))
+  expect_lt(abs(mean(dat$D) - 0.5), 0.05)
+  expect_gt(mean(dat$X[dat$D == 1]) - mean(dat$X[dat$D == 0]), 0.5)
+})
+
+test_that("recycle() repeats a short vector over the step's rows", {
+  dat <- draw_data(declare_model(N = 6, D = recycle(c(1, 2, 3))))
+  expect_equal(dat$D, c(1, 2, 3, 1, 2, 3))
+})
+
+test_that("a clustered design draws, assigns and estimates by cluster", {
+  # The end of the path: an ICC draw supplies the correlated outcome,
+  # randomizr assigns whole clusters, and estimatr clusters the standard
+  # error. The three packages are `Depends` and meet only inside a design.
+  design <-
+    declare_parameters(icc = 0.5, ate = 0.4) +
+    declare_model(N = 600, cl = rep(1:60, each = 10),
+                  U = draw_normal_icc(mean = 0, clusters = cl, ICC = icc, sd = 1),
+                  Y_Z_0 = U, Y_Z_1 = U + ate) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = cluster_ra(clusters = cl)) +
+    declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
+    declare_estimator(Y ~ Z, clusters = cl, inquiry = "ATE")
+
+  set.seed(343)
+  out <- run_design(design)
+  expect_equal(out$estimand, 0.4)
+  expect_lt(abs(out$estimate - 0.4), 0.5)
+  # Treatment is constant within a cluster, which is what makes it a cluster
+  # design rather than a design with a cluster column.
+  dat <- draw_data(design)
+  expect_true(all(tapply(dat$Z, dat$cl, function(z) length(unique(z))) == 1))
+})
