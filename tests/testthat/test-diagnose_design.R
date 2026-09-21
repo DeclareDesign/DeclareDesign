@@ -185,3 +185,64 @@ test_that("group_by |> diagnose_design() works end-to-end", {
   expect_s3_class(diag, "diagnosis")
   expect_true("sig" %in% names(diag$diagnosands_df))
 })
+
+test_that("diagnose_design needs a design", {
+  expect_error(diagnose_design(sims = 2), "requires at least one `design`")
+})
+
+test_that("a diagnosands argument that is not a declare_diagnosands() object is refused", {
+  expect_error(
+    diagnose_design(simple_design(N = 20), sims = 2, bootstrap_sims = 0,
+                    diagnosands = list(bias = mean)),
+    "must be a declare_diagnosands\\(\\) object"
+  )
+})
+
+test_that("a diagnosands subset that is not logical is refused", {
+  expect_error(
+    diagnose_design(simple_design(N = 20), sims = 3, bootstrap_sims = 0,
+                    diagnosands = declare_diagnosands(m = mean(estimate),
+                                                      subset = estimate)),
+    "must evaluate to a logical vector"
+  )
+})
+
+# The bootstrap needs at least two resampling units, and it needs to know what
+# a unit is. Where it cannot tell, it returns nothing rather than a standard
+# error computed over one unit.
+
+test_that("the bootstrap is skipped when the simulations carry no sim_ID", {
+  sims <- tibble::tibble(estimate = rnorm(10))
+  diag <- diagnose_design(sims, bootstrap_sims = 5,
+                          diagnosands = declare_diagnosands(m = mean(estimate)))
+  expect_false("se(m)" %in% names(get_diagnosands(diag)))
+})
+
+test_that("the bootstrap is skipped when there is only one simulation to resample", {
+  diag <- diagnose_design(simple_design(N = 20), sims = 1, bootstrap_sims = 5)
+  expect_equal(get_diagnosands(diag)$n_sims, 1L)
+  expect_false(any(grepl("^se\\(", names(get_diagnosands(diag)))))
+})
+
+test_that("bootstrap standard errors attach to an ungrouped diagnosis", {
+  # A simulations table with nothing to group by: the standard errors are
+  # bound on as columns rather than joined.
+  sims <- tibble::tibble(sim_ID = 1:10, estimate = rnorm(10))
+  diag <- diagnose_design(sims, bootstrap_sims = 5,
+                          diagnosands = declare_diagnosands(m = mean(estimate)))
+  diagnosands <- get_diagnosands(diag)
+  expect_equal(nrow(diagnosands), 1L)
+  expect_true("se(m)" %in% names(diagnosands))
+})
+
+test_that("a nested design with no estimates has no variance decomposition", {
+  # The decomposition runs over per-simulation quantities (`estimate`,
+  # `p.value` and the rest), and an inquiry-only design reports none of them.
+  design <- declare_model(N = 20, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.3) +
+    declare_assignment(Z = complete_ra(N), draws = 3) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+  diag <- diagnose_design(design, bootstrap_sims = 0,
+                          diagnosands = declare_diagnosands(m = mean(estimand)))
+  expect_null(diag$variance_decomposition)
+  expect_equal(get_diagnosands(diag)$m, 0.3)
+})
