@@ -462,14 +462,11 @@ print.summary.design <- function(x, ...) {
       cat("  ", x$steps$one_run[i], "\n", sep = "")
     }
   }
-  if (x$ran) {
-    if (nrow(x$estimates) > 0) {
-      cat("\nOne run of the design:\n")
-      print(x$estimates)
-    } else if (nrow(x$inquiries) > 0) {
-      cat("\nOne run of the design:\n")
-      print(x$inquiries)
-    }
+  # `x$estimates` is the merge of the run's estimates and inquiries, so a design
+  # with an inquiry and no estimator prints its inquiry rows here.
+  if (x$ran && nrow(x$estimates) > 0) {
+    cat("\nOne run of the design:\n")
+    print(x$estimates)
   }
   if (nrow(x$parameters) > 0) {
     cat("\nParameters and objects the design refers to:\n")

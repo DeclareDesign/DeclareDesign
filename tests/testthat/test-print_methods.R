@@ -140,3 +140,129 @@ test_that("format() finds the parameter names on a DeclareDesign diagnosis", {
   expect_true("ate" %in% names(format(d)))
   expect_false("Ate" %in% names(format(d)))
 })
+
+test_that("print() on a step names it and its type", {
+  out <- capture.output(print(declare_model(N = 10, Y = rnorm(N))))
+  expect_equal(out, "<design_step: model [model]>")
+  expect_s3_class(declare_model(N = 10), "design_step")
+})
+
+test_that("a step with no recorded call falls back to its verb", {
+  step <- declare_sampling(S = 1)
+  attr(step, "call") <- NULL
+  expect_equal(DeclareDesign:::format_step_call(step), "declare_sampling(...)")
+})
+
+test_that("print() lists the notes a design takes when it runs", {
+  design <- declare_model(N = 10, Y = rnorm(N)) + declare_notes(tallest = max(Y))
+  out <- capture.output(print(design))
+  expect_true(any(grepl("^Notes the design takes when it runs", out)))
+  expect_true(any(grepl("tallest", out) & grepl("max\\(Y\\)", out)))
+})
+
+test_that("summary() reports the value a note took, and print() lists it", {
+  design <- declare_model(N = 10, Y = as.numeric(1:10)) + declare_notes(tallest = max(Y))
+  s <- summary(design)
+  expect_equal(s$steps$one_run[2], "tallest = 10")
+  out <- capture.output(print(s))
+  expect_true(any(grepl("^  tallest = 10$", out)))
+  expect_true(any(grepl("^Notes the design takes when it runs", out)))
+})
+
+test_that("summary() of an inquiry-only design prints the inquiries", {
+  design <- declare_model(N = 10, Y_Z_0 = 0, Y_Z_1 = 1) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+  s <- summary(design)
+  expect_equal(names(s$estimates), c("inquiry", "estimand"))
+  out <- capture.output(print(s))
+  expect_true(any(grepl("^One run of the design:$", out)))
+  expect_true(any(grepl("ATE", out)))
+})
+
+test_that("summary() says which columns a step drops and when it changes nothing", {
+  design <- declare_model(N = 10, Y = 1, W = 2) +
+    declare_step(dplyr::select, -W) +
+    declare_step(dplyr::mutate, Y = Y)
+  s <- summary(design)
+  expect_equal(s$steps$one_run[2], "drops W")
+  expect_equal(s$steps$one_run[3], "leaves the data as it was")
+})
+
+test_that("summary() leaves a step that does not run on a draw unaccounted for", {
+  design <- declare_parameters(N = 10) +
+    declare_model(N = N, Y = rnorm(N))
+  s <- summary(design)
+  expect_true(is.na(s$steps$one_run[1]))
+  expect_equal(s$steps$one_run[2], "N = 10 rows; adds ID, Y")
+})
+
+test_that("summary() describes an inquiry or estimator that produced no rows", {
+  design <- declare_model(N = 5, Y = 1) +
+    declare_inquiry(handler = function(data) {
+      data.frame(inquiry = character(0), estimand = numeric(0))
+    }) +
+    declare_estimator(handler = function(data) data.frame(estimate = numeric(0)),
+                      label = "empty")
+  s <- summary(design)
+  expect_equal(s$steps$one_run[2], "no estimand")
+  expect_equal(s$steps$one_run[3], "no estimate")
+})
+
+test_that("summary() counts the rows of an estimator table with no estimate column", {
+  design <- declare_model(N = 5, Y = 1) +
+    declare_estimator(handler = function(data) data.frame(term = c("a", "b"), foo = 1:2),
+                      label = "odd")
+  expect_equal(summary(design)$steps$one_run[2], "2 rows")
+})
+
+test_that("the step accounting guards hold for tables it cannot read", {
+  expect_equal(DeclareDesign:::describe_data_change(NULL, "not a frame"),
+               "returned no data frame")
+  expect_equal(DeclareDesign:::describe_inquiry_rows(data.frame(foo = 1:3)),
+               "3 rows")
+  expect_equal(DeclareDesign:::describe_inquiry_rows(data.frame(foo = 1)),
+               "1 row")
+})
+
+test_that("print(diagnosis) reports the nesting and the variance decomposition", {
+  design <- declare_model(N = 20, U = rnorm(N), draws = 2) +
+    declare_model(Y_Z_0 = U, Y_Z_1 = U + 0.3) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = sample(rep(0:1, length.out = N))) +
+    declare_measurement(Y = Y_Z_0 * (1 - Z) + Y_Z_1 * Z) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
+                      label = "ols")
+  diagnosis <- diagnose_design(design, bootstrap_sims = 0)
+  expect_false(is.null(diagnosis$variance_decomposition))
+  out <- capture.output(print(diagnosis))
+  expect_true(any(grepl("simulations \\[nested: model\\]", out)))
+  expect_true(any(grepl("^Variance decomposition:$", out)))
+  expect_false(any(grepl("draw_levels", out)))
+})
+
+test_that("print(diagnosis) says nothing about matching when there is nothing to match", {
+  design <- declare_model(N = 20, Y_Z_0 = 0, Y_Z_1 = 1) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+  diagnosis <- diagnose_design(design, sims = 3, bootstrap_sims = 0)
+  expect_null(diagnosis$matched_on)
+  out <- capture.output(print(diagnosis))
+  expect_false(any(grepl("matched to inquiries", out)))
+})
+
+test_that("format() refuses anything that is not a diagnosis", {
+  expect_error(DeclareDesign:::format.diagnosis(data.frame(a = 1)),
+               "must be a diagnosis object")
+})
+
+test_that("tidy() of a diagnosis with no diagnosands returns the table it has", {
+  diagnosis <- structure(
+    list(diagnosands_df = tibble::tibble(design = "d", n_sims = 3L),
+         diagnosand_names = character(0)),
+    class = "diagnosis")
+  expect_equal(tidy(diagnosis), tibble::tibble(design = "d", n_sims = 3L))
+})
+
+test_that("a bootstrap interval is NA when any replicate is NA", {
+  expect_true(is.na(DeclareDesign:::quantile_na(c(1, NA, 3), 0.5)))
+  expect_equal(DeclareDesign:::quantile_na(c(1, 2, 3), 0.5), 2)
+})
