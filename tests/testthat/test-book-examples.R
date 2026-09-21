@@ -166,7 +166,9 @@ test_that("insert_step / replace_step / delete_step still work after deprecation
 test_that("set_diagnosands stores diagnosands used by diagnose_design", {
   skip_if_no_estimatr()
   d <- simple_design(N = 30)
-  d <- set_diagnosands(d, declare_diagnosands(power = mean(p.value <= 0.05)))
+  d <- suppressWarnings(
+    set_diagnosands(d, declare_diagnosands(power = mean(p.value <= 0.05)))
+  )
   diag <- diagnose_design(d, sims = 3, bootstrap_sims = 0)
   diag_df <- get_diagnosands(diag)
   expect_true("power" %in% names(diag_df))

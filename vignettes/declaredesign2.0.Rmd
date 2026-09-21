@@ -56,7 +56,7 @@ design <-
 diagnose_design(design, sims = 500)
 ```
 
-Everything about that block carries over: the `+` operator, expressions that see the columns declared earlier in the same step, `N` available inside the data mask, `potential_outcomes()` and `reveal_outcomes()`, formula-first estimators with `.method =` and `.summary =`, `term =`, and the `inquiry` argument that links an estimator to its estimand. Writing the potential outcomes out by hand (`Y_Z_0 = U, Y_Z_1 = U + 0.3`) and revealing them with an arithmetic expression works just as well. `draw_data()`, `draw_estimands()`, `draw_estimates()`, `run_design()`, `simulate_design()`, `diagnose_design()`, `diagnose_designs()`, `reshape_diagnosis()`, `tidy()`, `get_diagnosands()`, `get_simulations()`, `declare_test()`, `declare_step()`, `declare_diagnosands()`, `set_diagnosands()` and `label_estimator()` all keep their names and what they return, and the book's designs are the evidence.
+Everything about that block carries over: the `+` operator, expressions that see the columns declared earlier in the same step, `N` available inside the data mask, `potential_outcomes()` and `reveal_outcomes()`, formula-first estimators with `.method =` and `.summary =`, `term =`, and the `inquiry` argument that links an estimator to its estimand. Writing the potential outcomes out by hand (`Y_Z_0 = U, Y_Z_1 = U + 0.3`) and revealing them with an arithmetic expression works just as well. `draw_data()`, `draw_estimands()`, `draw_estimates()`, `run_design()`, `simulate_design()`, `diagnose_design()`, `diagnose_designs()`, `reshape_diagnosis()`, `tidy()`, `get_diagnosands()`, `get_simulations()`, `declare_test()`, `declare_step()`, `declare_diagnosands()` and `label_estimator()` all keep their names and what they return, and the book's designs are the evidence.
 
 The book's way of redesigning is the 2.0 way. A value named above the design is a parameter of it:
 
@@ -183,6 +183,10 @@ You can also filter simulations before diagnosing, bind simulations from separat
 #### `expand_design()` is deprecated
 
 A designer's argument is a name the design reads, so `redesign(designer(), N = c(100, 200))` does what `expand_design(designer, N = c(100, 200))` did, with one verb instead of two. `expand_design()` still works and warns once per session. The one thing it did that `redesign()` cannot is rebuild a design whose shape depends on an argument (a designer that adds a step when `blocked = TRUE`); call the designer with each value for that.
+
+#### `set_diagnosands()` is deprecated
+
+Diagnosands belong to a diagnosis, not to a design. `diagnose_design(design, diagnosands = declare_diagnosands(...))` does what attaching them did, and the attached form has two failure modes that the argument does not have. A diagnosands object *replaces* the default set rather than adding to it, so declaring one diagnosand silently drops the other six. And the attribute does not survive `redesign()`: a design that reported custom diagnosands before a parameter moved reports the defaults after it, which is a table of `NA` rather than an error when the estimator emits a column the defaults cannot read. `set_diagnosands()` still works and warns once per session, and `redesign()` warns when it drops an attached set.
 
 #### Step-modification functions are deprecated
 

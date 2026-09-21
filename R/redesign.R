@@ -733,6 +733,16 @@ redesign <- function(.design, ..., .expand = TRUE) {
   check_params_are_declared(design, names(new_params), reachable)
   check_params_in_design(design, names(new_params), reachable)
   check_param_vectors(design, new_params)
+  # A design rebuilt with new parameters does not carry the diagnosands
+  # attribute, and the defaults that replace it may not be computable from
+  # the estimator's output, which is a table of NAs rather than an error.
+  if (!is.null(attr(design, "diagnosands"))) {
+    rlang::warn(c(
+      "`redesign()` drops the diagnosands attached to the design.",
+      i = "Pass them to the diagnosis instead: `diagnose_design(design, diagnosands = ...)`.",
+      x = "The redesigned design will be diagnosed with `default_diagnosands()`."
+    ), .frequency = "once", .frequency_id = "redesign_diagnosands")
+  }
   param_df <- param_grid(new_params, expand = .expand)
   designs <- purrr::map(seq_len(nrow(param_df)), function(i) {
     params_i <- extract_param_row(param_df, i)

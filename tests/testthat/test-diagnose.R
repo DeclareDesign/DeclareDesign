@@ -1,8 +1,10 @@
 test_that("diagnose_design accepts custom diagnosands via set_diagnosands", {
-  design <- simple_design(N = 30) |>
-    set_diagnosands(declare_diagnosands(
-      mean_estimate = mean(estimate, na.rm = TRUE)
-    ))
+  design <- suppressWarnings(
+    simple_design(N = 30) |>
+      set_diagnosands(declare_diagnosands(
+        mean_estimate = mean(estimate, na.rm = TRUE)
+      ))
+  )
   d <- diagnose_design(design, sims = 5, bootstrap_sims = 0)
   expect_true("mean_estimate" %in% names(get_diagnosands(d)))
   expect_false("bias" %in% names(get_diagnosands(d)))
@@ -292,8 +294,10 @@ test_that("a design carrying DeclareDesign diagnosands falls back to the default
 })
 
 test_that("our own set_diagnosands object is still read", {
-  design <- simple_design(N = 30) |>
-    set_diagnosands(declare_diagnosands(mean_estimate = mean(estimate)))
+  design <- suppressWarnings(
+    simple_design(N = 30) |>
+      set_diagnosands(declare_diagnosands(mean_estimate = mean(estimate)))
+  )
   expect_no_warning(d <- diagnose_design(design, sims = 5, bootstrap_sims = 0))
   expect_equal(setdiff(names(get_diagnosands(d)),
                        c("design", "inquiry", "estimator", "outcome", "term",

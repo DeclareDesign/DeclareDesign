@@ -1,7 +1,16 @@
-#' Attach diagnosands to a design
+#' Attach diagnosands to a design (deprecated)
 #'
-#' Stores `diagnosands` as an attribute on `design`; [diagnose_design()] will
-#' use these in place of the defaults when present.
+#' Deprecated in 2.0. Stores `diagnosands` as an attribute on `design`, which
+#' [diagnose_design()] uses in place of the defaults when present. Pass the
+#' diagnosands to the diagnosis instead:
+#' `diagnose_design(design, diagnosands = ...)`.
+#'
+#' Two reasons, beyond diagnosis not being a feature of a design. The
+#' attribute does not survive [redesign()], so anything attached this way is
+#' silently gone the first time a parameter moves, and the defaults that
+#' replace it may not be computable from the estimator's output. And a
+#' diagnosands object replaces the default set rather than adding to it, so
+#' declaring one diagnosand drops the other six without saying so.
 #'
 #' @family diagnosands
 #' @param design A `design`.
@@ -15,13 +24,19 @@
 #'   declare_inquiry(mu = mean(Y)) +
 #'   declare_estimator(Y ~ 1, .method = lm, term = "(Intercept)", inquiry = "mu")
 #'
-#' design <- set_diagnosands(
+#' # instead of set_diagnosands(design, ...)
+#' diagnose_design(
 #'   design,
-#'   declare_diagnosands(mean_estimate = mean(estimate, na.rm = TRUE))
+#'   diagnosands = declare_diagnosands(mean_estimate = mean(estimate, na.rm = TRUE)),
+#'   sims = 5,
+#'   bootstrap_sims = 0
 #' )
-#'
-#' diagnose_design(design, sims = 5, bootstrap_sims = 0)
 set_diagnosands <- function(design, diagnosands = default_diagnosands()) {
+  rlang::warn(c(
+    "`set_diagnosands()` is deprecated in DeclareDesign 2.0.",
+    i = "Pass them to the diagnosis instead: `diagnose_design(design, diagnosands = ...)`.",
+    x = "Diagnosands attached to a design do not survive `redesign()`."
+  ), .frequency = "once", .frequency_id = "set_diagnosands")
   attr(design, "diagnosands") <- diagnosands
   design
 }

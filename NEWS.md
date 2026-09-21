@@ -17,6 +17,7 @@ DeclareDesign 2.0 is a ground-up reimplementation on tidyverse primitives. The d
 ## Deprecations
 
 * `expand_design()` warns once per session; call the designer and `redesign()` the result: `redesign(designer(), N = c(100, 200))`.
+* `set_diagnosands()` warns once per session; pass the diagnosands to the diagnosis instead, `diagnose_design(design, diagnosands = ...)`. An attached set replaces the defaults rather than adding to them, and does not survive `redesign()`, which now warns when it drops one.
 * `insert_step()`, `delete_step()` and `replace_step()` warn once per session; rebuild the design with `design[1:2] + new_step + design[4:5]` instead.
 * `declare_population()`, `model_handler()` and `tidy_estimator()` warn once per session.
 * `declare_estimator(model = )` is read as `.method = ` with a warning.

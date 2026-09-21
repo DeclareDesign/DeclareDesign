@@ -2,7 +2,7 @@
 % Please edit documentation in R/set_diagnosands.R
 \name{set_diagnosands}
 \alias{set_diagnosands}
-\title{Attach diagnosands to a design}
+\title{Attach diagnosands to a design (deprecated)}
 \usage{
 set_diagnosands(design, diagnosands = default_diagnosands())
 }
@@ -16,8 +16,18 @@ set_diagnosands(design, diagnosands = default_diagnosands())
 The design with \code{diagnosands} attribute set.
 }
 \description{
-Stores \code{diagnosands} as an attribute on \code{design}; \code{\link[=diagnose_design]{diagnose_design()}} will
-use these in place of the defaults when present.
+Deprecated in 2.0. Stores \code{diagnosands} as an attribute on \code{design}, which
+\code{\link[=diagnose_design]{diagnose_design()}} uses in place of the defaults when present. Pass the
+diagnosands to the diagnosis instead:
+\code{diagnose_design(design, diagnosands = ...)}.
+}
+\details{
+Two reasons, beyond diagnosis not being a feature of a design. The
+attribute does not survive \code{\link[=redesign]{redesign()}}, so anything attached this way is
+silently gone the first time a parameter moves, and the defaults that
+replace it may not be computable from the estimator's output. And a
+diagnosands object replaces the default set rather than adding to it, so
+declaring one diagnosand drops the other six without saying so.
 }
 \examples{
 design <-
@@ -25,12 +35,13 @@ design <-
   declare_inquiry(mu = mean(Y)) +
   declare_estimator(Y ~ 1, .method = lm, term = "(Intercept)", inquiry = "mu")
 
-design <- set_diagnosands(
+# instead of set_diagnosands(design, ...)
+diagnose_design(
   design,
-  declare_diagnosands(mean_estimate = mean(estimate, na.rm = TRUE))
+  diagnosands = declare_diagnosands(mean_estimate = mean(estimate, na.rm = TRUE)),
+  sims = 5,
+  bootstrap_sims = 0
 )
-
-diagnose_design(design, sims = 5, bootstrap_sims = 0)
 }
 \seealso{
 Other diagnosands:
