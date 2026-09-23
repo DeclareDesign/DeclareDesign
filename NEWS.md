@@ -33,7 +33,7 @@ DeclareDesign 2.0 is a ground-up reimplementation on tidyverse primitives. The d
 * `print(design)` shows the calls that declared the steps, as 1.x did, and the parameters `redesign()` can reach. `summary(design)` runs the design once and says under each step what it did to the data (rows kept, columns added, dropped or changed, the estimand, the estimate), returning the pieces as a `summary.design` object; `run = FALSE` skips the run.
 * `diagnose_design()` accepts a simulations data frame and honours its grouping; `diagnose_simulations()` is the same entry point by name.
 * `default_diagnosands()` and `select_diagnosands()` build a diagnosands set from names; `tidy()` works on a diagnosis.
-* Estimator and step arguments pass to `.method` or the handler as written, so methods that do their own non-standard evaluation work (closes #463; also #456, #457, #479, #482, #509).
+* Estimator and step arguments pass to `.method` or the handler as written, so methods that do their own non-standard evaluation work (closes #463; also #456, #457, #482, #509).
 
 ## Messages that were silences
 
@@ -41,6 +41,7 @@ DeclareDesign 2.0 is a ground-up reimplementation on tidyverse primitives. The d
 
 
 * An inquiry that no estimator targets keeps its own row in a diagnosis, with an NA estimator and its `mean_estimand`, as in 1.x; the join had dropped it.
+* The warning that estimates and inquiries were matched ambiguously fires only when the match was ambiguous (closes #479). Two estimators both naming `ATE`, with other inquiries declared beside it, produce more rows than either table had, because the unanswered inquiries keep their own rows; the old test was that row count alone, so it reported a multiplication that had not happened and advised naming an inquiry the estimators had already named. A shared-column match now warns only where one key value carries more than one row on both sides, and says which key. A match on no shared column warns as before.
 * `declare_sampling(handler = )` takes a custom sampling function, as the other data verbs do.
 * An estimator naming an inquiry no step produced warns once, naming the labels that exist.
 * A sampling step that produces no `S` column and has no `filter` warns once that every row was kept.

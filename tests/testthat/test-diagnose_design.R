@@ -55,6 +55,44 @@ test_that("designs supplied as bare symbols are named for the symbol", {
   expect_setequal(sims$design, c("dum", "dee"))
 })
 
+test_that("two estimators on one inquiry do not warn, whatever else is declared", {
+  # Issue #479. The full join carries an inquiry no estimator targets through as
+  # its own row, so this returns four rows from two estimates and three
+  # inquiries: two matched, two unanswered. The old guard compared that count
+  # against max(2, 3) and called it a multiplication, then advised naming the
+  # inquiry both estimators had already named.
+  design <- declare_model(N = 100, U = rnorm(N)) +
+    declare_inquiry(ATE = 1, ATE_1 = 2, ATE_2 = 3) +
+    declare_estimator(U ~ 1, term = "(Intercept)", inquiry = "ATE", label = "est1") +
+    declare_estimator(U ~ 1, term = "(Intercept)", inquiry = "ATE", label = "est2")
+  one_run <- expect_no_warning(run_design(design))
+  expect_equal(nrow(one_run), 4L)
+  matched <- one_run[!is.na(one_run$estimator), ]
+  expect_equal(nrow(matched), 2L)
+  expect_equal(matched$estimand, c(1, 1))
+  expect_setequal(one_run$inquiry[is.na(one_run$estimator)], c("ATE_1", "ATE_2"))
+})
+
+test_that("a key repeated on both sides warns and names the key", {
+  design <- declare_model(N = 40, U = rnorm(N)) +
+    declare_inquiry(ATE = 1) + declare_inquiry(ATE = 2) +
+    declare_estimator(U ~ 1, term = "(Intercept)", inquiry = "ATE", label = "est1") +
+    declare_estimator(U ~ 1, term = "(Intercept)", inquiry = "ATE", label = "est2")
+  expect_warning(one_run <- run_design(design),
+                 "Both tables carry more than one row for `ATE`")
+  expect_equal(nrow(one_run), 4L)
+})
+
+test_that("one estimator against several inquiries it does not name is silent", {
+  # One-to-many is intended: the estimator matches its own inquiry and the rest
+  # keep their rows. Only a key repeating on both sides multiplies anything.
+  design <- declare_model(N = 40, U = rnorm(N)) +
+    declare_inquiry(ATE = 1, ATT = 2) +
+    declare_estimator(U ~ 1, term = "(Intercept)", inquiry = "ATE", label = "est1")
+  one_run <- expect_no_warning(run_design(design))
+  expect_equal(nrow(one_run), 2L)
+})
+
 test_that("the diagnosis reports a match that did not go on inquiry", {
   unlabelled <- declare_model(N = 40, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +

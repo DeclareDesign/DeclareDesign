@@ -76,23 +76,84 @@ merge_estimates_inquiries <- function(estimates, inquiries) {
                      suffix = c("", ".inquiry"),
                      relationship = "many-to-many")
   }
-  if (nrow(result) > max(nrow(estimates), nrow(inquiries))) {
-    matched_on <- if (length(shared) == 0) {
-      "no shared column, so every inquiry was attached to every estimate"
-    } else {
-      paste0("the shared ", paste0("`", shared, "`", collapse = ", "))
-    }
+  warn_multiplied_rows(estimates, inquiries, result, shared)
+  attr(result, "matched_on") <- shared
+  result
+}
+
+#' Warn when the estimate-inquiry join multiplied rows
+#'
+#' Two conditions, and they need different advice. With no shared column every
+#' inquiry is attached to every estimate, and the fix is to name the inquiry.
+#' With a shared column the join multiplies only where one key value carries
+#' more than one row *on both sides*, and there the labels already exist, so the
+#' fix is to say which key values repeat.
+#'
+#' The row count alone cannot tell the two apart, and used to be the whole test
+#' (`nrow(result) > max(nrow(estimates), nrow(inquiries))`). A full join carries
+#' an inquiry no estimator targets through as its own row, so two estimators
+#' both naming `ATE` against three declared inquiries gives four rows from two
+#' estimates, exceeds that bound, and warned that the rows were multiplied when
+#' nothing was: two matched rows plus two unanswered inquiries. That is issue
+#' #479, and the advice it printed was to name the inquiry the estimators had
+#' already named.
+#'
+#' @keywords internal
+#' @noRd
+warn_multiplied_rows <- function(estimates, inquiries, result, shared) {
+  if (length(shared) == 0) {
+    if (nrow(result) <= max(nrow(estimates), nrow(inquiries))) return(invisible(NULL))
     rlang::warn(paste0(
-      "Estimates and inquiries were matched on ", matched_on,
-      ", which multiplied the rows: ", nrow(result), " rows from ",
+      "Estimates and inquiries were matched on no shared column, so every ",
+      "inquiry was attached to every estimate: ", nrow(result), " rows from ",
       nrow(estimates), " estimates and ", nrow(inquiries), " inquiries.\n",
       "Name the inquiry each estimator targets, ",
       "declare_estimator(..., inquiry = \"", inquiries$inquiry[[1]], "\"), ",
       "so the match is one to one."
     ))
+    return(invisible(NULL))
   }
-  attr(result, "matched_on") <- shared
-  result
+  ambiguous <- keys_repeated_on_both_sides(estimates, inquiries, shared)
+  if (!length(ambiguous)) return(invisible(NULL))
+  rlang::warn(paste0(
+    "Estimates and inquiries were matched on the shared ",
+    paste0("`", shared, "`", collapse = ", "),
+    ", which multiplied the rows: ", nrow(result), " rows from ",
+    nrow(estimates), " estimates and ", nrow(inquiries), " inquiries.\n",
+    "Both tables carry more than one row for ",
+    paste0("`", ambiguous, "`", collapse = ", "),
+    ", so every such estimate was paired with every such inquiry."
+  ))
+}
+
+#' Key values carrying more than one row in both tables
+#'
+#' The join multiplies rows for a key value only when both sides repeat it. Two
+#' estimators against one inquiry is one-to-many and intended: each estimator
+#' gets the same estimand.
+#'
+#' The `NA` marker keeps a missing label distinct from an inquiry named "NA".
+#'
+#' @keywords internal
+#' @noRd
+keys_repeated_on_both_sides <- function(estimates, inquiries, shared) {
+  join_key <- function(df) {
+    parts <- lapply(shared, function(column) {
+      values <- df[[column]]
+      paste0(ifelse(is.na(values), "\u0001", "\u0002"), as.character(values))
+    })
+    do.call(paste, c(parts, sep = "\r"))
+  }
+  estimate_counts <- table(join_key(estimates))
+  inquiry_counts <- table(join_key(inquiries))
+  repeated <- intersect(names(estimate_counts)[estimate_counts > 1],
+                        names(inquiry_counts)[inquiry_counts > 1])
+  if (!length(repeated)) return(character(0))
+  # Report the key as the user wrote it, not as the internal marker string.
+  labels <- vapply(strsplit(repeated, "\r", fixed = TRUE), function(parts) {
+    paste(substring(parts, 2), collapse = " / ")
+  }, character(1))
+  labels
 }
 
 #' Compute diagnosands on a simulations table

@@ -126,7 +126,8 @@ test_that("several unlabelled estimators against several inquiries warns", {
     declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
     declare_estimator(Y ~ Z, .method = lm, term = "Z", label = "unadjusted") +
     declare_estimator(Y ~ Z + X, .method = lm, term = "Z", label = "adjusted")
-  expect_warning(run_design(design), "multiplied the rows")
+  expect_warning(run_design(design),
+                 "every inquiry was attached to every estimate")
 })
 
 test_that("declare_step with handler = fabricate evaluates lazily", {
