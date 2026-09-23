@@ -25,6 +25,7 @@ DeclareDesign 2.0 is a ground-up reimplementation on tidyverse primitives. The d
 ## New
 
 * `declare_parameters()` names the values a design can be redesigned over, and `declare_notes()` names the quantities it works out along the way; `design_parameters()` and `design_notes()` list them. A declared parameter is bound for every step after it, including a helper function that reads it.
+* `run_design()`, `draw_data()`, `draw_estimands()` and `draw_estimates()` take named parameter values, so `draw_data(design, theta = 0.5)` draws from a declaration that leaves `theta` free (closes #497). The values go through `redesign()`, so the rules about which names a design accepts are stated in one place, and supplying several values is refused rather than narrowed: sweep with `redesign()` and draw from each.
 * A design is a value: it carries the objects its expressions read, so it survives `saveRDS()`, reaches a parallel worker, and does not change meaning when a workspace variable is edited (closes #293).
 * Step-level `draws` fan a step out and hold everything upstream fixed; the diagnosis of such a design carries a `variance_decomposition` attributing the variance of each per-simulation quantity to the step that generated it.
 * An estimator that errors on a draw under `simulate_design()` is recorded as a row with `error = TRUE`, one warning per run gives the counts, and diagnosands use the draws that succeeded (closes #385). `run_design()` and `draw_estimates()` still stop.

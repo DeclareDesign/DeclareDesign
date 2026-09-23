@@ -4,10 +4,15 @@
 \alias{draw_data}
 \title{Draw the realized data from a design}
 \usage{
-draw_data(design)
+draw_data(design, ...)
 }
 \arguments{
 \item{design}{A \code{design}.}
+
+\item{...}{Named parameter values, as in \code{\link[=redesign]{redesign()}}. Each supplies one
+value: use \code{redesign()} itself to sweep over several. A parameter named
+\code{design}, or any prefix of it, cannot be supplied this way and needs the
+\code{redesign()} route.}
 }
 \value{
 A data frame.
@@ -17,10 +22,21 @@ Runs the data-generating steps only. The inquiries and estimators are not
 run, so a design whose estimator fails still draws its data, and drawing
 data does not pay to fit models it would throw away.
 }
+\details{
+Named parameter values in \code{...} are applied first, so
+\code{draw_data(design, theta = 0.5)} is \code{draw_data(redesign(design, theta = 0.5))}: a convenience for trying a value without naming it above the design
+or rewriting the declaration. The names reach the design by \code{\link[=redesign]{redesign()}}'s
+rule, so a name the design does not read errors, and a number written inside
+a step is refused with the two ways to name it.
+}
 \examples{
 design <- declare_model(N = 25, X = rnorm(N))
 df <- draw_data(design)
 nrow(df)
+
+# A value the declaration leaves free, supplied at draw time
+model <- declare_model(N = 25, D = rbinom(N, 1, 0.5), Y = theta * D + rnorm(N))
+head(draw_data(model, theta = 0.5))
 }
 \seealso{
 Other drawing from a design:

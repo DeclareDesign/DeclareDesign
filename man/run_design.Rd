@@ -4,10 +4,15 @@
 \alias{run_design}
 \title{Execute a design end-to-end}
 \usage{
-run_design(design)
+run_design(design, ...)
 }
 \arguments{
 \item{design}{A \code{design}.}
+
+\item{...}{Named parameter values, as in \code{\link[=redesign]{redesign()}}. Each supplies one
+value: use \code{redesign()} itself to sweep over several. A parameter named
+\code{design}, or any prefix of it, cannot be supplied this way and needs the
+\code{redesign()} route.}
 }
 \value{
 A tibble of estimates with estimands joined where applicable.

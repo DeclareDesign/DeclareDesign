@@ -9,13 +9,18 @@
 #'
 #' @family drawing from a design
 #' @param design A `design`.
+#' @param ... Named parameter values, as in [redesign()]. Each supplies one
+#'   value: use `redesign()` itself to sweep over several. A parameter named
+#'   `design`, or any prefix of it, cannot be supplied this way and needs the
+#'   `redesign()` route.
 #' @return A tibble of estimates with estimands joined where applicable.
 #' @export
 #' @examples
 #' design <- declare_model(N = 30, U = rnorm(N), Y = U) +
 #'   declare_inquiry(mu = mean(Y))
 #' run_design(design)
-run_design <- function(design) {
+run_design <- function(design, ...) {
+  design <- apply_draw_time_params(design, rlang::list2(...))
   result <- run_design_internal(design)
   stop_on_estimator_failure(result$estimates)
   merge_estimates_inquiries(result$estimates, result$inquiries)
@@ -116,16 +121,62 @@ run_step <- function(step, data) {
 #' run, so a design whose estimator fails still draws its data, and drawing
 #' data does not pay to fit models it would throw away.
 #'
+#' Named parameter values in `...` are applied first, so
+#' `draw_data(design, theta = 0.5)` is `draw_data(redesign(design, theta =
+#' 0.5))`: a convenience for trying a value without naming it above the design
+#' or rewriting the declaration. The names reach the design by [redesign()]'s
+#' rule, so a name the design does not read errors, and a number written inside
+#' a step is refused with the two ways to name it.
+#'
 #' @family drawing from a design
 #' @param design A `design`.
+#' @param ... Named parameter values, as in [redesign()]. Each supplies one
+#'   value: use `redesign()` itself to sweep over several. A parameter named
+#'   `design`, or any prefix of it, cannot be supplied this way and needs the
+#'   `redesign()` route.
 #' @return A data frame.
 #' @export
 #' @examples
 #' design <- declare_model(N = 25, X = rnorm(N))
 #' df <- draw_data(design)
 #' nrow(df)
-draw_data <- function(design) {
+#'
+#' # A value the declaration leaves free, supplied at draw time
+#' model <- declare_model(N = 25, D = rbinom(N, 1, 0.5), Y = theta * D + rnorm(N))
+#' head(draw_data(model, theta = 0.5))
+draw_data <- function(design, ...) {
+  design <- apply_draw_time_params(design, rlang::list2(...))
   run_design_internal(design, what = "dgp")$data
+}
+
+#' Apply parameter values supplied at draw time
+#'
+#' Issue #497: a reader exploring a declaration wants to try a value without
+#' naming it above the design first. The values go through [redesign()], so
+#' every rule about which names a design will accept is stated in one place.
+#'
+#' A sweep is refused rather than quietly drawing from the first design, since
+#' the verb returns one table.
+#'
+#' @keywords internal
+#' @noRd
+apply_draw_time_params <- function(design, params) {
+  if (!length(params)) return(design)
+  if (!rlang::is_named(params)) {
+    rlang::abort(c(
+      "Every value supplied here has to name the parameter it sets.",
+      i = "`draw_data(design, theta = 0.5)`, as in `redesign()`."
+    ))
+  }
+  out <- do.call(redesign, c(list(.design = design), params))
+  if (!inherits(out, "design")) {
+    rlang::abort(c(
+      paste0("Supplying several values gives ", length(out),
+             " designs, and this verb draws from one."),
+      i = "Sweep with `redesign()` and draw from each: `lapply(redesign(design, theta = c(0.1, 0.5)), draw_data)`."
+    ))
+  }
+  out
 }
 
 #' Draw the realized estimands
@@ -134,13 +185,18 @@ draw_data <- function(design) {
 #'
 #' @family drawing from a design
 #' @param design A `design`.
+#' @param ... Named parameter values, as in [redesign()]. Each supplies one
+#'   value: use `redesign()` itself to sweep over several. A parameter named
+#'   `design`, or any prefix of it, cannot be supplied this way and needs the
+#'   `redesign()` route.
 #' @return A tibble of inquiries (one row per estimand).
 #' @export
 #' @examples
 #' design <- declare_model(N = 25, U = rnorm(N), Y = U) +
 #'   declare_inquiry(mu = mean(Y))
 #' draw_estimands(design)
-draw_estimands <- function(design) {
+draw_estimands <- function(design, ...) {
+  design <- apply_draw_time_params(design, rlang::list2(...))
   run_design_internal(design, what = c("dgp", "inquiry"))$inquiries
 }
 
@@ -154,6 +210,10 @@ draw_estimand <- draw_estimands
 #'
 #' @family drawing from a design
 #' @param design A `design`.
+#' @param ... Named parameter values, as in [redesign()]. Each supplies one
+#'   value: use `redesign()` itself to sweep over several. A parameter named
+#'   `design`, or any prefix of it, cannot be supplied this way and needs the
+#'   `redesign()` route.
 #' @return A tibble of estimates with estimands joined where applicable.
 #' @export
 #' @examples
@@ -162,7 +222,8 @@ draw_estimand <- draw_estimands
 #'   declare_estimator(Y ~ 1, .method = lm, term = "(Intercept)",
 #'                     inquiry = "mu", label = "ols")
 #' draw_estimates(design)
-draw_estimates <- function(design) {
+draw_estimates <- function(design, ...) {
+  design <- apply_draw_time_params(design, rlang::list2(...))
   result <- run_design_internal(design)
   stop_on_estimator_failure(result$estimates)
   merge_estimates_inquiries(result$estimates, result$inquiries)

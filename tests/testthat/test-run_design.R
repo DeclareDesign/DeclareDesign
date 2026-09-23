@@ -145,3 +145,40 @@ test_that("a design with no estimator returns zero estimate rows", {
   expect_equal(nrow(get_estimates(design, draw_data(design))), 0L)
   expect_equal(nrow(run_design(design)), 1L)
 })
+
+test_that("a parameter supplied at draw time reaches the design", {
+  # Issue #497. The reporter's declaration leaves `theta` free deliberately,
+  # because naming it above the design is what he is trying to avoid.
+  model <- declare_model(N = 4000, e = rnorm(N), D = rbinom(N, 1, 0.5),
+                         Y = theta * D + e)
+  low <- draw_data(model, theta = 0.1)
+  high <- draw_data(model, theta = 0.9)
+  expect_equal(nrow(low), 4000L)
+  gap <- function(df) mean(df$Y[df$D == 1]) - mean(df$Y[df$D == 0])
+  expect_equal(gap(low), 0.1, tolerance = 0.1)
+  expect_equal(gap(high), 0.9, tolerance = 0.1)
+})
+
+test_that("draw-time parameters work on every verb in the family", {
+  design <- declare_model(N = 200, e = rnorm(N), D = rbinom(N, 1, 0.5),
+                          Y = theta * D + e) +
+    declare_inquiry(ATE = theta) +
+    declare_estimator(Y ~ D, .method = lm, term = "D", inquiry = "ATE",
+                      label = "ols")
+  expect_equal(nrow(draw_data(design, theta = 0.5)), 200L)
+  expect_equal(draw_estimands(design, theta = 0.5)$estimand, 0.5)
+  expect_equal(draw_estimates(design, theta = 0.5)$estimand, 0.5)
+  expect_equal(run_design(design, theta = 0.5)$estimand, 0.5)
+})
+
+test_that("a sweep supplied at draw time is refused, not silently narrowed", {
+  model <- declare_model(N = 20, D = rbinom(N, 1, 0.5), Y = theta * D + rnorm(N))
+  expect_error(draw_data(model, theta = c(0.1, 0.5)),
+               "gives 2 designs, and this verb draws from one")
+})
+
+test_that("drawing without parameters is unchanged", {
+  design <- declare_model(N = 25, X = rnorm(N)) + declare_inquiry(m = mean(X))
+  expect_equal(nrow(draw_data(design)), 25L)
+  expect_equal(nrow(draw_estimands(design)), 1L)
+})
