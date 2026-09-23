@@ -161,7 +161,7 @@ test_that("a parameter named d is reachable, and so are de, des, desi, desig", {
   designer <- function(d = 2) declare_model(N = d, Y = rnorm(N))
   fam <- suppressWarnings(expand_design(designer, d = c(3, 6)))
   expect_equal(vapply(fam, function(x) nrow(draw_data(x)), integer(1)),
-               c(design_1 = 3L, design_2 = 6L))
+               c(`d = 3` = 3L, `d = 6` = 6L))
 })
 
 test_that("a column does not make its own parameter unreachable", {
@@ -188,7 +188,7 @@ test_that("a name the design expects redesign to supply is not refused", {
   designs <- redesign(declaration, N = c(20, 40), prob = 0.5)
   expect_length(designs, 2L)
   expect_equal(vapply(designs, function(d) nrow(draw_data(d)), integer(1)),
-               c(design_1 = 20L, design_2 = 40L))
+               c(`N = 20, prob = 0.5` = 20L, `N = 40, prob = 0.5` = 40L))
   # and they are still not reported as parameters, because they hold nothing
   expect_false("N" %in% design_parameters(declaration)$name)
 })
@@ -330,6 +330,8 @@ test_that("a data frame is one replacement value and needs no wrapping", {
   expect_equal(nrow(draw_data(redesign(design, small = list(big)))), 121L)
   fam <- redesign(design, small = list(small, big))
   expect_length(fam, 2L)
+  # A data frame cannot be written into a name, so the whole list stays
+  # positional rather than mixing the two spellings.
   expect_equal(vapply(fam, function(d) nrow(draw_data(d)), integer(1)),
                c(design_1 = 30L, design_2 = 121L))
 })
@@ -459,4 +461,30 @@ test_that("`.expand = FALSE` requires parameter vectors of one length", {
     ),
     "length 1 or the same length"
   )
+})
+
+test_that("a redesigned list is named by the values that distinguish it", {
+  # Issue #472. The names become the `design` column of a simulation, so
+  # `design_1` tells a reader only what the row's position already said.
+  design <- declare_parameters(n = 50) +
+    declare_model(N = n, Y = rnorm(N)) + declare_inquiry(m = mean(Y))
+  expect_named(redesign(design, n = c(10, 20)), c("n = 10", "n = 20"))
+  # The use the issue asks for.
+  stacked <- dplyr::bind_rows(lapply(redesign(design, n = c(10, 20)), draw_data),
+                              .id = "design")
+  expect_setequal(stacked$design, c("n = 10", "n = 20"))
+  expect_equal(nrow(stacked), 30L)
+})
+
+test_that("every swept parameter appears in the name, in the order supplied", {
+  design <- declare_parameters(n = 50, b = 0.2) +
+    declare_model(N = n, Y = b * rnorm(N))
+  expect_named(redesign(design, n = c(10, 20), b = c(0.2, 0.5)),
+               c("n = 10, b = 0.2", "n = 20, b = 0.2",
+                 "n = 10, b = 0.5", "n = 20, b = 0.5"))
+})
+
+test_that("a single combination is still one design, not a list of one", {
+  design <- declare_parameters(n = 50) + declare_model(N = n, Y = rnorm(N))
+  expect_s3_class(redesign(design, n = 10), "design")
 })

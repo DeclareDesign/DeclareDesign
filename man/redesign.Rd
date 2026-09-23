@@ -25,7 +25,10 @@ of that name.}
 }
 \value{
 A single \code{design} if one combination is supplied, otherwise a list
-of designs named \code{design_1}, \code{design_2}, etc.
+of designs named by the values that distinguish them: \code{redesign(design, N = c(10, 20))} gives \code{N = 10} and \code{N = 20}, so a simulation's \code{design}
+column, and \code{bind_rows(.id = "design")}, carry the values that vary.
+Designs are named \code{design_1}, \code{design_2}, etc. when a parameter's value
+cannot be written down, such as a function or a data frame.
 }
 \description{
 Returns a copy of the design with one or more parameters changed, so that

@@ -47,3 +47,4 @@ DeclareDesign 2.0 is a ground-up reimplementation on tidyverse primitives. The d
 * A sampling step that produces no `S` column and has no `filter` warns once that every row was kept.
 * An error inside a step names the step and its verb, with the original error as the cause.
 * A redesign of a name the design does not use warns; a bare vector handed to a vector-valued parameter warns that it is being read as several designs.
+* `redesign()` names the list it returns by the values that distinguish each design (closes #472). `redesign(design, N = c(10, 20))` gives `N = 10` and `N = 20`, so a simulation's `design` column and `bind_rows(.id = "design")` carry the values that vary; 1.x named them `design_1`, `design_2`, which is what a reader already knew from the position. A parameter whose value cannot be written down, such as a function or a data frame, leaves the whole list positional.

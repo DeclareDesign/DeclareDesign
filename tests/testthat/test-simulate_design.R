@@ -100,6 +100,6 @@ test_that("a parameter does not overwrite a column the simulation already report
     declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE")
   sims <- simulate_design(!!!redesign(design, estimand = c(0.3, 0.9)), sims = 3)
   expect_false(any(sims$estimand %in% c(0.3, 0.9)))
-  expect_gt(mean(sims$estimand[sims$design == "design_2"]),
-            mean(sims$estimand[sims$design == "design_1"]))
+  expect_gt(mean(sims$estimand[sims$design == "estimand = 0.9"]),
+            mean(sims$estimand[sims$design == "estimand = 0.3"]))
 })

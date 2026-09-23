@@ -692,7 +692,11 @@ param_grid <- function(params, expand = TRUE) {
 #'   undotted `expand` after the dots would collide exactly with a parameter
 #'   of that name.
 #' @return A single `design` if one combination is supplied, otherwise a list
-#'   of designs named `design_1`, `design_2`, etc.
+#'   of designs named by the values that distinguish them: `redesign(design,
+#'   N = c(10, 20))` gives `N = 10` and `N = 20`, so a simulation's `design`
+#'   column, and `bind_rows(.id = "design")`, carry the values that vary.
+#'   Designs are named `design_1`, `design_2`, etc. when a parameter's value
+#'   cannot be written down, such as a function or a data frame.
 #' @export
 #' @examples
 #' designer <- function(N) {
@@ -751,7 +755,7 @@ redesign <- function(.design, ..., .expand = TRUE) {
     d
   })
   if (length(designs) == 1L) return(designs[[1]])
-  names(designs) <- paste0("design_", seq_along(designs))
+  names(designs) <- label_param_rows(param_df)
   designs
 }
 
@@ -814,5 +818,30 @@ expand_design <- function(.designer, ..., .expand = TRUE) {
     d
   })
   if (length(designs) == 1L) return(designs[[1]])
-  setNames(designs, paste0("design_", seq_along(designs)))
+  setNames(designs, label_param_rows(param_df))
+}
+
+#' Name each redesigned design by the values that distinguish it
+#'
+#' These names become the `design` column of any simulation or diagnosis, so
+#' `design_1` tells a reader only what the row's position already said. Issue
+#' #472: `redesign(design, N = c(10, 20))` gives `N = 10` and `N = 20`, and
+#' `bind_rows(.id = "design")` is labelled with the values that vary.
+#'
+#' Falls back to positional names for the whole list when any parameter cannot
+#' be written down (a function, a data frame, a list), rather than mixing the
+#' two spellings in one list.
+#'
+#' @keywords internal
+#' @noRd
+label_param_rows <- function(param_df) {
+  positional <- paste0("design_", seq_len(nrow(param_df)))
+  writable <- vapply(param_df, function(column) {
+    is.atomic(column) && !is.list(column)
+  }, logical(1))
+  if (!length(writable) || !all(writable)) return(positional)
+  parts <- lapply(names(param_df), function(name) {
+    paste0(name, " = ", format(param_df[[name]], trim = TRUE))
+  })
+  make.unique(do.call(paste, c(parts, sep = ", ")))
 }
