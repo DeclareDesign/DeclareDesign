@@ -412,7 +412,7 @@ test_that("a custom step's arguments stay as written through a redesign", {
     # column's contents, on the rebuilt step as well as the declared one.
     expect_equal(names(draw_data(design)), c("pair", "A", "B"))
     expect_equal(names(draw_data(redesign(design, k = 3))), c("pair", "A", "B"))
-    expect_equal(unique(draw_data(design)$kk), NULL)
+    expect_false("kk" %in% names(draw_data(design)))
   })
 })
 
