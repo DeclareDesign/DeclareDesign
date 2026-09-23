@@ -37,6 +37,11 @@ test_that("sequential and multisession plans give the same numbers for the same 
   expect_equal(seq_nested$estimate, par_nested$estimate)
 })
 
+# Left plan-agnostic on purpose: the one draw is the entropy draw in
+# sim_stream_seeds(), and the contract is that it is the *only* advance under
+# any plan. Running the suite with R_FUTURE_PLAN=multisession is what turns this
+# into the parallel assertion, and it is what caught furrr drawing a second
+# value from the caller's stream (#445).
 test_that("the caller's generator is left as it was found, one draw on", {
   design <- seed_design()
   kind <- RNGkind()
@@ -44,6 +49,18 @@ test_that("the caller's generator is left as it was found, one draw on", {
   set.seed(5); invisible(simulate_design(design, sims = 3)); x_after <- runif(3)
   expect_equal(RNGkind(), kind)
   expect_false(identical(x_before, x_after))
+  set.seed(5); invisible(sample.int(.Machine$integer.max, 1L)); x_one_on <- runif(3)
+  expect_equal(x_after, x_one_on)
+})
+
+test_that("a parallel plan leaves the caller's generator one draw on as well", {
+  skip_on_cran()
+  skip_if_not_installed("future")
+  skip_if_not_installed("furrr")
+  design <- seed_design()
+  old <- future::plan(future::multisession, workers = 2)
+  on.exit(future::plan(old), add = TRUE)
+  set.seed(5); invisible(simulate_design(design, sims = 3)); x_after <- runif(3)
   set.seed(5); invisible(sample.int(.Machine$integer.max, 1L)); x_one_on <- runif(3)
   expect_equal(x_after, x_one_on)
 })

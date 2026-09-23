@@ -25,6 +25,14 @@ pop.var <- function(x) mean((x - mean(x, na.rm = TRUE))^2, na.rm = TRUE)
 #' workers = N)` before the call and needs furrr installed; nothing else
 #' changes.
 #'
+#' The entropy draw inside [sim_stream_seeds()] is the one advance of the
+#' caller's own generator this promises, so the loop itself is run with that
+#' generator saved and put back. `furrr::future_map2()` draws one uniform from
+#' it whenever it is handed a seed, once per call and whichever plan is
+#' active, and the sequential path goes through `purrr::map2()` and draws
+#' none; without this the caller's stream was left one value further on under
+#' `plan(multisession)` than under `plan(sequential)`.
+#'
 #' @keywords internal
 #' @noRd
 sim_map_fn <- function(label = NULL) {
@@ -32,6 +40,8 @@ sim_map_fn <- function(label = NULL) {
   function(x, f, ...) {
     tick <- dd_progressor(length(x), label)
     seeds <- sim_stream_seeds(length(x))
+    saved <- save_rng_state()
+    on.exit(restore_rng_state(saved), add = TRUE)
     base_map(x, seeds, function(xi, seed, ...) {
       tick()
       with_stream_seed(seed, f(xi, ...))

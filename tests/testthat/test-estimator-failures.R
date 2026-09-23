@@ -3,6 +3,12 @@
 # that will not converge is a fit on an awkward draw, so diagnosing on the
 # survivors flatters the design. Everything here is about the accounting.
 
+# The counter is process-local, and deliberately: mutated closure state cannot
+# cross a process boundary, so under `plan(multisession)` every worker gets a
+# fresh copy and `fail_on` fires once per worker rather than once per run. Every
+# test below that asserts a *count* of failures is therefore a sequential-plan
+# assertion and pins the plan to say so. The test that the accounting survives
+# the boundary at all asserts what is recorded, not how much of it.
 flaky <- function(fail_on) {
   i <- 0L
   function(data) {
@@ -10,6 +16,13 @@ flaky <- function(fail_on) {
     if (i %in% fail_on) stop("model did not converge")
     estimatr::lm_robust(Y ~ Z, data = data)
   }
+}
+
+# future is a Suggests, and with it absent the plan is sequential already, so
+# this is a no-op rather than a skip: none of these tests is about parallelism.
+pin_sequential_plan <- function() {
+  if (!requireNamespace("future", quietly = TRUE)) return(NULL)
+  future::plan(future::sequential)
 }
 
 two_estimator_design <- function(handler) {
@@ -32,6 +45,8 @@ test_that("one failing draw does not abort the run", {
 })
 
 test_that("the failure is recorded, with its message", {
+  old_plan <- pin_sequential_plan()
+  on.exit(if (!is.null(old_plan)) future::plan(old_plan), add = TRUE)
   design <- two_estimator_design(flaky(fail_on = c(1L, 3L)))
   sims <- suppressWarnings(simulate_design(design, sims = 4))
   failed <- sims[!is.na(sims$error) & sims$error, ]
@@ -42,6 +57,8 @@ test_that("the failure is recorded, with its message", {
 })
 
 test_that("one warning per run, naming the estimator and the count", {
+  old_plan <- pin_sequential_plan()
+  on.exit(if (!is.null(old_plan)) future::plan(old_plan), add = TRUE)
   design <- two_estimator_design(flaky(fail_on = c(1L, 2L, 3L)))
   ws <- character(0)
   withCallingHandlers(
@@ -71,6 +88,8 @@ test_that("a run with no failures warns not at all", {
 })
 
 test_that("n_sims counts the draws a diagnosand actually used", {
+  old_plan <- pin_sequential_plan()
+  on.exit(if (!is.null(old_plan)) future::plan(old_plan), add = TRUE)
   # The point of the whole exercise. If the failed rows were summarised
   # instead of dropped, n_sims would read 6 for both estimators while every
   # default diagnosand, all of which carry na.rm = TRUE, computed on fewer.
@@ -110,8 +129,39 @@ test_that("a single run re-raises rather than returning an NA row", {
 })
 
 test_that("the same design tolerates the same failure under simulation", {
+  old_plan <- pin_sequential_plan()
+  on.exit(if (!is.null(old_plan)) future::plan(old_plan), add = TRUE)
   design <- two_estimator_design(flaky(fail_on = 1L))
   sims <- suppressWarnings(simulate_design(design, sims = 3))
   expect_equal(sum(sims$error, na.rm = TRUE), 1)
   expect_equal(sum(sims$estimator == "reliable"), 3)
+})
+
+test_that("the accounting crosses a process boundary", {
+  # The count is per worker (see flaky() above), so what is asserted here is
+  # that the accounting survives the boundary at all: a failed draw arrives in
+  # the main process carrying its message and no estimate, the run is not
+  # aborted, and the one warning still reaches the caller from a worker.
+  skip_on_cran()
+  skip_if_not_installed("future")
+  skip_if_not_installed("furrr")
+  design <- two_estimator_design(flaky(fail_on = 1L))
+  old_plan <- future::plan(future::multisession, workers = 2)
+  on.exit(future::plan(old_plan), add = TRUE)
+  ws <- character(0)
+  sims <- withCallingHandlers(
+    simulate_design(design, sims = 4),
+    warning = function(w) {
+      ws <<- c(ws, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  failed <- sims[!is.na(sims$error) & sims$error, ]
+  expect_gt(nrow(failed), 0)
+  expect_true(all(failed$estimator == "flaky"))
+  expect_true(all(grepl("did not converge", failed$error_message)))
+  expect_true(all(is.na(failed$estimate)))
+  expect_equal(sum(sims$estimator == "reliable"), 4)
+  expect_length(ws, 1)
+  expect_match(ws, "did not converge")
 })
