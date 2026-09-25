@@ -74,6 +74,16 @@ test_that("one warning per run, naming the estimator and the count", {
   expect_match(ws, "did not converge")
 })
 
+test_that("a single failed draw is counted in the singular", {
+  old_plan <- pin_sequential_plan()
+  on.exit(if (!is.null(old_plan)) future::plan(old_plan), add = TRUE)
+  design <- two_estimator_design(flaky(fail_on = 2L))
+  expect_warning(
+    simulate_design(design, sims = 3),
+    "1 estimator draw failed and was recorded"
+  )
+})
+
 test_that("a run with no failures warns not at all", {
   design <- two_estimator_design(flaky(fail_on = integer(0)))
   ws <- character(0)

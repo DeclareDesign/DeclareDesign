@@ -314,8 +314,9 @@ warn_estimator_failures <- function(estimates_df, design_label = NULL) {
   first <- estimates_df$error_message[failed][[1]]
   rlang::warn(paste0(
     if (!is.null(design_label)) paste0(design_label, ": ") else "",
-    length(failed), " estimator draw", if (length(failed) > 1) "s" else "",
-    " failed and were recorded rather than run: ", who, ".\n",
+    length(failed), " estimator ",
+    if (length(failed) > 1) "draws failed and were" else "draw failed and was",
+    " recorded rather than run: ", who, ".\n",
     "First error: ", first, "\n",
     "Diagnosands are computed on the draws that succeeded, and `n_sims` ",
     "reports how many that was. Failed draws are not missing at random, so ",
