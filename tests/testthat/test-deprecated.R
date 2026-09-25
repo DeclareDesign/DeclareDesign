@@ -1,5 +1,11 @@
 # R/deprecated.R: the 1.x spellings, and what each one does now.
 #
+# A deprecated function defined in another source file is tested in that
+# file's mirror: `expand_design()` in test-redesign.R, `set_diagnosands()` in
+# test-set_diagnosands.R, `insert_step()` and its siblings in
+# test-modify_design.R, `model =` in test-declare_estimator.R, and
+# `draw_estimand()` in test-run_design.R.
+#
 # These tests lived in test-autolabel.R, which is a file about estimator
 # labelling and has nothing to do with them.
 #

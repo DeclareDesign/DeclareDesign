@@ -1,4 +1,10 @@
-test_that("declare_estimator returns a tidy table with estimator label", {
+# `declare_estimator()`, `declare_test()` and `label_estimator()`: how a
+# method is called, which terms come back, and which inquiry they attach to.
+#
+# Estimator labels are test-autolabel.R, and an estimator that fails on a draw
+# is test-estimator-failures.R.
+
+test_that("declare_estimator returns a tidy table carrying the estimator label", {
   design <- declare_model(N = 30, Z = rep(0:1, 15), Y = Z + rnorm(N)) +
     declare_estimator(Y ~ Z, .method = lm, term = "Z", label = "ols")
   est <- draw_estimates(design)
@@ -7,7 +13,7 @@ test_that("declare_estimator returns a tidy table with estimator label", {
   expect_equal(est$term, "Z")
 })
 
-test_that("declare_estimator joins to inquiry", {
+test_that("an estimator is joined to the inquiry it names", {
   design <- declare_model(N = 30, Z = rep(0:1, 15), Y = Z + rnorm(N)) +
     declare_inquiry(ATE = 1) +
     declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
@@ -17,7 +23,7 @@ test_that("declare_estimator joins to inquiry", {
   expect_equal(est$inquiry, "ATE")
 })
 
-test_that("term filter restricts the rows returned", {
+test_that("a term filter restricts the rows returned", {
   design <- declare_model(N = 30, Z = rep(0:1, 15), X = rnorm(N),
                           Y = Z + X + rnorm(N)) +
     declare_estimator(Y ~ Z + X, .method = lm, term = "Z", label = "ols")

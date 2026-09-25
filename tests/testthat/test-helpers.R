@@ -1,3 +1,5 @@
+# R/helpers.R: the internal helpers no verb's own file reaches directly.
+
 test_that("pop.var is the mean squared deviation, not the corrected variance", {
   x <- c(1, 2, 3, 4, 5)
   expect_equal(pop.var(x), 2)

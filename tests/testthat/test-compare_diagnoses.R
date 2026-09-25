@@ -1,3 +1,6 @@
+# `compare_diagnoses()`: two designs diagnosed on one set of diagnosands, and
+# the difference between them.
+
 test_that("compare_diagnoses reports both designs and their difference", {
   design <- simple_design(N = 40)
   cmp <- compare_diagnoses(design, redesign(design, N = 400),

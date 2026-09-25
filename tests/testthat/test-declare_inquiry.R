@@ -1,3 +1,6 @@
+# `declare_inquiry()` and its aliases: named estimands, subsets, labels, and
+# custom handlers.
+
 test_that("declare_inquiry computes named scalar estimands", {
   step <- declare_inquiry(mu = mean(Y), med = median(Y))
   df <- data.frame(Y = c(1, 2, 3, 4, 5))
@@ -6,14 +9,14 @@ test_that("declare_inquiry computes named scalar estimands", {
   expect_equal(out$estimand, c(mean(df$Y), median(df$Y)))
 })
 
-test_that("declare_inquiry honors subset", {
+test_that("declare_inquiry evaluates on its subset", {
   step <- declare_inquiry(mu = mean(Y), subset = group == "a")
   df <- data.frame(Y = 1:6, group = rep(c("a", "b"), 3))
   out <- step(df)
   expect_equal(out$estimand, mean(df$Y[df$group == "a"]))
 })
 
-test_that("declare_inquiry aliases work", {
+test_that("the declare_inquiry aliases all build an inquiry step", {
   s1 <- declare_inquiries(mu = mean(Y))
   s2 <- declare_estimand(mu = mean(Y))
   s3 <- declare_estimands(mu = mean(Y))
@@ -32,7 +35,7 @@ test_that("multiple splats keep the default label", {
   expect_equal(attr(step, "label"), "inquiry")
 })
 
-test_that("ATT-style subset = Z == 1 evaluates inquiry on subset", {
+test_that("an ATT is an inquiry on the subset Z == 1", {
   step <- declare_inquiry(ATT = mean(Y_Z_1 - Y_Z_0), subset = Z == 1)
   df <- data.frame(Y_Z_0 = 1:10, Y_Z_1 = 3:12,
                    Z = c(1, 0, 1, 0, 1, 0, 1, 0, 1, 0))

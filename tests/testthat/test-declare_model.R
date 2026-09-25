@@ -1,4 +1,10 @@
-test_that("declare_model on first step uses NULL data", {
+# `declare_model()`, `declare_measurement()`, `declare_assignment()` and
+# `declare_sampling()`: which data a step starts from, what a handler
+# receives, and which step appends a row id.
+#
+# The fabricatr entry point all four call is test-fabricatr-contract.R.
+
+test_that("a model step in first position starts from no data", {
   step <- declare_model(N = 25, X = rnorm(N))
   df <- step(NULL)
   expect_equal(nrow(df), 25L)
@@ -14,26 +20,26 @@ test_that("declare_measurement adds columns to existing data", {
   expect_true("Y" %in% names(d2))
 })
 
-test_that("declare_sampling filters by S column by default", {
+test_that("declare_sampling filters on the S column by default", {
   step <- declare_sampling(S = rep(c(1, 0), length.out = 10))
   df <- data.frame(ID = seq_len(10))
   out <- step(df)
   expect_true(all(out$S == 1))
 })
 
-test_that("declare_sampling honors filter expression", {
+test_that("declare_sampling honors a filter expression", {
   step <- declare_sampling(X = seq_len(10), filter = X > 5)
   df <- data.frame(ID = seq_len(10))
   out <- step(df)
   expect_true(all(out$X > 5))
 })
 
-test_that("design step labels are inferred", {
+test_that("a step's label is inferred when none is given", {
   d <- declare_model(N = 5, Y = rnorm(N), label = "popgen")
   expect_equal(attr(d, "label"), "popgen")
 })
 
-test_that("step type and causal type attributes are set", {
+test_that("each verb sets its step type and causal type", {
   m <- declare_model(N = 5, Y = rnorm(N))
   expect_equal(attr(m, "step_type"), "model")
   expect_equal(attr(m, "causal_type"), "dgp")

@@ -1,3 +1,9 @@
+# R/find_objects.R: which names a design reads, which of those `redesign()`
+# can change, and how `find_all_objects()` and `design_parameters()` report
+# them.
+#
+# Names reached through a function's closure are test-closure-parameters.R.
+
 test_that("a name a data step declares is a column, not a parameter", {
   local({
     Y <- 999

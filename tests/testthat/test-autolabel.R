@@ -1,3 +1,6 @@
+# The label an estimator gets when none is given, and how two that collide
+# are told apart: `autolabel_estimators()` in R/aaa_classes.R.
+
 test_that("two default estimators get formula-based autolabels", {
   design <- suppressMessages(
     declare_model(N = 20, Y = rnorm(N), Z = rep(0:1, 10)) +
@@ -8,7 +11,7 @@ test_that("two default estimators get formula-based autolabels", {
   expect_true(all(c("Y~Z", "Y~Z+1") %in% lbls))
 })
 
-test_that("same formula different method gets method appended", {
+test_that("the same formula under a different method has the method appended", {
   design <- suppressMessages(
     declare_model(N = 20, Y = rnorm(N), Z = rep(0:1, 10)) +
     declare_estimator(Y ~ Z, .method = lm) +
@@ -22,7 +25,7 @@ test_that("same formula different method gets method appended", {
   expect_true(all(grepl("Y~Z", lbls)))
 })
 
-test_that("truly duplicate estimators get .a .b suffix", {
+test_that("identical estimators are suffixed .a and .b", {
   design <- suppressMessages(
     declare_model(N = 20, Y = rnorm(N), Z = rep(0:1, 10)) +
     declare_estimator(Y ~ Z, .method = lm, label = "ols") +
@@ -35,7 +38,7 @@ test_that("truly duplicate estimators get .a .b suffix", {
   expect_true(all(c("ols.a", "ols.b") %in% lbls))
 })
 
-test_that("estimator column in simulations uses autolabel not original label", {
+test_that("the estimator column in simulations carries the autolabel, not the label given", {
   design <- suppressMessages(
     declare_model(N = 30, Y = rnorm(N), Z = rep(0:1, 15)) +
     declare_inquiry(mu = mean(Y)) +
@@ -48,7 +51,7 @@ test_that("estimator column in simulations uses autolabel not original label", {
   expect_false(any(duplicated(est_labels)))
 })
 
-test_that("autolabel emits an inform message on relabel", {
+test_that("relabelling an estimator emits a message", {
   expect_message(
     declare_model(N = 20, Y = rnorm(N), Z = rep(0:1, 10)) +
       declare_estimator(Y ~ Z, .method = lm) +
@@ -57,7 +60,7 @@ test_that("autolabel emits an inform message on relabel", {
   )
 })
 
-test_that("single estimator is not autolabeled", {
+test_that("a single estimator is not autolabelled", {
   design <- declare_model(N = 20, Y = rnorm(N), Z = rep(0:1, 10)) +
     declare_estimator(Y ~ Z, .method = lm, label = "my_est")
   est_steps <- unclass(design)[

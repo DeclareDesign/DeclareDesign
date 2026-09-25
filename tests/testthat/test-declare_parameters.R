@@ -1,3 +1,9 @@
+# `declare_parameters()`: named values the steps after it read, fixed for the
+# life of the design and changed only by `redesign()`.
+#
+# Parameters found without a declaration are test-find_objects.R and
+# test-closure-parameters.R.
+
 test_that("a declared parameter drives the design and follows a redesign", {
   local({
     design <- declare_parameters(n_units = 100, effect = 0.5) +

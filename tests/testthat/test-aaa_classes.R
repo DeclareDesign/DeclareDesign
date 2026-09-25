@@ -1,3 +1,7 @@
+# R/aaa_classes.R: how steps are built and added together into a design.
+#
+# The estimator labels inferred as a design is built are test-autolabel.R.
+
 test_that("a design can be built up from NULL", {
   # `NULL + step` is what makes Reduce() over a list of steps work, and it is
   # the same no-op as `step + NULL`, which the roxygen documents for adding a
@@ -9,6 +13,13 @@ test_that("a design can be built up from NULL", {
   expect_equal(run_design(design)$estimand, 3)
   expect_s3_class(NULL + declare_model(N = 3), "design")
   expect_s3_class(NULL + (declare_model(N = 3) + declare_inquiry(m = 1)), "design")
+})
+
+test_that("design + NULL returns the design unchanged", {
+  d <- declare_model(N = 10, Y = rnorm(N))
+  d2 <- d + NULL
+  expect_s3_class(d2, "design")
+  expect_length(d2, 1L)
 })
 
 test_that("an estimator with no formula keeps the label it was given", {

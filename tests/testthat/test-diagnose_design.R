@@ -93,6 +93,72 @@ test_that("one estimator against several inquiries it does not name is silent", 
   expect_equal(nrow(one_run), 2L)
 })
 
+test_that("an estimator with no inquiry = still finds the single inquiry", {
+  design <- declare_model(N = 40, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = sample(rep(0:1, length.out = N))) +
+    declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z")
+
+  one_run <- run_design(design)
+  expect_equal(one_run$inquiry, "ATE")
+  expect_equal(one_run$estimand, 0.5)
+
+  sims <- simulate_design(design, sims = 5)
+  expect_true("estimand" %in% names(sims))
+  expect_equal(nrow(sims), 5L)
+
+  d <- diagnose_design(design, sims = 5, bootstrap_sims = 0)
+  expect_false(is.na(get_diagnosands(d)$bias))
+})
+
+test_that("an unlabelled estimator is reported against each inquiry", {
+  design <- declare_model(N = 40, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_inquiry(ATT = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = sample(rep(0:1, length.out = N))) +
+    declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z")
+  one_run <- run_design(design)
+  expect_equal(one_run$inquiry, c("ATE", "ATT"))
+  expect_equal(one_run$estimate, rep(one_run$estimate[1], 2))
+})
+
+test_that("estimates and inquiries match on the group columns they share", {
+  # Regression test: joining on `inquiry` alone crossed the 3 groups against
+  # the 3 groups, and the estimand a group was scored against was arbitrary.
+  design <- declare_model(N = 60, g = rep(c("a", "b", "c"), 20),
+                          U = rnorm(N), Y = U + as.numeric(g == "b")) +
+    declare_inquiry(handler = function(data) {
+      data |>
+        dplyr::group_by(g) |>
+        dplyr::summarize(inquiry = "group_mean", estimand = mean(Y),
+                         .groups = "drop")
+    }) +
+    declare_estimator(handler = function(data) {
+      data |>
+        dplyr::group_by(g) |>
+        dplyr::summarize(term = "mean", estimate = mean(Y), .groups = "drop") |>
+        dplyr::mutate(inquiry = "group_mean", estimator = "means")
+    })
+  one_run <- expect_no_warning(run_design(design))
+  expect_equal(nrow(one_run), 3L)
+  expect_equal(one_run$estimate, one_run$estimand)
+})
+
+test_that("several unlabelled estimators against several inquiries warns", {
+  design <- declare_model(N = 40, U = rnorm(N), X = rnorm(N),
+                          Y_Z_0 = U, Y_Z_1 = U + 0.5) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_inquiry(ATT = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = sample(rep(0:1, length.out = N))) +
+    declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", label = "unadjusted") +
+    declare_estimator(Y ~ Z + X, .method = lm, term = "Z", label = "adjusted")
+  expect_warning(run_design(design),
+                 "every inquiry was attached to every estimate")
+})
+
 test_that("the diagnosis reports a match that did not go on inquiry", {
   unlabelled <- declare_model(N = 40, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
@@ -155,7 +221,7 @@ test_that("a 1.x argument to simulate or diagnose errors instead of vanishing", 
   # `future.seed = TRUE` used to do nothing, both without a message.
   design <- simple_design(N = 20)
   expect_error(diagnose_design(design, sims = 2, bootstrap_sims = 0,
-                               make_groups = vars(N)),
+                               make_groups = DeclareDesign::vars(N)),
                "make_groups")
   expect_error(simulate_design(design, sims = 2, future.seed = TRUE),
                "future.seed")
@@ -189,7 +255,7 @@ test_that("an inquiry no estimator targets keeps its own diagnosis row, as in 1.
 # diagnose_design() as the unified entry point ----
 #
 # Moved from test-autolabel.R, which is a file about estimator labelling.
-test_that("simulate_design |> diagnose_design() works (df piped in)", {
+test_that("diagnose_design accepts simulations piped in", {
   design <- declare_model(N = 30, Y = rnorm(N), Z = rep(0:1, 15)) +
     declare_inquiry(mu = mean(Y)) +
     declare_estimator(Y ~ 1, .method = lm, term = "(Intercept)", inquiry = "mu")
@@ -211,7 +277,7 @@ test_that("group_by() upstream of diagnose_simulations adds groups", {
   expect_equal(nrow(diag$diagnosands_df), 2L)
 })
 
-test_that("group_by |> diagnose_design() works end-to-end", {
+test_that("diagnose_design accepts grouped simulations piped in", {
   design <- declare_model(N = 50, Y = rnorm(N), Z = rep(0:1, 25)) +
     declare_inquiry(mu = mean(Y)) +
     declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "mu")

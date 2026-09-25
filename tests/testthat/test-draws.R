@@ -1,4 +1,7 @@
-test_that("draws attribute is stored on design steps", {
+# Nested simulation: a step with `draws =` is redrawn that many times for each
+# draw of the steps above it, and the diagnosis decomposes the variance by step.
+
+test_that("a step stores its draws", {
   s <- declare_model(N = 10, Y = rnorm(N), draws = 5)
   expect_equal(attr(s, "draws"), 5L)
   s2 <- declare_inquiry(mu = mean(Y), draws = 3)
@@ -15,7 +18,7 @@ test_that("draws attribute is stored on design steps", {
   expect_equal(attr(s7, "draws"), 11L)
 })
 
-test_that("default draws is 1", {
+test_that("draws defaults to 1", {
   s <- declare_model(N = 10, Y = rnorm(N))
   expect_equal(attr(s, "draws"), 1L)
 })
@@ -59,7 +62,7 @@ test_that("nested simulation adds <label>_draw columns", {
   expect_equal(length(unique(sim$assignment_draw)), 3L)
 })
 
-test_that("warn when sims and draws both specified", {
+test_that("specifying both sims and draws warns", {
   design <-
     declare_model(N = 10, U = rnorm(N), Y_Z_1 = U + 0.3, Y_Z_0 = U,
                   draws = 5) +
@@ -143,7 +146,7 @@ test_that("an inquiry upstream of a model fan-out still varies by world", {
   expect_equal(length(unique(sims$estimand)), 4L)
 })
 
-test_that("only-model draws works (no assignment fan-out)", {
+test_that("draws on the model alone work without an assignment fan-out", {
   design <-
     declare_model(N = 30, U = rnorm(N), Y_Z_1 = U + .3, Y_Z_0 = U,
                   draws = 4) +
@@ -158,7 +161,7 @@ test_that("only-model draws works (no assignment fan-out)", {
   expect_false("assignment_draw" %in% names(sim))
 })
 
-test_that("flat diagnose_design still works unchanged", {
+test_that("a design with no draws diagnoses as before", {
   design <- declare_model(N = 20, Y = rnorm(N)) +
     declare_inquiry(mu = mean(Y)) +
     declare_estimator(Y ~ 1, .method = lm, term = "(Intercept)",
@@ -167,7 +170,7 @@ test_that("flat diagnose_design still works unchanged", {
   expect_null(diag$variance_decomposition)
 })
 
-test_that("three-level nesting works", {
+test_that("three levels of nesting simulate", {
   design <-
     declare_model(N = 100, U = rnorm(N), Y_Z_1 = U + .3, Y_Z_0 = U,
                   draws = 3) +

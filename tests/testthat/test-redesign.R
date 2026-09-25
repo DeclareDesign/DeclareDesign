@@ -1,9 +1,18 @@
+# `redesign()` and `expand_design()`: replacing parameters, sweeping them into
+# a list of designs, naming that list, and refusing a name the design does
+# not read.
+#
+# Which names count as parameters is test-find_objects.R and
+# test-closure-parameters.R.
+
 test_that("redesign returns a single design when one combination is supplied", {
   design <- simple_design(N = 30)
   d2 <- redesign(design, N = 100)
   expect_s3_class(d2, "design")
   df <- draw_data(d2)
   expect_equal(nrow(df), 100L)
+  design <- declare_parameters(n = 50) + declare_model(N = n, Y = rnorm(N))
+  expect_s3_class(redesign(design, n = 10), "design")
 })
 
 test_that("redesign expands the parameter grid by default", {
@@ -482,9 +491,4 @@ test_that("every swept parameter appears in the name, in the order supplied", {
   expect_named(redesign(design, n = c(10, 20), b = c(0.2, 0.5)),
                c("n = 10, b = 0.2", "n = 20, b = 0.2",
                  "n = 10, b = 0.5", "n = 20, b = 0.5"))
-})
-
-test_that("a single combination is still one design, not a list of one", {
-  design <- declare_parameters(n = 50) + declare_model(N = n, Y = rnorm(N))
-  expect_s3_class(redesign(design, n = 10), "design")
 })

@@ -24,6 +24,15 @@ test_that("run_design returns one row per estimate with the estimand joined", {
   expect_equal(out$estimand, 0.5)
 })
 
+test_that("run_design returns one data frame, not a list of three", {
+  design <- simple_design(N = 40)
+  one_run <- run_design(design)
+  expect_s3_class(one_run, "data.frame")
+  expect_equal(nrow(one_run), 1L)
+  expect_true(all(c("inquiry", "estimand", "estimate") %in% names(one_run)))
+  expect_false("sim_ID" %in% names(one_run))
+})
+
 test_that("run_design accepts a bare step, not only a design", {
   # construct_design(wrap_step(.)) is the path a one-step design takes, and
   # `declare_model(N = 10) + NULL` is not how anyone writes it by hand.
@@ -36,6 +45,7 @@ test_that("run_design refuses something that is not a design", {
   expect_error(run_design(tibble::tibble(x = 1)),
                "must be a `design` or `design_step`")
   expect_error(run_design("Y ~ Z"), "must be a `design` or `design_step`")
+  expect_error(run_design(6), "must be a `design` or `design_step`")
 })
 
 test_that("a failing step is named before its own error is re-raised", {
@@ -47,6 +57,14 @@ test_that("a failing step is named before its own error is re-raised", {
   # The original condition survives as the parent, so a caller catching by
   # class still can.
   expect_s3_class(err$parent, "condition")
+})
+
+test_that("a failing inquiry is named the same way", {
+  design <- declare_model(N = 20, U = rnorm(N)) +
+    declare_inquiry(m = mean(W))
+  err <- tryCatch(draw_estimands(design), error = function(e) e)
+  expect_match(conditionMessage(err), "In step `m` \\(declare_inquiry\\(\\)\\)")
+  expect_match(conditionMessage(err$parent), "object 'W' not found")
 })
 
 test_that("draw_data runs the data steps and nothing else", {

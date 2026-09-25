@@ -1,3 +1,7 @@
+# `declare_notes()` and `design_notes()`: values taken once per run at a
+# point in the design and read by the steps after it. Unlike a parameter, a
+# note is redrawn on every run and cannot be redesigned.
+
 test_that("a note is computed at its own position and outlives its data", {
   local({
     design <- declare_model(N = 100, Y = 1:100) +

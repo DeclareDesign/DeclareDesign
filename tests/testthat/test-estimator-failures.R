@@ -162,6 +162,9 @@ test_that("the accounting crosses a process boundary", {
   expect_true(all(grepl("did not converge", failed$error_message)))
   expect_true(all(is.na(failed$estimate)))
   expect_equal(sum(sims$estimator == "reliable"), 4)
+  # A worker can relay warnings of its own, such as a package built under a
+  # newer R, so only this package's warning is counted.
+  ws <- ws[grepl("estimator draws? failed", ws)]
   expect_length(ws, 1)
   expect_match(ws, "did not converge")
 })

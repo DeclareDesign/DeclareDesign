@@ -1,3 +1,9 @@
+# `simulate_design()`: the simulations table, over one design or a list of
+# them.
+#
+# Nested draws are test-draws.R, failed estimators test-estimator-failures.R,
+# seeds test-seeds.R, and parallel plans test-capture.R.
+
 d1 <- function() declare_model(N = 6, Y = rnorm(N)) + declare_inquiry(m = mean(Y))
 d2 <- function() declare_model(N = 8, Y = rnorm(N)) + declare_inquiry(m = mean(Y))
 

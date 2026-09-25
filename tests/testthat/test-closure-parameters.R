@@ -1,3 +1,9 @@
+# Parameters a design reads through a function rather than in a declaration:
+# out of a handler's or a `.method`'s closure, or by the function's own name.
+#
+# How found names are reported is test-find_objects.R and test-declare_parameters.R;
+# what `redesign()` does with them is test-redesign.R.
+
 test_that("a parameter a handler reads out of its closure is found and changed", {
   # Macartan's `b` / `f` / `hdl` case, undeclared. DeclareDesign 1.1.1 reaches
   # it, so this is a regression to close rather than a feature to add.
@@ -68,8 +74,8 @@ test_that("this package's own closures are not reported as design parameters", {
                    %in% found))
 })
 
-test_that("Macartan's twice-reported N and se_type are gone", {
-  # His 2026-08-22 example: `design_parameters()` listed `N` at two values and
+test_that("an N and se_type written as literals are not parameters, even written twice", {
+  # Macartan's 2026-08-22 example: `design_parameters()` listed `N` at two values and
   # `se_type` at two values, none of which a redesign could coherently change.
   local({
     N <- 200
