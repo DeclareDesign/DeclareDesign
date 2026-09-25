@@ -71,9 +71,7 @@ test_that("diagnose_design carries the same argument", {
   expect_s3_class(get_diagnosands(res), "data.frame")
 })
 
-test_that("simulation still works when progressr is not installed", {
-  # progressr is a Suggests. dd_progressor() has to degrade to a no-op rather
-  # than error when it is absent.
+test_that("an opted-out progressor is a function that does nothing", {
   skip_if_not_installed("withr")
   tick <- withr::with_options(
     list(DeclareDesign.progress = FALSE),
@@ -81,6 +79,24 @@ test_that("simulation still works when progressr is not installed", {
   )
   expect_true(is.function(tick))
   expect_null(tick())
+})
+
+test_that("simulation still works when progressr is not installed", {
+  # progressr is a Suggests. Asking for progress without it warns and runs the
+  # simulation anyway, and the progressor degrades to a no-op. Every other
+  # package is still looked up for real, so future and furrr are not claimed
+  # present on a machine that lacks them.
+  real_require <- base::requireNamespace
+  local_mocked_bindings(
+    requireNamespace = function(package, ...) {
+      if (identical(package, "progressr")) FALSE else real_require(package, ...)
+    },
+    .package = "base"
+  )
+  expect_null(DeclareDesign:::dd_progressor(10, "x")())
+  expect_warning(sims <- simulate_design(simple_design(), sims = 2, progress = TRUE),
+                 "needs the progressr package")
+  expect_equal(nrow(sims), 2L)
 })
 
 test_that("progress does not change the result", {

@@ -294,6 +294,10 @@ test_that("diagnose_design needs a design", {
   expect_error(diagnose_design(sims = 2), "requires at least one `design`")
 })
 
+test_that("diagnose_designs is diagnose_design under its plural name", {
+  expect_identical(diagnose_designs, diagnose_design)
+})
+
 test_that("a diagnosands argument that is not a declare_diagnosands() object is refused", {
   expect_error(
     diagnose_design(simple_design(N = 20), sims = 2, bootstrap_sims = 0,

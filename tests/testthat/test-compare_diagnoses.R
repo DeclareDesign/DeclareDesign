@@ -49,7 +49,7 @@ test_that("merge_by_estimator = FALSE crosses the estimators of the two designs"
                2L * nrow(matched$compared_diagnoses_df))
 })
 
-test_that("compare_diagnoses refuses designs with nothing to match on", {
+test_that("compare_diagnoses refuses what it cannot compare", {
   design <- simple_design(N = 40)
   no_labels <- declare_model(N = 40, Y = rnorm(N)) + declare_inquiry(mu = mean(Y))
   expect_error(compare_diagnoses(design, no_labels, sims = 10,
@@ -57,6 +57,22 @@ test_that("compare_diagnoses refuses designs with nothing to match on", {
                "no labels in common")
   expect_error(compare_diagnoses(design, "not a design"),
                "must be a `design` or a `diagnosis`")
+
+  bias <- diagnose_design(design, sims = 5, bootstrap_sims = 0,
+                          diagnosands = declare_diagnosands(bias = mean(estimate - estimand)))
+  spread <- diagnose_design(design, sims = 5, bootstrap_sims = 0,
+                            diagnosands = declare_diagnosands(spread = sd(estimate)))
+  expect_error(compare_diagnoses(bias, spread), "no diagnosands in common")
+
+  # An estimator with no inquiry, term or outcome leaves only its label to
+  # match on, and merge_by_estimator = FALSE takes that away too.
+  bare <- declare_model(N = 20, Y = rnorm(N)) +
+    declare_estimator(handler = function(data) data.frame(estimate = mean(data$Y)),
+                      label = "mean")
+  bare_diagnosis <- diagnose_design(bare, sims = 4, bootstrap_sims = 0)
+  expect_error(compare_diagnoses(bare_diagnosis, bare_diagnosis,
+                                 merge_by_estimator = FALSE),
+               "share no inquiry, estimator, outcome, or term labels")
 })
 
 test_that("compare_diagnoses applies one set of diagnosands to both designs", {

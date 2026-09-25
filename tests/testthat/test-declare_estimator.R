@@ -316,6 +316,22 @@ test_that("legacy `model =` is read as `.method` with a deprecation warning", {
   expect_identical(attr(later, "method_name"), "lm")
 })
 
+test_that("declare_test reads a legacy `model =` as `.method` too", {
+  # The deprecation warning is shared with declare_estimator() and fires once
+  # per session, so it is asserted only in the test above.
+  step <- suppressWarnings(
+    declare_test(Y ~ Z, model = estimatr::lm_robust, term = "Z", label = "t"))
+  expect_identical(attr(step, "method_name"), "lm_robust")
+  design <- declare_model(N = 40, Z = rep(0:1, 20), Y = Z + rnorm(N)) + step
+  est <- draw_estimates(design)
+  expect_equal(est$term, "Z")
+  expect_true(all(c("std.error", "df") %in% names(est)))
+})
+
+test_that("label_test is label_estimator under a second name", {
+  expect_identical(label_test, label_estimator)
+})
+
 test_that("a method written inline is named `custom` rather than deparsed whole", {
   long <- function(formula, data) lm(formula, data = data)
   expect_equal(

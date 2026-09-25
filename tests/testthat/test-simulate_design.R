@@ -11,6 +11,10 @@ test_that("simulate_design needs a design", {
   expect_error(simulate_design(sims = 2), "requires at least one `design`")
 })
 
+test_that("simulate_designs is simulate_design under its plural name", {
+  expect_identical(simulate_designs, simulate_design)
+})
+
 test_that("a bare step simulates as a one-step design", {
   sims <- simulate_design(declare_inquiry(m = 1), sims = 2)
   expect_equal(unique(sims$design), "design_1")

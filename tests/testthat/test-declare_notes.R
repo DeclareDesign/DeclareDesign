@@ -107,6 +107,10 @@ test_that("design_notes() reports the notes and the expressions behind them", {
   })
 })
 
+test_that("design_notes() refuses anything that is not a design", {
+  expect_error(design_notes("not a design"), "must be a `design` or `design_step`")
+})
+
 test_that("a column beats a note of the same name in the steps that follow", {
   local({
     design <- declare_model(N = 3, a = 1:3) +

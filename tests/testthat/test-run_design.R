@@ -195,6 +195,13 @@ test_that("a sweep supplied at draw time is refused, not silently narrowed", {
                "gives 2 designs, and this verb draws from one")
 })
 
+test_that("a value supplied at draw time without a name is refused", {
+  model <- declare_model(N = 20, D = rbinom(N, 1, 0.5), Y = theta * D + rnorm(N))
+  expect_error(draw_data(model, 0.5), "has to name the parameter it sets")
+  expect_error(draw_estimates(model, 0.5), "draw_data(design, theta = 0.5)",
+               fixed = TRUE)
+})
+
 test_that("drawing without parameters is unchanged", {
   design <- declare_model(N = 25, X = rnorm(N)) + declare_inquiry(m = mean(X))
   expect_equal(nrow(draw_data(design)), 25L)

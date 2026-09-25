@@ -24,6 +24,22 @@ test_that("select_diagnosands subsets diagnosands", {
   expect_equal(names(attr(trimmed, "dots")), c("bias", "rmse"))
 })
 
+test_that("a subset of a diagnosands set evaluates the way diagnose_design does", {
+  # select_diagnosands() rebuilds the step, and the rebuilt step's own function
+  # is called by nothing in the package. test-declare_diagnosands.R asserts the
+  # same agreement for a step as declared.
+  sims <- simulate_design(simple_design(), sims = 6)
+  subset <- select_diagnosands(
+    declare_diagnosands(bias = mean(estimate - estimand),
+                        power = mean(p.value <= alpha),
+                        spread = sd(estimate)),
+    c("bias", "spread"))
+  direct <- subset(sims)
+  expect_equal(direct$diagnosand, c("bias", "spread"))
+  computed <- DeclareDesign:::compute_diagnosands(sims, subset, character(0))
+  expect_equal(direct$value, c(computed$bias, computed$spread))
+})
+
 test_that("select_diagnosands builds a set from the library, as in DeclareDesign", {
   diags <- select_diagnosands("sd_estimate", "mean_se")
   expect_equal(names(attr(diags, "dots")), c("sd_estimate", "mean_se"))

@@ -149,6 +149,13 @@ test_that("the refusal leads with the ordinary route and quotes the design back"
   expect_match(msg2, "`target <- 0.25`", fixed = TRUE)
 })
 
+test_that("a value too long to quote back is left as a placeholder", {
+  labelled <- declare_model(N = 30, Y = rnorm(N)) +
+    declare_inquiry(target = "a label long enough to run past forty characters")
+  expect_error(redesign(labelled, target = "short"), "`target <- <value>`",
+               fixed = TRUE)
+})
+
 test_that("a parameter named d is reachable, and so are de, des, desi, desig", {
   # Macartan: "`.design` is a good solution for d arguments; this has tripped
   # me up before." `mediation_analysis` in the library has a parameter named
@@ -451,6 +458,11 @@ test_that("a redesigned custom step passes fabricate its own formals", {
 
 test_that("redesign refuses anything that is not a design", {
   expect_error(redesign(42, N = 3), "must be a `design` or `design_step`")
+})
+
+test_that("redesign with no parameters returns the design unchanged", {
+  design <- simple_design()
+  expect_identical(redesign(design), design)
 })
 
 test_that("a designer sweep of a single value returns the design itself", {
