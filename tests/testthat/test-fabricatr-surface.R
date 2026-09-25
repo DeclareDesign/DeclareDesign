@@ -3,7 +3,7 @@
 # `test-fabricatr-contract.R` asserts the private entry point this package
 # calls. This file asserts the other half of the boundary: the fabricatr
 # functions a *user* writes inside `declare_model()` and the other verbs.
-# fabricatr is a `Depends`, so all 27 of its exports sit on the search path of
+# fabricatr is a `Depends`, so all 28 of its exports sit on the search path of
 # every design written here, and DeclareDesign's own suite reaches 9 of them.
 #
 # fabricatr's tests call these functions directly, with ordinary arguments,
@@ -233,6 +233,37 @@ test_that("an ICC draw reads the cluster column and the declared ICC", {
   independent <- draw_data(redesign(design, icc = 0))
   # Clustered draws move together, so the cluster means are further apart.
   expect_gt(spread(dat), 3 * spread(independent))
+})
+
+test_that("an AR draw reads the panel's columns and the declared rho", {
+  # draw_normal_ar() postdates fabricatr 1.0.2, so unlike the rest of this
+  # file there is no released behaviour to agree with. Over 200 draws the
+  # lag-1 correlation ranged 0.62 to 0.77 at rho = 0.7 and -0.09 to 0.10 at
+  # rho = 0, and the sd 1.86 to 2.12 under both.
+  design <-
+    declare_parameters(rho = 0.7) +
+    declare_model(
+      units = add_level(N = 500),
+      periods = declare_level(N = 4),
+      obs = cross_levels(
+        .by = join_using(units, periods),
+        U = draw_normal_ar(clusters = units, time = periods, rho = rho, sd = 2)))
+  lag_1 <- function(d) {
+    wide <- tapply(d$U, list(d$units, d$periods), sum)
+    cor(wide[, 1], wide[, 2])
+  }
+
+  set.seed(343)
+  dat <- draw_data(design)
+  expect_equal(nrow(dat), 2000L)
+  expect_lt(abs(lag_1(dat) - 0.7), 0.15)
+  expect_lt(abs(sd(dat$U) - 2), 0.25)
+
+  set.seed(343)
+  independent <- draw_data(redesign(design, rho = 0))
+  expect_lt(abs(lag_1(independent)), 0.15)
+  # sd is the marginal sd, so changing rho leaves the spread where it was.
+  expect_lt(abs(sd(independent$U) - 2), 0.25)
 })
 
 test_that("draw_multivariate() makes several columns from one declaration", {
