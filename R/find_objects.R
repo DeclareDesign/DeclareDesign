@@ -22,6 +22,35 @@ expr_symbols <- function(expr) {
   unlist(lapply(as.list(expr), expr_symbols), use.names = FALSE) %||% character(0)
 }
 
+#' Symbols a step that builds data reads from outside the design
+#'
+#' Inside `fabricate()`, `N` is the number of rows in hand (the data's, or the
+#' level's being built), so a bare `N` in such a step is not a name the design
+#' reads. The exception is the value of an argument named `N`, whether the
+#' step's own `N = N` or a level's `nest_level(N = N)`: fabricate evaluates it
+#' before those rows exist, so it reads the enclosing scope, `N` included.
+#'
+#' @param expr An expression.
+#' @param n_value Whether `expr` is the value of an argument named `N`.
+#' @keywords internal
+#' @noRd
+data_step_symbols <- function(expr, n_value = FALSE) {
+  if (n_value) return(expr_symbols(expr))
+  if (rlang::is_symbol(expr)) return(setdiff(expr_symbols(expr), "N"))
+  if (!rlang::is_call(expr)) return(character(0))
+  if (rlang::is_call(expr, c("$", "@")) && length(expr) == 3L) {
+    return(data_step_symbols(expr[[2]]))
+  }
+  args <- as.list(expr)
+  arg_names <- names(args) %||% rep("", length(args))
+  unlist(
+    lapply(seq_along(args), function(k) {
+      data_step_symbols(args[[k]], identical(arg_names[[k]], "N"))
+    }),
+    use.names = FALSE
+  ) %||% character(0)
+}
+
 #' Is this environment supplied by a package rather than by the user?
 #'
 #' @keywords internal
@@ -135,11 +164,14 @@ step_quosures <- function(step) {
 #' is an argument and creates no column, so it stays visible to every later
 #' step, and `redesign(design, m_arms = 4)` reaches all of them.
 #'
-#' `N` is its own case. Within the step that declares it, `rnorm(N)` reads the
-#' number of rows fabricate is building rather than the workspace's `N`, so the
-#' step shadows it. It is not a column, though, so it does not shadow anything
-#' later: an estimator whose `term` reads `N`, or a second level declaring
-#' `nest_level(N = N)`, is reading the workspace and can be redesigned.
+#' `N` is its own case. In any step that builds data, `rnorm(N)` or
+#' `complete_rs(N, n = 10)` reads the number of rows in hand rather than the
+#' workspace's `N`, whether or not any step declared `N`: a design built on
+#' `declare_model(data = pop)` has rows from its first step. The value of an
+#' argument named `N` is the exception, since fabricate evaluates it before the
+#' rows exist, so `declare_model(N = N)` and a later `nest_level(N = N)` read
+#' the workspace and can be redesigned. `N` is not a column, so an estimator
+#' whose `term` reads `N` is reading the workspace too.
 #'
 #' @param design A `design` or a `design_step`.
 #' @return A data frame with one row per name per step: `name`, `value`
@@ -285,10 +317,13 @@ find_all_objects <- function(design, include_unbound = FALSE) {
     }
     invisible(NULL)
   }
-  add_quosure <- function(quo, step, masked = character(0)) {
+  add_quosure <- function(quo, step, masked = character(0),
+                          data_step = FALSE, n_value = FALSE) {
     env <- rlang::quo_get_env(quo)
-    label <- rlang::as_label(rlang::quo_get_expr(quo))
-    symbols <- setdiff(unique(expr_symbols(rlang::quo_get_expr(quo))), masked)
+    expr <- rlang::quo_get_expr(quo)
+    label <- rlang::as_label(expr)
+    symbols <- if (data_step) data_step_symbols(expr, n_value) else expr_symbols(expr)
+    symbols <- setdiff(unique(symbols), masked)
     for (name in setdiff(symbols, notes)) {
       found <- user_binding_env(env, name)
       if (is.null(found)) {
@@ -327,14 +362,18 @@ find_all_objects <- function(design, include_unbound = FALSE) {
     builds_data <- step_builds_data(step)
     step_mask <- character(0)
     for (j in seq_along(dots)) {
-      add_quosure(dots[[j]], i, c(mask, step_mask))
+      if (builds_data) {
+        # `N` is settled by data_step_symbols() here, not by the mask.
+        add_quosure(dots[[j]], i, setdiff(c(mask, step_mask), "N"),
+                    data_step = TRUE, n_value = identical(dot_names[j], "N"))
+      } else {
+        add_quosure(dots[[j]], i, c(mask, step_mask))
+      }
       if (builds_data && nzchar(dot_names[j])) step_mask <- c(step_mask, dot_names[j])
     }
-    # `N` is shadowed from the step that declares it onward, because `rnorm(N)`
-    # reads the number of rows fabricate is building rather than anything
-    # defined outside the design, in that step and in every later one. A
-    # designer's `declare_model(N = N)` still reports `N`, from its own
-    # expression, before the shadow goes up.
+    # Steps that build data settle `N` through data_step_symbols(). For any
+    # other step, a step that declared `N` still masks it from then on, as
+    # before.
     mask <- c(mask, step_mask)
     # A name a handler, a `.method` or a `.summary` reads out of its closure is
     # a parameter of the design like any other. Nothing masks these: a closure
