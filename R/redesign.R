@@ -599,7 +599,7 @@ expr_has_symbol <- function(expr, name) {
 #' a fitted model), and anything with a `dim` attribute (a matrix, an array).
 #'
 #' A data frame is a list and a matrix is atomic, so without the first test
-#' both would be taken apart: `redesign(design, pilot = df)` would ask for one
+#' both would be taken apart: `redesign(design, dataset = df)` would ask for one
 #' design per column, which is never what a data-valued parameter means. To
 #' vary such a parameter across designs, pass a list of values.
 #'
@@ -672,8 +672,10 @@ param_grid <- function(params, expand = TRUE) {
 #'
 #' Only bare vectors and bare lists are read that way. A data frame, a matrix
 #' and anything carrying a class are single replacement values, so a design
-#' written as `declare_model(data = pilot, ...)` swaps its data with
-#' `redesign(design, pilot = new_df)` and needs no wrapping. A redesign
+#' written as `declare_model(data = dataset, ...)`, with `dataset <- pilot`
+#' in the workspace, swaps its data with `redesign(design, dataset = real)`
+#' and needs no wrapping. Naming the parameter `dataset` rather than after the
+#' data it starts with keeps the name true once it is redesigned. A redesign
 #' reaches the name the design reads the data under, not `data`, which names
 #' fabricate's argument and belongs to the declaration.
 #'

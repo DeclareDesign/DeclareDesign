@@ -124,7 +124,7 @@ redesign(design, prob_each = c(0, 0.5, 0.5))
 redesign(design, prob_each = list(c(0, 0.5, 0.5)))
 ```
 
-The rule applies to bare vectors and bare lists, and to nothing else. A data frame, a matrix, a function and anything else carrying a class is one value, so a design built on a supplied data set is re-run on another one by naming it: `declare_model(data = pilot, ...)` is redesigned with `redesign(design, pilot = full_sample)`, reaching the name the design reads the data under rather than `data`, which names fabricate's argument. 1.x read the data frame as a list of columns and asked for one design per column.
+The rule applies to bare vectors and bare lists, and to nothing else. A data frame, a matrix, a function and anything else carrying a class is one value, so a design built on a supplied data set is re-run on another one by naming it: a design written `declare_model(data = dataset, ...)` with `dataset <- pilot` is redesigned with `redesign(design, dataset = full_sample)`, reaching the name the design reads the data under rather than `data`, which names fabricate's argument. 1.x read the data frame as a list of columns and asked for one design per column.
 
 #### `inquiry =` is the quoted label of the inquiry
 

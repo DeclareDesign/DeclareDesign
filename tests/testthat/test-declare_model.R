@@ -116,9 +116,9 @@ test_that("a handler with no data argument is still called without data", {
 })
 
 test_that("resample_data as a handler takes a scalar N", {
-  pilot <- data.frame(a = 1:5, b = 6:10)
+  dataset <- data.frame(a = 1:5, b = 6:10)
   n_out <- 12
-  out <- draw_data(declare_model(data = pilot, handler = fabricatr::resample_data,
+  out <- draw_data(declare_model(data = dataset, handler = fabricatr::resample_data,
                                  N = n_out))
   expect_equal(nrow(out), 12L)
   expect_equal(names(out), c("a", "b"))

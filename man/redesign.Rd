@@ -55,8 +55,10 @@ handed to a list-valued parameter whose elements are not lists warns.
 
 Only bare vectors and bare lists are read that way. A data frame, a matrix
 and anything carrying a class are single replacement values, so a design
-written as \code{declare_model(data = pilot, ...)} swaps its data with
-\code{redesign(design, pilot = new_df)} and needs no wrapping. A redesign
+written as \code{declare_model(data = dataset, ...)}, with \code{dataset <- pilot}
+in the workspace, swaps its data with \code{redesign(design, dataset = real)}
+and needs no wrapping. Naming the parameter \code{dataset} rather than after the
+data it starts with keeps the name true once it is redesigned. A redesign
 reaches the name the design reads the data under, not \code{data}, which names
 fabricate's argument and belongs to the declaration.
 }
