@@ -2,15 +2,15 @@
 % Please edit documentation in R/deprecated.R
 \name{declare_population}
 \alias{declare_population}
-\title{Deprecated alias for declare_model}
+\title{Deprecated alias for \code{declare_model()}}
 \usage{
 declare_population(...)
 }
 \arguments{
-\item{...}{Forwarded to \code{\link[=declare_model]{declare_model()}}.}
+\item{...}{(optional) Forwarded to \code{\link[=declare_model]{declare_model()}}.}
 }
 \value{
-A \code{design_step}.
+A \code{design_step}, as \code{\link[=declare_model]{declare_model()}} returns.
 }
 \description{
 \code{declare_population()} is retained for compatibility with older scripts but

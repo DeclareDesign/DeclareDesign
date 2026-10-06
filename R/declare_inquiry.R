@@ -86,18 +86,25 @@ make_inquiry_step <- function(dots, subset_quo, label, handler = NULL) {
 #'
 #' @family design declarations
 #'
-#' @param ... Named expressions. Each expression becomes an inquiry whose
-#'   numeric value is recorded in the simulation output.
-#' @param subset Optional unquoted expression filtering the data before
-#'   estimands are computed.
-#' @param label Step label. Defaults to `"inquiry"`.
-#' @param handler Optional alternative handler. When supplied, `...` arguments
-#'   are evaluated against the data and passed to `handler()` rather than
-#'   being treated as named scalar inquiries; useful for vectorised inquiry
-#'   sets (for example, `handler = tibble`).
-#' @param draws Number of nested draws for this step. When `> 1`, the step is
-#'   re-executed `draws` times for each upstream draw during nested simulation.
-#' @return A `design_step`.
+#' @param ... (optional) Named expressions. Each expression becomes an inquiry
+#'   whose numeric value is recorded in the simulation output. An unnamed
+#'   expression takes the step's `label` as its name.
+#' @param subset (optional) Unquoted expression evaluated on the data; only
+#'   rows where it is `TRUE` enter the estimands.
+#' @param label (optional) Step label. Defaults to `"inquiry"`. A step that
+#'   declares exactly one named inquiry takes that name as its label instead,
+#'   overriding `label`.
+#' @param handler (optional) A function. When supplied, `...` arguments are
+#'   evaluated against the data and passed to `handler()` rather than being
+#'   treated as named scalar inquiries; useful for vectorised inquiry sets
+#'   (for example, `handler = tibble`).
+#' @param draws (optional) Number of nested draws for this step. Defaults to
+#'   `1`. When `> 1`, the step is re-executed `draws` times for each upstream
+#'   draw during nested simulation.
+#' @return A `design_step` (class `c("design_step", "dd", "function")`): a
+#'   function that takes a data frame and returns a tibble with columns
+#'   `inquiry` and `estimand`, one row per inquiry. Add it to a design with
+#'   `+`.
 #' @export
 #' @examples
 #' design <-

@@ -85,20 +85,29 @@ long_replicates <- function(diagnosis, diagnosands, label_cols, keys, suffix) {
 #' computed with different diagnosands compares whatever they have in common.
 #'
 #' @family simulation and diagnosis
-#' @param design1,design2 A `design` or a `diagnosis`.
-#' @param sims Number of simulations, used only for arguments that are designs.
-#' @param bootstrap_sims Number of bootstrap replicates, used only for
-#'   arguments that are designs. With `0`, differences are reported without
-#'   standard errors or intervals.
-#' @param diagnosands A diagnosands `design_step` applied to both designs, so
-#'   the two sides are compared on the same footing by construction. Used only
-#'   for arguments that are designs; a diagnosis passed in keeps the
-#'   diagnosands it was computed with.
-#' @param merge_by_estimator Match estimators by label. `FALSE` compares every
-#'   pair of estimators within an inquiry.
-#' @param alpha One minus the coverage of the reported interval.
-#' @return A `compared_diagnoses` object: a list with `compared_diagnoses_df`
-#'   and the two diagnoses.
+#' @param design1,design2 (required) A `design` or a `diagnosis`.
+#' @param sims (optional) Number of simulations, used only for arguments that
+#'   are designs. Defaults to `500`.
+#' @param bootstrap_sims (optional) Number of bootstrap replicates, used only
+#'   for arguments that are designs. Defaults to `100`. With `0`, differences
+#'   are reported without standard errors or intervals.
+#' @param diagnosands (optional) A diagnosands `design_step` applied to both
+#'   designs, so the two sides are compared on the same footing by
+#'   construction. `NULL` (the default) uses what [diagnose_design()] would:
+#'   diagnosands attached with [set_diagnosands()], else
+#'   [default_diagnosands()]. Used only for arguments that are designs; a
+#'   diagnosis passed in keeps the diagnosands it was computed with.
+#' @param merge_by_estimator (optional) Match estimators by label. `TRUE` by
+#'   default; `FALSE` compares every pair of estimators within an inquiry.
+#' @param alpha (optional) One minus the coverage of the reported interval.
+#'   Defaults to `0.05`.
+#' @return A `compared_diagnoses` object: a list with three elements.
+#'   `compared_diagnoses_df` is a tibble with one row per diagnosand per
+#'   matched group, holding the grouping columns, `diagnosand`, `mean_1`,
+#'   `mean_2`, `mean_difference`, `se_1`, `se_2`, `se_difference`, `conf.low`,
+#'   and `conf.high` (the last four are `NA` without bootstrap replicates).
+#'   `diagnosis1` and `diagnosis2` are the two `diagnosis`
+#'   objects compared.
 #' @export
 #' @examples
 #' design <- declare_parameters(n_units = 100) +
@@ -190,9 +199,11 @@ compare_diagnoses <- function(design1, design2, sims = 500,
 
 #' Print a diagnosand comparison
 #'
-#' @param x A `compared_diagnoses` object.
-#' @param ... Passed to the data frame print method.
-#' @return The input invisibly.
+#' @param x (required) A `compared_diagnoses` object, as returned by
+#'   [compare_diagnoses()].
+#' @param ... (optional) Passed to the [print()] method of
+#'   `compared_diagnoses_df`.
+#' @return `x`, invisibly.
 #' @export
 #' @method print compared_diagnoses
 #' @examples

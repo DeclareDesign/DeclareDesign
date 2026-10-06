@@ -7,17 +7,21 @@
 \method{tidy}{diagnosis}(x, conf.int = TRUE, conf.level = 0.95, ...)
 }
 \arguments{
-\item{x}{A \code{diagnosis}.}
+\item{x}{(required) A \code{diagnosis}.}
 
-\item{conf.int}{Whether to include the confidence interval. Defaults to
-\code{TRUE}.}
+\item{conf.int}{(optional) Whether to include the confidence interval.
+Defaults to \code{TRUE}.}
 
-\item{conf.level}{Confidence level for the interval. Defaults to 0.95.}
+\item{conf.level}{(optional) Confidence level for the interval. Defaults to
+\code{0.95}.}
 
-\item{...}{Ignored.}
+\item{...}{(optional) Ignored.}
 }
 \value{
-A tibble.
+A tibble with one row per group per diagnosand: the grouping
+columns (\code{design}, \code{inquiry}, \code{estimator}, \code{outcome}, \code{term}, and any
+redesign parameters), \code{diagnosand}, \code{estimate}, and, when bootstrapped,
+\code{std.error}, \code{conf.low}, and \code{conf.high}.
 }
 \description{
 Returns the diagnosands in long form, one row per group per diagnosand, with

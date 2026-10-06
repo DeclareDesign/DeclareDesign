@@ -15,34 +15,42 @@ declare_test(
 )
 }
 \arguments{
-\item{...}{Arguments forwarded to \code{.method}. Typically the formula appears
-first (e.g., \code{Y ~ Z}). A legacy \verb{model =} argument is read as \code{.method}
-with a deprecation warning rather than forwarded.}
+\item{...}{(optional) Arguments forwarded, as written, to \code{.method} (or to
+\code{handler}), which evaluates them itself with the data as \code{data}.
+Typically the formula appears first (e.g., \code{Y ~ Z}); without a \code{handler},
+these must include whatever \code{.method} needs. A legacy \verb{model =} argument
+is read as \code{.method} with a deprecation warning rather than forwarded.}
 
-\item{.method}{The model-fitting function. Defaults to
-\code{\link[estimatr:lm_robust]{estimatr::lm_robust()}}.}
+\item{.method}{(optional) The model-fitting function. Defaults to
+\code{\link[stats:lm]{stats::lm()}}, not the \code{\link[estimatr:lm_robust]{estimatr::lm_robust()}} that
+\code{\link[=declare_estimator]{declare_estimator()}} uses.}
 
-\item{.summary}{Function used to tidy \code{.method}'s output. Defaults to
-\code{\link[=tidy_try]{tidy_try()}}.}
+\item{.summary}{(optional) Function used to tidy \code{.method}'s output.
+Defaults to \code{\link[=tidy_try]{tidy_try()}}.}
 
-\item{term}{Which model terms to report. A character vector keeps exactly
-those terms, in that order, and errors if any is absent from the tidied
-output; \code{TRUE} keeps every term including the intercept. When left
+\item{term}{(optional) Which model terms to report. A character vector keeps
+exactly those terms, in that order, and errors if any is absent from the
+tidied output; \code{TRUE} keeps every term including the intercept. When left
 unset (or \code{FALSE}), only the first non-intercept term is reported, so
-\code{declare_estimator(Y ~ Z + X)} returns the \code{Z} row alone. Evaluated on
-every draw, so it may name a design parameter.}
+\code{declare_estimator(Y ~ Z + X)} returns the \code{Z} row alone; a \code{handler}'s
+table is kept whole unless \code{term} names terms. Evaluated on every draw, so
+it may name a design parameter.}
 
-\item{label}{Step label. Defaults to \code{"estimator"}.}
+\item{label}{(optional) Step label. Defaults to \code{"test"}. When two
+estimator or test steps in one design share a label, \code{+} relabels them
+from their formulas, with a message.}
 
-\item{handler}{Optional handler function. When supplied, the test bypasses
-\code{.method}/\code{.summary} and instead calls \code{handler(data, ...)} with the
-evaluated dots, which must return a tidy table.}
+\item{handler}{(optional) A function. When supplied, the test bypasses
+\code{.method} and \code{.summary} and instead calls \code{handler(data, ...)} with the
+dots as written, not evaluated; it must return a tidy table.}
 
-\item{draws}{Number of nested draws for this step. When \verb{> 1}, the step is
-re-executed \code{draws} times for each upstream draw during nested simulation.}
+\item{draws}{(optional) Number of nested draws for this step. Defaults to
+\code{1}. When \verb{> 1}, the step is re-executed \code{draws} times for each upstream
+draw during nested simulation.}
 }
 \value{
-A \code{design_step}.
+A \code{design_step}, as \code{\link[=declare_estimator]{declare_estimator()}} returns, whose estimates
+carry no \code{inquiry} column.
 }
 \description{
 Like \code{\link[=declare_estimator]{declare_estimator()}} but the result table does not gain an \code{inquiry}

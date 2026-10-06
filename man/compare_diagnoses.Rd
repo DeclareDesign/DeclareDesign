@@ -15,27 +15,36 @@ compare_diagnoses(
 )
 }
 \arguments{
-\item{design1, design2}{A \code{design} or a \code{diagnosis}.}
+\item{design1, design2}{(required) A \code{design} or a \code{diagnosis}.}
 
-\item{sims}{Number of simulations, used only for arguments that are designs.}
+\item{sims}{(optional) Number of simulations, used only for arguments that
+are designs. Defaults to \code{500}.}
 
-\item{bootstrap_sims}{Number of bootstrap replicates, used only for
-arguments that are designs. With \code{0}, differences are reported without
-standard errors or intervals.}
+\item{bootstrap_sims}{(optional) Number of bootstrap replicates, used only
+for arguments that are designs. Defaults to \code{100}. With \code{0}, differences
+are reported without standard errors or intervals.}
 
-\item{diagnosands}{A diagnosands \code{design_step} applied to both designs, so
-the two sides are compared on the same footing by construction. Used only
-for arguments that are designs; a diagnosis passed in keeps the
-diagnosands it was computed with.}
+\item{diagnosands}{(optional) A diagnosands \code{design_step} applied to both
+designs, so the two sides are compared on the same footing by
+construction. \code{NULL} (the default) uses what \code{\link[=diagnose_design]{diagnose_design()}} would:
+diagnosands attached with \code{\link[=set_diagnosands]{set_diagnosands()}}, else
+\code{\link[=default_diagnosands]{default_diagnosands()}}. Used only for arguments that are designs; a
+diagnosis passed in keeps the diagnosands it was computed with.}
 
-\item{merge_by_estimator}{Match estimators by label. \code{FALSE} compares every
-pair of estimators within an inquiry.}
+\item{merge_by_estimator}{(optional) Match estimators by label. \code{TRUE} by
+default; \code{FALSE} compares every pair of estimators within an inquiry.}
 
-\item{alpha}{One minus the coverage of the reported interval.}
+\item{alpha}{(optional) One minus the coverage of the reported interval.
+Defaults to \code{0.05}.}
 }
 \value{
-A \code{compared_diagnoses} object: a list with \code{compared_diagnoses_df}
-and the two diagnoses.
+A \code{compared_diagnoses} object: a list with three elements.
+\code{compared_diagnoses_df} is a tibble with one row per diagnosand per
+matched group, holding the grouping columns, \code{diagnosand}, \code{mean_1},
+\code{mean_2}, \code{mean_difference}, \code{se_1}, \code{se_2}, \code{se_difference}, \code{conf.low},
+and \code{conf.high} (the last four are \code{NA} without bootstrap replicates).
+\code{diagnosis1} and \code{diagnosis2} are the two \code{diagnosis}
+objects compared.
 }
 \description{
 Diagnoses both designs and reports, for every diagnosand they have in

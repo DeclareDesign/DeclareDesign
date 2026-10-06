@@ -23,16 +23,21 @@
 #' DeclareDesign 1.x, so a 1.x seed does not reproduce a 1.x table here.
 #'
 #' @family simulation and diagnosis
-#' @param ... One or more `design` objects.
-#' @param sims Number of simulations per design. Defaults to `NULL`, which
-#'   means 500 flat simulations for a design with no step-level `draws`. A
-#'   design with step-level `draws` runs in nested mode whether or not `sims`
-#'   is supplied; supplying it warns and is otherwise ignored.
-#' @param progress If `TRUE`, display a progress bar for this call by wrapping
-#'   it in [progressr::with_progress()]. The better habit is to opt in once per
-#'   session with `progressr::handlers(global = TRUE)`, which covers every call
-#'   and lets you choose how progress is shown. Nothing is displayed by default.
-#' @return A tibble of stacked simulation results.
+#' @param ... (required) One or more `design` objects, or lists of them.
+#' @param sims (optional) Number of simulations per design. Defaults to `NULL`,
+#'   which means 500 flat simulations for a design with no step-level `draws`. A
+#'   design with step-level `draws` runs in nested mode whether or not `sims` is
+#'   supplied; supplying it warns and is otherwise ignored.
+#' @param progress (optional) If `TRUE`, display a progress bar for this call
+#'   by wrapping it in [progressr::with_progress()]. The better habit is to opt
+#'   in once per session with `progressr::handlers(global = TRUE)`, which covers
+#'   every call and lets you choose how progress is shown. Nothing is displayed
+#'   by default.
+#' @return A tibble with one row per estimate per simulation: `design`,
+#'   `sim_ID`, the estimate columns (`term`, `estimate`, `std.error`,
+#'   `p.value`, `conf.low`, `conf.high`, and so on), `estimator`, `inquiry`,
+#'   `estimand`, and a column for each redesign parameter. A nested
+#'   simulation adds a `<label>_draw` column for each step with `draws > 1`.
 #' @export
 #' @examples
 #' design <- declare_model(N = 30, U = rnorm(N), Z = rep(0:1, 15), Y = U + Z) +

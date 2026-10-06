@@ -7,12 +7,13 @@
 set_citation(design, ...)
 }
 \arguments{
-\item{design}{A \code{design}.}
+\item{design}{(required) A \code{design}.}
 
-\item{...}{Citation fields (e.g., \code{title}, \code{author}, \code{year}).}
+\item{...}{(optional) Citation fields (e.g., \code{title}, \code{author}, \code{year}).}
 }
 \value{
-The design with a \code{citation} attribute set.
+\code{design}, with the fields in \code{...} stored as a named list in its
+\code{citation} attribute.
 }
 \description{
 Records bibliographic information on the design. This is currently a

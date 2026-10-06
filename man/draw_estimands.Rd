@@ -10,15 +10,16 @@ draw_estimands(design, ...)
 draw_estimand(design, ...)
 }
 \arguments{
-\item{design}{A \code{design}.}
+\item{design}{(required) A \code{design}.}
 
-\item{...}{Named parameter values, as in \code{\link[=redesign]{redesign()}}. Each supplies one
-value: use \code{redesign()} itself to sweep over several. A parameter named
-\code{design}, or any prefix of it, cannot be supplied this way and needs the
-\code{redesign()} route.}
+\item{...}{(optional) Named parameter values, as in \code{\link[=redesign]{redesign()}}. Each
+supplies one value: use \code{redesign()} itself to sweep over several. A
+parameter named \code{design}, or any prefix of it, cannot be supplied this way
+and needs the \code{redesign()} route.}
 }
 \value{
-A tibble of inquiries (one row per estimand).
+A tibble with columns \code{inquiry} and \code{estimand}, one row per
+inquiry.
 }
 \description{
 Runs the data-generating and inquiry steps only, not the estimators.

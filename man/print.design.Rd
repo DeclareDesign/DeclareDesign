@@ -7,12 +7,12 @@
 \method{print}{design}(x, ...)
 }
 \arguments{
-\item{x}{A \code{design}.}
+\item{x}{(required) A \code{design}.}
 
-\item{...}{Ignored.}
+\item{...}{(optional) Ignored.}
 }
 \value{
-The input invisibly.
+\code{x}, invisibly.
 }
 \description{
 Lists the steps as the calls that declared them, then the parameters and

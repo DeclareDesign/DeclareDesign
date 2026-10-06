@@ -7,21 +7,22 @@
 redesign(.design, ..., .expand = TRUE)
 }
 \arguments{
-\item{.design}{A \code{design}. Named with a dot, like \code{.method} and \code{.summary}
-in \code{\link[=declare_estimator]{declare_estimator()}}, because everything else here is a parameter of
-the user's design: a plain \code{design} would partially match and swallow a
-parameter named \code{d}, \code{de}, \code{des}, \code{desi} or \code{desig}, and designs with a
-parameter named \code{d} exist.}
+\item{.design}{(required) A \code{design}. Named with a dot, like \code{.method} and
+\code{.summary} in \code{\link[=declare_estimator]{declare_estimator()}}, because everything else here is a
+parameter of the user's design: a plain \code{design} would partially match and
+swallow a parameter named \code{d}, \code{de}, \code{des}, \code{desi}, or \code{desig}, and designs
+with a parameter named \code{d} exist.}
 
-\item{...}{Named parameter values. A bare atomic vector, and a bare list,
-supply one design per element; a data frame, a matrix, a function or any
-classed object is one value. To sweep over such values, pass a list of
-them, and to supply one list as a single value wrap it: \code{list(x)}.}
+\item{...}{(optional) Named parameter values. A bare atomic vector, and a
+bare list, supply one design per element; a data frame, a matrix, a
+function, or any classed object is one value. To sweep over such values,
+pass a list of them, and to supply one list as a single value wrap it:
+\code{list(x)}.}
 
-\item{.expand}{If \code{TRUE} (default), expand the parameter grid; if \code{FALSE},
-zip parallel vectors. Dotted for the same reason as \code{.design}: an
-undotted \code{expand} after the dots would collide exactly with a parameter
-of that name.}
+\item{.expand}{(optional) If \code{TRUE} (the default), expand the parameter
+grid; if \code{FALSE}, zip parallel vectors. Dotted for the same reason as
+\code{.design}: an undotted \code{expand} after the dots would collide exactly with a
+parameter of that name.}
 }
 \value{
 A single \code{design} if one combination is supplied, otherwise a list
@@ -42,8 +43,8 @@ A parameter that no step responds to draws a warning and is otherwise
 ignored. \code{\link[=summary]{summary()}} on a design lists the names that are available.
 
 An atomic vector always supplies one value per design, so a parameter that
-is itself a vector has to be wrapped: \code{prob_each = list(c(0, .5, .5))} is
-one design, where \code{prob_each = c(0, .5, .5)} is three. Handing a bare
+is itself a vector has to be wrapped: \code{prob_each = list(c(0, 0.5, 0.5))} is
+one design, where \code{prob_each = c(0, 0.5, 0.5)} is three. Handing a bare
 vector to a parameter that currently holds one warns.
 
 A bare list is split the same way, one design per element, so a parameter
@@ -53,7 +54,7 @@ design per element of \code{levels}. The two are told apart by what the elements
 are, since a sweep over lists holds a list in every element, and a bare list
 handed to a list-valued parameter whose elements are not lists warns.
 
-Only bare vectors and bare lists are read that way. A data frame, a matrix
+Only bare vectors and bare lists are read that way. A data frame, a matrix,
 and anything carrying a class are single replacement values, so a design
 written as \code{declare_model(data = dataset, ...)}, with \code{dataset <- pilot}
 in the workspace, swaps its data with \code{redesign(design, dataset = real)}

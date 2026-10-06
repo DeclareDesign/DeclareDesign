@@ -8,12 +8,16 @@
 #' inquiries alone, and [draw_estimates()] for the estimates alone.
 #'
 #' @family drawing from a design
-#' @param design A `design`.
-#' @param ... Named parameter values, as in [redesign()]. Each supplies one
-#'   value: use `redesign()` itself to sweep over several. A parameter named
-#'   `design`, or any prefix of it, cannot be supplied this way and needs the
-#'   `redesign()` route.
-#' @return A tibble of estimates with estimands joined where applicable.
+#' @param design (required) A `design`.
+#' @param ... (optional) Named parameter values, as in [redesign()]. Each
+#'   supplies one value: use `redesign()` itself to sweep over several. A
+#'   parameter named `design`, or any prefix of it, cannot be supplied this way
+#'   and needs the `redesign()` route.
+#' @return The result of one run: a tibble with one row per estimate: the
+#'   tidied columns (`term`, `estimate`, `std.error`, `p.value`, `conf.low`,
+#'   `conf.high`, and so on), `estimator`, and, where an estimator names an
+#'   inquiry, `inquiry` and the realized `estimand`. A design with no
+#'   estimator returns its estimands instead, as [draw_estimands()] does.
 #' @export
 #' @examples
 #' design <- declare_model(N = 30, U = rnorm(N), Y = U) +
@@ -125,16 +129,19 @@ run_step <- function(step, data) {
 #' `draw_data(design, theta = 0.5)` is `draw_data(redesign(design, theta =
 #' 0.5))`: a convenience for trying a value without naming it above the design
 #' or rewriting the declaration. The names reach the design by [redesign()]'s
-#' rule, so a name the design does not read errors, and a number written inside
-#' a step is refused with the two ways to name it.
+#' rule, so a name the design does not read warns and is ignored, and a
+#' number written inside a step is refused with the two ways to name it.
+#' `data`, `start` and `end`, 1.x's arguments for running part of a design on
+#' supplied data, are refused with [get_estimates()] and `design[start:end]`
+#' as the replacements, unless the design reads a parameter by that name.
 #'
 #' @family drawing from a design
-#' @param design A `design`.
-#' @param ... Named parameter values, as in [redesign()]. Each supplies one
-#'   value: use `redesign()` itself to sweep over several. A parameter named
-#'   `design`, or any prefix of it, cannot be supplied this way and needs the
-#'   `redesign()` route.
-#' @return A data frame.
+#' @param design (required) A `design`.
+#' @param ... (optional) Named parameter values, as in [redesign()]. Each
+#'   supplies one value: use `redesign()` itself to sweep over several. A
+#'   parameter named `design`, or any prefix of it, cannot be supplied this way
+#'   and needs the `redesign()` route.
+#' @return A tibble: the data as the last data-generating step leaves it.
 #' @export
 #' @examples
 #' design <- declare_model(N = 25, X = rnorm(N))
@@ -168,6 +175,25 @@ apply_draw_time_params <- function(design, params) {
       i = "`draw_data(design, theta = 0.5)`, as in `redesign()`."
     ))
   }
+  # 1.x's `draw_data(design, data = df)` would otherwise become a redesign over
+  # a name the design does not read, which warns and fabricates fresh data in
+  # place of the data supplied. A design that does read `start` keeps it.
+  legacy <- intersect(names(params), c("data", "start", "end"))
+  if (length(legacy)) {
+    reachable <- unique(find_all_objects(design, include_unbound = TRUE)$name)
+    legacy <- setdiff(legacy, reachable)
+  }
+  if (length(legacy)) {
+    rlang::abort(c(
+      paste0(paste0("`", legacy, "`", collapse = " and "),
+             if (length(legacy) > 1) " are" else " is",
+             " 1.x's way of running part of a design on supplied data, ",
+             "and this design reads no parameter by ",
+             if (length(legacy) > 1) "those names." else "that name."),
+      i = "Run the estimators on supplied data with `get_estimates(design, data, start, end)`.",
+      i = "Take a slice of the design with `design[start:end]`."
+    ))
+  }
   out <- do.call(redesign, c(list(.design = design), params))
   if (!inherits(out, "design")) {
     rlang::abort(c(
@@ -184,12 +210,13 @@ apply_draw_time_params <- function(design, params) {
 #' Runs the data-generating and inquiry steps only, not the estimators.
 #'
 #' @family drawing from a design
-#' @param design A `design`.
-#' @param ... Named parameter values, as in [redesign()]. Each supplies one
-#'   value: use `redesign()` itself to sweep over several. A parameter named
-#'   `design`, or any prefix of it, cannot be supplied this way and needs the
-#'   `redesign()` route.
-#' @return A tibble of inquiries (one row per estimand).
+#' @param design (required) A `design`.
+#' @param ... (optional) Named parameter values, as in [redesign()]. Each
+#'   supplies one value: use `redesign()` itself to sweep over several. A
+#'   parameter named `design`, or any prefix of it, cannot be supplied this way
+#'   and needs the `redesign()` route.
+#' @return A tibble with columns `inquiry` and `estimand`, one row per
+#'   inquiry.
 #' @export
 #' @examples
 #' design <- declare_model(N = 25, U = rnorm(N), Y = U) +
@@ -209,12 +236,16 @@ draw_estimand <- draw_estimands
 #' Runs the design once and returns its estimates joined to inquiries.
 #'
 #' @family drawing from a design
-#' @param design A `design`.
-#' @param ... Named parameter values, as in [redesign()]. Each supplies one
-#'   value: use `redesign()` itself to sweep over several. A parameter named
-#'   `design`, or any prefix of it, cannot be supplied this way and needs the
-#'   `redesign()` route.
-#' @return A tibble of estimates with estimands joined where applicable.
+#' @param design (required) A `design`.
+#' @param ... (optional) Named parameter values, as in [redesign()]. Each
+#'   supplies one value: use `redesign()` itself to sweep over several. A
+#'   parameter named `design`, or any prefix of it, cannot be supplied this way
+#'   and needs the `redesign()` route.
+#' @return The estimates from one run: a tibble with one row per estimate: the
+#'   tidied columns (`term`, `estimate`, `std.error`, `p.value`, `conf.low`,
+#'   `conf.high`, and so on), `estimator`, and, where an estimator names an
+#'   inquiry, `inquiry` and the realized `estimand`. A design with no
+#'   estimator returns its estimands instead.
 #' @export
 #' @examples
 #' design <- declare_model(N = 30, U = rnorm(N), Y = U) +
@@ -234,11 +265,16 @@ draw_estimates <- function(design, ...) {
 #' Runs only the estimator steps of a design against a supplied data frame.
 #'
 #' @family drawing from a design
-#' @param design A `design`.
-#' @param data A data frame.
-#' @param start Integer; first step index to consider.
-#' @param end Integer; last step index to consider.
-#' @return A tibble of estimates.
+#' @param design (required) A `design`.
+#' @param data (optional) A data frame. Defaults to `draw_data(design)`, a
+#'   fresh draw.
+#' @param start (optional) Integer; first step index to consider. Defaults
+#'   to `1`.
+#' @param end (optional) Integer; last step index to consider. Defaults to
+#'   the last step.
+#' @return A tibble with one row per estimate from the estimator and test
+#'   steps between `start` and `end`, as [draw_estimates()] returns but
+#'   without estimands. An empty tibble when that range holds no estimator.
 #' @export
 #' @examples
 #' design <- declare_model(N = 30, U = rnorm(N), Z = rep(0:1, 15), Y = U + Z) +

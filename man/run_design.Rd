@@ -7,15 +7,19 @@
 run_design(design, ...)
 }
 \arguments{
-\item{design}{A \code{design}.}
+\item{design}{(required) A \code{design}.}
 
-\item{...}{Named parameter values, as in \code{\link[=redesign]{redesign()}}. Each supplies one
-value: use \code{redesign()} itself to sweep over several. A parameter named
-\code{design}, or any prefix of it, cannot be supplied this way and needs the
-\code{redesign()} route.}
+\item{...}{(optional) Named parameter values, as in \code{\link[=redesign]{redesign()}}. Each
+supplies one value: use \code{redesign()} itself to sweep over several. A
+parameter named \code{design}, or any prefix of it, cannot be supplied this way
+and needs the \code{redesign()} route.}
 }
 \value{
-A tibble of estimates with estimands joined where applicable.
+The result of one run: a tibble with one row per estimate: the
+tidied columns (\code{term}, \code{estimate}, \code{std.error}, \code{p.value}, \code{conf.low},
+\code{conf.high}, and so on), \code{estimator}, and, where an estimator names an
+inquiry, \code{inquiry} and the realized \code{estimand}. A design with no
+estimator returns its estimands instead, as \code{\link[=draw_estimands]{draw_estimands()}} does.
 }
 \description{
 Runs the design once and returns one row per estimate, with the realized

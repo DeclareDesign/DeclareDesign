@@ -7,12 +7,13 @@
 \method{+}{dd}(e1, e2)
 }
 \arguments{
-\item{e1}{A \code{design_step} or \code{design}.}
+\item{e1}{(required) A \code{design_step}, a \code{design}, or \code{NULL}.}
 
-\item{e2}{A \code{design_step}, \code{design}, or \code{NULL}.}
+\item{e2}{(required) A \code{design_step}, a \code{design}, or \code{NULL}.}
 }
 \value{
-A \code{design}.
+A \code{design} (class \code{c("design", "dd")}): a list of the steps of
+\code{e1} followed by those of \code{e2}, named by their labels.
 }
 \description{
 The \code{+} operator concatenates \code{design_step} and \code{design} objects into a

@@ -29,9 +29,7 @@ library(randomizr)
 library(estimatr)
 ```
 
-`DeclareDesign` declares and diagnoses. The other three supply the pieces a
-declaration is written out of: `fabricatr` makes data, `randomizr` randomizes,
-and `estimatr` estimates.
+`DeclareDesign` declares and diagnoses. The other three supply the pieces a declaration is written out of: `fabricatr` makes data, `randomizr` randomizes, and `estimatr` estimates.
 
 ## Declaration
 
@@ -51,7 +49,8 @@ n_units <- 100
 declaration <-
   declare_model(
     N = n_units,
-    potential_outcomes(Y ~ 0.2 * Z + rnorm(N))
+    U = rnorm(N),
+    potential_outcomes(Y ~ 0.2 * Z + U)
   ) +
   declare_inquiry(ATE = mean(Y_Z_1) - mean(Y_Z_0)) +
   declare_assignment(Z = complete_ra(N)) +
@@ -65,7 +64,7 @@ Run the design to see what one study would look like:
 head(draw_data(declaration))
 ```
 
-Both potential outcomes are in the data because you are simulating the world. A real study observes `Y` alone.
+Both potential outcomes are in the data because you are simulating the world. A real study observes `Y` alone. Each unit's two potential outcomes share the same `U`, so they differ by exactly 0.2 and the average treatment effect is 0.2 in every run.
 
 ```{r}
 draw_estimands(declaration)
@@ -73,17 +72,19 @@ draw_estimands(declaration)
 draw_estimates(declaration)
 ```
 
+The inquiry is 0.2, and one study's estimate can miss it by a long way. How far it misses on average, and how often a study like this one finds a significant effect, is what diagnosis answers.
+
 ## Diagnosis
 
 Diagnosis is the process of simulating the design many times and calculating summary statistics about the design that describe its properties, which we call diagnosands.
 
 ```{r}
-diagnosis <- diagnose_design(declaration, sims = 100)
+diagnosis <- diagnose_design(declaration, sims = 500)
 
 diagnosis
 ```
 
-Bias sits near zero, so the estimator recovers the estimand on average. Power is the number to look at here: with 100 units and an effect of 0.2, most runs of this study end without a significant result.
+Bias sits near zero, so the estimator recovers the estimand on average. Power is the number to look at here: with 100 units and an effect of 0.2, about four runs in five end without a significant result, and coverage near 0.95 says the confidence intervals are the width they claim to be.
 
 Each diagnosand comes with a bootstrapped standard error, so you can tell a real difference from simulation noise. `?default_diagnosands` says what each one means.
 
@@ -94,7 +95,7 @@ We redesign to learn how the diagnosands change as design features change. `rede
 ```{r}
 designs <- redesign(declaration, n_units = c(100, 200, 300, 400, 500))
 
-diagnose_design(designs, sims = 100)
+diagnose_design(designs, sims = 500)
 ```
 
 A design can be redesigned over any name its expressions read from outside it, as `n_units` is read here. A number written into the design, as `0.2` is above, is part of the design: to redesign over values of it, give it a name first. `declare_parameters()` names a value inside the design instead, which earns its place when several steps read it or when a column shares its name.

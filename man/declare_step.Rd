@@ -7,23 +7,26 @@
 declare_step(handler, ..., label = "custom_step", draws = 1L)
 }
 \arguments{
-\item{handler}{A function whose first argument is \code{data}.}
+\item{handler}{(required) A function whose first argument is \code{data}.}
 
-\item{...}{Additional arguments passed to \code{handler} \strong{as written}, so the
-handler evaluates them itself. A bare column name arrives as a name, which
-is what lets \code{tidyr::pivot_wider(id_cols = pair)} and the dplyr verbs
-select and mask as they normally do. This is the same rule
+\item{...}{(optional) Additional arguments passed to \code{handler} \strong{as
+written}, so the handler evaluates them itself. A bare column name arrives
+as a name, which is what lets \code{tidyr::pivot_wider(id_cols = pair)} and the
+dplyr verbs select and mask as they normally do. This is the same rule
 \code{\link[=declare_estimator]{declare_estimator()}} follows. A handler that does no evaluation of its own
 and wants a value computed from the data takes a closure instead:
 \code{declare_step(handler = function(data) f(data, cutoff = mean(data$a)))}.}
 
-\item{label}{Step label.}
+\item{label}{(optional) Step label. Defaults to \code{"custom_step"}.}
 
-\item{draws}{Number of nested draws for this step. When \verb{> 1}, the step is
-re-executed \code{draws} times for each upstream draw during nested simulation.}
+\item{draws}{(optional) Number of nested draws for this step. Defaults to
+\code{1}. When \verb{> 1}, the step is re-executed \code{draws} times for each upstream
+draw during nested simulation.}
 }
 \value{
-A \code{design_step}.
+A \code{design_step} (class \code{c("design_step", "dd", "function")}): a
+function that takes the current data frame and returns what \code{handler}
+returns for it. Add it to a design with \code{+}.
 }
 \description{
 Wraps an arbitrary handler function as a step in the design. The handler

@@ -12,16 +12,21 @@ get_estimates(
 )
 }
 \arguments{
-\item{design}{A \code{design}.}
+\item{design}{(required) A \code{design}.}
 
-\item{data}{A data frame.}
+\item{data}{(optional) A data frame. Defaults to \code{draw_data(design)}, a
+fresh draw.}
 
-\item{start}{Integer; first step index to consider.}
+\item{start}{(optional) Integer; first step index to consider. Defaults
+to \code{1}.}
 
-\item{end}{Integer; last step index to consider.}
+\item{end}{(optional) Integer; last step index to consider. Defaults to
+the last step.}
 }
 \value{
-A tibble of estimates.
+A tibble with one row per estimate from the estimator and test
+steps between \code{start} and \code{end}, as \code{\link[=draw_estimates]{draw_estimates()}} returns but
+without estimands. An empty tibble when that range holds no estimator.
 }
 \description{
 Runs only the estimator steps of a design against a supplied data frame.

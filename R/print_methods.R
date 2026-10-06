@@ -7,9 +7,9 @@
 #' alone. [summary()] runs the design once as well and says what each step
 #' did to the data.
 #'
-#' @param x A `design`.
-#' @param ... Ignored.
-#' @return The input invisibly.
+#' @param x (required) A `design`.
+#' @param ... (optional) Ignored.
+#' @return `x`, invisibly.
 #' @export
 #' @method print design
 #' @examples
@@ -61,9 +61,9 @@ print_design_objects <- function(x) {
 
 #' Print a design step
 #'
-#' @param x A `design_step`.
-#' @param ... Ignored.
-#' @return The input invisibly.
+#' @param x (required) A `design_step`.
+#' @param ... (optional) Ignored.
+#' @return `x`, invisibly.
 #' @export
 #' @method print design_step
 #' @examples
@@ -82,10 +82,11 @@ print.design_step <- function(x, ...) {
 #' estimates per group, with bootstrap standard errors in parentheses on the
 #' row beneath.
 #'
-#' @param x A `diagnosis`.
-#' @param digits Number of decimal places.
-#' @param ... Ignored.
-#' @return The reshaped table invisibly.
+#' @param x (required) A `diagnosis`.
+#' @param digits (optional) Number of decimal places. Defaults to `2`.
+#' @param ... (optional) Ignored.
+#' @return The `data.frame` of formatted strings that [format.diagnosis()]
+#'   returns, invisibly.
 #' @export
 #' @method print diagnosis
 #' @examples
@@ -131,10 +132,11 @@ print.diagnosis <- function(x, digits = 2, ...) {
 #'
 #' The same report [print.diagnosis()] gives.
 #'
-#' @param object A `diagnosis`.
-#' @param digits Number of decimal places.
-#' @param ... Ignored.
-#' @return The reshaped table invisibly.
+#' @param object (required) A `diagnosis`.
+#' @param digits (optional) Number of decimal places. Defaults to `2`.
+#' @param ... (optional) Ignored.
+#' @return The `data.frame` of formatted strings that [format.diagnosis()]
+#'   returns, invisibly.
 #' @export
 #' @method summary diagnosis
 #' @examples
@@ -210,10 +212,12 @@ describe_inquiry_match <- function(matched_on) {
 #' and an argument that duplicates a verb is the wart this package exists to
 #' remove.
 #'
-#' @param x A `diagnosis` object.
-#' @param digits Number of decimal places.
-#' @param ... Ignored.
-#' @return A `data.frame` of formatted strings.
+#' @param x (required) A `diagnosis` object.
+#' @param digits (optional) Number of decimal places. Defaults to `2`.
+#' @param ... (optional) Ignored.
+#' @return A `data.frame` of character columns: the grouping columns and one
+#'   column per diagnosand under its display name, with each bootstrap
+#'   standard error in parentheses on the row beneath its estimate.
 #' @export
 #' @method format diagnosis
 #' @examples
@@ -266,7 +270,7 @@ format.diagnosis <- function(x, digits = 2, ...) {
 
 #' @rdname format.diagnosis
 #' @family diagnosands
-#' @param diagnosis A `diagnosis` object.
+#' @param diagnosis (required) A `diagnosis` object.
 #' @export
 reshape_diagnosis <- function(diagnosis, digits = 2) {
   format(diagnosis, digits = digits)
@@ -321,7 +325,7 @@ add_parens <- function(x, digits = 2) {
 #' Summarize a design
 #'
 #' Runs the design once and reports what each step did: the rows a data step
-#' produced or kept and the columns it added, dropped or changed; the value
+#' produced or kept and the columns it added, dropped, or changed; the value
 #' each inquiry took; the estimate each estimator returned. The run itself,
 #' estimates joined to estimands, comes after the steps, then the parameters
 #' and objects the design refers to. Everything the printout shows is on the
@@ -332,13 +336,14 @@ add_parens <- function(x, digits = 2) {
 #' `run = FALSE` gives the steps and the parameters alone, which is what
 #' [print()] shows.
 #'
-#' @param object A `design`.
-#' @param run Whether to run the design once. Defaults to `TRUE`.
-#' @param ... Ignored.
+#' @param object (required) A `design`.
+#' @param run (optional) Whether to run the design once. Defaults to `TRUE`.
+#' @param ... (optional) Ignored.
 #' @return A `summary.design`: a list with `steps` (a tibble with one row per
 #'   step: `step`, `label`, `type`, `call`, and `one_run`, the account of that
 #'   step on this run), `parameters` and `notes` (as [design_parameters()]
-#'   and [design_notes()] return them), `ran`, and when the design was run,
+#'   and [design_notes()] return them), `ran` (logical), and when the design
+#'   was run,
 #'   `data` (the final data), `inquiries` and `estimates` (as [run_design()]
 #'   returns them).
 #' @export
@@ -493,12 +498,16 @@ generics::tidy
 #' `std.error`, `conf.low`, and `conf.high` come from the bootstrap replicates,
 #' so they appear only when the diagnosis was run with `bootstrap_sims > 0`.
 #'
-#' @param x A `diagnosis`.
-#' @param conf.int Whether to include the confidence interval. Defaults to
-#'   `TRUE`.
-#' @param conf.level Confidence level for the interval. Defaults to 0.95.
-#' @param ... Ignored.
-#' @return A tibble.
+#' @param x (required) A `diagnosis`.
+#' @param conf.int (optional) Whether to include the confidence interval.
+#'   Defaults to `TRUE`.
+#' @param conf.level (optional) Confidence level for the interval. Defaults to
+#'   `0.95`.
+#' @param ... (optional) Ignored.
+#' @return A tibble with one row per group per diagnosand: the grouping
+#'   columns (`design`, `inquiry`, `estimator`, `outcome`, `term`, and any
+#'   redesign parameters), `diagnosand`, `estimate`, and, when bootstrapped,
+#'   `std.error`, `conf.low`, and `conf.high`.
 #' @importFrom generics tidy
 #' @export tidy.diagnosis
 #' @export

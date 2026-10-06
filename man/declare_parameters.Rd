@@ -7,13 +7,15 @@
 declare_parameters(..., label = "parameters")
 }
 \arguments{
-\item{...}{Named parameters. Each is evaluated once, in order, and may read
-the parameters declared before it.}
+\item{...}{(optional) Named parameters. Each is evaluated once, in order,
+and may read the parameters declared before it.}
 
-\item{label}{Step label.}
+\item{label}{(optional) Step label. Defaults to \code{"parameters"}.}
 }
 \value{
-A \code{design_step}.
+A \code{design_step} (class \code{c("design_step", "dd", "function")})
+that carries the declared parameters and their values. Called on a data
+frame, it returns the data unchanged. Add it to a design with \code{+}.
 }
 \description{
 Names the quantities a design is built from, so that \code{\link[=redesign]{redesign()}} changes

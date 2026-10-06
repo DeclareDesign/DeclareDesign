@@ -7,10 +7,11 @@
 cite_design(design)
 }
 \arguments{
-\item{design}{A \code{design}.}
+\item{design}{(required) A \code{design}.}
 }
 \value{
-The citation list, or \code{NULL} if none has been set.
+The named list of citation fields set by \code{\link[=set_citation]{set_citation()}}, or
+\code{NULL} if none has been set.
 }
 \description{
 Retrieve a design's citation (stub)

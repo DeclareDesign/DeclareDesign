@@ -1,10 +1,10 @@
-#' Deprecated alias for declare_model
+#' Deprecated alias for `declare_model()`
 #'
 #' `declare_population()` is retained for compatibility with older scripts but
 #' will be removed in a future version. Use [declare_model()] instead.
 #'
-#' @param ... Forwarded to [declare_model()].
-#' @return A `design_step`.
+#' @param ... (optional) Forwarded to [declare_model()].
+#' @return A `design_step`, as [declare_model()] returns.
 #' @export
 declare_population <- function(...) {
   rlang::warn(
@@ -37,8 +37,8 @@ declare_population <- function(...) {
 #' [compare_diagnoses()], which compares what two designs achieve rather than
 #' how they are written, is implemented.
 #'
-#' @param ... Ignored.
-#' @return Never returns.
+#' @param ... (optional) Ignored.
+#' @return Never returns; always raises an error.
 #' @name compare_designs
 #' @export
 compare_designs          <- function(...) .compare_defunct("compare_designs")
@@ -61,13 +61,14 @@ compare_design_summaries <- function(...) .compare_defunct("compare_design_summa
 #' @export
 print_code               <- function(...) .compare_defunct("print_code")
 
-#' Deprecated alias for label_estimator
+#' Deprecated alias for `label_estimator()`
 #'
 #' `model_handler()` and `tidy_estimator()` are retained for compatibility but
 #' will be removed in a future version. Use [label_estimator()] instead.
 #'
-#' @param ... Forwarded to [label_estimator()].
-#' @return A function.
+#' @param ... (required) Forwarded to [label_estimator()], which needs at
+#'   least `.method`.
+#' @return A function, as [label_estimator()] returns.
 #' @export
 model_handler <- function(...) {
   rlang::warn("`model_handler()` is deprecated. Use `label_estimator()` instead.")
@@ -92,7 +93,7 @@ tidy_estimator <- function(...) {
 #' write instead. Without them R reports `could not find function`, which says
 #' nothing about the replacement.
 #'
-#' @param ... Ignored.
+#' @param ... (optional) Ignored.
 #' @return Never returns; always raises an error.
 #' @name declare-defunct
 NULL

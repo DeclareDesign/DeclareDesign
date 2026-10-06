@@ -141,46 +141,6 @@ step_quosures <- function(step) {
   Filter(rlang::is_quosure, quos)
 }
 
-#' Find the parameters and objects a design refers to
-#'
-#' Walks every captured expression in the design and reports the names that
-#' [redesign()] can change: the parameters a [declare_parameters()] step
-#' declares, and objects the design's expressions read out of the environments
-#' they were written in. Symbols that resolve to a package (`rnorm`,
-#' `complete_ra`) and symbols that resolve to nothing, because they name a
-#' column supplied by an earlier step, are both left out.
-#'
-#' An argument written as a literal is not one of them. `declare_model(N = 500)`
-#' puts 500 in the design; nothing outside it holds that number and nothing
-#' names it, so there is nothing for a redesign to change. `declare_parameters(
-#' n = 500) + declare_model(N = n)` is how a design says a redesign may set
-#' that number.
-#'
-#' A name a previous expression put in the data is a column, not a parameter:
-#' the data mask shadows the environment, so once a step has declared `Y`, a
-#' later `mean(Y)` reads the column and not whatever `Y` happens to be bound
-#' to in the workspace. Only steps that build data shadow names this way. A
-#' name handed to a handler (`declare_inquiry(handler = f, m_arms = m_arms)`)
-#' is an argument and creates no column, so it stays visible to every later
-#' step, and `redesign(design, m_arms = 4)` reaches all of them.
-#'
-#' `N` is its own case. In any step that builds data, `rnorm(N)` or
-#' `complete_rs(N, n = 10)` reads the number of rows in hand rather than the
-#' workspace's `N`, whether or not any step declared `N`: a design built on
-#' `declare_model(data = pop)` has rows from its first step. The value of an
-#' argument named `N` is the exception, since fabricate evaluates it before the
-#' rows exist, so `declare_model(N = N)` and a later `nest_level(N = N)` read
-#' the workspace and can be redesigned. `N` is not a column, so an estimator
-#' whose `term` reads `N` is reading the workspace too.
-#'
-#' @param design A `design` or a `design_step`.
-#' @return A data frame with one row per name per step: `name`, `value`
-#'   (a display snippet of the value),
-#'   `kind` (`scalar`, `vector`, `list`, `data`, `function` or `other`),
-#'   `step`, `quosure`, and the environment the name was found in. Rows are
-#'   in step order.
-#' @keywords internal
-#' @noRd
 #' Whether a step's named arguments become columns of the data
 #'
 #' A step that runs `fabricate()` turns each named dot into a column, which
@@ -255,7 +215,7 @@ closure_symbols <- function(fn) {
 
 #' Is this name bound nowhere the declaration can see, packages included?
 #'
-#' Distinguishes the two cases [user_binding_env()] collapses into `NULL`. A
+#' Distinguishes the two cases `user_binding_env()` collapses into `NULL`. A
 #' name that resolves to a package (`rnorm`, `complete_ra`) is not a parameter
 #' and never will be. A name that resolves to nothing is usually a column an
 #' earlier step created, but it is also how a design written for a designer
@@ -269,6 +229,44 @@ name_is_unbound <- function(env, name) {
   !exists(name, envir = env, inherits = TRUE)
 }
 
+#' Find the parameters and objects a design refers to
+#'
+#' Walks every captured expression in the design and reports the names that
+#' [redesign()] can change: the parameters a [declare_parameters()] step
+#' declares, and objects the design's expressions read out of the environments
+#' they were written in. Symbols that resolve to a package (`rnorm`,
+#' `complete_ra`) and symbols that resolve to nothing, because they name a
+#' column supplied by an earlier step, are both left out.
+#'
+#' An argument written as a literal is not one of them. `declare_model(N = 500)`
+#' puts 500 in the design; nothing outside it holds that number and nothing
+#' names it, so there is nothing for a redesign to change. `declare_parameters(
+#' n = 500) + declare_model(N = n)` is how a design says a redesign may set
+#' that number.
+#'
+#' A name a previous expression put in the data is a column, not a parameter:
+#' the data mask shadows the environment, so once a step has declared `Y`, a
+#' later `mean(Y)` reads the column and not whatever `Y` happens to be bound
+#' to in the workspace. Only steps that build data shadow names this way. A
+#' name handed to a handler (`declare_inquiry(handler = f, m_arms = m_arms)`)
+#' is an argument and creates no column, so it stays visible to every later
+#' step, and `redesign(design, m_arms = 4)` reaches all of them.
+#'
+#' `N` is its own case. In any step that builds data, `rnorm(N)` or
+#' `complete_rs(N, n = 10)` reads the number of rows in hand rather than the
+#' workspace's `N`, whether or not any step declared `N`: a design built on
+#' `declare_model(data = pop)` has rows from its first step. The value of an
+#' argument named `N` is the exception, since fabricate evaluates it before the
+#' rows exist, so `declare_model(N = N)` and a later `nest_level(N = N)` read
+#' the workspace and can be redesigned. `N` is not a column, so an estimator
+#' whose `term` reads `N` is reading the workspace too.
+#'
+#' @param design A `design` or a `design_step`.
+#' @return A data frame with one row per name per step: `name`, `value`
+#'   (a display snippet of the value),
+#'   `kind` (`scalar`, `vector`, `list`, `data`, `function` or `other`),
+#'   `step`, `quosure`, and the environment the name was found in. Rows are
+#'   in step order.
 #' @param include_unbound Whether to report names that are bound nowhere.
 #'   `design_parameters()` leaves them out, because most of them are columns.
 #'   [redesign()] needs them, because the rest are names it is expected to
@@ -445,13 +443,15 @@ current_param_value <- function(design, name) {
 
 #' Print the objects table, one row per name
 #'
-#' The table carries an `env` column of environments, which `print.data.frame`
-#' cannot format, so the table is aggregated down to the three columns a reader
-#' wants before it is printed.
+#' The table carries an `env` column of environments, which
+#' `print.data.frame()` cannot format, so before it is printed the table is
+#' aggregated to one row per name, with the columns a reader wants: `name`,
+#' `value`, `kind`, `declared`, and `steps` (every step that reads the name).
 #'
-#' @param x An `objects` table, as returned by `find_all_objects()`.
-#' @param ... Ignored.
-#' @return The input invisibly.
+#' @param x (required) An `objects` table, as returned by
+#'   [design_parameters()].
+#' @param ... (optional) Ignored.
+#' @return `x`, invisibly.
 #' @export
 #' @method print objects
 print.objects <- function(x, ...) {
@@ -549,7 +549,7 @@ dynamic_lookup_calls <- c(
 #' Would pruning lose something this declaration needs?
 #'
 #' True when any expression, or the body of any user-written function it
-#' reaches, calls something from [dynamic_lookup_calls]. Deliberately
+#' reaches, calls something from `dynamic_lookup_calls`. Deliberately
 #' conservative: a false positive costs a design that carries more than it
 #' needs, a false negative costs a design that does not run.
 #'
@@ -595,7 +595,7 @@ declaration_uses_dynamic_lookup <- function(exprs, env) {
 #' `DeclareDesign:::capture_globals_quosure()` carries.
 #'
 #' One environment is built per declaration rather than one per quosure,
-#' because [dots_env()] hands the *first* dot's environment to the step's
+#' because `dots_env()` hands the *first* dot's environment to the step's
 #' executor. Capturing per quosure leaves an estimator whose first argument is
 #' a formula evaluating its remaining arguments in an environment that captured
 #' nothing.
@@ -645,7 +645,7 @@ capture_dots_env <- function(dots) {
   out
 }
 
-#' Single-quosure form of [capture_dots_env()], for `filter` and `subset`
+#' Single-quosure form of `capture_dots_env()`, for `filter` and `subset`
 #' @keywords internal
 #' @noRd
 capture_quosure_env <- function(quo) {

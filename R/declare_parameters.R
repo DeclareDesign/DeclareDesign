@@ -32,10 +32,12 @@
 #' The step generates no data and is skipped when the design runs.
 #'
 #' @family design declarations
-#' @param ... Named parameters. Each is evaluated once, in order, and may read
-#'   the parameters declared before it.
-#' @param label Step label.
-#' @return A `design_step`.
+#' @param ... (optional) Named parameters. Each is evaluated once, in order,
+#'   and may read the parameters declared before it.
+#' @param label (optional) Step label. Defaults to `"parameters"`.
+#' @return A `design_step` (class `c("design_step", "dd", "function")`)
+#'   that carries the declared parameters and their values. Called on a data
+#'   frame, it returns the data unchanged. Add it to a design with `+`.
 #' @export
 #' @examples
 #' design <-
@@ -113,8 +115,8 @@ parameter_values <- function(step) {
 
 #' Keep the values a parameter declaration evaluated to
 #'
-#' Called once, from [apply_parameters()], so every later rebuild reuses them.
-#' [modify_design_params()] drops the ones a redesign invalidates.
+#' Called once, from `apply_parameters()`, so every later rebuild reuses them.
+#' `modify_design_params()` drops the ones a redesign invalidates.
 #'
 #' @keywords internal
 #' @noRd
@@ -267,7 +269,7 @@ bind_params_into_step <- function(step, params, marker = "dd_param_env",
 
 #' Push each parameter declaration onto the steps that follow it
 #'
-#' Called from [construct_design()], so a design carries its parameters
+#' Called from `construct_design()`, so a design carries its parameters
 #' already bound however it was assembled. A design with no parameter
 #' declaration returns untouched and never reaches the rebinding path at all,
 #' which is what keeps this invisible to every design written before it
@@ -306,12 +308,14 @@ apply_parameters <- function(steps) {
 #' because those are columns an earlier step created.
 #'
 #' @family modifying a design
-#' @param design A `design` or a `design_step`.
-#' @return A data frame with one row per name per step: `name`, `value`
-#'   (a display snippet of the value),
-#'   `kind` (`scalar`, `vector`, `list`, `data`, `function` or `other`),
-#'   `declared` (whether a `declare_parameters()` step declares it), and
-#'   `step`. Rows are in step order.
+#' @param design (required) A `design` or a `design_step`.
+#' @return A data frame of class `objects` with one row per name per step:
+#'   `name`, `value` (a display snippet of the value), `kind` (`scalar`,
+#'   `vector`, `list`, `data`, `function`, or `other`), `declared` (whether a
+#'   [declare_parameters()] step declares it), and `step` (the position of the
+#'   step that reads it), plus the list
+#'   columns `quosure` and `env` that locate the binding. Rows are in step
+#'   order. It prints aggregated to one row per name.
 #' @export
 #' @examples
 #' design <- declare_parameters(n_units = 100) +

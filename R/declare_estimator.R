@@ -1,13 +1,16 @@
 #' Tidy a model fit, with a fallback
 #'
 #' Tries [broom::tidy()] with confidence intervals; if that fails (because the
-#' model class has no `tidy` method), assembles a minimal tidy table from the
+#' model class has no `tidy()` method), assembles a minimal tidy table from the
 #' coefficient summary.
 #'
-#' @param fit A fitted model.
-#' @param ... Passed to [broom::tidy()].
-#' @return A tibble with columns including `term`, `estimate`, `std.error`,
-#'   `statistic`, `p.value`, `conf.low`, `conf.high`.
+#' @param fit (required) A fitted model. A data frame is returned as a tibble
+#'   unchanged.
+#' @param ... (optional) Passed to [broom::tidy()].
+#' @return A tibble with one row per term and columns including `term`,
+#'   `estimate`, `std.error`, `statistic`, `p.value`, `conf.low`, and
+#'   `conf.high`. When neither [broom::tidy()] nor `coef(summary(fit))`
+#'   works, a tibble with those columns and no rows.
 #' @export
 #' @examples
 #' fit <- lm(mpg ~ wt, data = mtcars)
@@ -261,28 +264,40 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
 #' and joined to its estimand by the `inquiry` label during diagnosis.
 #'
 #' @family design declarations
-#' @param ... Arguments forwarded to `.method`. Typically the formula appears
-#'   first (e.g., `Y ~ Z`). A legacy `model =` argument is read as `.method`
-#'   with a deprecation warning rather than forwarded.
-#' @param .method The model-fitting function. Defaults to
+#' @param ... (optional) Arguments forwarded, as written, to `.method` (or to
+#'   `handler`), which evaluates them itself with the data as `data`.
+#'   Typically the formula appears first (e.g., `Y ~ Z`); without a `handler`,
+#'   these must include whatever `.method` needs. A legacy `model =` argument
+#'   is read as `.method` with a deprecation warning rather than forwarded.
+#' @param .method (optional) The model-fitting function. Defaults to
 #'   [estimatr::lm_robust()].
-#' @param .summary Function used to tidy `.method`'s output. Defaults to
-#'   [tidy_try()].
-#' @param inquiry Either an inquiry label (character), a `design_step`, or a
-#'   list of these; used to join the estimate to its target estimand.
-#' @param term Which model terms to report. A character vector keeps exactly
-#'   those terms, in that order, and errors if any is absent from the tidied
-#'   output; `TRUE` keeps every term including the intercept. When left
+#' @param .summary (optional) Function used to tidy `.method`'s output.
+#'   Defaults to [tidy_try()].
+#' @param inquiry (optional) Either an inquiry label (character), a
+#'   `design_step`, or a list of these; used to join the estimate to its
+#'   target estimand.
+#' @param term (optional) Which model terms to report. A character vector keeps
+#'   exactly those terms, in that order, and errors if any is absent from the
+#'   tidied output; `TRUE` keeps every term including the intercept. When left
 #'   unset (or `FALSE`), only the first non-intercept term is reported, so
-#'   `declare_estimator(Y ~ Z + X)` returns the `Z` row alone. Evaluated on
-#'   every draw, so it may name a design parameter.
-#' @param label Step label. Defaults to `"estimator"`.
-#' @param handler Optional handler function. When supplied, the estimator
-#'   bypasses `.method`/`.summary` and instead calls
-#'   `handler(data, ...evaluated_dots...)`, which must return a tidy table.
-#' @param draws Number of nested draws for this step. When `> 1`, the step is
-#'   re-executed `draws` times for each upstream draw during nested simulation.
-#' @return A `design_step`.
+#'   `declare_estimator(Y ~ Z + X)` returns the `Z` row alone; a `handler`'s
+#'   table is kept whole unless `term` names terms. Evaluated on every draw, so
+#'   it may name a design parameter.
+#' @param label (optional) Step label. Defaults to `"estimator"`. When two
+#'   estimator or test steps in one design share a label, `+` relabels them
+#'   from their formulas, with a message.
+#' @param handler (optional) A function. When supplied, the estimator bypasses
+#'   `.method` and `.summary` and instead calls `handler(data, ...)` with the
+#'   dots as written, not evaluated; it must return a tidy table.
+#' @param draws (optional) Number of nested draws for this step. Defaults to
+#'   `1`. When `> 1`, the step is re-executed `draws` times for each upstream
+#'   draw during nested simulation.
+#' @return A `design_step` (class `c("design_step", "dd", "function")`): a
+#'   function that takes a data frame and returns a tibble of estimates, one
+#'   row per reported term, with `estimator` and, when `inquiry` is set,
+#'   `inquiry` columns. A draw on which `.method` errors returns a row with
+#'   `error = TRUE` and the message rather than stopping the run. Add it to a
+#'   design with `+`.
 #' @export
 #' @examples
 #' design <- declare_model(N = 50, U = rnorm(N), Y = U) +
@@ -312,8 +327,8 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
     # fell back to stats::lm when estimatr was missing, which silently turned
     # HC2 standard errors into classical ones: an analysis choice made by an
     # installation accident, with nothing printed to say so.
-    .method <- estimatr::lm_robust
-    method_name <- "lm_robust"
+    .method <- stats::lm
+    method_name <- "lm"
   } else if (is.null(method_expr)) {
     method_name <- legacy$method_name
   } else {
@@ -365,12 +380,20 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
 #'
 #' @inheritParams declare_estimator
 #' @family design declarations
-#' @param handler Optional handler function. When supplied, the test bypasses
-#'   `.method`/`.summary` and instead calls `handler(data, ...)` with the
-#'   evaluated dots, which must return a tidy table.
-#' @param draws Number of nested draws for this step. When `> 1`, the step is
-#'   re-executed `draws` times for each upstream draw during nested simulation.
-#' @return A `design_step`.
+#' @param .method (optional) The model-fitting function. Defaults to
+#'   [stats::lm()], not the [estimatr::lm_robust()] that
+#'   [declare_estimator()] uses.
+#' @param label (optional) Step label. Defaults to `"test"`. When two
+#'   estimator or test steps in one design share a label, `+` relabels them
+#'   from their formulas, with a message.
+#' @param handler (optional) A function. When supplied, the test bypasses
+#'   `.method` and `.summary` and instead calls `handler(data, ...)` with the
+#'   dots as written, not evaluated; it must return a tidy table.
+#' @param draws (optional) Number of nested draws for this step. Defaults to
+#'   `1`. When `> 1`, the step is re-executed `draws` times for each upstream
+#'   draw during nested simulation.
+#' @return A `design_step`, as [declare_estimator()] returns, whose estimates
+#'   carry no `inquiry` column.
 #' @export
 #' @examples
 #' design <- declare_model(N = 30, Z = rep(0:1, 15), Y = Z + rnorm(N)) +
@@ -435,15 +458,23 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
 #' Wrap a custom function as a labeled estimator
 #'
 #' `label_estimator()` and `label_test()` return functions suitable for use
-#' as `.method` in [declare_estimator()] / [declare_test()]; they tag the
-#' tidied output with `estimator`, `inquiry`, and a term filter.
+#' as `.method` in [declare_estimator()] or [declare_test()]; they tag the
+#' tidied output with `estimator` and `inquiry` columns and filter its terms.
 #'
-#' @param .method A function that fits a model from `data` and `...`.
-#' @param label Estimator label.
-#' @param inquiry Inquiry label (or list of labels).
-#' @param term Optional term filter.
-#' @param .summary Function for tidying the model fit. Defaults to [tidy_try()].
-#' @return A function suitable for use inside [declare_estimator()].
+#' @param .method (required) A function that fits a model from `data` and
+#'   `...`.
+#' @param label (optional) Estimator label, written to the `estimator` column.
+#'   `NULL` (the default) adds no column.
+#' @param inquiry (optional) Inquiry label (or list of labels); the first is
+#'   written to the `inquiry` column. `NULL` (the default) adds no column.
+#' @param term (optional) Character vector of terms to keep. `NULL` (the
+#'   default) keeps every term.
+#' @param .summary (optional) Function for tidying the model fit. Defaults to
+#'   [tidy_try()].
+#' @return A function of `data` and `...` that calls
+#'   `.method(data = data, ...)`, tidies the fit with `.summary`, and returns
+#'   the resulting tibble with the `estimator` and `inquiry` columns set and
+#'   its rows restricted to `term`.
 #' @export
 #' @examples
 #' my_est <- label_estimator(

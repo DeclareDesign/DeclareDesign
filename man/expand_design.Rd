@@ -7,12 +7,13 @@
 expand_design(.designer, ..., .expand = TRUE)
 }
 \arguments{
-\item{.designer}{A function returning a \code{design}.}
+\item{.designer}{(required) A function returning a \code{design}.}
 
-\item{...}{Named parameter values to vary.}
+\item{...}{(optional) Named parameter values to vary, passed to
+\code{.designer} as its arguments.}
 
-\item{.expand}{If \code{TRUE}, expand the grid; if \code{FALSE}, zip parallel
-vectors.}
+\item{.expand}{(optional) If \code{TRUE} (the default), expand the grid; if
+\code{FALSE}, zip parallel vectors.}
 }
 \value{
 A \code{design} or a named list of designs, as \code{\link[=redesign]{redesign()}} returns.

@@ -356,7 +356,7 @@ modify_design_params <- function(design, params) {
 #' the expression, and a parameter used only inside a data-mask expression
 #' (`rnorm(N)`) is in the expression but may be bound nowhere.
 #'
-#' [modify_design_params()] and [step_uses_param()] must agree on this, or
+#' `modify_design_params()` and `step_uses_param()` must agree on this, or
 #' `redesign()` warns about a parameter it goes on to change (or changes one
 #' it warned about).
 #'
@@ -500,7 +500,7 @@ check_params_in_design <- function(design, param_names, reachable) {
 #' An atomic vector always supplies one value per element, so
 #' `redesign(design, n_units = c(50, 100))` means two designs. That rule is
 #' unambiguous only until the parameter itself holds a vector: asking for
-#' `prob_each = c(0, .5, .5)` then produces three designs holding one number
+#' `prob_each = c(0, 0.5, 0.5)` then produces three designs holding one number
 #' each, which is almost never what was meant and which does not fail until
 #' something draws from them. Warning here puts the complaint at the call.
 #'
@@ -556,7 +556,7 @@ check_param_vectors <- function(design, params) {
 #' found `dplyr::n` and so never warned, which is the one case the warning
 #' exists for.
 #'
-#' The other half of [quo_uses_param()], `expr_has_symbol()`, still catches a
+#' The other half of `quo_uses_param()`, `expr_has_symbol()`, still catches a
 #' name the step's expression mentions outright, so a design that really does
 #' read a package object keeps working.
 #'
@@ -659,8 +659,8 @@ param_grid <- function(params, expand = TRUE) {
 #' ignored. [summary()] on a design lists the names that are available.
 #'
 #' An atomic vector always supplies one value per design, so a parameter that
-#' is itself a vector has to be wrapped: `prob_each = list(c(0, .5, .5))` is
-#' one design, where `prob_each = c(0, .5, .5)` is three. Handing a bare
+#' is itself a vector has to be wrapped: `prob_each = list(c(0, 0.5, 0.5))` is
+#' one design, where `prob_each = c(0, 0.5, 0.5)` is three. Handing a bare
 #' vector to a parameter that currently holds one warns.
 #'
 #' A bare list is split the same way, one design per element, so a parameter
@@ -670,7 +670,7 @@ param_grid <- function(params, expand = TRUE) {
 #' are, since a sweep over lists holds a list in every element, and a bare list
 #' handed to a list-valued parameter whose elements are not lists warns.
 #'
-#' Only bare vectors and bare lists are read that way. A data frame, a matrix
+#' Only bare vectors and bare lists are read that way. A data frame, a matrix,
 #' and anything carrying a class are single replacement values, so a design
 #' written as `declare_model(data = dataset, ...)`, with `dataset <- pilot`
 #' in the workspace, swaps its data with `redesign(design, dataset = real)`
@@ -680,19 +680,20 @@ param_grid <- function(params, expand = TRUE) {
 #' fabricate's argument and belongs to the declaration.
 #'
 #' @family modifying a design
-#' @param .design A `design`. Named with a dot, like `.method` and `.summary`
-#'   in [declare_estimator()], because everything else here is a parameter of
-#'   the user's design: a plain `design` would partially match and swallow a
-#'   parameter named `d`, `de`, `des`, `desi` or `desig`, and designs with a
-#'   parameter named `d` exist.
-#' @param ... Named parameter values. A bare atomic vector, and a bare list,
-#'   supply one design per element; a data frame, a matrix, a function or any
-#'   classed object is one value. To sweep over such values, pass a list of
-#'   them, and to supply one list as a single value wrap it: `list(x)`.
-#' @param .expand If `TRUE` (default), expand the parameter grid; if `FALSE`,
-#'   zip parallel vectors. Dotted for the same reason as `.design`: an
-#'   undotted `expand` after the dots would collide exactly with a parameter
-#'   of that name.
+#' @param .design (required) A `design`. Named with a dot, like `.method` and
+#'   `.summary` in [declare_estimator()], because everything else here is a
+#'   parameter of the user's design: a plain `design` would partially match and
+#'   swallow a parameter named `d`, `de`, `des`, `desi`, or `desig`, and designs
+#'   with a parameter named `d` exist.
+#' @param ... (optional) Named parameter values. A bare atomic vector, and a
+#'   bare list, supply one design per element; a data frame, a matrix, a
+#'   function, or any classed object is one value. To sweep over such values,
+#'   pass a list of them, and to supply one list as a single value wrap it:
+#'   `list(x)`.
+#' @param .expand (optional) If `TRUE` (the default), expand the parameter
+#'   grid; if `FALSE`, zip parallel vectors. Dotted for the same reason as
+#'   `.design`: an undotted `expand` after the dots would collide exactly with a
+#'   parameter of that name.
 #' @return A single `design` if one combination is supplied, otherwise a list
 #'   of designs named by the values that distinguish them: `redesign(design,
 #'   N = c(10, 20))` gives `N = 10` and `N = 20`, so a simulation's `design`
@@ -791,10 +792,11 @@ extract_param_row <- function(param_df, i) {
 #' `blocked = TRUE`. For that, call the designer with each value.
 #'
 #' @family modifying a design
-#' @param .designer A function returning a `design`.
-#' @param ... Named parameter values to vary.
-#' @param .expand If `TRUE`, expand the grid; if `FALSE`, zip parallel
-#'   vectors.
+#' @param .designer (required) A function returning a `design`.
+#' @param ... (optional) Named parameter values to vary, passed to
+#'   `.designer` as its arguments.
+#' @param .expand (optional) If `TRUE` (the default), expand the grid; if
+#'   `FALSE`, zip parallel vectors.
 #' @return A `design` or a named list of designs, as [redesign()] returns.
 #' @export
 #' @examples

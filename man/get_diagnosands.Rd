@@ -7,10 +7,13 @@
 get_diagnosands(diagnosis)
 }
 \arguments{
-\item{diagnosis}{A \code{diagnosis} object.}
+\item{diagnosis}{(required) A \code{diagnosis} object.}
 }
 \value{
-A tibble of diagnosands.
+The diagnosis's \code{diagnosands_df}: a tibble with one row per group
+(design, inquiry, estimator, outcome, and term), holding \code{n_sims}, a
+column per diagnosand, and, when bootstrapped, an \verb{se(<diagnosand>)}
+column for each.
 }
 \description{
 Get the diagnosands table from a diagnosis

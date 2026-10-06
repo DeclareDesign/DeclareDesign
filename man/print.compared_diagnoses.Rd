@@ -7,12 +7,14 @@
 \method{print}{compared_diagnoses}(x, ...)
 }
 \arguments{
-\item{x}{A \code{compared_diagnoses} object.}
+\item{x}{(required) A \code{compared_diagnoses} object, as returned by
+\code{\link[=compare_diagnoses]{compare_diagnoses()}}.}
 
-\item{...}{Passed to the data frame print method.}
+\item{...}{(optional) Passed to the \code{\link[=print]{print()}} method of
+\code{compared_diagnoses_df}.}
 }
 \value{
-The input invisibly.
+\code{x}, invisibly.
 }
 \description{
 Print a diagnosand comparison

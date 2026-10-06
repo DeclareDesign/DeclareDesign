@@ -7,19 +7,22 @@
 select_diagnosands(..., alpha = 0.05, subset = NULL, na.rm = FALSE)
 }
 \arguments{
-\item{...}{Diagnosand names to keep, optionally preceded by a diagnosands
-\code{design_step} to subset.}
+\item{...}{(required) Diagnosand names to keep, as strings, optionally
+preceded by a diagnosands \code{design_step} to subset.}
 
-\item{alpha}{Significance level used by \code{power}, \code{type_s_rate},
-\code{exaggeration_ratio}, and \code{prop_pos_sig}.}
+\item{alpha}{(optional) Significance level used by \code{power}, \code{type_s_rate},
+\code{exaggeration_ratio}, and \code{prop_pos_sig}. Defaults to \code{0.05}.}
 
-\item{subset}{An expression evaluated on the simulations table; only the
-rows for which it is \code{TRUE} enter the diagnosands.}
+\item{subset}{(optional) An expression evaluated on the simulations table;
+only the rows for which it is \code{TRUE} enter the diagnosands. \code{NULL} (the
+default) keeps every simulation.}
 
-\item{na.rm}{Passed to the library diagnosands.}
+\item{na.rm}{(optional) Passed to the library diagnosands. Defaults to
+\code{FALSE}.}
 }
 \value{
-A diagnosands \code{design_step}.
+A diagnosands \code{design_step}, as \code{\link[=declare_diagnosands]{declare_diagnosands()}} returns,
+holding the named diagnosands in the order given.
 }
 \description{
 Two ways to call this, told apart by whether the first argument is a

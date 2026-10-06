@@ -49,11 +49,13 @@
 #' @family design declarations
 #' @seealso [declare_parameters()] for the quantities a caller may change,
 #'   [design_notes()] for the notes a design takes.
-#' @param ... Named quantities. Each is evaluated when the design runs, in
-#'   order, and may read the parameters, the notes taken before it, and the
-#'   current data.
-#' @param label Step label.
-#' @return A `design_step`.
+#' @param ... (optional) Named quantities. Each is evaluated when the design
+#'   runs, in order, and may read the parameters, the notes taken before it,
+#'   and the current data.
+#' @param label (optional) Step label. Defaults to `"notes"`.
+#' @return A `design_step` (class `c("design_step", "dd", "function")`)
+#'   whose `dots` attribute holds the note expressions. Called on a data
+#'   frame, it returns the data unchanged. Add it to a design with `+`.
 #' @export
 #' @examples
 #' # A quantity that outlives the data it is computed from.
@@ -242,8 +244,10 @@ check_notes_against_params <- function(steps) {
 #'
 #' @family modifying a design
 #' @seealso [design_parameters()].
-#' @param design A `design` or a `design_step`.
-#' @return A data frame with one row per note: `name`, `expr` and `step`.
+#' @param design (required) A `design` or a `design_step`.
+#' @return A data frame with one row per note and columns `name`, `expr` (the
+#'   expression, as a character label), and `step` (the position of the step
+#'   that declares it).
 #' @export
 #' @examples
 #' design <- declare_parameters(m_arms = 3) +

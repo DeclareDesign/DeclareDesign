@@ -10,16 +10,18 @@
 reshape_diagnosis(diagnosis, digits = 2)
 }
 \arguments{
-\item{x}{A \code{diagnosis} object.}
+\item{x}{(required) A \code{diagnosis} object.}
 
-\item{digits}{Number of decimal places.}
+\item{digits}{(optional) Number of decimal places. Defaults to \code{2}.}
 
-\item{...}{Ignored.}
+\item{...}{(optional) Ignored.}
 
-\item{diagnosis}{A \code{diagnosis} object.}
+\item{diagnosis}{(required) A \code{diagnosis} object.}
 }
 \value{
-A \code{data.frame} of formatted strings.
+A \code{data.frame} of character columns: the grouping columns and one
+column per diagnosand under its display name, with each bootstrap
+standard error in parentheses on the row beneath its estimate.
 }
 \description{
 Rounds the diagnosands, puts each bootstrap standard error in parentheses on

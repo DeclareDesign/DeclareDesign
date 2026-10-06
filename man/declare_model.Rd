@@ -7,17 +7,21 @@
 declare_model(..., label = "model", draws = 1L)
 }
 \arguments{
-\item{...}{Named arguments forwarded to \code{\link[fabricatr:fabricate]{fabricatr::fabricate()}}. Unquoted
-expressions are evaluated lazily in the caller's environment with access
-to the current data frame.}
+\item{...}{(optional) Named arguments forwarded to
+\code{\link[fabricatr:fabricate]{fabricatr::fabricate()}}. Unquoted expressions are evaluated lazily in the
+caller's environment with access to the current data frame.}
 
-\item{label}{Step label. Defaults to \code{"model"}.}
+\item{label}{(optional) Step label. Defaults to \code{"model"}.}
 
-\item{draws}{Number of nested draws for this step. When \verb{> 1}, the step is
-re-executed \code{draws} times for each upstream draw during nested simulation.}
+\item{draws}{(optional) Number of nested draws for this step. Defaults to
+\code{1}. When \verb{> 1}, the step is re-executed \code{draws} times for each upstream
+draw during nested simulation.}
 }
 \value{
-A \code{design_step}.
+A \code{design_step} (class \code{c("design_step", "dd", "function")}): a
+function that takes the current data frame and returns a tibble with the
+declared columns added (or built from scratch, for the first step). Add it
+to a design with \code{+}.
 }
 \description{
 The model describes the world the design runs in. It does not have to be

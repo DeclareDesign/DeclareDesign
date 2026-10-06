@@ -2,25 +2,26 @@
 % Please edit documentation in R/modify_design.R
 \name{insert_step}
 \alias{insert_step}
-\title{Insert a step into a design}
+\title{Insert a step into a design (deprecated)}
 \usage{
 insert_step(design, new_step, before = NULL, after = NULL)
 }
 \arguments{
-\item{design}{A \code{design}.}
+\item{design}{(required) A \code{design}.}
 
-\item{new_step}{A \code{design_step} to insert.}
+\item{new_step}{(required) A \code{design_step} to insert.}
 
-\item{before, after}{A label, integer, or \code{design_step} indicating the
-anchor point. Provide exactly one of the two. \code{before} comes first, as in
-DeclareDesign 1.x, so a script that passed the anchor by position keeps
-its meaning.}
+\item{before, after}{(required) A label, integer, or \code{design_step}
+indicating the anchor point. Provide exactly one of the two; if both are
+given, \code{after} is used. \code{before} comes first, as in DeclareDesign 1.x, so
+a script that passed the anchor by position keeps its meaning.}
 }
 \value{
-A \code{design}.
+A \code{design} with \code{new_step} inserted at the anchor.
 }
 \description{
-Insert a step into a design
+Deprecated in 2.0, and warns once per session. Reconstruct the design with
+\code{+} instead.
 }
 \examples{
 design <- declare_model(N = 30, Y = rnorm(N)) +

@@ -7,14 +7,18 @@
 diagnose_simulations(simulations_df, diagnosands = NULL, bootstrap_sims = 100)
 }
 \arguments{
-\item{simulations_df}{A tibble produced by \code{\link[=simulate_design]{simulate_design()}}.}
+\item{simulations_df}{(required) A tibble produced by \code{\link[=simulate_design]{simulate_design()}}.
+Grouping set with \code{\link[dplyr:group_by]{dplyr::group_by()}} adds to the groups diagnosed.}
 
-\item{diagnosands}{A diagnosands step (e.g., \code{\link[=default_diagnosands]{default_diagnosands()}}).}
+\item{diagnosands}{(optional) A diagnosands \code{design_step} (e.g., from
+\code{\link[=declare_diagnosands]{declare_diagnosands()}}). \code{NULL} (the default) uses
+\code{\link[=default_diagnosands]{default_diagnosands()}}.}
 
-\item{bootstrap_sims}{Number of bootstrap replicates.}
+\item{bootstrap_sims}{(optional) Number of bootstrap replicates. Defaults
+to \code{100}; \code{0} skips the bootstrap.}
 }
 \value{
-A \code{diagnosis} object.
+A \code{diagnosis} object, as \code{\link[=diagnose_design]{diagnose_design()}} returns.
 }
 \description{
 Diagnose a precomputed simulations table

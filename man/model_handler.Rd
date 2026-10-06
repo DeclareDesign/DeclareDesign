@@ -3,17 +3,18 @@
 \name{model_handler}
 \alias{model_handler}
 \alias{tidy_estimator}
-\title{Deprecated alias for label_estimator}
+\title{Deprecated alias for \code{label_estimator()}}
 \usage{
 model_handler(...)
 
 tidy_estimator(...)
 }
 \arguments{
-\item{...}{Forwarded to \code{\link[=label_estimator]{label_estimator()}}.}
+\item{...}{(required) Forwarded to \code{\link[=label_estimator]{label_estimator()}}, which needs at
+least \code{.method}.}
 }
 \value{
-A function.
+A function, as \code{\link[=label_estimator]{label_estimator()}} returns.
 }
 \description{
 \code{model_handler()} and \code{tidy_estimator()} are retained for compatibility but

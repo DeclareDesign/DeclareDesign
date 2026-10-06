@@ -6,15 +6,19 @@
 #' where present.
 #'
 #' @family diagnosands
-#' @param ... Named expressions defining diagnosands.
-#' @param subset An expression evaluated on the simulations table; only rows
-#'   for which it is `TRUE` enter the diagnosands. `NULL` (the default) keeps
-#'   every simulation.
-#' @param alpha Significance level. Any diagnosand expression that mentions
-#'   `alpha` sees this value.
-#' @param label Step label.
-#' @return A `design_step` whose `dots` attribute carries the diagnosand
-#'   quosures.
+#' @param ... (optional) Named expressions defining diagnosands, each
+#'   evaluated on the simulations table of one group and returning a single
+#'   value.
+#' @param subset (optional) An expression evaluated on the simulations table;
+#'   only rows for which it is `TRUE` enter the diagnosands. `NULL` (the
+#'   default) keeps every simulation.
+#' @param alpha (optional) Significance level. Any diagnosand expression that
+#'   mentions `alpha` sees this value. Defaults to `0.05`.
+#' @param label (optional) Step label. Defaults to `"diagnosands"`.
+#' @return A diagnosands `design_step`: a function that takes a simulations
+#'   table and returns a tibble with columns `diagnosand` and `value`, one row
+#'   per diagnosand. Its `dots` attribute carries the diagnosand quosures. Pass
+#'   it to [diagnose_design()] as `diagnosands`.
 #' @export
 #' @examples
 #' diags <- declare_diagnosands(
@@ -118,7 +122,8 @@ unwrap_quosure <- function(quo) {
 #' }
 #'
 #' @family diagnosands
-#' @return A diagnosand `design_step`.
+#' @return A diagnosands `design_step`, as [declare_diagnosands()] returns,
+#'   holding the seven diagnosands above.
 #' @export
 #' @examples
 #' default_diagnosands()

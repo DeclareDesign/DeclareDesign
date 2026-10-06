@@ -25,10 +25,10 @@ compare_design_summaries(...)
 print_code(...)
 }
 \arguments{
-\item{...}{Ignored.}
+\item{...}{(optional) Ignored.}
 }
 \value{
-Never returns.
+Never returns; always raises an error.
 }
 \description{
 These functions existed in DeclareDesign 1.x but are not part of 2.0. Each

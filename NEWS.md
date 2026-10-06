@@ -8,7 +8,7 @@ DeclareDesign 2.0 is a ground-up reimplementation on tidyverse primitives. The d
 * `declare_estimator(inquiry = )` takes the inquiry's label as a string. Passing the inquiry step object is an error; in 1.x it linked the estimator to an inquiry called `"inquiry"` and returned `NA` estimands.
 * `diagnose_design()` and `simulate_design()` drop `make_groups`, `add_grouping_variables` and `future.seed`, each with an error naming the replacement. Group with `simulate_design() |> group_by() |> diagnose_design()`; seed with `set.seed()` before the call.
 * `redesign()` and `expand_design()` take `.design`, `.designer` and `.expand`, so a parameter named `d` or `expand` is no longer swallowed by partial matching. `expand_design()` drops `prefix`.
-* `draw_data()` takes the design alone; `data`, `start` and `end` are gone. Use `get_estimates(design, data)` to run estimators on supplied data and `design[i:j]` for a slice.
+* `draw_data()` no longer runs part of a design on supplied data; `data`, `start` and `end` are gone, and passing them stops with an error naming the replacement unless the design reads a parameter by that name. Use `get_estimates(design, data)` to run estimators on supplied data and `design[i:j]` for a slice.
 * `label_estimator(fn = )` and `label_test(fn = )` are `.method = `; `set_diagnosands(x = )` is `design = `; `reshape_diagnosis()` drops `select` and `exclude`.
 * `compare_designs()`, `compare_design_code()`, `compare_design_summaries()`, `compare_design_estimates()`, `compare_design_estimands()`, `compare_design_data()` and `print_code()` are defunct and say so. `compare_diagnoses()` stays.
 * `declare_potential_outcomes()` and `declare_reveal()` are defunct; `declare_estimators()` is gone.

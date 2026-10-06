@@ -7,15 +7,15 @@
 draw_data(design, ...)
 }
 \arguments{
-\item{design}{A \code{design}.}
+\item{design}{(required) A \code{design}.}
 
-\item{...}{Named parameter values, as in \code{\link[=redesign]{redesign()}}. Each supplies one
-value: use \code{redesign()} itself to sweep over several. A parameter named
-\code{design}, or any prefix of it, cannot be supplied this way and needs the
-\code{redesign()} route.}
+\item{...}{(optional) Named parameter values, as in \code{\link[=redesign]{redesign()}}. Each
+supplies one value: use \code{redesign()} itself to sweep over several. A
+parameter named \code{design}, or any prefix of it, cannot be supplied this way
+and needs the \code{redesign()} route.}
 }
 \value{
-A data frame.
+A tibble: the data as the last data-generating step leaves it.
 }
 \description{
 Runs the data-generating steps only. The inquiries and estimators are not
@@ -26,8 +26,11 @@ data does not pay to fit models it would throw away.
 Named parameter values in \code{...} are applied first, so
 \code{draw_data(design, theta = 0.5)} is \code{draw_data(redesign(design, theta = 0.5))}: a convenience for trying a value without naming it above the design
 or rewriting the declaration. The names reach the design by \code{\link[=redesign]{redesign()}}'s
-rule, so a name the design does not read errors, and a number written inside
-a step is refused with the two ways to name it.
+rule, so a name the design does not read warns and is ignored, and a
+number written inside a step is refused with the two ways to name it.
+\code{data}, \code{start} and \code{end}, 1.x's arguments for running part of a design on
+supplied data, are refused with \code{\link[=get_estimates]{get_estimates()}} and \code{design[start:end]}
+as the replacements, unless the design reads a parameter by that name.
 }
 \examples{
 design <- declare_model(N = 25, X = rnorm(N))

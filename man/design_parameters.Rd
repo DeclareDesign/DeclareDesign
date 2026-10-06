@@ -7,14 +7,16 @@
 design_parameters(design)
 }
 \arguments{
-\item{design}{A \code{design} or a \code{design_step}.}
+\item{design}{(required) A \code{design} or a \code{design_step}.}
 }
 \value{
-A data frame with one row per name per step: \code{name}, \code{value}
-(a display snippet of the value),
-\code{kind} (\code{scalar}, \code{vector}, \code{list}, \code{data}, \code{function} or \code{other}),
-\code{declared} (whether a \code{declare_parameters()} step declares it), and
-\code{step}. Rows are in step order.
+A data frame of class \code{objects} with one row per name per step:
+\code{name}, \code{value} (a display snippet of the value), \code{kind} (\code{scalar},
+\code{vector}, \code{list}, \code{data}, \code{function}, or \code{other}), \code{declared} (whether a
+\code{\link[=declare_parameters]{declare_parameters()}} step declares it), and \code{step} (the position of the
+step that reads it), plus the list
+columns \code{quosure} and \code{env} that locate the binding. Rows are in step
+order. It prints aggregated to one row per name.
 }
 \description{
 Lists the names \code{\link[=redesign]{redesign()}} can change: the parameters a

@@ -156,10 +156,6 @@ keys_repeated_on_both_sides <- function(estimates, inquiries, shared) {
   labels
 }
 
-#' Compute diagnosands on a simulations table
-#'
-#' @keywords internal
-#' @noRd
 #' Rewrite diagnosand quosures so a failure yields NA
 #'
 #' Wraps each diagnosand expression so a missing-column or evaluation error in
@@ -226,6 +222,10 @@ warn_foreign_diagnosands <- function() {
   ))
 }
 
+#' Compute diagnosands on a simulations table
+#'
+#' @keywords internal
+#' @noRd
 compute_diagnosands <- function(simulations_df, diagnosands, group_by_set) {
   dots <- attr(diagnosands, "dots")
   if (is.null(dots)) {
@@ -331,18 +331,30 @@ bootstrap_diagnosands <- function(simulations_df, diagnosands, group_by_set,
 #' errors for each diagnosand are also reported.
 #'
 #' @family simulation and diagnosis
-#' @param ... One or more `design` objects.
-#' @param sims Number of simulations. Defaults to `NULL`. When `NULL`, designs
-#'   with step-level `draws` run in nested mode; otherwise the design runs
-#'   `500` flat simulations. When supplied alongside step-level `draws`, the
-#'   `draws` are ignored and a warning is emitted.
-#' @param bootstrap_sims Number of bootstrap replicates for diagnosand SEs.
-#' @param diagnosands A diagnosands `design_step` (e.g., from
-#'   [declare_diagnosands()]). Defaults to [default_diagnosands()].
-#' @param progress If `TRUE`, display a progress bar for this call by wrapping
-#'   it in [progressr::with_progress()]. See [simulate_design()].
-#' @return A `diagnosis` object. When the simulation was nested, the result
-#'   carries an additional `$variance_decomposition` slot.
+#' @param ... (required) One or more `design` objects, or lists of them. A
+#'   simulations data frame from [simulate_design()] in first position is
+#'   diagnosed directly, as [diagnose_simulations()] does.
+#' @param sims (optional) Number of simulations. Defaults to `NULL`. When
+#'   `NULL`, designs with step-level `draws` run in nested mode; otherwise the
+#'   design runs `500` flat simulations. When supplied alongside step-level
+#'   `draws`, the `draws` are ignored and a warning is emitted.
+#' @param bootstrap_sims (optional) Number of bootstrap replicates for
+#'   diagnosand standard errors. Defaults to `100`; `0` skips the bootstrap.
+#' @param diagnosands (optional) A diagnosands `design_step` (e.g., from
+#'   [declare_diagnosands()]). `NULL` (the default) uses diagnosands attached
+#'   with [set_diagnosands()], else [default_diagnosands()].
+#' @param progress (optional) If `TRUE`, display a progress bar for this call
+#'   by wrapping it in [progressr::with_progress()]. Defaults to `FALSE`. See
+#'   [simulate_design()].
+#' @return A `diagnosis` object: a list whose main elements are
+#'   `simulations_df` (the simulations, as [simulate_design()] returns them),
+#'   `diagnosands_df` (a tibble with one row per group of design, redesign
+#'   parameters, inquiry, estimator, outcome, and term, holding `n_sims`, a
+#'   column per diagnosand, and, when bootstrapped, an `se(<diagnosand>)` column
+#'   for each), `diagnosand_names`, `bootstrap_sims`, and `bootstrap_replicates`.
+#'   When the simulation was nested, `variance_decomposition` holds a tibble
+#'   decomposing the variance of each quantity by draw level; otherwise it is
+#'   `NULL`.
 #' @export
 #' @examples
 #' design <- declare_model(N = 40, U = rnorm(N), Z = rep(0:1, 20), Y = U + Z) +
@@ -399,10 +411,14 @@ diagnose_designs <- diagnose_design
 #' Diagnose a precomputed simulations table
 #'
 #' @family simulation and diagnosis
-#' @param simulations_df A tibble produced by [simulate_design()].
-#' @param diagnosands A diagnosands step (e.g., [default_diagnosands()]).
-#' @param bootstrap_sims Number of bootstrap replicates.
-#' @return A `diagnosis` object.
+#' @param simulations_df (required) A tibble produced by [simulate_design()].
+#'   Grouping set with [dplyr::group_by()] adds to the groups diagnosed.
+#' @param diagnosands (optional) A diagnosands `design_step` (e.g., from
+#'   [declare_diagnosands()]). `NULL` (the default) uses
+#'   [default_diagnosands()].
+#' @param bootstrap_sims (optional) Number of bootstrap replicates. Defaults
+#'   to `100`; `0` skips the bootstrap.
+#' @return A `diagnosis` object, as [diagnose_design()] returns.
 #' @export
 #' @examples
 #' design <- declare_model(N = 40, U = rnorm(N), Z = rep(0:1, 20), Y = U + Z) +
@@ -488,7 +504,7 @@ apply_diagnosand_subset <- function(simulations_df, diagnosands) {
 #' For nested simulations with K levels of draws, uses the law of total
 #' variance to attribute the variance of any per-simulation numeric column
 #' to each draw level. Level k's contribution is the variance of the
-#' conditional mean E[y | L1, ..., Lk], averaged over the outer (L1, ...,
+#' conditional mean `E[y | L1, ..., Lk]`, averaged over the outer (L1, ...,
 #' L(k-1)) draw. A final residual component captures within-cell variance
 #' (stochasticity inside the innermost draw).
 #'

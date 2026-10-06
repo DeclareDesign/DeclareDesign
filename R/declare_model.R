@@ -98,13 +98,17 @@ make_fabricate_step <- function(dots, id_label_na = FALSE) {
 #' Subsequent model steps add columns to the existing data.
 #'
 #' @family design declarations
-#' @param ... Named arguments forwarded to [fabricatr::fabricate()]. Unquoted
-#'   expressions are evaluated lazily in the caller's environment with access
-#'   to the current data frame.
-#' @param label Step label. Defaults to `"model"`.
-#' @param draws Number of nested draws for this step. When `> 1`, the step is
-#'   re-executed `draws` times for each upstream draw during nested simulation.
-#' @return A `design_step`.
+#' @param ... (optional) Named arguments forwarded to
+#'   [fabricatr::fabricate()]. Unquoted expressions are evaluated lazily in the
+#'   caller's environment with access to the current data frame.
+#' @param label (optional) Step label. Defaults to `"model"`.
+#' @param draws (optional) Number of nested draws for this step. Defaults to
+#'   `1`. When `> 1`, the step is re-executed `draws` times for each upstream
+#'   draw during nested simulation.
+#' @return A `design_step` (class `c("design_step", "dd", "function")`): a
+#'   function that takes the current data frame and returns a tibble with the
+#'   declared columns added (or built from scratch, for the first step). Add it
+#'   to a design with `+`.
 #' @export
 #' @examples
 #' design <- declare_model(N = 50, U = rnorm(N), Y = U + 1)
@@ -143,7 +147,10 @@ declare_model <- function(..., label = "model", draws = 1L) {
 #'
 #' @inheritParams declare_model
 #' @family design declarations
-#' @return A `design_step`.
+#' @param label (optional) Step label. Defaults to `"measurement"`.
+#' @return A `design_step` (class `c("design_step", "dd", "function")`): a
+#'   function that takes the current data frame and returns it with the
+#'   declared columns added. Add it to a design with `+`.
 #' @export
 #' @examples
 #' design <-
@@ -177,7 +184,10 @@ declare_measurement <- function(..., label = "measurement", draws = 1L) {
 #'
 #' @inheritParams declare_model
 #' @family design declarations
-#' @return A `design_step`.
+#' @param label (optional) Step label. Defaults to `"assignment"`.
+#' @return A `design_step` (class `c("design_step", "dd", "function")`): a
+#'   function that takes the current data frame and returns it with the
+#'   declared columns added. Add it to a design with `+`.
 #' @export
 #' @examples
 #' design <-
@@ -262,9 +272,13 @@ make_sampling_step <- function(dots, filter_quo) {
 #'
 #' @inheritParams declare_model
 #' @family design declarations
-#' @param filter Optional unquoted expression evaluated against the data;
-#'   rows where the expression is `TRUE` are retained.
-#' @return A `design_step`.
+#' @param filter (optional) Unquoted expression evaluated against the data;
+#'   rows where the expression is `TRUE` are retained, and `S` is then not
+#'   consulted.
+#' @param label (optional) Step label. Defaults to `"sampling"`.
+#' @return A `design_step` (class `c("design_step", "dd", "function")`): a
+#'   function that takes the current data frame and returns the rows sampled,
+#'   with any declared columns added. Add it to a design with `+`.
 #' @export
 #' @examples
 #' design <-

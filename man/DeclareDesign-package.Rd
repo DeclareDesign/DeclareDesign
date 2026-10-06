@@ -14,14 +14,14 @@ four elements of a research design:
 \itemize{
 \item \code{\link[=declare_model]{declare_model()}} describes the world the design runs in.
 \item \code{\link[=declare_inquiry]{declare_inquiry()}} records the question. Its value on a draw is the estimand.
-\item \code{\link[=declare_sampling]{declare_sampling()}}, \code{\link[=declare_assignment]{declare_assignment()}} and \code{\link[=declare_measurement]{declare_measurement()}}
+\item \code{\link[=declare_sampling]{declare_sampling()}}, \code{\link[=declare_assignment]{declare_assignment()}}, and \code{\link[=declare_measurement]{declare_measurement()}}
 make up the data strategy: who is observed, what they are assigned, and
 what is measured.
 \item \code{\link[=declare_estimator]{declare_estimator()}} and \code{\link[=declare_test]{declare_test()}} are the answer strategy.
 }
 
 \code{\link[=diagnose_design]{diagnose_design()}} simulates a design many times and reports how its
-estimates compare to its estimands: bias, power, coverage and the rest.
+estimates compare to its estimands: bias, power, coverage, and the rest.
 \code{\link[=redesign]{redesign()}} changes a parameter and returns a new design, so two versions
 can be compared before any data are collected.
 

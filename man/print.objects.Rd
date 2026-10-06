@@ -7,15 +7,17 @@
 \method{print}{objects}(x, ...)
 }
 \arguments{
-\item{x}{An \code{objects} table, as returned by \code{find_all_objects()}.}
+\item{x}{(required) An \code{objects} table, as returned by
+\code{\link[=design_parameters]{design_parameters()}}.}
 
-\item{...}{Ignored.}
+\item{...}{(optional) Ignored.}
 }
 \value{
-The input invisibly.
+\code{x}, invisibly.
 }
 \description{
-The table carries an \code{env} column of environments, which \code{print.data.frame}
-cannot format, so the table is aggregated down to the three columns a reader
-wants before it is printed.
+The table carries an \code{env} column of environments, which
+\code{print.data.frame()} cannot format, so before it is printed the table is
+aggregated to one row per name, with the columns a reader wants: \code{name},
+\code{value}, \code{kind}, \code{declared}, and \code{steps} (every step that reads the name).
 }

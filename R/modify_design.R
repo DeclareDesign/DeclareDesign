@@ -18,16 +18,19 @@ resolve_step_index <- function(design, step) {
   stop("`step` must be a label, an integer, or a design_step.")
 }
 
-#' Insert a step into a design
+#' Insert a step into a design (deprecated)
+#'
+#' Deprecated in 2.0, and warns once per session. Reconstruct the design with
+#' `+` instead.
 #'
 #' @family modifying a design
-#' @param design A `design`.
-#' @param new_step A `design_step` to insert.
-#' @param before,after A label, integer, or `design_step` indicating the
-#'   anchor point. Provide exactly one of the two. `before` comes first, as in
-#'   DeclareDesign 1.x, so a script that passed the anchor by position keeps
-#'   its meaning.
-#' @return A `design`.
+#' @param design (required) A `design`.
+#' @param new_step (required) A `design_step` to insert.
+#' @param before,after (required) A label, integer, or `design_step`
+#'   indicating the anchor point. Provide exactly one of the two; if both are
+#'   given, `after` is used. `before` comes first, as in DeclareDesign 1.x, so
+#'   a script that passed the anchor by position keeps its meaning.
+#' @return A `design` with `new_step` inserted at the anchor.
 #' @export
 #' @examples
 #' design <- declare_model(N = 30, Y = rnorm(N)) +
@@ -56,12 +59,16 @@ insert_step <- function(design, new_step, before = NULL, after = NULL) {
   construct_design(combined)
 }
 
-#' Delete a step from a design
+#' Delete a step from a design (deprecated)
+#'
+#' Deprecated in 2.0, and warns once per session. Reconstruct the design with
+#' `+` instead.
 #'
 #' @family modifying a design
-#' @param design A `design`.
-#' @param step A label, integer, or `design_step`.
-#' @return A `design`.
+#' @param design (required) A `design`.
+#' @param step (required) A label, integer, or `design_step` naming the step
+#'   to delete.
+#' @return A `design` without that step.
 #' @export
 #' @examples
 #' design <- declare_model(N = 30, Y = rnorm(N)) +
@@ -78,13 +85,17 @@ delete_step <- function(design, step) {
   construct_design(steps)
 }
 
-#' Replace a step in a design
+#' Replace a step in a design (deprecated)
+#'
+#' Deprecated in 2.0, and warns once per session. Reconstruct the design with
+#' `+` instead.
 #'
 #' @family modifying a design
-#' @param design A `design`.
-#' @param step A label, integer, or `design_step` to replace.
-#' @param new_step The replacement `design_step`.
-#' @return A `design`.
+#' @param design (required) A `design`.
+#' @param step (required) A label, integer, or `design_step` naming the step
+#'   to replace.
+#' @param new_step (required) The replacement `design_step`.
+#' @return A `design` with `new_step` in place of `step`.
 #' @export
 #' @examples
 #' design <- declare_model(N = 30, Y = rnorm(N)) +

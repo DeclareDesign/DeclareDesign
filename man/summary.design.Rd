@@ -7,23 +7,24 @@
 \method{summary}{design}(object, run = TRUE, ...)
 }
 \arguments{
-\item{object}{A \code{design}.}
+\item{object}{(required) A \code{design}.}
 
-\item{run}{Whether to run the design once. Defaults to \code{TRUE}.}
+\item{run}{(optional) Whether to run the design once. Defaults to \code{TRUE}.}
 
-\item{...}{Ignored.}
+\item{...}{(optional) Ignored.}
 }
 \value{
 A \code{summary.design}: a list with \code{steps} (a tibble with one row per
 step: \code{step}, \code{label}, \code{type}, \code{call}, and \code{one_run}, the account of that
 step on this run), \code{parameters} and \code{notes} (as \code{\link[=design_parameters]{design_parameters()}}
-and \code{\link[=design_notes]{design_notes()}} return them), \code{ran}, and when the design was run,
+and \code{\link[=design_notes]{design_notes()}} return them), \code{ran} (logical), and when the design
+was run,
 \code{data} (the final data), \code{inquiries} and \code{estimates} (as \code{\link[=run_design]{run_design()}}
 returns them).
 }
 \description{
 Runs the design once and reports what each step did: the rows a data step
-produced or kept and the columns it added, dropped or changed; the value
+produced or kept and the columns it added, dropped, or changed; the value
 each inquiry took; the estimate each estimator returned. The run itself,
 estimates joined to estimands, comes after the steps, then the parameters
 and objects the design refers to. Everything the printout shows is on the

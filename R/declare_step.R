@@ -57,18 +57,21 @@ call_fabricate_with_dots <- function(data, dots, default_id_label = "ID") {
 #' must accept `data` as its first argument and return a data frame.
 #'
 #' @family design declarations
-#' @param handler A function whose first argument is `data`.
-#' @param ... Additional arguments passed to `handler` **as written**, so the
-#'   handler evaluates them itself. A bare column name arrives as a name, which
-#'   is what lets `tidyr::pivot_wider(id_cols = pair)` and the dplyr verbs
-#'   select and mask as they normally do. This is the same rule
+#' @param handler (required) A function whose first argument is `data`.
+#' @param ... (optional) Additional arguments passed to `handler` **as
+#'   written**, so the handler evaluates them itself. A bare column name arrives
+#'   as a name, which is what lets `tidyr::pivot_wider(id_cols = pair)` and the
+#'   dplyr verbs select and mask as they normally do. This is the same rule
 #'   [declare_estimator()] follows. A handler that does no evaluation of its own
 #'   and wants a value computed from the data takes a closure instead:
 #'   `declare_step(handler = function(data) f(data, cutoff = mean(data$a)))`.
-#' @param label Step label.
-#' @param draws Number of nested draws for this step. When `> 1`, the step is
-#'   re-executed `draws` times for each upstream draw during nested simulation.
-#' @return A `design_step`.
+#' @param label (optional) Step label. Defaults to `"custom_step"`.
+#' @param draws (optional) Number of nested draws for this step. Defaults to
+#'   `1`. When `> 1`, the step is re-executed `draws` times for each upstream
+#'   draw during nested simulation.
+#' @return A `design_step` (class `c("design_step", "dd", "function")`): a
+#'   function that takes the current data frame and returns what `handler`
+#'   returns for it. Add it to a design with `+`.
 #' @export
 #' @examples
 #' step <- declare_step(handler = function(data, k) {

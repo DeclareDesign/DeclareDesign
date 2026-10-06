@@ -7,10 +7,12 @@
 design_notes(design)
 }
 \arguments{
-\item{design}{A \code{design} or a \code{design_step}.}
+\item{design}{(required) A \code{design} or a \code{design_step}.}
 }
 \value{
-A data frame with one row per note: \code{name}, \code{expr} and \code{step}.
+A data frame with one row per note and columns \code{name}, \code{expr} (the
+expression, as a character label), and \code{step} (the position of the step
+that declares it).
 }
 \description{
 Lists the names a \code{\link[=declare_notes]{declare_notes()}} step declares and the expression each

@@ -7,14 +7,15 @@
 \method{print}{diagnosis}(x, digits = 2, ...)
 }
 \arguments{
-\item{x}{A \code{diagnosis}.}
+\item{x}{(required) A \code{diagnosis}.}
 
-\item{digits}{Number of decimal places.}
+\item{digits}{(optional) Number of decimal places. Defaults to \code{2}.}
 
-\item{...}{Ignored.}
+\item{...}{(optional) Ignored.}
 }
 \value{
-The reshaped table invisibly.
+The \code{data.frame} of formatted strings that \code{\link[=format.diagnosis]{format.diagnosis()}}
+returns, invisibly.
 }
 \description{
 Prints the table \code{\link[=format.diagnosis]{format.diagnosis()}} builds: one row of diagnosand

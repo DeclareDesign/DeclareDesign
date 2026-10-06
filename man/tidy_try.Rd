@@ -7,17 +7,20 @@
 tidy_try(fit, ...)
 }
 \arguments{
-\item{fit}{A fitted model.}
+\item{fit}{(required) A fitted model. A data frame is returned as a tibble
+unchanged.}
 
-\item{...}{Passed to \code{\link[broom:tidy]{broom::tidy()}}.}
+\item{...}{(optional) Passed to \code{\link[broom:tidy]{broom::tidy()}}.}
 }
 \value{
-A tibble with columns including \code{term}, \code{estimate}, \code{std.error},
-\code{statistic}, \code{p.value}, \code{conf.low}, \code{conf.high}.
+A tibble with one row per term and columns including \code{term},
+\code{estimate}, \code{std.error}, \code{statistic}, \code{p.value}, \code{conf.low}, and
+\code{conf.high}. When neither \code{\link[broom:tidy]{broom::tidy()}} nor \code{coef(summary(fit))}
+works, a tibble with those columns and no rows.
 }
 \description{
 Tries \code{\link[broom:tidy]{broom::tidy()}} with confidence intervals; if that fails (because the
-model class has no \code{tidy} method), assembles a minimal tidy table from the
+model class has no \code{tidy()} method), assembles a minimal tidy table from the
 coefficient summary.
 }
 \examples{

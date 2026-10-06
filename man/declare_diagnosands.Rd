@@ -7,20 +7,24 @@
 declare_diagnosands(..., subset = NULL, alpha = 0.05, label = "diagnosands")
 }
 \arguments{
-\item{...}{Named expressions defining diagnosands.}
+\item{...}{(optional) Named expressions defining diagnosands, each
+evaluated on the simulations table of one group and returning a single
+value.}
 
-\item{subset}{An expression evaluated on the simulations table; only rows
-for which it is \code{TRUE} enter the diagnosands. \code{NULL} (the default) keeps
-every simulation.}
+\item{subset}{(optional) An expression evaluated on the simulations table;
+only rows for which it is \code{TRUE} enter the diagnosands. \code{NULL} (the
+default) keeps every simulation.}
 
-\item{alpha}{Significance level. Any diagnosand expression that mentions
-\code{alpha} sees this value.}
+\item{alpha}{(optional) Significance level. Any diagnosand expression that
+mentions \code{alpha} sees this value. Defaults to \code{0.05}.}
 
-\item{label}{Step label.}
+\item{label}{(optional) Step label. Defaults to \code{"diagnosands"}.}
 }
 \value{
-A \code{design_step} whose \code{dots} attribute carries the diagnosand
-quosures.
+A diagnosands \code{design_step}: a function that takes a simulations
+table and returns a tibble with columns \code{diagnosand} and \code{value}, one row
+per diagnosand. Its \code{dots} attribute carries the diagnosand quosures. Pass
+it to \code{\link[=diagnose_design]{diagnose_design()}} as \code{diagnosands}.
 }
 \description{
 Defines the summary statistics computed across simulations during

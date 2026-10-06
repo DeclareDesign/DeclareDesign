@@ -10,20 +10,25 @@ simulate_design(..., sims = NULL, progress = FALSE)
 simulate_designs(..., sims = NULL, progress = FALSE)
 }
 \arguments{
-\item{...}{One or more \code{design} objects.}
+\item{...}{(required) One or more \code{design} objects, or lists of them.}
 
-\item{sims}{Number of simulations per design. Defaults to \code{NULL}, which
-means 500 flat simulations for a design with no step-level \code{draws}. A
-design with step-level \code{draws} runs in nested mode whether or not \code{sims}
-is supplied; supplying it warns and is otherwise ignored.}
+\item{sims}{(optional) Number of simulations per design. Defaults to \code{NULL},
+which means 500 flat simulations for a design with no step-level \code{draws}. A
+design with step-level \code{draws} runs in nested mode whether or not \code{sims} is
+supplied; supplying it warns and is otherwise ignored.}
 
-\item{progress}{If \code{TRUE}, display a progress bar for this call by wrapping
-it in \code{\link[progressr:with_progress]{progressr::with_progress()}}. The better habit is to opt in once per
-session with \code{progressr::handlers(global = TRUE)}, which covers every call
-and lets you choose how progress is shown. Nothing is displayed by default.}
+\item{progress}{(optional) If \code{TRUE}, display a progress bar for this call
+by wrapping it in \code{\link[progressr:with_progress]{progressr::with_progress()}}. The better habit is to opt
+in once per session with \code{progressr::handlers(global = TRUE)}, which covers
+every call and lets you choose how progress is shown. Nothing is displayed
+by default.}
 }
 \value{
-A tibble of stacked simulation results.
+A tibble with one row per estimate per simulation: \code{design},
+\code{sim_ID}, the estimate columns (\code{term}, \code{estimate}, \code{std.error},
+\code{p.value}, \code{conf.low}, \code{conf.high}, and so on), \code{estimator}, \code{inquiry},
+\code{estimand}, and a column for each redesign parameter. A nested
+simulation adds a \verb{<label>_draw} column for each step with \code{draws > 1}.
 }
 \description{
 Runs each design \code{sims} times, collecting estimands and estimates into a

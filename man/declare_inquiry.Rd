@@ -40,24 +40,31 @@ declare_estimands(
 )
 }
 \arguments{
-\item{...}{Named expressions. Each expression becomes an inquiry whose
-numeric value is recorded in the simulation output.}
+\item{...}{(optional) Named expressions. Each expression becomes an inquiry
+whose numeric value is recorded in the simulation output. An unnamed
+expression takes the step's \code{label} as its name.}
 
-\item{subset}{Optional unquoted expression filtering the data before
-estimands are computed.}
+\item{subset}{(optional) Unquoted expression evaluated on the data; only
+rows where it is \code{TRUE} enter the estimands.}
 
-\item{label}{Step label. Defaults to \code{"inquiry"}.}
+\item{label}{(optional) Step label. Defaults to \code{"inquiry"}. A step that
+declares exactly one named inquiry takes that name as its label instead,
+overriding \code{label}.}
 
-\item{handler}{Optional alternative handler. When supplied, \code{...} arguments
-are evaluated against the data and passed to \code{handler()} rather than
-being treated as named scalar inquiries; useful for vectorised inquiry
-sets (for example, \code{handler = tibble}).}
+\item{handler}{(optional) A function. When supplied, \code{...} arguments are
+evaluated against the data and passed to \code{handler()} rather than being
+treated as named scalar inquiries; useful for vectorised inquiry sets
+(for example, \code{handler = tibble}).}
 
-\item{draws}{Number of nested draws for this step. When \verb{> 1}, the step is
-re-executed \code{draws} times for each upstream draw during nested simulation.}
+\item{draws}{(optional) Number of nested draws for this step. Defaults to
+\code{1}. When \verb{> 1}, the step is re-executed \code{draws} times for each upstream
+draw during nested simulation.}
 }
 \value{
-A \code{design_step}.
+A \code{design_step} (class \code{c("design_step", "dd", "function")}): a
+function that takes a data frame and returns a tibble with columns
+\code{inquiry} and \code{estimand}, one row per inquiry. Add it to a design with
+\code{+}.
 }
 \description{
 Each named argument records an inquiry: an expression evaluated on the data

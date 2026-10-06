@@ -7,10 +7,11 @@
 get_simulations(diagnosis)
 }
 \arguments{
-\item{diagnosis}{A \code{diagnosis} object.}
+\item{diagnosis}{(required) A \code{diagnosis} object.}
 }
 \value{
-A tibble of simulations.
+The diagnosis's \code{simulations_df}: a tibble with one row per
+estimate per simulation, as \code{\link[=simulate_design]{simulate_design()}} returns it.
 }
 \description{
 Get the simulations table from a diagnosis

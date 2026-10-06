@@ -7,10 +7,10 @@
 vars(...)
 }
 \arguments{
-\item{...}{Expressions.}
+\item{...}{(optional) Expressions, captured unevaluated.}
 }
 \value{
-A list of quosures.
+A list of quosures of class \code{quosures}, one per expression.
 }
 \description{
 Convenience alias for \code{\link[rlang:quos]{rlang::quos()}} used inside design declarations to

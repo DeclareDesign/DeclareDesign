@@ -7,14 +7,15 @@
 pop.var(x)
 }
 \arguments{
-\item{x}{A numeric vector.}
+\item{x}{(required) A numeric vector.}
 }
 \value{
-A scalar.
+A numeric scalar: the mean of \code{(x - mean(x))^2} over the non-missing
+values of \code{x}.
 }
 \description{
 Computes the (uncorrected) variance: the mean squared deviation from the
-mean. Useful for design-based standard errors.
+mean. Useful for design-based standard errors. Missing values are dropped.
 }
 \examples{
 pop.var(c(1, 2, 3, 4, 5))

@@ -1,10 +1,11 @@
 #' Population variance
 #'
 #' Computes the (uncorrected) variance: the mean squared deviation from the
-#' mean. Useful for design-based standard errors.
+#' mean. Useful for design-based standard errors. Missing values are dropped.
 #'
-#' @param x A numeric vector.
-#' @return A scalar.
+#' @param x (required) A numeric vector.
+#' @return A numeric scalar: the mean of `(x - mean(x))^2` over the non-missing
+#'   values of `x`.
 #' @export
 #' @examples
 #' pop.var(c(1, 2, 3, 4, 5))
@@ -14,7 +15,7 @@ pop.var <- function(x) mean((x - mean(x, na.rm = TRUE))^2, na.rm = TRUE)
 #'
 #' Every simulation draw runs on its own L'Ecuyer-CMRG stream, whichever
 #' `future::plan()` is active. The streams are made in the main process by
-#' [sim_stream_seeds()] and handed to the loop, so `set.seed(1)` followed by
+#' `sim_stream_seeds()` and handed to the loop, so `set.seed(1)` followed by
 #' `simulate_design()` gives the same table under `plan(sequential)` and
 #' `plan(multisession)`. Routing the sequential case through `purrr::map` with
 #' the caller's own RNG gave a different table per plan, which is the kind of
@@ -25,7 +26,7 @@ pop.var <- function(x) mean((x - mean(x, na.rm = TRUE))^2, na.rm = TRUE)
 #' workers = N)` before the call and needs furrr installed; nothing else
 #' changes.
 #'
-#' The entropy draw inside [sim_stream_seeds()] is the one advance of the
+#' The entropy draw inside `sim_stream_seeds()` is the one advance of the
 #' caller's own generator this promises, so the loop itself is run with that
 #' generator saved and put back. `furrr::future_map2()` draws one uniform from
 #' it whenever it is handed a seed, once per call and whichever plan is
@@ -168,7 +169,7 @@ with_dd_progress <- function(expr) {
 #' plan and furrr installed the seeds go to the workers through
 #' `furrr_options(seed = )`, which assigns each one as `.Random.seed` before
 #' the item runs; otherwise the same assignment happens in the main process
-#' through [with_stream_seed()].
+#' through `with_stream_seed()`.
 #'
 #' @keywords internal
 #' @noRd
@@ -198,8 +199,8 @@ sim_base_map_fn <- function() {
 #' Convenience alias for [rlang::quos()] used inside design declarations to
 #' pass through bare expressions.
 #'
-#' @param ... Expressions.
-#' @return A list of quosures.
+#' @param ... (optional) Expressions, captured unevaluated.
+#' @return A list of quosures of class `quosures`, one per expression.
 #' @export
 #' @examples
 #' qs <- vars(x, y, z)
@@ -249,8 +250,8 @@ dots_as_written <- function(dots) {
 #' wrote the call in and not whatever is on the stack during a simulation.
 #'
 #' Two things keep the first dot speaking for the rest, and both are load
-#' bearing: [capture_dots_env()] gives co-captured quosures one captured
-#' environment, and [reshare_quo_envs()] puts them back on one after a
+#' bearing: `capture_dots_env()` gives co-captured quosures one captured
+#' environment, and `reshare_quo_envs()` puts them back on one after a
 #' parameter has been bound into whichever of them reads it.
 #'
 #' @keywords internal
@@ -263,8 +264,9 @@ dots_env <- function(dots, default = rlang::caller_env()) {
 #' Get the simulations table from a diagnosis
 #'
 #' @family simulation and diagnosis
-#' @param diagnosis A `diagnosis` object.
-#' @return A tibble of simulations.
+#' @param diagnosis (required) A `diagnosis` object.
+#' @return The diagnosis's `simulations_df`: a tibble with one row per
+#'   estimate per simulation, as [simulate_design()] returns it.
 #' @export
 #' @examples
 #' design <- declare_model(N = 30, Y = rnorm(N), Z = rep(0:1, 15)) +
@@ -278,8 +280,11 @@ get_simulations <- function(diagnosis) diagnosis$simulations_df
 #' Get the diagnosands table from a diagnosis
 #'
 #' @family simulation and diagnosis
-#' @param diagnosis A `diagnosis` object.
-#' @return A tibble of diagnosands.
+#' @param diagnosis (required) A `diagnosis` object.
+#' @return The diagnosis's `diagnosands_df`: a tibble with one row per group
+#'   (design, inquiry, estimator, outcome, and term), holding `n_sims`, a
+#'   column per diagnosand, and, when bootstrapped, an `se(<diagnosand>)`
+#'   column for each.
 #' @export
 #' @examples
 #' design <- declare_model(N = 30, Y = rnorm(N), Z = rep(0:1, 15)) +

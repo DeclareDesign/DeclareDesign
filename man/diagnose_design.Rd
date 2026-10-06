@@ -22,24 +22,36 @@ diagnose_designs(
 )
 }
 \arguments{
-\item{...}{One or more \code{design} objects.}
+\item{...}{(required) One or more \code{design} objects, or lists of them. A
+simulations data frame from \code{\link[=simulate_design]{simulate_design()}} in first position is
+diagnosed directly, as \code{\link[=diagnose_simulations]{diagnose_simulations()}} does.}
 
-\item{sims}{Number of simulations. Defaults to \code{NULL}. When \code{NULL}, designs
-with step-level \code{draws} run in nested mode; otherwise the design runs
-\code{500} flat simulations. When supplied alongside step-level \code{draws}, the
-\code{draws} are ignored and a warning is emitted.}
+\item{sims}{(optional) Number of simulations. Defaults to \code{NULL}. When
+\code{NULL}, designs with step-level \code{draws} run in nested mode; otherwise the
+design runs \code{500} flat simulations. When supplied alongside step-level
+\code{draws}, the \code{draws} are ignored and a warning is emitted.}
 
-\item{bootstrap_sims}{Number of bootstrap replicates for diagnosand SEs.}
+\item{bootstrap_sims}{(optional) Number of bootstrap replicates for
+diagnosand standard errors. Defaults to \code{100}; \code{0} skips the bootstrap.}
 
-\item{diagnosands}{A diagnosands \code{design_step} (e.g., from
-\code{\link[=declare_diagnosands]{declare_diagnosands()}}). Defaults to \code{\link[=default_diagnosands]{default_diagnosands()}}.}
+\item{diagnosands}{(optional) A diagnosands \code{design_step} (e.g., from
+\code{\link[=declare_diagnosands]{declare_diagnosands()}}). \code{NULL} (the default) uses diagnosands attached
+with \code{\link[=set_diagnosands]{set_diagnosands()}}, else \code{\link[=default_diagnosands]{default_diagnosands()}}.}
 
-\item{progress}{If \code{TRUE}, display a progress bar for this call by wrapping
-it in \code{\link[progressr:with_progress]{progressr::with_progress()}}. See \code{\link[=simulate_design]{simulate_design()}}.}
+\item{progress}{(optional) If \code{TRUE}, display a progress bar for this call
+by wrapping it in \code{\link[progressr:with_progress]{progressr::with_progress()}}. Defaults to \code{FALSE}. See
+\code{\link[=simulate_design]{simulate_design()}}.}
 }
 \value{
-A \code{diagnosis} object. When the simulation was nested, the result
-carries an additional \verb{$variance_decomposition} slot.
+A \code{diagnosis} object: a list whose main elements are
+\code{simulations_df} (the simulations, as \code{\link[=simulate_design]{simulate_design()}} returns them),
+\code{diagnosands_df} (a tibble with one row per group of design, redesign
+parameters, inquiry, estimator, outcome, and term, holding \code{n_sims}, a
+column per diagnosand, and, when bootstrapped, an \verb{se(<diagnosand>)} column
+for each), \code{diagnosand_names}, \code{bootstrap_sims}, and \code{bootstrap_replicates}.
+When the simulation was nested, \code{variance_decomposition} holds a tibble
+decomposing the variance of each quantity by draw level; otherwise it is
+\code{NULL}.
 }
 \description{
 Simulates the design and computes diagnosands (bias, RMSE, power, coverage,

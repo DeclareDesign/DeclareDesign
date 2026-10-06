@@ -7,13 +7,14 @@
 set_diagnosands(design, diagnosands = default_diagnosands())
 }
 \arguments{
-\item{design}{A \code{design}.}
+\item{design}{(required) A \code{design}.}
 
-\item{diagnosands}{A diagnosands \code{design_step}. Defaults to
+\item{diagnosands}{(optional) A diagnosands \code{design_step}. Defaults to
 \code{\link[=default_diagnosands]{default_diagnosands()}}.}
 }
 \value{
-The design with \code{diagnosands} attribute set.
+\code{design}, with \code{diagnosands} stored in its \code{diagnosands}
+attribute.
 }
 \description{
 Deprecated in 2.0. Stores \code{diagnosands} as an attribute on \code{design}, which

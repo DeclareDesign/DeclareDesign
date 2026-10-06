@@ -7,12 +7,12 @@
 \method{print}{design_step}(x, ...)
 }
 \arguments{
-\item{x}{A \code{design_step}.}
+\item{x}{(required) A \code{design_step}.}
 
-\item{...}{Ignored.}
+\item{...}{(optional) Ignored.}
 }
 \value{
-The input invisibly.
+\code{x}, invisibly.
 }
 \description{
 Print a design step

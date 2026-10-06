@@ -4,13 +4,13 @@
 #'
 #' * [declare_model()] describes the world the design runs in.
 #' * [declare_inquiry()] records the question. Its value on a draw is the estimand.
-#' * [declare_sampling()], [declare_assignment()] and [declare_measurement()]
+#' * [declare_sampling()], [declare_assignment()], and [declare_measurement()]
 #'   make up the data strategy: who is observed, what they are assigned, and
 #'   what is measured.
 #' * [declare_estimator()] and [declare_test()] are the answer strategy.
 #'
 #' [diagnose_design()] simulates a design many times and reports how its
-#' estimates compare to its estimands: bias, power, coverage and the rest.
+#' estimates compare to its estimands: bias, power, coverage, and the rest.
 #' [redesign()] changes a parameter and returns a new design, so two versions
 #' can be compared before any data are collected.
 #'
@@ -257,9 +257,10 @@ wrap_step <- function(step) {
 #' single `design`. `design + NULL` is a no-op that returns the design
 #' unchanged, which makes conditional step addition convenient.
 #'
-#' @param e1 A `design_step` or `design`.
-#' @param e2 A `design_step`, `design`, or `NULL`.
-#' @return A `design`.
+#' @param e1 (required) A `design_step`, a `design`, or `NULL`.
+#' @param e2 (required) A `design_step`, a `design`, or `NULL`.
+#' @return A `design` (class `c("design", "dd")`): a list of the steps of
+#'   `e1` followed by those of `e2`, named by their labels.
 #' @export
 #' @method + dd
 #' @examples

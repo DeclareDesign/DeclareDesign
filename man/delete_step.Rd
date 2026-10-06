@@ -2,20 +2,22 @@
 % Please edit documentation in R/modify_design.R
 \name{delete_step}
 \alias{delete_step}
-\title{Delete a step from a design}
+\title{Delete a step from a design (deprecated)}
 \usage{
 delete_step(design, step)
 }
 \arguments{
-\item{design}{A \code{design}.}
+\item{design}{(required) A \code{design}.}
 
-\item{step}{A label, integer, or \code{design_step}.}
+\item{step}{(required) A label, integer, or \code{design_step} naming the step
+to delete.}
 }
 \value{
-A \code{design}.
+A \code{design} without that step.
 }
 \description{
-Delete a step from a design
+Deprecated in 2.0, and warns once per session. Reconstruct the design with
+\code{+} instead.
 }
 \examples{
 design <- declare_model(N = 30, Y = rnorm(N)) +

@@ -2,22 +2,24 @@
 % Please edit documentation in R/modify_design.R
 \name{replace_step}
 \alias{replace_step}
-\title{Replace a step in a design}
+\title{Replace a step in a design (deprecated)}
 \usage{
 replace_step(design, step, new_step)
 }
 \arguments{
-\item{design}{A \code{design}.}
+\item{design}{(required) A \code{design}.}
 
-\item{step}{A label, integer, or \code{design_step} to replace.}
+\item{step}{(required) A label, integer, or \code{design_step} naming the step
+to replace.}
 
-\item{new_step}{The replacement \code{design_step}.}
+\item{new_step}{(required) The replacement \code{design_step}.}
 }
 \value{
-A \code{design}.
+A \code{design} with \code{new_step} in place of \code{step}.
 }
 \description{
-Replace a step in a design
+Deprecated in 2.0, and warns once per session. Reconstruct the design with
+\code{+} instead.
 }
 \examples{
 design <- declare_model(N = 30, Y = rnorm(N)) +

@@ -7,14 +7,16 @@
 declare_notes(..., label = "notes")
 }
 \arguments{
-\item{...}{Named quantities. Each is evaluated when the design runs, in
-order, and may read the parameters, the notes taken before it, and the
-current data.}
+\item{...}{(optional) Named quantities. Each is evaluated when the design
+runs, in order, and may read the parameters, the notes taken before it,
+and the current data.}
 
-\item{label}{Step label.}
+\item{label}{(optional) Step label. Defaults to \code{"notes"}.}
 }
 \value{
-A \code{design_step}.
+A \code{design_step} (class \code{c("design_step", "dd", "function")})
+whose \code{dots} attribute holds the note expressions. Called on a data
+frame, it returns the data unchanged. Add it to a design with \code{+}.
 }
 \description{
 Records a named quantity at a point in the pipeline and makes it available

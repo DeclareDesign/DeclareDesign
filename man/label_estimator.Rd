@@ -22,23 +22,31 @@ label_test(
 )
 }
 \arguments{
-\item{.method}{A function that fits a model from \code{data} and \code{...}.}
+\item{.method}{(required) A function that fits a model from \code{data} and
+\code{...}.}
 
-\item{label}{Estimator label.}
+\item{label}{(optional) Estimator label, written to the \code{estimator} column.
+\code{NULL} (the default) adds no column.}
 
-\item{inquiry}{Inquiry label (or list of labels).}
+\item{inquiry}{(optional) Inquiry label (or list of labels); the first is
+written to the \code{inquiry} column. \code{NULL} (the default) adds no column.}
 
-\item{term}{Optional term filter.}
+\item{term}{(optional) Character vector of terms to keep. \code{NULL} (the
+default) keeps every term.}
 
-\item{.summary}{Function for tidying the model fit. Defaults to \code{\link[=tidy_try]{tidy_try()}}.}
+\item{.summary}{(optional) Function for tidying the model fit. Defaults to
+\code{\link[=tidy_try]{tidy_try()}}.}
 }
 \value{
-A function suitable for use inside \code{\link[=declare_estimator]{declare_estimator()}}.
+A function of \code{data} and \code{...} that calls
+\code{.method(data = data, ...)}, tidies the fit with \code{.summary}, and returns
+the resulting tibble with the \code{estimator} and \code{inquiry} columns set and
+its rows restricted to \code{term}.
 }
 \description{
 \code{label_estimator()} and \code{label_test()} return functions suitable for use
-as \code{.method} in \code{\link[=declare_estimator]{declare_estimator()}} / \code{\link[=declare_test]{declare_test()}}; they tag the
-tidied output with \code{estimator}, \code{inquiry}, and a term filter.
+as \code{.method} in \code{\link[=declare_estimator]{declare_estimator()}} or \code{\link[=declare_test]{declare_test()}}; they tag the
+tidied output with \code{estimator} and \code{inquiry} columns and filter its terms.
 }
 \examples{
 my_est <- label_estimator(

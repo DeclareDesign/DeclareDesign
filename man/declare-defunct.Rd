@@ -11,7 +11,7 @@ declare_potential_outcomes(...)
 declare_reveal(...)
 }
 \arguments{
-\item{...}{Ignored.}
+\item{...}{(optional) Ignored.}
 }
 \value{
 Never returns; always raises an error.

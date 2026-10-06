@@ -7,14 +7,15 @@
 \method{summary}{diagnosis}(object, digits = 2, ...)
 }
 \arguments{
-\item{object}{A \code{diagnosis}.}
+\item{object}{(required) A \code{diagnosis}.}
 
-\item{digits}{Number of decimal places.}
+\item{digits}{(optional) Number of decimal places. Defaults to \code{2}.}
 
-\item{...}{Ignored.}
+\item{...}{(optional) Ignored.}
 }
 \value{
-The reshaped table invisibly.
+The \code{data.frame} of formatted strings that \code{\link[=format.diagnosis]{format.diagnosis()}}
+returns, invisibly.
 }
 \description{
 The same report \code{\link[=print.diagnosis]{print.diagnosis()}} gives.

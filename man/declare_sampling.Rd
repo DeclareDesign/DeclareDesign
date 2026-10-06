@@ -7,20 +7,24 @@
 declare_sampling(..., filter = NULL, label = "sampling", draws = 1L)
 }
 \arguments{
-\item{...}{Named arguments forwarded to \code{\link[fabricatr:fabricate]{fabricatr::fabricate()}}. Unquoted
-expressions are evaluated lazily in the caller's environment with access
-to the current data frame.}
+\item{...}{(optional) Named arguments forwarded to
+\code{\link[fabricatr:fabricate]{fabricatr::fabricate()}}. Unquoted expressions are evaluated lazily in the
+caller's environment with access to the current data frame.}
 
-\item{filter}{Optional unquoted expression evaluated against the data;
-rows where the expression is \code{TRUE} are retained.}
+\item{filter}{(optional) Unquoted expression evaluated against the data;
+rows where the expression is \code{TRUE} are retained, and \code{S} is then not
+consulted.}
 
-\item{label}{Step label. Defaults to \code{"model"}.}
+\item{label}{(optional) Step label. Defaults to \code{"sampling"}.}
 
-\item{draws}{Number of nested draws for this step. When \verb{> 1}, the step is
-re-executed \code{draws} times for each upstream draw during nested simulation.}
+\item{draws}{(optional) Number of nested draws for this step. Defaults to
+\code{1}. When \verb{> 1}, the step is re-executed \code{draws} times for each upstream
+draw during nested simulation.}
 }
 \value{
-A \code{design_step}.
+A \code{design_step} (class \code{c("design_step", "dd", "function")}): a
+function that takes the current data frame and returns the rows sampled,
+with any declared columns added. Add it to a design with \code{+}.
 }
 \description{
 Draws the sample from the population, keeping the rows where the sampling

@@ -202,6 +202,26 @@ test_that("a value supplied at draw time without a name is refused", {
                fixed = TRUE)
 })
 
+test_that("1.x's data, start and end are refused rather than ignored", {
+  # Draw-time parameters (#497) made `draw_data(design, data = df)` a redesign
+  # over a name the design does not read, which warned and then fabricated
+  # fresh data in place of the data supplied.
+  design <- declare_model(N = 10, Y = rnorm(N)) + declare_inquiry(m = mean(Y))
+  df <- draw_data(design)
+  expect_error(draw_data(design, data = df), "get_estimates(design, data",
+               fixed = TRUE)
+  expect_error(draw_data(design, start = 1, end = 1), "`start` and `end`")
+  expect_error(run_design(design, data = df), "1.x's way")
+  expect_error(draw_estimates(design, data = df), "1.x's way")
+  expect_error(draw_estimands(design, end = 1), "1.x's way")
+})
+
+test_that("a parameter the design reads may be called start or end", {
+  start <- 5
+  design <- declare_model(N = start, Y = rnorm(N)) + NULL
+  expect_equal(nrow(draw_data(design, start = 8)), 8L)
+})
+
 test_that("drawing without parameters is unchanged", {
   design <- declare_model(N = 25, X = rnorm(N)) + declare_inquiry(m = mean(X))
   expect_equal(nrow(draw_data(design)), 25L)

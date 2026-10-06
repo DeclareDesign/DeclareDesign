@@ -13,10 +13,11 @@
 #' declaring one diagnosand drops the other six without saying so.
 #'
 #' @family diagnosands
-#' @param design A `design`.
-#' @param diagnosands A diagnosands `design_step`. Defaults to
+#' @param design (required) A `design`.
+#' @param diagnosands (optional) A diagnosands `design_step`. Defaults to
 #'   [default_diagnosands()].
-#' @return The design with `diagnosands` attribute set.
+#' @return `design`, with `diagnosands` stored in its `diagnosands`
+#'   attribute.
 #' @export
 #' @examples
 #' design <-
@@ -95,14 +96,17 @@ diagnosand_library <- function() {
 #' `mean_var_hat`, `prop_pos_sig`, and `mean_ci_length`.
 #'
 #' @family diagnosands
-#' @param ... Diagnosand names to keep, optionally preceded by a diagnosands
-#'   `design_step` to subset.
-#' @param alpha Significance level used by `power`, `type_s_rate`,
-#'   `exaggeration_ratio`, and `prop_pos_sig`.
-#' @param subset An expression evaluated on the simulations table; only the
-#'   rows for which it is `TRUE` enter the diagnosands.
-#' @param na.rm Passed to the library diagnosands.
-#' @return A diagnosands `design_step`.
+#' @param ... (required) Diagnosand names to keep, as strings, optionally
+#'   preceded by a diagnosands `design_step` to subset.
+#' @param alpha (optional) Significance level used by `power`, `type_s_rate`,
+#'   `exaggeration_ratio`, and `prop_pos_sig`. Defaults to `0.05`.
+#' @param subset (optional) An expression evaluated on the simulations table;
+#'   only the rows for which it is `TRUE` enter the diagnosands. `NULL` (the
+#'   default) keeps every simulation.
+#' @param na.rm (optional) Passed to the library diagnosands. Defaults to
+#'   `FALSE`.
+#' @return A diagnosands `design_step`, as [declare_diagnosands()] returns,
+#'   holding the named diagnosands in the order given.
 #' @export
 #' @examples
 #' select_diagnosands("sd_estimate", "mean_se")
@@ -180,9 +184,10 @@ subset_diagnosands <- function(diagnosands, keep) {
 #' lightweight stub.
 #'
 #' @family citing a design
-#' @param design A `design`.
-#' @param ... Citation fields (e.g., `title`, `author`, `year`).
-#' @return The design with a `citation` attribute set.
+#' @param design (required) A `design`.
+#' @param ... (optional) Citation fields (e.g., `title`, `author`, `year`).
+#' @return `design`, with the fields in `...` stored as a named list in its
+#'   `citation` attribute.
 #' @export
 #' @examples
 #' design <- declare_model(N = 10, Y = rnorm(N))
@@ -195,8 +200,9 @@ set_citation <- function(design, ...) {
 #' Retrieve a design's citation (stub)
 #'
 #' @family citing a design
-#' @param design A `design`.
-#' @return The citation list, or `NULL` if none has been set.
+#' @param design (required) A `design`.
+#' @return The named list of citation fields set by [set_citation()], or
+#'   `NULL` if none has been set.
 #' @export
 #' @examples
 #' design <- set_citation(declare_model(N = 10, Y = rnorm(N)),
