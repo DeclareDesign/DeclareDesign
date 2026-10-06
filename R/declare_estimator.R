@@ -327,8 +327,8 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
     # fell back to stats::lm when estimatr was missing, which silently turned
     # HC2 standard errors into classical ones: an analysis choice made by an
     # installation accident, with nothing printed to say so.
-    .method <- stats::lm
-    method_name <- "lm"
+    .method <- estimatr::lm_robust
+    method_name <- "lm_robust"
   } else if (is.null(method_expr)) {
     method_name <- legacy$method_name
   } else {
@@ -381,8 +381,7 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
 #' @inheritParams declare_estimator
 #' @family design declarations
 #' @param .method (optional) The model-fitting function. Defaults to
-#'   [stats::lm()], not the [estimatr::lm_robust()] that
-#'   [declare_estimator()] uses.
+#'   [estimatr::lm_robust()], as in [declare_estimator()].
 #' @param label (optional) Step label. Defaults to `"test"`. When two
 #'   estimator or test steps in one design share a label, `+` relabels them
 #'   from their formulas, with a message.
@@ -397,7 +396,7 @@ declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
 #' @export
 #' @examples
 #' design <- declare_model(N = 30, Z = rep(0:1, 15), Y = Z + rnorm(N)) +
-#'   declare_test(Y ~ Z, .method = lm, term = "Z", label = "diff")
+#'   declare_test(Y ~ Z, term = "Z", label = "diff")
 #' draw_estimates(design)
 declare_test <- function(..., .method = NULL, .summary = tidy_try,
                          term = NULL, label = "test", handler = NULL,
@@ -416,8 +415,8 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
     method_expr <- NULL
   }
   if (is.null(.method)) {
-    .method <- stats::lm
-    method_name <- "lm"
+    .method <- estimatr::lm_robust
+    method_name <- "lm_robust"
   } else if (is.null(method_expr)) {
     method_name <- legacy$method_name
   } else {

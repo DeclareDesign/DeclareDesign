@@ -52,6 +52,23 @@ test_that("declare_test does not add an inquiry column", {
   expect_equal(est$estimator, "diff")
 })
 
+test_that("declare_test defaults to lm_robust, as declare_estimator does", {
+  # 1.x built declare_test on method_handler, whose .method default is
+  # lm_robust. The rewrite had fallen back to stats::lm, which changes the
+  # standard errors of every test written without a .method. Unequal arms
+  # and unequal variances, so HC2 and classical standard errors differ.
+  set.seed(343)
+  design <- declare_model(
+    N = 40, Z = rep(0:1, c(10, 30)), Y = Z + rnorm(N, sd = 1 + 3 * Z)
+  ) +
+    declare_test(Y ~ Z, term = "Z")
+  df <- draw_data(design)
+  est <- get_estimates(design, df)
+  fit <- estimatr::lm_robust(Y ~ Z, data = df)
+  expect_equal(est$std.error, unname(fit$std.error["Z"]))
+  expect_true("df" %in% names(est))
+})
+
 test_that("an unset term reports the first non-intercept term only", {
   # The 1.x contract, and what Macartan's designs are written against:
   # `declare_estimator(Y ~ Z + X)` is one estimate of one inquiry, and the

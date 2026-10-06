@@ -22,8 +22,7 @@ these must include whatever \code{.method} needs. A legacy \verb{model =} argume
 is read as \code{.method} with a deprecation warning rather than forwarded.}
 
 \item{.method}{(optional) The model-fitting function. Defaults to
-\code{\link[stats:lm]{stats::lm()}}, not the \code{\link[estimatr:lm_robust]{estimatr::lm_robust()}} that
-\code{\link[=declare_estimator]{declare_estimator()}} uses.}
+\code{\link[estimatr:lm_robust]{estimatr::lm_robust()}}, as in \code{\link[=declare_estimator]{declare_estimator()}}.}
 
 \item{.summary}{(optional) Function used to tidy \code{.method}'s output.
 Defaults to \code{\link[=tidy_try]{tidy_try()}}.}
@@ -58,7 +57,7 @@ column; intended for tests not tied to an estimand.
 }
 \examples{
 design <- declare_model(N = 30, Z = rep(0:1, 15), Y = Z + rnorm(N)) +
-  declare_test(Y ~ Z, .method = lm, term = "Z", label = "diff")
+  declare_test(Y ~ Z, term = "Z", label = "diff")
 draw_estimates(design)
 }
 \seealso{
