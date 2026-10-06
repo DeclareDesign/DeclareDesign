@@ -1,0 +1,123 @@
+url: https://declaredesign.org/r/declaredesign
+
+home:
+  title: Declaring and diagnosing research designs
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#0054AD"
+    border-radius: 0.5rem
+    btn-border-radius: 0.25rem
+
+development:
+  mode: auto
+
+navbar:
+  left:
+  - text: Getting started
+    href: articles/getting-started.html
+  - text: Reference
+    href: reference/index.html
+  - text: What changed in 2.0
+    href: articles/declaredesign2.0.html
+  right:
+  - text: "Software"
+    menu:
+      - text: DeclareDesign
+        href: https://declaredesign.org/r/declaredesign/
+      - text: randomizr
+        href: https://declaredesign.org/r/randomizr/
+      - text: fabricatr
+        href: https://declaredesign.org/r/fabricatr/
+      - text: estimatr
+        href: https://declaredesign.org/r/estimatr/
+      - text: rdss
+        href: https://declaredesign.org/r/rdss/
+      - text: DesignLibrary
+        href: https://declaredesign.org/r/designlibrary/
+      - text: DesignWizard
+        href: https://eos.wzb.eu/ipi/DDWizard/
+  - text: declaredesign.org
+    href: https://declaredesign.org
+
+reference:
+- title: Declare
+  desc: The steps of a design, joined with `+`.
+  contents:
+  - declare_model
+  - declare_inquiry
+  - declare_sampling
+  - declare_assignment
+  - declare_measurement
+  - declare_estimator
+  - declare_test
+  - declare_step
+  - declare_parameters
+  - declare_notes
+  - label_estimator
+  - tidy_try
+  - vars
+  - "`+.dd`"
+
+- title: Draw and run
+  desc: Run a declared design once.
+  contents:
+  - draw_data
+  - draw_estimands
+  - draw_estimates
+  - get_estimates
+  - run_design
+
+- title: Diagnose
+  desc: Run a design many times and summarize how it performs.
+  contents:
+  - diagnose_design
+  - simulate_design
+  - diagnose_simulations
+  - declare_diagnosands
+  - select_diagnosands
+  - default_diagnosands
+  - get_diagnosands
+  - get_simulations
+  - compare_diagnoses
+  - tidy.diagnosis
+  - pop.var
+
+- title: Redesign
+  desc: Change the parameters of a declared design.
+  contents:
+  - redesign
+  - design_parameters
+  - design_notes
+
+- title: Inspect
+  desc: Print and summarize designs and diagnoses.
+  contents:
+  - print.design
+  - summary.design
+  - print.design_step
+  - print.diagnosis
+  - summary.diagnosis
+  - format.diagnosis
+  - print.compared_diagnoses
+  - print.objects
+  - cite_design
+  - set_citation
+
+- title: Deprecated and defunct
+  desc: 1.x functions kept for porting, each pointing at its replacement.
+  contents:
+  - insert_step
+  - delete_step
+  - replace_step
+  - expand_design
+  - set_diagnosands
+  - declare_population
+  - model_handler
+  - declare-defunct
+  - compare_designs
+
+- title: Package
+  contents:
+  - DeclareDesign-package
