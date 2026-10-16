@@ -28,9 +28,10 @@ is read as \code{.method} with a deprecation warning rather than forwarded.}
 \item{.summary}{(optional) Function used to tidy \code{.method}'s output.
 Defaults to \code{\link[=tidy_try]{tidy_try()}}.}
 
-\item{inquiry}{(optional) Either an inquiry label (character), a
-\code{design_step}, or a list of these; used to join the estimate to its
-target estimand.}
+\item{inquiry}{(optional) The label of the inquiry this estimator targets,
+as a string (\code{inquiry = "ATE"}), or a character vector of labels. Passing
+the inquiry step object is an error. The label joins the estimate to its
+estimand in every table of estimates and in the diagnosis.}
 
 \item{term}{(optional) Which model terms to report. A character vector keeps
 exactly those terms, in that order, and errors if any is absent from the

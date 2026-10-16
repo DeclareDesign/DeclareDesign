@@ -123,7 +123,7 @@ unwrap_quosure <- function(quo) {
 #'
 #' @family diagnosands
 #' @return A diagnosands `design_step`, as [declare_diagnosands()] returns,
-#'   holding the seven diagnosands above.
+#'   holding the seven diagnosands listed under Details.
 #' @export
 #' @examples
 #' default_diagnosands()

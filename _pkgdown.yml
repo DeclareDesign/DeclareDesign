@@ -1,4 +1,4 @@
-url: https://declaredesign.org/r/declaredesign
+url: https://declaredesign.org/r/declaredesign/
 
 home:
   title: Declaring and diagnosing research designs
@@ -21,6 +21,8 @@ navbar:
     href: reference/index.html
   - text: What changed in 2.0
     href: articles/declaredesign2.0.html
+  - text: News
+    href: news/index.html
   right:
   - text: "Software"
     menu:
@@ -55,10 +57,14 @@ reference:
   - declare_step
   - declare_parameters
   - declare_notes
+  - "`+.dd`"
+
+- title: Helpers
+  desc: Functions used inside a declaration rather than as a step of it.
+  contents:
   - label_estimator
   - tidy_try
   - vars
-  - "`+.dd`"
 
 - title: Draw and run
   desc: Run a declared design once.
@@ -102,8 +108,12 @@ reference:
   - format.diagnosis
   - print.compared_diagnoses
   - print.objects
-  - cite_design
+
+- title: Cite
+  desc: Attach a citation to a design and retrieve it.
+  contents:
   - set_citation
+  - cite_design
 
 - title: Deprecated and defunct
   desc: 1.x functions kept for porting, each pointing at its replacement.

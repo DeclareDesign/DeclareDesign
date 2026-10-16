@@ -26,7 +26,8 @@ Imports:
     purrr,
     rlang,
     tibble,
-    tidyr
+    tidyr,
+    utils
 Remotes:
     DeclareDesign/fabricatr@rewrite
 Suggests:
@@ -42,6 +43,6 @@ VignetteBuilder: knitr
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
 Config/roxygen2/version: 8.0.0
-URL: https://declaredesign.org/r/declaredesign,
+URL: https://declaredesign.org/r/declaredesign/,
     https://github.com/DeclareDesign/DeclareDesign
 BugReports: https://github.com/DeclareDesign/DeclareDesign/issues

@@ -35,6 +35,15 @@ can be compared before any data are collected.
 diagnose_design(design)
 }\if{html}{\out{</div>}}
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://declaredesign.org/r/declaredesign/}
+  \item \url{https://github.com/DeclareDesign/DeclareDesign}
+  \item Report bugs at \url{https://github.com/DeclareDesign/DeclareDesign/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Alexander Coppock \email{acoppock@gmail.com} (\href{https://orcid.org/0000-0002-5733-2386}{ORCID})
 

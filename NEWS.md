@@ -6,41 +6,39 @@ DeclareDesign 2.0 is a ground-up reimplementation on tidyverse primitives. The d
 
 * `redesign()` reaches a name the design reads (a value named above the design, a designer function's argument, or a `declare_parameters()` entry) and no longer a number written inside a step. `redesign(design, N = 1000)` over `declare_model(N = 500)` errors with the two ways to name the value; in 1.x it warned and returned the design unchanged.
 * `declare_estimator(inquiry = )` takes the inquiry's label as a string. Passing the inquiry step object is an error; in 1.x it linked the estimator to an inquiry called `"inquiry"` and returned `NA` estimands.
-* `diagnose_design()` and `simulate_design()` drop `make_groups`, `add_grouping_variables` and `future.seed`, each with an error naming the replacement. Group with `simulate_design() |> group_by() |> diagnose_design()`; seed with `set.seed()` before the call.
-* `redesign()` and `expand_design()` take `.design`, `.designer` and `.expand`, so a parameter named `d` or `expand` is no longer swallowed by partial matching. `expand_design()` drops `prefix`.
-* `draw_data()` no longer runs part of a design on supplied data; `data`, `start` and `end` are gone, and passing them stops with an error naming the replacement unless the design reads a parameter by that name. Use `get_estimates(design, data)` to run estimators on supplied data and `design[i:j]` for a slice.
+* `diagnose_design()` and `simulate_design()` drop `make_groups`, `add_grouping_variables`, and `future.seed`, each with an error naming the replacement. Group with `simulate_design() |> group_by() |> diagnose_design()`; seed with `set.seed()` before the call.
+* `redesign()`'s first argument is `.design` and `expand_design()`'s is `.designer`, and both take `.expand` after the dots, so a parameter named `expand`, or `d` or any other prefix of `design`, is no longer swallowed by partial matching. `expand_design()` drops `prefix`, which named the designs it returned `design_1`, `design_2`, and so on; designs are now named by the values that distinguish them.
+* `draw_data()` no longer runs part of a design on supplied data; `data`, `start`, and `end` are gone, and passing them stops with an error naming the replacement unless the design reads a parameter by that name. Use `get_estimates(design, data)` to run estimators on supplied data and `design[i:j]` for a slice.
 * `label_estimator(fn = )` and `label_test(fn = )` are `.method = `; `set_diagnosands(x = )` is `design = `; `reshape_diagnosis()` drops `select` and `exclude`.
-* `compare_designs()`, `compare_design_code()`, `compare_design_summaries()`, `compare_design_estimates()`, `compare_design_estimands()`, `compare_design_data()` and `print_code()` are defunct and say so. `compare_diagnoses()` stays.
+* `compare_designs()`, `compare_design_code()`, `compare_design_summaries()`, `compare_design_estimates()`, `compare_design_inquiries()`, `compare_design_data()`, and `print_code()` are defunct and say so. `compare_diagnoses()` stays.
 * `declare_potential_outcomes()` and `declare_reveal()` are defunct; `declare_estimators()` is gone.
-* Every table of estimates carries an `estimand` column and puts `estimator`, `inquiry` and `estimand` after the tidied statistics. Two estimators with one label are renamed apart with a message rather than an error.
+* Every table of estimates carries an `estimand` column and puts `estimator`, `inquiry`, and `estimand` after the tidied statistics. Two estimators with one label are renamed apart with a message rather than an error.
 
 ## Deprecations
 
 * `expand_design()` warns once per session; call the designer and `redesign()` the result: `redesign(designer(), N = c(100, 200))`.
 * `set_diagnosands()` warns once per session; pass the diagnosands to the diagnosis instead, `diagnose_design(design, diagnosands = ...)`. An attached set replaces the defaults rather than adding to them, and does not survive `redesign()`, which now warns when it drops one.
-* `insert_step()`, `delete_step()` and `replace_step()` warn once per session; rebuild the design with `design[1:2] + new_step + design[4:5]` instead.
-* `declare_population()`, `model_handler()` and `tidy_estimator()` warn once per session.
+* `insert_step()`, `delete_step()`, and `replace_step()` warn once per session; rebuild the design with `design[1:2] + new_step + design[4:5]` instead.
+* `declare_population()`, `model_handler()`, and `tidy_estimator()` warn once per session.
 * `declare_estimator(model = )` is read as `.method = ` with a warning.
 
 ## New
 
 * `declare_parameters()` names the values a design can be redesigned over, and `declare_notes()` names the quantities it works out along the way; `design_parameters()` and `design_notes()` list them. A declared parameter is bound for every step after it, including a helper function that reads it.
-* `run_design()`, `draw_data()`, `draw_estimands()` and `draw_estimates()` take named parameter values, so `draw_data(design, theta = 0.5)` draws from a declaration that leaves `theta` free (closes #497). The values go through `redesign()`, so the rules about which names a design accepts are stated in one place, and supplying several values is refused rather than narrowed: sweep with `redesign()` and draw from each.
+* `run_design()`, `draw_data()`, `draw_estimands()`, and `draw_estimates()` take named parameter values, so `draw_data(design, theta = 0.5)` draws from a declaration that leaves `theta` free (closes #497). The values go through `redesign()`, so the rules about which names a design accepts are stated in one place, and supplying several values is refused rather than narrowed: sweep with `redesign()` and draw from each.
 * A design is a value: it carries the objects its expressions read, so it survives `saveRDS()`, reaches a parallel worker, and does not change meaning when a workspace variable is edited (closes #293).
 * Step-level `draws` fan a step out and hold everything upstream fixed; the diagnosis of such a design carries a `variance_decomposition` attributing the variance of each per-simulation quantity to the step that generated it.
 * An estimator that errors on a draw under `simulate_design()` is recorded as a row with `error = TRUE`, one warning per run gives the counts, and diagnosands use the draws that succeeded (closes #385). `run_design()` and `draw_estimates()` still stop.
 * Every simulation draw runs on its own L'Ecuyer-CMRG stream under any `future::plan()`, so a seeded run gives the same table sequentially and in parallel, and the caller's own generator is left in the same place either way: one draw on, whichever plan is active (closes #445). `furrr` draws a value from the caller's stream whenever it is handed a seed, so a parallel run used to leave it one uniform further on than a sequential one.
 * `progress = TRUE` on `simulate_design()` and `diagnose_design()`, or `progressr::handlers(global = TRUE)` once per session, reports progress through progressr, from parallel workers too.
 * `print(design)` shows the calls that declared the steps, as 1.x did, and the parameters `redesign()` can reach. `summary(design)` runs the design once and says under each step what it did to the data (rows kept, columns added, dropped or changed, the estimand, the estimate), returning the pieces as a `summary.design` object; `run = FALSE` skips the run.
-* `diagnose_design()` accepts a simulations data frame and honours its grouping; `diagnose_simulations()` is the same entry point by name.
+* `diagnose_design()` accepts a simulations data frame in place of a design and honours its grouping. `diagnose_simulations()` does the same thing under a name that says what the argument is.
 * `default_diagnosands()` and `select_diagnosands()` build a diagnosands set from names; `tidy()` works on a diagnosis.
 * Estimator and step arguments pass to `.method` or the handler as written, so methods that do their own non-standard evaluation work (closes #463; also #456, #457, #482, #509).
 
-## Messages that were silences
+## Failures that are now reported
 
-* A `declare_measurement()`, `declare_assignment()` or `declare_sampling()` step that supplies its own rows, rather than receiving them from the model, no longer appends a row id column. The flag that controls this was set at all four call sites and never passed to `fabricate()`, so the steps avoided a stray `ID` column only because they normally run with data already in hand. 1.x wrote `ID_label = NA` at each of those sites. The rule belongs to the verb rather than to the handler, so it holds whether or not the declaration spells out `handler = fabricate`; in 1.x that was a different handler from the verb's own and appended an `ID`.
-
-
+* A `declare_measurement()`, `declare_assignment()`, or `declare_sampling()` step that supplies its own rows, rather than receiving them from the model, no longer appends a row id column. 1.x asked for this at every call site but never passed the flag on to `fabricate()`, so the steps avoided a stray `ID` column only because they normally run with data already in hand, and a declaration that spelled out `handler = fabricate` got the `ID` anyway. The rule now belongs to the verb, whichever handler is named.
 * An inquiry that no estimator targets keeps its own row in a diagnosis, with an NA estimator and its `mean_estimand`, as in 1.x; the join had dropped it.
 * The warning that estimates and inquiries were matched ambiguously fires only when the match was ambiguous (closes #479). Two estimators both naming `ATE`, with other inquiries declared beside it, produce more rows than either table had, because the unanswered inquiries keep their own rows; the old test was that row count alone, so it reported a multiplication that had not happened and advised naming an inquiry the estimators had already named. A shared-column match now warns only where one key value carries more than one row on both sides, and says which key. A match on no shared column warns as before.
 * `declare_sampling(handler = )` takes a custom sampling function, as the other data verbs do.

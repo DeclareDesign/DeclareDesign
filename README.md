@@ -1,6 +1,6 @@
 # DeclareDesign
 
-DeclareDesign declares, diagnoses and redesigns research designs. A design is written as four parts, a model of the world, an inquiry about it, a data strategy and an answer strategy, joined with `+`; `diagnose_design()` then simulates it and reports bias, power, coverage and whatever else you ask for, before any data are collected.
+DeclareDesign declares, diagnoses, and redesigns research designs. A design is written as four parts, a model of the world, an inquiry about it, a data strategy, and an answer strategy, joined with `+`; `diagnose_design()` then simulates it and reports bias, power, coverage, and whatever else you ask for, before any data are collected.
 
 ```r
 library(DeclareDesign)
@@ -13,13 +13,23 @@ design <-
   declare_estimator(Y ~ Z, .method = difference_in_means, inquiry = "ATE")
 
 diagnose_design(design)
+#> Research design diagnosis
+#>   500 simulations
+#>   bootstrap standard errors in parentheses (100 replicates)
+#>
+#>  Design Inquiry Estimator Outcome Term N Sims Mean Estimand Mean Estimate
+#>  design     ATE estimator       Y    Z    500          0.20          0.20
+#>                                                      (0.00)        (0.01)
+#>    Bias SD Estimate   RMSE  Power Coverage
+#>    0.00        0.20   0.20   0.17     0.96
+#>  (0.01)      (0.01) (0.01) (0.02)   (0.01)
 ```
 
-The companion packages supply the pieces: [fabricatr](https://github.com/DeclareDesign/fabricatr) makes data, [randomizr](https://github.com/DeclareDesign/randomizr) randomizes, and [estimatr](https://github.com/DeclareDesign/estimatr) estimates. The book *Research Design in the Social Sciences* (Blair, Coppock and Humphreys) works through all of it at <https://book.declaredesign.org>.
+`library(DeclareDesign)` also attaches the three companion packages that supply the pieces: [fabricatr](https://declaredesign.org/r/fabricatr/) makes data, [randomizr](https://declaredesign.org/r/randomizr/) randomizes, and [estimatr](https://declaredesign.org/r/estimatr/) estimates. The book *Research Design in the Social Sciences* (Blair, Coppock, and Humphreys) works through all of it at <https://book.declaredesign.org>.
 
 ## Installing
 
-Version 2.0 is on this repository's `rewrite` branch and not yet on CRAN. It installs under the released name and replaces the CRAN DeclareDesign in your library, as do fabricatr 2.0 and estimatr 2.0, which it needs:
+Version 2.0 is on the `rewrite` branch of the [GitHub repository](https://github.com/DeclareDesign/DeclareDesign) and not yet on CRAN. It installs under the released name and replaces the CRAN DeclareDesign in your library, as do fabricatr 2.0 and estimatr 2.0, which it needs:
 
 ```r
 remotes::install_github("DeclareDesign/fabricatr@rewrite")
@@ -40,4 +50,4 @@ To keep the CRAN versions for comparison, install them into a separate library a
 * An estimator that fails on one draw is recorded rather than fatal.
 * `inquiry =` takes the inquiry's label; `make_groups` is `group_by()`; `print_code()` and `compare_designs()` are gone.
 
-`NEWS.md` has the full list, and `vignette("declaredesign2.0")` the reasoning, the speed measurements and a grep table for porting a script. `vignette("getting-started")` is the short introduction.
+The [changelog](https://declaredesign.org/r/declaredesign/news/) has the full list, and `vignette("declaredesign2.0")` the reasoning, the speed measurements, and a grep table for porting a script. `vignette("getting-started")` is the short introduction.

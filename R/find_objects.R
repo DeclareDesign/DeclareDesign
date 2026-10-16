@@ -443,16 +443,34 @@ current_param_value <- function(design, name) {
 
 #' Print the objects table, one row per name
 #'
-#' The table carries an `env` column of environments, which
-#' `print.data.frame()` cannot format, so before it is printed the table is
-#' aggregated to one row per name, with the columns a reader wants: `name`,
-#' `value`, `kind`, `declared`, and `steps` (every step that reads the name).
+#' Prints the table [design_parameters()] returns, and that `print(design)`
+#' shows under "Parameters and objects the design refers to", aggregated to
+#' one row per name with five columns. `name` is the name [redesign()] can
+#' change. `value` is a display snippet of what it currently holds. `kind` is
+#' how [redesign()] reads a bare replacement: `scalar`, `vector`, and `list`
+#' supply one design per element, while `data`, `function`, and `other` are
+#' single values. `declared` is `TRUE` when a [declare_parameters()] step
+#' declares the name and `FALSE` when the design reads it from the
+#' environment it was written in. `steps` lists the positions of the steps
+#' that read the name, which are the steps that would respond to a change.
+#'
+#' The underlying table has one row per name per step and carries the
+#' `quosure` and `env` columns that locate each binding; those are left out of
+#' the print.
 #'
 #' @param x (required) An `objects` table, as returned by
 #'   [design_parameters()].
 #' @param ... (optional) Ignored.
 #' @return `x`, invisibly.
 #' @export
+#' @examples
+#' tau <- 0.3
+#' design <-
+#'   declare_parameters(n_units = 100) +
+#'   declare_model(N = n_units, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + tau) +
+#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+#'   declare_assignment(Z = complete_ra(N))
+#' design_parameters(design)
 #' @method print objects
 print.objects <- function(x, ...) {
   if (nrow(x) == 0) {

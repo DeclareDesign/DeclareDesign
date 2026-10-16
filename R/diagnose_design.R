@@ -617,7 +617,7 @@ compute_variance_decomposition <- function(simulations_df, draw_cols,
 
     result[["quantity"]] <- col_name
     result[["draw_levels"]] <- paste(step_names, collapse = " > ")
-    result
+    dplyr::relocate(result, "quantity", .after = dplyr::all_of(group_by_set))
   }
 
   out <- purrr::map(target_cols, decompose_one) |>

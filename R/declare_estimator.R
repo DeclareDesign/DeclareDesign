@@ -273,9 +273,10 @@ make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
 #'   [estimatr::lm_robust()].
 #' @param .summary (optional) Function used to tidy `.method`'s output.
 #'   Defaults to [tidy_try()].
-#' @param inquiry (optional) Either an inquiry label (character), a
-#'   `design_step`, or a list of these; used to join the estimate to its
-#'   target estimand.
+#' @param inquiry (optional) The label of the inquiry this estimator targets,
+#'   as a string (`inquiry = "ATE"`), or a character vector of labels. Passing
+#'   the inquiry step object is an error. The label joins the estimate to its
+#'   estimand in every table of estimates and in the diagnosis.
 #' @param term (optional) Which model terms to report. A character vector keeps
 #'   exactly those terms, in that order, and errors if any is absent from the
 #'   tidied output; `TRUE` keeps every term including the intercept. When left
@@ -456,9 +457,13 @@ declare_test <- function(..., .method = NULL, .summary = tidy_try,
 
 #' Wrap a custom function as a labeled estimator
 #'
-#' `label_estimator()` and `label_test()` return functions suitable for use
-#' as `.method` in [declare_estimator()] or [declare_test()]; they tag the
-#' tidied output with `estimator` and `inquiry` columns and filter its terms.
+#' `label_estimator()` returns a function suitable for use as `.method` in
+#' [declare_estimator()] or [declare_test()]: it fits the model, tidies the
+#' fit, tags the result with `estimator` and `inquiry` columns, and keeps the
+#' terms asked for. `label_test()` is the same function under a second name,
+#' kept so that 1.x scripts run; a test is an estimator whose tidied output
+#' carries a p-value, and nothing in the wrapper depends on which name was
+#' called. 1.x's `fn =` argument is `.method =` in both.
 #'
 #' @param .method (required) A function that fits a model from `data` and
 #'   `...`.

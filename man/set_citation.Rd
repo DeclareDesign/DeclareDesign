@@ -2,26 +2,45 @@
 % Please edit documentation in R/set_diagnosands.R
 \name{set_citation}
 \alias{set_citation}
-\title{Attach a citation to a design (stub)}
+\title{Attach a citation to a design}
 \usage{
-set_citation(design, ...)
+set_citation(
+  design,
+  title = NULL,
+  author = NULL,
+  year = NULL,
+  description = "Unpublished research design declaration",
+  citation = NULL
+)
 }
 \arguments{
 \item{design}{(required) A \code{design}.}
 
-\item{...}{(optional) Citation fields (e.g., \code{title}, \code{author}, \code{year}).}
+\item{title}{(optional) Title of the design.}
+
+\item{author}{(optional) Author or authors, as a string or a
+\code{\link[utils:person]{utils::person()}}.}
+
+\item{year}{(optional) Year.}
+
+\item{description}{(optional) Note on the entry. Defaults to
+\code{"Unpublished research design declaration"}.}
+
+\item{citation}{(optional) A ready-made citation, as a string or a
+\code{bibentry}, used in place of the fields above.}
 }
 \value{
-\code{design}, with the fields in \code{...} stored as a named list in its
-\code{citation} attribute.
+\code{design}, with the citation stored in its \code{citation} attribute.
 }
 \description{
-Records bibliographic information on the design. This is currently a
-lightweight stub.
+Records how the design should be cited, as a \code{\link[utils:bibentry]{utils::bibentry()}} built from
+the fields given, or as the text in \code{citation}. \code{\link[=cite_design]{cite_design()}} returns it.
 }
 \examples{
 design <- declare_model(N = 10, Y = rnorm(N))
-set_citation(design, title = "Example", author = "Coppock", year = 2026)
+design <- set_citation(design, title = "Example", author = "Coppock",
+                       year = 2026)
+cite_design(design)
 }
 \seealso{
 Other citing a design:

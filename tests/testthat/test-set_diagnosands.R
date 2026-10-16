@@ -176,10 +176,15 @@ test_that("select_diagnosands() needs at least one name", {
 
 test_that("a design carries the citation it was given", {
   design <- declare_model(N = 10, Y = rnorm(N)) + declare_inquiry(mu = mean(Y))
-  expect_null(cite_design(design))
+  expect_s3_class(cite_design(design), "bibentry")
+  expect_true(any(grepl("DeclareDesign", format(cite_design(design)))))
   cited <- set_citation(design, title = "Example", author = "Coppock", year = 2026)
-  expect_equal(cite_design(cited),
-               list(title = "Example", author = "Coppock", year = 2026))
+  cite <- cite_design(cited)
+  expect_s3_class(cite, "bibentry")
+  expect_equal(unclass(cite)[[1]]$title, "Example")
+  expect_equal(unclass(cite)[[1]]$year, "2026")
   expect_s3_class(cited, "design")
   expect_equal(names(cited), names(design))
+  text <- "Lovelace (1953). Notes."
+  expect_equal(cite_design(set_citation(design, citation = text)), text)
 })

@@ -178,36 +178,54 @@ subset_diagnosands <- function(diagnosands, keep) {
   rebuild_step(diagnosands, dots[keep])
 }
 
-#' Attach a citation to a design (stub)
+#' Attach a citation to a design
 #'
-#' Records bibliographic information on the design. This is currently a
-#' lightweight stub.
+#' Records how the design should be cited, as a [utils::bibentry()] built from
+#' the fields given, or as the text in `citation`. [cite_design()] returns it.
 #'
 #' @family citing a design
 #' @param design (required) A `design`.
-#' @param ... (optional) Citation fields (e.g., `title`, `author`, `year`).
-#' @return `design`, with the fields in `...` stored as a named list in its
-#'   `citation` attribute.
+#' @param title (optional) Title of the design.
+#' @param author (optional) Author or authors, as a string or a
+#'   [utils::person()].
+#' @param year (optional) Year.
+#' @param description (optional) Note on the entry. Defaults to
+#'   `"Unpublished research design declaration"`.
+#' @param citation (optional) A ready-made citation, as a string or a
+#'   `bibentry`, used in place of the fields above.
+#' @return `design`, with the citation stored in its `citation` attribute.
 #' @export
 #' @examples
 #' design <- declare_model(N = 10, Y = rnorm(N))
-#' set_citation(design, title = "Example", author = "Coppock", year = 2026)
-set_citation <- function(design, ...) {
-  attr(design, "citation") <- list(...)
+#' design <- set_citation(design, title = "Example", author = "Coppock",
+#'                        year = 2026)
+#' cite_design(design)
+set_citation <- function(design, title = NULL, author = NULL, year = NULL,
+                         description = "Unpublished research design declaration",
+                         citation = NULL) {
+  if (is.null(citation)) {
+    citation <- utils::bibentry("unpublished", title = title, author = author,
+                                year = year, note = description)
+  }
+  attr(design, "citation") <- citation
   design
 }
 
-#' Retrieve a design's citation (stub)
+#' Retrieve a design's citation
+#'
+#' Returns the citation [set_citation()] attached to the design, or, when
+#' none was attached, the citation for the DeclareDesign package itself.
 #'
 #' @family citing a design
 #' @param design (required) A `design`.
-#' @return The named list of citation fields set by [set_citation()], or
-#'   `NULL` if none has been set.
+#' @return The design's citation, a `bibentry` or a string, or
+#'   `utils::citation("DeclareDesign")` when none has been set.
 #' @export
 #' @examples
 #' design <- set_citation(declare_model(N = 10, Y = rnorm(N)),
-#'                        title = "Example")
+#'                        title = "Example", author = "Coppock", year = 2026)
 #' cite_design(design)
 cite_design <- function(design) {
-  attr(design, "citation")
+  citation <- attr(design, "citation")
+  if (is.null(citation)) utils::citation("DeclareDesign") else citation
 }

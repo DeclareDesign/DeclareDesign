@@ -16,8 +16,28 @@
 \code{x}, invisibly.
 }
 \description{
-The table carries an \code{env} column of environments, which
-\code{print.data.frame()} cannot format, so before it is printed the table is
-aggregated to one row per name, with the columns a reader wants: \code{name},
-\code{value}, \code{kind}, \code{declared}, and \code{steps} (every step that reads the name).
+Prints the table \code{\link[=design_parameters]{design_parameters()}} returns, and that \code{print(design)}
+shows under "Parameters and objects the design refers to", aggregated to
+one row per name with five columns. \code{name} is the name \code{\link[=redesign]{redesign()}} can
+change. \code{value} is a display snippet of what it currently holds. \code{kind} is
+how \code{\link[=redesign]{redesign()}} reads a bare replacement: \code{scalar}, \code{vector}, and \code{list}
+supply one design per element, while \code{data}, \code{function}, and \code{other} are
+single values. \code{declared} is \code{TRUE} when a \code{\link[=declare_parameters]{declare_parameters()}} step
+declares the name and \code{FALSE} when the design reads it from the
+environment it was written in. \code{steps} lists the positions of the steps
+that read the name, which are the steps that would respond to a change.
+}
+\details{
+The underlying table has one row per name per step and carries the
+\code{quosure} and \code{env} columns that locate each binding; those are left out of
+the print.
+}
+\examples{
+tau <- 0.3
+design <-
+  declare_parameters(n_units = 100) +
+  declare_model(N = n_units, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + tau) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_assignment(Z = complete_ra(N))
+design_parameters(design)
 }

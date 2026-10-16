@@ -2,7 +2,7 @@
 % Please edit documentation in R/set_diagnosands.R
 \name{cite_design}
 \alias{cite_design}
-\title{Retrieve a design's citation (stub)}
+\title{Retrieve a design's citation}
 \usage{
 cite_design(design)
 }
@@ -10,15 +10,16 @@ cite_design(design)
 \item{design}{(required) A \code{design}.}
 }
 \value{
-The named list of citation fields set by \code{\link[=set_citation]{set_citation()}}, or
-\code{NULL} if none has been set.
+The design's citation, a \code{bibentry} or a string, or
+\code{utils::citation("DeclareDesign")} when none has been set.
 }
 \description{
-Retrieve a design's citation (stub)
+Returns the citation \code{\link[=set_citation]{set_citation()}} attached to the design, or, when
+none was attached, the citation for the DeclareDesign package itself.
 }
 \examples{
 design <- set_citation(declare_model(N = 10, Y = rnorm(N)),
-                       title = "Example")
+                       title = "Example", author = "Coppock", year = 2026)
 cite_design(design)
 }
 \seealso{

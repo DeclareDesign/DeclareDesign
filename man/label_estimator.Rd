@@ -44,9 +44,13 @@ the resulting tibble with the \code{estimator} and \code{inquiry} columns set an
 its rows restricted to \code{term}.
 }
 \description{
-\code{label_estimator()} and \code{label_test()} return functions suitable for use
-as \code{.method} in \code{\link[=declare_estimator]{declare_estimator()}} or \code{\link[=declare_test]{declare_test()}}; they tag the
-tidied output with \code{estimator} and \code{inquiry} columns and filter its terms.
+\code{label_estimator()} returns a function suitable for use as \code{.method} in
+\code{\link[=declare_estimator]{declare_estimator()}} or \code{\link[=declare_test]{declare_test()}}: it fits the model, tidies the
+fit, tags the result with \code{estimator} and \code{inquiry} columns, and keeps the
+terms asked for. \code{label_test()} is the same function under a second name,
+kept so that 1.x scripts run; a test is an estimator whose tidied output
+carries a p-value, and nothing in the wrapper depends on which name was
+called. 1.x's \verb{fn =} argument is \verb{.method =} in both.
 }
 \examples{
 my_est <- label_estimator(

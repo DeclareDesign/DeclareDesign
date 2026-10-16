@@ -8,7 +8,7 @@ default_diagnosands()
 }
 \value{
 A diagnosands \code{design_step}, as \code{\link[=declare_diagnosands]{declare_diagnosands()}} returns,
-holding the seven diagnosands above.
+holding the seven diagnosands listed under Details.
 }
 \description{
 Returns the standard set of diagnosands. A diagnosand is a summary of a
