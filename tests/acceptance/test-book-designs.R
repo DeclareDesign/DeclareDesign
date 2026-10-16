@@ -3590,6 +3590,7 @@ test_that("declaration_18.10 runs (experimental causal), ported", {
     declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
     declare_estimator(Y ~ Z, fixed_effects = ~ periods + units, 
                       clusters = units, 
+                      se_type = "CR2",
                       subset = time < max(time),
                       inquiry = "ATE", label = "TWFE")
   expect_s3_class(declaration_18.10, "design")
