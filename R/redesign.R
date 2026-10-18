@@ -641,7 +641,9 @@ param_grid <- function(params, expand = TRUE) {
       stop("All parameter vectors must have length 1 or the same length when ",
            "`.expand = FALSE`.")
     }
-    as.data.frame(lapply(lens, function(l) if (l == 1L) rep(1L, n) else seq_len(l)))
+    # A list, not `as.data.frame()`, whose name check renamed `effect size`
+    # to `effect.size` and left `idx[[nm]]` below NULL.
+    lapply(lens, function(l) if (l == 1L) rep(1L, n) else seq_len(l))
   }
   out <- purrr::imap(cols, function(col, nm) simplify_param_col(col[idx[[nm]]]))
   tibble::as_tibble(out)
