@@ -33,6 +33,28 @@ test_that("redesign with .expand = FALSE zips parameters", {
   expect_length(fam, 2L)
 })
 
+test_that("a parameter whose name needs backticks zips as it expands", {
+  # The zipped grid went through as.data.frame(), which renamed
+  # `effect size` to `effect.size`, so the lookup by name came back NULL and
+  # redesign() failed with "Column `effect size` is NULL".
+  designer <- function(N, `effect size`) {
+    declare_model(N = N, Y = rnorm(N) + `effect size`) +
+      declare_inquiry(mu = `effect size`)
+  }
+  design <- designer(N = 50, `effect size` = 0.5)
+
+  fam <- redesign(design, N = c(25, 75), `effect size` = c(0.1, 0.2),
+                  .expand = FALSE)
+  expect_length(fam, 2L)
+  ns <- vapply(fam, function(d) nrow(draw_data(d)), integer(1))
+  expect_equal(unname(ns), c(25L, 75L))
+  mus <- vapply(fam, function(d) draw_estimands(d)$estimand, numeric(1))
+  expect_equal(unname(mus), c(0.1, 0.2))
+
+  expect_length(redesign(design, N = c(25, 75), `effect size` = c(0.1, 0.2)),
+                4L)
+})
+
 test_that("expand_design builds a list from a designer", {
   designer <- function(N) declare_model(N = N, Y = rnorm(N))
   fam <- suppressWarnings(expand_design(designer, N = c(10, 20)))
