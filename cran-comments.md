@@ -13,7 +13,7 @@ This version was written by the maintainers working with AI assistance (Claude, 
 ## Test environments
 
 * local macOS 26.6 (aarch64, Apple M4), R 4.6.0
-* GitHub Actions: ubuntu-latest (devel, release, oldrel-1), macOS-latest (release), windows-latest (release). <PENDING: first run with the devel job; the four-job run 39166729091, before the book designs joined `tests/testthat/`, was green at `FAIL 0 | WARN 0 | SKIP 0 | PASS 1106`.>
+* GitHub Actions: ubuntu-latest (devel, release, oldrel-1), macOS-latest (release), windows-latest (release). All five green at `FAIL 0 | WARN 0 | SKIP 0 | PASS 1282` (run 39437001050).
 * win-builder: not yet run
 
 ## R CMD check results
