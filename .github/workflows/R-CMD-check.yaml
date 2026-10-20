@@ -35,6 +35,7 @@ jobs:
       fail-fast: false
       matrix:
         config:
+          - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
           - {os: ubuntu-latest,  r: 'release'}
           - {os: ubuntu-latest,  r: 'oldrel-1'}
           - {os: macos-latest,   r: 'release'}

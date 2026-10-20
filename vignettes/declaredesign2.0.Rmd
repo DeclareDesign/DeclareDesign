@@ -24,6 +24,8 @@ The pipeline is faster and it parallelises. Simulation and diagnosis run 1.19 to
 
 The rewrite can express designs the original cannot. `declare_parameters()` names what a design can be redesigned over, and `declare_notes()` names what it works out along the way. Step-level `draws` hold a population fixed while the assignment is redrawn, or the reverse, and the diagnosis then decomposes the variance of any per-simulation quantity by the step that generated it. An estimator that fails on one draw is recorded rather than fatal.
 
+DeclareDesign 2.0 was written by its maintainers working with AI assistance (Claude, from Anthropic).
+
 ## Getting it
 
 The 2.0 packages are not on CRAN yet. They install from GitHub under their released names, so installing them replaces the CRAN versions in your library; keep the CRAN versions available by installing them into a separate library and passing `lib.loc` when you want them.
