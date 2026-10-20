@@ -8,12 +8,12 @@ DeclareDesign 2.0.0 is a reimplementation of the package on tidyverse primitives
 
 It requires fabricatr (>= 2.0.0), estimatr (>= 2.0.0), and randomizr (>= 1.0.1). estimatr 2.0.1 and randomizr 2.0.1 are on CRAN, and fabricatr 2.0.0 was accepted on <DATE>. The fabricatr submission told CRAN this release would follow it.
 
-This version was written by the maintainers working with AI assistance (Claude, from Anthropic), and `vignette("declaredesign2.0")` says so. The evidence for the release: a suite of 1106 assertions, and an acceptance suite (`tests/acceptance/`, run outside `R CMD check`) that declares and executes 84 of the 90 design declarations in Blair, Coppock, and Humphreys, *Research Design in the Social Sciences* (Princeton University Press, 2023), 81 of them verbatim, and fails any whose estimator returns only `NA`.
+This version was written by the maintainers working with AI assistance (Claude, from Anthropic), and `vignette("declaredesign2.0")` says so. The evidence for the release: a suite of 1245 assertions under `R CMD check` (1262 with `NOT_CRAN` set), which declares and executes 72 of the 90 design declarations in Blair, Coppock, and Humphreys, *Research Design in the Social Sciences* (Princeton University Press, 2023) and fails any whose estimator returns only `NA`. A separate acceptance suite (`tests/acceptance/`, skipped on CRAN) does the same for 12 more that need modelling packages outside this package's dependencies.
 
 ## Test environments
 
 * local macOS 26.6 (aarch64, Apple M4), R 4.6.0
-* GitHub Actions: ubuntu-latest (devel, release, oldrel-1), macOS-latest (release), windows-latest (release). <PENDING: first run with the devel job; the four-job run 39166729091 was green at `FAIL 0 | WARN 0 | SKIP 0 | PASS 1106`.>
+* GitHub Actions: ubuntu-latest (devel, release, oldrel-1), macOS-latest (release), windows-latest (release). <PENDING: first run with the devel job; the four-job run 39166729091, before the book designs joined `tests/testthat/`, was green at `FAIL 0 | WARN 0 | SKIP 0 | PASS 1106`.>
 * win-builder: not yet run
 
 ## R CMD check results
