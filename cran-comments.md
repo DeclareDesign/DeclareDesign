@@ -8,13 +8,15 @@ This version was written by the maintainers working with AI assistance (Claude, 
 
 ## Test environments
 
-* local macOS 26.6 (aarch64, Apple M4), R 4.6.0: 0 errors | 0 warnings | 0 notes, other than a warning that this machine's randomizr binary was built under R 4.6.1
-* GitHub Actions: ubuntu-latest (devel, release, oldrel-1), macOS-latest (release), windows-latest (release). All five green at `FAIL 0 | WARN 0 | SKIP 0 | PASS 1282` (run 39437001050).
-* win-builder: not yet run
+* local macOS 26.6 (aarch64, Apple M4), R 4.6.1: 0 errors | 0 warnings | 0 notes
+* GitHub Actions: ubuntu-latest (devel, release, oldrel-1), macOS-latest (release), windows-latest (release). All five green at `FAIL 0 | WARN 0 | SKIP 0 | PASS 1282` (run 40108321491, with every dependency from CRAN).
+* win-builder: R-devel (2026-10-23 r90760 ucrt), 1 NOTE
 
 ## R CMD check results
 
-<PENDING: win-builder>
+0 errors | 0 warnings | 1 note
+
+* "Possibly misspelled words in DESCRIPTION: Tidyverse, tidyverse." Both are correct: tidyverse is the name of the collection of R packages the rewrite is built on.
 
 ## Reverse dependencies
 
