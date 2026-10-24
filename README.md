@@ -29,15 +29,17 @@ diagnose_design(design)
 
 ## Installing
 
-Version 2.0 is on the `rewrite` branch of the [GitHub repository](https://github.com/DeclareDesign/DeclareDesign) and not yet on CRAN. It installs under the released name and replaces the CRAN DeclareDesign in your library, as do fabricatr 2.0 and estimatr 2.0, which it needs:
+Install from CRAN, which brings fabricatr, randomizr, and estimatr 2.0 with it:
 
 ```r
-remotes::install_github("DeclareDesign/fabricatr@rewrite")
-remotes::install_github("DeclareDesign/estimatr@rewrite")
-remotes::install_github("DeclareDesign/DeclareDesign@rewrite", build_vignettes = TRUE)
+install.packages("DeclareDesign")
 ```
 
-To keep the CRAN versions for comparison, install them into a separate library and pass `lib.loc`.
+The development version is on [GitHub](https://github.com/DeclareDesign/DeclareDesign):
+
+```r
+remotes::install_github("DeclareDesign/DeclareDesign")
+```
 
 ## What changed in 2.0
 

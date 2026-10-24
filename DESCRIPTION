@@ -9,7 +9,7 @@ Authors@R: c(person("Alexander", "Coppock", email = "acoppock@gmail.com", role =
              person("Neal", "Fultz", email = "nfultz@gmail.com", role = "aut"))
 Description: Declares, simulates, diagnoses and redesigns research designs.
     A design is declared as a model, an inquiry, a data strategy and an answer
-    strategy, then simulated with purrr and diagnosed with dplyr. Version 2.0
+    strategy, then simulated with 'purrr' and diagnosed with 'dplyr'. Version 2.0
     is a ground-up rewrite of the package on tidyverse conventions.
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -28,8 +28,6 @@ Imports:
     tibble,
     tidyr,
     utils
-Remotes:
-    DeclareDesign/fabricatr@rewrite
 Suggests:
     furrr,
     future,

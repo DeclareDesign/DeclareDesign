@@ -28,15 +28,13 @@ DeclareDesign 2.0 was written by its maintainers working with AI assistance (Cla
 
 ## Getting it
 
-The 2.0 packages are not on CRAN yet. They install from GitHub under their released names, so installing them replaces the CRAN versions in your library; keep the CRAN versions available by installing them into a separate library and passing `lib.loc` when you want them.
+Installing DeclareDesign 2.0 from CRAN brings fabricatr, randomizr, and estimatr 2.0 with it. To keep 1.1.1 available for comparison, install it into a separate library and pass `lib.loc` when you want it.
 
 ```{r}
-remotes::install_github("DeclareDesign/fabricatr@rewrite")
-remotes::install_github("DeclareDesign/estimatr@rewrite")
-remotes::install_github("DeclareDesign/DeclareDesign@rewrite", build_vignettes = TRUE)
+install.packages("DeclareDesign")
 ```
 
-`randomizr` from CRAN is enough. `vignette("getting-started")` is the short introduction; this vignette is the long one.
+`vignette("getting-started")` is the short introduction; this vignette is the long one.
 
 ## What does not change
 
@@ -232,7 +230,7 @@ Silent, in the sense that a run which stopped in 1.x now finishes. Under `simula
 
 ### In fabricatr 2.0
 
-fabricatr 2.0 has its own vignette, [`vignette("fabricatr2.0", package = "fabricatr")`](https://declaredesign.org/r/fabricatr/articles/fabricatr2.0.html), and its changes are confined to the spelling of multilevel and cross-classified declarations. A flat `declare_model(N = 500, ...)` is unaffected, and so is the output of every declaration that runs: the same columns, in the same order, with the same types, `ID` still zero-padded character, `N` still available in the data mask and still absent from the output.
+fabricatr 2.0 has its own vignette, [`vignette("fabricatr2.0", package = "fabricatr")`](https://CRAN.R-project.org/package=fabricatr/vignettes/fabricatr2.0.html), and its changes are confined to the spelling of multilevel and cross-classified declarations. A flat `declare_model(N = 500, ...)` is unaffected, and so is the output of every declaration that runs: the same columns, in the same order, with the same types, `ID` still zero-padded character, `N` still available in the data mask and still absent from the output.
 
 Three spellings change, and each warns once per session and runs, printing the call to write instead:
 
@@ -387,7 +385,7 @@ summary(design)
 
 ## Speed
 
-All timings come from [`data-raw/benchmark_vignette.R`](https://github.com/DeclareDesign/DeclareDesign/blob/rewrite/data-raw/benchmark_vignette.R), which re-measures every figure in this section and reports which ones have moved. Each cell runs in its own R process and reports the quietest of three runs, each the median of five replications. The parallel row warms its workers first, because `future::plan()` spawns them once per session and charging that to the run understates what parallelism buys: measured without warming, the last row reads 2.4x rather than 3.4x. Measured 2026-09-12 on an Apple M4 Pro under R 4.6.0, comparing DeclareDesign 1.1.1 with fabricatr 1.0.2 against DeclareDesign 2.0.0 with fabricatr 2.0.0, holding estimatr fixed at 2.0.0 on both sides, on the two-arm design declared above (N = 600, `lm_robust`). The first two rows compare the packages; the third compares 2.0.0 with itself, sequential against four workers.
+All timings come from [`data-raw/benchmark_vignette.R`](https://github.com/DeclareDesign/DeclareDesign/blob/f596be6e1059ef5d91aa053f403e81ceec2bfe60/data-raw/benchmark_vignette.R), which re-measures every figure in this section and reports which ones have moved. Each cell runs in its own R process and reports the quietest of three runs, each the median of five replications. The parallel row warms its workers first, because `future::plan()` spawns them once per session and charging that to the run understates what parallelism buys: measured without warming, the last row reads 2.4x rather than 3.4x. Measured 2026-09-12 on an Apple M4 Pro under R 4.6.0, comparing DeclareDesign 1.1.1 with fabricatr 1.0.2 against DeclareDesign 2.0.0 with fabricatr 2.0.0, holding estimatr fixed at 2.0.0 on both sides, on the two-arm design declared above (N = 600, `lm_robust`). The first two rows compare the packages; the third compares 2.0.0 with itself, sequential against four workers.
 
 | Operation | Before | After | Ratio |
 |---|---:|---:|---:|
@@ -411,15 +409,15 @@ DeclareDesign 2.0 is 6,153 lines of R against 1.1.1's 7,036, so the line count i
 
 ## Current status
 
-As of 2026-10-15. The rewrite is pre-release. randomizr 2.0 and estimatr 2.0 are on CRAN; DeclareDesign 2.0 follows fabricatr 2.0, which is not yet.
+As of 2026-10-24. fabricatr 2.0, randomizr 2.0, and estimatr 2.0 are on CRAN, and DeclareDesign 2.0 is released against them.
 
-**What the claims above rest on.** The 84 book declarations are run by [`tests/acceptance/test-book-designs.R`](https://github.com/DeclareDesign/DeclareDesign/blob/rewrite/tests/acceptance/test-book-designs.R), each asserting that the declaration builds, runs, and returns estimates that are not all `NA`. Of the six left out, four use a value the book defines outside any code chunk, one needs the `interference` package, which is not on CRAN, and one fails identically under 1.1.1. Separately, on 2026-08-22 all 191 code chunks of the book's fifteen code-bearing chapters were run in order under 2.0, and 173 ran without error. None of the rest failed for a reason that is 2.0's: two are `install.packages()` calls; ten read a name the book defines in a chunk it does not display; two are typos in the book's own code; two redesign a literal written inside a step, which fails under 1.1.1 as well; and one attaches the CRAN DesignLibrary over 2.0, which is the open item below. The designs of `macartan/ResearchDesigns` also run under 2.0, 966 assertions with no failures.
+**What the claims above rest on.** The 84 book declarations are run as tests, the 72 that need only this package's dependencies by [`tests/testthat/test-book-designs.R`](https://github.com/DeclareDesign/DeclareDesign/blob/f596be6e1059ef5d91aa053f403e81ceec2bfe60/tests/testthat/test-book-designs.R) and the other 12 by [`tests/acceptance/test-book-designs.R`](https://github.com/DeclareDesign/DeclareDesign/blob/f596be6e1059ef5d91aa053f403e81ceec2bfe60/tests/acceptance/test-book-designs.R), each asserting that the declaration builds, runs, and returns estimates that are not all `NA`. Of the six left out, four use a value the book defines outside any code chunk, one needs the `interference` package, which is not on CRAN, and one fails identically under 1.1.1. Separately, on 2026-08-22 all 191 code chunks of the book's fifteen code-bearing chapters were run in order under 2.0, and 173 ran without error. None of the rest failed for a reason that is 2.0's: two are `install.packages()` calls; ten read a name the book defines in a chunk it does not display; two are typos in the book's own code; two redesign a literal written inside a step, which fails under 1.1.1 as well; and one attaches the CRAN DesignLibrary over 2.0, which is the open item below. The designs of `macartan/ResearchDesigns` also run under 2.0, 966 assertions with no failures.
 
-**Open.** `library(DesignLibrary)` attaches CRAN DeclareDesign 1.1.1 over 2.0 until DesignLibrary is released against 2.0, and the result is a hybrid that fails on the next declaration.
+**Open.** DesignLibrary 0.1.10, the version on CRAN, declares potential outcomes with `declare_potential_outcomes()`, which 2.0 makes defunct, so its designers stop with that error under 2.0. DesignLibrary 2.0, written against DeclareDesign 2.0, follows this release.
 
 ### Bugs reported against 1.1.1 that 2.0 fixes
 
-Each open issue on the DeclareDesign tracker that can be reproduced in code was run against both packages by [`data-raw/open_issues.R`](https://github.com/DeclareDesign/DeclareDesign/blob/rewrite/data-raw/open_issues.R), so this list can be regenerated rather than trusted. Seven of them fail in 1.1.1 and work in 2.0:
+Each open issue on the DeclareDesign tracker that can be reproduced in code was run against both packages by [`data-raw/open_issues.R`](https://github.com/DeclareDesign/DeclareDesign/blob/f596be6e1059ef5d91aa053f403e81ceec2bfe60/data-raw/open_issues.R), so this list can be regenerated rather than trusted. Seven of them fail in 1.1.1 and work in 2.0:
 
 | Issue | What happens in DeclareDesign 1.1.1 |
 |---|---|
