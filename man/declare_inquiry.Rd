@@ -5,150 +5,98 @@
 \alias{declare_inquiries}
 \alias{declare_estimand}
 \alias{declare_estimands}
-\alias{inquiry_handler}
-\title{Declare inquiry}
+\title{Declare an inquiry}
 \usage{
-declare_inquiry(..., handler = inquiry_handler, label = "inquiry")
+declare_inquiry(
+  ...,
+  subset = NULL,
+  label = "inquiry",
+  handler = NULL,
+  draws = 1L
+)
 
-declare_inquiries(..., handler = inquiry_handler, label = "inquiry")
+declare_inquiries(
+  ...,
+  subset = NULL,
+  label = "inquiry",
+  handler = NULL,
+  draws = 1L
+)
 
-declare_estimand(...)
+declare_estimand(
+  ...,
+  subset = NULL,
+  label = "inquiry",
+  handler = NULL,
+  draws = 1L
+)
 
-declare_estimands(...)
-
-inquiry_handler(data, ..., subset = NULL, term = FALSE, label)
+declare_estimands(
+  ...,
+  subset = NULL,
+  label = "inquiry",
+  handler = NULL,
+  draws = 1L
+)
 }
 \arguments{
-\item{...}{arguments to be captured, and later passed to the handler}
+\item{...}{(optional) Named expressions. Each expression becomes an inquiry
+whose numeric value is recorded in the simulation output. An unnamed
+expression takes the step's \code{label} as its name.}
 
-\item{handler}{a tidy-in, tidy-out function}
+\item{subset}{(optional) Unquoted expression evaluated on the data; only
+rows where it is \code{TRUE} enter the estimands.}
 
-\item{label}{a string describing the step}
+\item{label}{(optional) Step label. Defaults to \code{"inquiry"}. A step that
+declares exactly one named inquiry takes that name as its label instead,
+overriding \code{label}.}
 
-\item{data}{a data.frame}
+\item{handler}{(optional) A function. When supplied, \code{...} arguments are
+evaluated against the data and passed to \code{handler()} rather than being
+treated as named scalar inquiries; useful for vectorised inquiry sets
+(for example, \code{handler = tibble}).}
 
-\item{subset}{a subset expression}
-
-\item{term}{TRUE/FALSE}
+\item{draws}{(optional) Number of nested draws for this step. Defaults to
+\code{1}. When \verb{> 1}, the step is re-executed \code{draws} times for each upstream
+draw during nested simulation.}
 }
 \value{
-a function, I(), that accepts a data.frame as an argument and returns a data.frame containing the value of the inquiry,  a^m.
+A \code{design_step} (class \code{c("design_step", "dd", "function")}): a
+function that takes a data frame and returns a tibble with columns
+\code{inquiry} and \code{estimand}, one row per inquiry. Add it to a design with
+\code{+}.
 }
 \description{
-Declares inquiries. 
-A research design typically seeks to find answers to questions. The questions 
-are the inquiries and the correct answer to questions (in fact, or under a 
-model) are the estimands. 
-The answers you generate from data, which may or may not be correct, are the estimates. 
-\code{declare_inquiry} is used to make research questions explicit and to 
-calculate estimands. 
-All inquiries should be answerable under the model.
-}
-\details{
-For the default diagnosands, the return value of the handler should have \code{inquiry} and \code{estimand} columns.
-
-If term is TRUE, the names of ... will be returned in a \code{term} column,
-and \code{inquiry} will contain the step label. This can be used as
-an additional dimension for use in diagnosis.
+Each named argument records an inquiry: an expression evaluated on the data
+as it stands when the step runs. Its value on a given draw is the estimand.
 }
 \examples{
-
-
-# Set up a design for use in examples:
-## Two-arm randomized experiment
 design <-
-  declare_model(
-    N = 500,
-    X = rep(c(0, 1), each = N / 2),
-    U = rnorm(N, sd = 0.25),
-    potential_outcomes(Y ~ 0.2 * Z + X + U)
-  ) +
-  declare_assignment(Z = complete_ra(N = N, m = 250)) +
-  declare_measurement(Y = reveal_outcomes(Y ~ Z))
-  
-head(draw_data(design))
-
-# Some common inquiries
-design +
+  declare_model(N = 100, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
 
-design +
-  declare_inquiry(difference_in_var = var(Y_Z_1) - var(Y_Z_0))
+draw_estimands(design)
 
-design +
-  declare_inquiry(mean_Y = mean(Y))
+# Placed before declare_sampling(), the question is about the population;
+# placed after, about the sample.
+design <-
+  declare_model(N = 500, Y = rnorm(N)) +
+  declare_inquiry(population_mean = mean(Y)) +
+  declare_sampling(S = sample(rep(0:1, length.out = N))) +
+  declare_inquiry(sample_mean = mean(Y))
 
-# Inquiries among a subset of units
-design +
-  declare_inquiry(ATT = mean(Y_Z_1 - Y_Z_0),
-                  subset = (Z == 1))
-
-design +
-  declare_inquiry(CATE = mean(Y_Z_1 - Y_Z_0),
-                  subset = X == 1)
-                  
-# equivalently
-design +
-  declare_inquiry(CATE = mean(Y_Z_1[X == 1] - Y_Z_0[X == 1]))
-
-# Add inquiries to a design along with estimators that
-# reference them
-diff_in_variances <-
-  function(data) {
-    data.frame(estimate = with(data, var(Y[Z == 1]) - var(Y[Z == 0])))
-  }
-
-design_1 <-
-  design +
-  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0),
-                  difference_in_var = var(Y_Z_1) - var(Y_Z_0)) +
-  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-  declare_estimator(Y ~ Z, 
-                    inquiry = "ATE",
-                    label = "DIM") +
-  declare_estimator(handler =
-                      label_estimator(diff_in_variances),
-                    inquiry = "difference_in_var",
-                    label = "DIV")
-
-run_design(design_1)
-
-# Two inquiries using one estimator
-
-design_2 <-
-  design +
-  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-  declare_inquiry(ATT = mean(Y_Z_1 - Y_Z_0), subset = (Z == 1)) +
-  declare_estimator(Y ~ Z, inquiry = c("ATE", "ATT"))
-
-run_design(design_2)
-
-# Two inquiries using different coefficients from one estimator
-
-design_3 <-
-  design +
-  declare_inquiry(intercept = mean(Y_Z_0),
-                  slope = mean(Y_Z_1 - Y_Z_0)) +
-  declare_estimator(
-    Y ~ Z,
-    .method = lm_robust,
-    term = TRUE,
-    inquiry = c("intercept", "slope")
-  )
-
-run_design(design_3)
-
-
-# declare_inquiries usage
-design_4 <- design +
-  declare_inquiries(
-    ATE = mean(Y_Z_1[X == 1] - Y_Z_0[X == 1]),
-    CATE_X0 = mean(Y_Z_1[X == 0] - Y_Z_0[X == 0]),
-    CATE_X1 = mean(Y_Z_1[X == 1] - Y_Z_0[X == 1]),
-    Difference_in_CATEs = CATE_X1 - CATE_X0,
-    mean_Y = mean(Y))
-    
-run_design(design_4)
-
-
+draw_estimands(design)
 }
+\seealso{
+Other design declarations:
+\code{\link[=declare_assignment]{declare_assignment()}},
+\code{\link[=declare_estimator]{declare_estimator()}},
+\code{\link[=declare_measurement]{declare_measurement()}},
+\code{\link[=declare_model]{declare_model()}},
+\code{\link[=declare_notes]{declare_notes()}},
+\code{\link[=declare_parameters]{declare_parameters()}},
+\code{\link[=declare_sampling]{declare_sampling()}},
+\code{\link[=declare_step]{declare_step()}},
+\code{\link[=declare_test]{declare_test()}}
+}
+\concept{design declarations}

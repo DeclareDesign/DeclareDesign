@@ -1,128 +1,159 @@
-#' Declare inquiry
+#' Build an inquiry step closure
 #'
-#' @description Declares inquiries. 
-#' A research design typically seeks to find answers to questions. The questions 
-#' are the inquiries and the correct answer to questions (in fact, or under a 
-#' model) are the estimands. 
-#' The answers you generate from data, which may or may not be correct, are the estimates. 
-#' \code{declare_inquiry} is used to make research questions explicit and to 
-#' calculate estimands. 
-#' All inquiries should be answerable under the model.
-#' 
-#' @inheritParams declare_internal_inherit_params
+#' @keywords internal
+#' @noRd
+make_inquiry_step <- function(dots, subset_quo, label, handler = NULL) {
+  force(dots)
+  force(subset_quo)
+  force(label)
+  force(handler)
+  function(data) {
+    if (!is.null(subset_quo)) {
+      keep <- rlang::eval_tidy(subset_quo, data = data)
+      data <- data[!is.na(keep) & keep, , drop = FALSE]
+    }
+    if (!is.null(handler)) {
+      # Evaluate left-to-right so named outputs from earlier args are visible
+      # to later ones (mirroring the no-handler branch). This lets users write
+      # patterns like `X = x_range, inquiry = str_c("X_", X)`.
+      eval_env <- if (is.data.frame(data)) as.list(data) else list()
+      arg_names <- names(dots) %||% rep("", length(dots))
+      args <- vector("list", length(dots))
+      names(args) <- arg_names
+      for (i in seq_along(dots)) {
+        q <- dots[[i]]
+        nm <- arg_names[i]
+        val <- rlang::eval_tidy(q, data = eval_env)
+        args[[i]] <- val
+        if (!is.null(nm) && nzchar(nm)) eval_env[[nm]] <- val
+      }
+      # Forward the step `label` to the handler when it accepts a `label` formal
+      # and the user has not bound it explicitly via `...`.
+      handler_args <- tryCatch(names(formals(handler)), error = function(e) NULL)
+      pass_data <- "data" %in% handler_args
+      pass_label <- !is.null(handler_args) &&
+        "label" %in% handler_args && !"label" %in% names(args)
+      call_args <- args
+      if (pass_data && !"data" %in% names(call_args)) {
+        call_args <- c(list(data = data), call_args)
+      }
+      if (pass_label) call_args$label <- label
+      result <- do.call(handler, call_args)
+      result <- tibble::as_tibble(result)
+      if (!"inquiry" %in% names(result)) {
+        result$inquiry <- label
+      }
+      if (!"estimand" %in% names(result)) {
+        if (ncol(result) >= 1L) {
+          first_num <- which(vapply(result, is.numeric, logical(1)))[1]
+          if (!is.na(first_num)) {
+            result$estimand <- result[[first_num]]
+          }
+        }
+      }
+      return(tibble::as_tibble(result))
+    }
+    nms <- names(dots)
+    if (is.null(nms)) nms <- rep("", length(dots))
+    if (any(nms == "")) {
+      missing <- which(nms == "")
+      # Single unnamed inquiry: the inquiry name is the step's label.
+      # Multiple unnamed inquiries: disambiguate with a numeric suffix.
+      if (length(dots) == 1L) {
+        nms[missing] <- label
+      } else {
+        nms[missing] <- paste0(label, "_", missing)
+      }
+      names(dots) <- nms
+    }
+    rows <- list()
+    eval_env <- as.list(data)
+    for (i in seq_along(dots)) {
+      q <- dots[[i]]
+      nm <- names(dots)[i]
+      val <- rlang::eval_tidy(q, data = eval_env)
+      rows[[i]] <- tibble::tibble(inquiry = nm, estimand = val)
+      eval_env[[nm]] <- val
+    }
+    dplyr::bind_rows(rows)
+  }
+}
+
+#' Declare an inquiry
 #'
-#' @return a function, I(), that accepts a data.frame as an argument and returns a data.frame containing the value of the inquiry,  a^m. 
+#' Each named argument records an inquiry: an expression evaluated on the data
+#' as it stands when the step runs. Its value on a given draw is the estimand.
 #'
-#' @details
+#' @family design declarations
 #'
-#' For the default diagnosands, the return value of the handler should have \code{inquiry} and \code{estimand} columns.
-#'
+#' @param ... (optional) Named expressions. Each expression becomes an inquiry
+#'   whose numeric value is recorded in the simulation output. An unnamed
+#'   expression takes the step's `label` as its name.
+#' @param subset (optional) Unquoted expression evaluated on the data; only
+#'   rows where it is `TRUE` enter the estimands.
+#' @param label (optional) Step label. Defaults to `"inquiry"`. A step that
+#'   declares exactly one named inquiry takes that name as its label instead,
+#'   overriding `label`.
+#' @param handler (optional) A function. When supplied, `...` arguments are
+#'   evaluated against the data and passed to `handler()` rather than being
+#'   treated as named scalar inquiries; useful for vectorised inquiry sets
+#'   (for example, `handler = tibble`).
+#' @param draws (optional) Number of nested draws for this step. Defaults to
+#'   `1`. When `> 1`, the step is re-executed `draws` times for each upstream
+#'   draw during nested simulation.
+#' @return A `design_step` (class `c("design_step", "dd", "function")`): a
+#'   function that takes a data frame and returns a tibble with columns
+#'   `inquiry` and `estimand`, one row per inquiry. Add it to a design with
+#'   `+`.
 #' @export
-#'
 #' @examples
-#' 
-#' 
-#' # Set up a design for use in examples:
-#' ## Two-arm randomized experiment
 #' design <-
-#'   declare_model(
-#'     N = 500,
-#'     X = rep(c(0, 1), each = N / 2),
-#'     U = rnorm(N, sd = 0.25),
-#'     potential_outcomes(Y ~ 0.2 * Z + X + U)
-#'   ) +
-#'   declare_assignment(Z = complete_ra(N = N, m = 250)) +
-#'   declare_measurement(Y = reveal_outcomes(Y ~ Z))
-#'   
-#' head(draw_data(design))
-#' 
-#' # Some common inquiries
-#' design +
+#'   declare_model(N = 100, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
 #'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
-#' 
-#' design +
-#'   declare_inquiry(difference_in_var = var(Y_Z_1) - var(Y_Z_0))
-#' 
-#' design +
-#'   declare_inquiry(mean_Y = mean(Y))
-#' 
-#' # Inquiries among a subset of units
-#' design +
-#'   declare_inquiry(ATT = mean(Y_Z_1 - Y_Z_0),
-#'                   subset = (Z == 1))
-#' 
-#' design +
-#'   declare_inquiry(CATE = mean(Y_Z_1 - Y_Z_0),
-#'                   subset = X == 1)
-#'                   
-#' # equivalently
-#' design +
-#'   declare_inquiry(CATE = mean(Y_Z_1[X == 1] - Y_Z_0[X == 1]))
-#' 
-#' # Add inquiries to a design along with estimators that
-#' # reference them
-#' diff_in_variances <-
-#'   function(data) {
-#'     data.frame(estimate = with(data, var(Y[Z == 1]) - var(Y[Z == 0])))
-#'   }
-#' 
-#' design_1 <-
-#'   design +
-#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0),
-#'                   difference_in_var = var(Y_Z_1) - var(Y_Z_0)) +
-#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-#'   declare_estimator(Y ~ Z, 
-#'                     inquiry = "ATE",
-#'                     label = "DIM") +
-#'   declare_estimator(handler =
-#'                       label_estimator(diff_in_variances),
-#'                     inquiry = "difference_in_var",
-#'                     label = "DIV")
-#' 
-#' run_design(design_1)
-#' 
-#' # Two inquiries using one estimator
-#' 
-#' design_2 <-
-#'   design +
-#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_inquiry(ATT = mean(Y_Z_1 - Y_Z_0), subset = (Z == 1)) +
-#'   declare_estimator(Y ~ Z, inquiry = c("ATE", "ATT"))
-#' 
-#' run_design(design_2)
-#' 
-#' # Two inquiries using different coefficients from one estimator
-#' 
-#' design_3 <-
-#'   design +
-#'   declare_inquiry(intercept = mean(Y_Z_0),
-#'                   slope = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_estimator(
-#'     Y ~ Z,
-#'     .method = lm_robust,
-#'     term = TRUE,
-#'     inquiry = c("intercept", "slope")
-#'   )
-#' 
-#' run_design(design_3)
-#' 
-#' 
-#' # declare_inquiries usage
-#' design_4 <- design +
-#'   declare_inquiries(
-#'     ATE = mean(Y_Z_1[X == 1] - Y_Z_0[X == 1]),
-#'     CATE_X0 = mean(Y_Z_1[X == 0] - Y_Z_0[X == 0]),
-#'     CATE_X1 = mean(Y_Z_1[X == 1] - Y_Z_0[X == 1]),
-#'     Difference_in_CATEs = CATE_X1 - CATE_X0,
-#'     mean_Y = mean(Y))
-#'     
-#' run_design(design_4)
-#' 
-#' 
-declare_inquiry <- make_declarations(inquiry_handler, "inquiry",
-                                     causal_type = "inquiry",
-                                     default_label = "inquiry"
-)
+#'
+#' draw_estimands(design)
+#'
+#' # Placed before declare_sampling(), the question is about the population;
+#' # placed after, about the sample.
+#' design <-
+#'   declare_model(N = 500, Y = rnorm(N)) +
+#'   declare_inquiry(population_mean = mean(Y)) +
+#'   declare_sampling(S = sample(rep(0:1, length.out = N))) +
+#'   declare_inquiry(sample_mean = mean(Y))
+#'
+#' draw_estimands(design)
+declare_inquiry <- function(..., subset = NULL, label = "inquiry",
+                            handler = NULL, draws = 1L) {
+  dots <- capture_dots_env(rlang::enquos(...))
+  subset_quo <- rlang::enquo(subset)
+  if (rlang::quo_is_null(subset_quo)) subset_quo <- NULL
+  handler_quo <- capture_quosure_env(rlang::enquo(handler))
+  call <- sys.call()
+  # When the user supplies exactly one named splat (e.g. `pate = mean(...)`),
+  # the splat name becomes the step's label so it doubles as a reference key
+  # in `declare_estimator(..., inquiry = pate_step)`. An explicit `label =`
+  # argument is overridden in that case (DD compatibility).
+  splat_names <- names(dots) %||% rep("", length(dots))
+  named_splats <- splat_names[nzchar(splat_names)]
+  if (length(dots) == 1L && length(named_splats) == 1L) {
+    label <- named_splats
+  }
+  fn <- make_inquiry_step(dots, subset_quo, label, handler = handler)
+  step <- build_step(
+    fn          = fn,
+    handler_expr = quote(declare_inquiry),
+    dots        = dots,
+    step_type   = "inquiry",
+    causal_type = "inquiry",
+    label       = label,
+    call        = call,
+    subset_quo  = subset_quo,
+    handler_quo = handler_quo,
+    handler_fn  = handler
+  )
+  attr(step, "draws") <- as.integer(draws)
+  step
+}
 
 #' @rdname declare_inquiry
 #' @export
@@ -130,91 +161,8 @@ declare_inquiries <- declare_inquiry
 
 #' @rdname declare_inquiry
 #' @export
-declare_estimand <-  function(...){
-  .Deprecated(new = "declare_inquiry")
-  declare_inquiry(...)
-}
+declare_estimand <- declare_inquiry
 
 #' @rdname declare_inquiry
 #' @export
-declare_estimands <- function(...){
-  .Deprecated(new = "declare_inquiry")
-  declare_inquiry(...)
-}
-
-
-#' @param subset a subset expression
-#' @param term TRUE/FALSE
-#' @param data a data.frame
-#' @details
-#'
-#' If term is TRUE, the names of ... will be returned in a \code{term} column,
-#' and \code{inquiry} will contain the step label. This can be used as
-#' an additional dimension for use in diagnosis.
-#'
-#'
-#' @importFrom rlang eval_tidy quos is_quosure quo_get_expr as_data_mask
-#' @rdname declare_inquiry
-inquiry_handler <- function(data, ..., subset = NULL, term = FALSE, label) {
-  options <- quos(...)
-  if (names(options)[1] == "") names(options)[1] <- label
-  
-  subset <- substitute(subset)
-  if (is_quosure(subset)) subset <- quo_get_expr(subset)
-  idx <- eval_tidy(subset, data = data)
-  if (!is.null(idx)) {
-    data <- data[idx, , drop = FALSE]
-  }
-  
-#  ret <- vector("list", length(options))
-  ret <- as_data_mask(data)
-  for (i in names(options)) {
-    ret[[i]] <- eval_tidy(options[[i]], data = ret)
-  }
-  ret <- mget(names(options), ret)
-  ret <- simplify2array(ret)
-  
-  if (term) {
-    data.frame(
-      inquiry = label,
-      term = names(options),
-      estimand = ret,
-      stringsAsFactors = FALSE,
-      row.names = NULL
-    )
-  } else {
-    data.frame(
-      inquiry = names(options),
-      estimand = ret,
-      stringsAsFactors = FALSE,
-      row.names = NULL
-    )
-  }
-}
-
-validation_fn(inquiry_handler) <- function(ret, dots, label) {
-  force(ret)
-  # add ... labels at build time
-  dotnames <- names(dots)
-  
-  declare_time_error_if_data(ret)
-  
-  # Don't overwrite label-label with splat label if term names are true
-  if ("term" %in% dotnames && isTRUE(eval_tidy(dots$term))) {
-    return(ret)
-  }
-  
-  maybeDotLabel <- dotnames[!dotnames %in% c("", names(formals(inquiry_handler)))]
-  if (any(duplicated(maybeDotLabel))) {
-    stop(paste0(
-      "Please provide unique names for each inquiry. Duplicates include ",
-      paste(maybeDotLabel[duplicated(maybeDotLabel)], collapse = ", "), "."
-    ), call. = FALSE)
-  }
-  if (length(maybeDotLabel) == 1) {
-    attr(ret, "steplabel") <- attr(ret, "label")
-    attr(ret, "label") <- maybeDotLabel[1]
-  }
-  
-  ret
-}
+declare_estimands <- declare_inquiry

@@ -1,287 +1,526 @@
-#' Simulate a design
+#' Simulate one or more designs
 #'
-#' Runs many simulations of a design and returns a simulations data.frame. Speed gains can be achieved by running simulate_design in parallel, see Examples.
+#' Runs each design `sims` times, collecting estimands and estimates into a
+#' single long tibble suitable for diagnosis. A `design` column names the
+#' design each row came from, whether one design is supplied or several.
 #'
-#' @param ... A design created using the + operator, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.
+#' If any step in a design has `draws > 1`, the simulation runs in nested
+#' mode: each step with `draws > 1` fans out, and the total simulation count
+#' equals the product of all `draws` values across steps. Declared `draws`
+#' take priority over `sims`, so supplying both runs the nested simulation and
+#' warns, printing the plan it is running instead.
 #'
-#' @param sims The number of simulations, defaulting to 500. If sims is a vector of the form c(10, 1, 2, 1) then different steps of a design will be simulated different numbers of times.
-#' @param future.seed Option for parallel diagnosis via the function future_lapply. A logical or an integer (of length one or seven), or a list of length(X) with pre-generated random seeds. By default, this is set to TRUE if the \code{future} and \code{future.apply} packages are installed, and FALSE if not. For details, see ?future_lapply.
+#' Steps upstream of the first fan-out run once and are held fixed across the
+#' draws below them, which is what makes `declare_assignment(..., draws = 50)`
+#' mean fifty randomizations of one population.
 #'
-#' @importFrom stats setNames
-#' @importFrom rlang is_list is_bare_integerish
-#' @importFrom utils head type.convert
+#' Parallelism is handled through the `future` ecosystem. Call
+#' `future::plan(multisession, workers = 4)` before `simulate_design()` and,
+#' if the `furrr` package is installed, simulations run in parallel with no
+#' other change. Every draw runs on its own L'Ecuyer-CMRG random-number
+#' stream whichever plan is active, so `set.seed()` before the call gives the
+#' same table sequentially and in parallel. The streams are not those of
+#' DeclareDesign 1.x, so a 1.x seed does not reproduce a 1.x table here.
+#'
+#' @family simulation and diagnosis
+#' @param ... (required) One or more `design` objects, or lists of them.
+#' @param sims (optional) Number of simulations per design. Defaults to `NULL`,
+#'   which means 500 flat simulations for a design with no step-level `draws`. A
+#'   design with step-level `draws` runs in nested mode whether or not `sims` is
+#'   supplied; supplying it warns and is otherwise ignored.
+#' @param progress (optional) If `TRUE`, display a progress bar for this call
+#'   by wrapping it in [progressr::with_progress()]. The better habit is to opt
+#'   in once per session with `progressr::handlers(global = TRUE)`, which covers
+#'   every call and lets you choose how progress is shown. Nothing is displayed
+#'   by default.
+#' @return A tibble with one row per estimate per simulation: `design`,
+#'   `sim_ID`, the estimate columns (`term`, `estimate`, `std.error`,
+#'   `p.value`, `conf.low`, `conf.high`, and so on), `estimator`, `inquiry`,
+#'   `estimand`, and a column for each redesign parameter. A nested
+#'   simulation adds a `<label>_draw` column for each step with `draws > 1`.
 #' @export
 #' @examples
-#'
-#' # Two-arm randomized experiment
-#' design <-
-#'   declare_model(
-#'     N = 500,
-#'     gender = rbinom(N, 1, 0.5),
-#'     X = rep(c(0, 1), each = N / 2),
-#'     U = rnorm(N, sd = 0.25),
-#'     potential_outcomes(Y ~ 0.2 * Z + X + U)
-#'   ) +
-#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_sampling(S = complete_rs(N = N, n = 200)) +
-#'   declare_assignment(Z = complete_ra(N = N, m = 100)) +
-#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-#'   declare_estimator(Y ~ Z, inquiry = "ATE")
-#' 
-#' \dontrun{
-#' # Simulate design
-#' simulations <- simulate_design(design, sims = 100)
-#' simulations
-#' 
-#' # Diagnose design using simulations
-#' diagnosis <- diagnose_design(simulations_df = simulations)
-#' diagnosis
-#' 
-#' # Simulate one part of the design for a fixed population
-#' # (The 100 simulates different assignments)
-#' head(simulate_design(design, sims = c(1, 1, 1, 100, 1, 1)))
-#' 
-#' # You may also run simulate_design in parallel using 
-#' #   the future package on a personal computer with multiple
-#' #   cores or on high performance computing clusters. 
-#' 
-#' library(future)
-#' options(parallelly.fork.enable = TRUE) # required for use in RStudio
-#' plan(multicore) # note other plans are possible, see future
-#' 
-#' simulate_design(design, sims = 500)
-#' 
-#' }
-#'
-#' @details
-#'
-#' Different steps of a design may each be simulated different a number of times, as specified by sims. In this case simulations are grouped into "fans". The nested 
-#' structure of simulations is recorded in the dataset using a set of variables named "step_x_draw." For example if sims = c(2,1,1,3) is passed to simulate_design, then there
-#' will be two distinct draws of step 1, indicated in variable "step_1_draw" (with values 1 and 2) and there will be three draws for step 4 within each of the step 1 draws, recorded in "step_4_draw" (with values 1 to 6).
-#'    
-simulate_design <- function(
-    ...,
-    sims = 500,
-    future.seed = requireNamespace("future", quietly = TRUE)
-) {
-  designs <- dots_to_list_of_designs(...)
-  
-  # if you provide a list of sims for each design, i.e.
-  #   sims = list(my_design_1 = c(100, 1, 1), my_design_2 = 200)
-  # use it! otherwise, create a list of length designs that repeats the sims
-  if (!is_list(sims)) {
-    sims <- lapply(seq_along(designs), function(i) sims)
+#' design <- declare_model(N = 30, U = rnorm(N), Z = rep(0:1, 15), Y = U + Z) +
+#'   declare_inquiry(ATE = 1) +
+#'   declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
+#'                     label = "ols")
+#' simulate_design(design, sims = 3)
+simulate_design <- function(..., sims = NULL, progress = FALSE) {
+  if (isTRUE(progress)) {
+    return(with_dd_progress(simulate_design(..., sims = sims, progress = FALSE)))
   }
-  
-  if(!(requireNamespace("future", quietly = TRUE) & requireNamespace("future.apply", quietly = TRUE)) && (!is.null(future.seed) & future.seed != FALSE)) {
-    stop("The future or future.apply packages are not installed. The future.seed argument must be set to FALSE.", call. = FALSE)
+  raw <- name_design_dots(...)
+  designs <- flatten_designs(raw)
+  if (length(designs) == 0) {
+    stop("simulate_design() requires at least one `design` object.")
   }
-  
-  # Simulate One or More Designs
-  simulations_list <- mapply(
-    design = designs,
-    sims = sims,
-    future.seed = future.seed,
-    FUN = simulate_single_design,
-    SIMPLIFY = FALSE
-  )
-  
-  simulations_list <- Map(cbind, design = names(simulations_list), simulations_list, stringsAsFactors = FALSE)
-  
-  # Cleanup
-  simulations_df <- rbind_disjoint(simulations_list)
-  rownames(simulations_df) <- NULL
-  
-  # Obtain all parameters
-  
-  parameters_df_list <- lapply(designs, function(x) attr(x, "parameters"))
-  parameters_df_list <- lapply(seq_along(parameters_df_list), function(i) {
-    out <- data.frame(design = names(parameters_df_list[i]))
-    if (!is.null(parameters_df_list[[i]])) {
-      out <- data.frame(out, parameters_df_list[[i]])
+  per_design <- purrr::imap(designs, function(design, design_label) {
+    if (design_has_nested_draws(design)) {
+      if (!is.null(sims)) warn_sims_draws_conflict(design, sims)
+      simulate_nested_single(design, design_label = design_label)
+    } else {
+      one_design_sims(design, sims = sims %||% 500L,
+                      design_label = design_label)
     }
-    out
   })
-  parameters_df <- rbind_disjoint(parameters_df_list)
-  parameters_df <- data.frame(lapply(parameters_df, type_convert), stringsAsFactors = FALSE)
-  
-  simulations_df <- merge(simulations_df, parameters_df, by = "design", sort = FALSE, all = TRUE)
-  
-  simulations_df <- simulations_df[, reorder_columns(parameters_df, simulations_df), drop = FALSE]
-  
-  attr(simulations_df, "parameters") <- parameters_df
-  
-  simulations_df
+  out <- dplyr::bind_rows(per_design)
+  param_names <- unique(unlist(lapply(designs, function(d) {
+    p <- attr(d, "parameters")
+    if (is.null(p)) character(0) else names(p)
+  })))
+  if (length(param_names) > 0) {
+    attr(out, "parameter_names") <- param_names
+  }
+  draw_cols <- unique(unlist(lapply(per_design, function(d) {
+    attr(d, "draw_cols")
+  })))
+  if (length(draw_cols) > 0) {
+    attr(out, "draw_cols") <- draw_cols
+    attr(out, "nested") <- TRUE
+  }
+  attr(out, "matched_on") <- unique(unlist(lapply(per_design, function(d) {
+    attr(d, "matched_on")
+  })))
+  out
+}
+
+#' Write a design's redesign parameters onto its simulations table
+#'
+#' A parameter that is not an atomic scalar (a function, say) is written as
+#' its deparsed source, so the column stays a plain vector that diagnosis can
+#' group by and print.
+#'
+#' @keywords internal
+#' @noRd
+attach_parameters <- function(out, params) {
+  if (is.null(params) || nrow(out) == 0) return(out)
+  for (nm in names(params)) {
+    if (nm %in% names(out)) next
+    value <- params[[nm]]
+    if (is.list(value)) value <- value[[1]]
+    if (!(is.atomic(value) && length(value) == 1L)) {
+      value <- paste(deparse(value), collapse = " ")
+    }
+    out[[nm]] <- value
+  }
+  out
+}
+
+#' Detect whether any step in a design has step-level draws > 1
+#'
+#' @keywords internal
+#' @noRd
+design_has_nested_draws <- function(design) {
+  steps <- if (inherits(design, "design")) unclass(design) else list(design)
+  any(vapply(steps, function(s) (attr(s, "draws") %||% 1L) > 1L, logical(1)))
+}
+
+#' Get the per-step draws vector
+#'
+#' @keywords internal
+#' @noRd
+get_step_draws <- function(design) {
+  steps <- unclass(design)
+  setNames(
+    vapply(steps, function(s) as.integer(attr(s, "draws") %||% 1L),
+           integer(1)),
+    names(steps)
+  )
+}
+
+#' Warn the user when both `sims` and step-level `draws` are set
+#'
+#' @keywords internal
+#' @noRd
+warn_sims_draws_conflict <- function(design, sims) {
+  step_draws <- get_step_draws(design)
+  total_nested <- prod(step_draws)
+  lines <- purrr::imap_chr(step_draws, function(d, nm) {
+    flag <- if (d > 1L) paste0("draws = ", d) else "draws = 1"
+    sprintf("    %-20s %s", nm, flag)
+  })
+  rlang::warn(paste0(
+    "`sims = ", sims, "` ignored: step-level `draws` are declared and take priority.\n",
+    "  Simulation plan:\n",
+    paste(lines, collapse = "\n"), "\n",
+    "  Running: ", total_nested, " nested paths ",
+    "(", paste(step_draws[step_draws > 1L], collapse = " x "), ")."
+  ))
+}
+
+#' Label the designs passed through `...`
+#'
+#' A dot takes its expression as a label only when that expression is a bare
+#' symbol *and* it holds a single design, so `simulate_design(design_a,
+#' design_b)` labels its two designs. A list of designs keeps its own names,
+#' whether it is written out (`list(dum = d, dee = d)`) or reached through a
+#' symbol, rather than having the enclosing expression pasted onto them. Names
+#' the caller supplied always win.
+#'
+#' @param ... Designs, lists of designs, or design steps.
+#' @return The dots as a list, named where a label could be found.
+#' @keywords internal
+#' @noRd
+name_design_dots <- function(...) {
+  items <- rlang::list2(...)
+  exprs <- rlang::enexprs(...)
+  nms <- rlang::names2(items)
+  single <- vapply(items, inherits, logical(1),
+                   what = c("design", "design_step"), which = FALSE)
+  auto <- !nzchar(nms) & single &
+    vapply(exprs, rlang::is_symbol, logical(1))
+  nms[auto] <- vapply(exprs[auto], rlang::as_string, character(1))
+  rlang::set_names(items, nms)
+}
+
+#' Flatten a list of designs / lists-of-designs / steps
+#'
+#' Accepts the raw `...` list passed by users to `simulate_design()` and
+#' `diagnose_design()`. Promotes bare design steps to single-step designs,
+#' recursively flattens lists (so the output of `redesign()` is accepted
+#' transparently), and preserves user-supplied names where available.
+#'
+#' @param raw A list of designs, design_steps, or lists thereof.
+#' @return A flat named list of `design` objects.
+#' @keywords internal
+#' @noRd
+flatten_designs <- function(raw) {
+  out <- list()
+  for (i in seq_along(raw)) {
+    item <- raw[[i]]
+    nm <- names(raw)[i]
+    if (!is.null(nm) && nm %in% c("make_groups", "future.seed",
+                                  "add_grouping_variables")) {
+      stop_not_a_design(item, nm)
+    }
+    if (inherits(item, "design")) {
+      label <- if (!is.null(nm) && nzchar(nm)) nm else
+        paste0("design_", length(out) + 1L)
+      out[[label]] <- item
+    } else if (inherits(item, "design_step")) {
+      label <- if (!is.null(nm) && nzchar(nm)) nm else
+        paste0("design_", length(out) + 1L)
+      out[[label]] <- construct_design(wrap_step(item))
+    } else if (is.list(item) && !is.data.frame(item)) {
+      sub <- flatten_designs(item)
+      if (length(sub) > 0) {
+        sub_names <- names(sub)
+        if (!is.null(nm) && nzchar(nm) && length(sub) == 1L) {
+          names(sub) <- nm
+        } else if (!is.null(nm) && nzchar(nm)) {
+          names(sub) <- paste0(nm, "_", sub_names)
+        }
+        for (k in names(sub)) {
+          label <- k
+          if (label %in% names(out)) {
+            label <- make.unique(c(names(out), label))[length(out) + 1L]
+          }
+          out[[label]] <- sub[[k]]
+        }
+      }
+    } else {
+      stop_not_a_design(item, nm)
+    }
+  }
+  out
+}
+
+#' Refuse an argument that is not a design
+#'
+#' The dots of [simulate_design()] and [diagnose_design()] take designs, and
+#' only designs, so an argument DeclareDesign 1.x accepted by name used to
+#' fall through here and vanish: `make_groups = vars(N)` returned an ungrouped
+#' table and `future.seed = TRUE` did nothing, neither with a message. The
+#' two names a 1.x script is likely to carry get the replacement spelled out.
+#'
+#' @keywords internal
+#' @noRd
+stop_not_a_design <- function(item, nm) {
+  what <- if (!is.null(nm) && nzchar(nm)) paste0("`", nm, "`") else
+    paste0("an object of class <", paste(class(item), collapse = "/"), ">")
+  hint <- if (identical(nm, "make_groups")) {
+    paste0(
+      "`make_groups` is gone. Group the simulations instead: ",
+      "`simulate_design(design) |> group_by(N) |> diagnose_design()`."
+    )
+  } else if (identical(nm, "future.seed")) {
+    paste0(
+      "`future.seed` is gone. Every draw runs on its own L'Ecuyer-CMRG ",
+      "stream under any `future::plan()`, so `set.seed()` before the call ",
+      "is all that is needed."
+    )
+  } else if (identical(nm, "add_grouping_variables")) {
+    "`add_grouping_variables` is gone; group the simulations with `group_by()`."
+  } else {
+    "Only designs, lists of designs and design steps are accepted here."
+  }
+  rlang::abort(c(
+    paste0(what, " is not a design."),
+    i = hint
+  ), call = NULL)
 }
 
 #' @rdname simulate_design
 #' @export
 simulate_designs <- simulate_design
 
-
-
-#' @importFrom rlang as_list
-simulate_single_design <- function(design, sims, future.seed = TRUE, low_simulations_warning = TRUE) {
-  if (!is_bare_integerish(sims) || (length(design) != length(sims) & length(sims) != 1)) {
-    stop("Please provide sims a scalar or a numeric vector of length the number of steps in designs.", call. = FALSE)
-  }
-  
-  if (min(sims) < 1) {
-    stop("Sims should be >= 1", call. = FALSE)
-  }
-  
-  # See also ?testthat::is_testing
-  if (low_simulations_warning && sims[1] < 30 && !identical(Sys.getenv("TESTTHAT"), "true")) {
-    warning(
-      "We recommend you choose a number of simulations higher than 30.",
-      call. = FALSE
-    )
-  }
-  
-  # escape hatch for all ones
-  if(prod(sims) == 1) sims <- 1
-  
-  # If sims is set correctly, fan out
-  
-  if (length(sims) == 1 && is.null(names(sims))) {
-    results_list <- withCallingHandlers(
-      {
-        future_lapply(seq_len(sims),
-                      function(i) run_design_internal(design),
-                      future.seed = future.seed,
-                      future.globals = "design") |> suppressWarnings()
-      },
-      warning = function(w) {
-        # Suppress warnings coming from `future_lapply` itself
-        if (grepl("may not be available", conditionMessage(w))) {
-          invokeRestart("muffleWarning")
-        }
-      }
-    )
-      } else {
-    sims <- check_sims(design, sims)
-    results_list <- fan_out(design, sims)
-    
-    
-    
-  }
-  
-  results2x <- function(results_list, what) {
-    subresult <- lapply(results_list, `[[`, what)
-    # df <- do.call(rbind.data.frame, subresult)
-    df <- rbind_disjoint(subresult)
-    if (nrow(df) == 0) {
-      return(df)
-    }
-    
-    df <- cbind(sim_ID = rep(seq_along(subresult), vapply(subresult, nrow, 0L)), df)
-  }
-  
-  estimates_df <- results2x(results_list, "estimates_df")
-  inquiries_df <- results2x(results_list, "inquiries_df")
-  
-  if (is_empty(estimates_df) && is_empty(inquiries_df)) {
-    stop("No estimates or inquiries were declared, so design cannot be simulated.", call. = FALSE)
-  } else if (is_empty(inquiries_df)) {
-    simulations_df <- estimates_df
-  } else if (is_empty(estimates_df)) {
-    simulations_df <- inquiries_df
-  } else if (all(inquiries_df$inquiry %in% estimates_df$inquiry) &
-             all(estimates_df$inquiry %in% inquiries_df$inquiry)){
-    
-    
-    inquiries_df_split <- split(x = inquiries_df, f = inquiries_df$inquiry)
-    estimates_df_split <- split(x = estimates_df, f = estimates_df$inquiry)
-    
-    non_missing_columns <- function(dat){
-      nonmissing <- apply(dat, 2, FUN = function(x) any(!is.na(x)))
-      return(dat[,nonmissing,drop = FALSE])
-    }
-    
-    
-    inquiries_df_split <- lapply(inquiries_df_split, non_missing_columns)
-    estimates_df_split <- lapply(estimates_df_split, non_missing_columns)
-    
-    by_split <- lapply(X = seq_along(inquiries_df_split), 
-                       FUN = function(x){
-                         colnames(inquiries_df_split[[x]]) %icn% estimates_df_split[[x]]
-                       })
-    
-    simulations_df_split <- 
-      mapply(FUN = merge,
-             x = inquiries_df_split,
-             y = estimates_df_split,
-             by = by_split,
-             MoreArgs = list(all = TRUE, sort = FALSE),
-             SIMPLIFY = FALSE
-      )
-    
-    simulations_df <- rbind_disjoint(simulations_df_split)
-  } else {
-    
-    simulations_df <- merge(
-      inquiries_df,
-      estimates_df,
-      by = colnames(inquiries_df) %icn% estimates_df,
-      all = TRUE,
-      sort = FALSE
-    )
-    
-    if (nrow(simulations_df) > max(nrow(inquiries_df), nrow(estimates_df))) {
-      warning(
-        "Estimators lack inquiry/term labels for matching, a many-to-many merge was performed."
-      )
-    }
-  }
-  
-  # removed for now
-  # if (!is_empty(attr(design, "parameters"))) {
-  #   simulations_df <-
-  #     data.frame(
-  #       simulations_df[, 1, drop = FALSE],
-  #       as_list(attr(design, "parameters")),
-  #       simulations_df[, -1, drop = FALSE], 
-  #       stringsAsFactors = FALSE
-  #     )
-  # }
-  # simulations_df <- data.frame(lapply(simulations_df, type_convert), stringsAsFactors = FALSE)
-  simulations_df
-}
-
-
-#' @importFrom rlang quo_squash is_call
-infer_names <- function(x, type = "design") {
-  inferred_names <- names(x) %||% rep("", length(x))
-  
-  inferred_names <- vapply(seq_along(x),
-                           FUN.VALUE = "",
-                           function(i, xi = x[[i]], nm = inferred_names[i]) {
-                             if (nm != "") {
-                               nm
-                             } else if (!is_quosure(xi) || is_call(quo_squash(xi))) {
-                               paste0(type, "_", i)
-                             } else {
-                               quo_text(xi)
-                             }
-                           }
+#' Simulate a single design (flat)
+#'
+#' @keywords internal
+#' @noRd
+one_design_sims <- function(design, sims, design_label = "design") {
+  map_fn <- sim_map_fn(paste0("Simulating ", design_label))
+  results <- map_fn(seq_len(sims), function(i) {
+    r <- run_design_internal(design)
+    list(inquiries = r$inquiries, estimates = r$estimates)
+  })
+  inquiries_df <- dplyr::bind_rows(
+    purrr::map(results, "inquiries"),
+    .id = "sim_ID"
   )
-  
-  # confirm no dupes
-  is_dupes <- duplicated(inferred_names)
-  if (any(is_dupes)) {
-    stop("You have more than one ", type, " named ", inferred_names[is_dupes])
+  estimates_df <- dplyr::bind_rows(
+    purrr::map(results, "estimates"),
+    .id = "sim_ID"
+  )
+  warn_estimator_failures(estimates_df, design_label)
+  if (nrow(inquiries_df) > 0) {
+    inquiries_df$sim_ID <- as.integer(inquiries_df$sim_ID)
   }
-  
-  inferred_names
+  if (nrow(estimates_df) > 0) {
+    estimates_df$sim_ID <- as.integer(estimates_df$sim_ID)
+  }
+  out <- merge_estimates_inquiries(estimates_df, inquiries_df)
+  matched_on <- attr(out, "matched_on")
+  if (nrow(out) > 0) {
+    out$design <- design_label
+    out <- dplyr::relocate(out, "design")
+  }
+  out <- attach_parameters(out, attr(design, "parameters"))
+  attr(out, "matched_on") <- matched_on
+  out
 }
 
-# TODO: remove this when 3.6 comes out
-# for version 3.4 compatibility
-#' @importFrom utils compareVersion
-type_convert <- function(x) {
-  if(compareVersion("3.5", paste(R.Version()$major, R.Version()$minor, sep = ".")) == -1){
-    if (inherits(x, "character") || inherits(x, "factor")) type.convert(x, as.is = TRUE) else x
-  } else {
-    if (inherits(x, "character")) type.convert(x, as.is = TRUE) else x
+#' Simulate a single design with nested step-level draws
+#'
+#' Each step with `draws > 1` fans out: subsequent steps are re-executed for
+#' every draw of that step, recursively. The outermost fan-out level (when it
+#' is a DGP step) is parallelised via `sim_map_fn()`; inner draws run
+#' sequentially within each outer iteration.
+#'
+#' @param design A single `design` object.
+#' @param design_label Name of the design, written into the `design` column.
+#' @return A tibble of merged estimates and inquiries with one
+#'   `<step_label>_draw` column per fan-out step.
+#' @keywords internal
+#' @noRd
+simulate_nested_single <- function(design, design_label = "design") {
+  steps <- unclass(design)
+  step_draws <- vapply(steps, function(s) as.integer(attr(s, "draws") %||% 1L),
+                       integer(1))
+  step_types <- vapply(steps, function(s) attr(s, "causal_type") %||% NA_character_,
+                       character(1))
+  step_labels <- names(steps)
+  fan_steps <- which(step_draws > 1L)
+
+  # run_from: execute steps[step_idx..end] against `data`, fanning out at any
+  # step with draws > 1. Returns a list with inquiries, estimates collected
+  # across all draws below this point. `pin` fixes this step to a single draw
+  # index, which is how the outermost fan-out is distributed across workers.
+  run_from <- function(step_idx, data, draw_cols = list(), pin = NULL,
+                       steps_cur = steps, notes = list()) {
+    if (step_idx > length(steps_cur)) {
+      return(list(
+        inquiries = tibble::tibble(),
+        estimates = tibble::tibble()
+      ))
+    }
+    step  <- steps_cur[[step_idx]]
+    n     <- step_draws[[step_idx]]
+    ct    <- step_types[[step_idx]]
+    label <- step_labels[[step_idx]]
+
+    # A note is taken once at its own position, inside whatever fan-out it
+    # sits under, so each branch of the fan carries the notes its own data
+    # produced.
+    if (is_notes_step(step)) {
+      notes <- record_notes(notes, note_values(step, data, notes))
+      return(run_from(step_idx + 1L, data, draw_cols, NULL,
+                      apply_notes_from(steps_cur, step_idx, notes), notes))
+    }
+
+    draw_ids <- if (is.null(pin)) seq_len(n) else pin
+    draw_results <- lapply(draw_ids, function(d) {
+      new_draw_cols <- draw_cols
+      if (n > 1L) new_draw_cols[[paste0(label, "_draw")]] <- d
+      if (identical(ct, "dgp")) {
+        new_data <- run_step(step, data)
+        run_from(step_idx + 1L, new_data, new_draw_cols, NULL, steps_cur, notes)
+      } else if (identical(ct, "inquiry")) {
+        inq <- run_step(step, data)
+        sub <- run_from(step_idx + 1L, data, new_draw_cols, NULL, steps_cur, notes)
+        if (nrow(inq) > 0) {
+          for (nm in names(new_draw_cols)) inq[[nm]] <- new_draw_cols[[nm]]
+        }
+        list(
+          inquiries = dplyr::bind_rows(inq, sub$inquiries),
+          estimates = sub$estimates
+        )
+      } else if (identical(ct, "estimator")) {
+        est <- run_step(step, data)
+        sub <- run_from(step_idx + 1L, data, new_draw_cols, NULL, steps_cur, notes)
+        if (nrow(est) > 0) {
+          for (nm in names(new_draw_cols)) est[[nm]] <- new_draw_cols[[nm]]
+        }
+        list(
+          inquiries = sub$inquiries,
+          estimates = dplyr::bind_rows(est, sub$estimates)
+        )
+      } else {
+        run_from(step_idx + 1L, data, new_draw_cols, NULL, steps_cur, notes)
+      }
+    })
+    list(
+      inquiries = dplyr::bind_rows(purrr::map(draw_results, "inquiries")),
+      estimates = dplyr::bind_rows(purrr::map(draw_results, "estimates"))
+    )
   }
+
+  # Steps upstream of the first fan-out sit outside the fan and run exactly
+  # once. Re-running them per draw would redraw the very thing the fan is meant
+  # to hold fixed: `declare_assignment(..., draws = 50)` asks for 50
+  # randomizations of one population, not 50 populations.
+  run_prefix <- function(idx) {
+    data <- NULL
+    inquiries <- list()
+    estimates <- list()
+    steps_cur <- steps
+    notes <- list()
+    for (i in idx) {
+      if (is_notes_step(steps_cur[[i]])) {
+        notes <- record_notes(notes, note_values(steps_cur[[i]], data, notes))
+        steps_cur <- apply_notes_from(steps_cur, i, notes)
+        next
+      }
+      ct <- step_types[[i]]
+      if (identical(ct, "dgp")) {
+        data <- run_step(steps_cur[[i]], data)
+      } else if (identical(ct, "inquiry")) {
+        inquiries[[length(inquiries) + 1L]] <- run_step(steps_cur[[i]], data)
+      } else if (identical(ct, "estimator")) {
+        estimates[[length(estimates) + 1L]] <- run_step(steps_cur[[i]], data)
+      }
+    }
+    list(data      = data,
+         inquiries = dplyr::bind_rows(inquiries),
+         estimates = dplyr::bind_rows(estimates),
+         steps     = steps_cur,
+         notes     = notes)
+  }
+
+  map_fn <- sim_map_fn("Simulating")
+  first_fan <- if (length(fan_steps) > 0) fan_steps[1] else NA_integer_
+
+  if (!is.na(first_fan)) {
+    prefix  <- run_prefix(seq_len(first_fan - 1L))
+    n_outer <- step_draws[[first_fan]]
+    outer_results <- map_fn(seq_len(n_outer), function(outer_d) {
+      run_from(first_fan, prefix$data, list(), pin = outer_d,
+               steps_cur = prefix$steps, notes = prefix$notes)
+    })
+    if (nrow(prefix$inquiries) > 0 || nrow(prefix$estimates) > 0) {
+      outer_results <- c(
+        list(list(inquiries = prefix$inquiries, estimates = prefix$estimates)),
+        outer_results
+      )
+    }
+  } else {
+    outer_results <- list(run_from(1L, NULL, list()))
+  }
+
+  inquiries_df <- dplyr::bind_rows(purrr::map(outer_results, "inquiries"),
+                                   .id = "sim_ID")
+  estimates_df <- dplyr::bind_rows(purrr::map(outer_results, "estimates"),
+                                   .id = "sim_ID")
+  warn_estimator_failures(estimates_df)
+  if (nrow(inquiries_df) > 0) {
+    inquiries_df$sim_ID <- as.integer(inquiries_df$sim_ID)
+  }
+  if (nrow(estimates_df) > 0) {
+    estimates_df$sim_ID <- as.integer(estimates_df$sim_ID)
+  }
+
+  # Override sim_ID to be a globally unique simulation identifier.
+  # In nested mode, sim_ID identifies a unique combination of all draw_cols.
+  draw_col_names <- paste0(step_labels[step_draws > 1L], "_draw")
+  inquiries_draw_cols <- intersect(draw_col_names, names(inquiries_df))
+  estimates_draw_cols <- intersect(draw_col_names, names(estimates_df))
+
+  if (length(estimates_draw_cols) > 0 && nrow(estimates_df) > 0) {
+    key <- do.call(paste, c(
+      lapply(estimates_draw_cols, function(c) estimates_df[[c]]),
+      list(sep = "\r")
+    ))
+    estimates_df$sim_ID <- as.integer(factor(key, levels = unique(key)))
+  }
+  if (length(inquiries_draw_cols) > 0 && nrow(inquiries_df) > 0) {
+    key <- do.call(paste, c(
+      lapply(inquiries_draw_cols, function(c) inquiries_df[[c]]),
+      list(sep = "\r")
+    ))
+    inquiries_df$sim_ID <- as.integer(factor(key, levels = unique(key)))
+  }
+
+  # For the merge to align estimates with inquiries from the same world,
+  # the join keys must include the draw columns for steps that come BEFORE
+  # the inquiry step (i.e., DGP-type fan-outs upstream of the inquiry).
+  # The simplest strategy: include any draw column present on the inquiries
+  # table in the merge.
+  out <- merge_estimates_inquiries_nested(estimates_df, inquiries_df,
+                                          inquiries_draw_cols)
+  matched_on <- attr(out, "matched_on")
+
+  if (nrow(out) > 0) {
+    out$design <- design_label
+    out <- dplyr::relocate(out, "design")
+  }
+  out <- attach_parameters(out, attr(design, "parameters"))
+  attr(out, "matched_on") <- matched_on
+  attr(out, "draw_cols") <- intersect(draw_col_names, names(out))
+  attr(out, "nested") <- TRUE
+  out
+}
+
+#' Merge estimates with inquiries in the nested-simulation case
+#'
+#' Like [merge_estimates_inquiries()] but additionally joins on any
+#' upstream-fanout draw columns that appear on the inquiries table, so
+#' estimators are linked to the right realised estimand.
+#'
+#' @keywords internal
+#' @noRd
+merge_estimates_inquiries_nested <- function(estimates, inquiries,
+                                             inquiry_draw_cols) {
+  if (nrow(estimates) == 0 && nrow(inquiries) == 0) return(tibble::tibble())
+  if (nrow(estimates) == 0) return(tibble::as_tibble(inquiries))
+  if (nrow(inquiries) == 0) return(tibble::as_tibble(estimates))
+  base_keys <- intersect(c("design", "inquiry"), names(estimates))
+  base_keys <- intersect(base_keys, names(inquiries))
+  draw_keys <- intersect(inquiry_draw_cols, names(estimates))
+  draw_keys <- intersect(draw_keys, names(inquiries))
+  join_cols <- c(base_keys, draw_keys)
+  result <- if (length(join_cols) == 0) {
+    dplyr::cross_join(tibble::as_tibble(estimates),
+                      tibble::as_tibble(inquiries),
+                      suffix = c("", ".inquiry"))
+  } else {
+    dplyr::left_join(
+      tibble::as_tibble(estimates),
+      tibble::as_tibble(inquiries),
+      by = join_cols,
+      suffix = c("", ".inquiry"),
+      relationship = "many-to-many"
+    )
+  }
+  attr(result, "matched_on") <- join_cols
+  result
 }

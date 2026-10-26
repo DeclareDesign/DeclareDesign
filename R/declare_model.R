@@ -1,172 +1,308 @@
-#' Declare the size and features of the population.
-#' 
-#' @description The model component of a research design captures background beliefs about 
-#' the world in which a study is implemented, the variables of interest, and 
-#' how these respond to each other. The \code{declare_model} function writes functions 
-#' that themselves create databases that represent these features of possible 
-#' worlds.  
+#' Build a DGP step closure
 #'
-#' @inheritParams declare_internal_inherit_params
-#' @return A function that returns a data.frame.
+#' Helper that splices a captured set of quosures into a `fabricatr::fabricate`
+#' call. Pulled out into its own helper so that [redesign()] can re-create
+#' steps after rebinding parameters in the captured environment.
+#'
+#' If the captured `dots` include a named `data` argument, that data frame is
+#' used as the starting state instead of (or in addition to) what is threaded
+#' in by the design.
+#'
+#' If `dots` includes a named `handler` argument that resolves to a function,
+#' the step calls `handler(...other_dots..., data = data)` (or omits `data`
+#' when the handler does not accept it) instead of going through fabricate.
+#'
+#' @param dots Named list of quosures.
+#' @param id_label_na Logical; if `TRUE`, pass `ID_label = NA` so fabricate
+#'   does not append a row id (used by measurement, assignment, sampling).
+#' @return A function of signature `function(data = NULL)`.
+#' @keywords internal
+#' @noRd
+make_fabricate_step <- function(dots, id_label_na = FALSE) {
+  force(dots)
+  force(id_label_na)
+  function(data = NULL) {
+    nm <- names(dots) %||% rep("", length(dots))
+    is_data <- !is.na(nm) & nm == "data"
+    is_handler <- !is.na(nm) & nm == "handler"
+    user_data_quo <- if (any(is_data)) dots[[which(is_data)[1]]] else NULL
+    user_handler_quo <- if (any(is_handler)) dots[[which(is_handler)[1]]] else NULL
+    rest <- dots[!is_data & !is_handler]
+    if (!is.null(user_data_quo)) {
+      user_data <- rlang::eval_tidy(user_data_quo)
+      if (is.null(data) || (is.data.frame(data) && nrow(data) == 0L)) {
+        data <- user_data
+      }
+    }
+    if (!is.null(user_handler_quo)) {
+      handler_fn <- rlang::eval_tidy(user_handler_quo)
+      if (handler_is_fabricate(handler_fn)) {
+        # A model step keeps fabricate()'s default id; the other three suppress
+        # it, unless the declaration names ID_label itself.
+        return(call_fabricate_with_dots(
+          data, rest,
+          default_id_label = if (id_label_na) NA else "ID"
+        ))
+      }
+      # Arguments reach the handler as written, which is what `declare_step()`
+      # does and what DeclareDesign 1.x did here. A handler that resolves its
+      # own arguments against the data (`dplyr::mutate()`, `tidyr::uncount()`,
+      # anything using tidyselect or a data mask) needs the expression rather
+      # than its value. Evaluating first both broke `n()` and left `uncount()`
+      # unable to drop the weights column it was given.
+      decl_env <- dots_env(rest, default = rlang::caller_env())
+      args <- dots_as_written(rest)
+      call_env <- rlang::env(decl_env, .dd_data = data)
+      # A handler with no slot for the data builds the table from scratch, so
+      # it is called with the declared arguments alone.
+      formal_names <- tryCatch(names(formals(handler_fn)),
+                               error = function(e) NULL)
+      takes_data <- is.null(formal_names) ||
+        any(c("data", ".data") %in% formal_names)
+      cl <- if (takes_data) {
+        rlang::call2(handler_fn, quote(.dd_data), !!!args)
+      } else {
+        rlang::call2(handler_fn, !!!args)
+      }
+      return(eval(cl, envir = call_env))
+    }
+    # Use fabricate_with_dots() to avoid double-quoting: !!!-injection turns
+    # quosures into formula objects (~expr), which fabricate()'s enquos()
+    # would re-capture incorrectly. It is fabricatr's exported entry point for
+    # a caller that captured the expressions itself, and the contract is
+    # asserted on both sides: fabricatr's test-declaredesign-api.R and this
+    # package's test-fabricatr-contract.R.
+    #
+    # `id_label_na` is what keeps a measurement, assignment or sampling step
+    # from appending a row id, which is what 1.x did by writing
+    # `ID_label = NA` at each of those four call sites. It was forced above and
+    # then never passed on, so the flag was inert and those steps avoided a
+    # stray ID column only because they always run with data already in hand.
+    fabricatr::fabricate_with_dots(
+      data = data,
+      dots = rest,
+      ID_label = if (id_label_na) NA else "ID"
+    )
+  }
+}
+
+#' Declare the data-generating model
+#'
+#' The model describes the world the design runs in. It does not have to be
+#' correct: declaring one you doubt is how you find out whether the design
+#' still works when you are wrong about it.
+#'
+#' Declares a step that builds (or augments) the population data via
+#' [fabricatr::fabricate()]. The first model step in a design receives
+#' `data = NULL`, so it must specify `N` (and any variables) directly.
+#' Subsequent model steps add columns to the existing data.
+#'
+#' @family design declarations
+#' @param ... (optional) Named arguments forwarded to
+#'   [fabricatr::fabricate()]. Unquoted expressions are evaluated lazily in the
+#'   caller's environment with access to the current data frame.
+#' @param label (optional) Step label. Defaults to `"model"`.
+#' @param draws (optional) Number of nested draws for this step. Defaults to
+#'   `1`. When `> 1`, the step is re-executed `draws` times for each upstream
+#'   draw during nested simulation.
+#' @return A `design_step` (class `c("design_step", "dd", "function")`): a
+#'   function that takes the current data frame and returns a tibble with the
+#'   declared columns added (or built from scratch, for the first step). Add it
+#'   to a design with `+`.
 #' @export
-#' @importFrom fabricatr fabricate
-#'
 #' @examples
-#' # declare_model is usually used when concatenating
-#' # design elements with `+`
-#' 
-#' ## Example: Two-arm randomized experiment
+#' design <- declare_model(N = 50, U = rnorm(N), Y = U + 1)
+#'
+#' head(draw_data(design))
+#'
+#' # A second model step adds columns to the data the first one made.
 #' design <-
-#'   declare_model(
-#'     N = 500,
-#'     X = rep(c(0, 1), each = N / 2),
-#'     U = rnorm(N, sd = 0.25),
-#'     potential_outcomes(Y ~ 0.2 * Z + X + U)
-#'   ) +
-#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_assignment(Z = complete_ra(N = N, m = 250)) +
-#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-#'   declare_estimator(Y ~ Z, inquiry = "ATE")
-#' 
-#' # declare_model returns a function:
-#' M <- declare_model(N = 100)
-#' M()
-#' 
-#' # You can also declare a population from existing data
-#' M <- declare_model(data = mtcars)
-#' M()
-#' 
-#' # You can resample from existing data
-#' M <- declare_model(N = 100, data = mtcars, handler = resample_data)
-#' M()
-#' 
-#' # You can build up more variables using any predefined variables.
-#' # For instance you can declare a model with observed covariates X1 
-#' # and X2 and unobserved heterogeneity U that each affect outcome Y
-#' M <- declare_model(
-#'   N = 5,
-#'   U = rnorm(N),
-#'   X1 = rbinom(N, size = 1, prob = 0.5),
-#'   X2 = X1 + rnorm(N),
-#'   Y = 0.1 * X1 + 0.2 * X2 + 0.1 * X1 * X2 + U
-#' )
-#' M()
-#' 
-#' # You can build up a model over multiple design steps 
-#' # Once steps are concatendated they become a design
-#' M1 <- declare_model(
-#'   N = 5,
-#'   U = rnorm(N))
-#' M2 <-  declare_model(
-#'   X1 = rbinom(N, size = 1, prob = 0.5),
-#'   X2 = X1 + rnorm(N))
-#' M2(M1())
-#' design <- M1 + M2
-#' draw_data(design)
-#' 
-#' # More eleboate data types.
-#' # We can draw correlated variables using draw_multivariate
-#' M <-
-#' declare_model(
-#'   draw_multivariate(c(X1, X2) ~ MASS::mvrnorm(
-#'     n = 1000,
-#'     mu = c(0, 0),
-#'     Sigma = matrix(c(1, 0.3, 0.3, 1), nrow = 2)
-#'   )))
-#' M()
-#' 
-#' # Declare potential outcomes model dependent on assignment Z
-#' ## Manually
-#' M <- 
-#'   declare_model(N = 100, 
-#'                 Y_Z_0 = rbinom(N, size = 1, prob = 0.5),
-#'                 Y_Z_1 = rbinom(N, size = 1, prob = 0.6)
-#'   )
-#' M()
-#' 
-#' ## Using the potential_outcomes function from fabricatr
-#' M <- 
-#'   declare_model(N = 100, 
-#'                 potential_outcomes(Y ~ rbinom(N, size = 1, prob = 0.1 * Z + 0.5))
-#'   )
-#' M()
-#'  
-#' ## we can draw from a distribution of effect sizes 
-#' M <-
-#'   declare_model(
-#'     N = 100, 
-#'     tau = runif(1, min = 0, max = 1), 
-#'     U = rnorm(N), 
-#'     potential_outcomes(Y ~ tau * Z + U)
-#'   )
-#' M()
-#' 
-#' ## we can simulate treatment-by-covariate effect heterogeneity:
-#' M <- 
-#'   declare_model(
-#'     N = 100, 
-#'     U = rnorm(N), 
-#'     X = rbinom(N, 1, prob = 0.5),
-#'     potential_outcomes(Y ~  0.3 * Z + 0.2*X + 0.1*Z*X + U)
-#'   )
-#' M()
-#' 
-#' ## potential outcomes can respond to two treatments:
-#' M <- declare_model(
-#'   N = 6,
-#'   U = rnorm(N),
-#'   potential_outcomes(Y ~ Z1 + Z2 + U, 
-#'                      conditions = list(Z1 = c(0, 1), Z2 = c(0, 1))))
-#' 
-#' M()
-#' 
-#' # Declare a two-level hierarchical population
-#' # containing varying numbers of individuals within
-#' # households and an age variable defined at the individual
-#' # level
-#' M <- declare_model(
-#'   households = add_level(
-#'     N = 100, 
-#'     N_members = sample(c(1, 2, 3, 4), N, 
-#'                        prob = c(0.2, 0.3, 0.25, 0.25), 
-#'                        replace = TRUE)
-#'   ),
-#'   individuals = add_level(
-#'     N = N_members, 
-#'     age = sample(18:90, N, replace = TRUE)
-#'   )
-#' )
-#' M()
-#' 
-#' ## Panel data have a more complex structure:
-#' M <- 
-#'   declare_model(
-#'     countries = add_level(
-#'       N = 196, 
-#'       country_shock = rnorm(N)
-#'     ),
-#'     years = add_level(
-#'       N = 100, 
-#'       time_trend = 1:N,
-#'       year_shock = runif(N, 1, 10), 
-#'       nest = FALSE
-#'     ),
-#'     observation = cross_levels(
-#'       by = join_using(countries, years),
-#'       observation_shock = rnorm(N),
-#'       Y = 0.01 * time_trend + country_shock + year_shock + observation_shock 
-#'     )
-#'   )
-#' M()
-#' 
-#' # Declare a population using a custom function
-#' # the default handler is fabricatr::fabricate,
-#' # but you can supply any function that returns a data.frame
-#' my_model_function <- function(N) {
-#'   data.frame(u = rnorm(N))
-#' }
-#' 
-#' M <- declare_model(N = 10, handler = my_model_function)
-#' M()
-#' 
-declare_model <- make_declarations(fabricate, "model")
+#'   declare_model(N = 50, U = rnorm(N)) +
+#'   declare_model(Y_Z_0 = U, Y_Z_1 = U + 0.5)
+#'
+#' head(draw_data(design))
+declare_model <- function(..., label = "model", draws = 1L) {
+  dots <- capture_dots_env(rlang::enquos(...))
+  call <- sys.call()
+  fn <- make_fabricate_step(dots, id_label_na = FALSE)
+  step <- build_step(
+    fn          = fn,
+    handler_expr = quote(fabricatr::fabricate),
+    dots        = dots,
+    step_type   = "model",
+    causal_type = "dgp",
+    label       = label,
+    call        = call
+  )
+  attr(step, "draws") <- as.integer(draws)
+  step
+}
+
+#' Declare measurement
+#'
+#' Records what the study observes: the measured outcome, typically `Y`
+#' revealed from the potential outcomes given the assignment `Z`. Columns are
+#' added to the data the way [declare_model()] adds them, without a new ID
+#' column.
+#'
+#' @inheritParams declare_model
+#' @family design declarations
+#' @param label (optional) Step label. Defaults to `"measurement"`.
+#' @return A `design_step` (class `c("design_step", "dd", "function")`): a
+#'   function that takes the current data frame and returns it with the
+#'   declared columns added. Add it to a design with `+`.
+#' @export
+#' @examples
+#' design <-
+#'   declare_model(N = 100, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
+#'   declare_assignment(Z = sample(rep(0:1, length.out = N))) +
+#'   declare_measurement(Y = Y_Z_0 * (1 - Z) + Y_Z_1 * Z)
+#'
+#' head(draw_data(design))
+declare_measurement <- function(..., label = "measurement", draws = 1L) {
+  dots <- capture_dots_env(rlang::enquos(...))
+  call <- sys.call()
+  fn <- make_fabricate_step(dots, id_label_na = TRUE)
+  step <- build_step(
+    fn          = fn,
+    handler_expr = quote(fabricatr::fabricate),
+    dots        = dots,
+    step_type   = "measurement",
+    causal_type = "dgp",
+    label       = label,
+    call        = call
+  )
+  attr(step, "draws") <- as.integer(draws)
+  step
+}
+
+#' Declare an assignment procedure
+#'
+#' Assigns units to treatment conditions, adding the assignment variable (`Z`
+#' by convention) to the data. The randomization itself is usually a randomizr
+#' function such as [randomizr::complete_ra()].
+#'
+#' @inheritParams declare_model
+#' @family design declarations
+#' @param label (optional) Step label. Defaults to `"assignment"`.
+#' @return A `design_step` (class `c("design_step", "dd", "function")`): a
+#'   function that takes the current data frame and returns it with the
+#'   declared columns added. Add it to a design with `+`.
+#' @export
+#' @examples
+#' design <-
+#'   declare_model(N = 100, U = rnorm(N)) +
+#'   declare_assignment(Z = sample(rep(0:1, length.out = N)))
+#'
+#' table(draw_data(design)$Z)
+declare_assignment <- function(..., label = "assignment", draws = 1L) {
+  dots <- capture_dots_env(rlang::enquos(...))
+  call <- sys.call()
+  fn <- make_fabricate_step(dots, id_label_na = TRUE)
+  step <- build_step(
+    fn          = fn,
+    handler_expr = quote(fabricatr::fabricate),
+    dots        = dots,
+    step_type   = "assignment",
+    causal_type = "dgp",
+    label       = label,
+    call        = call
+  )
+  attr(step, "draws") <- as.integer(draws)
+  step
+}
+
+#' Build a sampling step closure
+#'
+#' @keywords internal
+#' @noRd
+make_sampling_step <- function(dots, filter_quo) {
+  force(dots)
+  force(filter_quo)
+  function(data = NULL) {
+    nm <- names(dots) %||% rep("", length(dots))
+    # A custom handler is the whole sampling step, as in 1.x: it receives the
+    # data and returns the sample, and only an explicit `filter` is applied
+    # on top of it.
+    if (any(!is.na(nm) & nm == "handler")) {
+      data <- make_fabricate_step(dots, id_label_na = TRUE)(data)
+      if (!is.null(filter_quo)) {
+        keep <- rlang::eval_tidy(filter_quo, data = data)
+        data <- data[!is.na(keep) & keep, , drop = FALSE]
+      }
+      return(data)
+    }
+    is_data <- !is.na(nm) & nm == "data"
+    user_data_quo <- if (any(is_data)) dots[[which(is_data)[1]]] else NULL
+    rest <- dots[!is_data]
+    if (!is.null(user_data_quo)) {
+      user_data <- rlang::eval_tidy(user_data_quo)
+      if (is.null(data) || (is.data.frame(data) && nrow(data) == 0L)) {
+        data <- user_data
+      }
+    }
+    # A sampling step never appends a row id, the same as the handler branch
+    # above and the same as 1.x's `fabricate(data = data, ..., ID_label = NA)`.
+    data <- fabricatr::fabricate_with_dots(data = data, dots = rest,
+                                            ID_label = NA)
+    if (!is.null(filter_quo)) {
+      keep <- rlang::eval_tidy(filter_quo, data = data)
+      data <- data[!is.na(keep) & keep, , drop = FALSE]
+    } else if ("S" %in% names(data)) {
+      keep <- data[["S"]]
+      data <- data[!is.na(keep) & keep == 1, , drop = FALSE]
+    } else {
+      rlang::warn(c(
+        "`declare_sampling()` found no column named `S` and no `filter`, so every row was kept.",
+        i = paste0("Name the sampling indicator `S`, as in `declare_sampling(S = ",
+                   "complete_rs(N, n = 50))`, or say which rows to keep with `filter = `.")
+      ), .frequency = "once", .frequency_id = "dd_sampling_no_S")
+    }
+    data
+  }
+}
+
+#' Declare a sampling procedure
+#'
+#' Draws the sample from the population, keeping the rows where the sampling
+#' indicator `S` is 1. Name the indicator `S`, as in
+#' `declare_sampling(S = complete_rs(N, n = 50))`, or say which rows to keep
+#' with `filter = `; a sampling step that produces neither keeps every row and
+#' warns.
+#'
+#' @inheritParams declare_model
+#' @family design declarations
+#' @param filter (optional) Unquoted expression evaluated against the data;
+#'   rows where the expression is `TRUE` are retained, and `S` is then not
+#'   consulted.
+#' @param label (optional) Step label. Defaults to `"sampling"`.
+#' @return A `design_step` (class `c("design_step", "dd", "function")`): a
+#'   function that takes the current data frame and returns the rows sampled,
+#'   with any declared columns added. Add it to a design with `+`.
+#' @export
+#' @examples
+#' design <-
+#'   declare_model(N = 200, Y = rnorm(N)) +
+#'   declare_sampling(S = sample(rep(0:1, length.out = N)))
+#'
+#' nrow(draw_data(design))
+declare_sampling <- function(..., filter = NULL, label = "sampling",
+                             draws = 1L) {
+  dots <- capture_dots_env(rlang::enquos(...))
+  filter_quo <- capture_quosure_env(rlang::enquo(filter))
+  if (rlang::quo_is_null(filter_quo)) filter_quo <- NULL
+  call <- sys.call()
+  fn <- make_sampling_step(dots, filter_quo)
+  step <- build_step(
+    fn           = fn,
+    handler_expr = quote(fabricatr::fabricate),
+    dots         = dots,
+    step_type    = "sampling",
+    causal_type  = "dgp",
+    label        = label,
+    call         = call,
+    filter_quo   = filter_quo
+  )
+  attr(step, "draws") <- as.integer(draws)
+  step
+}

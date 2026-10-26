@@ -1,0 +1,184 @@
+# Nested simulation: a step with `draws =` is redrawn that many times for each
+# draw of the steps above it, and the diagnosis decomposes the variance by step.
+
+test_that("a step stores its draws", {
+  s <- declare_model(N = 10, Y = rnorm(N), draws = 5)
+  expect_equal(attr(s, "draws"), 5L)
+  s2 <- declare_inquiry(mu = mean(Y), draws = 3)
+  expect_equal(attr(s2, "draws"), 3L)
+  s3 <- declare_estimator(Y ~ Z, .method = lm, term = "Z", draws = 7)
+  expect_equal(attr(s3, "draws"), 7L)
+  s4 <- declare_assignment(Z = sample(rep(0:1, length.out = N)), draws = 4)
+  expect_equal(attr(s4, "draws"), 4L)
+  s5 <- declare_sampling(S = sample(rep(0:1, length.out = N)), draws = 2)
+  expect_equal(attr(s5, "draws"), 2L)
+  s6 <- declare_measurement(Y = Y * 2, draws = 9)
+  expect_equal(attr(s6, "draws"), 9L)
+  s7 <- declare_test(Y ~ Z, .method = lm, draws = 11)
+  expect_equal(attr(s7, "draws"), 11L)
+})
+
+test_that("draws defaults to 1", {
+  s <- declare_model(N = 10, Y = rnorm(N))
+  expect_equal(attr(s, "draws"), 1L)
+})
+
+test_that("design_has_nested_draws returns TRUE when any step has draws > 1", {
+  d1 <- declare_model(N = 10, Y = rnorm(N)) +
+    declare_inquiry(mu = mean(Y))
+  expect_false(design_has_nested_draws(d1))
+
+  d2 <- declare_model(N = 10, Y = rnorm(N), draws = 5) +
+    declare_inquiry(mu = mean(Y))
+  expect_true(design_has_nested_draws(d2))
+})
+
+test_that("nested simulation produces world_sims * design_sims paths", {
+  design <-
+    declare_model(N = 10, U = rnorm(N), Y_Z_1 = U + 0.3, Y_Z_0 = U,
+                  draws = 5) +
+    declare_inquiry(mu = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = sample(rep(0:1, length.out = N)), draws = 3) +
+    declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "mu",
+                      label = "ols")
+  sim <- simulate_design(design)
+  expect_equal(max(sim$sim_ID), 5L * 3L)
+})
+
+test_that("nested simulation adds <label>_draw columns", {
+  design <-
+    declare_model(N = 10, U = rnorm(N), Y_Z_1 = U + 0.3, Y_Z_0 = U,
+                  draws = 5) +
+    declare_inquiry(mu = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = sample(rep(0:1, length.out = N)), draws = 3) +
+    declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "mu",
+                      label = "ols")
+  sim <- simulate_design(design)
+  expect_true("model_draw" %in% names(sim))
+  expect_true("assignment_draw" %in% names(sim))
+  expect_equal(length(unique(sim$model_draw)), 5L)
+  expect_equal(length(unique(sim$assignment_draw)), 3L)
+})
+
+test_that("specifying both sims and draws warns", {
+  design <-
+    declare_model(N = 10, U = rnorm(N), Y_Z_1 = U + 0.3, Y_Z_0 = U,
+                  draws = 5) +
+    declare_inquiry(mu = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = sample(rep(0:1, length.out = N)), draws = 3) +
+    declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "mu",
+                      label = "ols")
+  w <- expect_warning(simulate_design(design, sims = 4), "sims.*ignored|ignored.*sims")
+  # draws still win: result should be nested (5 x 3 = 15 paths), not 4 flat
+  sim <- suppressWarnings(simulate_design(design, sims = 4))
+  expect_equal(max(sim$sim_ID), 5L * 3L)
+})
+
+test_that("diagnose_design uses nested draws when sims is NULL", {
+  design <-
+    declare_model(N = 20, U = rnorm(N), Y_Z_1 = U + .3, Y_Z_0 = U,
+                  draws = 4) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = sample(rep(0:1, length.out = N)), draws = 3) +
+    declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
+                      label = "ols")
+  diag <- diagnose_design(design, bootstrap_sims = 0)
+  expect_equal(max(diag$simulations_df$sim_ID), 4L * 3L)
+  expect_false(is.null(diag$variance_decomposition))
+})
+
+test_that("variance decomposition names its components after the draw steps", {
+  design <-
+    declare_model(N = 20, U = rnorm(N), Y_Z_1 = U + .3, Y_Z_0 = U,
+                  draws = 4) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = sample(rep(0:1, length.out = N)), draws = 3) +
+    declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
+                      label = "ols")
+  diag <- diagnose_design(design, bootstrap_sims = 0)
+  vd <- diag$variance_decomposition
+  expect_true(all(c("var_total", "var_model", "var_assignment", "var_residual",
+                    "frac_model", "frac_assignment", "frac_residual")
+                  %in% names(vd)))
+  fracs <- vd$frac_model + vd$frac_assignment + vd$frac_residual
+  expect_equal(fracs, rep(1, length(fracs)), tolerance = 1e-8)
+})
+
+test_that("draws on a step after the inquiry keep the inquiry and hold the population fixed", {
+  # Regression test. The outer fan-out ran only DGP steps ahead of the first
+  # fanned step, so an inquiry declared before it never executed and every
+  # estimand came back missing, while the model was redrawn per assignment.
+  design <-
+    declare_model(N = 20, U = rnorm(N), Y_Z_1 = U + .3, Y_Z_0 = U) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = sample(rep(0:1, length.out = N)), draws = 5) +
+    declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
+                      label = "ols")
+  sims <- simulate_design(design)
+  expect_equal(nrow(sims), 5L)
+  expect_true("estimand" %in% names(sims))
+  expect_false(any(is.na(sims$estimand)))
+  # One population means one realised estimand shared by all five draws
+  expect_equal(length(unique(sims$estimand)), 1L)
+  expect_gt(length(unique(sims$estimate)), 1L)
+})
+
+test_that("an inquiry upstream of a model fan-out still varies by world", {
+  design <-
+    declare_model(N = 20, tau = rnorm(1), U = rnorm(N),
+                  Y_Z_0 = U, Y_Z_1 = U + tau, draws = 4) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = sample(rep(0:1, length.out = N)), draws = 3) +
+    declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
+                      label = "ols")
+  sims <- simulate_design(design)
+  expect_equal(nrow(sims), 12L)
+  per_world <- tapply(sims$estimand, sims$model_draw, function(x)
+    length(unique(x)))
+  expect_equal(as.vector(per_world), rep(1L, 4))
+  expect_equal(length(unique(sims$estimand)), 4L)
+})
+
+test_that("draws on the model alone work without an assignment fan-out", {
+  design <-
+    declare_model(N = 30, U = rnorm(N), Y_Z_1 = U + .3, Y_Z_0 = U,
+                  draws = 4) +
+    declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+    declare_assignment(Z = sample(rep(0:1, length.out = N))) +
+    declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
+                      label = "ols")
+  sim <- simulate_design(design)
+  expect_equal(max(sim$sim_ID), 4L)
+  expect_true("model_draw" %in% names(sim))
+  expect_false("assignment_draw" %in% names(sim))
+})
+
+test_that("a design with no draws diagnoses as before", {
+  design <- declare_model(N = 20, Y = rnorm(N)) +
+    declare_inquiry(mu = mean(Y)) +
+    declare_estimator(Y ~ 1, .method = lm, term = "(Intercept)",
+                      inquiry = "mu", label = "ols")
+  diag <- diagnose_design(design, sims = 5, bootstrap_sims = 0)
+  expect_null(diag$variance_decomposition)
+})
+
+test_that("three levels of nesting simulate", {
+  design <-
+    declare_model(N = 100, U = rnorm(N), Y_Z_1 = U + .3, Y_Z_0 = U,
+                  draws = 3) +
+    declare_sampling(S = c(rep(1, 50), rep(0, 50)), draws = 2) +
+    declare_assignment(Z = sample(rep(0:1, length.out = length(U))),
+                       draws = 4) +
+    declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+    declare_estimator(Y ~ Z, .method = lm, term = "Z", label = "ols")
+  sim <- simulate_design(design)
+  expect_equal(max(sim$sim_ID), 3L * 2L * 4L)
+})

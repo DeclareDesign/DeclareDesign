@@ -1,99 +1,231 @@
-#' Set the diagnosands for a design
+#' Attach diagnosands to a design (deprecated)
 #'
-#' A researcher often has a set of diagnosands in mind to appropriately assess the quality of a design. \code{set_diagnosands} sets the default diagnosands for a design, so that later readers can assess the design on the same terms as the original author. Readers can also use \code{diagnose_design} to diagnose the design using any other set of diagnosands.
+#' Deprecated in 2.0. Stores `diagnosands` as an attribute on `design`, which
+#' [diagnose_design()] uses in place of the defaults when present. Pass the
+#' diagnosands to the diagnosis instead:
+#' `diagnose_design(design, diagnosands = ...)`.
 #'
-#' @param x A design typically created using the + operator, or a simulations data.frame created by \code{simulate_design}.
-#' @param diagnosands A set of diagnosands created by \code{\link{declare_diagnosands}}
+#' Two reasons, beyond diagnosis not being a feature of a design. The
+#' attribute does not survive [redesign()], so anything attached this way is
+#' silently gone the first time a parameter moves, and the defaults that
+#' replace it may not be computable from the estimator's output. And a
+#' diagnosands object replaces the default set rather than adding to it, so
+#' declaring one diagnosand drops the other six without saying so.
 #'
-#' @return a design object with a diagnosand attribute
-#'
-#' @examples
-#' 
-#' # Two-arm randomized experiment
-#' design <-
-#'   declare_model(
-#'     N = 500,
-#'     gender = rbinom(N, 1, 0.5),
-#'     X = rep(c(0, 1), each = N / 2),
-#'     U = rnorm(N, sd = 0.25),
-#'     potential_outcomes(Y ~ 0.2 * Z + X + U)
-#'   ) +
-#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_sampling(S = complete_rs(N = N, n = 200)) +
-#'   declare_assignment(Z = complete_ra(N = N, m = 100)) +
-#'   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-#'   declare_estimator(Y ~ Z, inquiry = "ATE")
-#' 
-#' # You can choose your own diagnosands instead of the defaults:
-#' 
-#' my_diagnosands <-
-#'   declare_diagnosands(median_bias = median(estimate - estimand))
-#' 
-#' \dontrun{
-#' ## You can set diagnosands with set_diagnosands 
-#' design <- set_diagnosands(design, diagnosands = my_diagnosands)
-#' diagnosis <- diagnose_design(design)
-#' diagnosis
-#' 
-#' ## Using set_diagnosands to diagnose simulated data
-#' simulations_df <- simulate_design(design)
-#' 
-#' simulations_df <- set_diagnosands(simulations_df, my_diagnosands)
-#' 
-#' diagnose_design(simulations_df)
-#' 
-#' # If you do not specify diagnosands in diagnose_design, 
-#' #   the function default_diagnosands() is used, 
-#' #   which is reproduced below.
-#' 
-#' alpha <- 0.05
-#' 
-#' default_diagnosands <- 
-#'   declare_diagnosands(
-#'     mean_estimand = mean(estimand),
-#'     mean_estimate = mean(estimate),
-#'     bias = mean(estimate - estimand),
-#'     sd_estimate = sqrt(pop.var(estimate)),
-#'     rmse = sqrt(mean((estimate - estimand) ^ 2)),
-#'     power = mean(p.value <= alpha),
-#'     coverage = mean(estimand <= conf.high & estimand >= conf.low)
-#'   )
-#'   
-#' diagnose_design(
-#'   simulations_df,
-#'   diagnosands = default_diagnosands
-#' )
-#' 
-#' # A longer list of potentially useful diagnosands might include:
-#' 
-#' extended_diagnosands <- 
-#'   declare_diagnosands(
-#'     mean_estimand = mean(estimand),
-#'     mean_estimate = mean(estimate),
-#'     bias = mean(estimate - estimand),
-#'     sd_estimate = sd(estimate),
-#'     rmse = sqrt(mean((estimate - estimand) ^ 2)),
-#'     power = mean(p.value <= alpha),
-#'     coverage = mean(estimand <= conf.high & estimand >= conf.low),
-#'     mean_se = mean(std.error),
-#'     type_s_rate = mean((sign(estimate) != sign(estimand))[p.value <= alpha]),
-#'     exaggeration_ratio = mean((estimate/estimand)[p.value <= alpha]),
-#'     var_estimate = pop.var(estimate),
-#'     mean_var_hat = mean(std.error^2),
-#'     prop_pos_sig = mean(estimate > 0 & p.value <= alpha),
-#'     mean_ci_length = mean(conf.high - conf.low)
-#'   )
-#'   
-#' diagnose_design(
-#'   simulations_df,
-#'   diagnosands = extended_diagnosands
-#' )
-#'
-#' }
+#' @family diagnosands
+#' @param design (required) A `design`.
+#' @param diagnosands (optional) A diagnosands `design_step`. Defaults to
+#'   [default_diagnosands()].
+#' @return `design`, with `diagnosands` stored in its `diagnosands`
+#'   attribute.
 #' @export
-set_diagnosands <- function(x, diagnosands = default_diagnosands) {
-  
-  attr(x, "diagnosands") <- diagnosands
+#' @examples
+#' design <-
+#'   declare_model(N = 30, Y = rnorm(N)) +
+#'   declare_inquiry(mu = mean(Y)) +
+#'   declare_estimator(Y ~ 1, .method = lm, term = "(Intercept)", inquiry = "mu")
+#'
+#' # instead of set_diagnosands(design, ...)
+#' diagnose_design(
+#'   design,
+#'   diagnosands = declare_diagnosands(mean_estimate = mean(estimate, na.rm = TRUE)),
+#'   sims = 5,
+#'   bootstrap_sims = 0
+#' )
+set_diagnosands <- function(design, diagnosands = default_diagnosands()) {
+  rlang::warn(c(
+    "`set_diagnosands()` is deprecated in DeclareDesign 2.0.",
+    i = "Pass them to the diagnosis instead: `diagnose_design(design, diagnosands = ...)`.",
+    x = "Diagnosands attached to a design do not survive `redesign()`."
+  ), .frequency = "once", .frequency_id = "set_diagnosands")
+  attr(design, "diagnosands") <- diagnosands
+  design
+}
 
-  x
+#' The diagnosands `select_diagnosands()` knows about
+#'
+#' A superset of [default_diagnosands()]. `alpha` and `na.rm` are left as free
+#' symbols so that they resolve to the formals of the calling
+#' `select_diagnosands()` frame.
+#'
+#' @keywords internal
+#' @noRd
+diagnosand_library <- function() {
+  list(
+    mean_estimand      = rlang::expr(mean(estimand, na.rm = na.rm)),
+    mean_estimate      = rlang::expr(mean(estimate, na.rm = na.rm)),
+    bias               = rlang::expr(mean(estimate - estimand, na.rm = na.rm)),
+    sd_estimate        = rlang::expr(stats::sd(estimate, na.rm = na.rm)),
+    rmse               = rlang::expr(sqrt(mean((estimate - estimand)^2, na.rm = na.rm))),
+    power              = rlang::expr(mean(p.value <= alpha, na.rm = na.rm)),
+    coverage           = rlang::expr(mean(conf.low <= estimand & estimand <= conf.high, na.rm = na.rm)),
+    mean_se            = rlang::expr(mean(std.error, na.rm = na.rm)),
+    type_s_rate        = rlang::expr(mean((sign(estimate) != sign(estimand))[p.value <= alpha], na.rm = na.rm)),
+    exaggeration_ratio = rlang::expr(mean((estimate / estimand)[p.value <= alpha], na.rm = na.rm)),
+    var_estimate       = rlang::expr(pop.var(estimate)),
+    mean_var_hat       = rlang::expr(mean(std.error^2, na.rm = na.rm)),
+    prop_pos_sig       = rlang::expr(mean(estimate > 0 & p.value <= alpha, na.rm = na.rm)),
+    mean_ci_length     = rlang::expr(mean(conf.high - conf.low, na.rm = na.rm))
+  )
+}
+
+#' Build a diagnosands step from a set of named diagnosands
+#'
+#' Two ways to call this, told apart by whether the first argument is a
+#' `design_step`.
+#'
+#' Given names only, `select_diagnosands("bias", "power")` builds a fresh
+#' diagnosands step out of the built-in library, which is what DeclareDesign
+#' does. `alpha`, `subset`, and `na.rm` shape the expressions it writes.
+#'
+#' Given a diagnosands step first, `select_diagnosands(my_diagnosands, "bias")`
+#' keeps those entries of that step and nothing else. The expressions are
+#' yours and are copied unchanged, so `alpha`, `subset`, and `na.rm` have
+#' nothing to act on and are refused rather than ignored: set them on the
+#' [declare_diagnosands()] call that made the set.
+#'
+#' A consequence worth knowing: the same name can mean different things in
+#' the two forms. `select_diagnosands("bias")` writes
+#' `mean(estimate - estimand, na.rm = FALSE)`, following DeclareDesign's
+#' default, while `select_diagnosands(default_diagnosands(), "bias")` returns
+#' the `na.rm = TRUE` version [default_diagnosands()] declares.
+#'
+#' The library is a superset of [default_diagnosands()]: `mean_estimand`,
+#' `mean_estimate`, `bias`, `sd_estimate`, `rmse`, `power`, `coverage`,
+#' `mean_se`, `type_s_rate`, `exaggeration_ratio`, `var_estimate`,
+#' `mean_var_hat`, `prop_pos_sig`, and `mean_ci_length`.
+#'
+#' @family diagnosands
+#' @param ... (required) Diagnosand names to keep, as strings, optionally
+#'   preceded by a diagnosands `design_step` to subset.
+#' @param alpha (optional) Significance level used by `power`, `type_s_rate`,
+#'   `exaggeration_ratio`, and `prop_pos_sig`. Defaults to `0.05`.
+#' @param subset (optional) An expression evaluated on the simulations table;
+#'   only the rows for which it is `TRUE` enter the diagnosands. `NULL` (the
+#'   default) keeps every simulation.
+#' @param na.rm (optional) Passed to the library diagnosands. Defaults to
+#'   `FALSE`.
+#' @return A diagnosands `design_step`, as [declare_diagnosands()] returns,
+#'   holding the named diagnosands in the order given.
+#' @export
+#' @examples
+#' select_diagnosands("sd_estimate", "mean_se")
+#'
+#' # subset a custom set instead of the library
+#' select_diagnosands(default_diagnosands(), "bias", "rmse")
+select_diagnosands <- function(..., alpha = 0.05, subset = NULL,
+                               na.rm = FALSE) {
+  args <- list(...)
+  base_set <- NULL
+  if (length(args) > 0 && inherits(args[[1]], "design_step")) {
+    base_set <- args[[1]]
+    args <- args[-1]
+  }
+  keep <- unlist(args, use.names = FALSE)
+  if (!is.character(keep) || length(keep) == 0) {
+    rlang::abort("Name at least one diagnosand to keep, as a string.")
+  }
+  if (!is.null(base_set)) {
+    supplied <- c("alpha", "subset", "na.rm")[
+      c(!missing(alpha), !missing(subset), !missing(na.rm))
+    ]
+    if (length(supplied) > 0) {
+      rlang::abort(c(
+        paste0("`", paste(supplied, collapse = "`, `"),
+               "` cannot be applied to a diagnosands set that already exists."),
+        "i" = "Those arguments build the library diagnosands, and this call is subsetting your own.",
+        "i" = "Set them on the `declare_diagnosands()` call that made the set."
+      ))
+    }
+    return(subset_diagnosands(base_set, keep))
+  }
+  library <- diagnosand_library()
+  unknown <- setdiff(keep, names(library))
+  if (length(unknown) > 0) {
+    rlang::abort(c(
+      paste0("Unknown diagnosand", if (length(unknown) > 1) "s" else "", ": ",
+             paste(unknown, collapse = ", "), "."),
+      "i" = paste0("Available: ", paste(names(library), collapse = ", "), "."),
+      "i" = "Write your own with `declare_diagnosands()`."
+    ))
+  }
+  subset_quo <- rlang::enquo(subset)
+  rlang::inject(
+    declare_diagnosands(!!!library[keep], subset = !!subset_quo, alpha = alpha)
+  )
+}
+
+#' Keep a named subset of an existing diagnosands step
+#'
+#' @keywords internal
+#' @noRd
+subset_diagnosands <- function(diagnosands, keep) {
+  if (!identical(attr(diagnosands, "step_type"), "diagnosand")) {
+    rlang::abort(c(
+      paste0("To subset a set of diagnosands, pass one: this is a ",
+             attr(diagnosands, "step_type") %||% "design", " step."),
+      "i" = "To build from the library instead, pass names only, as in `select_diagnosands(\"bias\")`."
+    ))
+  }
+  dots <- attr(diagnosands, "dots")
+  unknown <- setdiff(keep, names(dots))
+  if (length(unknown) > 0) {
+    rlang::abort(paste0(
+      "Diagnosand", if (length(unknown) > 1) "s" else "", " not in this set: ",
+      paste(unknown, collapse = ", "), "."
+    ))
+  }
+  rebuild_step(diagnosands, dots[keep])
+}
+
+#' Attach a citation to a design
+#'
+#' Records how the design should be cited, as a [utils::bibentry()] built from
+#' the fields given, or as the text in `citation`. [cite_design()] returns it.
+#'
+#' @family citing a design
+#' @param design (required) A `design`.
+#' @param title (optional) Title of the design.
+#' @param author (optional) Author or authors, as a string or a
+#'   [utils::person()].
+#' @param year (optional) Year.
+#' @param description (optional) Note on the entry. Defaults to
+#'   `"Unpublished research design declaration"`.
+#' @param citation (optional) A ready-made citation, as a string or a
+#'   `bibentry`, used in place of the fields above.
+#' @return `design`, with the citation stored in its `citation` attribute.
+#' @export
+#' @examples
+#' design <- declare_model(N = 10, Y = rnorm(N))
+#' design <- set_citation(design, title = "Example", author = "Coppock",
+#'                        year = 2026)
+#' cite_design(design)
+set_citation <- function(design, title = NULL, author = NULL, year = NULL,
+                         description = "Unpublished research design declaration",
+                         citation = NULL) {
+  if (is.null(citation)) {
+    citation <- utils::bibentry("unpublished", title = title, author = author,
+                                year = year, note = description)
+  }
+  attr(design, "citation") <- citation
+  design
+}
+
+#' Retrieve a design's citation
+#'
+#' Returns the citation [set_citation()] attached to the design, or, when
+#' none was attached, the citation for the DeclareDesign package itself.
+#'
+#' @family citing a design
+#' @param design (required) A `design`.
+#' @return The design's citation, a `bibentry` or a string, or
+#'   `utils::citation("DeclareDesign")` when none has been set.
+#' @export
+#' @examples
+#' design <- set_citation(declare_model(N = 10, Y = rnorm(N)),
+#'                        title = "Example", author = "Coppock", year = 2026)
+#' cite_design(design)
+cite_design <- function(design) {
+  citation <- attr(design, "citation")
+  if (is.null(citation)) utils::citation("DeclareDesign") else citation
 }

@@ -4,96 +4,87 @@
 \alias{redesign}
 \title{Redesign}
 \usage{
-redesign(design, ..., expand = TRUE)
+redesign(.design, ..., .expand = TRUE)
 }
 \arguments{
-\item{design}{An object of class design.}
+\item{.design}{(required) A \code{design}. Named with a dot, like \code{.method} and
+\code{.summary} in \code{\link[=declare_estimator]{declare_estimator()}}, because everything else here is a
+parameter of the user's design: a plain \code{design} would partially match and
+swallow a parameter named \code{d}, \code{de}, \code{des}, \code{desi}, or \code{desig}, and designs
+with a parameter named \code{d} exist.}
 
-\item{...}{Arguments to redesign e.g., \code{n = 100.} If redesigning multiple arguments, they must be specified as a named list. lists should also be used if redesigning with respect to a dataset or with respect to a vector. For instance, redesign(design, df = list(new_df)).}
+\item{...}{(optional) Named parameter values. A bare atomic vector, and a
+bare list, supply one design per element; a data frame, a matrix, a
+function, or any classed object is one value. To sweep over such values,
+pass a list of them, and to supply one list as a single value wrap it:
+\code{list(x)}.}
 
-\item{expand}{If TRUE, redesign using the crossproduct of \code{...}, otherwise recycle them.}
+\item{.expand}{(optional) If \code{TRUE} (the default), expand the parameter
+grid; if \code{FALSE}, zip parallel vectors. Dotted for the same reason as
+\code{.design}: an undotted \code{expand} after the dots would collide exactly with a
+parameter of that name.}
 }
 \value{
-A design, or, in the case of multiple values being passed onto \code{...}, a `by`-list of designs.
+A single \code{design} if one combination is supplied, otherwise a list
+of designs named by the values that distinguish them: \code{redesign(design, N = c(10, 20))} gives \code{N = 10} and \code{N = 20}, so a simulation's \code{design}
+column, and \code{bind_rows(.id = "design")}, carry the values that vary.
+Designs are named \code{design_1}, \code{design_2}, etc. when a parameter's value
+cannot be written down, such as a function or a data frame.
 }
 \description{
-\code{redesign} quickly generates a design from an existing one by resetting symbols used in design handler parameters in a step's environment (Advanced).
+Returns a copy of the design with one or more parameters changed, so that
+versions can be diagnosed side by side. Several values for a parameter give
+several designs: with \code{.expand = TRUE} (the default) the cross-product of
+the values is taken, and with \code{.expand = FALSE} they are zipped
+position-wise.
 }
 \details{
-If you attempt to change a parameter that is not saved into a design you will receive a message but not an error.
+A parameter that no step responds to draws a warning and is otherwise
+ignored. \code{\link[=summary]{summary()}} on a design lists the names that are available.
+
+An atomic vector always supplies one value per design, so a parameter that
+is itself a vector has to be wrapped: \code{prob_each = list(c(0, 0.5, 0.5))} is
+one design, where \code{prob_each = c(0, 0.5, 0.5)} is three. Handing a bare
+vector to a parameter that currently holds one warns.
+
+A bare list is split the same way, one design per element, so a parameter
+whose value is a list is wrapped by the same rule:
+\code{levels_list = list(levels)} is one design and \code{levels_list = levels} is one
+design per element of \code{levels}. The two are told apart by what the elements
+are, since a sweep over lists holds a list in every element, and a bare list
+handed to a list-valued parameter whose elements are not lists warns.
+
+Only bare vectors and bare lists are read that way. A data frame, a matrix,
+and anything carrying a class are single replacement values, so a design
+written as \code{declare_model(data = dataset, ...)}, with \code{dataset <- pilot}
+in the workspace, swaps its data with \code{redesign(design, dataset = real)}
+and needs no wrapping. Naming the parameter \code{dataset} rather than after the
+data it starts with keeps the name true once it is redesigned. A redesign
+reaches the name the design reads the data under, not \code{data}, which names
+fabricate's argument and belongs to the declaration.
 }
 \examples{
-
-# Two-arm randomized experiment
-n <- 500
-
-design <-
-  declare_model(
-    N = 1000,
-    gender = rbinom(N, 1, 0.5),
-    X = rep(c(0, 1), each = N / 2),
-    U = rnorm(N, sd = 0.25),
-    potential_outcomes(Y ~ 0.2 * Z + X + U)
-  ) +
-  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-  declare_sampling(S = complete_rs(N = N, n = n)) +
-  declare_assignment(Z = complete_ra(N = N, m = n/2)) +
-  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-  declare_estimator(Y ~ Z, inquiry = "ATE")
-
-# Use redesign to return a single modified design
-modified_design <- redesign(design, n = 200)
-
-# Use redesign to return a series of modified designs
-## Sample size is varied while the rest of the design remains
-## constant
-design_vary_N <- redesign(design, n = c(100, 500, 900))
-
-\dontrun{
-# redesign can be used in conjunction with diagnose_designs
-# to optimize the design for specific diagnosands
-diagnose_designs(design_vary_N)
+designer <- function(N) {
+  declare_model(N = N, Y = rnorm(N)) +
+    declare_inquiry(mu = mean(Y))
 }
+design <- designer(50)
+redesigned <- redesign(design, N = c(10, 20))
+length(redesigned)
 
-# When redesigning with arguments that are vectors,
-# use list() in redesign, with each list item
-# representing a design you wish to create
-
-prob_each <- c(.1, .5, .4)
-
-population <- declare_model(N = 1000)
-assignment <- declare_assignment(
-  Z = complete_ra(prob_each = prob_each), 
-  legacy = FALSE)
-
-design <- population + assignment
-
-## returns two designs
-
-designs_vary_prob_each <- redesign(
-  design,
-  prob_each = list(c(.2, .5, .3), c(0, .5, .5)))
-
-# To illustrate what does and does not get edited by redesign, 
-# consider the following three designs. In the first two, argument
-# X is called from the step's environment; in the third it is not.
-# Using redesign will alter the role of X in the first two designs
-# but not the third one.
-
-X <- 3
-f <- function(b, X) b*X
-g <- function(b) b*X
-
-design1 <- declare_model(N = 1, A = X)       + NULL
-design2 <- declare_model(N = 1, A = f(2, X)) + NULL
-design3 <- declare_model(N = 1, A = g(2))    + NULL
-
-draw_data(design1)
-draw_data(design2)
-draw_data(design3)
-
-draw_data(redesign(design1, X=0))
-draw_data(redesign(design2, X=0))
-draw_data(redesign(design3, X=0))
-
+# a function-valued parameter
+summarizer <- function(x) mean(x)
+design <- declare_model(N = 50, Y = rnorm(N)) +
+  declare_inquiry(mu = summarizer(Y))
+redesign(design, summarizer = stats::median)
 }
+\seealso{
+Other modifying a design:
+\code{\link[=delete_step]{delete_step()}},
+\code{\link[=design_notes]{design_notes()}},
+\code{\link[=design_parameters]{design_parameters()}},
+\code{\link[=expand_design]{expand_design()}},
+\code{\link[=insert_step]{insert_step()}},
+\code{\link[=replace_step]{replace_step()}}
+}
+\concept{modifying a design}

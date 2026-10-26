@@ -2,230 +2,87 @@
 % Please edit documentation in R/declare_estimator.R
 \name{declare_estimator}
 \alias{declare_estimator}
-\alias{declare_estimators}
-\alias{label_estimator}
-\alias{method_handler}
-\title{Declare estimator}
+\title{Declare an estimator}
 \usage{
 declare_estimator(
   ...,
-  handler = label_estimator(method_handler),
-  label = "estimator"
-)
-
-declare_estimators(
-  ...,
-  handler = label_estimator(method_handler),
-  label = "estimator"
-)
-
-label_estimator(fn)
-
-method_handler(
-  data,
-  ...,
-  .method = estimatr::lm_robust,
+  .method = NULL,
   .summary = tidy_try,
-  model,
-  model_summary,
-  term = FALSE
+  inquiry = NULL,
+  term = NULL,
+  label = "estimator",
+  handler = NULL,
+  draws = 1L
 )
 }
 \arguments{
-\item{...}{arguments to be captured, and later passed to the handler}
+\item{...}{(optional) Arguments forwarded, as written, to \code{.method} (or to
+\code{handler}), which evaluates them itself with the data as \code{data}.
+Typically the formula appears first (e.g., \code{Y ~ Z}); without a \code{handler},
+these must include whatever \code{.method} needs. A legacy \verb{model =} argument
+is read as \code{.method} with a deprecation warning rather than forwarded.}
 
-\item{handler}{a tidy-in, tidy-out function}
+\item{.method}{(optional) The model-fitting function. Defaults to
+\code{\link[estimatr:lm_robust]{estimatr::lm_robust()}}.}
 
-\item{label}{a string describing the step}
+\item{.summary}{(optional) Function used to tidy \code{.method}'s output.
+Defaults to \code{\link[=tidy_try]{tidy_try()}}.}
 
-\item{fn}{A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval), and a term column for labeling coefficient estimates.}
+\item{inquiry}{(optional) The label of the inquiry this estimator targets,
+as a string (\code{inquiry = "ATE"}), or a character vector of labels. Passing
+the inquiry step object is an error. The label joins the estimate to its
+estimand in every table of estimates and in the diagnosis.}
 
-\item{data}{a data.frame}
+\item{term}{(optional) Which model terms to report. A character vector keeps
+exactly those terms, in that order, and errors if any is absent from the
+tidied output; \code{TRUE} keeps every term including the intercept. When left
+unset (or \code{FALSE}), only the first non-intercept term is reported, so
+\code{declare_estimator(Y ~ Z + X)} returns the \code{Z} row alone; a \code{handler}'s
+table is kept whole unless \code{term} names terms. Evaluated on every draw, so
+it may name a design parameter.}
 
-\item{.method}{A method function, e.g. lm or glm. By default, the method is the \code{\link[estimatr:lm_robust]{estimatr::lm_robust}} function from the estimatr package, which fits OLS regression and calculates robust and cluster-robust standard errors.}
+\item{label}{(optional) Step label. Defaults to \code{"estimator"}. When two
+estimator or test steps in one design share a label, \code{+} relabels them
+from their formulas, with a message.}
 
-\item{.summary}{A method-in data-out function to extract coefficient estimates or method summary statistics, such as \code{\link[broom:tidy]{broom::tidy}} or \code{\link[broom:glance]{broom::glance}}. By default, the \code{DeclareDesign} method summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the method object sent to \code{method}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the method object, it fails.}
+\item{handler}{(optional) A function. When supplied, the estimator bypasses
+\code{.method} and \code{.summary} and instead calls \code{handler(data, ...)} with the
+dots as written, not evaluated; it must return a tidy table.}
 
-\item{model}{Deprecated argument. Use \code{.method} instead.}
-
-\item{model_summary}{Deprecated argument. Use \code{.summary} instead.}
-
-\item{term}{Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.}
+\item{draws}{(optional) Number of nested draws for this step. Defaults to
+\code{1}. When \verb{> 1}, the step is re-executed \code{draws} times for each upstream
+draw during nested simulation.}
 }
 \value{
-A function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimator and associated statistics.
+A \code{design_step} (class \code{c("design_step", "dd", "function")}): a
+function that takes a data frame and returns a tibble of estimates, one
+row per reported term, with \code{estimator} and, when \code{inquiry} is set,
+\code{inquiry} columns. A draw on which \code{.method} errors returns a row with
+\code{error = TRUE} and the message rather than stopping the run. Add it to a
+design with \code{+}.
 }
 \description{
-Declares an estimator which generates estimates and associated statistics.
-
-Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific inquiry in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an inquiry. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
-}
-\details{
-\code{declare_estimator} is designed to handle two main ways of generating parameter estimates from data.
-
-In \code{declare_estimator}, you can optionally provide the name of an inquiry or an object created by \code{\link{declare_inquiry}} to connect your estimate(s) to inquiry(s).
-
-The first is through \code{label_estimator(method_handler)}, which is the default value of the \code{handler} argument. Users can use standard method functions like lm, glm, or iv_robust. The methods are summarized using the function passed to the \code{summary} argument. This will usually be a "tidier" like \code{broom::tidy}. The default \code{summary} function is \code{tidy_try}, which applies a tidy method if available, and if not, tries to make one on the fly.
-
-An example of this approach is:
-
-\code{declare_estimator(Y ~ Z + X, .method = lm_robust, .summary = tidy, term = "Z", inquiry = "ATE")}
-
-The second approach is using a custom data-in, data-out function, usually first passed to \code{label_estimator}. The reason to pass the custom function to \code{label_estimator} first is to enable clean labeling and linking to inquiries.
-
-An example of this approach is:
-
-\code{
-my_fun <- function(data){ with(data, median(Y[Z == 1]) - median(Y[Z == 0])) }
-}
-
-\code{
-declare_estimator(handler = label_estimator(my_fun), inquiry = "ATE")
-}
-
-\code{label_estimator} takes a data-in-data out function to \code{fn}, and returns a data-in-data-out function that first runs the provided estimation function \code{fn} and then appends a label for the estimator and, if an inquiry is provided, a label for the inquiry.
+Declares the answer strategy: a function that produces an estimate of an
+inquiry from the observed data. The estimate is tidied to one row per term
+and joined to its estimand by the \code{inquiry} label during diagnosis.
 }
 \examples{
-
-# Setup for examples
-design <-
-  declare_model(
-    N = 500,
-    gender = rbinom(N, 1, 0.5),
-    U = rnorm(N, sd = 0.25),
-    potential_outcomes(Y ~ rbinom(
-      N, 1, prob = pnorm(0.2 * Z + 0.2 * gender + 0.1 * Z * gender + U)
-    ))
-  ) +
-  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-  declare_sampling(S = complete_rs(N = N, n = 200)) +
-  declare_assignment(Z = complete_ra(N = N, m = 100)) +
-  declare_measurement(Y = reveal_outcomes(Y ~ Z))
-
-run_design(design)
-
-# default estimator is lm_robust with tidy summary
-design_0 <-
-  design +
-  declare_estimator(Y ~ Z, inquiry = "ATE")
-
-run_design(design_0)
-
-# Linear regression using lm_robust and tidy summary
-design_1 <-
-  design +
-  declare_estimator(
-    formula = Y ~ Z,
-    .method = lm_robust,
-    .summary = tidy,
-    term = "Z",
-    inquiry = "ATE",
-    label = "lm_no_controls"
-  )
-
-run_design(design_1)
-
-# Use glance summary function to view model fit statistics
-design_2 <-
-  design +
-  declare_estimator(.method = lm_robust,
-                    formula = Y ~ Z,
-                    .summary = glance)
-
-run_design(design_2)
-
-# Custom answer strategies
-# A custom estimator should take data as an argument and return a data.frame
-# with columns such as "estimate", "std.error", "p.value", "conf.low", "conf.high"
-my_estimator <- function(data) {
-  data.frame(estimate = mean(data$Y))
-}
-
-# Add a custom estimator to the design, wrapping it in `label_estimator()`
-# in order to pass label and inquiry arguments
-
-design_3 <-
-  design +
-  declare_inquiry(Y_bar = mean(Y)) +
-  declare_estimator(handler = label_estimator(my_estimator),
-                    label = "mean",
-                    inquiry = "Y_bar")
-
-run_design(design_3)
-
-# Use `term` to select particular coefficients
-design_4 <-
-  design +
-  declare_inquiry(difference_in_cates = mean(Y_Z_1[gender == 1] - Y_Z_0[gender == 1]) -
-                    mean(Y_Z_1[gender == 0] - Y_Z_0[gender == 0])) +
-  declare_estimator(Y ~ Z * gender,
-                    term = "Z:gender",
-                    inquiry = "difference_in_cates",
-                    .method = lm_robust)
-
-run_design(design_4)
-
-if(require("broom")) {
-
-  # Use glm from base R
-  design_5 <-
-    design +
-    declare_estimator(Y ~ Z + gender,
-                      family = "gaussian",
-                      inquiry = "ATE",
-                      .method = glm)
-
-  run_design(design_5)
-
-  # If we use logit, we'll need to estimate the average marginal effect with
-  # marginaleffects::avg_slopes. We wrap this up in a function we'll pass to
-  # .summary.
-
-  if(require("marginaleffects")) {
-
-    library(marginaleffects) # for predictions
-    library(broom) # for tidy
-
-    tidy_avg_slopes <- function(x) {
-      tidy(avg_slopes(x))
-    }
-
-    design_6 <-
-      design +
-      declare_estimator(
-        Y ~ Z + gender,
-        .method = glm,
-        family = binomial("logit"),
-        .summary = tidy_avg_slopes,
-        term = "Z"
-      )
-
-    run_design(design_6)
-
-    # Multiple estimators for one inquiry
-
-    design_7 <-
-      design +
-      declare_estimator(Y ~ Z,
-                        .method = lm_robust,
-                        inquiry = "ATE",
-                        label = "OLS") +
-      declare_estimator(
-        Y ~ Z + gender,
-        .method = glm,
-        family = binomial("logit"),
-        .summary = tidy_avg_slopes,
-        inquiry = "ATE",
-        term = "Z",
-        label = "logit"
-      )
-
-    run_design(design_7)
-
-  }
-
-}
+design <- declare_model(N = 50, U = rnorm(N), Y = U) +
+  declare_inquiry(mu = mean(Y)) +
+  declare_estimator(Y ~ 1, .method = lm, term = "(Intercept)",
+                    inquiry = "mu", label = "ols")
+draw_estimates(design)
 }
 \seealso{
-[estimatr::lm_robust()], [broom::glance()]
+Other design declarations:
+\code{\link[=declare_assignment]{declare_assignment()}},
+\code{\link[=declare_inquiry]{declare_inquiry()}},
+\code{\link[=declare_measurement]{declare_measurement()}},
+\code{\link[=declare_model]{declare_model()}},
+\code{\link[=declare_notes]{declare_notes()}},
+\code{\link[=declare_parameters]{declare_parameters()}},
+\code{\link[=declare_sampling]{declare_sampling()}},
+\code{\link[=declare_step]{declare_step()}},
+\code{\link[=declare_test]{declare_test()}}
 }
+\concept{design declarations}

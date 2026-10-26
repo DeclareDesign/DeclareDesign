@@ -3,75 +3,70 @@
 \name{simulate_design}
 \alias{simulate_design}
 \alias{simulate_designs}
-\title{Simulate a design}
+\title{Simulate one or more designs}
 \usage{
-simulate_design(
-  ...,
-  sims = 500,
-  future.seed = requireNamespace("future", quietly = TRUE)
-)
+simulate_design(..., sims = NULL, progress = FALSE)
 
-simulate_designs(
-  ...,
-  sims = 500,
-  future.seed = requireNamespace("future", quietly = TRUE)
-)
+simulate_designs(..., sims = NULL, progress = FALSE)
 }
 \arguments{
-\item{...}{A design created using the + operator, or a set of designs. You can also provide a single list of designs, for example one created by \code{\link{expand_design}}.}
+\item{...}{(required) One or more \code{design} objects, or lists of them.}
 
-\item{sims}{The number of simulations, defaulting to 500. If sims is a vector of the form c(10, 1, 2, 1) then different steps of a design will be simulated different numbers of times.}
+\item{sims}{(optional) Number of simulations per design. Defaults to \code{NULL},
+which means 500 flat simulations for a design with no step-level \code{draws}. A
+design with step-level \code{draws} runs in nested mode whether or not \code{sims} is
+supplied; supplying it warns and is otherwise ignored.}
 
-\item{future.seed}{Option for parallel diagnosis via the function future_lapply. A logical or an integer (of length one or seven), or a list of length(X) with pre-generated random seeds. By default, this is set to TRUE if the \code{future} and \code{future.apply} packages are installed, and FALSE if not. For details, see ?future_lapply.}
+\item{progress}{(optional) If \code{TRUE}, display a progress bar for this call
+by wrapping it in \code{\link[progressr:with_progress]{progressr::with_progress()}}. The better habit is to opt
+in once per session with \code{progressr::handlers(global = TRUE)}, which covers
+every call and lets you choose how progress is shown. Nothing is displayed
+by default.}
+}
+\value{
+A tibble with one row per estimate per simulation: \code{design},
+\code{sim_ID}, the estimate columns (\code{term}, \code{estimate}, \code{std.error},
+\code{p.value}, \code{conf.low}, \code{conf.high}, and so on), \code{estimator}, \code{inquiry},
+\code{estimand}, and a column for each redesign parameter. A nested
+simulation adds a \verb{<label>_draw} column for each step with \code{draws > 1}.
 }
 \description{
-Runs many simulations of a design and returns a simulations data.frame. Speed gains can be achieved by running simulate_design in parallel, see Examples.
+Runs each design \code{sims} times, collecting estimands and estimates into a
+single long tibble suitable for diagnosis. A \code{design} column names the
+design each row came from, whether one design is supplied or several.
 }
 \details{
-Different steps of a design may each be simulated different a number of times, as specified by sims. In this case simulations are grouped into "fans". The nested 
-structure of simulations is recorded in the dataset using a set of variables named "step_x_draw." For example if sims = c(2,1,1,3) is passed to simulate_design, then there
-will be two distinct draws of step 1, indicated in variable "step_1_draw" (with values 1 and 2) and there will be three draws for step 4 within each of the step 1 draws, recorded in "step_4_draw" (with values 1 to 6).
+If any step in a design has \code{draws > 1}, the simulation runs in nested
+mode: each step with \code{draws > 1} fans out, and the total simulation count
+equals the product of all \code{draws} values across steps. Declared \code{draws}
+take priority over \code{sims}, so supplying both runs the nested simulation and
+warns, printing the plan it is running instead.
+
+Steps upstream of the first fan-out run once and are held fixed across the
+draws below them, which is what makes \code{declare_assignment(..., draws = 50)}
+mean fifty randomizations of one population.
+
+Parallelism is handled through the \code{future} ecosystem. Call
+\code{future::plan(multisession, workers = 4)} before \code{simulate_design()} and,
+if the \code{furrr} package is installed, simulations run in parallel with no
+other change. Every draw runs on its own L'Ecuyer-CMRG random-number
+stream whichever plan is active, so \code{set.seed()} before the call gives the
+same table sequentially and in parallel. The streams are not those of
+DeclareDesign 1.x, so a 1.x seed does not reproduce a 1.x table here.
 }
 \examples{
-
-# Two-arm randomized experiment
-design <-
-  declare_model(
-    N = 500,
-    gender = rbinom(N, 1, 0.5),
-    X = rep(c(0, 1), each = N / 2),
-    U = rnorm(N, sd = 0.25),
-    potential_outcomes(Y ~ 0.2 * Z + X + U)
-  ) +
-  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-  declare_sampling(S = complete_rs(N = N, n = 200)) +
-  declare_assignment(Z = complete_ra(N = N, m = 100)) +
-  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-  declare_estimator(Y ~ Z, inquiry = "ATE")
-
-\dontrun{
-# Simulate design
-simulations <- simulate_design(design, sims = 100)
-simulations
-
-# Diagnose design using simulations
-diagnosis <- diagnose_design(simulations_df = simulations)
-diagnosis
-
-# Simulate one part of the design for a fixed population
-# (The 100 simulates different assignments)
-head(simulate_design(design, sims = c(1, 1, 1, 100, 1, 1)))
-
-# You may also run simulate_design in parallel using 
-#   the future package on a personal computer with multiple
-#   cores or on high performance computing clusters. 
-
-library(future)
-options(parallelly.fork.enable = TRUE) # required for use in RStudio
-plan(multicore) # note other plans are possible, see future
-
-simulate_design(design, sims = 500)
-
+design <- declare_model(N = 30, U = rnorm(N), Z = rep(0:1, 15), Y = U + Z) +
+  declare_inquiry(ATE = 1) +
+  declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
+                    label = "ols")
+simulate_design(design, sims = 3)
 }
-
+\seealso{
+Other simulation and diagnosis:
+\code{\link[=compare_diagnoses]{compare_diagnoses()}},
+\code{\link[=diagnose_design]{diagnose_design()}},
+\code{\link[=diagnose_simulations]{diagnose_simulations()}},
+\code{\link[=get_diagnosands]{get_diagnosands()}},
+\code{\link[=get_simulations]{get_simulations()}}
 }
+\concept{simulation and diagnosis}

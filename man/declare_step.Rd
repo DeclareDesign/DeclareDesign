@@ -2,34 +2,63 @@
 % Please edit documentation in R/declare_step.R
 \name{declare_step}
 \alias{declare_step}
-\title{Declare a custom step}
+\title{Declare a custom data-handling step}
 \usage{
-declare_step(
-  ...,
-  handler = function(data, ...f, ...) ...f(data, ...),
-  label = NULL
-)
+declare_step(handler, ..., label = "custom_step", draws = 1L)
 }
 \arguments{
-\item{...}{arguments to be captured, and later passed to the handler}
+\item{handler}{(required) A function whose first argument is \code{data}.}
 
-\item{handler}{a tidy-in, tidy-out function}
+\item{...}{(optional) Additional arguments passed to \code{handler} \strong{as
+written}, so the handler evaluates them itself. A bare column name arrives
+as a name, which is what lets \code{tidyr::pivot_wider(id_cols = pair)} and the
+dplyr verbs select and mask as they normally do. This is the same rule
+\code{\link[=declare_estimator]{declare_estimator()}} follows. A handler that does no evaluation of its own
+and wants a value computed from the data takes a closure instead:
+\code{declare_step(handler = function(data) f(data, cutoff = mean(data$a)))}.}
 
-\item{label}{a string describing the step}
+\item{label}{(optional) Step label. Defaults to \code{"custom_step"}.}
+
+\item{draws}{(optional) Number of nested draws for this step. Defaults to
+\code{1}. When \verb{> 1}, the step is re-executed \code{draws} times for each upstream
+draw during nested simulation.}
 }
 \value{
-A function that returns a data.frame.
+A \code{design_step} (class \code{c("design_step", "dd", "function")}): a
+function that takes the current data frame and returns what \code{handler}
+returns for it. Add it to a design with \code{+}.
 }
 \description{
-With declare_step, you can include any function that takes data as one of its arguments and returns data in a design declaration. The first argument is always a "handler", which is the name of the data-in, data-out function.
-For handy data manipulations use \code{declare_step(fabricate, ...)}.
+Wraps an arbitrary handler function as a step in the design. The handler
+must accept \code{data} as its first argument and return a data frame.
 }
 \examples{
+step <- declare_step(handler = function(data, k) {
+  data$X2 <- data$X * k
+  data
+}, k = 2)
+df <- data.frame(X = 1:5)
+step(df)
 
-population <- declare_model(N = 5, noise = rnorm(N))
-manipulate <- declare_step(fabricate, noise_squared = noise^2, zero = 0)
-
-design <- population + manipulate
-draw_data(design)
-
+# A tidyselect handler receives the column names, not their contents.
+wide <- declare_step(
+  id_cols = pair, names_from = role, values_from = c(ID, a),
+  handler = tidyr::pivot_wider
+)
+long <- data.frame(pair = rep(1:3, each = 2), role = rep(c("A", "B"), 3),
+                   ID = sprintf("\%03d", 1:6), a = 1:6)
+wide(long)
 }
+\seealso{
+Other design declarations:
+\code{\link[=declare_assignment]{declare_assignment()}},
+\code{\link[=declare_estimator]{declare_estimator()}},
+\code{\link[=declare_inquiry]{declare_inquiry()}},
+\code{\link[=declare_measurement]{declare_measurement()}},
+\code{\link[=declare_model]{declare_model()}},
+\code{\link[=declare_notes]{declare_notes()}},
+\code{\link[=declare_parameters]{declare_parameters()}},
+\code{\link[=declare_sampling]{declare_sampling()}},
+\code{\link[=declare_test]{declare_test()}}
+}
+\concept{design declarations}

@@ -1,15 +1,36 @@
-citHeader("To cite DeclareDesign in publications use:")
+if (!exists("meta") || is.null(meta)) meta <- packageDescription("DeclareDesign")
+
+citHeader(
+  "To cite the DeclareDesign software, cite the package itself. To cite the ",
+  "design framework it implements, cite Blair, Coppock and Humphreys (2023) ",
+  "for the book-length treatment or Blair, Cooper, Coppock and Humphreys ",
+  "(2019) for the article. Citing the package and the framework are different ",
+  "acts and either may be what you want."
+)
+
+bibentry(
+  key          = "DeclareDesign",
+  bibtype      = "Manual",
+  title        = paste0("DeclareDesign: ", meta$Title),
+  author       = c(person("Alexander", "Coppock"),
+                   person("Graeme", "Blair"),
+                   person("Jasper", "Cooper"),
+                   person("Macartan", "Humphreys"),
+                   person("Neal", "Fultz")),
+  year         = "2026",
+  note         = paste("R package version", meta$Version),
+  url          = "https://declaredesign.org/r/declaredesign/"
+)
 
 bibentry(
   key          = "blair_coppock_humphreys_2023",
   bibtype      = "book",
-	title        = "Research Design in the Social Sciences: Declaration, Diagnosis, and Redesign",
-  author       = c(person("Graeme", "Blair"), 
-                   person("Alexander", "Coppock"), 
+  title        = "Research Design in the Social Sciences: Declaration, Diagnosis, and Redesign",
+  author       = c(person("Graeme", "Blair"),
+                   person("Alexander", "Coppock"),
                    person("Macartan", "Humphreys")),
-	publisher    = "Princeton University Press",
+  publisher    = "Princeton University Press",
   address      = "Princeton",
-	
   year         = "2023",
   url          = "https://book.declaredesign.org",
 
@@ -39,4 +60,3 @@ bibentry(
         "American Political Science Review 113(3): 838-859.",
         "URL https://declaredesign.org/paper.pdf")
 )
-

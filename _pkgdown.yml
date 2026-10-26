@@ -1,4 +1,4 @@
-url: https://declaredesign.org/r/declaredesign
+url: https://declaredesign.org/r/declaredesign/
 
 home:
   title: Declaring and diagnosing research designs
@@ -16,9 +16,13 @@ development:
 navbar:
   left:
   - text: Getting started
-    href: https://declaredesign.org/getting-started/
+    href: articles/getting-started.html
   - text: Reference
     href: reference/index.html
+  - text: What changed in 2.0
+    href: articles/declaredesign2.0.html
+  - text: News
+    href: news/index.html
   right:
   - text: "Software"
     menu:
@@ -41,74 +45,89 @@ navbar:
 
 reference:
 - title: Declare
-  description: These functions declare research design steps
+  desc: The steps of a design, joined with `+`.
   contents:
   - declare_model
   - declare_inquiry
-  - declare_inquiries
   - declare_sampling
   - declare_assignment
   - declare_measurement
   - declare_estimator
-  - declare_estimators
   - declare_test
   - declare_step
-  - set_citation
-  - label_estimator
-  - label_test
-  - tidy_try
+  - declare_parameters
+  - declare_notes
   - "`+.dd`"
 
-- title: Post-declaration functions
-  description: These functions operate on declared designs
+- title: Helpers
+  desc: Functions used inside a declaration rather than as a step of it.
   contents:
-  - cite_design
+  - label_estimator
+  - tidy_try
+  - vars
+
+- title: Draw and run
+  desc: Run a declared design once.
+  contents:
   - draw_data
   - draw_estimands
   - draw_estimates
-  - run_design
   - get_estimates
-  - print.design
-  - summary.design
-  - print_code
+  - run_design
 
 - title: Diagnose
-  description: These functions assist with research design diagnosis
+  desc: Run a design many times and summarize how it performs.
   contents:
-  - declare_diagnosands
   - diagnose_design
-  - diagnose_designs
+  - simulate_design
+  - diagnose_simulations
+  - declare_diagnosands
+  - select_diagnosands
+  - default_diagnosands
   - get_diagnosands
   - get_simulations
-  - simulate_design
-  - simulate_designs
-  - set_diagnosands
-  - select_diagnosands
-  - reshape_diagnosis
+  - compare_diagnoses
   - tidy.diagnosis
   - pop.var
 
 - title: Redesign
-  description: These functions modify declared designs
+  desc: Change the parameters of a declared design.
+  contents:
+  - redesign
+  - design_parameters
+  - design_notes
+
+- title: Inspect
+  desc: Print and summarize designs and diagnoses.
+  contents:
+  - print.design
+  - summary.design
+  - print.design_step
+  - print.diagnosis
+  - summary.diagnosis
+  - format.diagnosis
+  - print.compared_diagnoses
+  - print.objects
+
+- title: Cite
+  desc: Attach a citation to a design and retrieve it.
+  contents:
+  - set_citation
+  - cite_design
+
+- title: Deprecated and defunct
+  desc: 1.x functions kept for porting, each pointing at its replacement.
   contents:
   - insert_step
   - delete_step
   - replace_step
   - expand_design
-  - redesign
-
-- title: Comparison
-  description: These functions compare declared designs
-  contents:
-  - compare_diagnoses
+  - set_diagnosands
+  - declare_population
+  - model_handler
+  - declare-defunct
   - compare_designs
-  - compare_design_code
-  - compare_design_summaries
-  - compare_design_data
-  - compare_design_estimates
-  - compare_design_inquiries
 
 - title: Package
-  description: Package description
   contents:
-  - DeclareDesign
+  - DeclareDesign-package

@@ -1,174 +1,115 @@
-# index of a step (specified by object, label or position)
-find_step <- function(design, step, verb) {
-  if (is.numeric(step) && step <= length(design) && step > 0) return(step)
+#' Resolve a step locator to an integer index
+#'
+#' @keywords internal
+#' @noRd
+resolve_step_index <- function(design, step) {
+  if (is.numeric(step)) return(as.integer(step))
   if (is.character(step)) {
-    design <- names(design)
+    idx <- match(step, names(design))
+    if (is.na(idx)) stop(sprintf("No step named %s.", step))
+    return(idx)
   }
-  w <- vapply(design, identical, FALSE, step)
-
-  w <- which(w)
-  if (length(w) == 0) {
-    stop("Could not find step to ", verb, " in design")
+  if (inherits(step, "design_step")) {
+    label <- attr(step, "label")
+    idx <- match(label, names(design))
+    if (is.na(idx)) stop(sprintf("Step labeled %s not found.", label))
+    return(idx)
   }
-
-  w[1]
+  stop("`step` must be a label, an integer, or a design_step.")
 }
 
-
-#' Modify a design after the fact
+#' Insert a step into a design (deprecated)
 #'
-#' Insert, delete and replace steps in an (already declared) design object.
+#' Deprecated in 2.0, and warns once per session. Reconstruct the design with
+#' `+` instead.
 #'
-#' @param design A design object, usually created using the + operator, \code{\link{expand_design}}, or the design library.
-#'
-#' @return A new design object.
-#'
-#' @importFrom rlang call_name quos quo_expr quo_is_missing
-#' @name modify_design
-#' @rdname modify_design
-#'
-#' @examples
-#'
-#'  my_model <- 
-#'    declare_model(
-#'      N = 100, 
-#'      U = rnorm(N),
-#'      Y_Z_0 = U,
-#'      Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)
-#'    )
-#'
-#'  my_assignment <- declare_assignment(Z = complete_ra(N, m = 50))
-#'  my_assignment_2 <- declare_assignment(Z = complete_ra(N, m = 25))
-#'
-#'  design <- my_model + my_assignment
-#'
-#'  draw_data(design)
-#'  
-#'  design_modified <- replace_step(design, 2, my_assignment_2)
-#'  
-#'  draw_data(design)
-NULL
-
-#' @param before The step before which to add steps.
-#' @param after The step after which to add steps.
-#' @param new_step The new step; Either a function or a partial call.
-#'
-#' @details See \code{\link{modify_design}} for details.
-#' @rdname modify_design
-#' @examples
-#'  
-#'  \dontrun{
-#'  
-#'  design <- 
-#'    declare_model(
-#'      N = 100,
-#'      U = rnorm(N),
-#'      potential_outcomes(Y ~ 0.20 * Z + U)
-#'    ) + 
-#'      declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-#'      declare_assignment(Z = complete_ra(N, m = N/2)) + 
-#'      declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
-#'      declare_estimator(Y ~ Z, inquiry = "ATE")
-#'  
-#'  insert_step(design, declare_sampling(S = complete_rs(N, n = 50)),
-#'              after = 1)
-#'
-#'  # If you are using a design created by a designer, for example from
-#'  # the DesignLibrary package, you will not have access to the step
-#'  # objects. Instead, you can always use the label of the step.
-#'  
-#'  design <- DesignLibrary::two_arm_designer()
-#'  
-#'  # get the labels for the steps
-#'  names(design)
-#'  
-#'  insert_step(design, 
-#'    declare_sampling(S = complete_rs(N, n = 50)),
-#'    after = "potential_outcomes")
-#'    
-#'  }
-#'
+#' @family modifying a design
+#' @param design (required) A `design`.
+#' @param new_step (required) A `design_step` to insert.
+#' @param before,after (required) A label, integer, or `design_step`
+#'   indicating the anchor point. Provide exactly one of the two; if both are
+#'   given, `after` is used. `before` comes first, as in DeclareDesign 1.x, so
+#'   a script that passed the anchor by position keeps its meaning.
+#' @return A `design` with `new_step` inserted at the anchor.
 #' @export
-insert_step <- function(design, new_step, before, after) {
-  check_design_class_single(design)
-  
-  if (missing(before)) before <- NULL
-  if (missing(after)) after <- NULL
-  insert_step_(design, new_step, before, after, enexpr(new_step))
+#' @examples
+#' design <- declare_model(N = 30, Y = rnorm(N)) +
+#'   declare_inquiry(mu = mean(Y))
+#' new_design <- insert_step(design,
+#'   declare_measurement(Y2 = Y * 2),
+#'   after = "model")
+#' names(new_design)
+insert_step <- function(design, new_step, before = NULL, after = NULL) {
+  rlang::warn(
+    "`insert_step()` is deprecated. Reconstruct the design explicitly instead.",
+    .frequency = "once", .frequency_id = "insert_step"
+  )
+  if (is.null(after) && is.null(before)) {
+    stop("Provide either `after` or `before`.")
+  }
+  steps <- unclass(design)
+  anchor <- if (!is.null(after)) resolve_step_index(design, after) else
+    resolve_step_index(design, before) - 1L
+  if (anchor < 0) anchor <- 0L
+  new_label <- attr(new_step, "label") %||% "step"
+  before_part <- if (anchor > 0) steps[seq_len(anchor)] else list()
+  after_part <- if (anchor < length(steps)) steps[seq.int(anchor + 1L, length(steps))] else list()
+  insert_named <- setNames(list(new_step), new_label)
+  combined <- c(before_part, insert_named, after_part)
+  construct_design(combined)
 }
 
-insert_step_ <- function(design, new_step, before = NULL, after = NULL, new_step_expr) {
-  check_design_class_single(design)
-  
-  if (is.null(after)) {
-    if (is.null(before)) {
-      stop("Must provide either before or after to add_step()")
-    }
-    after <- find_step(design, before, "insert before") - 1
-  } else {
-    after <- find_step(design, after, "insert after")
-  }
-
-  new_step <- wrap_step(new_step, new_step_expr)
-
-  i <- seq_along(design) <= after
-  steps <- c(design[i], new_step, design[!i], recursive = FALSE)
-
+#' Delete a step from a design (deprecated)
+#'
+#' Deprecated in 2.0, and warns once per session. Reconstruct the design with
+#' `+` instead.
+#'
+#' @family modifying a design
+#' @param design (required) A `design`.
+#' @param step (required) A label, integer, or `design_step` naming the step
+#'   to delete.
+#' @return A `design` without that step.
+#' @export
+#' @examples
+#' design <- declare_model(N = 30, Y = rnorm(N)) +
+#'   declare_inquiry(mu = mean(Y))
+#' delete_step(design, "mu") |> names()
+delete_step <- function(design, step) {
+  rlang::warn(
+    "`delete_step()` is deprecated. Reconstruct the design explicitly instead.",
+    .frequency = "once", .frequency_id = "delete_step"
+  )
+  steps <- unclass(design)
+  idx <- resolve_step_index(design, step)
+  steps <- steps[-idx]
   construct_design(steps)
 }
 
-#' @param step The quoted label of the step to be deleted or replaced.
+#' Replace a step in a design (deprecated)
 #'
+#' Deprecated in 2.0, and warns once per session. Reconstruct the design with
+#' `+` instead.
+#'
+#' @family modifying a design
+#' @param design (required) A `design`.
+#' @param step (required) A label, integer, or `design_step` naming the step
+#'   to replace.
+#' @param new_step (required) The replacement `design_step`.
+#' @return A `design` with `new_step` in place of `step`.
 #' @export
-#' @rdname modify_design
 #' @examples
-#' 
-#' design <- 
-#'   declare_model(
-#'     N = 100,
-#'     U = rnorm(N),
-#'     potential_outcomes(Y ~ 0.20 * Z + U)
-#'   ) + 
-#'     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-#'     declare_assignment(Z = complete_ra(N, m = N/2)) + 
-#'     declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
-#'     declare_estimator(Y ~ Z, inquiry = "ATE")
-#
-#' delete_step(design, step = 5)
-#' 
-delete_step <- function(design, step) {
-  check_design_class_single(design)
-  
-  i <- find_step(design, step, "delete")
-  construct_design(design[-i])
-}
-
-#' @export
-#' @rdname modify_design
-#' @examples
-#' 
-#' design <- 
-#'   declare_model(
-#'     N = 100,
-#'     U = rnorm(N),
-#'     potential_outcomes(Y ~ 0.20 * Z + U)
-#'   ) + 
-#'     declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) + 
-#'     declare_assignment(Z = complete_ra(N, m = N/2)) + 
-#'     declare_measurement(Y = reveal_outcomes(Y ~ Z)) + 
-#'     declare_estimator(Y ~ Z, inquiry = "ATE")
-#' 
-#' replace_step(
-#'   design, 
-#'   step = 3, 
-#'   new_step = declare_assignment(Z = simple_ra(N, prob = 0.5)))
+#' design <- declare_model(N = 30, Y = rnorm(N)) +
+#'   declare_inquiry(mu = mean(Y))
+#' replace_step(design, "mu", declare_inquiry(med = median(Y)))
 replace_step <- function(design, step, new_step) {
-  check_design_class_single(design)
-  
-  i <- find_step(design, step, "replace")
-  new_step <- wrap_step(new_step, enexpr(new_step))
-  design[i] <- new_step
-  names(design)[i] <- names(new_step)
-
-  construct_design(design)
+  rlang::warn(
+    "`replace_step()` is deprecated. Reconstruct the design explicitly instead.",
+    .frequency = "once", .frequency_id = "replace_step"
+  )
+  steps <- unclass(design)
+  idx <- resolve_step_index(design, step)
+  new_label <- attr(new_step, "label") %||% names(steps)[idx]
+  steps[[idx]] <- new_step
+  names(steps)[idx] <- new_label
+  construct_design(steps)
 }

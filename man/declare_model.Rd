@@ -2,183 +2,60 @@
 % Please edit documentation in R/declare_model.R
 \name{declare_model}
 \alias{declare_model}
-\title{Declare the size and features of the population.}
+\title{Declare the data-generating model}
 \usage{
-declare_model(..., handler = fabricate, label = NULL)
+declare_model(..., label = "model", draws = 1L)
 }
 \arguments{
-\item{...}{arguments to be captured, and later passed to the handler}
+\item{...}{(optional) Named arguments forwarded to
+\code{\link[fabricatr:fabricate]{fabricatr::fabricate()}}. Unquoted expressions are evaluated lazily in the
+caller's environment with access to the current data frame.}
 
-\item{handler}{a tidy-in, tidy-out function}
+\item{label}{(optional) Step label. Defaults to \code{"model"}.}
 
-\item{label}{a string describing the step}
+\item{draws}{(optional) Number of nested draws for this step. Defaults to
+\code{1}. When \verb{> 1}, the step is re-executed \code{draws} times for each upstream
+draw during nested simulation.}
 }
 \value{
-A function that returns a data.frame.
+A \code{design_step} (class \code{c("design_step", "dd", "function")}): a
+function that takes the current data frame and returns a tibble with the
+declared columns added (or built from scratch, for the first step). Add it
+to a design with \code{+}.
 }
 \description{
-The model component of a research design captures background beliefs about 
-the world in which a study is implemented, the variables of interest, and 
-how these respond to each other. The \code{declare_model} function writes functions 
-that themselves create databases that represent these features of possible 
-worlds.
+The model describes the world the design runs in. It does not have to be
+correct: declaring one you doubt is how you find out whether the design
+still works when you are wrong about it.
+}
+\details{
+Declares a step that builds (or augments) the population data via
+\code{\link[fabricatr:fabricate]{fabricatr::fabricate()}}. The first model step in a design receives
+\code{data = NULL}, so it must specify \code{N} (and any variables) directly.
+Subsequent model steps add columns to the existing data.
 }
 \examples{
-# declare_model is usually used when concatenating
-# design elements with `+`
+design <- declare_model(N = 50, U = rnorm(N), Y = U + 1)
 
-## Example: Two-arm randomized experiment
+head(draw_data(design))
+
+# A second model step adds columns to the data the first one made.
 design <-
-  declare_model(
-    N = 500,
-    X = rep(c(0, 1), each = N / 2),
-    U = rnorm(N, sd = 0.25),
-    potential_outcomes(Y ~ 0.2 * Z + X + U)
-  ) +
-  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-  declare_assignment(Z = complete_ra(N = N, m = 250)) +
-  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-  declare_estimator(Y ~ Z, inquiry = "ATE")
+  declare_model(N = 50, U = rnorm(N)) +
+  declare_model(Y_Z_0 = U, Y_Z_1 = U + 0.5)
 
-# declare_model returns a function:
-M <- declare_model(N = 100)
-M()
-
-# You can also declare a population from existing data
-M <- declare_model(data = mtcars)
-M()
-
-# You can resample from existing data
-M <- declare_model(N = 100, data = mtcars, handler = resample_data)
-M()
-
-# You can build up more variables using any predefined variables.
-# For instance you can declare a model with observed covariates X1 
-# and X2 and unobserved heterogeneity U that each affect outcome Y
-M <- declare_model(
-  N = 5,
-  U = rnorm(N),
-  X1 = rbinom(N, size = 1, prob = 0.5),
-  X2 = X1 + rnorm(N),
-  Y = 0.1 * X1 + 0.2 * X2 + 0.1 * X1 * X2 + U
-)
-M()
-
-# You can build up a model over multiple design steps 
-# Once steps are concatendated they become a design
-M1 <- declare_model(
-  N = 5,
-  U = rnorm(N))
-M2 <-  declare_model(
-  X1 = rbinom(N, size = 1, prob = 0.5),
-  X2 = X1 + rnorm(N))
-M2(M1())
-design <- M1 + M2
-draw_data(design)
-
-# More eleboate data types.
-# We can draw correlated variables using draw_multivariate
-M <-
-declare_model(
-  draw_multivariate(c(X1, X2) ~ MASS::mvrnorm(
-    n = 1000,
-    mu = c(0, 0),
-    Sigma = matrix(c(1, 0.3, 0.3, 1), nrow = 2)
-  )))
-M()
-
-# Declare potential outcomes model dependent on assignment Z
-## Manually
-M <- 
-  declare_model(N = 100, 
-                Y_Z_0 = rbinom(N, size = 1, prob = 0.5),
-                Y_Z_1 = rbinom(N, size = 1, prob = 0.6)
-  )
-M()
-
-## Using the potential_outcomes function from fabricatr
-M <- 
-  declare_model(N = 100, 
-                potential_outcomes(Y ~ rbinom(N, size = 1, prob = 0.1 * Z + 0.5))
-  )
-M()
- 
-## we can draw from a distribution of effect sizes 
-M <-
-  declare_model(
-    N = 100, 
-    tau = runif(1, min = 0, max = 1), 
-    U = rnorm(N), 
-    potential_outcomes(Y ~ tau * Z + U)
-  )
-M()
-
-## we can simulate treatment-by-covariate effect heterogeneity:
-M <- 
-  declare_model(
-    N = 100, 
-    U = rnorm(N), 
-    X = rbinom(N, 1, prob = 0.5),
-    potential_outcomes(Y ~  0.3 * Z + 0.2*X + 0.1*Z*X + U)
-  )
-M()
-
-## potential outcomes can respond to two treatments:
-M <- declare_model(
-  N = 6,
-  U = rnorm(N),
-  potential_outcomes(Y ~ Z1 + Z2 + U, 
-                     conditions = list(Z1 = c(0, 1), Z2 = c(0, 1))))
-
-M()
-
-# Declare a two-level hierarchical population
-# containing varying numbers of individuals within
-# households and an age variable defined at the individual
-# level
-M <- declare_model(
-  households = add_level(
-    N = 100, 
-    N_members = sample(c(1, 2, 3, 4), N, 
-                       prob = c(0.2, 0.3, 0.25, 0.25), 
-                       replace = TRUE)
-  ),
-  individuals = add_level(
-    N = N_members, 
-    age = sample(18:90, N, replace = TRUE)
-  )
-)
-M()
-
-## Panel data have a more complex structure:
-M <- 
-  declare_model(
-    countries = add_level(
-      N = 196, 
-      country_shock = rnorm(N)
-    ),
-    years = add_level(
-      N = 100, 
-      time_trend = 1:N,
-      year_shock = runif(N, 1, 10), 
-      nest = FALSE
-    ),
-    observation = cross_levels(
-      by = join_using(countries, years),
-      observation_shock = rnorm(N),
-      Y = 0.01 * time_trend + country_shock + year_shock + observation_shock 
-    )
-  )
-M()
-
-# Declare a population using a custom function
-# the default handler is fabricatr::fabricate,
-# but you can supply any function that returns a data.frame
-my_model_function <- function(N) {
-  data.frame(u = rnorm(N))
+head(draw_data(design))
 }
-
-M <- declare_model(N = 10, handler = my_model_function)
-M()
-
+\seealso{
+Other design declarations:
+\code{\link[=declare_assignment]{declare_assignment()}},
+\code{\link[=declare_estimator]{declare_estimator()}},
+\code{\link[=declare_inquiry]{declare_inquiry()}},
+\code{\link[=declare_measurement]{declare_measurement()}},
+\code{\link[=declare_notes]{declare_notes()}},
+\code{\link[=declare_parameters]{declare_parameters()}},
+\code{\link[=declare_sampling]{declare_sampling()}},
+\code{\link[=declare_step]{declare_step()}},
+\code{\link[=declare_test]{declare_test()}}
 }
+\concept{design declarations}

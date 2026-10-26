@@ -1,0 +1,309 @@
+#' Execute a design end-to-end
+#'
+#' Runs the design once and returns one row per estimate, with the realized
+#' estimands joined on. This is one simulation: `simulate_design(sims = 1)`
+#' without the `sim_ID` column.
+#'
+#' Use [draw_data()] for the realized data frame, [draw_estimands()] for the
+#' inquiries alone, and [draw_estimates()] for the estimates alone.
+#'
+#' @family drawing from a design
+#' @param design (required) A `design`.
+#' @param ... (optional) Named parameter values, as in [redesign()]. Each
+#'   supplies one value: use `redesign()` itself to sweep over several. A
+#'   parameter named `design`, or any prefix of it, cannot be supplied this way
+#'   and needs the `redesign()` route.
+#' @return The result of one run: a tibble with one row per estimate: the
+#'   tidied columns (`term`, `estimate`, `std.error`, `p.value`, `conf.low`,
+#'   `conf.high`, and so on), `estimator`, and, where an estimator names an
+#'   inquiry, `inquiry` and the realized `estimand`. A design with no
+#'   estimator returns its estimands instead, as [draw_estimands()] does.
+#' @export
+#' @examples
+#' design <- declare_model(N = 30, U = rnorm(N), Y = U) +
+#'   declare_inquiry(mu = mean(Y))
+#' run_design(design)
+run_design <- function(design, ...) {
+  design <- apply_draw_time_params(design, rlang::list2(...))
+  result <- run_design_internal(design)
+  stop_on_estimator_failure(result$estimates)
+  merge_estimates_inquiries(result$estimates, result$inquiries)
+}
+
+#' Execute a design and keep the data alongside the results
+#'
+#' The workhorse behind [run_design()] and the `draw_*()` family. Returns the
+#' three pieces separately, before estimates and inquiries are joined.
+#'
+#' @param design A `design`.
+#' @param what Which kinds of step to run. `draw_data()` asks for `"dgp"`
+#'   alone and `draw_estimands()` for the inquiries, so a failing estimator
+#'   does not take them down with it and neither pays to fit models it will
+#'   discard.
+#' @param trace If `TRUE`, also return `trace`, one element per step holding
+#'   what that step produced on this run: the data after a data step, the
+#'   inquiry rows, or the estimate rows. [summary.design()] reads it.
+#' @return A list with elements `data`, `inquiries`, and `estimates`, plus
+#'   `trace` when asked for.
+#' @keywords internal
+#' @noRd
+run_design_internal <- function(design,
+                                what = c("dgp", "inquiry", "estimator"),
+                                trace = FALSE) {
+  if (inherits(design, "design_step")) {
+    design <- construct_design(wrap_step(design))
+  }
+  if (!inherits(design, "design")) {
+    stop("`design` must be a `design` or `design_step` object.")
+  }
+  data <- NULL
+  inquiries <- list()
+  estimates <- list()
+  # A note is taken during the run, so the steps after it are rebound on every
+  # draw against a local copy of the step list. The design itself is never
+  # touched, which is what keeps one draw's notes out of the next one.
+  steps <- unclass(design)
+  notes <- list()
+  traced <- vector("list", length(steps))
+  for (i in seq_along(steps)) {
+    step <- steps[[i]]
+    if (is_notes_step(step)) {
+      notes <- record_notes(notes, note_values(step, data, notes))
+      if (trace) traced[[i]] <- list(notes = note_values(step, data, notes))
+      steps <- apply_notes_from(steps, i, notes)
+      next
+    }
+    ct <- attr(step, "causal_type")
+    if (is.null(ct) || !ct %in% what) next
+    if (identical(ct, "dgp")) {
+      data <- run_step(step, data)
+      if (trace) traced[[i]] <- list(data = data)
+    } else if (identical(ct, "inquiry")) {
+      inq <- run_step(step, data)
+      inquiries[[length(inquiries) + 1L]] <- inq
+      if (trace) traced[[i]] <- list(inquiries = inq)
+    } else if (identical(ct, "estimator")) {
+      est <- run_step(step, data)
+      estimates[[length(estimates) + 1L]] <- est
+      if (trace) traced[[i]] <- list(estimates = est)
+    }
+  }
+  out <- list(
+    data      = data,
+    inquiries = dplyr::bind_rows(inquiries),
+    estimates = dplyr::bind_rows(estimates)
+  )
+  if (trace) out$trace <- traced
+  out
+}
+
+#' Run one step, naming it if it fails
+#'
+#' A column that does not exist fails inside `eval_tidy()` with "object 'W'
+#' not found" and nothing else, and a five-step design has five places that
+#' could have been. The step's label and verb go in front; the original
+#' condition is kept as the parent, so anything catching by class still can.
+#'
+#' @keywords internal
+#' @noRd
+run_step <- function(step, data) {
+  tryCatch(
+    step(data),
+    error = function(e) {
+      rlang::abort(
+        paste0("In step `", attr(step, "label") %||% "?", "` (",
+               step_verb(step), "())."),
+        parent = e, call = NULL
+      )
+    }
+  )
+}
+
+#' Draw the realized data from a design
+#'
+#' Runs the data-generating steps only. The inquiries and estimators are not
+#' run, so a design whose estimator fails still draws its data, and drawing
+#' data does not pay to fit models it would throw away.
+#'
+#' Named parameter values in `...` are applied first, so
+#' `draw_data(design, theta = 0.5)` is `draw_data(redesign(design, theta =
+#' 0.5))`: a convenience for trying a value without naming it above the design
+#' or rewriting the declaration. The names reach the design by [redesign()]'s
+#' rule, so a name the design does not read warns and is ignored, and a
+#' number written inside a step is refused with the two ways to name it.
+#' `data`, `start` and `end`, 1.x's arguments for running part of a design on
+#' supplied data, are refused with [get_estimates()] and `design[start:end]`
+#' as the replacements, unless the design reads a parameter by that name.
+#'
+#' @family drawing from a design
+#' @param design (required) A `design`.
+#' @param ... (optional) Named parameter values, as in [redesign()]. Each
+#'   supplies one value: use `redesign()` itself to sweep over several. A
+#'   parameter named `design`, or any prefix of it, cannot be supplied this way
+#'   and needs the `redesign()` route.
+#' @return A tibble: the data as the last data-generating step leaves it.
+#' @export
+#' @examples
+#' design <- declare_model(N = 25, X = rnorm(N))
+#' df <- draw_data(design)
+#' nrow(df)
+#'
+#' # A value the declaration leaves free, supplied at draw time
+#' model <- declare_model(N = 25, D = rbinom(N, 1, 0.5), Y = theta * D + rnorm(N))
+#' head(draw_data(model, theta = 0.5))
+draw_data <- function(design, ...) {
+  design <- apply_draw_time_params(design, rlang::list2(...))
+  run_design_internal(design, what = "dgp")$data
+}
+
+#' Apply parameter values supplied at draw time
+#'
+#' Issue #497: a reader exploring a declaration wants to try a value without
+#' naming it above the design first. The values go through [redesign()], so
+#' every rule about which names a design will accept is stated in one place.
+#'
+#' A sweep is refused rather than quietly drawing from the first design, since
+#' the verb returns one table.
+#'
+#' @keywords internal
+#' @noRd
+apply_draw_time_params <- function(design, params) {
+  if (!length(params)) return(design)
+  if (!rlang::is_named(params)) {
+    rlang::abort(c(
+      "Every value supplied here has to name the parameter it sets.",
+      i = "`draw_data(design, theta = 0.5)`, as in `redesign()`."
+    ))
+  }
+  # 1.x's `draw_data(design, data = df)` would otherwise become a redesign over
+  # a name the design does not read, which warns and fabricates fresh data in
+  # place of the data supplied. A design that does read `start` keeps it.
+  legacy <- intersect(names(params), c("data", "start", "end"))
+  if (length(legacy)) {
+    reachable <- unique(find_all_objects(design, include_unbound = TRUE)$name)
+    legacy <- setdiff(legacy, reachable)
+  }
+  if (length(legacy)) {
+    rlang::abort(c(
+      paste0(paste0("`", legacy, "`", collapse = " and "),
+             if (length(legacy) > 1) " are" else " is",
+             " 1.x's way of running part of a design on supplied data, ",
+             "and this design reads no parameter by ",
+             if (length(legacy) > 1) "those names." else "that name."),
+      i = "Run the estimators on supplied data with `get_estimates(design, data, start, end)`.",
+      i = "Take a slice of the design with `design[start:end]`."
+    ))
+  }
+  out <- do.call(redesign, c(list(.design = design), params))
+  if (!inherits(out, "design")) {
+    rlang::abort(c(
+      paste0("Supplying several values gives ", length(out),
+             " designs, and this verb draws from one."),
+      i = "Sweep with `redesign()` and draw from each: `lapply(redesign(design, theta = c(0.1, 0.5)), draw_data)`."
+    ))
+  }
+  out
+}
+
+#' Draw the realized estimands
+#'
+#' Runs the data-generating and inquiry steps only, not the estimators.
+#'
+#' @family drawing from a design
+#' @param design (required) A `design`.
+#' @param ... (optional) Named parameter values, as in [redesign()]. Each
+#'   supplies one value: use `redesign()` itself to sweep over several. A
+#'   parameter named `design`, or any prefix of it, cannot be supplied this way
+#'   and needs the `redesign()` route.
+#' @return A tibble with columns `inquiry` and `estimand`, one row per
+#'   inquiry.
+#' @export
+#' @examples
+#' design <- declare_model(N = 25, U = rnorm(N), Y = U) +
+#'   declare_inquiry(mu = mean(Y))
+#' draw_estimands(design)
+draw_estimands <- function(design, ...) {
+  design <- apply_draw_time_params(design, rlang::list2(...))
+  run_design_internal(design, what = c("dgp", "inquiry"))$inquiries
+}
+
+#' @rdname draw_estimands
+#' @export
+draw_estimand <- draw_estimands
+
+#' Draw the realized estimates
+#'
+#' Runs the design once and returns its estimates joined to inquiries.
+#'
+#' @family drawing from a design
+#' @param design (required) A `design`.
+#' @param ... (optional) Named parameter values, as in [redesign()]. Each
+#'   supplies one value: use `redesign()` itself to sweep over several. A
+#'   parameter named `design`, or any prefix of it, cannot be supplied this way
+#'   and needs the `redesign()` route.
+#' @return The estimates from one run: a tibble with one row per estimate: the
+#'   tidied columns (`term`, `estimate`, `std.error`, `p.value`, `conf.low`,
+#'   `conf.high`, and so on), `estimator`, and, where an estimator names an
+#'   inquiry, `inquiry` and the realized `estimand`. A design with no
+#'   estimator returns its estimands instead.
+#' @export
+#' @examples
+#' design <- declare_model(N = 30, U = rnorm(N), Y = U) +
+#'   declare_inquiry(mu = mean(Y)) +
+#'   declare_estimator(Y ~ 1, .method = lm, term = "(Intercept)",
+#'                     inquiry = "mu", label = "ols")
+#' draw_estimates(design)
+draw_estimates <- function(design, ...) {
+  design <- apply_draw_time_params(design, rlang::list2(...))
+  result <- run_design_internal(design)
+  stop_on_estimator_failure(result$estimates)
+  merge_estimates_inquiries(result$estimates, result$inquiries)
+}
+
+#' Get estimates for a fixed dataset
+#'
+#' Runs only the estimator steps of a design against a supplied data frame.
+#'
+#' @family drawing from a design
+#' @param design (required) A `design`.
+#' @param data (optional) A data frame. Defaults to `draw_data(design)`, a
+#'   fresh draw.
+#' @param start (optional) Integer; first step index to consider. Defaults
+#'   to `1`.
+#' @param end (optional) Integer; last step index to consider. Defaults to
+#'   the last step.
+#' @return A tibble with one row per estimate from the estimator and test
+#'   steps between `start` and `end`, as [draw_estimates()] returns but
+#'   without estimands. An empty tibble when that range holds no estimator.
+#' @export
+#' @examples
+#' design <- declare_model(N = 30, U = rnorm(N), Z = rep(0:1, 15), Y = U + Z) +
+#'   declare_estimator(Y ~ Z, .method = lm, term = "Z", label = "ols")
+#' df <- draw_data(design)
+#' get_estimates(design, df)
+get_estimates <- function(design, data = draw_data(design), start = 1L,
+                          end = length(design)) {
+  if (inherits(design, "design_step")) {
+    design <- construct_design(wrap_step(design))
+  }
+  steps <- unclass(design)[seq.int(start, end)]
+  # Notes are taken against the supplied data rather than against the data
+  # they would have seen in a full run, which is the only thing available
+  # here. A note that has to be computed before a sampling step therefore
+  # reads the sample, so a design that depends on one is better run than
+  # re-estimated.
+  notes <- list()
+  estimates <- list()
+  for (i in seq_along(steps)) {
+    step <- steps[[i]]
+    if (is_notes_step(step)) {
+      notes <- record_notes(notes, note_values(step, data, notes))
+      steps <- apply_notes_from(steps, i, notes)
+      next
+    }
+    if (identical(attr(step, "causal_type"), "estimator")) {
+      estimates[[length(estimates) + 1L]] <- run_step(step, data)
+    }
+  }
+  dplyr::bind_rows(estimates)
+}

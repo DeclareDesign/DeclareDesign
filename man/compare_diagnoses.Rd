@@ -2,54 +2,88 @@
 % Please edit documentation in R/compare_diagnoses.R
 \name{compare_diagnoses}
 \alias{compare_diagnoses}
-\title{Compare Diagnoses}
+\title{Compare the diagnosands of two designs}
 \usage{
 compare_diagnoses(
   design1,
   design2,
   sims = 500,
   bootstrap_sims = 100,
+  diagnosands = NULL,
   merge_by_estimator = TRUE,
   alpha = 0.05
 )
 }
 \arguments{
-\item{design1}{A design or a diagnosis.}
+\item{design1, design2}{(required) A \code{design} or a \code{diagnosis}.}
 
-\item{design2}{A design or a diagnosis.}
+\item{sims}{(optional) Number of simulations, used only for arguments that
+are designs. Defaults to \code{500}.}
 
-\item{sims}{The number of simulations, defaulting to 1000. \code{sims} may also be a vector indicating the number of simulations for each step in a design, as described for \code{\link{simulate_design}}. Used for both designs.}
+\item{bootstrap_sims}{(optional) Number of bootstrap replicates, used only
+for arguments that are designs. Defaults to \code{100}. With \code{0}, differences
+are reported without standard errors or intervals.}
 
-\item{bootstrap_sims}{Number of bootstrap replicates for the diagnosands to obtain the standard errors of the diagnosands, defaulting to \code{1000}. Set to \code{FALSE} to turn off bootstrapping. Used for both designs. Must be greater or equal to 100.}
+\item{diagnosands}{(optional) A diagnosands \code{design_step} applied to both
+designs, so the two sides are compared on the same footing by
+construction. \code{NULL} (the default) uses what \code{\link[=diagnose_design]{diagnose_design()}} would:
+diagnosands attached with \code{\link[=set_diagnosands]{set_diagnosands()}}, else
+\code{\link[=default_diagnosands]{default_diagnosands()}}. Used only for arguments that are designs; a
+diagnosis passed in keeps the diagnosands it was computed with.}
 
-\item{merge_by_estimator}{A logical. Whether to include \code{estimator} in the set of columns used for merging. Defaults to \code{TRUE}.}
+\item{merge_by_estimator}{(optional) Match estimators by label. \code{TRUE} by
+default; \code{FALSE} compares every pair of estimators within an inquiry.}
 
-\item{alpha}{The significance level, 0.05 by default.}
+\item{alpha}{(optional) One minus the coverage of the reported interval.
+Defaults to \code{0.05}.}
 }
 \value{
-A list with a \code{data.frame} of compared diagnoses and both diagnoses.
+A \code{compared_diagnoses} object: a list with three elements.
+\code{compared_diagnoses_df} is a tibble with one row per diagnosand per
+matched group, holding the grouping columns, \code{diagnosand}, \code{mean_1},
+\code{mean_2}, \code{mean_difference}, \code{se_1}, \code{se_2}, \code{se_difference}, \code{conf.low},
+and \code{conf.high} (the last four are \code{NA} without bootstrap replicates).
+\code{diagnosis1} and \code{diagnosis2} are the two \code{diagnosis}
+objects compared.
 }
 \description{
-Diagnose and compare designs.
+Diagnoses both designs and reports, for every diagnosand they have in
+common, the value under each design and the difference between them. The
+bootstrap replicates behind each diagnosis supply a standard error and a
+confidence interval for the difference.
 }
 \details{
-The function \code{compare_diagnoses} runs a many-to-many merge matching by \code{inquiry} and \code{term} (if present). If  \code{merge_by_estimator} equals \code{TRUE}, \code{estimator} is also included in the merging condition. Any diagnosand that is not included in both designs will be dropped from the merge.
+Rows are matched on whichever of \code{inquiry}, \code{estimator}, and \code{term} both
+diagnoses carry. With \code{merge_by_estimator = FALSE}, estimators are not
+matched to each other and every pair within an inquiry is compared, which
+is how to compare two estimators that carry different labels.
+
+\code{mean_difference} is the difference of the two point estimates. The
+bootstrap enters only through \code{se_difference} and the interval. The two
+designs are simulated independently, so the replicates are paired
+arbitrarily; the interval is a percentile interval on that difference.
+
+Either argument may be a design or an already computed \code{diagnosis}, so a
+diagnosis that took a long time to run can be reused. Passing two diagnoses
+computed with different diagnosands compares whatever they have in common.
 }
 \examples{
-design_a <-
-  declare_model(N  = 100,
-                U = rnorm(N),
-                Y_Z_0 = U,
-                Y_Z_1 = U + rnorm(N, mean = 2, sd = 2)) +
+design <- declare_parameters(n_units = 100) +
+  declare_model(N = n_units, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + 0.5) +
   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-  declare_assignment(Z = complete_ra(N, prob = 0.5)) +
-  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
-  declare_estimator(Y ~ Z, inquiry = "ATE")
-
-design_b <- replace_step(
-  design_a, step = "assignment",
-  declare_assignment(Z = complete_ra(N, prob = 0.3)) )
-\dontrun{
-comparison <- compare_diagnoses(design_a, design_b, sims = 40)
+  declare_assignment(Z = randomizr::complete_ra(N)) +
+  declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+  declare_estimator(Y ~ Z, .method = lm, term = "Z", inquiry = "ATE",
+                    label = "ols")
+bigger <- redesign(design, n_units = 200)
+compare_diagnoses(design, bigger, sims = 20, bootstrap_sims = 20)
 }
+\seealso{
+Other simulation and diagnosis:
+\code{\link[=diagnose_design]{diagnose_design()}},
+\code{\link[=diagnose_simulations]{diagnose_simulations()}},
+\code{\link[=get_diagnosands]{get_diagnosands()}},
+\code{\link[=get_simulations]{get_simulations()}},
+\code{\link[=simulate_design]{simulate_design()}}
 }
+\concept{simulation and diagnosis}

@@ -1,54 +1,46 @@
 Package: DeclareDesign
-Title: Declare and Diagnose Research Designs
-Version: 1.1.1
-Authors@R: c(person("Graeme", "Blair", email = "graeme.blair@gmail.com", role = c("aut"), comment = c(ORCID = "0000-0001-9164-2102")),
-             person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = c("aut"), comment = c(ORCID = "0000-0002-8639-3188")),
-             person("Alexander", "Coppock", email = "acoppock@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-5733-2386")),
-             person("Macartan", "Humphreys", email = "macartan@gmail.com", role = c("aut"), comment = c(ORCID = "0000-0001-7029-2326")),
-             person("Neal", "Fultz", email = "nfultz@gmail.com", role = c("aut")))
-Description: Researchers can characterize and learn about the properties of
-    research designs before implementation using `DeclareDesign`. Ex ante
-    declaration and diagnosis of designs can help researchers clarify the 
-    strengths and limitations of their designs and to improve their 
-    properties, and can help readers evaluate a research strategy prior
-    to implementation and without access to results. It can also make it
-    easier for designs to be shared, replicated, and critiqued.
+Type: Package
+Title: A Tidyverse-First Research Design Declaration and Diagnosis Tool
+Version: 2.0.0
+Authors@R: c(person("Alexander", "Coppock", email = "acoppock@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-5733-2386")),
+             person("Graeme", "Blair", email = "graeme.blair@gmail.com", role = "aut", comment = c(ORCID = "0000-0001-9164-2102")),
+             person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = "aut", comment = c(ORCID = "0000-0002-8639-3188")),
+             person("Macartan", "Humphreys", email = "macartan@gmail.com", role = "aut", comment = c(ORCID = "0000-0001-7029-2326")),
+             person("Neal", "Fultz", email = "nfultz@gmail.com", role = "aut"))
+Description: Declares, simulates, diagnoses and redesigns research designs.
+    A design is declared as a model, an inquiry, a data strategy and an answer
+    strategy, then simulated with 'purrr' and diagnosed with 'dplyr'. Version 2.0
+    is a ground-up rewrite of the package on tidyverse conventions.
+License: MIT + file LICENSE
+Encoding: UTF-8
 Depends:
     R (>= 4.1.0),
-    randomizr (>= 0.20.0),
-    fabricatr (>= 0.10.0),
-    estimatr (>= 0.20.0)
+    randomizr (>= 1.0.1),
+    fabricatr (>= 2.0.0),
+    estimatr (>= 2.0.0)
 Imports:
-    rlang, generics, methods
-License: MIT + file LICENSE
-URL: https://declaredesign.org/r/declaredesign/, https://github.com/DeclareDesign/DeclareDesign
-BugReports: https://github.com/DeclareDesign/DeclareDesign/issues
-Encoding: UTF-8
-RoxygenNote: 7.3.3
-Suggests:
-    testthat,
-    knitr,
-    rmarkdown,
-    AER,
-    diffobj,
-    dplyr,
-    data.table,
-    tibble,
-    ggplot2,
-    future,
-    future.apply,
     broom,
+    dplyr,
+    generics,
+    parallel,
+    purrr,
+    rlang,
+    tibble,
+    tidyr,
+    utils
+Suggests:
+    furrr,
+    future,
+    knitr,
     MASS,
-    Matching,
-    betareg,
-    biglm,
-    gam,
-    sf,
-    reshape2,
-    DesignLibrary,
-    coin,
-    marginaleffects,
-    psych,
-    CausalQueries,
-    rdrobust,
-    rdss
+    progressr,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    withr
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+Config/roxygen2/version: 8.0.0
+URL: https://declaredesign.org/r/declaredesign/,
+    https://github.com/DeclareDesign/DeclareDesign
+BugReports: https://github.com/DeclareDesign/DeclareDesign/issues

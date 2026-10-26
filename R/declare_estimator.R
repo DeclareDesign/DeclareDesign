@@ -1,456 +1,518 @@
-#' Declare estimator
+#' Tidy a model fit, with a fallback
 #'
-#' @description Declares an estimator which generates estimates and associated statistics.
+#' Tries [broom::tidy()] with confidence intervals; if that fails (because the
+#' model class has no `tidy()` method), assembles a minimal tidy table from the
+#' coefficient summary.
 #'
-#' Use of \code{declare_test} is identical to use of \code{\link{declare_estimator}}. Use \code{declare_test} for hypothesis testing with no specific inquiry in mind; use \code{declare_estimator} for hypothesis testing when you can link each estimate to an inquiry. For example, \code{declare_test} could be used for a K-S test of distributional equality and \code{declare_estimator} for a difference-in-means estimate of an average treatment effect.
-#'
-#' @inheritParams declare_internal_inherit_params
-#'
-#' @details
-#'
-#' \code{declare_estimator} is designed to handle two main ways of generating parameter estimates from data.
-#'
-#' In \code{declare_estimator}, you can optionally provide the name of an inquiry or an object created by \code{\link{declare_inquiry}} to connect your estimate(s) to inquiry(s).
-#'
-#' The first is through \code{label_estimator(method_handler)}, which is the default value of the \code{handler} argument. Users can use standard method functions like lm, glm, or iv_robust. The methods are summarized using the function passed to the \code{summary} argument. This will usually be a "tidier" like \code{broom::tidy}. The default \code{summary} function is \code{tidy_try}, which applies a tidy method if available, and if not, tries to make one on the fly.
-#'
-#' An example of this approach is:
-#'
-#' \code{declare_estimator(Y ~ Z + X, .method = lm_robust, .summary = tidy, term = "Z", inquiry = "ATE")}
-#'
-#' The second approach is using a custom data-in, data-out function, usually first passed to \code{label_estimator}. The reason to pass the custom function to \code{label_estimator} first is to enable clean labeling and linking to inquiries.
-#'
-#' An example of this approach is:
-#'
-#' \code{
-#' my_fun <- function(data){ with(data, median(Y[Z == 1]) - median(Y[Z == 0])) }
-#' }
-#'
-#' \code{
-#' declare_estimator(handler = label_estimator(my_fun), inquiry = "ATE")
-#' }
-#'
+#' @param fit (required) A fitted model. A data frame is returned as a tibble
+#'   unchanged.
+#' @param ... (optional) Passed to [broom::tidy()].
+#' @return A tibble with one row per term and columns including `term`,
+#'   `estimate`, `std.error`, `statistic`, `p.value`, `conf.low`, and
+#'   `conf.high`. When neither [broom::tidy()] nor `coef(summary(fit))`
+#'   works, a tibble with those columns and no rows.
 #' @export
-#' @importFrom estimatr difference_in_means
-#'
-#' @return A function that accepts a data.frame as an argument and returns a data.frame containing the value of the estimator and associated statistics.
-#'
-#' @seealso [estimatr::lm_robust()], [broom::glance()]
-#'
 #' @examples
-#'
-#' # Setup for examples
-#' design <-
-#'   declare_model(
-#'     N = 500,
-#'     gender = rbinom(N, 1, 0.5),
-#'     U = rnorm(N, sd = 0.25),
-#'     potential_outcomes(Y ~ rbinom(
-#'       N, 1, prob = pnorm(0.2 * Z + 0.2 * gender + 0.1 * Z * gender + U)
-#'     ))
-#'   ) +
-#'   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
-#'   declare_sampling(S = complete_rs(N = N, n = 200)) +
-#'   declare_assignment(Z = complete_ra(N = N, m = 100)) +
-#'   declare_measurement(Y = reveal_outcomes(Y ~ Z))
-#'
-#' run_design(design)
-#'
-#' # default estimator is lm_robust with tidy summary
-#' design_0 <-
-#'   design +
-#'   declare_estimator(Y ~ Z, inquiry = "ATE")
-#'
-#' run_design(design_0)
-#'
-#' # Linear regression using lm_robust and tidy summary
-#' design_1 <-
-#'   design +
-#'   declare_estimator(
-#'     formula = Y ~ Z,
-#'     .method = lm_robust,
-#'     .summary = tidy,
-#'     term = "Z",
-#'     inquiry = "ATE",
-#'     label = "lm_no_controls"
-#'   )
-#'
-#' run_design(design_1)
-#'
-#' # Use glance summary function to view model fit statistics
-#' design_2 <-
-#'   design +
-#'   declare_estimator(.method = lm_robust,
-#'                     formula = Y ~ Z,
-#'                     .summary = glance)
-#'
-#' run_design(design_2)
-#'
-#' # Custom answer strategies
-#' # A custom estimator should take data as an argument and return a data.frame
-#' # with columns such as "estimate", "std.error", "p.value", "conf.low", "conf.high"
-#' my_estimator <- function(data) {
-#'   data.frame(estimate = mean(data$Y))
-#' }
-#'
-#' # Add a custom estimator to the design, wrapping it in `label_estimator()`
-#' # in order to pass label and inquiry arguments
-#'
-#' design_3 <-
-#'   design +
-#'   declare_inquiry(Y_bar = mean(Y)) +
-#'   declare_estimator(handler = label_estimator(my_estimator),
-#'                     label = "mean",
-#'                     inquiry = "Y_bar")
-#'
-#' run_design(design_3)
-#'
-#' # Use `term` to select particular coefficients
-#' design_4 <-
-#'   design +
-#'   declare_inquiry(difference_in_cates = mean(Y_Z_1[gender == 1] - Y_Z_0[gender == 1]) -
-#'                     mean(Y_Z_1[gender == 0] - Y_Z_0[gender == 0])) +
-#'   declare_estimator(Y ~ Z * gender,
-#'                     term = "Z:gender",
-#'                     inquiry = "difference_in_cates",
-#'                     .method = lm_robust)
-#'
-#' run_design(design_4)
-#'
-#' if(require("broom")) {
-#'
-#'   # Use glm from base R
-#'   design_5 <-
-#'     design +
-#'     declare_estimator(Y ~ Z + gender,
-#'                       family = "gaussian",
-#'                       inquiry = "ATE",
-#'                       .method = glm)
-#'
-#'   run_design(design_5)
-#'
-#'   # If we use logit, we'll need to estimate the average marginal effect with
-#'   # marginaleffects::avg_slopes. We wrap this up in a function we'll pass to
-#'   # .summary.
-#'
-#'   if(require("marginaleffects")) {
-#'
-#'     library(marginaleffects) # for predictions
-#'     library(broom) # for tidy
-#'
-#'     tidy_avg_slopes <- function(x) {
-#'       tidy(avg_slopes(x))
-#'     }
-#'
-#'     design_6 <-
-#'       design +
-#'       declare_estimator(
-#'         Y ~ Z + gender,
-#'         .method = glm,
-#'         family = binomial("logit"),
-#'         .summary = tidy_avg_slopes,
-#'         term = "Z"
-#'       )
-#'
-#'     run_design(design_6)
-#'
-#'     # Multiple estimators for one inquiry
-#'
-#'     design_7 <-
-#'       design +
-#'       declare_estimator(Y ~ Z,
-#'                         .method = lm_robust,
-#'                         inquiry = "ATE",
-#'                         label = "OLS") +
-#'       declare_estimator(
-#'         Y ~ Z + gender,
-#'         .method = glm,
-#'         family = binomial("logit"),
-#'         .summary = tidy_avg_slopes,
-#'         inquiry = "ATE",
-#'         term = "Z",
-#'         label = "logit"
-#'       )
-#'
-#'     run_design(design_7)
-#'
-#'   }
-#'
-#' }
-declare_estimator <-
-  make_declarations(
-    label_estimator(method_handler),
-    step_type = "estimator",
-    causal_type = "estimator",
-    default_label = "estimator"
+#' fit <- lm(mpg ~ wt, data = mtcars)
+#' tidy_try(fit)
+tidy_try <- function(fit, ...) {
+  # If the handler already returned a tidy data frame, pass it through directly.
+  # broom::tidy.data.frame is deprecated (it computes column-level summary stats,
+  # not what we want) and will be removed; the right fix is to not call it at all.
+  if (is.data.frame(fit)) return(tibble::as_tibble(fit))
+  out <- tryCatch(
+    broom::tidy(fit, conf.int = TRUE, ...),
+    error = function(e) NULL
   )
-
-#' @rdname declare_estimator
-#' @export
-declare_estimators <- declare_estimator
-
-#' @details
-#' \code{label_estimator} takes a data-in-data out function to \code{fn}, and returns a data-in-data-out function that first runs the provided estimation function \code{fn} and then appends a label for the estimator and, if an inquiry is provided, a label for the inquiry.
-#'
-#' @param fn A function that takes a data.frame as an argument and returns a data.frame with the estimates, summary statistics (i.e., standard error, p-value, and confidence interval), and a term column for labeling coefficient estimates.
-#'
-#' @rdname declare_estimator
-#' @importFrom rlang enquo
-#' @export
-label_estimator <- function(fn) {
-  if (!("data" %in% names(formals(fn)))) {
-    stop("Must provide a `estimator_function` function with a data argument.")
+  if (!is.null(out)) return(tibble::as_tibble(out))
+  s <- tryCatch(coef(summary(fit)), error = function(e) NULL)
+  if (is.null(s)) {
+    return(tibble::tibble(
+      term      = character(0),
+      estimate  = numeric(0),
+      std.error = numeric(0),
+      statistic = numeric(0),
+      p.value   = numeric(0),
+      conf.low  = numeric(0),
+      conf.high = numeric(0)
+    ))
   }
+  cn <- colnames(s)
+  est_col <- cn[grepl("Estimate|Value", cn)][1]
+  se_col  <- cn[grepl("Std", cn)][1]
+  stat_col <- cn[grepl("value$", cn) & cn != est_col][1]
+  p_col   <- cn[grepl("^Pr", cn)][1]
+  tibble::tibble(
+    term      = rownames(s),
+    estimate  = if (!is.na(est_col)) s[, est_col] else NA_real_,
+    std.error = if (!is.na(se_col)) s[, se_col] else NA_real_,
+    statistic = if (!is.na(stat_col)) s[, stat_col] else NA_real_,
+    p.value   = if (!is.na(p_col)) s[, p_col] else NA_real_,
+    conf.low  = NA_real_,
+    conf.high = NA_real_
+  )
+}
 
-  f <- function(data, ..., inquiry = NULL, estimand = NULL, label) {
-    calling_args <-
-      names(match.call(expand.dots = FALSE)) %i% names(formals(fn))
-
-    dots <- if ("..." %in% calling_args) {
-      quos(...)
-    } else {
-      list()
+#' Render a captured `.method` expression as a short character label
+#'
+#' Strips any namespace prefix so `estimatr::lm_robust` becomes `"lm_robust"`.
+#' Anonymous or otherwise un-named methods fall back to `"custom"`.
+#'
+#' @keywords internal
+#' @noRd
+method_expr_label <- function(expr) {
+  if (is.null(expr)) return(NULL)
+  if (is.symbol(expr)) return(as.character(expr))
+  if (is.call(expr)) {
+    head <- expr[[1]]
+    if (is.symbol(head) && as.character(head) %in% c("::", ":::") &&
+        length(expr) >= 3L && is.symbol(expr[[3]])) {
+      return(as.character(expr[[3]]))
     }
+  }
+  out <- tryCatch(deparse(expr, width.cutoff = 60L)[[1]], error = function(e) NA_character_)
+  if (is.na(out) || nchar(out) > 40L) "custom" else out
+}
 
-    calling_args <- setdiff(calling_args, c("", "data", "..."))
+#' Pull a legacy `model =` argument out of the captured dots
+#'
+#' DeclareDesign renamed `model` to `.method` and still accepts the old spelling
+#' with a deprecation warning. Left in `...`, `model` is forwarded to the
+#' fitting function, which fails with an error from inside `lm_robust()` that
+#' says nothing about the rename.
+#'
+#' @return A list with the (possibly reduced) `dots`, the resolved method
+#'   function, and its label; method is NULL when no `model` was supplied.
+#' @keywords internal
+#' @noRd
+extract_legacy_model <- function(dots) {
+  nms <- names(dots) %||% rep("", length(dots))
+  idx <- which(nms == "model")
+  if (length(idx) == 0L) {
+    return(list(dots = dots, method = NULL, method_name = NULL))
+  }
+  q <- dots[[idx[1L]]]
+  rlang::warn(
+    "The `model =` argument is deprecated. Use `.method =` instead.",
+    .frequency = "once", .frequency_id = "declare_estimator_model"
+  )
+  list(
+    dots        = dots[-idx[1L]],
+    method      = rlang::eval_tidy(q),
+    method_name = method_expr_label(rlang::quo_get_expr(q))
+  )
+}
 
-    for (e in calling_args) {
-      dots[[e]] <-
-        do.call(enquo, list(as.symbol(e))) # this *should* retrieve term names as quosure. IDK
-    }
-
-    ret <- eval_tidy(quo(fn(data, !!!dots)))
-
-    ret <- data.frame(
-      estimator = label,
-      ret,
-      stringsAsFactors = FALSE
+#' Normalize an `inquiry` argument to a character vector
+#'
+#' @keywords internal
+#' @noRd
+normalize_inquiry <- function(inquiry) {
+  if (is.null(inquiry)) return(NULL)
+  if (is.character(inquiry)) return(inquiry)
+  if (inherits(inquiry, "design_step")) {
+    rlang::abort(
+      "Pass the inquiry label as a string, not a step object.",
+      "i" = 'Use `inquiry = "ATE"` instead of `inquiry = my_inquiry_step`.'
     )
-
-    if (!is.null(estimand) && !is.null(inquiry)) {
-      stop("Please provide either an inquiry or an estimand, but not both")
-    }
-    if (!is.null(estimand)) {
-      inquiry <- estimand
-      warning(
-        "The argument 'estimand = ' is deprecated. Please use 'inquiry = ' instead.",
-        call. = FALSE
-      )
-    }
-
-    inquiry <- get_inquiry(inquiry)
-
-    if (length(inquiry) > 0) {
-      if (
-        exists("term") &&
-          is.character(term) &&
-          is.character(inquiry) &&
-          length(term) == length(inquiry)
-      ) {
-        merge_df <- data.frame(term = term, inquiry = inquiry)
-        ret <- merge(ret, merge_df, by = "term", all = TRUE, sort = FALSE)
-      } else {
-        ret <-
-          cbind(
-            ret,
-            inquiry = inquiry,
-            row.names = NULL,
-            stringsAsFactors = FALSE
-          )
-      }
-    }
-
-    ret
   }
-
-  formals(f) <- formals(fn)
-  if (!"inquiry" %in% names(formals(f))) {
-    formals(f)["inquiry"] <- list(NULL)
+  if (is.list(inquiry)) {
+    return(unlist(lapply(inquiry, normalize_inquiry)))
   }
-  if (!"estimand" %in% names(formals(f))) {
-    formals(f)["estimand"] <- list(NULL)
-  }
-
-  if (!"label" %in% names(formals(f))) {
-    formals(f)$label <- alist(a = )$a
-  }
-
-  attributes(f) <- attributes(fn)
-
-  f
+  as.character(inquiry)
 }
 
-#' @rdname DeclareDesign-deprecated
-#' @section \code{tidy_estimator}:
-#' For \code{tidy_estimator}, use \code{\link{label_estimator}}.
+#' Keep the rows of a tidied fit that `term` asks for
 #'
-#' @export
-tidy_estimator <- function(estimator_function) {
-  warning(
-    "tidy_estimator() has been deprecated. Please use label_estimator() instead."
-  )
-  label_estimator(fn = estimator_function)
-}
-
-#' @rdname DeclareDesign-deprecated
-#' @section \code{model_handler}:
-#' For \code{model_handler}, use \code{\link{method_handler}}.
+#' The 1.x contract. A character `term` keeps exactly those rows, in the
+#' user's order so they align with a vector `inquiry`, and a name the summary
+#' did not produce is an error rather than a silently shorter table.
+#' `term = TRUE` keeps every row, intercept included. Left unset (or `FALSE`),
+#' the estimator reports the first non-intercept term only:
+#' `declare_estimator(Y ~ Z + X)` is one estimate of one inquiry, and a
+#' covariate is not a second row of it.
 #'
-#' @export
-model_handler <- function(...) {
-  warning(
-    "model_handler() has been deprecated. Please use method_handler() instead."
-  )
-  method_handler(...)
+#' @keywords internal
+#' @noRd
+filter_terms <- function(res, term) {
+  if (!"term" %in% names(res)) return(res)
+  if (is.character(term)) {
+    missing_terms <- setdiff(term, res$term)
+    if (length(missing_terms) > 0L) {
+      stop("Not all of the terms declared in your estimator are present in ",
+           "the estimator's output, including ",
+           paste(missing_terms, collapse = ", "), ".", call. = FALSE)
+    }
+    return(res[match(term, res$term), , drop = FALSE])
+  }
+  if (isTRUE(term) || nrow(res) < 2L) return(res)
+  res[which.max(res$term != "(Intercept)"), , drop = FALSE]
 }
 
-#' @param data a data.frame
-#' @param .method A method function, e.g. lm or glm. By default, the method is the \code{\link[estimatr:lm_robust]{estimatr::lm_robust}} function from the estimatr package, which fits OLS regression and calculates robust and cluster-robust standard errors.
-#' @param .summary A method-in data-out function to extract coefficient estimates or method summary statistics, such as \code{\link[broom:tidy]{broom::tidy}} or \code{\link[broom:glance]{broom::glance}}. By default, the \code{DeclareDesign} method summary function \code{\link{tidy_try}} is used, which first attempts to use the available tidy method for the method object sent to \code{method}, then if not attempts to summarize coefficients using the \code{coef(summary())} and \code{confint} methods. If these do not exist for the method object, it fails.
-#' @param model Deprecated argument. Use \code{.method} instead.
-#' @param model_summary Deprecated argument. Use \code{.summary} instead.
-#' @param term Symbols or literal character vector of term that represent quantities of interest, i.e. Z. If FALSE, return the first non-intercept term; if TRUE return all term. To escape non-standard-evaluation use \code{!!}.
-#' @rdname declare_estimator
-#' @importFrom rlang eval_tidy enquo
-method_handler <-
-  function(
-    data,
-    ...,
-    .method = estimatr::lm_robust,
-    .summary = tidy_try,
-    model,
-    model_summary,
-    term = FALSE
-  ) {
-    if (!missing(model)) {
-      .method <- model
-      warning(
-        "The argument 'model = ' is deprecated. Please use '.method = ' instead."
-      )
-    }
-    if (!missing(model_summary)) {
-      .summary <- model_summary
-      warning(
-        "The argument 'model_summary = ' is deprecated. Please use '.summary = ' instead."
-      )
-    }
-
-    coefficient_names <-
-      enquo(term) # forces evaluation of quosure
-    coefficient_names <- reveal_nse_helper(coefficient_names)
-
-    args <- quos(...)
-
-    # TODO: special case weights offsets for glm etc?
-
-    results <- eval_tidy(quo(.method(!!!args, data = data)))
-
-    summary_fn <- interpret_summary(.summary)
-
-    results <- eval_tidy(summary_fn(results))
-
-    if ("term" %in% colnames(results)) {
-      if (is.character(coefficient_names)) {
-        coefs_in_output <- coefficient_names %in% results$term
-        if (!all(coefs_in_output)) {
-          stop(
-            "Not all of the terms declared in your estimator are present in the estimator's output, including ",
-            paste(coefficient_names[!coefs_in_output], collapse = ", "),
-            ".",
-            call. = FALSE
-          )
+#' Build an estimator/test step closure
+#'
+#' `inquiry` and `term` arrive as quosures and are evaluated on every draw, in
+#' the environment the declaration was written in. They are declared arguments
+#' like any other, so [redesign()] has to be able to reach them: an estimator
+#' whose `term` reads `paste0("factor(Z)", seq_len(m_arms)[-1])` has to follow
+#' `m_arms` when the design is re-parameterized, or the design half-updates
+#' and reports fewer contrasts than it assigns, without erroring.
+#'
+#' @keywords internal
+#' @noRd
+make_estimator_step <- function(method, summary_fn, dots, label, inquiry, term,
+                                add_inquiry, handler = NULL) {
+  force(method)
+  # `.summary = ~tidy_stan(., exponentiate = TRUE)` is how the book writes a
+  # one-argument tidier, so the formula shorthand has to become a function
+  # before the step calls it. `as_function()` leaves a real function alone.
+  summary_fn <- rlang::as_function(summary_fn)
+  force(dots)
+  force(label)
+  force(inquiry)
+  force(term)
+  force(add_inquiry)
+  force(handler)
+  # Capture the helpers and the declaration environment by value so the closure
+  # is self-contained and works inside furrr workers without requiring the
+  # DeclareDesign namespace.
+  as_written <- dots_as_written
+  args <- as_written(dots)
+  decl_env <- dots_env(dots, default = rlang::caller_env())
+  function(data) {
+    # `.dd_data` holds the simulation's data frame for the duration of one
+    # call. The arguments are spliced in as written, so anything the method
+    # resolves against the data it resolves itself.
+    call_env <- rlang::env(decl_env, .dd_data = data)
+    # Evaluated per draw, not at declaration, so that a redesign() reaches
+    # them. Neither reads the data: they name model terms and inquiry labels,
+    # both of which belong to the declaration's own environment.
+    term <- eval_step_arg(term)
+    inquiry <- normalize_inquiry(eval_step_arg(inquiry))
+    # An estimator that fails on one draw used to take the whole run with it,
+    # which on a 500-sim diagnosis with a slow method is the expensive way to
+    # learn that a fit did not converge. The draw is recorded as a failure
+    # instead and the run continues. Nothing here makes the failure quiet:
+    # `simulate_design()` warns once per run and `diagnose_design()` counts
+    # the failed draws out of `n_sims`, because draws that fail are not
+    # missing at random and diagnosing on the survivors flatters the design.
+    res <- tryCatch({
+      # A named term the fit did not produce is an error, and it is raised
+      # here so that it is a failure of this draw like any other: a term
+      # that exists only when a small draw happens to fill every arm is
+      # exactly the per-draw case the guard is for.
+      if (!is.null(handler)) {
+        out <- eval(rlang::call2(handler, quote(.dd_data), !!!args),
+                    envir = call_env)
+        # A handler's table is its own. A handler that returns one row per
+        # group is reporting one estimate per group, so nothing is dropped
+        # unless a term is named.
+        if (is.character(term)) {
+          filter_terms(tibble::as_tibble(out), term)
+        } else {
+          tibble::as_tibble(out)
         }
-        results <- results[results$term %in% coefficient_names, , drop = FALSE]
-      } else if (is.logical(coefficient_names) && !coefficient_names) {
-        results <- results[
-          which.max(results$term != "(Intercept)"),
-          ,
-          drop = FALSE
-        ]
+      } else {
+        fit <- eval(rlang::call2(method, !!!args, data = quote(.dd_data)),
+                    envir = call_env)
+        filter_terms(tibble::as_tibble(summary_fn(fit)), term)
+      }
+    }, error = function(e) {
+      tibble::tibble(
+        estimator = label,
+        term = NA_character_,
+        estimate = NA_real_,
+        std.error = NA_real_,
+        p.value = NA_real_,
+        conf.low = NA_real_,
+        conf.high = NA_real_,
+        error = TRUE,
+        error_message = conditionMessage(e)
+      )
+    })
+    # `res$error` on a tibble warns about an uninitialised column before it
+    # returns NULL, so ask the names instead.
+    if ("error" %in% names(res) && isTRUE(res$error[[1]])) {
+      if (add_inquiry && !is.null(inquiry)) res$inquiry <- inquiry[[1]]
+      return(res)
+    }
+    if (!"estimator" %in% names(res) || all(is.na(res$estimator))) {
+      res$estimator <- label
+    }
+    if (add_inquiry && !is.null(inquiry)) {
+      if (!"inquiry" %in% names(res)) {
+        if (nrow(res) == length(inquiry) || length(inquiry) == 1L) {
+          res$inquiry <- inquiry
+        } else if (nrow(res) == 1L && length(inquiry) > 1L) {
+          # Replicate the single estimate row once per inquiry so the merge
+          # can attach a different estimand to each.
+          res <- res[rep(1L, length(inquiry)), , drop = FALSE]
+          res$inquiry <- inquiry
+        } else {
+          res$inquiry <- inquiry[1]
+        }
       }
     }
-
-    results
+    res
   }
+}
 
-# this is an internal function that is a helper to allow users to provide the summary arg in a variety of formats
-#' @importFrom rlang is_formula expr_interp as_function expr quo eval_bare is_character is_function
-interpret_summary <- function(summary_fn) {
-  # parts copied from dplyr:::as_inlined_function and dplyr:::as_fun_list
-
-  if (is_formula(summary_fn)) {
-    f <- expr_interp(summary_fn)
-    # TODO: unsure of what env should be here!
-    fn <- as_function(f, env = parent.frame())
-    body(fn) <- expr({
-      # pairlist(...)
-      `_quo` <- quo(!!body(fn))
-      eval_bare(`_quo`, parent.frame())
-    })
-    return(fn)
-  } else if (is_character(summary_fn)) {
-    return(get(summary_fn, envir = parent.frame(), mode = "function"))
-  } else if (is_function(summary_fn)) {
-    return(summary_fn)
+#' Declare an estimator
+#'
+#' Declares the answer strategy: a function that produces an estimate of an
+#' inquiry from the observed data. The estimate is tidied to one row per term
+#' and joined to its estimand by the `inquiry` label during diagnosis.
+#'
+#' @family design declarations
+#' @param ... (optional) Arguments forwarded, as written, to `.method` (or to
+#'   `handler`), which evaluates them itself with the data as `data`.
+#'   Typically the formula appears first (e.g., `Y ~ Z`); without a `handler`,
+#'   these must include whatever `.method` needs. A legacy `model =` argument
+#'   is read as `.method` with a deprecation warning rather than forwarded.
+#' @param .method (optional) The model-fitting function. Defaults to
+#'   [estimatr::lm_robust()].
+#' @param .summary (optional) Function used to tidy `.method`'s output.
+#'   Defaults to [tidy_try()].
+#' @param inquiry (optional) The label of the inquiry this estimator targets,
+#'   as a string (`inquiry = "ATE"`), or a character vector of labels. Passing
+#'   the inquiry step object is an error. The label joins the estimate to its
+#'   estimand in every table of estimates and in the diagnosis.
+#' @param term (optional) Which model terms to report. A character vector keeps
+#'   exactly those terms, in that order, and errors if any is absent from the
+#'   tidied output; `TRUE` keeps every term including the intercept. When left
+#'   unset (or `FALSE`), only the first non-intercept term is reported, so
+#'   `declare_estimator(Y ~ Z + X)` returns the `Z` row alone; a `handler`'s
+#'   table is kept whole unless `term` names terms. Evaluated on every draw, so
+#'   it may name a design parameter.
+#' @param label (optional) Step label. Defaults to `"estimator"`. When two
+#'   estimator or test steps in one design share a label, `+` relabels them
+#'   from their formulas, with a message.
+#' @param handler (optional) A function. When supplied, the estimator bypasses
+#'   `.method` and `.summary` and instead calls `handler(data, ...)` with the
+#'   dots as written, not evaluated; it must return a tidy table.
+#' @param draws (optional) Number of nested draws for this step. Defaults to
+#'   `1`. When `> 1`, the step is re-executed `draws` times for each upstream
+#'   draw during nested simulation.
+#' @return A `design_step` (class `c("design_step", "dd", "function")`): a
+#'   function that takes a data frame and returns a tibble of estimates, one
+#'   row per reported term, with `estimator` and, when `inquiry` is set,
+#'   `inquiry` columns. A draw on which `.method` errors returns a row with
+#'   `error = TRUE` and the message rather than stopping the run. Add it to a
+#'   design with `+`.
+#' @export
+#' @examples
+#' design <- declare_model(N = 50, U = rnorm(N), Y = U) +
+#'   declare_inquiry(mu = mean(Y)) +
+#'   declare_estimator(Y ~ 1, .method = lm, term = "(Intercept)",
+#'                     inquiry = "mu", label = "ols")
+#' draw_estimates(design)
+declare_estimator <- function(..., .method = NULL, .summary = tidy_try,
+                              inquiry = NULL, term = NULL, label = "estimator",
+                              handler = NULL, draws = 1L) {
+  dots <- capture_dots_env(rlang::enquos(...))
+  term_quo <- capture_quosure_env(rlang::enquo(term))
+  inquiry_quo <- capture_quosure_env(rlang::enquo(inquiry))
+  method_quo <- capture_quosure_env(rlang::enquo(.method))
+  summary_quo <- capture_quosure_env(rlang::enquo(.summary))
+  handler_quo <- capture_quosure_env(rlang::enquo(handler))
+  call <- sys.call()
+  method_expr <- substitute(.method)
+  legacy <- extract_legacy_model(dots)
+  dots <- legacy$dots
+  if (!is.null(legacy$method) && is.null(.method)) {
+    .method <- legacy$method
+    method_expr <- NULL
+  }
+  if (is.null(.method)) {
+    # estimatr is a Depends, so lm_robust is always there. The former guard
+    # fell back to stats::lm when estimatr was missing, which silently turned
+    # HC2 standard errors into classical ones: an analysis choice made by an
+    # installation accident, with nothing printed to say so.
+    .method <- estimatr::lm_robust
+    method_name <- "lm_robust"
+  } else if (is.null(method_expr)) {
+    method_name <- legacy$method_name
   } else {
-    stop(
-      "Please provide one sided formula, a function, or a function name to summary."
-    )
+    method_name <- method_expr_label(method_expr)
   }
-}
-
-validation_fn(model_handler) <- function(ret, dots, label) {
-  declare_time_error_if_data(ret)
-
-  if ("model" %in% names(dots)) {
-    model <- eval_tidy(dots$model)
-    if (!is.function(model) || !"data" %in% names(formals(model))) {
-      declare_time_error(
-        "Must provide a function for `model` that takes a `data` argument.",
-        ret
-      )
-    }
-
-    attr(ret, "extra_summary") <-
-      sprintf("Model:\t%s", as.character(f_rhs(dots$model)))
-  }
-  ret
-}
-
-validation_fn(method_handler) <- function(ret, dots, label) {
-  declare_time_error_if_data(ret)
-
-  if ("model" %in% names(dots)) {
-    dots$.method <- dots$model
-    dots$model <- NULL
-  }
-
-  if (".method" %in% names(dots)) {
-    method <- eval_tidy(dots$.method)
-    if (!is.function(method) || !"data" %in% names(formals(method))) {
-      declare_time_error(
-        "Must provide a function for `method` that takes a `data` argument.",
-        ret
-      )
-    }
-
-    attr(ret, "extra_summary") <-
-      sprintf("Method:\t%s", as.character(f_rhs(dots$.method)))
-  }
-  ret
-}
-
-# helper methods for inquiry = my_inquiry arguments to estimator_handler
-#
-get_inquiry <- function(inquiry) {
-  force(inquiry) # no promise nonsense when we look at it
-  switch(
-    class(inquiry)[1],
-    "character" = inquiry,
-    "design_step" = attributes(inquiry)$label,
-    "list" = vapply(inquiry, get_inquiry, NA_character_),
-    # note recursion here
-    NULL = NULL,
-    warning("Did not match class of `inquiry`")
+  # Evaluated once here as well, so that an inquiry passed as a step object
+  # fails where it was written rather than on the first draw. A name a
+  # `declare_parameters()` step will supply cannot resolve yet, and its
+  # failure here says nothing, so only a value that does resolve is checked.
+  resolved <- tryCatch(list(rlang::eval_tidy(inquiry_quo)),
+                       error = function(e) NULL)
+  if (!is.null(resolved)) normalize_inquiry(resolved[[1]])
+  fn <- make_estimator_step(
+    method      = .method,
+    summary_fn  = .summary,
+    dots        = dots,
+    label       = label,
+    inquiry     = inquiry_quo,
+    term        = term_quo,
+    add_inquiry = TRUE,
+    handler     = handler
   )
+  step <- build_step(
+    fn           = fn,
+    handler_expr = quote(declare_estimator),
+    dots         = dots,
+    step_type    = "estimator",
+    causal_type  = "estimator",
+    label        = label,
+    call         = call,
+    method_arg   = .method,
+    summary_arg  = .summary,
+    inquiry_quo  = inquiry_quo,
+    term_quo     = term_quo,
+    method_quo   = method_quo,
+    summary_quo  = summary_quo,
+    handler_quo  = handler_quo,
+    handler_fn   = handler,
+    method_name  = method_name
+  )
+  attr(step, "draws") <- as.integer(draws)
+  step
 }
+
+#' Declare a hypothesis test
+#'
+#' Like [declare_estimator()] but the result table does not gain an `inquiry`
+#' column; intended for tests not tied to an estimand.
+#'
+#' @inheritParams declare_estimator
+#' @family design declarations
+#' @param .method (optional) The model-fitting function. Defaults to
+#'   [estimatr::lm_robust()], as in [declare_estimator()].
+#' @param label (optional) Step label. Defaults to `"test"`. When two
+#'   estimator or test steps in one design share a label, `+` relabels them
+#'   from their formulas, with a message.
+#' @param handler (optional) A function. When supplied, the test bypasses
+#'   `.method` and `.summary` and instead calls `handler(data, ...)` with the
+#'   dots as written, not evaluated; it must return a tidy table.
+#' @param draws (optional) Number of nested draws for this step. Defaults to
+#'   `1`. When `> 1`, the step is re-executed `draws` times for each upstream
+#'   draw during nested simulation.
+#' @return A `design_step`, as [declare_estimator()] returns, whose estimates
+#'   carry no `inquiry` column.
+#' @export
+#' @examples
+#' design <- declare_model(N = 30, Z = rep(0:1, 15), Y = Z + rnorm(N)) +
+#'   declare_test(Y ~ Z, term = "Z", label = "diff")
+#' draw_estimates(design)
+declare_test <- function(..., .method = NULL, .summary = tidy_try,
+                         term = NULL, label = "test", handler = NULL,
+                         draws = 1L) {
+  dots <- capture_dots_env(rlang::enquos(...))
+  term_quo <- capture_quosure_env(rlang::enquo(term))
+  method_quo <- capture_quosure_env(rlang::enquo(.method))
+  summary_quo <- capture_quosure_env(rlang::enquo(.summary))
+  handler_quo <- capture_quosure_env(rlang::enquo(handler))
+  call <- sys.call()
+  method_expr <- substitute(.method)
+  legacy <- extract_legacy_model(dots)
+  dots <- legacy$dots
+  if (!is.null(legacy$method) && is.null(.method)) {
+    .method <- legacy$method
+    method_expr <- NULL
+  }
+  if (is.null(.method)) {
+    .method <- estimatr::lm_robust
+    method_name <- "lm_robust"
+  } else if (is.null(method_expr)) {
+    method_name <- legacy$method_name
+  } else {
+    method_name <- method_expr_label(method_expr)
+  }
+  fn <- make_estimator_step(
+    method      = .method,
+    summary_fn  = .summary,
+    dots        = dots,
+    label       = label,
+    inquiry     = NULL,
+    term        = term_quo,
+    add_inquiry = FALSE,
+    handler     = handler
+  )
+  step <- build_step(
+    fn           = fn,
+    handler_expr = quote(declare_test),
+    dots         = dots,
+    step_type    = "test",
+    causal_type  = "estimator",
+    label        = label,
+    call         = call,
+    method_arg   = .method,
+    summary_arg  = .summary,
+    inquiry_quo  = NULL,
+    term_quo     = term_quo,
+    method_quo   = method_quo,
+    summary_quo  = summary_quo,
+    handler_quo  = handler_quo,
+    handler_fn   = handler,
+    method_name  = method_name
+  )
+  attr(step, "draws") <- as.integer(draws)
+  step
+}
+
+#' Wrap a custom function as a labeled estimator
+#'
+#' `label_estimator()` returns a function suitable for use as `.method` in
+#' [declare_estimator()] or [declare_test()]: it fits the model, tidies the
+#' fit, tags the result with `estimator` and `inquiry` columns, and keeps the
+#' terms asked for. `label_test()` is the same function under a second name,
+#' kept so that 1.x scripts run; a test is an estimator whose tidied output
+#' carries a p-value, and nothing in the wrapper depends on which name was
+#' called. 1.x's `fn =` argument is `.method =` in both.
+#'
+#' @param .method (required) A function that fits a model from `data` and
+#'   `...`.
+#' @param label (optional) Estimator label, written to the `estimator` column.
+#'   `NULL` (the default) adds no column.
+#' @param inquiry (optional) Inquiry label (or list of labels); the first is
+#'   written to the `inquiry` column. `NULL` (the default) adds no column.
+#' @param term (optional) Character vector of terms to keep. `NULL` (the
+#'   default) keeps every term.
+#' @param .summary (optional) Function for tidying the model fit. Defaults to
+#'   [tidy_try()].
+#' @return A function of `data` and `...` that calls
+#'   `.method(data = data, ...)`, tidies the fit with `.summary`, and returns
+#'   the resulting tibble with the `estimator` and `inquiry` columns set and
+#'   its rows restricted to `term`.
+#' @export
+#' @examples
+#' my_est <- label_estimator(
+#'   function(data, ...) lm(Y ~ Z, data = data),
+#'   label = "lm", inquiry = "ATE", term = "Z"
+#' )
+#' df <- data.frame(Y = rnorm(20), Z = rep(0:1, 10))
+#' my_est(df)
+label_estimator <- function(.method, label = NULL, inquiry = NULL, term = NULL,
+                            .summary = tidy_try) {
+  # Forced here because the closure below travels: under
+  # `future::plan(multisession)` it is serialised to a worker, and an
+  # unevaluated promise for `.method` points back at a frame the worker does
+  # not have. 1.x forced it too, through `formals(fn)`.
+  force(.method)
+  inquiry_chr <- normalize_inquiry(inquiry)
+  summary_fn <- rlang::as_function(.summary)
+  out <- function(data, ...) {
+    fit <- .method(data = data, ...)
+    res <- tibble::as_tibble(summary_fn(fit))
+    if (!is.null(label)) res$estimator <- label
+    if (!is.null(inquiry_chr)) res$inquiry <- inquiry_chr[1]
+    if (!is.null(term)) res <- res[res$term %in% term, , drop = FALSE]
+    res
+  }
+  # This closure is ours, not the user's, so the names it reads (`term`,
+  # `label`, `summary_fn`, `inquiry_chr`) are not parameters of anybody's
+  # design. Marked rather than inferred: a closure a package returns has an
+  # ordinary function frame for an environment, and no property of that frame
+  # separates it from one the user wrote.
+  attr(out, "dd_internal") <- TRUE
+  out
+}
+
+#' @rdname label_estimator
+#' @export
+label_test <- label_estimator
