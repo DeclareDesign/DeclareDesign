@@ -180,11 +180,14 @@ sim_base_map_fn <- function() {
       !inherits(future::plan(), "sequential")) {
     # Snapshot attached packages so workers can load the same ones.
     # This ensures functions like complete_ra(), lm_robust(), etc. referenced
-    # in quosure environments are available on each worker.
-    pkgs <- setdiff(
+    # in quosure environments are available on each worker. Workers attach in
+    # the order given, each on top of the last, so the list is reversed from
+    # search() order: attaching it as listed put MASS's select() above dplyr's
+    # on the workers when the main session had them the other way round.
+    pkgs <- rev(setdiff(
       sub("^package:", "", grep("^package:", search(), value = TRUE)),
       c("base", ".GlobalEnv", "Autoloads")
-    )
+    ))
     function(x, seeds, f, ...) {
       opts <- furrr::furrr_options(seed = seeds, packages = pkgs)
       furrr::future_map2(x, seeds, f, ..., .options = opts)

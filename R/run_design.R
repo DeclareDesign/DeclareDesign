@@ -114,12 +114,7 @@ run_step <- function(step, data) {
       # The entry point has already warned, but R prints that warning after
       # this error, so the hint is repeated where it will be read first.
       missing <- unresolved_packages(list(step))
-      hint <- if (length(missing)) {
-        c(i = paste0("This step reads ",
-                     paste0("`", names(missing), "`", collapse = ", "),
-                     " from packages that are not attached. ",
-                     attach_hint(missing)))
-      }
+      hint <- if (length(missing)) unresolved_bullets(missing)
       rlang::abort(
         c(paste0("In step `", attr(step, "label") %||% "?", "` (",
                  step_verb(step), "())."), hint),

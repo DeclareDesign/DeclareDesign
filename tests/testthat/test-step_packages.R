@@ -72,11 +72,42 @@ test_that("a design read back without the package warns before it fails", {
   )
   expect_warning(try(draw_data(loaded), silent = TRUE), "library\\(ddfakepkg\\)")
   err <- suppressWarnings(tryCatch(draw_data(loaded), error = identity))
-  expect_match(conditionMessage(err), "`fake_upper` from packages that are not attached")
+  expect_match(conditionMessage(err), "`fake_upper` came from ddfakepkg")
   expect_match(conditionMessage(err), "library\\(ddfakepkg\\)")
 
   attach_fake_package()
   expect_no_warning(draw_data(loaded))
+})
+
+attach_other_package <- function(env = parent.frame()) {
+  attach(list(fake_upper = function(x) tolower(x)),
+         name = "package:ddotherpkg", warn.conflicts = FALSE)
+  withr::defer(
+    if ("package:ddotherpkg" %in% search()) detach("package:ddotherpkg"),
+    envir = env
+  )
+}
+
+test_that("a name that now resolves to another package warns", {
+  # The dplyr-over-stats case: detach the package that masked, and the name
+  # still resolves, to the wrong function.
+  attach_other_package()
+  attach_fake_package()
+  design <- declare_globally(
+    declare_model(N = 5, lab = fake_upper(letters[1:N]))
+  )
+  detach("package:ddfakepkg")
+  expect_warning(draw_data(design), "now resolves to ddotherpkg")
+  expect_warning(draw_data(design), "library\\(ddfakepkg\\)")
+})
+
+test_that("a name masked by a later attach warns with the qualified name", {
+  attach_fake_package()
+  design <- declare_globally(
+    declare_model(N = 5, lab = fake_upper(letters[1:N]))
+  )
+  attach_other_package()
+  expect_warning(draw_data(design), "ddfakepkg::fake_upper")
 })
 
 test_that("draw_data() says nothing about a package only the inquiry needs", {

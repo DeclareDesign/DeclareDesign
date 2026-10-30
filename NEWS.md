@@ -1,6 +1,7 @@
 # DeclareDesign (development version)
 
-* A step records the names it reads from attached packages when it is declared, and `draw_data()`, `run_design()`, `simulate_design()`, and the other entry points warn once, before running, when the session cannot find them: a design saved with `saveRDS()` and read back without `library(stringr)` now says to attach stringr rather than failing with only `could not find function "str_to_upper"`. Nothing is loaded or attached on the design's behalf (#299).
+* A step records the names it reads from attached packages when it is declared, and `draw_data()`, `run_design()`, `simulate_design()`, and the other entry points warn once, before running, when the session cannot find them: a design saved with `saveRDS()` and read back without `library(stringr)` now says to attach stringr rather than failing with only `could not find function "str_to_upper"`. The check asks where a name resolves, not only whether it does, so a design declared with dplyr's `filter()` warns in a session where `filter` falls through to stats. Nothing is loaded or attached on the design's behalf (#299).
+* Parallel simulation attaches the main session's packages on each worker in the order that reproduces the main session's masking. Workers attached them in `search()` order, which put the package the main session had underneath on top, so a design reading `select()` with MASS and dplyr both attached ran MASS's in one process and dplyr's in the other.
 
 # DeclareDesign 2.0.0
 

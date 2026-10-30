@@ -102,21 +102,31 @@ warn_unattached_packages <- function(designs,
   }, steps)
   missing <- unresolved_packages(steps)
   if (!length(missing)) return(invisible(NULL))
-  by_pkg <- split(names(missing), missing)
-  bullets <- vapply(names(by_pkg), function(pkg) {
-    paste0(pkg, ": ", paste0("`", by_pkg[[pkg]], "`", collapse = ", "))
-  }, character(1))
-  names(bullets) <- rep("*", length(bullets))
   rlang::warn(
-    c("This design reads names from packages that are not attached.",
-      bullets,
-      i = attach_hint(missing)),
+    c("This design reads names that no longer come from the package they were declared with.",
+      unresolved_bullets(missing)),
     class = "dd_unattached_packages"
   )
   invisible(NULL)
 }
 
-#' Recorded names the session cannot find, names to packages
+#' Where a name resolves from `globalenv()` now
+#'
+#' The attached package that supplies it, `""` for a binding in the workspace
+#' or in base, or `NA` when nothing does.
+#'
+#' @keywords internal
+#' @noRd
+current_source <- function(name) {
+  if (!exists(name, envir = globalenv())) return(NA_character_)
+  attached_package_of(globalenv(), name) %||% ""
+}
+
+#' Recorded names that do not resolve to the recorded package, names to packages
+#'
+#' Finding the name is not enough. A design declared with dplyr attached reads
+#' `filter` and `lag` from dplyr; in a session without dplyr both still resolve,
+#' to stats, and the step runs the wrong function.
 #'
 #' @param steps A list of `design_step`s.
 #' @keywords internal
@@ -125,13 +135,42 @@ unresolved_packages <- function(steps) {
   recorded <- unlist(unname(lapply(steps, function(step) attr(step, "packages"))))
   if (!length(recorded)) return(character(0))
   recorded <- recorded[!duplicated(names(recorded))]
-  recorded[!vapply(names(recorded), exists, logical(1), envir = globalenv())]
+  now <- vapply(names(recorded), current_source, character(1))
+  recorded[is.na(now) | now != recorded]
 }
 
-#' `Attach them first: library(a); library(b).`
+#' One bullet per unresolved name, then what to do about them
+#'
+#' An unattached package is fixed by attaching it. A masked one is not:
+#' `library()` on a package already attached leaves it where it is, so the
+#' advice is the qualified name.
+#'
 #' @keywords internal
 #' @noRd
-attach_hint <- function(missing) {
-  paste0("Attach them first: ",
-         paste0("library(", unique(missing), ")", collapse = "; "), ".")
+unresolved_bullets <- function(missing) {
+  now <- vapply(names(missing), current_source, character(1))
+  attached <- paste0("package:", missing) %in% search()
+  what <- ifelse(
+    is.na(now), "nothing",
+    ifelse(nzchar(now), now, "a workspace or base binding")
+  )
+  bullets <- paste0("`", names(missing), "` came from ", missing,
+                    "; it now resolves to ", what, ".")
+  names(bullets) <- rep("*", length(bullets))
+  hints <- character(0)
+  if (any(!attached)) {
+    hints <- c(hints, i = paste0(
+      "Attach first: ",
+      paste0("library(", unique(missing[!attached]), ")", collapse = "; "), "."
+    ))
+  }
+  if (any(attached)) {
+    hints <- c(hints, i = paste0(
+      "Masked by a later attach; write ",
+      paste0("`", missing[attached], "::", names(missing)[attached], "`",
+             collapse = ", "),
+      " in the declaration."
+    ))
+  }
+  c(bullets, hints)
 }
