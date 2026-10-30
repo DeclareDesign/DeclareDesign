@@ -1,7 +1,7 @@
 Package: DeclareDesign
 Type: Package
 Title: A Tidyverse-First Research Design Declaration and Diagnosis Tool
-Version: 2.0.0
+Version: 2.0.0.9000
 Authors@R: c(person("Alexander", "Coppock", email = "acoppock@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-5733-2386")),
              person("Graeme", "Blair", email = "graeme.blair@gmail.com", role = "aut", comment = c(ORCID = "0000-0001-9164-2102")),
              person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = "aut", comment = c(ORCID = "0000-0002-8639-3188")),
