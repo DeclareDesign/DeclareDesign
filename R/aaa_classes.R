@@ -72,6 +72,8 @@ build_step <- function(fn, handler_expr, dots, step_type, causal_type, label,
   for (nm in names(attrs)) {
     attr(fn, nm) <- attrs[[nm]]
   }
+  packages <- step_packages(fn)
+  if (length(packages)) attr(fn, "packages") <- packages
   fn
 }
 

@@ -54,6 +54,7 @@ simulate_design <- function(..., sims = NULL, progress = FALSE) {
   if (length(designs) == 0) {
     stop("simulate_design() requires at least one `design` object.")
   }
+  warn_unattached_packages(designs)
   per_design <- purrr::imap(designs, function(design, design_label) {
     if (design_has_nested_draws(design)) {
       if (!is.null(sims)) warn_sims_draws_conflict(design, sims)

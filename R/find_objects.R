@@ -19,6 +19,9 @@ expr_symbols <- function(expr) {
   if (rlang::is_call(expr, c("$", "@")) && length(expr) == 3L) {
     return(expr_symbols(expr[[2]]))
   }
+  # `stats::rnorm` names a namespace and an export in it; neither side is
+  # looked up in the scope the expression runs in.
+  if (rlang::is_call(expr, c("::", ":::"))) return(character(0))
   unlist(lapply(as.list(expr), expr_symbols), use.names = FALSE) %||% character(0)
 }
 

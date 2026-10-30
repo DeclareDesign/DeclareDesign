@@ -1,3 +1,7 @@
+# DeclareDesign (development version)
+
+* A step records the names it reads from attached packages when it is declared, and `draw_data()`, `run_design()`, `simulate_design()`, and the other entry points warn once, before running, when the session cannot find them: a design saved with `saveRDS()` and read back without `library(stringr)` now says to attach stringr rather than failing with only `could not find function "str_to_upper"`. Nothing is loaded or attached on the design's behalf (#299).
+
 # DeclareDesign 2.0.0
 
 DeclareDesign 2.0 is a ground-up reimplementation on tidyverse primitives. The declaration syntax is unchanged; the changes below are at the edges. `vignette("declaredesign2.0")` gives the reasoning for each and a grep table for porting a script.

@@ -25,6 +25,7 @@
 #' run_design(design)
 run_design <- function(design, ...) {
   design <- apply_draw_time_params(design, rlang::list2(...))
+  warn_unattached_packages(design)
   result <- run_design_internal(design)
   stop_on_estimator_failure(result$estimates)
   merge_estimates_inquiries(result$estimates, result$inquiries)
@@ -110,9 +111,18 @@ run_step <- function(step, data) {
   tryCatch(
     step(data),
     error = function(e) {
+      # The entry point has already warned, but R prints that warning after
+      # this error, so the hint is repeated where it will be read first.
+      missing <- unresolved_packages(list(step))
+      hint <- if (length(missing)) {
+        c(i = paste0("This step reads ",
+                     paste0("`", names(missing), "`", collapse = ", "),
+                     " from packages that are not attached. ",
+                     attach_hint(missing)))
+      }
       rlang::abort(
-        paste0("In step `", attr(step, "label") %||% "?", "` (",
-               step_verb(step), "())."),
+        c(paste0("In step `", attr(step, "label") %||% "?", "` (",
+                 step_verb(step), "())."), hint),
         parent = e, call = NULL
       )
     }
@@ -153,6 +163,7 @@ run_step <- function(step, data) {
 #' head(draw_data(model, theta = 0.5))
 draw_data <- function(design, ...) {
   design <- apply_draw_time_params(design, rlang::list2(...))
+  warn_unattached_packages(design, what = "dgp")
   run_design_internal(design, what = "dgp")$data
 }
 
@@ -224,6 +235,7 @@ apply_draw_time_params <- function(design, params) {
 #' draw_estimands(design)
 draw_estimands <- function(design, ...) {
   design <- apply_draw_time_params(design, rlang::list2(...))
+  warn_unattached_packages(design, what = c("dgp", "inquiry"))
   run_design_internal(design, what = c("dgp", "inquiry"))$inquiries
 }
 
@@ -255,6 +267,7 @@ draw_estimand <- draw_estimands
 #' draw_estimates(design)
 draw_estimates <- function(design, ...) {
   design <- apply_draw_time_params(design, rlang::list2(...))
+  warn_unattached_packages(design)
   result <- run_design_internal(design)
   stop_on_estimator_failure(result$estimates)
   merge_estimates_inquiries(result$estimates, result$inquiries)
@@ -287,6 +300,7 @@ get_estimates <- function(design, data = draw_data(design), start = 1L,
     design <- construct_design(wrap_step(design))
   }
   steps <- unclass(design)[seq.int(start, end)]
+  warn_unattached_packages(list(steps), what = "estimator")
   # Notes are taken against the supplied data rather than against the data
   # they would have seen in a full run, which is the only thing available
   # here. A note that has to be computed before a sampling step therefore
