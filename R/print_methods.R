@@ -541,15 +541,15 @@ tidy.diagnosis <- function(x, conf.int = TRUE, conf.level = 0.95, ...) {
   }
 
   if (isTRUE(conf.int) && is.data.frame(x$bootstrap_replicates)) {
-    alpha <- 1 - conf.level
+    tail_prob <- (1 - conf.level) / 2
     intervals <- x$bootstrap_replicates |>
       dplyr::select(dplyr::all_of(c(group_cols, diag_names))) |>
       tidyr::pivot_longer(dplyr::all_of(diag_names), names_to = "diagnosand",
                           values_to = "replicate") |>
       dplyr::group_by(dplyr::across(dplyr::all_of(c(group_cols, "diagnosand")))) |>
       dplyr::summarize(
-        conf.low  = quantile_na(.data$replicate, alpha / 2),
-        conf.high = quantile_na(.data$replicate, 1 - alpha / 2),
+        conf.low  = quantile_na(.data$replicate, tail_prob),
+        conf.high = quantile_na(.data$replicate, 1 - tail_prob),
         .groups   = "drop"
       )
     out <- dplyr::left_join(out, intervals, by = c(group_cols, "diagnosand"))
