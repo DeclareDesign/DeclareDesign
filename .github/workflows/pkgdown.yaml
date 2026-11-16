@@ -15,7 +15,7 @@ on:
   schedule:
     - cron: "23 0 * * 0"
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
